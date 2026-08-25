@@ -1,0 +1,24 @@
+{
+  "name": "@lifekit-hq/core",
+  "version": "0.1.0",
+  "peerDependencies": {
+    "@angular/common": "^21.2.0",
+    "@angular/core": "^21.2.0",
+    "@angular/router": "^21.2.0",
+    "@ngrx/signals": "^21.0.0",
+    "rxjs": "^7.8.0"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "sideEffects": false,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lifekit-hq/lifekit-common.git",
+    "directory": "projects/core"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  }
+}

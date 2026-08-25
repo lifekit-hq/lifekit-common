@@ -1,0 +1,19 @@
+{
+  "name": "@lifekit-hq/tokens",
+  "version": "0.1.0",
+  "description": "lifekit design tokens — CSS custom properties (light/dark themes) + Tailwind preset. Framework-agnostic.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lifekit-hq/lifekit-common.git",
+    "directory": "projects/tokens"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "exports": {
+    "./theme.css": "./theme.css",
+    "./tailwind": "./tailwind/preset.cjs"
+  },
+  "files": ["theme.css", "tailwind/"]
+}

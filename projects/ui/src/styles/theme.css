@@ -1,0 +1,4 @@
+/* Canonical tokens live in @lifekit-hq/tokens — this file re-exports them for
+   the packaged ui asset. App pipeline concerns (tailwind, cdk overlay css)
+   belong in the consuming app's entry stylesheet. */
+@import '../../../tokens/theme.css';

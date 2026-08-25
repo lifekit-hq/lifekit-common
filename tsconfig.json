@@ -1,0 +1,11 @@
+{
+  "extends": "@lifekit-hq/config/tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node", "google.accounts", "vitest/globals"],
+    "paths": {
+      "@lifekit-hq/core": ["./projects/core/src/public-api.ts"],
+      "@lifekit-hq/ui": ["./projects/ui/src/public-api.ts"]
+    }
+  },
+  "exclude": ["**/*.stories.ts"]
+}

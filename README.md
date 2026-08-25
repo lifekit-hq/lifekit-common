@@ -1,4 +1,4 @@
-# lifekit-ui
+# lifekit-common
 
 Shared lifekit design system and Angular component library.
 
@@ -9,7 +9,7 @@ Shared lifekit design system and Angular component library.
 | `@lifekit-hq/core` | Angular signal-store features and helpers | Angular apps |
 | `@lifekit-hq/config` | Shared tooling presets — ESLint, Prettier, Stylelint, base tsconfig | lifekit repos (build-time only) |
 
-Extracted from [finance-sentry](https://github.com/lifekit-hq/finance-sentry) (`frontend/projects/dsdevq-common`) per lifekit-ui#1.
+Extracted from [finance-sentry](https://github.com/lifekit-hq/finance-sentry) (`frontend/projects/dsdevq-common`) per lifekit-common#1.
 
 ## Development
 
