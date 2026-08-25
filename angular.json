@@ -2,5 +2,158 @@
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
   "newProjectRoot": "projects",
-  "projects": {}
+  "projects": {
+    "@lifekit-hq/ui": {
+      "projectType": "library",
+      "root": "projects/ui",
+      "sourceRoot": "projects/ui/src",
+      "prefix": "cmn",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/ui/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/ui/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "projects/ui/tsconfig.spec.json",
+            "coverage": true,
+            "browsers": [
+              "chromium"
+            ]
+          },
+          "configurations": {
+            "ci": {
+              "watch": false,
+              "headless": true,
+              "coverage": true,
+              "coverageThresholds": {
+                "statements": 84,
+                "branches": 85,
+                "functions": 74,
+                "lines": 84
+              }
+            }
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "eslintConfig": "projects/ui/eslint.config.mjs",
+            "lintFilePatterns": [
+              "projects/ui/src/**/*.ts",
+              "projects/ui/src/**/*.html"
+            ]
+          }
+        },
+        "storybook": {
+          "builder": "@storybook/angular:start-storybook",
+          "options": {
+            "configDir": "projects/ui/.storybook",
+            "browserTarget": "storybook-host:build",
+            "tsConfig": "projects/ui/tsconfig.storybook.json",
+            "port": 6006,
+            "compodoc": false,
+            "styles": [
+              "projects/ui/.storybook/storybook.css"
+            ]
+          }
+        },
+        "build-storybook": {
+          "builder": "@storybook/angular:build-storybook",
+          "options": {
+            "configDir": "projects/ui/.storybook",
+            "browserTarget": "storybook-host:build",
+            "tsConfig": "projects/ui/tsconfig.storybook.json",
+            "outputDir": "projects/ui/storybook-static",
+            "compodoc": false,
+            "styles": [
+              "projects/ui/.storybook/storybook.css"
+            ]
+          }
+        }
+      }
+    },
+    "@lifekit-hq/core": {
+      "projectType": "library",
+      "root": "projects/core",
+      "sourceRoot": "projects/core/src",
+      "prefix": "cmn",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/core/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/core/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "projects/core/tsconfig.spec.json",
+            "coverage": true,
+            "browsers": [
+              "chromium"
+            ]
+          },
+          "configurations": {
+            "ci": {
+              "watch": false,
+              "headless": true,
+              "coverage": true,
+              "coverageThresholds": {
+                "statements": 95,
+                "branches": 95,
+                "functions": 95,
+                "lines": 95
+              }
+            }
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "eslintConfig": "projects/core/eslint.config.mjs",
+            "lintFilePatterns": [
+              "projects/core/src/**/*.ts"
+            ]
+          }
+        }
+      }
+    },
+    "storybook-host": {
+      "projectType": "application",
+      "root": ".storybook-host",
+      "sourceRoot": ".storybook-host",
+      "prefix": "host",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "outputPath": "dist/storybook-host",
+            "index": ".storybook-host/index.html",
+            "browser": ".storybook-host/main.ts",
+            "tsConfig": ".storybook-host/tsconfig.json",
+            "styles": [
+              "projects/ui/.storybook/storybook.css"
+            ],
+            "assets": []
+          }
+        }
+      }
+    }
+  }
 }

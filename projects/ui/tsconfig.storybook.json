@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../out-tsc/storybook",
+    "skipLibCheck": true,
+    "types": ["node", "google.accounts"]
+  },
+  "include": ["src/**/*.ts", ".storybook/**/*.ts"],
+  "exclude": ["**/*.spec.ts"]
+}
