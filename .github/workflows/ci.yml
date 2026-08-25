@@ -1,0 +1,28 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run smoke:tokens
+      # ng lint / test / build / build-storybook gates activate when the ui+core
+      # port lands (lifekit-ui#1 PR 2) — angular.json has no projects yet.
+      - name: Angular gates (when projects exist)
+        run: |
+          if node -e "const a=require('./angular.json'); process.exit(Object.keys(a.projects).length? 0:1)"; then
+            npm run lint
+            npm run test
+            npm run build
+            npm run build-storybook
+          else
+            echo "No Angular projects yet — skipping ng gates."
+          fi
