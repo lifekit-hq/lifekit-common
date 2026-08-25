@@ -1,0 +1,56 @@
+name: Release Please
+
+# Maintains the release PR (version bump + CHANGELOG, all packages lockstep) and, once
+# that PR merges, tags the release and publishes @lifekit-hq/* to GitHub Packages.
+
+on:
+  push:
+    branches: [main]
+  # Dispatched by weekly-release.yml after it merges the release PR: a merge done with
+  # GITHUB_TOKEN does not fire push workflows, so the tag/publish step must be invoked
+  # explicitly (workflow_dispatch is exempt from that restriction).
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  packages: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.rp.outputs.release_created }}
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: rp
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  publish:
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: https://npm.pkg.github.com
+          scope: "@lifekit-hq"
+      - run: npm ci
+      - name: Build Angular packages
+        run: npm run build
+      - name: Publish all packages
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npm publish ./dist/lifekit-hq/ui
+          npm publish ./dist/lifekit-hq/core
+          npm publish ./projects/tokens
+          npm publish ./projects/config

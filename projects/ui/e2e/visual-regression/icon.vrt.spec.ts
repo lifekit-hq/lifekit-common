@@ -1,6 +1,14 @@
 import {expect, test} from '@playwright/test';
 
-const STORIES = ['default', 'small', 'large', 'with-color', 'with-aria-label', 'all-sizes', 'common-icons'];
+const STORIES = [
+  'default',
+  'small',
+  'large',
+  'with-color',
+  'with-aria-label',
+  'all-sizes',
+  'common-icons',
+];
 
 for (const story of STORIES) {
   test(`icon/${story} — light`, async ({page}) => {

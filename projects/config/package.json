@@ -2,7 +2,6 @@
   "name": "@lifekit-hq/config",
   "version": "0.1.0",
   "type": "module",
-  "private": true,
   "exports": {
     "./eslint": "./eslint/index.mjs",
     "./prettier": "./prettier/index.mjs",
@@ -23,5 +22,21 @@
     "stylelint-config-standard-scss": "*",
     "stylelint-prettier": "*",
     "typescript-eslint": "*"
-  }
+  },
+  "description": "lifekit tooling presets \u2014 ESLint, Prettier, Stylelint, base tsconfig",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lifekit-hq/lifekit-common.git",
+    "directory": "projects/config"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "files": [
+    "eslint/",
+    "prettier/",
+    "stylelint/",
+    "tsconfig.base.json"
+  ]
 }

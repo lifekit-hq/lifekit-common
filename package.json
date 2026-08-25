@@ -12,7 +12,8 @@
     "format:check": "prettier --check \"projects/**/*.{ts,html,scss,css}\"",
     "storybook": "ng run \"@lifekit-hq/ui:storybook\"",
     "build-storybook": "ng run \"@lifekit-hq/ui:build-storybook\"",
-    "smoke:tokens": "node -e \"const p=require('./projects/tokens/tailwind/preset.cjs'); if(!p.theme) throw new Error('preset has no theme'); require('fs').accessSync('./projects/tokens/theme.css'); console.log('tokens ok')\""
+    "smoke:tokens": "node -e \"const p=require('./projects/tokens/tailwind/preset.cjs'); if(!p.theme) throw new Error('preset has no theme'); require('fs').accessSync('./projects/tokens/theme.css'); console.log('tokens ok')\"",
+    "prepare": "husky"
   },
   "workspaces": [
     "projects/*"
@@ -61,7 +62,9 @@
     "eslint-plugin-prettier": "^5.5.5",
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "eslint-plugin-unused-imports": "^4.4.1",
+    "husky": "^9.1.7",
     "jsdom": "^29.0.1",
+    "lint-staged": "^17.3.0",
     "ng-packagr": "^21.2.0",
     "postcss": "^8.5.9",
     "prettier": "^3.8.1",
@@ -73,5 +76,14 @@
     "typescript": "^5.3.0",
     "typescript-eslint": "8.56.1",
     "vitest": "^4.1.10"
+  },
+  "lint-staged": {
+    "projects/**/*.ts": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "projects/**/*.{html,scss,css,json}": [
+      "prettier --write"
+    ]
   }
 }
