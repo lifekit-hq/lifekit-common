@@ -5,7 +5,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lifekit-hq/lifekit-ui.git",
+    "url": "git+https://github.com/lifekit-hq/lifekit-common.git",
     "directory": "projects/tokens"
   },
   "publishConfig": {
