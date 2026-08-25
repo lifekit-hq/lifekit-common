@@ -1,6 +1,14 @@
 import {expect, test} from '@playwright/test';
 
-const STORIES = ['info', 'success', 'warning', 'error', 'with-title', 'dismissible', 'with-long-content'];
+const STORIES = [
+  'info',
+  'success',
+  'warning',
+  'error',
+  'with-title',
+  'dismissible',
+  'with-long-content',
+];
 
 for (const story of STORIES) {
   test(`alert/${story} — light`, async ({page}) => {

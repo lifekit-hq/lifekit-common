@@ -1,6 +1,13 @@
 import {expect, test} from '@playwright/test';
 
-const STORIES = ['default', 'with-hint', 'with-error', 'required', 'disabled', 'full-reactive-form-example'];
+const STORIES = [
+  'default',
+  'with-hint',
+  'with-error',
+  'required',
+  'disabled',
+  'full-reactive-form-example',
+];
 
 for (const story of STORIES) {
   test(`form-field/${story} — light`, async ({page}) => {
