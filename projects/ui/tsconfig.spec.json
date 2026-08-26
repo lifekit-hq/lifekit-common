@@ -4,10 +4,6 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "../../out-tsc/spec",
-    "rootDir": "./src",
-    "composite": true,
-    "declaration": true,
-    "declarationMap": true,
     "types": ["vitest/globals", "google.accounts"]
   },
   "include": ["src/**/*.ts"],

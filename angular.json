@@ -141,6 +141,49 @@
         }
       }
     },
+    "@lifekit-hq/charts-core": {
+      "projectType": "library",
+      "root": "projects/charts-core",
+      "sourceRoot": "projects/charts-core/src",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/charts-core/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/charts-core/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "projects/charts-core/tsconfig.spec.json",
+            "setupFiles": [
+              "projects/ui/src/test-setup.ts"
+            ]
+          },
+          "configurations": {
+            "ci": {
+              "watch": false,
+              "coverage": true
+            }
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "eslintConfig": "projects/charts-core/eslint.config.mjs",
+            "lintFilePatterns": [
+              "projects/charts-core/src/**/*.ts"
+            ]
+          }
+        }
+      }
+    },
     "storybook-host": {
       "projectType": "application",
       "root": ".storybook-host",
@@ -158,6 +201,49 @@
               "projects/ui/.storybook/storybook.css"
             ],
             "assets": []
+          }
+        }
+      }
+    },
+    "@lifekit-hq/elements": {
+      "projectType": "library",
+      "root": "projects/elements",
+      "sourceRoot": "projects/elements/src",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/elements/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/elements/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "projects/elements/tsconfig.spec.json",
+            "setupFiles": [
+              "projects/ui/src/test-setup.ts"
+            ]
+          },
+          "configurations": {
+            "ci": {
+              "watch": false,
+              "coverage": true
+            }
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "eslintConfig": "projects/elements/eslint.config.mjs",
+            "lintFilePatterns": [
+              "projects/elements/src/**/*.ts"
+            ]
           }
         }
       }

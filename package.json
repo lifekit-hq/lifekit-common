@@ -5,8 +5,8 @@
   "description": "lifekit design system & Angular component library workspace",
   "scripts": {
     "ng": "ng",
-    "build": "ng build @lifekit-hq/ui && ng build @lifekit-hq/core",
-    "test": "ng test @lifekit-hq/ui --configuration ci && ng test @lifekit-hq/core --configuration ci",
+    "build": "ng build @lifekit-hq/charts-core && ng build @lifekit-hq/elements && ng build @lifekit-hq/ui && ng build @lifekit-hq/core",
+    "test": "ng test @lifekit-hq/charts-core --configuration ci && ng test @lifekit-hq/elements --configuration ci && ng test @lifekit-hq/ui --configuration ci && ng test @lifekit-hq/core --configuration ci",
     "lint": "ng lint",
     "format": "prettier --write \"projects/**/*.{ts,html,scss,css}\"",
     "format:check": "prettier --check \"projects/**/*.{ts,html,scss,css}\"",
@@ -34,6 +34,7 @@
     "chart.js": "^4.5.1",
     "chroma-js": "^3.2.0",
     "deep-chat": "^2.5.0",
+    "lit": "^3.3.3",
     "lucide-angular": "^1.0.0",
     "rxjs": "^7.8.0",
     "tslib": "^2.6.0",

@@ -1,0 +1,18 @@
+{
+  "name": "@lifekit-hq/charts-core",
+  "version": "0.2.0",
+  "description": "Framework-free Chart.js config builders and token mappers",
+  "sideEffects": false,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lifekit-hq/lifekit-common.git",
+    "directory": "projects/charts-core"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "peerDependencies": {
+    "chart.js": "^4.5.1"
+  }
+}

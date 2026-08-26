@@ -1,8 +1,11 @@
 {
   "extends": "@lifekit-hq/config/tsconfig.base.json",
   "compilerOptions": {
+    "skipLibCheck": true,
     "types": ["node", "google.accounts", "vitest/globals"],
     "paths": {
+      "@lifekit-hq/charts-core": ["./projects/charts-core/src/index.ts"],
+      "@lifekit-hq/elements": ["./projects/elements/src/index.ts"],
       "@lifekit-hq/core": ["./projects/core/src/public-api.ts"],
       "@lifekit-hq/ui": ["./projects/ui/src/public-api.ts"]
     }

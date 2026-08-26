@@ -1,0 +1,19 @@
+{
+  "name": "@lifekit-hq/elements",
+  "version": "0.2.0",
+  "description": "Framework-free Lit custom elements — the long-term UI substrate for the lifekit ecosystem",
+  "sideEffects": false,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lifekit-hq/lifekit-common.git",
+    "directory": "projects/elements"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "peerDependencies": {
+    "chart.js": "^4.5.1",
+    "lit": "^3.0.0"
+  }
+}

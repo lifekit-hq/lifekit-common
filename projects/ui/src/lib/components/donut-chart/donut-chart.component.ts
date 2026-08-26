@@ -8,28 +8,15 @@ import {
   OnDestroy,
   viewChild,
 } from '@angular/core';
-import {ArcElement, Chart, DoughnutController, Legend, Tooltip} from 'chart.js';
+import {
+  buildDonutChartConfig,
+  type DonutSegment,
+  resolveDonutChartTokens,
+  updateDonutChart,
+} from '@lifekit-hq/charts-core';
+import {Chart} from 'chart.js';
 
-Chart.register(DoughnutController, ArcElement, Tooltip, Legend);
-
-export interface DonutSegment {
-  label: string;
-  value: number;
-  color?: string;
-}
-
-const DEFAULT_COLORS = [
-  '#4f46e5',
-  '#10b981',
-  '#f59e0b',
-  '#ef4444',
-  '#6366f1',
-  '#34d399',
-  '#fbbf24',
-  '#a78bfa',
-];
-
-const PERCENT_MULTIPLIER = 100;
+export type {DonutSegment} from '@lifekit-hq/charts-core';
 
 @Component({
   selector: 'cmn-donut-chart',
@@ -71,12 +58,7 @@ export class DonutChartComponent implements AfterViewInit, OnDestroy {
     effect(() => {
       const segs = this.segments();
       if (this.chart) {
-        this.chart.data.labels = segs.map(s => s.label);
-        this.chart.data.datasets[0].data = segs.map(s => s.value);
-        this.chart.data.datasets[0].backgroundColor = segs.map(
-          (s, i) => s.color ?? DEFAULT_COLORS[i % DEFAULT_COLORS.length]
-        );
-        this.chart.update('none');
+        updateDonutChart(this.chart, segs);
       }
     });
   }
@@ -95,61 +77,14 @@ export class DonutChartComponent implements AfterViewInit, OnDestroy {
     if (!ctx) {
       return;
     }
-
-    const textSecondary = getComputedStyle(document.documentElement)
-      .getPropertyValue('--color-text-secondary')
-      .trim();
-    const segs = this.segments();
-    const currency = this.currency();
-
-    this.chart = new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: segs.map(s => s.label),
-        datasets: [
-          {
-            data: segs.map(s => s.value),
-            backgroundColor: segs.map(
-              (s, i) => s.color ?? DEFAULT_COLORS[i % DEFAULT_COLORS.length]
-            ),
-            borderWidth: 0,
-            hoverOffset: 4,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        cutout: '70%',
-        plugins: {
-          legend: {
-            display: this.showLegend(),
-            position: 'bottom',
-            labels: {
-              color: textSecondary || '#464555',
-              font: {family: 'Inter', size: 11},
-              boxWidth: 10,
-              padding: 12,
-            },
-          },
-          tooltip: {
-            callbacks: {
-              label: tooltipCtx => {
-                const val = tooltipCtx.parsed;
-                const formatted = new Intl.NumberFormat('en-US', {
-                  style: 'currency',
-                  currency,
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 0,
-                }).format(val);
-                const total = tooltipCtx.dataset.data.reduce((a, b) => a + b, 0);
-                const pct = total > 0 ? ((val / total) * PERCENT_MULTIPLIER).toFixed(1) : '0.0';
-                return `${formatted} (${pct}%)`;
-              },
-            },
-          },
-        },
-      },
-    });
+    this.chart = new Chart(
+      ctx,
+      buildDonutChartConfig(
+        this.segments(),
+        resolveDonutChartTokens(),
+        this.currency(),
+        this.showLegend()
+      )
+    );
   }
 }
