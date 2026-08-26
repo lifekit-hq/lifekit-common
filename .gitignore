@@ -3,6 +3,7 @@ dist/
 storybook-static/
 coverage/
 .angular/
+out-tsc/
 *.log
 .DS_Store
 fixtures/consumer-type-check/.tmp/

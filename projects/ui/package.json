@@ -9,6 +9,7 @@
     "@angular/router": "^21.2.0"
   },
   "dependencies": {
+    "@lifekit-hq/charts-core": "0.2.0",
     "tslib": "^2.3.0"
   },
   "sideEffects": false,

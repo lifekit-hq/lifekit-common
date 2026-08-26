@@ -16,11 +16,13 @@ npm run build-storybook  # static Storybook catalog (deployed to Pages on merge)
 ## Verify gate
 
 ```bash
+npm run build && \
 node_modules/.bin/ng test @lifekit-hq/charts-core --configuration ci && \
 node_modules/.bin/ng test @lifekit-hq/elements --configuration ci && \
 node_modules/.bin/ng test @lifekit-hq/ui --configuration ci && \
 node_modules/.bin/ng test @lifekit-hq/core --configuration ci && \
 node_modules/.bin/ng lint && \
+npm run consumer-type-check && \
 node_modules/.bin/ng run "@lifekit-hq/ui:build-storybook"
 ```
 
