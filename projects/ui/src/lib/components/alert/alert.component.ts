@@ -1,5 +1,6 @@
 import {ChangeDetectionStrategy, Component, computed, input, output} from '@angular/core';
 
+import {type Nullable} from '../../types';
 import {IconComponent, type LucideIconName} from '../icon/icon.component';
 
 export type AlertVariant = 'info' | 'success' | 'warning' | 'error' | 'accent';
