@@ -118,18 +118,18 @@ verdict is grounded in a code-read of the current implementation.
 `hasError`, and `placeholder`. Exposes computed CSS classes via `SIZE_CLASSES` and `ICON_SIZE`
 maps. No external stylesheet, no custom dropdown widget.
 
-**The finance-sentry#319 rationale (recorded in the component docstring, ported unchanged in
-commit `ac5a5b9`):**
+**The finance-sentry#319 rationale (verbatim from the PR body,
+[finance-sentry#319](https://github.com/lifekit-hq/finance-sentry/pull/319) — title:
+"fix(ui): UI hardening sweep — native cmn-select (drop ng-zorro), chart labels, dev-cache"):**
 
-> "Native-backed select. Deliberately built on a plain `<select>` + design tokens rather than a
-> third-party widget: it needs no external stylesheet or icon registration, stays consistent with
-> the app's Tailwind theme, and gets accessibility + keyboard type-ahead for free."
-
-**Access note:** The full discussion of finance-sentry#319 lives in the finance-sentry GitHub
-issue tracker, which is a separate private repository not reachable for grep at time of this
-audit. The docstring above is the decision record carried into this repo with the component. The
-core of that decision — avoid ng-zorro's `nz-select` because it ships its own stylesheet, icon
-font, and dropdown widget that would fight our Tailwind token system — is captured here verbatim.
+> **`cmn-select` rebuilt on a native `<select>`; ng-zorro removed entirely.** `cmn-select` was
+> built on ng-zorro's `<nz-select>`, but ng-zorro's CSS and icon registration were never wired up
+> — so the control rendered broken *and* threw an unregistered-icon runtime error. ng-zorro had
+> exactly one consumer, so rather than pull in the whole antd theme, `cmn-select` now uses a
+> native `<select>` + design tokens + a Lucide chevron (same public API). Removes
+> `ng-zorro-antd` from both package.json files and the lockfile.
+> Fixes #312 (budgets category selector broken), #314 (icon runtime error), #315 (two icon
+> systems / drop ng-zorro).
 
 **Verdict: keep-own.** The native `<select>` gives us a11y and keyboard type-ahead at zero cost
 and zero dependency surface. A custom combobox widget (whether ng-zorro's, Angular Material's,
@@ -200,22 +200,24 @@ would be wasteful. The custom implementation is appropriately minimal for the re
 
 ## finance-sentry#319 history
 
-The `cmn-select` component was deliberately built without ng-zorro's `nz-select`. The decision
-is recorded in the component's docstring (see §select above), which was ported unchanged from
-`finance-sentry/dsdevq-common` in commit `ac5a5b9` (2026-08-25).
+[finance-sentry#319](https://github.com/lifekit-hq/finance-sentry/pull/319) — "fix(ui): UI
+hardening sweep — native cmn-select (drop ng-zorro), chart labels, dev-cache" — deliberately
+dropped ng-zorro's `nz-select` and replaced it with a native `<select>`. Verbatim from the
+PR body (no comments; the body is the complete decision record):
 
-**Reconstruction is not provided here.** The acceptance criterion for this audit is that the
-recorded rationale is quoted, not reconstructed. The docstring is the carry-forward record.
-The full issue/PR discussion (the thread that produced the "native-backed select" wording) lives
-in `finance-sentry#319`, which is a separate private repository. The key facts are:
+> **`cmn-select` rebuilt on a native `<select>`; ng-zorro removed entirely.** `cmn-select` was
+> built on ng-zorro's `<nz-select>`, but ng-zorro's CSS and icon registration were never wired up
+> — so the control rendered broken *and* threw an unregistered-icon runtime error. ng-zorro had
+> exactly one consumer, so rather than pull in the whole antd theme, `cmn-select` now uses a
+> native `<select>` + design tokens + a Lucide chevron (same public API). Removes
+> `ng-zorro-antd` from both package.json files and the lockfile.
+> Fixes #312 (budgets category selector broken), #314 (icon runtime error), #315 (two icon
+> systems / drop ng-zorro).
 
-1. ng-zorro's `nz-select` was evaluated and deliberately dropped in finance-sentry#319.
-2. The replacement was a native `<select>` + design tokens.
-3. The recorded reason: avoids external stylesheet, avoids external icon registration, stays
-   consistent with Tailwind, gets a11y + keyboard type-ahead from the browser for free.
-
-This audit confirms that verdict stands — the native approach remains correct (see §select
-verdict above) — and adds no new information to the reasoning.
+The critical point for this audit: ng-zorro was not rejected on philosophical grounds — it was
+broken in production (CSS and icon registration were never wired up) and had exactly one consumer,
+making a full antd integration unjustifiable. The native `<select>` was the minimal correct fix.
+This audit confirms that verdict stands (see §select verdict above).
 
 ---
 
