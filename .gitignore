@@ -5,3 +5,4 @@ coverage/
 .angular/
 *.log
 .DS_Store
+fixtures/consumer-type-check/.tmp/

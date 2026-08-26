@@ -1,5 +1,17 @@
-// Fixture: verify Nullable/Maybe/AsyncStatus resolve from the published package.
-// Compiled by the CI job with skipLibCheck: false against the npm-packed artifact.
+// Fixture: verify the published package's types resolve for a real consumer.
+// run.sh `npm pack`s the built library and extracts the tarball into a local
+// node_modules/@lifekit-hq/ui, so this file compiles (skipLibCheck: false)
+// against the ACTUAL packed artifact through real package resolution —
+// package.json exports and files filtering included (issue #13).
+//
+// Whole-surface sweep: with skipLibCheck:false, importing the entire public
+// API pulls every declaration of the emitted types rollup into the program —
+// any type the rollup references but drops (the #9 bug class) fails the build.
+// Peer deps (@angular/*) and ambient @types resolve from the repo's own
+// node_modules — the consumer-provides-peers contract. Known gap: the rollup
+// leans on ambient google.accounts types the package does not declare
+// (tracked as its own issue); the repo devDependency masks it here.
+import * as api from '@lifekit-hq/ui';
 import type {AlertItemComponent, AsyncStatus, ButtonComponent, Maybe, Nullable} from '@lifekit-hq/ui';
 
 // Nullable<T> must be T | null
@@ -24,4 +36,4 @@ const icon: Nullable<string> = btn.icon();
 const badgeLabel: Nullable<string> = alertItem.badgeLabel();
 
 // Silence "unused variable" without removing the checks
-void [a, b, c, d, e, f, g, icon, badgeLabel];
+void [api, a, b, c, d, e, f, g, icon, badgeLabel];
