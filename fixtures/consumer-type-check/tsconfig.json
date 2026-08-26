@@ -5,11 +5,7 @@
     "moduleResolution": "bundler",
     "module": "ES2022",
     "target": "ES2022",
-    "noEmit": true,
-    "baseUrl": "../..",
-    "paths": {
-      "@lifekit-hq/ui": ["dist/lifekit-hq/ui"]
-    }
+    "noEmit": true
   },
   "include": ["consumer.ts"]
 }
