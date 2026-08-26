@@ -1,3 +1,6 @@
+// Types
+export type * from './types';
+
 // Components
 export * from './components/alert/alert.component';
 export * from './components/alert-item/alert-item.component';

@@ -19,3 +19,5 @@ jobs:
       - run: npm run test
       - run: npm run build
       - run: npm run build-storybook
+      - name: Consumer type-check (skipLibCheck:false against packed types)
+        run: npm run consumer-type-check
