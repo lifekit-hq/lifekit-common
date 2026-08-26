@@ -1,12 +1,16 @@
 /**
  * Angular consumption proof for <lk-line-chart>.
  *
- * This story imports the element as a side effect (registering the custom element),
- * then renders it via an Angular template with CUSTOM_ELEMENTS_SCHEMA. It demonstrates
- * that Angular host apps can consume @lifekit-hq/elements without any Angular adapter —
- * property binding, CSS custom-property theming, and slot content all work.
+ * Imports the element class by name so production bundlers (which honour
+ * sideEffects:false on the package) cannot tree-shake away the module's
+ * customElements.define() call. The if-guard makes this safe whether or not
+ * the module's own top-level define has already run.
  */
-import '@lifekit-hq/elements';
+import {LkLineChart} from '@lifekit-hq/elements';
+
+if (!customElements.get('lk-line-chart')) {
+  customElements.define('lk-line-chart', LkLineChart);
+}
 
 import {CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
 import type {ChartPoint} from '@lifekit-hq/charts-core';
