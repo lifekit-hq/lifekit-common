@@ -1,0 +1,138 @@
+{
+  "config": {
+    "argv": [
+      "/usr/bin/node",
+      "/workspace/node_modules/.bin/playwright",
+      "test",
+      "--config=projects/ui/playwright.smoke.config.ts"
+    ],
+    "configFile": "/workspace/projects/ui/playwright.smoke.config.ts",
+    "rootDir": "/workspace/projects/ui/e2e/smoke",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/workspace/projects/ui/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/workspace/projects/ui/e2e/smoke",
+        "testIgnore": [],
+        "testMatch": ["**/*.@(spec|test).?(c|m)[jt]s?(x)"],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json",
+        {
+          "outputFile": "e2e/smoke/results.json"
+        }
+      ],
+      ["list", null]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.62.1",
+    "workers": 1,
+    "webServer": {
+      "command": "node -e \"require('http').createServer((req,res)=>{const fs=require('fs'),path=require('path'),dir='projects/ui/storybook-static',fp=path.join(dir,req.url.split('?')[0]==='/'?'index.html':req.url.split('?')[0]),ext=path.extname(fp);fs.readFile(fp,(e,d)=>{if(e){res.writeHead(404);res.end();}else{res.writeHead(200,{'Content-Type':{html:'text/html',js:'application/javascript',css:'text/css',json:'application/json'}[ext.slice(1)]||'application/octet-stream'});res.end(d);}});}).listen(6007)\"",
+      "url": "http://localhost:6007",
+      "reuseExistingServer": true,
+      "timeout": 30000
+    }
+  },
+  "suites": [
+    {
+      "title": "lk-line-chart.smoke.spec.ts",
+      "file": "lk-line-chart.smoke.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "lk-line-chart registers and renders its shadow root in production build",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 9,
+                  "error": {
+                    "message": "Error: browserType.launch: Target page, context or browser has been closed\nBrowser logs:\n\n<launching> /home/agent/.cache/ms-playwright/chromium_headless_shell-1234/chrome-linux/headless_shell --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/tmp/playwright_chromiumdev_profile-xWul3V --remote-debugging-pipe --no-startup-window\n<launched> pid=1597\n[pid=1597][err] /home/agent/.cache/ms-playwright/chromium_headless_shell-1234/chrome-linux/headless_shell: error while loading shared libraries: libXfixes.so.3: cannot open shared object file: No such file or directory\nCall log:\n\u001b[2m  - <launching> /home/agent/.cache/ms-playwright/chromium_headless_shell-1234/chrome-linux/headless_shell --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/tmp/playwright_chromiumdev_profile-xWul3V --remote-debugging-pipe --no-startup-window\u001b[22m\n\u001b[2m  - <launched> pid=1597\u001b[22m\n\u001b[2m  - [pid=1597][err] /home/agent/.cache/ms-playwright/chromium_headless_shell-1234/chrome-linux/headless_shell: error while loading shared libraries: libXfixes.so.3: cannot open shared object file: No such file or directory\u001b[22m\n\u001b[2m  - [pid=1597] <gracefully close start>\u001b[22m\n\u001b[2m  - [pid=1597] <kill>\u001b[22m\n\u001b[2m  - [pid=1597] <will force kill>\u001b[22m\n\u001b[2m  - [pid=1597] exception while trying to kill process: Error: kill ESRCH\u001b[22m\n\u001b[2m  - [pid=1597] <process did exit: exitCode=127, signal=null>\u001b[22m\n\u001b[2m  - [pid=1597] starting temporary directories cleanup\u001b[22m\n\u001b[2m  - [pid=1597] finished temporary directories cleanup\u001b[22m\n\u001b[2m  - [pid=1597] <gracefully close end>\u001b[22m\n",
+                    "stack": "Error: browserType.launch: Target page, context or browser has been closed\nBrowser logs:\n\n<launching> /home/agent/.cache/ms-playwright/chromium_headless_shell-1234/chrome-linux/headless_shell --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/tmp/playwright_chromiumdev_profile-xWul3V --remote-debugging-pipe --no-startup-window\n<launched> pid=1597\n[pid=1597][err] /home/agent/.cache/ms-playwright/chromium_headless_shell-1234/chrome-linux/headless_shell: error while loading shared libraries: libXfixes.so.3: cannot open shared object file: No such file or directory\nCall log:\n\u001b[2m  - <launching> /home/agent/.cache/ms-playwright/chromium_headless_shell-1234/chrome-linux/headless_shell --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/tmp/playwright_chromiumdev_profile-xWul3V --remote-debugging-pipe --no-startup-window\u001b[22m\n\u001b[2m  - <launched> pid=1597\u001b[22m\n\u001b[2m  - [pid=1597][err] /home/agent/.cache/ms-playwright/chromium_headless_shell-1234/chrome-linux/headless_shell: error while loading shared libraries: libXfixes.so.3: cannot open shared object file: No such file or directory\u001b[22m\n\u001b[2m  - [pid=1597] <gracefully close start>\u001b[22m\n\u001b[2m  - [pid=1597] <kill>\u001b[22m\n\u001b[2m  - [pid=1597] <will force kill>\u001b[22m\n\u001b[2m  - [pid=1597] exception while trying to kill process: Error: kill ESRCH\u001b[22m\n\u001b[2m  - [pid=1597] <process did exit: exitCode=127, signal=null>\u001b[22m\n\u001b[2m  - [pid=1597] starting temporary directories cleanup\u001b[22m\n\u001b[2m  - [pid=1597] finished temporary directories cleanup\u001b[22m\n\u001b[2m  - [pid=1597] <gracefully close end>\u001b[22m\n"
+                  },
+                  "errors": [
+                    {
+                      "message": "Error: browserType.launch: Target page, context or browser has been closed\nBrowser logs:\n\n<launching> /home/agent/.cache/ms-playwright/chromium_headless_shell-1234/chrome-linux/headless_shell --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/tmp/playwright_chromiumdev_profile-xWul3V --remote-debugging-pipe --no-startup-window\n<launched> pid=1597\n[pid=1597][err] /home/agent/.cache/ms-playwright/chromium_headless_shell-1234/chrome-linux/headless_shell: error while loading shared libraries: libXfixes.so.3: cannot open shared object file: No such file or directory\nCall log:\n\u001b[2m  - <launching> /home/agent/.cache/ms-playwright/chromium_headless_shell-1234/chrome-linux/headless_shell --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/tmp/playwright_chromiumdev_profile-xWul3V --remote-debugging-pipe --no-startup-window\u001b[22m\n\u001b[2m  - <launched> pid=1597\u001b[22m\n\u001b[2m  - [pid=1597][err] /home/agent/.cache/ms-playwright/chromium_headless_shell-1234/chrome-linux/headless_shell: error while loading shared libraries: libXfixes.so.3: cannot open shared object file: No such file or directory\u001b[22m\n\u001b[2m  - [pid=1597] <gracefully close start>\u001b[22m\n\u001b[2m  - [pid=1597] <kill>\u001b[22m\n\u001b[2m  - [pid=1597] <will force kill>\u001b[22m\n\u001b[2m  - [pid=1597] exception while trying to kill process: Error: kill ESRCH\u001b[22m\n\u001b[2m  - [pid=1597] <process did exit: exitCode=127, signal=null>\u001b[22m\n\u001b[2m  - [pid=1597] starting temporary directories cleanup\u001b[22m\n\u001b[2m  - [pid=1597] finished temporary directories cleanup\u001b[22m\n\u001b[2m  - [pid=1597] <gracefully close end>\u001b[22m\n"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [
+                    {
+                      "text": "Skipping host requirements validation logic because `PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS` env variable is set.\n"
+                    }
+                  ],
+                  "retry": 0,
+                  "startTime": "2026-08-26T18:46:37.928Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/workspace/projects/ui/test-results/lk-line-chart.smoke-lk-lin-d17a8-ow-root-in-production-build-chromium/error-context.md"
+                    }
+                  ]
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "deacdee8c855e7dcdc3b-f0310796cb51f801d7ee",
+          "file": "lk-line-chart.smoke.spec.ts",
+          "line": 5,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-08-26T18:46:36.917Z",
+    "duration": 1216.9759999999999,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

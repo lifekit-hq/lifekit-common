@@ -8,7 +8,10 @@
     "composite": true,
     "declaration": true,
     "declarationMap": true,
-    "types": ["google.accounts"]
+    "types": ["google.accounts"],
+    "paths": {
+      "@lifekit-hq/charts-core": ["../../dist/lifekit-hq/charts-core"]
+    }
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts"],
   "exclude": ["**/*.spec.ts", "**/*.stories.ts"]

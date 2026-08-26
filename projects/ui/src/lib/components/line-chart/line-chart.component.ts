@@ -9,30 +9,14 @@ import {
   viewChild,
 } from '@angular/core';
 import {
-  CategoryScale,
-  Chart,
-  Filler,
-  LinearScale,
-  LineController,
-  LineElement,
-  PointElement,
-  Tooltip,
-} from 'chart.js';
+  buildLineChartConfig,
+  type ChartPoint,
+  resolveLineChartTokens,
+  updateLineChart,
+} from '@lifekit-hq/charts-core';
+import {Chart} from 'chart.js';
 
-Chart.register(
-  CategoryScale,
-  LinearScale,
-  LineController,
-  PointElement,
-  LineElement,
-  Tooltip,
-  Filler
-);
-
-export interface ChartPoint {
-  label: string;
-  value: number;
-}
+export type {ChartPoint} from '@lifekit-hq/charts-core';
 
 @Component({
   selector: 'cmn-line-chart',
@@ -64,9 +48,7 @@ export class LineChartComponent implements AfterViewInit, OnDestroy {
     effect(() => {
       const points = this.data();
       if (this.chart) {
-        this.chart.data.labels = points.map(p => p.label);
-        this.chart.data.datasets[0].data = points.map(p => p.value);
-        this.chart.update('none');
+        updateLineChart(this.chart, points);
       }
     });
   }
@@ -85,87 +67,9 @@ export class LineChartComponent implements AfterViewInit, OnDestroy {
     if (!ctx) {
       return;
     }
-
-    const accent = getComputedStyle(document.documentElement)
-      .getPropertyValue('--color-accent-default')
-      .trim();
-    const textSecondary = getComputedStyle(document.documentElement)
-      .getPropertyValue('--color-text-secondary')
-      .trim();
-    const borderDefault = getComputedStyle(document.documentElement)
-      .getPropertyValue('--color-border-default')
-      .trim();
-
-    const currency = this.currency();
-    const points = this.data();
-
-    this.chart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: points.map(p => p.label),
-        datasets: [
-          {
-            data: points.map(p => p.value),
-            borderColor: accent || '#4f46e5',
-            backgroundColor: `${accent || '#4f46e5'}1a`,
-            borderWidth: 2,
-            pointRadius: 0,
-            pointHoverRadius: 4,
-            fill: true,
-            tension: 0.3,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        // Points are hidden (pointRadius: 0); with Chart.js's default intersect:true the
-        // tooltip would only fire when hovering exactly on an invisible point, so it never
-        // showed. Index mode surfaces the nearest point for the hovered x-position.
-        interaction: {mode: 'index', intersect: false},
-        plugins: {
-          legend: {display: false},
-          tooltip: {
-            mode: 'index',
-            intersect: false,
-            callbacks: {
-              label: tooltipCtx => {
-                const val = tooltipCtx.parsed.y as number;
-                return new Intl.NumberFormat('en-US', {
-                  style: 'currency',
-                  currency,
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 0,
-                }).format(val);
-              },
-            },
-          },
-        },
-        scales: {
-          x: {
-            grid: {color: borderDefault || '#c7c4d8'},
-            ticks: {
-              color: textSecondary || '#464555',
-              font: {family: 'Inter', size: 11},
-            },
-          },
-          y: {
-            grid: {color: borderDefault || '#c7c4d8'},
-            ticks: {
-              color: textSecondary || '#464555',
-              font: {family: 'Inter', size: 11},
-              callback: val =>
-                new Intl.NumberFormat('en-US', {
-                  style: 'currency',
-                  currency,
-                  notation: 'compact',
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 0,
-                }).format(val as number),
-            },
-          },
-        },
-      },
-    });
+    this.chart = new Chart(
+      ctx,
+      buildLineChartConfig(this.data(), resolveLineChartTokens(), this.currency())
+    );
   }
 }

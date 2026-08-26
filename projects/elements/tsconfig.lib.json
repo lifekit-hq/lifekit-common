@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "../../out-tsc/lib",
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "paths": {
+      "@lifekit-hq/charts-core": ["../../dist/lifekit-hq/charts-core"]
+    }
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/**/*.spec.ts"]
+}
