@@ -118,9 +118,11 @@ verdict is grounded in a code-read of the current implementation.
 `hasError`, and `placeholder`. Exposes computed CSS classes via `SIZE_CLASSES` and `ICON_SIZE`
 maps. No external stylesheet, no custom dropdown widget.
 
-**The finance-sentry#319 rationale (verbatim from the PR body,
+**The finance-sentry#319 rationale — fetched verbatim from the PR body via unauthenticated
+GitHub REST API (`GET https://api.github.com/repos/lifekit-hq/finance-sentry/pulls/319`,
+2026-08-26; repo is public).
 [finance-sentry#319](https://github.com/lifekit-hq/finance-sentry/pull/319) — title:
-"fix(ui): UI hardening sweep — native cmn-select (drop ng-zorro), chart labels, dev-cache"):**
+"fix(ui): UI hardening sweep — native cmn-select (drop ng-zorro), chart labels, dev-cache":**
 
 > **`cmn-select` rebuilt on a native `<select>`; ng-zorro removed entirely.** `cmn-select` was
 > built on ng-zorro's `<nz-select>`, but ng-zorro's CSS and icon registration were never wired up
@@ -203,7 +205,9 @@ would be wasteful. The custom implementation is appropriately minimal for the re
 [finance-sentry#319](https://github.com/lifekit-hq/finance-sentry/pull/319) — "fix(ui): UI
 hardening sweep — native cmn-select (drop ng-zorro), chart labels, dev-cache" — deliberately
 dropped ng-zorro's `nz-select` and replaced it with a native `<select>`. Verbatim from the
-PR body (no comments; the body is the complete decision record):
+PR body, fetched via unauthenticated GitHub REST API
+(`GET https://api.github.com/repos/lifekit-hq/finance-sentry/pulls/319`, 2026-08-26; repo is
+public; no comments — body is the complete decision record):
 
 > **`cmn-select` rebuilt on a native `<select>`; ng-zorro removed entirely.** `cmn-select` was
 > built on ng-zorro's `<nz-select>`, but ng-zorro's CSS and icon registration were never wired up
