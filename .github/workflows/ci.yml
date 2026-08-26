@@ -13,6 +13,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Strategy coverage check
+        run: npm run check-strategy
       - run: npm run smoke:tokens
       - run: npm run lint
       - run: npm run format:check
