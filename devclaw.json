@@ -1,0 +1,8 @@
+{
+  "$schema": "https://raw.githubusercontent.com/lifekit-hq/devclaw/main/docs/reference/devclaw-manifest.schema.json",
+  "schemaVersion": 1,
+  "boilerplateRevision": 1,
+  "surface": "library",
+  "stack": ["typescript", "lit", "angular"],
+  "verifyCmd": "npm ci && npm run check-strategy && npm run smoke:tokens && npm run lint && npm run format:check && npm run test && npm run build && npm run build-storybook && npm run consumer-type-check"
+}
