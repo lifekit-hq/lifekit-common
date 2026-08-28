@@ -12,6 +12,7 @@
     "format:check": "prettier --check \"projects/**/*.{ts,html,scss,css}\"",
     "storybook": "ng run \"@lifekit-hq/ui:storybook\"",
     "build-storybook": "ng run \"@lifekit-hq/ui:build-storybook\"",
+    "check-strategy": "node scripts/check-strategy-coverage.mjs",
     "smoke:tokens": "node -e \"const p=require('./projects/tokens/tailwind/preset.cjs'); if(!p.theme) throw new Error('preset has no theme'); require('fs').accessSync('./projects/tokens/theme.css'); console.log('tokens ok')\"",
     "consumer-type-check": "bash fixtures/consumer-type-check/run.sh",
     "prepare": "husky"
