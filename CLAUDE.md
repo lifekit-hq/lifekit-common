@@ -37,11 +37,12 @@ npm run build-storybook  # static catalog (deployed to Pages on merge)
 
 - **Branch**: `<type>/<issue#>-<slug>` (e.g. `feat/2-publish-pipeline`); create via `gh issue develop <n>`.
 - **Commits / PR titles**: conventional commits — release-please parses them into the CHANGELOG. Scope = package or area: `feat(ui): …`, `fix(tokens): …`.
+- **PR body**: what + why, then a **Validation** section stating exactly what was run and green.
 - **Issues**: imperative title, no priority prefix — priority lives in the `P1`/`P2` label. P1 issues carry acceptance criteria; P2/P3 stay one-liners until promoted.
 - **Milestones**: `M<n> — <outcome>`, named for the outcome, never a date.
 - **Releases**: release-please maintains the release PR (lockstep version bump across all packages + CHANGELOG); the Weekly Release workflow merges it Mondays 08:00 UTC (or dispatch manually for "release now"). Merging it tags the release and publishes all four packages to GitHub Packages.
 - Main is protected in spirit: all changes land via squash-merged PR, CI green first.
-- Only `README.md` and `CLAUDE.md` belong at the repo root — no session artifacts or ad-hoc docs (strategy verdicts go to `docs/`).
+- Root markdown is `README.md`, `CLAUDE.md`, and the devclaw onboarding set (`AGENTS.md`); `CHANGELOG.md` is release-please-owned. No session artifacts or ad-hoc docs at the root — durable docs go to `docs/`.
 
 ## Storybook-first rule
 
