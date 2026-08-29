@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.2](https://github.com/lifekit-hq/lifekit-common/compare/v0.2.1...v0.2.2) (2026-08-29)
+
+
+### Documentation
+
+* align CLAUDE.md conventions with the amended repo gold standard ([#21](https://github.com/lifekit-hq/lifekit-common/issues/21)) ([866ff56](https://github.com/lifekit-hq/lifekit-common/commit/866ff56e47569b1bcca390bb95092e682a5d3555))
+* devclaw work-item issue template (spec 024 — the issue is the contract) ([#19](https://github.com/lifekit-hq/lifekit-common/issues/19)) ([5d654fb](https://github.com/lifekit-hq/lifekit-common/commit/5d654fb3150d7da40dbc92e535cd33cff0ae7377))
+
 ## [0.2.1](https://github.com/lifekit-hq/lifekit-common/compare/v0.2.0...v0.2.1) (2026-08-28)
 
 
