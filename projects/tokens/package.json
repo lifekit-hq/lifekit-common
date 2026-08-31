@@ -1,6 +1,6 @@
 {
   "name": "@lifekit-hq/tokens",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "lifekit design tokens — CSS custom properties (light/dark themes) + Tailwind preset. Framework-agnostic.",
   "license": "MIT",
   "repository": {
