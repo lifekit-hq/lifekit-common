@@ -26,9 +26,10 @@
           "options": {
             "tsConfig": "projects/ui/tsconfig.spec.json",
             "coverage": true,
-            "setupFiles": [
-              "projects/ui/src/test-setup.ts"
-            ]
+            "browsers": [
+              "chromium"
+            ],
+            "headless": true
           },
           "configurations": {
             "ci": {
@@ -40,12 +41,6 @@
                 "functions": 74,
                 "lines": 84
               }
-            },
-            "local-browser": {
-              "browsers": [
-                "chromium"
-              ],
-              "headless": true
             }
           }
         },
@@ -109,7 +104,11 @@
           "builder": "@angular/build:unit-test",
           "options": {
             "tsConfig": "projects/core/tsconfig.spec.json",
-            "coverage": true
+            "coverage": true,
+            "browsers": [
+              "chromium"
+            ],
+            "headless": true
           },
           "configurations": {
             "ci": {
@@ -121,12 +120,6 @@
                 "functions": 95,
                 "lines": 95
               }
-            },
-            "local-browser": {
-              "browsers": [
-                "chromium"
-              ],
-              "headless": true
             }
           }
         },
@@ -162,9 +155,10 @@
           "builder": "@angular/build:unit-test",
           "options": {
             "tsConfig": "projects/charts-core/tsconfig.spec.json",
-            "setupFiles": [
-              "projects/ui/src/test-setup.ts"
-            ]
+            "browsers": [
+              "chromium"
+            ],
+            "headless": true
           },
           "configurations": {
             "ci": {
@@ -226,9 +220,10 @@
           "builder": "@angular/build:unit-test",
           "options": {
             "tsConfig": "projects/elements/tsconfig.spec.json",
-            "setupFiles": [
-              "projects/ui/src/test-setup.ts"
-            ]
+            "browsers": [
+              "chromium"
+            ],
+            "headless": true
           },
           "configurations": {
             "ci": {

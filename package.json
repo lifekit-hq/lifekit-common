@@ -6,6 +6,7 @@
   "scripts": {
     "ng": "ng",
     "build": "ng build @lifekit-hq/charts-core && ng build @lifekit-hq/elements && ng build @lifekit-hq/ui && ng build @lifekit-hq/core",
+    "pretest": "playwright install chromium",
     "test": "ng test @lifekit-hq/charts-core --configuration ci && ng test @lifekit-hq/elements --configuration ci && ng test @lifekit-hq/ui --configuration ci && ng test @lifekit-hq/core --configuration ci",
     "lint": "ng lint",
     "format": "prettier --write \"projects/**/*.{ts,html,scss,css}\"",
@@ -66,7 +67,6 @@
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "eslint-plugin-unused-imports": "^4.4.1",
     "husky": "^9.1.7",
-    "jsdom": "^29.0.1",
     "lint-staged": "^17.3.0",
     "ng-packagr": "^21.2.0",
     "postcss": "^8.5.9",
