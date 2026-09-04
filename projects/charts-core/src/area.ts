@@ -41,7 +41,7 @@ export function resolveAreaChartTokens(): AreaChartTokens {
   };
 }
 
-export function buildAreaDatasets(series: AreaSeries[]): ChartDataset<'line'>[] {
+export function buildAreaDatasets(series: AreaSeries[], stacked = true): ChartDataset<'line'>[] {
   return series.map((s, i) => {
     const color = s.color ?? DEFAULT_SERIES_COLORS[i % DEFAULT_SERIES_COLORS.length];
     return {
@@ -52,7 +52,7 @@ export function buildAreaDatasets(series: AreaSeries[]): ChartDataset<'line'>[] 
       borderWidth: 1.5,
       pointRadius: 0,
       pointHoverRadius: 4,
-      fill: true,
+      fill: stacked,
       tension: 0.3,
     };
   });
@@ -61,13 +61,14 @@ export function buildAreaDatasets(series: AreaSeries[]): ChartDataset<'line'>[] 
 export function buildAreaChartConfig(
   series: AreaSeries[],
   tokens: AreaChartTokens,
-  currency: string
+  currency: string,
+  stacked = true
 ): ChartConfiguration<'line'> {
   return {
     type: 'line',
     data: {
       labels: series[0]?.points.map(p => p.label) ?? [],
-      datasets: buildAreaDatasets(series),
+      datasets: buildAreaDatasets(series, stacked),
     },
     options: {
       responsive: true,
@@ -100,7 +101,7 @@ export function buildAreaChartConfig(
       },
       scales: {
         x: {
-          stacked: true,
+          stacked,
           grid: {display: false},
           border: {display: false},
           ticks: {
@@ -112,7 +113,7 @@ export function buildAreaChartConfig(
           },
         },
         y: {
-          stacked: true,
+          stacked,
           grid: {color: tokens.borderDefault},
           border: {display: false},
           ticks: {
@@ -126,10 +127,21 @@ export function buildAreaChartConfig(
   };
 }
 
-export function updateAreaChart(chart: Chart, series: AreaSeries[]): void {
+export function updateAreaChart(chart: Chart, series: AreaSeries[], stacked = true): void {
   // eslint-disable-next-line no-param-reassign
   chart.data.labels = series[0]?.points.map(p => p.label) ?? [];
   // eslint-disable-next-line no-param-reassign
-  chart.data.datasets = buildAreaDatasets(series);
+  chart.data.datasets = buildAreaDatasets(series, stacked);
+  // Scale stacking lives in options, not the datasets, so toggling `stacked` has to
+  // reach into the live chart rather than only replacing the data. The cast narrows
+  // Chart.js's all-scale-types union, which has no common `stacked` (radial lacks it).
+  const scales = chart.options.scales as
+    Record<string, {stacked?: boolean} | undefined> | undefined;
+  const x = scales?.['x'];
+  const y = scales?.['y'];
+  if (x && y) {
+    x.stacked = stacked;
+    y.stacked = stacked;
+  }
   chart.update('none');
 }
