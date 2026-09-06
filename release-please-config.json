@@ -7,7 +7,9 @@
       "changelog-path": "CHANGELOG.md",
       "extra-files": [
         {"type": "json", "path": "package.json", "jsonpath": "$.version"},
+        {"type": "json", "path": "projects/charts-core/package.json", "jsonpath": "$.version"},
         {"type": "json", "path": "projects/ui/package.json", "jsonpath": "$.version"},
+        {"type": "json", "path": "projects/ui/package.json", "jsonpath": "$.dependencies['@lifekit-hq/charts-core']"},
         {"type": "json", "path": "projects/core/package.json", "jsonpath": "$.version"},
         {"type": "json", "path": "projects/tokens/package.json", "jsonpath": "$.version"},
         {"type": "json", "path": "projects/config/package.json", "jsonpath": "$.version"}
