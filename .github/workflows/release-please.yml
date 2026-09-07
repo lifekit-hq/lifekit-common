@@ -50,6 +50,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          npm publish ./dist/lifekit-hq/charts-core
           npm publish ./dist/lifekit-hq/ui
           npm publish ./dist/lifekit-hq/core
           npm publish ./projects/tokens
