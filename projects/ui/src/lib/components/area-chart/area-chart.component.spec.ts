@@ -89,8 +89,15 @@ describe('AreaChartComponent', () => {
       return chart as Chart;
     }
 
-    function fills(chart: Chart): unknown[] {
-      return chart.data.datasets.map(d => (d as {fill?: unknown}).fill);
+    /**
+     * The fill target the Filler plugin resolved for each dataset — `false` when filling is
+     * off, `'origin'` when it is on. Read here rather than off `dataset.fill`, which is only
+     * a read-back of what the builder wrote and so proves nothing about Filler acting on it.
+     */
+    function resolvedFills(chart: Chart): unknown[] {
+      return chart.data.datasets.map(
+        (_, i) => (chart.getDatasetMeta(i) as unknown as {$filler?: {fill?: unknown}}).$filler?.fill
+      );
     }
 
     beforeEach(() => {
@@ -101,7 +108,7 @@ describe('AreaChartComponent', () => {
     it('defaults to stacked bands so the shipped behaviour is unchanged', () => {
       expect(fixture.componentInstance.stacked()).toBe(true);
       expect(stacking(liveChart())).toEqual({x: true, y: true});
-      expect(fills(liveChart())).toEqual([true, true]);
+      expect(resolvedFills(liveChart())).toEqual(['origin', 'origin']);
       expect(plottedMax(liveChart())).toBe(TALLEST_COLUMN);
     });
 
@@ -110,7 +117,7 @@ describe('AreaChartComponent', () => {
       fixture.detectChanges();
 
       expect(stacking(liveChart())).toEqual({x: false, y: false});
-      expect(fills(liveChart())).toEqual([false, false]);
+      expect(resolvedFills(liveChart())).toEqual([false, false]);
       // Each series is plotted from zero, so the axis tops out at the tallest single point.
       expect(plottedMax(liveChart())).toBe(TALLEST_POINT);
     });
@@ -124,6 +131,7 @@ describe('AreaChartComponent', () => {
 
       expect(liveChart()).toBe(before);
       expect(stacking(liveChart())).toEqual({x: true, y: true});
+      expect(resolvedFills(liveChart())).toEqual(['origin', 'origin']);
       expect(plottedMax(liveChart())).toBe(TALLEST_COLUMN);
       expect(liveChart().data.labels).toEqual(['Jan', 'Feb']);
     });

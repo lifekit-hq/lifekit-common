@@ -33,6 +33,20 @@
   `projects/charts-core/package.json` and rewrites ui's pin to match, and the publish step publishes
   charts-core ahead of ui. Workers do not edit `.github/workflows/release-please.yml` or
   `release-please-config.json` — report the block instead.
+- **The squash-merge title is the only commit release-please ever sees.** Every PR here lands
+  squashed (`… (#N)` on `main`), so the PR title becomes main's sole commit for the branch and the
+  branch's own commit subjects are discarded. A `test:`/`chore:` title therefore produces no
+  version bump, no `autorelease: pending` PR, and a Weekly Release run that no-ops with "No pending
+  release PR" — done-when 3 fails silently, with every green check. This branch's title must be the
+  `feat(ui):` subject, which is what makes the release a **minor** (0.2.2 → 0.3.0), not the patch
+  the issue's wording assumes. The title field is on GitHub, not in the tree, so a worker can only
+  set the tip subject and flag it; confirming the title is an owner step. Recorded because the
+  first pass at US3 missed it: the slice line below said "no files in this repo" and stopped there.
+- **Fill is asserted through the Filler plugin, not the dataset property.** `dataset.fill` is a
+  read-back of what `buildAreaDatasets` wrote — the same blind spot the stacking assertions had.
+  `chart.getDatasetMeta(i).$filler.fill` is Filler's *decoded* target (`'origin'` on, `false` off),
+  so it fails if the plugin never acted. Mutation-verified: forcing `fill: true` fails the Lines
+  test with `expected ['origin','origin'] to deeply equal [false, false]`.
 
 ## Slice surface (the next session's read budget)
 
@@ -42,5 +56,7 @@
 - **US2 — the proof.** `projects/charts-core/src/area.spec.ts` (pure builders, fake chart is fine),
   `projects/ui/src/lib/components/area-chart/area-chart.component.spec.ts` (real headless Chromium,
   real Chart.js — assert rendered state).
-- **US3 — the release.** No files in this repo. Merge, then release-please; publishing is the
-  Weekly Release workflow (Mondays 08:00 UTC) or a manual dispatch.
+- **US3 — the release.** No `projects/**` files. The branch itself is the surface: it must carry
+  `main`'s charts-core publish plumbing (PR #26, merged in) and be titled `feat(ui): …` so the
+  squash lands as a releasable commit. Then release-please raises the version PR; publishing is the
+  Weekly Release workflow (Mondays 08:00 UTC) or a manual dispatch. Both are owner actions.

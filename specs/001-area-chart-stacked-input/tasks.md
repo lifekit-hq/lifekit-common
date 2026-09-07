@@ -20,15 +20,31 @@
       on a real Chart.js instance in headless Chromium.
 - [x] Those assertions read the built scale and the y-axis's plotted maximum, so they fail if
       Chart.js ignores the option rather than passing on a read-back of what was written.
+- [x] Fill — the other half of done-when 1 — is read off the Filler plugin's resolved target
+      (`getDatasetMeta(i).$filler.fill`) rather than `dataset.fill`, for the same reason.
 
 ## [US3] finance-sentry can drop the patch — done-when 3
 
-- [ ] Merge the PR — release-please raises the lockstep patch-release PR (ui + core + tokens +
-      config + charts-core, with ui's charts-core pin rewritten to match).
+- [x] Branch carries the charts-core publish plumbing: `main` merged in, bringing PR #26's
+      `release-please-config.json` extra-files (charts-core version + ui's pin) and the
+      `npm publish ./dist/lifekit-hq/charts-core` step. Without it the release publishes a
+      `@lifekit-hq/ui` whose exact `@lifekit-hq/charts-core` pin does not exist on the registry.
+- [x] Merged tree re-verified end to end — the release job builds from `main`, so the merge has to
+      be green before the release, not after it.
+- [x] Branch tip re-subjected `feat(ui): expose a real stacked input on cmn-area-chart`, because
+      the squash title is the only commit release-please ever sees (see plan.md) and the tip
+      carried `test(ui):`, which bumps nothing. The governing field is the PR's *title*, which
+      lives on GitHub and not in this repo — so this only helps if the title is derived from the
+      tip. **Owner: confirm PR #25's title reads `feat(ui): …` before merging.**
+- [ ] Merge the PR — release-please raises the lockstep release PR: **0.2.2 → 0.3.0** (minor, not
+      the patch the issue's wording assumes — `feat` bumps the minor) across ui + core + tokens +
+      config + charts-core, with ui's charts-core pin rewritten to match. Owner action.
 - [ ] Release: Weekly Release workflow (Mondays 08:00 UTC) or a manual dispatch merges the release
       PR, which tags and publishes all packages to GitHub Packages. Owner action — no worker step.
-- [ ] finance-sentry pins the release and deletes `scripts/patch-lifekit-ui.js` + its `postinstall`
-      hook (tracked in finance-sentry#557, not in this repo).
+      If the run prints "No pending release PR", the squash title was not releasable and `main`
+      needs a follow-up `feat`/`fix` commit.
+- [ ] finance-sentry pins `@lifekit-hq/ui@0.3.0` and deletes `scripts/patch-lifekit-ui.js` + its
+      `postinstall` hook (tracked in finance-sentry#557, not in this repo).
 
 ## Follow-ups found while shipping this (not in scope here)
 
@@ -41,3 +57,8 @@
       declares the peer. Should be declared on ui too.
 - [ ] `cmn-bar-chart` still ships no `*.stories.ts`, against the CLAUDE.md rule (pre-existing, one
       of several).
+- [ ] The area tooltip footer prints `Total: …` unconditionally (`area.ts`), which is misleading in
+      `stacked=false` mode where the bands are no longer summed. Pre-existing wording, and
+      finance-sentry's monkey-patch had the same gap, so not a regression — but worth an issue.
+- [ ] `@lifekit-hq/elements` is built but never published by `release-please.yml`. Nothing depends
+      on it externally today, so it is not blocking this release.
