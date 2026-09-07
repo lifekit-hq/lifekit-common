@@ -53,10 +53,26 @@ describe('AreaChartComponent', () => {
   });
 
   describe('stacked input', () => {
-    /** Chart.js models scales as a deep-partial union, so read `stacked` structurally. */
+    /** Tallest single series — the y-axis has to span this in either mode. */
+    const TALLEST_SERIES = Math.max(...SAMPLE.flatMap(s => s.points.map(p => p.value)));
+    /** Tallest column total — only a genuinely stacked y-axis has to span this. */
+    const TALLEST_COLUMN = Math.max(
+      ...SAMPLE[0].points.map((_, i) => SAMPLE.reduce((sum, s) => sum + s.points[i].value, 0))
+    );
+
+    /**
+     * Read stacking off the *built* scale, not `chart.options`: the options object echoes
+     * back whatever was written to it, so asserting there passes even when Chart.js never
+     * applied the change. Chart.js types scales as a union with no common `stacked`.
+     */
     function stacking(chart: Chart): {x?: boolean; y?: boolean} {
-      const scales = (chart.options as {scales?: Record<string, {stacked?: boolean}>}).scales;
-      return {x: scales?.['x']?.stacked, y: scales?.['y']?.stacked};
+      const scales = chart.scales as Record<string, {options: {stacked?: boolean}} | undefined>;
+      return {x: scales['x']?.options.stacked, y: scales['y']?.options.stacked};
+    }
+
+    /** What the rendered y-axis actually spans — the observable proof that stacking applied. */
+    function yAxisSpan(chart: Chart): number {
+      return chart.scales['y'].max;
     }
 
     function liveChart(): Chart {
@@ -80,6 +96,7 @@ describe('AreaChartComponent', () => {
       expect(fixture.componentInstance.stacked()).toBe(true);
       expect(stacking(liveChart())).toEqual({x: true, y: true});
       expect(fills(liveChart())).toEqual([true, true]);
+      expect(yAxisSpan(liveChart())).toBeGreaterThanOrEqual(TALLEST_COLUMN);
     });
 
     it('switches the live chart to independent unfilled lines when set to false', () => {
@@ -88,6 +105,9 @@ describe('AreaChartComponent', () => {
 
       expect(stacking(liveChart())).toEqual({x: false, y: false});
       expect(fills(liveChart())).toEqual([false, false]);
+      // Each series is plotted from zero, so the axis stops at the tallest one.
+      expect(yAxisSpan(liveChart())).toBeGreaterThanOrEqual(TALLEST_SERIES);
+      expect(yAxisSpan(liveChart())).toBeLessThan(TALLEST_COLUMN);
     });
 
     it('toggles back to stacked without recreating the chart or refetching series', () => {
@@ -99,6 +119,7 @@ describe('AreaChartComponent', () => {
 
       expect(liveChart()).toBe(before);
       expect(stacking(liveChart())).toEqual({x: true, y: true});
+      expect(yAxisSpan(liveChart())).toBeGreaterThanOrEqual(TALLEST_COLUMN);
       expect(liveChart().data.labels).toEqual(['Jan', 'Feb']);
     });
   });
