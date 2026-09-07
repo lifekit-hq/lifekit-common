@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/lifekit-hq/lifekit-common/compare/v0.2.2...v0.3.0) (2026-09-07)
+
+
+### Features
+
+* **ui:** expose a real stacked input on cmn-area-chart ([#25](https://github.com/lifekit-hq/lifekit-common/issues/25)) ([28f690b](https://github.com/lifekit-hq/lifekit-common/commit/28f690bc41ef30bd6750e7c7d678e0da0890d66a)), closes [#23](https://github.com/lifekit-hq/lifekit-common/issues/23)
+
 ## [0.2.2](https://github.com/lifekit-hq/lifekit-common/compare/v0.2.1...v0.2.2) (2026-08-29)
 
 
