@@ -53,11 +53,13 @@ describe('AreaChartComponent', () => {
   });
 
   describe('stacked input', () => {
-    /** Tallest single series — the y-axis has to span this in either mode. */
-    const TALLEST_SERIES = Math.max(...SAMPLE.flatMap(s => s.points.map(p => p.value)));
-    /** Tallest column total — only a genuinely stacked y-axis has to span this. */
+    /** Tallest single point — what an unstacked y-axis has to reach, and no more. */
+    const TALLEST_POINT = Math.max(...SAMPLE.flatMap(s => s.points.map(p => p.value)));
+    /** Tallest column total — what a genuinely stacked y-axis has to reach. */
     const TALLEST_COLUMN = Math.max(
-      ...SAMPLE[0].points.map((_, i) => SAMPLE.reduce((sum, s) => sum + s.points[i].value, 0))
+      ...SAMPLE[0].points.map((_, i) =>
+        SAMPLE.reduce((sum, s) => sum + (s.points[i]?.value ?? 0), 0)
+      )
     );
 
     /**
@@ -70,9 +72,13 @@ describe('AreaChartComponent', () => {
       return {x: scales['x']?.options.stacked, y: scales['y']?.options.stacked};
     }
 
-    /** What the rendered y-axis actually spans — the observable proof that stacking applied. */
-    function yAxisSpan(chart: Chart): number {
-      return chart.scales['y'].max;
+    /**
+     * The top of the data the y-axis actually plots — the observable proof that stacking
+     * applied, since Chart.js only sums the columns here when the scale is stacked. Read
+     * through `getMinMax` rather than `scale.max`, which is rounded out to a tick.
+     */
+    function plottedMax(chart: Chart): number {
+      return chart.scales['y'].getMinMax(true).max;
     }
 
     function liveChart(): Chart {
@@ -96,7 +102,7 @@ describe('AreaChartComponent', () => {
       expect(fixture.componentInstance.stacked()).toBe(true);
       expect(stacking(liveChart())).toEqual({x: true, y: true});
       expect(fills(liveChart())).toEqual([true, true]);
-      expect(yAxisSpan(liveChart())).toBeGreaterThanOrEqual(TALLEST_COLUMN);
+      expect(plottedMax(liveChart())).toBe(TALLEST_COLUMN);
     });
 
     it('switches the live chart to independent unfilled lines when set to false', () => {
@@ -105,9 +111,8 @@ describe('AreaChartComponent', () => {
 
       expect(stacking(liveChart())).toEqual({x: false, y: false});
       expect(fills(liveChart())).toEqual([false, false]);
-      // Each series is plotted from zero, so the axis stops at the tallest one.
-      expect(yAxisSpan(liveChart())).toBeGreaterThanOrEqual(TALLEST_SERIES);
-      expect(yAxisSpan(liveChart())).toBeLessThan(TALLEST_COLUMN);
+      // Each series is plotted from zero, so the axis tops out at the tallest single point.
+      expect(plottedMax(liveChart())).toBe(TALLEST_POINT);
     });
 
     it('toggles back to stacked without recreating the chart or refetching series', () => {
@@ -119,7 +124,7 @@ describe('AreaChartComponent', () => {
 
       expect(liveChart()).toBe(before);
       expect(stacking(liveChart())).toEqual({x: true, y: true});
-      expect(yAxisSpan(liveChart())).toBeGreaterThanOrEqual(TALLEST_COLUMN);
+      expect(plottedMax(liveChart())).toBe(TALLEST_COLUMN);
       expect(liveChart().data.labels).toEqual(['Jan', 'Feb']);
     });
   });
