@@ -43,12 +43,15 @@ export class AreaChartComponent implements AfterViewInit, OnDestroy {
   public readonly series = input<AreaSeries[]>([]);
   public readonly label = input<string>('');
   public readonly currency = input<string>('USD');
+  /** `true` stacks the bands into a cumulative total; `false` draws independent, unfilled lines. */
+  public readonly stacked = input<boolean>(true);
 
   constructor() {
     effect(() => {
       const series = this.series();
+      const stacked = this.stacked();
       if (this.chart) {
-        updateAreaChart(this.chart, series);
+        updateAreaChart(this.chart, series, stacked);
       }
     });
   }
@@ -69,7 +72,7 @@ export class AreaChartComponent implements AfterViewInit, OnDestroy {
     }
     this.chart = new Chart(
       ctx,
-      buildAreaChartConfig(this.series(), resolveAreaChartTokens(), this.currency())
+      buildAreaChartConfig(this.series(), resolveAreaChartTokens(), this.currency(), this.stacked())
     );
   }
 }

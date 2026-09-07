@@ -12,7 +12,14 @@
 // leans on ambient google.accounts types the package does not declare
 // (tracked as its own issue); the repo devDependency masks it here.
 import * as api from '@lifekit-hq/ui';
-import type {AlertItemComponent, AsyncStatus, ButtonComponent, Maybe, Nullable} from '@lifekit-hq/ui';
+import type {
+  AlertItemComponent,
+  AreaChartComponent,
+  AsyncStatus,
+  ButtonComponent,
+  Maybe,
+  Nullable,
+} from '@lifekit-hq/ui';
 
 // Nullable<T> must be T | null
 const a: Nullable<string> = null;
@@ -35,5 +42,10 @@ declare const alertItem: AlertItemComponent;
 const icon: Nullable<string> = btn.icon();
 const badgeLabel: Nullable<string> = alertItem.badgeLabel();
 
+// cmn-area-chart's `stacked` must reach consumers as a real boolean input —
+// finance-sentry monkey-patched node_modules to get one (issue #23).
+declare const areaChart: AreaChartComponent;
+const stacked: boolean = areaChart.stacked();
+
 // Silence "unused variable" without removing the checks
-void [api, a, b, c, d, e, f, g, icon, badgeLabel];
+void [api, a, b, c, d, e, f, g, icon, badgeLabel, stacked];
