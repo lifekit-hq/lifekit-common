@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/lifekit-hq/lifekit-common/compare/v0.3.0...v0.3.1) (2026-09-07)
+
+
+### Bug Fixes
+
+* **charts-core:** publish in partial compilation mode ([#29](https://github.com/lifekit-hq/lifekit-common/issues/29)) ([b5c4db3](https://github.com/lifekit-hq/lifekit-common/commit/b5c4db399dfbe48031fcdb76307aed8645c003b3))
+
 ## [0.3.0](https://github.com/lifekit-hq/lifekit-common/compare/v0.2.2...v0.3.0) (2026-09-07)
 
 
