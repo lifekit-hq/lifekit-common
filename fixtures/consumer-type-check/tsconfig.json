@@ -2,6 +2,7 @@
   "compilerOptions": {
     "strict": true,
     "skipLibCheck": false,
+    "types": [],
     "moduleResolution": "bundler",
     "module": "ES2022",
     "target": "ES2022",

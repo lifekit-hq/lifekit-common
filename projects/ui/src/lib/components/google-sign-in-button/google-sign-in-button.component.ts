@@ -11,6 +11,25 @@ import {
   viewChild,
 } from '@angular/core';
 
+/**
+ * Structural mirror of `google.accounts.id.GsiButtonConfiguration`, declared
+ * locally so the published type rollup never references the ambient `google`
+ * namespace — consumers are not required to install `@types/google.accounts`
+ * (issue #15). `renderButton()` below keeps it assignable to the ambient type.
+ */
+export interface GoogleSignInButtonConfiguration {
+  type: 'standard' | 'icon';
+  theme?: 'outline' | 'filled_blue' | 'filled_black';
+  size?: 'small' | 'medium' | 'large';
+  text?: 'signin_with' | 'signup_with' | 'continue_with' | 'signin';
+  shape?: 'rectangular' | 'pill' | 'circle' | 'square';
+  logo_alignment?: 'left' | 'center';
+  /** Minimum button width in pixels (max 400). */
+  width?: number;
+  locale?: string;
+  click_listener?: () => void;
+}
+
 @Component({
   selector: 'cmn-google-sign-in-button',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -21,7 +40,7 @@ export class GoogleSignInButtonComponent implements AfterViewInit, OnDestroy {
   private readonly btnRef = viewChild.required<ElementRef<HTMLElement>>('btn');
 
   public readonly clientId = input.required<string>();
-  public readonly buttonConfiguration = input<google.accounts.id.GsiButtonConfiguration>({
+  public readonly buttonConfiguration = input<GoogleSignInButtonConfiguration>({
     type: 'standard',
     shape: 'rectangular',
     theme: 'outline',
