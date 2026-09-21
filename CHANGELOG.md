@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2](https://github.com/lifekit-hq/lifekit-common/compare/v0.3.1...v0.3.2) (2026-09-19)
+
+
+### Bug Fixes
+
+* **ui:** type GoogleSignInButton configuration with an exported structural type ([#32](https://github.com/lifekit-hq/lifekit-common/issues/32)) ([d0360f2](https://github.com/lifekit-hq/lifekit-common/commit/d0360f2d266fe8b379d6587215e90e39962791f3)), closes [#15](https://github.com/lifekit-hq/lifekit-common/issues/15)
+
 ## [0.3.1](https://github.com/lifekit-hq/lifekit-common/compare/v0.3.0...v0.3.1) (2026-09-07)
 
 
