@@ -263,7 +263,10 @@ These are new components or behaviour changes, outside this issue's boundary:
 
 ### 6.3 Coverage delivered alongside this audit
 
-Every exported component in `ui`, and every exported symbol in `core`,
-`charts-core` and `elements`, now has a spec; every exported component has a
-story covering its real states, not just a happy default. The per-component
-breakdown is in the pull request that carries this document.
+Every exported component in `ui` now has a story covering its real states, and
+every exported symbol across all four code packages has a spec for what a story
+cannot assert. The per-component breakdown is in the pull request that carries
+this document.
+
+Two defects surfaced by writing that coverage are fixed here (§6.1); everything
+else is filed (§6.2).
