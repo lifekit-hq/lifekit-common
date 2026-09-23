@@ -7,6 +7,8 @@ import {ChangeDetectionStrategy, Component, computed, input, output} from '@angu
     <button
       [attr.aria-checked]="checked()"
       [attr.aria-label]="label()"
+      [attr.aria-disabled]="disabled() ? true : null"
+      [disabled]="disabled()"
       [class]="trackClass()"
       (click)="toggled.emit(!checked())"
       role="switch"
