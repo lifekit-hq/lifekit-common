@@ -251,21 +251,15 @@ it has one element in it.
 
 These are new components or behaviour changes, outside this issue's boundary:
 
-- **React bindings, or more custom elements.** Two of three consumers cannot
-  use `@lifekit-hq/ui` at all. `@lifekit-hq/elements` is the existing seam.
-- **A Tailwind v4 token entry point.** The current preset is v3-only.
-- **Non-colour tokens as CSS variables** (radius, font-family, layout metrics),
-  so non-Tailwind consumers can reach them.
-- **A usage/meter chip** (devclaw's `UsageChip`); `cmn-chip` is a filter pill.
-- **A `live` pulse variant on `cmn-status-indicator`.**
-- **One canonical relative-time formatter in `@lifekit-hq/core`**, replacing the
-  four copies (finance-sentry's `TimeUtils`, `cmn-alert-item`'s private
-  `formatRelativeTime`, lifekit-dashboard's `utils/time.ts`, devclaw's
-  `util/time.ts`).
-- **A stepper / multi-step-modal component** (finance-sentry's connect flow).
-- **Filling in `docs/STRATEGY.md`'s usage-evidence column** from §5. That table
-  is a DRAFT awaiting ratification and its decisions are issue #5's call, so
-  this change leaves it untouched and records the evidence here instead.
+| #                                                             | What                                                                                                                                                                               |
+| ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [#34](https://github.com/lifekit-hq/lifekit-common/issues/34) | Close the framework gap — two of three consumers are React and cannot use `@lifekit-hq/ui`. `@lifekit-hq/elements` is the existing seam.                                           |
+| [#35](https://github.com/lifekit-hq/lifekit-common/issues/35) | A Tailwind v4 token entry point; the current preset is v3-only.                                                                                                                    |
+| [#36](https://github.com/lifekit-hq/lifekit-common/issues/36) | Radius, font and layout tokens as CSS custom properties, so non-Tailwind consumers can reach them.                                                                                 |
+| [#37](https://github.com/lifekit-hq/lifekit-common/issues/37) | A usage/meter chip, and a `live` pulse on `cmn-status-indicator` — the two things devclaw has that the library lacks.                                                              |
+| [#38](https://github.com/lifekit-hq/lifekit-common/issues/38) | One canonical relative-time formatter in `@lifekit-hq/core`, replacing the four copies.                                                                                            |
+| [#39](https://github.com/lifekit-hq/lifekit-common/issues/39) | A stepper / multi-step-dialog component (finance-sentry's connect flow).                                                                                                           |
+| [#40](https://github.com/lifekit-hq/lifekit-common/issues/40) | Fill in `docs/STRATEGY.md`'s usage-evidence column from §5. That table is a DRAFT awaiting ratification and its decisions are issue #5's call, so this change leaves it untouched. |
 
 ### 6.3 Coverage delivered alongside this audit
 
