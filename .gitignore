@@ -11,3 +11,7 @@ fixtures/consumer-type-check/.tmp/
 # devclaw per-goal checkouts (boilerplate revision 2) — one goal, one clone
 # under the project workspace; never this repo's own content.
 .goals/
+
+# vitest browser-mode failure artifacts
+__screenshots__/
+.vitest-attachments/
