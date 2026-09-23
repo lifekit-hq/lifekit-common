@@ -11,30 +11,24 @@ const DEFAULT_SKELETON_ROWS = 3;
   selector: 'cmn-async-state',
   imports: [AlertComponent, SkeletonComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  // A single <ng-content /> on purpose: Angular projects light DOM into the
+  // FIRST matching outlet only, so a second one in another branch would render
+  // empty. The branches below are ordered so exactly one outlet exists.
   template: `
-    @switch (status()) {
-      @case ('loading') {
-        <div class="space-y-cmn-3">
-          @for (_ of skeletonArray; track $index) {
-            <cmn-skeleton [height]="skeletonHeight()" />
-          }
-        </div>
-      }
-      @case ('error') {
-        <cmn-alert variant="error">{{ errorMessage() || 'Something went wrong.' }}</cmn-alert>
-      }
-      @case ('success') {
-        @if (isEmpty()) {
-          <p class="py-cmn-6 text-center text-cmn-sm text-text-secondary">
-            {{ emptyMessage() }}
-          </p>
-        } @else {
-          <ng-content />
+    @if (status() === 'loading') {
+      <div class="space-y-cmn-3">
+        @for (_ of skeletonArray; track $index) {
+          <cmn-skeleton [height]="skeletonHeight()" />
         }
-      }
-      @default {
-        <ng-content />
-      }
+      </div>
+    } @else if (status() === 'error') {
+      <cmn-alert variant="error">{{ errorMessage() || 'Something went wrong.' }}</cmn-alert>
+    } @else if (status() === 'success' && isEmpty()) {
+      <p class="py-cmn-6 text-center text-cmn-sm text-text-secondary">
+        {{ emptyMessage() }}
+      </p>
+    } @else {
+      <ng-content />
     }
   `,
 })
