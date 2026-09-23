@@ -66,7 +66,7 @@ export default meta;
 type Story = StoryObj<DataTableComponent<Transaction>>;
 
 const TEMPLATE = `
-  <cmn-data-table [rows]="rows" [emptyMessage]="emptyMessage">
+  <cmn-data-table [rows]="rows" [emptyMessage]="emptyMessage" [loading]="loading">
     <cmn-column key="date" header="Date">
       <ng-template cmnCell let-row>{{ row.date }}</ng-template>
     </cmn-column>
@@ -93,7 +93,7 @@ export const Empty: Story = {
   render: args => ({props: args, template: TEMPLATE}),
 };
 
-/** The loading state: the table keeps its header and shows placeholder rows. */
+/** The loading state: the table is replaced by skeleton placeholder rows. */
 export const Loading: Story = {
   args: {rows: [], loading: true},
   render: args => ({props: args, template: TEMPLATE}),

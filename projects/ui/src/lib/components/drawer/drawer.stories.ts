@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
 import type {Meta, StoryObj} from '@storybook/angular';
 import {moduleMetadata} from '@storybook/angular';
 
@@ -66,13 +66,13 @@ class StoryLongDrawerContentComponent {
       <cmn-button (clicked)="openScrolling()" variant="secondary">Scrolling body</cmn-button>
       <cmn-button (clicked)="openLocked()" variant="secondary">disableClose</cmn-button>
     </div>
-    <p class="mt-cmn-4 text-cmn-sm text-text-secondary">Last result: {{ result }}</p>
+    <p class="mt-cmn-4 text-cmn-sm text-text-secondary">Last result: {{ result() }}</p>
   `,
 })
 class StoryDrawerLauncherComponent {
   private readonly drawer = inject(CmnDrawerService);
 
-  protected result = '—';
+  protected readonly result = signal('—');
 
   protected open(): void {
     this.drawer
@@ -81,7 +81,7 @@ class StoryDrawerLauncherComponent {
         data: {description: 'Whole Foods', amount: '-$87.43'},
       })
       .afterClosed()
-      .subscribe(r => (this.result = String(r)));
+      .subscribe(r => this.result.set(String(r)));
   }
 
   protected openUntitled(): void {

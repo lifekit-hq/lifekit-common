@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
 import type {Meta, StoryObj} from '@storybook/angular';
 
 import {CmnDialogService} from '../../services/dialog/dialog.service';
@@ -30,7 +30,7 @@ const ONE_GROUP: CommandPaletteItem[] = ITEMS.filter(i => i.group === 'Pages');
       <cmn-button (clicked)="open([])" variant="secondary">No items</cmn-button>
     </div>
     <p class="mt-cmn-4 text-cmn-sm text-text-secondary">
-      Arrow keys move the selection, Enter activates, Escape closes. Last result: {{ result }}
+      Arrow keys move the selection, Enter activates, Escape closes. Last result: {{ result() }}
     </p>
   `,
 })
@@ -39,7 +39,7 @@ class StoryPaletteLauncherComponent {
 
   protected readonly items = ITEMS;
   protected readonly oneGroup = ONE_GROUP;
-  protected result = '—';
+  protected readonly result = signal('—');
 
   protected open(items: CommandPaletteItem[]): void {
     this.dialog
@@ -50,7 +50,7 @@ class StoryPaletteLauncherComponent {
         panelClass: 'cmn-command-palette-panel',
       })
       .afterClosed()
-      .subscribe(r => (this.result = r ? `${r.type}:${r.id}` : 'dismissed'));
+      .subscribe(r => this.result.set(r ? `${r.type}:${r.id}` : 'dismissed'));
   }
 }
 

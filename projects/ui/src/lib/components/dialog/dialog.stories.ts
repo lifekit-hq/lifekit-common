@@ -1,5 +1,5 @@
 import {DialogRef} from '@angular/cdk/dialog';
-import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
 import type {Meta, StoryObj} from '@storybook/angular';
 import {moduleMetadata} from '@storybook/angular';
 
@@ -64,20 +64,20 @@ class StoryBareDialogContentComponent {
       <cmn-button (clicked)="openBare()" variant="secondary">bare container</cmn-button>
       <cmn-button (clicked)="confirm()" variant="destructive">confirm()</cmn-button>
     </div>
-    <p class="mt-cmn-4 text-cmn-sm text-text-secondary">Last result: {{ result }}</p>
+    <p class="mt-cmn-4 text-cmn-sm text-text-secondary">Last result: {{ result() }}</p>
   `,
 })
 class StoryDialogLauncherComponent {
   private readonly dialog = inject(CmnDialogService);
 
   protected readonly sizes: CmnDialogSize[] = ['sm', 'md', 'lg', 'full'];
-  protected result = '—';
+  protected readonly result = signal('—');
 
   protected openSized(size: CmnDialogSize): void {
     this.dialog
       .open<boolean>(StoryDialogContentComponent, {title: `Dialog — ${size}`, size})
       .afterClosed()
-      .subscribe(r => (this.result = String(r)));
+      .subscribe(r => this.result.set(String(r)));
   }
 
   protected openUntitled(): void {
@@ -105,7 +105,7 @@ class StoryDialogLauncherComponent {
         confirmLabel: 'Disconnect',
         confirmVariant: 'destructive',
       })
-      .subscribe(r => (this.result = String(r)));
+      .subscribe(r => this.result.set(String(r)));
   }
 }
 
