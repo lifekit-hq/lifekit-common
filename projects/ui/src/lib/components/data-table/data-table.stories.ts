@@ -66,16 +66,14 @@ export default meta;
 type Story = StoryObj<DataTableComponent<Transaction>>;
 
 const TEMPLATE = `
-  <cmn-data-table [rows]="rows" [emptyMessage]="emptyMessage">
+  <cmn-data-table [rows]="rows" [emptyMessage]="emptyMessage" [loading]="loading">
     <cmn-column key="date" header="Date">
       <ng-template cmnCell let-row>{{ row.date }}</ng-template>
     </cmn-column>
     <cmn-column key="description" header="Description">
       <ng-template cmnCell let-row>{{ row.description }}</ng-template>
     </cmn-column>
-    <cmn-column key="account" header="Account">
-      <ng-template cmnCell let-row>{{ row.account }}</ng-template>
-    </cmn-column>
+    <cmn-column key="account" header="Account" />
     <cmn-column key="amount" header="Amount" align="right">
       <ng-template cmnCell let-row>{{ row.amount }}</ng-template>
     </cmn-column>
@@ -93,4 +91,79 @@ export const Default: Story = {
 export const Empty: Story = {
   args: {rows: [], emptyMessage: 'No recent transactions'},
   render: args => ({props: args, template: TEMPLATE}),
+};
+
+/** The loading state: the table is replaced by skeleton placeholder rows. */
+export const Loading: Story = {
+  args: {rows: [], loading: true},
+  render: args => ({props: args, template: TEMPLATE}),
+};
+
+const PAGINATED_TEMPLATE = `
+  <cmn-data-table [rows]="rows" [pagination]="pagination">
+    <cmn-column key="date" header="Date">
+      <ng-template cmnCell let-row>{{ row.date }}</ng-template>
+    </cmn-column>
+    <cmn-column key="description" header="Description">
+      <ng-template cmnCell let-row>{{ row.description }}</ng-template>
+    </cmn-column>
+    <cmn-column key="amount" header="Amount" align="right">
+      <ng-template cmnCell let-row>{{ row.amount }}</ng-template>
+    </cmn-column>
+  </cmn-data-table>
+`;
+
+/** The first page — Previous is disabled, Next is live. */
+export const FirstPage: Story = {
+  args: {
+    rows: ROWS,
+    pagination: {totalCount: 128, offset: 0, limit: 10, hasMore: true},
+  },
+  render: args => ({props: args, template: PAGINATED_TEMPLATE}),
+};
+
+/** A page in the middle of a larger result set. */
+export const Paginated: Story = {
+  args: {
+    rows: ROWS,
+    pagination: {totalCount: 128, offset: 10, limit: 10, hasMore: true},
+  },
+  render: args => ({props: args, template: PAGINATED_TEMPLATE}),
+};
+
+/** The last page — there is nothing further to fetch. */
+export const LastPage: Story = {
+  args: {
+    rows: ROWS,
+    pagination: {totalCount: 15, offset: 10, limit: 10, hasMore: false},
+  },
+  render: args => ({props: args, template: PAGINATED_TEMPLATE}),
+};
+
+/**
+ * `cmnHeaderCell` replaces a column's plain `header` string with a template, so
+ * a header can carry an icon, a sort affordance or any other markup.
+ */
+export const CustomHeaderCell: Story = {
+  args: {rows: ROWS},
+  render: args => ({
+    props: args,
+    template: `
+      <cmn-data-table [rows]="rows">
+        <cmn-column key="description" header="Description">
+          <ng-template cmnHeaderCell>
+            <span class="font-semibold text-accent-default">Merchant</span>
+          </ng-template>
+          <ng-template cmnCell let-row>{{ row.description }}</ng-template>
+        </cmn-column>
+        <cmn-column key="amount" header="Amount" align="right">
+          <ng-template cmnCell let-row let-i="index">
+            <span [class.text-status-success]="row.amount.startsWith('+')">
+              {{ i + 1 }}. {{ row.amount }}
+            </span>
+          </ng-template>
+        </cmn-column>
+      </cmn-data-table>
+    `,
+  }),
 };
