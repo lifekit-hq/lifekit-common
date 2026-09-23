@@ -243,9 +243,11 @@ it has one element in it.
 
 ### 6.1 Fixed in this change
 
-| Finding                                                                                                                                                                                                                                                                          | Fix                                                              |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| `cmn-toggle`'s `disabled` input dims the control and sets `pointer-events-none`, but never sets the button's `disabled` property or `aria-disabled`. A keyboard user can still focus the switch and activate it with Enter/Space, and assistive tech is not told it is disabled. | Bind `[disabled]` and `[attr.aria-disabled]` on the host button. |
+| Finding                                                                                                                                                                                                                                                                          | Fix                                                                                |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `cmn-toggle`'s `disabled` input dims the control and sets `pointer-events-none`, but never sets the button's `disabled` property or `aria-disabled`. A keyboard user can still focus the switch and activate it with Enter/Space, and assistive tech is not told it is disabled. | Bind `[disabled]` and `[attr.aria-disabled]` on the host button.                   |
+| `cmn-async-state`'s template carried two `<ng-content />` outlets (`success` and `default`); Angular projects light DOM into the first matching outlet only, so the `success` branch — the state a consumer reaches once its data has loaded — rendered empty.                   | Flatten the `@switch` into an `@if` chain ordered so exactly one outlet exists.    |
+| `poll`'s `shareReplay(1)` defaulted to `refCount: false`, so once every subscriber unsubscribed before `isDone`, the timer and `request()` kept firing forever in the background.                                                                                                | `shareReplay({bufferSize: 1, refCount: true})` so polling stops with no observers. |
 
 ### 6.2 Filed, not fixed
 
@@ -269,5 +271,5 @@ every exported symbol across all four code packages has a spec for what a story
 cannot assert. The per-component breakdown is in the pull request that carries
 this document.
 
-Two defects surfaced by writing that coverage are fixed here (§6.1); everything
+Three defects surfaced by writing that coverage are fixed here (§6.1); everything
 else is filed (§6.2).

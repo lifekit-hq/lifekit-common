@@ -64,7 +64,7 @@ All 41 components listed below are ported-from-production unless otherwise noted
 | alert-item | ported-from-production | interactive | keep-own | Relative-time formatting, read/dismiss events, inline dynamic colours; finance-sentry notification pattern; too complex to convert before simpler leaves are done |
 | app-layout | ported-from-production | templated | keep-own | Angular app-shell orchestrator (SidebarNav + TopBar composition, router/event concerns); convert only once the app shell itself migrates to elements |
 | area-chart | ported-from-production | simple-leaf | element-rewrite | charts-core Lit path established by `lk-line-chart` pilot (#10); canvas + Chart.js has no Angular deps — next in the chart rewrite queue |
-| async-state | ported-from-production | templated | keep-own | Signal-based state machine with multi-branch `ng-content`; no Lit slot equivalent pattern decided yet |
+| async-state | ported-from-production | templated | keep-own | Signal-based state machine whose branches converge on a single `ng-content` outlet; no Lit slot equivalent pattern decided yet |
 | badge | ported-from-production | simple-leaf | element-rewrite | Pure CSS + slot wrapper, no framework logic; textbook custom-element target |
 | bar-chart | ported-from-production | simple-leaf | element-rewrite | Same charts-core Lit path as `area-chart` |
 | button | ported-from-production | interactive | element-rewrite | No Angular CDK deps; variants + slots model maps cleanly to Lit; high-value early pilot — button is the most reused primitive |
