@@ -45,7 +45,7 @@ class StoryToastLauncherComponent {
 }
 
 const meta: Meta<StoryToastLauncherComponent> = {
-  title: 'Components/Toast/ToastService',
+  title: 'Services/Toast',
   component: StoryToastLauncherComponent,
   tags: ['autodocs'],
 };
