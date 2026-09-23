@@ -12,6 +12,6 @@ export function poll<T>(request: () => Observable<T>, options: PollOptions<T>): 
   return timer(startDelay, options.intervalMs).pipe(
     switchMap(() => request()),
     takeWhile(value => !options.isDone(value), true),
-    shareReplay(1)
+    shareReplay({bufferSize: 1, refCount: true})
   );
 }

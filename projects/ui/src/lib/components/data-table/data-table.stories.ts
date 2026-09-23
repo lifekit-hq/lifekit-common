@@ -73,9 +73,7 @@ const TEMPLATE = `
     <cmn-column key="description" header="Description">
       <ng-template cmnCell let-row>{{ row.description }}</ng-template>
     </cmn-column>
-    <cmn-column key="account" header="Account">
-      <ng-template cmnCell let-row>{{ row.account }}</ng-template>
-    </cmn-column>
+    <cmn-column key="account" header="Account" />
     <cmn-column key="amount" header="Amount" align="right">
       <ng-template cmnCell let-row>{{ row.amount }}</ng-template>
     </cmn-column>
@@ -101,12 +99,6 @@ export const Loading: Story = {
   render: args => ({props: args, template: TEMPLATE}),
 };
 
-/** Loading over rows that are already on screen — a refresh, not a first load. */
-export const LoadingWithRows: Story = {
-  args: {rows: ROWS, loading: true},
-  render: args => ({props: args, template: TEMPLATE}),
-};
-
 const PAGINATED_TEMPLATE = `
   <cmn-data-table [rows]="rows" [pagination]="pagination">
     <cmn-column key="date" header="Date">
@@ -120,6 +112,15 @@ const PAGINATED_TEMPLATE = `
     </cmn-column>
   </cmn-data-table>
 `;
+
+/** The first page — Previous is disabled, Next is live. */
+export const FirstPage: Story = {
+  args: {
+    rows: ROWS,
+    pagination: {totalCount: 128, offset: 0, limit: 10, hasMore: true},
+  },
+  render: args => ({props: args, template: PAGINATED_TEMPLATE}),
+};
 
 /** A page in the middle of a larger result set. */
 export const Paginated: Story = {

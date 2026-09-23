@@ -115,4 +115,22 @@ describe('poll', () => {
     sub.unsubscribe();
     lateSub.unsubscribe();
   });
+
+  it('stops the timer and the requests once every subscriber has unsubscribed', async () => {
+    const request = vi.fn(() => of<Job>({state: 'running'}));
+    const stream = poll(request, {intervalMs: INTERVAL_MS, isDone: () => false});
+
+    const subA = stream.subscribe();
+    const subB = stream.subscribe();
+    await vi.advanceTimersByTimeAsync(INTERVAL_MS);
+    expect(request).toHaveBeenCalledTimes(2);
+
+    subA.unsubscribe();
+    await vi.advanceTimersByTimeAsync(INTERVAL_MS);
+    expect(request).toHaveBeenCalledTimes(3);
+
+    subB.unsubscribe();
+    await vi.advanceTimersByTimeAsync(INTERVAL_MS * 5);
+    expect(request).toHaveBeenCalledTimes(3);
+  });
 });

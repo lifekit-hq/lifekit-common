@@ -30,7 +30,7 @@ const HISTORY: CmnChatMessage[] = [
 ];
 
 const meta: Meta<ChatComponent> = {
-  title: 'Components/Chat',
+  title: 'Components/Chat/Chat',
   component: ChatComponent,
   tags: ['autodocs'],
   render: args => ({
