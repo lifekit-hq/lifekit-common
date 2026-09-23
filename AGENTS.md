@@ -49,9 +49,13 @@ specs/           speckit artifacts (spec.md, plan.md, tasks.md per feature)
 - Build order: charts-core must be built before elements; elements before ui (tsconfig `paths` point at `dist/`).
 - `sideEffects` must list element registration files explicitly — `sideEffects: false` silently drops `customElements.define` calls in Rollup/Vite production builds.
 - VRT baselines are `*-win32.png`; Denys runs VRT on Windows. Container-pinned Linux baselines are a follow-up (not in the current verify gate).
+- Every exported component ships a `*.stories.ts` covering its real states and a `*.spec.ts` for what a story cannot assert. Infrastructure components that only exist behind a service (dialog/drawer containers, the command palette) get one launcher story per service rather than a story each.
+- Two of the three consumers are React, so `@lifekit-hq/ui` is reachable only by finance-sentry today; `tokens` (plain custom properties) and `elements` (Lit) are the framework-free seams. See `docs/CONSUMER-GAP-AUDIT.md` before adding surface area.
+- Vitest browser mode writes failure screenshots to `__screenshots__/` next to the failing spec; the directory is gitignored.
 
 ## Further reading
 
 - `CLAUDE.md` — coding conventions, commit style, PR/issue norms
+- `docs/CONSUMER-GAP-AUDIT.md` — what each consumer needs against what the library provides, and what is unused
 - `projects/elements/README.md` — settled conventions for the Lit element layer
 - `specs/` — speckit feature artifacts
