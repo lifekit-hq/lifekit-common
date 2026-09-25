@@ -6,7 +6,8 @@
  * Exits 1 (fail) when:
  *   - a component directory has no row in the table, or
  *   - a row carries a decision value outside the allowed set, or
- *   - a row names a directory that no longer exists (stale entry).
+ *   - a row names a directory that no longer exists (stale entry), or
+ *   - the `**Summary:**` line's per-decision counts disagree with the table rows.
  */
 import {readFileSync, readdirSync} from 'node:fs';
 import {dirname, join} from 'node:path';
@@ -72,6 +73,26 @@ for (const name of tableRows.keys()) {
   if (!dirSet.has(name)) {
     console.error(`STALE    '${name}' — row exists in docs/STRATEGY.md but directory not found`);
     errors++;
+  }
+}
+
+// 4. The Summary line must match the table's per-decision counts.
+const SUMMARY = /^\*\*Summary:\*\*\s*(.+)$/m.exec(strategyText);
+if (!SUMMARY) {
+  console.error("SUMMARY  no '**Summary:**' line found in docs/STRATEGY.md");
+  errors++;
+} else {
+  const claimed = new Map();
+  for (const m of SUMMARY[1].matchAll(/(\d+)\s+([a-z-]+)/g)) claimed.set(m[2], Number(m[1]));
+  for (const decision of ALLOWED_DECISIONS) {
+    const actual = [...tableRows.values()].filter(d => d === decision).length;
+    const stated = claimed.get(decision);
+    if (stated !== actual) {
+      console.error(
+        `SUMMARY  '${decision}' — Summary line says ${stated ?? 'nothing'}, table has ${actual}`,
+      );
+      errors++;
+    }
   }
 }
 
