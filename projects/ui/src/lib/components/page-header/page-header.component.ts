@@ -9,9 +9,9 @@ import {type LucideIconName} from '../icon/icon.component';
   imports: [ButtonComponent],
   host: {style: 'display: block'},
   template: `
-    <div class="flex items-start justify-between gap-cmn-4">
-      <div class="flex flex-col gap-cmn-1">
-        <h1 class="font-headline text-cmn-2xl font-semibold text-text-primary">
+    <div class="flex flex-wrap items-start justify-between gap-cmn-4">
+      <div class="flex min-w-0 flex-1 basis-64 flex-col gap-cmn-1">
+        <h1 class="font-headline text-cmn-3xl break-words font-semibold text-text-primary">
           {{ title() }}
         </h1>
         @if (subtitle()) {

@@ -48,3 +48,34 @@ export const ActionDisabled: Story = {
     actionDisabled: true,
   },
 };
+
+export const LongTitle: Story = {
+  args: {
+    title: 'Quarterly brokerage and bank account reconciliation across every connected institution',
+    subtitle: 'Manage your connected bank and brokerage accounts',
+    actionLabel: 'Connect Account',
+    actionIcon: 'Plus',
+  },
+};
+
+export const Narrow: Story = {
+  args: {
+    title: 'Accounts',
+    subtitle: 'Manage your connected bank and brokerage accounts',
+    actionLabel: 'Connect Account',
+    actionIcon: 'Plus',
+  },
+  render: args => ({
+    props: args,
+    template: `
+      <div style="max-width: 400px">
+        <cmn-page-header
+          [title]="title"
+          [subtitle]="subtitle"
+          [actionLabel]="actionLabel"
+          [actionIcon]="actionIcon"
+        />
+      </div>
+    `,
+  }),
+};

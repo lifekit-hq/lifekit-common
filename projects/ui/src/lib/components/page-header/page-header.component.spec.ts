@@ -79,4 +79,26 @@ describe('PageHeaderComponent', () => {
     const btn = fixture.debugElement.query(By.css('cmn-button'));
     expect(btn.componentInstance.disabled()).toBe(true);
   });
+
+  it('should render the title in the 3xl heading token, not 2xl', () => {
+    const h1: HTMLElement = fixture.nativeElement.querySelector('h1');
+    expect(h1.classList).toContain('text-cmn-3xl');
+    expect(h1.classList).not.toContain('text-cmn-2xl');
+  });
+
+  it('should not render subtitle for an empty string', () => {
+    fixture.componentRef.setInput('subtitle', '');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('p')).toBeNull();
+  });
+
+  it('should not emit actionClick while disabled', () => {
+    fixture.componentRef.setInput('actionLabel', 'Connect Account');
+    fixture.componentRef.setInput('actionDisabled', true);
+    fixture.detectChanges();
+    let count = 0;
+    fixture.componentInstance.actionClick.subscribe(() => count++);
+    (fixture.nativeElement.querySelector('button') as HTMLButtonElement).click();
+    expect(count).toBe(0);
+  });
 });
