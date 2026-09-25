@@ -1,6 +1,6 @@
 # Component Strategy Audit — lifekit-hq/lifekit-common
 
-**Status:** DRAFT — awaiting ratification by Denys (merge = approval)
+**Status:** Ratified 2026-08-28 by the merge of [#17](https://github.com/lifekit-hq/lifekit-common/pull/17)
 **Tracks:** [#5](https://github.com/lifekit-hq/lifekit-common/issues/5)
 **Blocks:** [#3](https://github.com/lifekit-hq/lifekit-common/issues/3) (look-and-feel pass)
 **Audited:** 2026-08-26
@@ -102,7 +102,7 @@ All 41 components listed below are ported-from-production unless otherwise noted
 | toggle | ported-from-production | interactive | element-rewrite | Switch button + thumb animation + `aria-checked`; `role="switch"` + boolean attribute = clean Lit mapping |
 | top-bar | ported-from-production | interactive | keep-own | Uses `MenuComponent`; event orchestration (search/theme/avatar); app-shell concern |
 
-**Summary:** 24 keep-own · 16 element-rewrite · 1 wrap-base · 0 delete
+**Summary:** 22 keep-own · 18 element-rewrite · 1 wrap-base · 0 delete
 
 ---
 
@@ -258,6 +258,6 @@ Every data-entry flow depends on these. Polish them before touching any page tha
 `disclosure-row` · `list-item-row` · `stat-card` · `google-sign-in-button` ·
 `editable-field` · `selectable-card` · `institution-avatar` · `chat`
 
-Within each tier, order is the author's call. `editable-field` and `selectable-card` have
-`element-rewrite` decisions but carry `interactive` complexity — they are included in Tier 6
-as coordination reminders, not as look-and-feel targets.
+Within each tier, order is the author's call. `selectable-card` has an
+`element-rewrite` decision and `editable-field` is `keep-own`, but both carry `interactive`
+complexity — they are included in Tier 6 as coordination reminders, not as look-and-feel targets.
