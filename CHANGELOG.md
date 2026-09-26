@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.4.0](https://github.com/lifekit-hq/lifekit-common/compare/v0.3.2...v0.4.0) (2026-09-26)
+
+
+### Features
+
+* **ui:** page-header heading scale, wrap rule, and secondary action ([#46](https://github.com/lifekit-hq/lifekit-common/issues/46)) ([adec93d](https://github.com/lifekit-hq/lifekit-common/commit/adec93d134cbb272f90754a974e409ec7a5be0b1))
+
+
+### Bug Fixes
+
+* **ui:** populate consumer gap audit, stories, tests, and fix bugs the audit surfaced ([#43](https://github.com/lifekit-hq/lifekit-common/issues/43)) ([40de421](https://github.com/lifekit-hq/lifekit-common/commit/40de421daeafadf969c8a57eb7a4b8a95a22544f))
+* **ui:** stat-card zero-delta rendering, loading-height match, and long-value truncation ([#47](https://github.com/lifekit-hq/lifekit-common/issues/47)) ([432bf98](https://github.com/lifekit-hq/lifekit-common/commit/432bf9875bb46f4850fdd3e7c062d7b4d8f36a4c))
+
+
+### Documentation
+
+* **strategy:** mark ratified, fix summary counts, check them in CI ([#45](https://github.com/lifekit-hq/lifekit-common/issues/45)) ([05b8873](https://github.com/lifekit-hq/lifekit-common/commit/05b8873ba9e7e67ab596a4c77dc9e39600225f79))
+
 ## [0.3.2](https://github.com/lifekit-hq/lifekit-common/compare/v0.3.1...v0.3.2) (2026-09-19)
 
 

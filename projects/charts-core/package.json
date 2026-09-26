@@ -1,6 +1,6 @@
 {
   "name": "@lifekit-hq/charts-core",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "description": "Framework-free Chart.js config builders and token mappers",
   "sideEffects": false,
   "license": "MIT",
