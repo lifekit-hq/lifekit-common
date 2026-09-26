@@ -14,7 +14,7 @@ const STORIES = [
 for (const story of STORIES) {
   test(`page-header/${story} — light`, async ({page}) => {
     await page.goto(`/iframe.html?id=components-pageheader--${story}&viewMode=story`);
-    await page.waitForSelector('cmn-page-header', {timeout: 10000}).catch(() => null);
+    await page.waitForSelector('cmn-page-header', {timeout: 10000});
     await expect(page).toHaveScreenshot(`page-header-${story}-light.png`);
   });
 
@@ -23,7 +23,7 @@ for (const story of STORIES) {
     await page.evaluate(() => {
       document.documentElement.setAttribute('data-theme', 'dark');
     });
-    await page.waitForSelector('cmn-page-header', {timeout: 10000}).catch(() => null);
+    await page.waitForSelector('cmn-page-header', {timeout: 10000});
     await expect(page).toHaveScreenshot(`page-header-${story}-dark.png`);
   });
 }
