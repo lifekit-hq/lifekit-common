@@ -47,6 +47,48 @@ export const Loading: Story = {
   args: {label: 'Total Wealth', value: '', loading: true},
 };
 
+export const ZeroDelta: Story = {
+  args: {
+    label: 'Total Wealth',
+    value: '$1,420,892.12',
+    delta: 0,
+    deltaLabel: '0.0% this month',
+  },
+};
+
+export const LongValue: Story = {
+  args: {
+    label: 'International Holdings',
+    value: '$12,345,678,901.23',
+    delta: 2.4,
+    deltaLabel: '+2.4% this month',
+  },
+  render: args => ({
+    props: args,
+    template: `
+      <div style="max-width: 160px">
+        <cmn-stat-card
+          [label]="label"
+          [value]="value"
+          [delta]="delta"
+          [deltaLabel]="deltaLabel"
+        />
+      </div>
+    `,
+  }),
+};
+
+export const LoadingToLoaded: Story = {
+  render: () => ({
+    template: `
+      <div class="grid grid-cols-2 gap-4 p-4 bg-surface-bg">
+        <cmn-stat-card label="Total Wealth" value="" [loading]="true" [delta]="4.2" deltaLabel="+4.2% this month" />
+        <cmn-stat-card label="Total Wealth" value="$1,420,892.12" [delta]="4.2" deltaLabel="+4.2% this month" icon="Wallet" />
+      </div>
+    `,
+  }),
+};
+
 export const AllCards: Story = {
   render: () => ({
     template: `
