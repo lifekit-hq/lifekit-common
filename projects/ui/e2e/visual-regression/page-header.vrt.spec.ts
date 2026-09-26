@@ -8,6 +8,7 @@ const STORIES = [
   'action-disabled',
   'long-title',
   'narrow',
+  'with-secondary-action',
 ];
 
 for (const story of STORIES) {

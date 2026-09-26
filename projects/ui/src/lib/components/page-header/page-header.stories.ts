@@ -79,3 +79,14 @@ export const Narrow: Story = {
     `,
   }),
 };
+
+export const WithSecondaryAction: Story = {
+  args: {
+    title: 'Accounts',
+    subtitle: 'Manage your connected bank and brokerage accounts',
+    actionLabel: 'Connect Account',
+    actionIcon: 'Plus',
+    secondaryActionLabel: 'Export',
+    secondaryActionIcon: 'Download',
+  },
+};

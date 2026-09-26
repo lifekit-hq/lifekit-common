@@ -101,4 +101,38 @@ describe('PageHeaderComponent', () => {
     (fixture.nativeElement.querySelector('button') as HTMLButtonElement).click();
     expect(count).toBe(0);
   });
+
+  it('should not render secondary action button when secondaryActionLabel is null', () => {
+    const buttons = fixture.debugElement.queryAll(By.css('cmn-button'));
+    expect(buttons.length).toBe(0);
+  });
+
+  it('should render secondary action button before the primary action', () => {
+    fixture.componentRef.setInput('actionLabel', 'Connect Account');
+    fixture.componentRef.setInput('secondaryActionLabel', 'Export');
+    fixture.detectChanges();
+    const buttons = fixture.debugElement.queryAll(By.css('cmn-button'));
+    expect(buttons.length).toBe(2);
+    expect(buttons[0].componentInstance.variant()).toBe('secondary');
+    expect(buttons[1].componentInstance.variant()).toBe('primary');
+  });
+
+  it('should emit secondaryClick when the secondary button is clicked', () => {
+    fixture.componentRef.setInput('secondaryActionLabel', 'Export');
+    fixture.detectChanges();
+    let count = 0;
+    fixture.componentInstance.secondaryClick.subscribe(() => count++);
+    (fixture.nativeElement.querySelector('button') as HTMLButtonElement).click();
+    expect(count).toBe(1);
+  });
+
+  it('should not emit secondaryClick while the secondary action is disabled', () => {
+    fixture.componentRef.setInput('secondaryActionLabel', 'Export');
+    fixture.componentRef.setInput('secondaryActionDisabled', true);
+    fixture.detectChanges();
+    let count = 0;
+    fixture.componentInstance.secondaryClick.subscribe(() => count++);
+    (fixture.nativeElement.querySelector('button') as HTMLButtonElement).click();
+    expect(count).toBe(0);
+  });
 });
