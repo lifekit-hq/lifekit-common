@@ -1,15 +1,13 @@
 name: Release Please
 
-# Maintains the release PR (version bump + CHANGELOG, all packages lockstep) and, once
-# that PR merges, tags the release and publishes @lifekit-hq/* to GitHub Packages.
+# Maintains the release PR (version bump + CHANGELOG, all packages lockstep) via the
+# lifekit-hq/.github reusable template, on the release-bot app token so the release
+# PR gets real CI. Once that PR merges, tags the release and publishes @lifekit-hq/*
+# to GitHub Packages.
 
 on:
   push:
     branches: [main]
-  # Dispatched by weekly-release.yml after it merges the release PR: a merge done with
-  # GITHUB_TOKEN does not fire push workflows, so the tag/publish step must be invoked
-  # explicitly (workflow_dispatch is exempt from that restriction).
-  workflow_dispatch:
 
 permissions:
   contents: write
@@ -18,15 +16,11 @@ permissions:
 
 jobs:
   release-please:
-    runs-on: ubuntu-latest
-    outputs:
-      release_created: ${{ steps.rp.outputs.release_created }}
-    steps:
-      - uses: googleapis/release-please-action@v4
-        id: rp
-        with:
-          config-file: release-please-config.json
-          manifest-file: .release-please-manifest.json
+    uses: lifekit-hq/.github/.github/workflows/release-please.yml@v1
+    with:
+      app-id: ${{ vars.RELEASE_APP_ID }}
+    secrets:
+      app-private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
 
   publish:
     needs: release-please
