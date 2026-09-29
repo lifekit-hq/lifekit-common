@@ -28,12 +28,12 @@ This document covers only the **remaining decisions** for the Angular components
 
 Each component row carries exactly one of:
 
-| Value | Meaning |
-| --- | --- |
-| `keep-own` | Own implementation is the right call — deliberate native/CDK-backed choice, or Angular-specific orchestration concern; look-and-feel pass applies here |
-| `wrap-base` | Delegate more behaviour to an existing framework-agnostic base (e.g., thin the Angular wrapper once the host migrates to Lit) |
-| `element-rewrite` | Convert to a Lit element in `projects/elements` per the strangler strategy; look-and-feel pass lands with the rewrite, not before |
-| `delete` | Remove — no active consumer found and functionality is covered elsewhere |
+| Value             | Meaning                                                                                                                                                |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `keep-own`        | Own implementation is the right call — deliberate native/CDK-backed choice, or Angular-specific orchestration concern; look-and-feel pass applies here |
+| `wrap-base`       | Delegate more behaviour to an existing framework-agnostic base (e.g., thin the Angular wrapper once the host migrates to Lit)                          |
+| `element-rewrite` | Convert to a Lit element in `projects/elements` per the strangler strategy; look-and-feel pass lands with the rewrite, not before                      |
+| `delete`          | Remove — no active consumer found and functionality is covered elsewhere                                                                               |
 
 ---
 
@@ -58,49 +58,49 @@ All 41 components listed below are ported-from-production unless otherwise noted
 > Machine-checked by `scripts/check-strategy-coverage.mjs` (run in CI).
 > Decision must be one of: `keep-own` | `wrap-base` | `element-rewrite` | `delete`.
 
-| Component | Usage evidence | Complexity | Decision | Rationale |
-| --- | --- | --- | --- | --- |
-| alert | ported-from-production | interactive | keep-own | Variant/dismiss pattern; depends on `icon` component — rewrite alongside `icon` after the Lit icon pilot lands |
-| alert-item | ported-from-production | interactive | keep-own | Relative-time formatting, read/dismiss events, inline dynamic colours; finance-sentry notification pattern; too complex to convert before simpler leaves are done |
-| app-layout | ported-from-production | templated | keep-own | Angular app-shell orchestrator (SidebarNav + TopBar composition, router/event concerns); convert only once the app shell itself migrates to elements |
-| area-chart | ported-from-production | simple-leaf | element-rewrite | charts-core Lit path established by `lk-line-chart` pilot (#10); canvas + Chart.js has no Angular deps — next in the chart rewrite queue |
-| async-state | ported-from-production | templated | keep-own | Signal-based state machine whose branches converge on a single `ng-content` outlet; no Lit slot equivalent pattern decided yet |
-| badge | ported-from-production | simple-leaf | element-rewrite | Pure CSS + slot wrapper, no framework logic; textbook custom-element target |
-| bar-chart | ported-from-production | simple-leaf | element-rewrite | Same charts-core Lit path as `area-chart` |
-| button | ported-from-production | interactive | element-rewrite | No Angular CDK deps; variants + slots model maps cleanly to Lit; high-value early pilot — button is the most reused primitive |
-| card | ported-from-production | simple-leaf | element-rewrite | Wrapper div + slot + token CSS; no logic beyond host-binding |
-| chat | ported-from-production | interactive | wrap-base | Shell wraps the Deep Chat web component (already framework-agnostic); Angular glue should thin to a Lit micro-wrapper once the host migrates |
-| chip | ported-from-production | simple-leaf | element-rewrite | Button + `aria-pressed` + CSS; simpler than `button`, same Lit path |
-| command-palette | ported-from-production | interactive | keep-own | Grouped keyboard navigation + real-time search; CDK Dialog integration; bespoke interaction model for lifekit navigation |
-| data-table | ported-from-production | templated | keep-own | CDK table is the correct foundation; column projection via `contentChildren` is Angular-idiomatic; see §"Expensive components" below |
-| dialog | ported-from-production | templated | keep-own | Extends `CdkDialogContainer`; focus-trap, `aria-modal`, keyboard dismiss come from CDK; see §"Expensive components" |
-| disclosure-row | ported-from-production | templated | keep-own | Named `ng-content` slots (status/actions) over native `<details>`; institution+amount is a finance-domain pattern; reasonable Lit target later once slot API is stable |
-| donut-chart | ported-from-production | simple-leaf | element-rewrite | charts-core Lit path; chrome/legend variants map to attributes and slots |
-| drawer | ported-from-production | templated | keep-own | CDK portal + entering/open/closing state machine + `beforeClose$` subscription; a11y focus management via CDK; see §"Expensive components" |
-| editable-field | ported-from-production | interactive | keep-own | `model()` two-way binding; inline form with Enter/Escape keyboard UX; Angular forms integration required |
-| empty-state | ported-from-production | simple-leaf | element-rewrite | Icon + text + CTA slot; purely presentational |
-| form-field | ported-from-production | templated | keep-own | `ControlValueAccessor` integration with `ReactiveFormsModule`; `contentChild(InputComponent)`; no Lit forms pattern decided |
-| google-sign-in-button | ported-from-production | simple-leaf | keep-own | Wraps Google Accounts library via `NgZone.runOutsideAngular`; framework-glue concerns outweigh conversion cost |
-| icon | ported-from-production | simple-leaf | element-rewrite | Lucide + custom SVG registry; high-value early pilot — icon is a foundational leaf depended on by many other components |
-| input | ported-from-production | interactive | keep-own | `ControlValueAccessor`; signal-based value/disabled; integrates with `form-field` and `ReactiveFormsModule` |
-| institution-avatar | ported-from-production | simple-leaf | element-rewrite | Image-with-fallback-to-initials; token-based sizing; no framework deps |
-| line-chart | ported-from-production | simple-leaf | element-rewrite | Lit replacement `lk-line-chart` already exists in `projects/elements` (#10); this Angular wrapper is the primary strangler target |
-| list-item-row | ported-from-production | templated | keep-own | Four named `ng-content` slots (avatar/meta/amount/actions); finance-specific layout; slot combinatorics map awkwardly to Lit today |
-| menu | ported-from-production | interactive | keep-own | `CdkConnectedOverlay` for smart positioning + viewport clamping; keyboard escape; overlay lifecycle |
-| page-container | ported-from-production | simple-leaf | element-rewrite | Layout wrapper + token CSS; no logic |
-| page-header | ported-from-production | interactive | keep-own | Depends on `ButtonComponent` internally; action button with loading/disabled state |
-| password-strength | ported-from-production | simple-leaf | element-rewrite | Four-segment progress bar; pure CSS, no framework logic |
-| select | ported-from-production | interactive | keep-own | Deliberate native `<select>` — see §"finance-sentry#319 history" |
-| selectable-card | ported-from-production | interactive | element-rewrite | Button + named slots (leading/body/trailing) + `aria-pressed`; maps cleanly to Lit |
-| sidebar-nav | ported-from-production | interactive | keep-own | Collapsible nav with collapsed signal, badge support, responsive width transition; app-shell concern |
-| skeleton | ported-from-production | simple-leaf | element-rewrite | Animate-pulse div; trivially simple |
-| stat-card | ported-from-production | interactive | keep-own | Depends on `SkeletonComponent`; delta formatting with trending icons; child-component dependency |
-| status-indicator | ported-from-production | simple-leaf | element-rewrite | Status badge + dot + optional timestamp; pure token CSS |
-| tab-group | ported-from-production | interactive | keep-own | `model()` two-way binding for `activeTab`; `aria-selected`; Angular-idiomatic tab panel |
-| tag | ported-from-production | simple-leaf | element-rewrite | Five-variant badge; trivially simple |
-| toast | ported-from-production | interactive | keep-own | Dismiss event + aria role + `toast.service.ts` service layer; keep Angular until service strategy is decided |
-| toggle | ported-from-production | interactive | element-rewrite | Switch button + thumb animation + `aria-checked`; `role="switch"` + boolean attribute = clean Lit mapping |
-| top-bar | ported-from-production | interactive | keep-own | Uses `MenuComponent`; event orchestration (search/theme/avatar); app-shell concern |
+| Component             | Usage evidence         | Complexity  | Decision        | Rationale                                                                                                                                                              |
+| --------------------- | ---------------------- | ----------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| alert                 | ported-from-production | interactive | keep-own        | Variant/dismiss pattern; depends on `icon` component — rewrite alongside `icon` after the Lit icon pilot lands                                                         |
+| alert-item            | ported-from-production | interactive | keep-own        | Relative-time formatting, read/dismiss events, inline dynamic colours; finance-sentry notification pattern; too complex to convert before simpler leaves are done      |
+| app-layout            | ported-from-production | templated   | keep-own        | Angular app-shell orchestrator (SidebarNav + TopBar composition, router/event concerns); convert only once the app shell itself migrates to elements                   |
+| area-chart            | ported-from-production | simple-leaf | element-rewrite | charts-core Lit path established by `lk-line-chart` pilot (#10); canvas + Chart.js has no Angular deps — next in the chart rewrite queue                               |
+| async-state           | ported-from-production | templated   | keep-own        | Signal-based state machine whose branches converge on a single `ng-content` outlet; no Lit slot equivalent pattern decided yet                                         |
+| badge                 | ported-from-production | simple-leaf | element-rewrite | Pure CSS + slot wrapper, no framework logic; textbook custom-element target                                                                                            |
+| bar-chart             | ported-from-production | simple-leaf | element-rewrite | Same charts-core Lit path as `area-chart`                                                                                                                              |
+| button                | ported-from-production | interactive | element-rewrite | No Angular CDK deps; variants + slots model maps cleanly to Lit; high-value early pilot — button is the most reused primitive                                          |
+| card                  | ported-from-production | simple-leaf | element-rewrite | Wrapper div + slot + token CSS; no logic beyond host-binding                                                                                                           |
+| chat                  | ported-from-production | interactive | wrap-base       | Shell wraps the Deep Chat web component (already framework-agnostic); Angular glue should thin to a Lit micro-wrapper once the host migrates                           |
+| chip                  | ported-from-production | simple-leaf | element-rewrite | Button + `aria-pressed` + CSS; simpler than `button`, same Lit path                                                                                                    |
+| command-palette       | ported-from-production | interactive | keep-own        | Grouped keyboard navigation + real-time search; CDK Dialog integration; bespoke interaction model for lifekit navigation                                               |
+| data-table            | ported-from-production | templated   | keep-own        | CDK table is the correct foundation; column projection via `contentChildren` is Angular-idiomatic; see §"Expensive components" below                                   |
+| dialog                | ported-from-production | templated   | keep-own        | Extends `CdkDialogContainer`; focus-trap, `aria-modal`, keyboard dismiss come from CDK; see §"Expensive components"                                                    |
+| disclosure-row        | ported-from-production | templated   | keep-own        | Named `ng-content` slots (status/actions) over native `<details>`; institution+amount is a finance-domain pattern; reasonable Lit target later once slot API is stable |
+| donut-chart           | ported-from-production | simple-leaf | element-rewrite | charts-core Lit path; chrome/legend variants map to attributes and slots                                                                                               |
+| drawer                | ported-from-production | templated   | keep-own        | CDK portal + entering/open/closing state machine + `beforeClose$` subscription; a11y focus management via CDK; see §"Expensive components"                             |
+| editable-field        | ported-from-production | interactive | keep-own        | `model()` two-way binding; inline form with Enter/Escape keyboard UX; Angular forms integration required                                                               |
+| empty-state           | ported-from-production | simple-leaf | element-rewrite | Icon + text + CTA slot; purely presentational                                                                                                                          |
+| form-field            | ported-from-production | templated   | keep-own        | `ControlValueAccessor` integration with `ReactiveFormsModule`; `contentChild(InputComponent)`; no Lit forms pattern decided                                            |
+| google-sign-in-button | ported-from-production | simple-leaf | keep-own        | Wraps Google Accounts library via `NgZone.runOutsideAngular`; framework-glue concerns outweigh conversion cost                                                         |
+| icon                  | ported-from-production | simple-leaf | element-rewrite | Lucide + custom SVG registry; high-value early pilot — icon is a foundational leaf depended on by many other components                                                |
+| input                 | ported-from-production | interactive | keep-own        | `ControlValueAccessor`; signal-based value/disabled; integrates with `form-field` and `ReactiveFormsModule`                                                            |
+| institution-avatar    | ported-from-production | simple-leaf | element-rewrite | Image-with-fallback-to-initials; token-based sizing; no framework deps                                                                                                 |
+| line-chart            | ported-from-production | simple-leaf | element-rewrite | Lit replacement `lk-line-chart` already exists in `projects/elements` (#10); this Angular wrapper is the primary strangler target                                      |
+| list-item-row         | ported-from-production | templated   | keep-own        | Four named `ng-content` slots (avatar/meta/amount/actions); finance-specific layout; slot combinatorics map awkwardly to Lit today                                     |
+| menu                  | ported-from-production | interactive | keep-own        | `CdkConnectedOverlay` for smart positioning + viewport clamping; keyboard escape; overlay lifecycle                                                                    |
+| page-container        | ported-from-production | simple-leaf | element-rewrite | Layout wrapper + token CSS; no logic                                                                                                                                   |
+| page-header           | ported-from-production | interactive | keep-own        | Depends on `ButtonComponent` internally; action button with loading/disabled state                                                                                     |
+| password-strength     | ported-from-production | simple-leaf | element-rewrite | Four-segment progress bar; pure CSS, no framework logic                                                                                                                |
+| select                | ported-from-production | interactive | keep-own        | Deliberate native `<select>` — see §"finance-sentry#319 history"                                                                                                       |
+| selectable-card       | ported-from-production | interactive | element-rewrite | Button + named slots (leading/body/trailing) + `aria-pressed`; maps cleanly to Lit                                                                                     |
+| sidebar-nav           | ported-from-production | interactive | keep-own        | Collapsible nav with collapsed signal, badge support, responsive width transition; app-shell concern                                                                   |
+| skeleton              | ported-from-production | simple-leaf | element-rewrite | Animate-pulse div; trivially simple                                                                                                                                    |
+| stat-card             | ported-from-production | interactive | keep-own        | Depends on `SkeletonComponent`; delta formatting with trending icons; child-component dependency                                                                       |
+| status-indicator      | ported-from-production | simple-leaf | element-rewrite | Status badge + dot + optional timestamp; pure token CSS                                                                                                                |
+| tab-group             | ported-from-production | interactive | keep-own        | `model()` two-way binding for `activeTab`; `aria-selected`; Angular-idiomatic tab panel                                                                                |
+| tag                   | ported-from-production | simple-leaf | element-rewrite | Five-variant badge; trivially simple                                                                                                                                   |
+| toast                 | ported-from-production | interactive | keep-own        | Dismiss event + aria role + `toast.service.ts` service layer; keep Angular until service strategy is decided                                                           |
+| toggle                | ported-from-production | interactive | element-rewrite | Switch button + thumb animation + `aria-checked`; `role="switch"` + boolean attribute = clean Lit mapping                                                              |
+| top-bar               | ported-from-production | interactive | keep-own        | Uses `MenuComponent`; event orchestration (search/theme/avatar); app-shell concern                                                                                     |
 
 **Summary:** 22 keep-own · 18 element-rewrite · 1 wrap-base · 0 delete
 
@@ -126,7 +126,7 @@ GitHub REST API (`GET https://api.github.com/repos/lifekit-hq/finance-sentry/pul
 
 > **`cmn-select` rebuilt on a native `<select>`; ng-zorro removed entirely.** `cmn-select` was
 > built on ng-zorro's `<nz-select>`, but ng-zorro's CSS and icon registration were never wired up
-> — so the control rendered broken *and* threw an unregistered-icon runtime error. ng-zorro had
+> — so the control rendered broken _and_ threw an unregistered-icon runtime error. ng-zorro had
 > exactly one consumer, so rather than pull in the whole antd theme, `cmn-select` now uses a
 > native `<select>` + design tokens + a Lucide chevron (same public API). Removes
 > `ng-zorro-antd` from both package.json files and the lockfile.
@@ -211,7 +211,7 @@ public; no comments — body is the complete decision record):
 
 > **`cmn-select` rebuilt on a native `<select>`; ng-zorro removed entirely.** `cmn-select` was
 > built on ng-zorro's `<nz-select>`, but ng-zorro's CSS and icon registration were never wired up
-> — so the control rendered broken *and* threw an unregistered-icon runtime error. ng-zorro had
+> — so the control rendered broken _and_ threw an unregistered-icon runtime error. ng-zorro had
 > exactly one consumer, so rather than pull in the whole antd theme, `cmn-select` now uses a
 > native `<select>` + design tokens + a Lucide chevron (same public API). Removes
 > `ng-zorro-antd` from both package.json files and the lockfile.
@@ -234,6 +234,7 @@ components receive their look-and-feel when they are converted to Lit, not befor
 Execute #3 in this order to maximise visible impact per unit of work:
 
 ### Tier 1 — atomic primitives (unblock everything else)
+
 `button` · `icon` · `badge` · `tag` · `chip` · `skeleton` · `status-indicator` · `toggle`
 
 These appear on virtually every screen. Finishing them first means every subsequent tier gets
@@ -241,20 +242,25 @@ the correct atoms. Note: `button` and `icon` are `element-rewrite` — their loo
 IS the rewrite; include them here as coordination points.
 
 ### Tier 2 — form layer
+
 `input` · `select` · `form-field`
 
 Every data-entry flow depends on these. Polish them before touching any page that has a form.
 
 ### Tier 3 — content containers and feedback
+
 `card` · `empty-state` · `toast` · `alert` · `alert-item` · `async-state` · `password-strength`
 
 ### Tier 4 — navigation shell
+
 `sidebar-nav` · `top-bar` · `app-layout` · `tab-group` · `page-container` · `page-header`
 
 ### Tier 5 — data and overlays
+
 `dialog` · `drawer` · `menu` · `data-table` · `command-palette`
 
 ### Tier 6 — domain-specific
+
 `disclosure-row` · `list-item-row` · `stat-card` · `google-sign-in-button` ·
 `editable-field` · `selectable-card` · `institution-avatar` · `chat`
 
