@@ -151,6 +151,7 @@ describe('AlertItemComponent', () => {
     expect(row().classList).not.toContain('border');
     expect(row().style.background).toBe('');
     expect(unreadDot()).not.toBeNull();
+    expect(unreadDot()?.classList).not.toContain('absolute');
 
     fixture.componentRef.setInput('isRead', true);
     fixture.detectChanges();

@@ -64,14 +64,6 @@ function formatRelativeTime(value: Nullable<string | number | Date>): string {
       (click)="onContainerClick()"
       class="relative flex cursor-pointer items-start gap-cmn-3 transition-colors"
     >
-      @if (!isRead()) {
-        <span
-          [style.background]="color()"
-          [style.right]="flat() ? '2.5rem' : ''"
-          class="absolute right-cmn-3 top-cmn-3 h-2 w-2 rounded-full"
-        ></span>
-      }
-
       <div
         [style.background]="color() + '18'"
         class="flex h-9 w-9 shrink-0 items-center justify-center rounded-cmn-md"
@@ -108,6 +100,18 @@ function formatRelativeTime(value: Nullable<string | number | Date>): string {
           <span class="text-[11px] text-text-disabled">{{ relativeTime() }}</span>
         }
       </div>
+
+      @if (!isRead()) {
+        <span
+          [class.absolute]="!flat()"
+          [class.right-cmn-3]="!flat()"
+          [class.top-cmn-3]="!flat()"
+          [class.mt-1.5]="flat()"
+          [class.shrink-0]="flat()"
+          [style.background]="color()"
+          class="h-2 w-2 rounded-full"
+        ></span>
+      }
 
       @if (dismissible()) {
         <button

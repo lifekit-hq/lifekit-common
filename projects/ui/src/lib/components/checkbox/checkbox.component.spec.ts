@@ -1,7 +1,23 @@
+import {ChangeDetectionStrategy, Component, signal} from '@angular/core';
 import {type ComponentFixture, TestBed} from '@angular/core/testing';
 import {beforeEach, describe, expect, it} from 'vitest';
 
 import {CheckboxComponent} from './checkbox.component';
+
+@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [CheckboxComponent],
+  template: `
+    <cmn-checkbox [checked]="checked()" [disabled]="disabled()" (changed)="emitted.push($event)">
+      <span class="text">Keep me signed in</span>
+    </cmn-checkbox>
+  `,
+})
+class LabelHostComponent {
+  public readonly checked = signal(false);
+  public readonly disabled = signal(false);
+  public readonly emitted: boolean[] = [];
+}
 
 describe('CheckboxComponent', () => {
   let fixture: ComponentFixture<CheckboxComponent>;
@@ -65,5 +81,34 @@ describe('CheckboxComponent', () => {
     expect(box().getAttribute('aria-disabled')).toBe('true');
     box().click();
     expect(emitted).toEqual([]);
+  });
+
+  describe('projected label', () => {
+    let host: ComponentFixture<LabelHostComponent>;
+
+    beforeEach(() => {
+      host = TestBed.createComponent(LabelHostComponent);
+      host.detectChanges();
+    });
+
+    const text = (): HTMLElement =>
+      (host.nativeElement as HTMLElement).querySelector('.text') as HTMLElement;
+
+    it('toggles when the label text is clicked', () => {
+      text().click();
+      expect(host.componentInstance.emitted).toEqual([true]);
+    });
+
+    it('does not toggle from label text when disabled', () => {
+      host.componentInstance.disabled.set(true);
+      host.detectChanges();
+      text().click();
+      expect(host.componentInstance.emitted).toEqual([]);
+    });
+
+    it('emits once when the box itself is clicked', () => {
+      ((host.nativeElement as HTMLElement).querySelector('button') as HTMLElement).click();
+      expect(host.componentInstance.emitted).toEqual([true]);
+    });
   });
 });

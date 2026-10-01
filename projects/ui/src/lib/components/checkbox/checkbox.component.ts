@@ -12,25 +12,28 @@ const BOX_BASE =
   selector: 'cmn-checkbox',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [IconComponent],
-  host: {class: 'inline-flex items-center gap-cmn-2'},
+  host: {class: 'inline-flex'},
   template: `
-    <button
-      [attr.aria-checked]="indeterminate() ? 'mixed' : checked()"
-      [attr.aria-label]="label() || null"
-      [attr.aria-disabled]="disabled() ? true : null"
-      [disabled]="disabled()"
-      [class]="boxClass()"
-      (click)="changed.emit(!checked())"
-      role="checkbox"
-      type="button"
-    >
-      @if (indeterminate()) {
-        <cmn-icon name="Minus" size="sm" />
-      } @else if (checked()) {
-        <cmn-icon name="Check" size="sm" />
-      }
-    </button>
-    <ng-content />
+    <!-- eslint-disable-next-line @angular-eslint/template/label-has-associated-control -->
+    <label [class.cursor-pointer]="!disabled()" class="inline-flex items-center gap-cmn-2">
+      <button
+        [attr.aria-checked]="indeterminate() ? 'mixed' : checked()"
+        [attr.aria-label]="label() || null"
+        [attr.aria-disabled]="disabled() ? true : null"
+        [disabled]="disabled()"
+        [class]="boxClass()"
+        (click)="changed.emit(!checked())"
+        role="checkbox"
+        type="button"
+      >
+        @if (indeterminate()) {
+          <cmn-icon name="Minus" size="sm" />
+        } @else if (checked()) {
+          <cmn-icon name="Check" size="sm" />
+        }
+      </button>
+      <ng-content />
+    </label>
   `,
 })
 export class CheckboxComponent {
