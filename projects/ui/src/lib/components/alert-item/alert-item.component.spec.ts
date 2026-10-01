@@ -134,4 +134,26 @@ describe('AlertItemComponent', () => {
     expect((fixture.nativeElement as HTMLElement).textContent).toContain('JOB-14');
     expect((fixture.nativeElement as HTMLElement).textContent).toContain('Bank sync');
   });
+
+  it('defaults to the bordered card density', () => {
+    fixture.detectChanges();
+    expect(row().classList).toContain('border');
+    expect(row().classList).toContain('rounded-cmn-lg');
+    expect(row().classList).not.toContain('border-b');
+  });
+
+  it('flat density drops the card chrome for a hairline separator and keeps the unread dot', () => {
+    fixture.componentRef.setInput('density', 'flat');
+    fixture.detectChanges();
+
+    expect(row().classList).toContain('border-b');
+    expect(row().classList).not.toContain('rounded-cmn-lg');
+    expect(row().classList).not.toContain('border');
+    expect(row().style.background).toBe('');
+    expect(unreadDot()).not.toBeNull();
+
+    fixture.componentRef.setInput('isRead', true);
+    fixture.detectChanges();
+    expect(unreadDot()).toBeNull();
+  });
 });

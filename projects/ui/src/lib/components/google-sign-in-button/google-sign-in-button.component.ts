@@ -49,6 +49,9 @@ export class GoogleSignInButtonComponent implements AfterViewInit, OnDestroy {
     width: 368,
   });
 
+  /** BCP-47 tag (e.g. `uk`); overrides `buttonConfiguration.locale` and the browser default. */
+  public readonly locale = input<string | undefined>(undefined);
+
   public readonly credential = output<string>();
 
   public ngAfterViewInit(): void {
@@ -58,7 +61,12 @@ export class GoogleSignInButtonComponent implements AfterViewInit, OnDestroy {
       callback: (r: google.accounts.id.CredentialResponse) =>
         this.zone.run(() => this.credential.emit(r.credential)),
     });
-    google.accounts.id.renderButton(this.btnRef().nativeElement, this.buttonConfiguration());
+    const locale = this.locale();
+    const config = this.buttonConfiguration();
+    google.accounts.id.renderButton(
+      this.btnRef().nativeElement,
+      locale ? {...config, locale} : config
+    );
     google.accounts.id.prompt();
   }
 

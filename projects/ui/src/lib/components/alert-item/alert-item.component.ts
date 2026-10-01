@@ -5,6 +5,7 @@ import {IconComponent, type LucideIconName} from '../icon/icon.component';
 import {TagComponent} from '../tag/tag.component';
 
 export type AlertItemSeverity = 'error' | 'warning' | 'info';
+export type AlertItemDensity = 'card' | 'flat';
 
 const SEVERITY_COLOR: Record<AlertItemSeverity, string> = {
   error: 'var(--color-status-error)',
@@ -50,16 +51,23 @@ function formatRelativeTime(value: Nullable<string | number | Date>): string {
   imports: [TagComponent, IconComponent],
   template: `
     <div
-      [class.border-border-default]="isRead()"
-      [class.bg-surface-card]="isRead()"
-      [style.border-color]="isRead() ? '' : color() + '30'"
-      [style.background]="isRead() ? '' : color() + '08'"
+      [class.border-border-default]="flat() || isRead()"
+      [class.bg-surface-card]="isRead() && !flat()"
+      [class.rounded-cmn-lg]="!flat()"
+      [class.border]="!flat()"
+      [class.p-cmn-4]="!flat()"
+      [class.border-b]="flat()"
+      [class.px-cmn-1]="flat()"
+      [class.py-cmn-3]="flat()"
+      [style.border-color]="!flat() && !isRead() ? color() + '30' : ''"
+      [style.background]="!flat() && !isRead() ? color() + '08' : ''"
       (click)="onContainerClick()"
-      class="relative flex cursor-pointer items-start gap-cmn-3 rounded-cmn-lg border p-cmn-4 transition-colors"
+      class="relative flex cursor-pointer items-start gap-cmn-3 transition-colors"
     >
       @if (!isRead()) {
         <span
           [style.background]="color()"
+          [style.right]="flat() ? '2.5rem' : ''"
           class="absolute right-cmn-3 top-cmn-3 h-2 w-2 rounded-full"
         ></span>
       }
@@ -125,6 +133,8 @@ export class AlertItemComponent {
   public readonly timestamp = input<Nullable<string | number | Date>>(null);
   public readonly isRead = input<boolean>(false);
   public readonly dismissible = input<boolean>(true);
+  /** `card` (default) is a bordered tile; `flat` is a hairline-separated feed row. */
+  public readonly density = input<AlertItemDensity>('card');
 
   public readonly read = output<void>();
   public readonly dismissed = output<void>();
@@ -134,6 +144,7 @@ export class AlertItemComponent {
     () => this.icon() ?? SEVERITY_ICON[this.severity()]
   );
   public readonly relativeTime = computed(() => formatRelativeTime(this.timestamp()));
+  public readonly flat = computed(() => this.density() === 'flat');
 
   public onContainerClick(): void {
     if (!this.isRead()) {

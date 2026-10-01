@@ -1,10 +1,14 @@
-import type {Meta, StoryObj} from '@storybook/angular';
+import {componentWrapperDecorator, type Meta, type StoryObj} from '@storybook/angular';
 
 import {AlertItemComponent} from './alert-item.component';
 
 const MINUTE_MS = 60_000;
 const HOUR_MS = 60 * MINUTE_MS;
 const DAY_MS = 24 * HOUR_MS;
+
+const darkSurface = componentWrapperDecorator(
+  story => `<div class="bg-surface-bg p-cmn-4">${story}</div>`
+);
 
 const meta: Meta<AlertItemComponent> = {
   title: 'Components/Alert Item',
@@ -102,4 +106,54 @@ export const NotDismissible: Story = {
     severity: 'error',
     dismissible: false,
   },
+};
+
+const FLAT_FEED = `
+  <div class="max-w-xl">
+    <cmn-alert-item
+      density="flat"
+      title="Sync failed"
+      message="Monobank returned 502 on the last three attempts."
+      severity="error"
+      [timestamp]="now"
+    />
+    <cmn-alert-item
+      density="flat"
+      title="Budget nearly spent"
+      message="Groceries is at 92% with 9 days left in the period."
+      severity="warning"
+      [timestamp]="hourAgo"
+    />
+    <cmn-alert-item
+      density="flat"
+      title="Statement ready"
+      message="March statement is available for Chase Checking."
+      severity="info"
+      [isRead]="true"
+      [timestamp]="dayAgo"
+    />
+  </div>
+`;
+
+const flatFeedProps = {
+  now: new Date(),
+  hourAgo: new Date(Date.now() - HOUR_MS),
+  dayAgo: new Date(Date.now() - DAY_MS),
+};
+
+/** Notification-feed rows: hairline separators and an unread dot, no card chrome. */
+export const Flat: Story = {
+  render: () => ({template: FLAT_FEED, props: flatFeedProps}),
+};
+
+export const FlatDark: Story = {
+  decorators: [darkSurface],
+  globals: {theme: 'dark'},
+  render: () => ({template: FLAT_FEED, props: flatFeedProps}),
+};
+
+export const CardDark: Story = {
+  decorators: [darkSurface],
+  globals: {theme: 'dark'},
+  args: Unread.args,
 };
