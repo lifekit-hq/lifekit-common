@@ -2,11 +2,11 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "../../out-tsc/spec",
-    "rootDir": "./src",
+    "rootDir": ".",
     "composite": true,
     "declaration": true,
     "declarationMap": true,
     "types": ["vitest/globals"]
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts", "pwa/**/*.ts"]
 }

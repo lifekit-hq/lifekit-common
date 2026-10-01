@@ -104,6 +104,10 @@
           "builder": "@angular/build:unit-test",
           "options": {
             "tsConfig": "projects/core/tsconfig.spec.json",
+            "include": [
+              "**/*.spec.ts",
+              "../pwa/**/*.spec.ts"
+            ],
             "coverage": true,
             "browsers": [
               "chromium"
@@ -128,7 +132,8 @@
           "options": {
             "eslintConfig": "projects/core/eslint.config.mjs",
             "lintFilePatterns": [
-              "projects/core/src/**/*.ts"
+              "projects/core/src/**/*.ts",
+              "projects/core/pwa/**/*.ts"
             ]
           }
         }
