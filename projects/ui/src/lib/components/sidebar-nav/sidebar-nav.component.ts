@@ -31,7 +31,10 @@ export interface NavItem {
         }
         <button
           [title]="collapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
+          [attr.aria-label]="collapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
+          [attr.aria-expanded]="!collapsed()"
           (click)="toggleCollapsed()"
+          type="button"
           class="ml-auto flex h-8 w-8 items-center justify-center rounded-cmn-md text-text-secondary hover:bg-surface-raised hover:text-text-primary transition-colors"
         >
           <cmn-icon [name]="collapsed() ? 'PanelLeftOpen' : 'PanelLeftClose'" size="sm" />

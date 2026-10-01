@@ -49,7 +49,7 @@ at the time of this audit. Usage evidence is therefore stated as:
 - **no external consumer found** — will be stated explicitly for any component that can be
   confirmed unused.
 
-All 41 components listed below are ported-from-production unless otherwise noted.
+All components listed below are ported-from-production unless otherwise noted.
 
 ---
 
@@ -62,11 +62,12 @@ All 41 components listed below are ported-from-production unless otherwise noted
 | --- | --- | --- | --- | --- |
 | alert | ported-from-production | interactive | keep-own | Variant/dismiss pattern; depends on `icon` component — rewrite alongside `icon` after the Lit icon pilot lands |
 | alert-item | ported-from-production | interactive | keep-own | Relative-time formatting, read/dismiss events, inline dynamic colours; finance-sentry notification pattern; too complex to convert before simpler leaves are done |
-| app-layout | ported-from-production | templated | keep-own | Angular app-shell orchestrator (SidebarNav + TopBar composition, router/event concerns); convert only once the app shell itself migrates to elements |
+| app-layout | ported-from-production | templated | keep-own | Angular app-shell orchestrator (SidebarNav + TopBar + BottomTabBar composition, router/event concerns); convert only once the app shell itself migrates to elements |
 | area-chart | ported-from-production | simple-leaf | element-rewrite | charts-core Lit path established by `lk-line-chart` pilot (#10); canvas + Chart.js has no Angular deps — next in the chart rewrite queue |
 | async-state | ported-from-production | templated | keep-own | Signal-based state machine whose branches converge on a single `ng-content` outlet; no Lit slot equivalent pattern decided yet |
 | badge | ported-from-production | simple-leaf | element-rewrite | Pure CSS + slot wrapper, no framework logic; textbook custom-element target |
 | bar-chart | ported-from-production | simple-leaf | element-rewrite | Same charts-core Lit path as `area-chart` |
+| bottom-tab-bar | new (added for app-layout phone mode) | interactive | keep-own | Phone navigation for `app-layout` below md: primary tabs plus a More sheet (CDK focus trap, badge support); app-shell concern, moves with the shell |
 | button | ported-from-production | interactive | element-rewrite | No Angular CDK deps; variants + slots model maps cleanly to Lit; high-value early pilot — button is the most reused primitive |
 | card | ported-from-production | simple-leaf | element-rewrite | Wrapper div + slot + token CSS; no logic beyond host-binding |
 | chat | ported-from-production | interactive | wrap-base | Shell wraps the Deep Chat web component (already framework-agnostic); Angular glue should thin to a Lit micro-wrapper once the host migrates |
@@ -102,7 +103,7 @@ All 41 components listed below are ported-from-production unless otherwise noted
 | toggle | ported-from-production | interactive | element-rewrite | Switch button + thumb animation + `aria-checked`; `role="switch"` + boolean attribute = clean Lit mapping |
 | top-bar | ported-from-production | interactive | keep-own | Uses `MenuComponent`; event orchestration (search/theme/avatar); app-shell concern |
 
-**Summary:** 22 keep-own · 18 element-rewrite · 1 wrap-base · 0 delete
+**Summary:** 23 keep-own · 18 element-rewrite · 1 wrap-base · 0 delete
 
 ---
 
@@ -249,7 +250,7 @@ Every data-entry flow depends on these. Polish them before touching any page tha
 `card` · `empty-state` · `toast` · `alert` · `alert-item` · `async-state` · `password-strength`
 
 ### Tier 4 — navigation shell
-`sidebar-nav` · `top-bar` · `app-layout` · `tab-group` · `page-container` · `page-header`
+`sidebar-nav` · `top-bar` · `bottom-tab-bar` · `app-layout` · `tab-group` · `page-container` · `page-header`
 
 ### Tier 5 — data and overlays
 `dialog` · `drawer` · `menu` · `data-table` · `command-palette`

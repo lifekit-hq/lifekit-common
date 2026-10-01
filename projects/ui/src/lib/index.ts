@@ -9,6 +9,7 @@ export * from './components/area-chart/area-chart.component';
 export * from './components/async-state/async-state.component';
 export * from './components/badge/badge.component';
 export * from './components/bar-chart/bar-chart.component';
+export * from './components/bottom-tab-bar/bottom-tab-bar.component';
 export * from './components/button/button.component';
 export * from './components/card/card.component';
 export * from './components/chat/chat.component';
