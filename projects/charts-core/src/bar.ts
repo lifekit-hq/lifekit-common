@@ -11,7 +11,7 @@ import {
 } from 'chart.js';
 
 import {type BarSeries, type BarValueFormat} from './types';
-import {cssVar} from './utils';
+import {chartFontFamily, cssVar, fontFamily} from './utils';
 
 Chart.register(CategoryScale, LinearScale, BarController, BarElement, Tooltip, Legend);
 
@@ -19,12 +19,15 @@ const DEFAULT_SERIES_COLORS = ['#10b981', '#ef4444', '#6366f1', '#f59e0b', '#647
 const BAR_RADIUS = 4;
 
 export interface BarChartTokens {
+  /** Canvas font stack; defaults to the `--font-sans` token. */
+  fontFamily?: string;
   textSecondary: string;
   borderDefault: string;
 }
 
 export function resolveBarChartTokens(): BarChartTokens {
   return {
+    fontFamily: chartFontFamily(),
     textSecondary: cssVar('--color-text-secondary', '#464555'),
     borderDefault: cssVar('--color-border-default', '#c7c4d8'),
   };
@@ -87,7 +90,7 @@ export function buildBarChartConfig(
             boxWidth: 10,
             boxHeight: 10,
             usePointStyle: true,
-            font: {family: 'Inter', size: 11},
+            font: {family: fontFamily(tokens), size: 11},
           },
         },
         tooltip: {
@@ -104,7 +107,7 @@ export function buildBarChartConfig(
           border: {display: false},
           ticks: {
             color: tokens.textSecondary,
-            font: {family: 'Inter', size: 11},
+            font: {family: fontFamily(tokens), size: 11},
             maxRotation: 0,
             autoSkip: true,
             maxTicksLimit: 12,
@@ -116,7 +119,7 @@ export function buildBarChartConfig(
           border: {display: false},
           ticks: {
             color: tokens.textSecondary,
-            font: {family: 'Inter', size: 11},
+            font: {family: fontFamily(tokens), size: 11},
             callback: val => barFormat(val as number, valueFormat, currency, true),
           },
         },

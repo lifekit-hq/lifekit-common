@@ -1,6 +1,6 @@
 import {describe, expect, it, vi} from 'vitest';
 
-import {cssVar, money} from './utils';
+import {chartFontFamily, cssVar, fontFamily, isSeriesEmpty, money} from './utils';
 
 describe('cssVar', () => {
   it('returns the CSS custom property value when set', () => {
@@ -38,5 +38,25 @@ describe('money', () => {
 
   it('formats negative values', () => {
     expect(money(-500, 'USD')).toBe('-$500');
+  });
+});
+
+describe('chart font and emptiness helpers', () => {
+  it('falls back to the sans stack when the token is unset, never a bare family', () => {
+    expect(chartFontFamily()).toBe('Inter, system-ui, sans-serif');
+    expect(fontFamily({})).toContain('sans-serif');
+    expect(fontFamily({fontFamily: 'Foo'})).toBe('Foo');
+  });
+
+  it('reads the --font-sans token when defined', () => {
+    document.documentElement.style.setProperty('--font-sans', 'Roboto, sans-serif');
+    expect(chartFontFamily()).toBe('Roboto, sans-serif');
+    document.documentElement.style.removeProperty('--font-sans');
+  });
+
+  it('isSeriesEmpty is true for no series or series without points', () => {
+    expect(isSeriesEmpty([])).toBe(true);
+    expect(isSeriesEmpty([{points: []}])).toBe(true);
+    expect(isSeriesEmpty([{points: [1]}])).toBe(false);
   });
 });

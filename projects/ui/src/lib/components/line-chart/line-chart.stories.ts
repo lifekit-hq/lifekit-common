@@ -34,3 +34,17 @@ export const Default: Story = {
 export const Empty: Story = {
   args: {data: [], label: 'Net Worth Performance', currency: 'USD'},
 };
+
+export const EmptyCustomMessage: Story = {
+  args: {data: [], label: 'Exchange rate', emptyMessage: 'No rates recorded yet'},
+};
+
+export const DefaultDark: Story = {
+  args: Default.args,
+  globals: {theme: 'dark'},
+};
+
+export const EmptyDark: Story = {
+  args: Empty.args,
+  globals: {theme: 'dark'},
+};

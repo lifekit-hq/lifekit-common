@@ -2,6 +2,7 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
+  computed,
   effect,
   ElementRef,
   input,
@@ -11,6 +12,7 @@ import {
 import {
   buildDonutChartConfig,
   type DonutSegment,
+  isDonutEmpty,
   resolveDonutChartTokens,
   updateDonutChart,
 } from '@lifekit-hq/charts-core';
@@ -21,6 +23,9 @@ export type {DonutSegment} from '@lifekit-hq/charts-core';
 @Component({
   selector: 'cmn-donut-chart',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  // A custom element is inline by default, which lets the ring-only wrapper's percentage
+  // height collapse; block gives Chart.js a real box to size against.
+  host: {class: 'block'},
   template: `
     @if (chrome()) {
       <div
@@ -32,12 +37,28 @@ export type {DonutSegment} from '@lifekit-hq/charts-core';
           {{ label() }}
         </span>
         <div class="relative w-full" style="min-height: 280px">
-          <canvas #chartCanvas></canvas>
+          <canvas #chartCanvas [class.invisible]="isEmpty()"></canvas>
+          @if (isEmpty()) {
+            <p
+              class="absolute inset-0 flex items-center justify-center text-center text-cmn-sm text-text-secondary"
+              data-testid="chart-empty"
+            >
+              {{ emptyMessage() }}
+            </p>
+          }
         </div>
       </div>
     } @else {
       <div class="relative h-full w-full" style="min-height: 220px">
-        <canvas #chartCanvas></canvas>
+        <canvas #chartCanvas [class.invisible]="isEmpty()"></canvas>
+        @if (isEmpty()) {
+          <p
+            class="absolute inset-0 flex items-center justify-center text-center text-cmn-sm text-text-secondary"
+            data-testid="chart-empty"
+          >
+            {{ emptyMessage() }}
+          </p>
+        }
       </div>
     }
   `,
@@ -53,6 +74,9 @@ export class DonutChartComponent implements AfterViewInit, OnDestroy {
   public readonly chrome = input<boolean>(true);
   /** When false, hides the chart's built-in legend (host renders its own). */
   public readonly showLegend = input<boolean>(true);
+  /** Shown in place of the ring when there is nothing to draw. */
+  public readonly emptyMessage = input<string>('No data yet');
+  protected readonly isEmpty = computed(() => isDonutEmpty(this.segments()));
 
   constructor() {
     effect(() => {

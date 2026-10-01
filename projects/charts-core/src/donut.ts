@@ -8,7 +8,7 @@ import {
 } from 'chart.js';
 
 import {type DonutSegment} from './types';
-import {cssVar} from './utils';
+import {chartFontFamily, cssVar, fontFamily} from './utils';
 
 Chart.register(DoughnutController, ArcElement, Tooltip, Legend);
 
@@ -25,13 +25,21 @@ const DEFAULT_COLORS = [
 const PERCENT_MULTIPLIER = 100;
 
 export interface DonutChartTokens {
+  /** Canvas font stack; defaults to the `--font-sans` token. */
+  fontFamily?: string;
   textSecondary: string;
 }
 
 export function resolveDonutChartTokens(): DonutChartTokens {
   return {
+    fontFamily: chartFontFamily(),
     textSecondary: cssVar('--color-text-secondary', '#464555'),
   };
+}
+
+/** A donut with no segments, or only zero-value ones, has no ring to draw. */
+export function isDonutEmpty(segments: readonly DonutSegment[]): boolean {
+  return segments.every(s => s.value <= 0);
 }
 
 function segmentColors(segments: DonutSegment[]): string[] {
@@ -67,7 +75,7 @@ export function buildDonutChartConfig(
           position: 'bottom',
           labels: {
             color: tokens.textSecondary,
-            font: {family: 'Inter', size: 11},
+            font: {family: fontFamily(tokens), size: 11},
             boxWidth: 10,
             padding: 12,
           },
