@@ -26,6 +26,7 @@ export {type NavItem} from '../sidebar-nav/sidebar-nav.component';
         <cmn-top-bar
           [title]="title()"
           [isDark]="isDark()"
+          [showThemeToggle]="showThemeToggle()"
           [avatarLabel]="avatarLabel()"
           [avatarMenuItems]="avatarMenuItems()"
           (searchClick)="searchClick.emit()"
@@ -51,6 +52,8 @@ export class AppLayoutComponent {
   public readonly activeRoute = input<string>('');
   public readonly title = input<string>('');
   public readonly isDark = input<boolean>(false);
+  /** Renders the top bar's theme toggle (both desktop and phone); false removes it. */
+  public readonly showThemeToggle = input<boolean>(true);
   public readonly avatarLabel = input<string>('');
   public readonly avatarMenuItems = input<MenuItem[]>([]);
   public readonly versionLabel = input<string>('');

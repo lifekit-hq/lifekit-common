@@ -90,6 +90,11 @@ export const DarkToggleOn: Story = {
   args: {isDark: true},
 };
 
+/** `showThemeToggle: false` removes the top bar's theme toggle (desktop and phone). */
+export const NoThemeToggle: Story = {
+  args: {showThemeToggle: false},
+};
+
 /** Nothing configured — no nav, no title, no avatar, no version. */
 export const Bare: Story = {
   args: {
