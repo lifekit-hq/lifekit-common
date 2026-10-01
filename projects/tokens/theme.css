@@ -206,3 +206,33 @@ cmn-drawer-container.cmn-drawer--closing {
   transform: translateX(100%);
   transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+/* Bottom sheet: the drawer's phone presentation (below md, or mode: 'sheet') */
+.cmn-drawer-panel.cmn-drawer-panel--sheet {
+  height: auto;
+}
+
+cmn-drawer-container.cmn-drawer--sheet {
+  width: 100%;
+  height: auto;
+  max-height: 90vh;
+  max-height: 90dvh;
+  overflow: hidden;
+  border-top-left-radius: 0.75rem;
+  border-top-right-radius: 0.75rem;
+  background-color: var(--color-surface-card);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  transform: translateY(100%);
+}
+
+cmn-drawer-container.cmn-drawer--sheet.cmn-drawer--open {
+  transform: translateY(0);
+}
+
+cmn-drawer-container.cmn-drawer--sheet.cmn-drawer--closing {
+  transform: translateY(100%);
+}
+
+cmn-drawer-container.cmn-drawer--dragging {
+  transition: none;
+}

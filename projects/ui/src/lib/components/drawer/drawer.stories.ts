@@ -1,10 +1,17 @@
-import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
+import {
+  afterNextRender,
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  input,
+  signal,
+} from '@angular/core';
 import type {Meta, StoryObj} from '@storybook/angular';
 import {moduleMetadata} from '@storybook/angular';
 
 import {CmnDrawerService} from '../../services/drawer/drawer.service';
 import {ButtonComponent} from '../button/button.component';
-import {CMN_DRAWER_DATA} from './drawer-config';
+import {CMN_DRAWER_DATA, type CmnDrawerMode} from './drawer-config';
 import {CmnDrawerRef} from './drawer-ref';
 
 interface TransactionData {
@@ -65,6 +72,8 @@ class StoryLongDrawerContentComponent {
       <cmn-button (clicked)="openWide()" variant="secondary">Wide</cmn-button>
       <cmn-button (clicked)="openScrolling()" variant="secondary">Scrolling body</cmn-button>
       <cmn-button (clicked)="openLocked()" variant="secondary">disableClose</cmn-button>
+      <cmn-button (clicked)="openIn('sheet')" variant="secondary">Bottom sheet</cmn-button>
+      <cmn-button (clicked)="openIn('side')" variant="secondary">Side panel (pinned)</cmn-button>
     </div>
     <p class="mt-cmn-4 text-cmn-sm text-text-secondary">Last result: {{ result() }}</p>
   `,
@@ -72,7 +81,19 @@ class StoryLongDrawerContentComponent {
 class StoryDrawerLauncherComponent {
   private readonly drawer = inject(CmnDrawerService);
 
+  /** Opens a drawer in this mode as soon as the story renders (visual stories). */
+  public readonly autoOpen = input<CmnDrawerMode | null>(null);
+
   protected readonly result = signal('—');
+
+  constructor() {
+    afterNextRender(() => {
+      const mode = this.autoOpen();
+      if (mode) {
+        this.openIn(mode);
+      }
+    });
+  }
 
   protected open(): void {
     this.drawer
@@ -94,6 +115,17 @@ class StoryDrawerLauncherComponent {
 
   protected openScrolling(): void {
     this.drawer.open(StoryLongDrawerContentComponent, {title: 'Long body'});
+  }
+
+  protected openIn(mode: CmnDrawerMode): void {
+    this.drawer
+      .open<string, TransactionData>(StoryDrawerContentComponent, {
+        title: 'Transaction detail',
+        data: {description: 'Whole Foods', amount: '-$87.43'},
+        mode,
+      })
+      .afterClosed()
+      .subscribe(r => this.result.set(String(r)));
   }
 
   protected openLocked(): void {
@@ -123,3 +155,30 @@ type Story = StoryObj<StoryDrawerLauncherComponent>;
  * scroll under a fixed header, and one that ignores backdrop clicks and Escape.
  */
 export const Playground: Story = {};
+
+/**
+ * The phone presentation: a bottom sheet with a drag handle, a 90dvh max height
+ * and safe-area bottom padding. Drag the handle or header down to dismiss.
+ * The default `responsive` mode uses it below `md`; `mode: 'sheet'` pins it.
+ */
+export const BottomSheet: Story = {
+  args: {autoOpen: 'sheet'},
+};
+
+/** The bottom sheet in the dark theme. */
+export const BottomSheetDark: Story = {
+  args: {autoOpen: 'sheet'},
+  globals: {theme: 'dark'},
+};
+
+/** The default `responsive` mode at phone width opens as a bottom sheet. */
+export const ResponsivePhone: Story = {
+  args: {autoOpen: 'responsive'},
+  globals: {viewport: {value: 'mobile2', isRotated: false}},
+};
+
+/** The side panel from `md` up, unchanged, in the dark theme. */
+export const SidePanelDark: Story = {
+  args: {autoOpen: 'side'},
+  globals: {theme: 'dark'},
+};

@@ -105,3 +105,123 @@ describe('CmnDrawerContainerComponent', () => {
     expect(fixture.componentInstance.portalOutlet()).toBeTruthy();
   });
 });
+
+describe('CmnDrawerContainerComponent as a bottom sheet', () => {
+  const DISMISS_DRAG_PX = 120;
+  const SHORT_DRAG_PX = 40;
+
+  let fixture: ComponentFixture<CmnDrawerContainerComponent>;
+  let drawerRef: CmnDrawerRef;
+  let host: HTMLElement;
+
+  beforeEach(async () => {
+    drawerRef = new CmnDrawerRef();
+    const overlayRef: Partial<OverlayRef> = {dispose: vi.fn()};
+    drawerRef.overlayRef = overlayRef as OverlayRef;
+
+    TestBed.resetTestingModule();
+    await TestBed.configureTestingModule({
+      imports: [CmnDrawerContainerComponent],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        {provide: CmnDrawerRef, useValue: drawerRef},
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(CmnDrawerContainerComponent);
+    fixture.componentInstance.sheet.set(true);
+    fixture.detectChanges();
+    host = fixture.nativeElement as HTMLElement;
+  });
+
+  function dragZone(): HTMLElement {
+    return host.querySelector('h2')?.parentElement?.parentElement as HTMLElement;
+  }
+
+  function pointer(type: string, clientY: number, target: Element = dragZone()): void {
+    target.dispatchEvent(new PointerEvent(type, {clientY, pointerId: 1, bubbles: true}));
+    fixture.detectChanges();
+  }
+
+  function drag(distance: number): void {
+    pointer('pointerdown', 0);
+    pointer('pointermove', distance);
+    pointer('pointerup', distance);
+  }
+
+  it('shows a drag handle and the sheet host class', () => {
+    expect(host.querySelector('[data-testid="drawer-handle"]')).not.toBeNull();
+    expect(host.classList.contains('cmn-drawer--sheet')).toBe(true);
+  });
+
+  it('has no handle in the side-panel presentation', () => {
+    fixture.componentInstance.sheet.set(false);
+    fixture.detectChanges();
+    expect(host.querySelector('[data-testid="drawer-handle"]')).toBeNull();
+    expect(host.classList.contains('cmn-drawer--sheet')).toBe(false);
+  });
+
+  it('follows the pointer while dragging down and ignores upward drags', () => {
+    pointer('pointerdown', 100);
+    pointer('pointermove', 150);
+    expect(host.style.transform).toBe('translateY(50px)');
+    expect(host.classList.contains('cmn-drawer--dragging')).toBe(true);
+
+    pointer('pointermove', 60);
+    expect(host.style.transform).toBe('');
+  });
+
+  it('dismisses when released past the threshold', () => {
+    const spy = vi.spyOn(drawerRef, 'close');
+    drag(DISMISS_DRAG_PX);
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(host.classList.contains('cmn-drawer--dragging')).toBe(false);
+  });
+
+  it('snaps back when released before the threshold', () => {
+    const spy = vi.spyOn(drawerRef, 'close');
+    drag(SHORT_DRAG_PX);
+    expect(spy).not.toHaveBeenCalled();
+    expect(host.style.transform).toBe('');
+  });
+
+  it('snaps back instead of dismissing when closing is disabled', () => {
+    const spy = vi.spyOn(drawerRef, 'close');
+    fixture.componentInstance.disableClose.set(true);
+    drag(DISMISS_DRAG_PX);
+    expect(spy).not.toHaveBeenCalled();
+  });
+
+  it('treats a cancelled pointer as a release', () => {
+    const spy = vi.spyOn(drawerRef, 'close');
+    pointer('pointerdown', 0);
+    pointer('pointermove', DISMISS_DRAG_PX);
+    pointer('pointercancel', DISMISS_DRAG_PX);
+    expect(spy).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not start a drag from the close button', () => {
+    const button = host.querySelector('button[aria-label="Close drawer"]') as HTMLElement;
+    pointer('pointerdown', 0, button);
+    pointer('pointermove', DISMISS_DRAG_PX, button);
+    expect(fixture.componentInstance.dragging()).toBe(false);
+    expect(host.style.transform).toBe('');
+  });
+
+  it('ignores moves and releases without a drag in progress', () => {
+    const spy = vi.spyOn(drawerRef, 'close');
+    pointer('pointermove', DISMISS_DRAG_PX);
+    pointer('pointerup', DISMISS_DRAG_PX);
+    expect(spy).not.toHaveBeenCalled();
+    expect(host.style.transform).toBe('');
+  });
+
+  it('does not drag in the side-panel presentation', () => {
+    fixture.componentInstance.sheet.set(false);
+    fixture.detectChanges();
+    pointer('pointerdown', 0);
+    pointer('pointermove', DISMISS_DRAG_PX);
+    expect(fixture.componentInstance.dragging()).toBe(false);
+  });
+});
