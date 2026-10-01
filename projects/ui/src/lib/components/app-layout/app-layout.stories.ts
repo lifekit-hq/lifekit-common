@@ -56,6 +56,7 @@ const meta: Meta<AppLayoutComponent> = {
         [activeRoute]="activeRoute"
         [title]="title"
         [isDark]="isDark"
+        [showThemeToggle]="showThemeToggle"
         [avatarLabel]="avatarLabel"
         [avatarMenuItems]="avatarMenuItems"
         [versionLabel]="versionLabel"
@@ -68,6 +69,7 @@ const meta: Meta<AppLayoutComponent> = {
     activeRoute: '/dashboard',
     title: 'Dashboard',
     isDark: false,
+    showThemeToggle: true,
     avatarLabel: 'D',
     avatarMenuItems: AVATAR_MENU,
     versionLabel: 'v0.3.2',
