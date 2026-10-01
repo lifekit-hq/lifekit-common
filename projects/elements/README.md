@@ -114,3 +114,32 @@ in this pilot.
   ];
 </script>
 ```
+
+### `<lk-update-prompt>`
+
+Presentational "new version available" prompt. Renders nothing until `ready` is true, then stays
+until the user acts on it.
+
+| Property | Type      | Default | Description                          |
+| -------- | --------- | ------- | ------------------------------------ |
+| `ready`  | `boolean` | `false` | Show the prompt (a new version is waiting) |
+
+Event: `lk-update-prompt-reload` — the user tapped Reload. Pair it with `AppUpdateService.reload()`
+from `@lifekit-hq/core/pwa`.
+
+### `<lk-offline-banner>`
+
+Self-contained banner shown while the device is offline (`online` / `offline` window events).
+
+| Property  | Type     | Default            | Description              |
+| --------- | -------- | ------------------ | ------------------------ |
+| `message` | `string` | generic offline text | Text shown in the banner |
+
+### `<lk-install-hint>`
+
+"Install this app" hint. Hidden when already installed (`display-mode: standalone` or
+`navigator.standalone`) or once dismissed. iOS Safari shows "Share, then Add to Home Screen";
+Chromium shows an Install button once the browser fires `beforeinstallprompt` (captured at module
+load, so late-mounting hints still work). Dismissal is remembered in `localStorage`.
+
+Event: `lk-install-hint-dismiss` — the user dismissed the hint.

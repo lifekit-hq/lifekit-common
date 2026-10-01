@@ -50,6 +50,7 @@
     "@angular/cli": "^21.2.3",
     "@angular/compiler-cli": "^21.2.5",
     "@angular/language-service": "^21.2.5",
+    "@angular/service-worker": "^21.2.21",
     "@playwright/test": "^1.62.1",
     "@smarttools/eslint-plugin-rxjs": "^1.0.22",
     "@storybook/angular": "^10.3.5",

@@ -1,10 +1,13 @@
 {
   "name": "@lifekit-hq/elements",
   "version": "0.2.0",
-  "description": "Framework-free Lit custom elements — the long-term UI substrate for the lifekit ecosystem",
+  "description": "Framework-free Lit custom elements \u2014 the long-term UI substrate for the lifekit ecosystem",
   "sideEffects": [
     "./src/index.ts",
-    "./src/lk-line-chart.ts"
+    "./src/lk-install-hint.ts",
+    "./src/lk-line-chart.ts",
+    "./src/lk-offline-banner.ts",
+    "./src/lk-update-prompt.ts"
   ],
   "license": "MIT",
   "repository": {
