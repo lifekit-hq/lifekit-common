@@ -128,7 +128,8 @@
           "options": {
             "eslintConfig": "projects/core/eslint.config.mjs",
             "lintFilePatterns": [
-              "projects/core/src/**/*.ts"
+              "projects/core/src/**/*.ts",
+              "projects/core/pwa/**/*.ts"
             ]
           }
         }
