@@ -136,4 +136,15 @@ describe('AppLayoutComponent', () => {
       expect(emitted).toEqual([NAV_ITEMS[1]]);
     });
   });
+
+  it('should show the theme toggle by default', () => {
+    expect(fixture.nativeElement.querySelector('button[aria-label="Toggle theme"]')).toBeTruthy();
+  });
+
+  it('should not render the theme toggle when showThemeToggle is false', () => {
+    fixture.componentRef.setInput('showThemeToggle', false);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('button[aria-label="Toggle theme"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('button[aria-label="Search"]')).toBeTruthy();
+  });
 });

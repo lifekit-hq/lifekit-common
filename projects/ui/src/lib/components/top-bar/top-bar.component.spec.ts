@@ -53,6 +53,13 @@ describe('TopBarComponent', () => {
     expect(host.querySelector('button[aria-label="Toggle theme"]')).toBeTruthy();
   });
 
+  it('should not render the theme toggle when showThemeToggle is false', () => {
+    fixture.componentRef.setInput('showThemeToggle', false);
+    fixture.detectChanges();
+    const host = fixture.nativeElement as HTMLElement;
+    expect(host.querySelector('button[aria-label="Toggle theme"]')).toBeNull();
+  });
+
   it('should show avatar initial from avatarLabel', () => {
     fixture.componentRef.setInput('avatarLabel', 'Denys');
     fixture.detectChanges();

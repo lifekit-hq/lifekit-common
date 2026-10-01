@@ -36,15 +36,17 @@ import {MenuComponent, type MenuItem} from '../menu/menu.component';
       </button>
 
       <!-- Theme toggle -->
-      <button
-        (click)="themeToggle.emit()"
-        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-cmn-md text-text-secondary hover:bg-surface-raised hover:text-text-primary transition-colors"
-        type="button"
-        title="Toggle theme"
-        aria-label="Toggle theme"
-      >
-        <cmn-icon [name]="isDark() ? 'Sun' : 'Moon'" size="sm" />
-      </button>
+      @if (showThemeToggle()) {
+        <button
+          (click)="themeToggle.emit()"
+          class="flex h-8 w-8 shrink-0 items-center justify-center rounded-cmn-md text-text-secondary hover:bg-surface-raised hover:text-text-primary transition-colors"
+          type="button"
+          title="Toggle theme"
+          aria-label="Toggle theme"
+        >
+          <cmn-icon [name]="isDark() ? 'Sun' : 'Moon'" size="sm" />
+        </button>
+      }
 
       <!-- Avatar -->
       <cmn-menu
@@ -61,6 +63,7 @@ import {MenuComponent, type MenuItem} from '../menu/menu.component';
 export class TopBarComponent {
   public readonly title = input<string>('');
   public readonly isDark = input<boolean>(false);
+  public readonly showThemeToggle = input<boolean>(true);
   public readonly avatarLabel = input<string>('');
   public readonly avatarMenuItems = input<MenuItem[]>([]);
 
