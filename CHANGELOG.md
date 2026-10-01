@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.5.0](https://github.com/lifekit-hq/lifekit-common/compare/v0.4.0...v0.5.0) (2026-10-01)
+
+
+### Features
+
+* **core:** add shared PWA layer ([#55](https://github.com/lifekit-hq/lifekit-common/issues/55)) ([608c95a](https://github.com/lifekit-hq/lifekit-common/commit/608c95afb06a766f889ca0f41617ab7b38ed9d6f))
+* **ui:** add month stepper and checkbox, flat alert-item density, google button locale ([#54](https://github.com/lifekit-hq/lifekit-common/issues/54)) ([1463f19](https://github.com/lifekit-hq/lifekit-common/commit/1463f19ca873fe1313f58ef70ec37a0422fc191f))
+* **ui:** add phone mode with bottom tab bar to app-layout ([#51](https://github.com/lifekit-hq/lifekit-common/issues/51)) ([1a1e05f](https://github.com/lifekit-hq/lifekit-common/commit/1a1e05fe1a77a18502453f03c81cf11f117954b9))
+* **ui:** data-table list rows and drawer bottom sheet below md ([#53](https://github.com/lifekit-hq/lifekit-common/issues/53)) ([e073306](https://github.com/lifekit-hq/lifekit-common/commit/e073306ee2ac6071caacc64f3c77f46c86a5cbb8))
+
+
+### Bug Fixes
+
+* **ui:** chart token font, donut rendering, and empty state ([#50](https://github.com/lifekit-hq/lifekit-common/issues/50)) ([bcd756f](https://github.com/lifekit-hq/lifekit-common/commit/bcd756ffc0f25f253e6ce91d6e7bdc9c2c810133))
+
 ## [0.4.0](https://github.com/lifekit-hq/lifekit-common/compare/v0.3.2...v0.4.0) (2026-09-26)
 
 
