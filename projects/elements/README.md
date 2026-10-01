@@ -85,9 +85,10 @@ baselines (for CI VRT) are a deliberate follow-up — not part of this package.
 ### Build
 
 The package is built by `ng build @lifekit-hq/elements` (ng-packagr compiles the TypeScript;
-no Angular-specific transforms are applied). The entry point is `src/public-api.ts`.
+no Angular-specific transforms are applied). The entry point is `src/index.ts`.
 
-Peer dependencies: `lit ^3.0.0`, `chart.js ^4.5.1`.
+Peer dependencies: `lit ^3.0.0`, `chart.js ^4.5.1`. Runtime dependency: `@lifekit-hq/charts-core`
+(version-locked to the lockstep release via `release-please-config.json`).
 
 ---
 
