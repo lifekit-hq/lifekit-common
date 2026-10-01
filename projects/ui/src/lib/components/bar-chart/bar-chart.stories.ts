@@ -75,7 +75,12 @@ export const SinglePoint: Story = {
   args: {series: [series('Spending', [1200])], label: 'Monthly Spending'},
 };
 
-/** No data at all — the chart renders its frame and label, nothing else. */
+/** No data at all — the frame and label stay, with an explicit message in place of the plot. */
 export const Empty: Story = {
   args: {series: [], label: 'Monthly Spending'},
+};
+
+export const EmptyDark: Story = {
+  args: Empty.args,
+  globals: {theme: 'dark'},
 };

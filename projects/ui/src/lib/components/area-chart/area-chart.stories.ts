@@ -42,5 +42,14 @@ export const Lines: Story = {
 };
 
 export const Empty: Story = {
-  args: {series: []},
+  args: {series: [], emptyMessage: 'No history yet'},
+};
+
+export const EmptyDark: Story = {
+  args: Empty.args,
+  globals: {theme: 'dark'},
+};
+
+export const StackedDark: Story = {
+  globals: {theme: 'dark'},
 };

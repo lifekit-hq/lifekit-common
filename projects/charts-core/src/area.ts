@@ -13,7 +13,7 @@ import {
 } from 'chart.js';
 
 import {type AreaSeries} from './types';
-import {cssVar, money} from './utils';
+import {chartFontFamily, cssVar, fontFamily, money} from './utils';
 
 Chart.register(
   CategoryScale,
@@ -30,12 +30,15 @@ const DEFAULT_SERIES_COLORS = ['#10b981', '#6366f1', '#f59e0b', '#64748b', '#ec4
 const FILL_ALPHA = 'cc';
 
 export interface AreaChartTokens {
+  /** Canvas font stack; defaults to the `--font-sans` token. */
+  fontFamily?: string;
   textSecondary: string;
   borderDefault: string;
 }
 
 export function resolveAreaChartTokens(): AreaChartTokens {
   return {
+    fontFamily: chartFontFamily(),
     textSecondary: cssVar('--color-text-secondary', '#464555'),
     borderDefault: cssVar('--color-border-default', '#c7c4d8'),
   };
@@ -84,7 +87,7 @@ export function buildAreaChartConfig(
             boxWidth: 10,
             boxHeight: 10,
             usePointStyle: true,
-            font: {family: 'Inter', size: 11},
+            font: {family: fontFamily(tokens), size: 11},
           },
         },
         tooltip: {
@@ -106,7 +109,7 @@ export function buildAreaChartConfig(
           border: {display: false},
           ticks: {
             color: tokens.textSecondary,
-            font: {family: 'Inter', size: 11},
+            font: {family: fontFamily(tokens), size: 11},
             maxRotation: 0,
             autoSkip: true,
             maxTicksLimit: 8,
@@ -118,7 +121,7 @@ export function buildAreaChartConfig(
           border: {display: false},
           ticks: {
             color: tokens.textSecondary,
-            font: {family: 'Inter', size: 11},
+            font: {family: fontFamily(tokens), size: 11},
             callback: val => money(val as number, currency, true),
           },
         },

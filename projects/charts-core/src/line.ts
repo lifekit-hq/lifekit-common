@@ -12,7 +12,7 @@ import {
 } from 'chart.js';
 
 import {type ChartPoint} from './types';
-import {cssVar, money} from './utils';
+import {chartFontFamily, cssVar, fontFamily, money} from './utils';
 
 Chart.register(
   CategoryScale,
@@ -25,6 +25,8 @@ Chart.register(
 );
 
 export interface LineChartTokens {
+  /** Canvas font stack; defaults to the `--font-sans` token. */
+  fontFamily?: string;
   accent: string;
   textSecondary: string;
   borderDefault: string;
@@ -32,6 +34,7 @@ export interface LineChartTokens {
 
 export function resolveLineChartTokens(): LineChartTokens {
   return {
+    fontFamily: chartFontFamily(),
     accent: cssVar('--color-accent-default', '#4f46e5'),
     textSecondary: cssVar('--color-text-secondary', '#464555'),
     borderDefault: cssVar('--color-border-default', '#c7c4d8'),
@@ -79,13 +82,13 @@ export function buildLineChartConfig(
       scales: {
         x: {
           grid: {color: tokens.borderDefault},
-          ticks: {color: tokens.textSecondary, font: {family: 'Inter', size: 11}},
+          ticks: {color: tokens.textSecondary, font: {family: fontFamily(tokens), size: 11}},
         },
         y: {
           grid: {color: tokens.borderDefault},
           ticks: {
             color: tokens.textSecondary,
-            font: {family: 'Inter', size: 11},
+            font: {family: fontFamily(tokens), size: 11},
             callback: val => money(val as number, currency, true),
           },
         },

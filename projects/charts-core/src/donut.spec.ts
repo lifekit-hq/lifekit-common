@@ -4,6 +4,7 @@ import {describe, expect, it} from 'vitest';
 import {
   buildDonutChartConfig,
   type DonutChartTokens,
+  isDonutEmpty,
   resolveDonutChartTokens,
   updateDonutChart,
 } from './donut';
@@ -131,5 +132,13 @@ describe('updateDonutChart', () => {
     expect(chart.data.labels).toEqual([]);
     expect(chart.data.datasets[0].data).toEqual([]);
     expect(chart.data.datasets[0].backgroundColor).toEqual([]);
+  });
+});
+
+describe('isDonutEmpty', () => {
+  it('is empty for no segments or only non-positive values', () => {
+    expect(isDonutEmpty([])).toBe(true);
+    expect(isDonutEmpty([{label: 'A', value: 0}])).toBe(true);
+    expect(isDonutEmpty(SEGMENTS)).toBe(false);
   });
 });

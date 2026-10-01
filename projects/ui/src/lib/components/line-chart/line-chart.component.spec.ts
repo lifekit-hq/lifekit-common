@@ -27,4 +27,11 @@ describe('LineChartComponent', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Net Worth Performance');
   });
+
+  it('shows the empty message when there are no points and hides it with data', () => {
+    expect(fixture.nativeElement.querySelector('[data-testid="chart-empty"]')).toBeTruthy();
+    fixture.componentRef.setInput('data', [{label: 'May', value: 1}]);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[data-testid="chart-empty"]')).toBeNull();
+  });
 });

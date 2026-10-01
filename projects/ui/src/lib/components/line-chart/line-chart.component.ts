@@ -2,6 +2,7 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
+  computed,
   effect,
   ElementRef,
   input,
@@ -31,7 +32,15 @@ export type {ChartPoint} from '@lifekit-hq/charts-core';
         {{ label() }}
       </span>
       <div class="relative h-48">
-        <canvas #chartCanvas></canvas>
+        <canvas #chartCanvas [class.invisible]="isEmpty()"></canvas>
+        @if (isEmpty()) {
+          <p
+            class="absolute inset-0 flex items-center justify-center text-center text-cmn-sm text-text-secondary"
+            data-testid="chart-empty"
+          >
+            {{ emptyMessage() }}
+          </p>
+        }
       </div>
     </div>
   `,
@@ -43,6 +52,9 @@ export class LineChartComponent implements AfterViewInit, OnDestroy {
   public readonly data = input<ChartPoint[]>([]);
   public readonly label = input<string>('');
   public readonly currency = input<string>('USD');
+  /** Shown in place of the plot when there is nothing to draw. */
+  public readonly emptyMessage = input<string>('No data yet');
+  protected readonly isEmpty = computed(() => this.data().length === 0);
 
   constructor() {
     effect(() => {

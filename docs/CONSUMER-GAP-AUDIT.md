@@ -194,9 +194,10 @@ changing; only the variable names differ.
    radii (`--r-sm/md/lg`), fonts (`--sans`, `--mono`), shadows
    (`--shadow-card`, `--shadow-pop`) and layout metrics (`--sidebar-w`,
    `--topbar-h`).
-   The library ships colours and two shadows but **no radius, font-family or
-   layout-metric tokens as CSS variables** — those live only in the Tailwind
-   preset. A non-Tailwind consumer cannot reach them.
+   The library ships colours, two shadows and a single `--font-sans` stack (added
+   for chart canvas text) but **no radius, mono-font or layout-metric tokens as
+   CSS variables** — those live only in the Tailwind preset. A non-Tailwind
+   consumer cannot reach them.
 3. **Dark-first vs light-first**, same as §3.2 item 3 — devclaw defaults to dark.
 4. **React components**, same as the dashboard.
 5. `@lifekit-hq/config`'s ESLint preset is Angular-only — not usable.
