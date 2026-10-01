@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1](https://github.com/lifekit-hq/lifekit-common/compare/v0.5.0...v0.5.1) (2026-10-01)
+
+
+### Bug Fixes
+
+* **elements:** publish @lifekit-hq/elements in the lockstep release ([#56](https://github.com/lifekit-hq/lifekit-common/issues/56)) ([3c5683d](https://github.com/lifekit-hq/lifekit-common/commit/3c5683d85e98193f58970bc29c21e339fef6d46b))
+
 ## [0.5.0](https://github.com/lifekit-hq/lifekit-common/compare/v0.4.0...v0.5.0) (2026-10-01)
 
 
