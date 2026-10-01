@@ -74,4 +74,5 @@ export * from './providers/provide-custom-icons';
 export * from './providers/provide-lucide-icons';
 
 // Tokens
+export * from './tokens/breakpoints';
 export * from './tokens/validation-messages.token';

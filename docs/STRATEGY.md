@@ -148,6 +148,8 @@ not ng-zorro.
 are projected via `contentChildren(CmnColumnComponent)`, which carry `CmnCellDirective` and
 `CmnHeaderCellDirective` templates. Adds token-based styling, skeleton loading state, pagination
 controls (previous/next), empty-row handling, and row-click events. Generic over the row type `T`.
+Below `md` (768px), columns that declare a `listSlot` render as stacked list rows (leading,
+primary, secondary, trailing, trailing-secondary) instead of table rows; `mode` pins either layout.
 
 **Verdict: keep-own.** `CdkTableModule` is already a "base library" — it provides the virtual
 DOM diffing for table rows without prescribing styles. The custom layer adds our token-based
@@ -177,7 +179,9 @@ bundle cost and its own theming layer. The CDK extension model is the correct fo
 **What it does today:** `CmnDrawerContainerComponent` uses `CdkPortalOutlet` to render drawer
 content into a slide-in panel. Manages an `entering → open → closing` state machine via
 `requestAnimationFrame`, reacts to `drawerRef.beforeClose$` to trigger the CSS closing state
-before the overlay is removed. Title is a `signal()` set by the opening call.
+before the overlay is removed. Title is a `signal()` set by the opening call. Below `md` it opens
+as a bottom sheet (drag handle with drag-to-dismiss, 90dvh max height, safe-area padding) and
+re-lays out if the viewport crosses `md` while open; `mode` pins the side panel or the sheet.
 
 **Verdict: keep-own.** CDK Portal handles overlay rendering; the container adds the animation
 state machine and token-based chrome. ng-zorro's `nz-drawer` would again bring its own

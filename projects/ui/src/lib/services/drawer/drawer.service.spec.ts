@@ -1,7 +1,9 @@
+import {BreakpointObserver, type BreakpointState} from '@angular/cdk/layout';
 import {provideHttpClient} from '@angular/common/http';
 import {provideHttpClientTesting} from '@angular/common/http/testing';
 import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {TestBed} from '@angular/core/testing';
+import {BehaviorSubject} from 'rxjs';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
 import {CMN_DRAWER_DATA} from '../../components/drawer/drawer-config';
@@ -15,14 +17,37 @@ import {CmnDrawerService} from './drawer.service';
 })
 class ContentComponent {}
 
+/** Stands in for the viewport: `wide` is true from `md` up. */
+class FakeBreakpointObserver {
+  public readonly state$ = new BehaviorSubject<BreakpointState>({matches: true, breakpoints: {}});
+
+  public setWide(matches: boolean): void {
+    this.state$.next({matches, breakpoints: {}});
+  }
+
+  public isMatched(): boolean {
+    return this.state$.value.matches;
+  }
+
+  public observe(): BehaviorSubject<BreakpointState> {
+    return this.state$;
+  }
+}
+
 describe('CmnDrawerService', () => {
   let service: CmnDrawerService;
+  let viewport: FakeBreakpointObserver;
 
   beforeEach(() => {
     vi.useFakeTimers();
+    viewport = new FakeBreakpointObserver();
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        {provide: BreakpointObserver, useValue: viewport},
+      ],
     });
     service = TestBed.inject(CmnDrawerService);
   });
@@ -105,5 +130,61 @@ describe('CmnDrawerService', () => {
       ?.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter', bubbles: true}));
     vi.advanceTimersByTime(1000);
     expect(panels()).toHaveLength(1);
+  });
+
+  function pane(): HTMLElement | null {
+    return document.querySelector<HTMLElement>('.cdk-overlay-pane.cmn-drawer-panel');
+  }
+
+  function isSheet(): boolean {
+    return (
+      pane()?.classList.contains('cmn-drawer-panel--sheet') === true &&
+      panels()[0]?.classList.contains('cmn-drawer--sheet') === true
+    );
+  }
+
+  it('slides in from the side at the configured width from md up', () => {
+    service.open(ContentComponent, {width: '720px'});
+    expect(isSheet()).toBe(false);
+    expect(pane()?.style.width).toBe('720px');
+    expect(pane()?.style.height).toBe('100%');
+  });
+
+  it('opens as a full-width bottom sheet below md', () => {
+    viewport.setWide(false);
+    service.open(ContentComponent, {width: '720px'});
+    expect(isSheet()).toBe(true);
+    expect(pane()?.style.width).toBe('100%');
+    expect(pane()?.style.height).toBe('');
+  });
+
+  it('honours an explicit side mode below md', () => {
+    viewport.setWide(false);
+    service.open(ContentComponent, {mode: 'side'});
+    expect(isSheet()).toBe(false);
+  });
+
+  it('honours an explicit sheet mode from md up', () => {
+    service.open(ContentComponent, {mode: 'sheet'});
+    expect(isSheet()).toBe(true);
+  });
+
+  it('re-lays out an open responsive drawer when the viewport crosses md', () => {
+    service.open(ContentComponent);
+    expect(isSheet()).toBe(false);
+
+    viewport.setWide(false);
+    expect(isSheet()).toBe(true);
+    expect(pane()?.style.width).toBe('100%');
+
+    viewport.setWide(true);
+    expect(isSheet()).toBe(false);
+    expect(pane()?.style.width).toBe('480px');
+  });
+
+  it('keeps a pinned mode when the viewport crosses md', () => {
+    service.open(ContentComponent, {mode: 'side'});
+    viewport.setWide(false);
+    expect(isSheet()).toBe(false);
   });
 });

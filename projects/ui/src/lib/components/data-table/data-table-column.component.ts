@@ -4,6 +4,15 @@ import {CmnCellDirective, CmnHeaderCellDirective} from './data-table-cell.direct
 
 export type CmnColumnAlign = 'left' | 'right' | 'center';
 
+/**
+ * Where a column's cell lands in the data-table's list-row layout (phone width):
+ * `leading` (avatar/logo), `primary` (first line), `secondary` (muted second line;
+ * several columns are joined with a middle dot), `trailing` (right-aligned value)
+ * and `trailing-secondary` (muted line under the trailing value). Columns without
+ * a slot are hidden in list mode.
+ */
+export type CmnListSlot = 'leading' | 'primary' | 'secondary' | 'trailing' | 'trailing-secondary';
+
 @Component({
   selector: 'cmn-column',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -14,6 +23,7 @@ export class CmnColumnComponent<T = any> {
   public readonly key = input.required<string>();
   public readonly header = input<string>('');
   public readonly align = input<CmnColumnAlign>('left');
+  public readonly listSlot = input<CmnListSlot | null>(null);
 
   public readonly cell = contentChild(CmnCellDirective<T>);
   public readonly headerCell = contentChild(CmnHeaderCellDirective);
