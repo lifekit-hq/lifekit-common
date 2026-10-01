@@ -71,6 +71,7 @@ All components listed below are ported-from-production unless otherwise noted.
 | button | ported-from-production | interactive | element-rewrite | No Angular CDK deps; variants + slots model maps cleanly to Lit; high-value early pilot — button is the most reused primitive |
 | card | ported-from-production | simple-leaf | element-rewrite | Wrapper div + slot + token CSS; no logic beyond host-binding |
 | chat | ported-from-production | interactive | wrap-base | Shell wraps the Deep Chat web component (already framework-agnostic); Angular glue should thin to a Lit micro-wrapper once the host migrates |
+| checkbox | new (added for login/register forms) | interactive | element-rewrite | Button + `role=checkbox` + `aria-checked` (incl. mixed) + projected label; same shape as `chip`/`toggle`, no Angular forms integration |
 | chip | ported-from-production | simple-leaf | element-rewrite | Button + `aria-pressed` + CSS; simpler than `button`, same Lit path |
 | command-palette | ported-from-production | interactive | keep-own | Grouped keyboard navigation + real-time search; CDK Dialog integration; bespoke interaction model for lifekit navigation |
 | data-table | ported-from-production | templated | keep-own | CDK table is the correct foundation; column projection via `contentChildren` is Angular-idiomatic; see §"Expensive components" below |
@@ -88,6 +89,7 @@ All components listed below are ported-from-production unless otherwise noted.
 | line-chart | ported-from-production | simple-leaf | element-rewrite | Lit replacement `lk-line-chart` already exists in `projects/elements` (#10); this Angular wrapper is the primary strangler target |
 | list-item-row | ported-from-production | templated | keep-own | Four named `ng-content` slots (avatar/meta/amount/actions); finance-specific layout; slot combinatorics map awkwardly to Lit today |
 | menu | ported-from-production | interactive | keep-own | `CdkConnectedOverlay` for smart positioning + viewport clamping; keyboard escape; overlay lifecycle |
+| month-stepper | new (added for Budgets and Flow breakdown) | interactive | keep-own | `model()` two-way `Date` binding with min/max clamping and arrow-key stepping; depends on `icon` |
 | page-container | ported-from-production | simple-leaf | element-rewrite | Layout wrapper + token CSS; no logic |
 | page-header | ported-from-production | interactive | keep-own | Depends on `ButtonComponent` internally; action button with loading/disabled state |
 | password-strength | ported-from-production | simple-leaf | element-rewrite | Four-segment progress bar; pure CSS, no framework logic |
@@ -103,7 +105,7 @@ All components listed below are ported-from-production unless otherwise noted.
 | toggle | ported-from-production | interactive | element-rewrite | Switch button + thumb animation + `aria-checked`; `role="switch"` + boolean attribute = clean Lit mapping |
 | top-bar | ported-from-production | interactive | keep-own | Uses `MenuComponent`; event orchestration (search/theme/avatar); app-shell concern |
 
-**Summary:** 23 keep-own · 18 element-rewrite · 1 wrap-base · 0 delete
+**Summary:** 24 keep-own · 19 element-rewrite · 1 wrap-base · 0 delete
 
 ---
 
@@ -246,7 +248,7 @@ the correct atoms. Note: `button` and `icon` are `element-rewrite` — their loo
 IS the rewrite; include them here as coordination points.
 
 ### Tier 2 — form layer
-`input` · `select` · `form-field`
+`input` · `select` · `checkbox` · `form-field`
 
 Every data-entry flow depends on these. Polish them before touching any page that has a form.
 
@@ -261,7 +263,7 @@ Every data-entry flow depends on these. Polish them before touching any page tha
 
 ### Tier 6 — domain-specific
 `disclosure-row` · `list-item-row` · `stat-card` · `google-sign-in-button` ·
-`editable-field` · `selectable-card` · `institution-avatar` · `chat`
+`editable-field` · `selectable-card` · `institution-avatar` · `month-stepper` · `chat`
 
 Within each tier, order is the author's call. `selectable-card` has an
 `element-rewrite` decision and `editable-field` is `keep-own`, but both carry `interactive`
