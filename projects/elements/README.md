@@ -120,8 +120,8 @@ in this pilot.
 Presentational "new version available" prompt. Renders nothing until `ready` is true, then stays
 until the user acts on it.
 
-| Property | Type      | Default | Description                          |
-| -------- | --------- | ------- | ------------------------------------ |
+| Property | Type      | Default | Description                                |
+| -------- | --------- | ------- | ------------------------------------------ |
 | `ready`  | `boolean` | `false` | Show the prompt (a new version is waiting) |
 
 Event: `lk-update-prompt-reload` — the user tapped Reload. Pair it with `AppUpdateService.reload()`
@@ -131,8 +131,8 @@ from `@lifekit-hq/core/pwa`.
 
 Self-contained banner shown while the device is offline (`online` / `offline` window events).
 
-| Property  | Type     | Default            | Description              |
-| --------- | -------- | ------------------ | ------------------------ |
+| Property  | Type     | Default              | Description              |
+| --------- | -------- | -------------------- | ------------------------ |
 | `message` | `string` | generic offline text | Text shown in the banner |
 
 ### `<lk-install-hint>`
