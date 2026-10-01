@@ -1,6 +1,6 @@
 {
   "name": "@lifekit-hq/elements",
-  "version": "0.2.0",
+  "version": "0.5.0",
   "description": "Framework-free Lit custom elements \u2014 the long-term UI substrate for the lifekit ecosystem",
   "sideEffects": [
     "./src/index.ts",
