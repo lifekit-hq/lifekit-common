@@ -1,13 +1,15 @@
 # lifekit-common — Claude Context
 
-Shared design system & Angular component library for the lifekit-hq ecosystem. Four lockstep-versioned packages published to GitHub Packages:
+Shared design system & Angular component library for the lifekit-hq ecosystem. Six lockstep-versioned packages published to GitHub Packages:
 
-| Package              | What                                                                                                    | Consumers                               |
-| -------------------- | ------------------------------------------------------------------------------------------------------- | --------------------------------------- |
-| `@lifekit-hq/tokens` | Design tokens — `theme.css` (pure custom properties, light/dark) + Tailwind preset. Framework-agnostic. | All lifekit frontends (Angular + React) |
-| `@lifekit-hq/ui`     | Angular component library (`cmn-*` selectors), Storybook-first                                          | finance-sentry                          |
-| `@lifekit-hq/core`   | Angular signal-store features & helpers                                                                 | finance-sentry                          |
-| `@lifekit-hq/config` | ESLint / Prettier / Stylelint / tsconfig presets                                                        | lifekit repos (build-time)              |
+| Package                   | What                                                                                                    | Consumers                               |
+| ------------------------- | ------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| `@lifekit-hq/tokens`      | Design tokens — `theme.css` (pure custom properties, light/dark) + Tailwind preset. Framework-agnostic. | All lifekit frontends (Angular + React) |
+| `@lifekit-hq/charts-core` | Framework-free Chart.js config builders (zero `@angular/*`)                                             | `ui`, `elements`                        |
+| `@lifekit-hq/elements`    | Framework-free Lit custom elements (`lk-*`) — incl. PWA install/update/offline pieces                   | finance-sentry                          |
+| `@lifekit-hq/ui`          | Angular component library (`cmn-*` selectors), Storybook-first                                          | finance-sentry                          |
+| `@lifekit-hq/core`        | Angular signal-store features & helpers                                                                 | finance-sentry                          |
+| `@lifekit-hq/config`      | ESLint / Prettier / Stylelint / tsconfig presets                                                        | lifekit repos (build-time)              |
 
 Extracted from finance-sentry (`dsdevq-common`) 2026-08-25. Sole developer: Denys.
 
@@ -40,7 +42,7 @@ npm run build-storybook  # static catalog (deployed to Pages on merge)
 - **PR body**: what + why, then a **Validation** section stating exactly what was run and green.
 - **Issues**: imperative title, no priority prefix — priority lives in the `P1`/`P2` label. P1 issues carry acceptance criteria; P2/P3 stay one-liners until promoted.
 - **Milestones**: `M<n> — <outcome>`, named for the outcome, never a date.
-- **Releases**: release-please maintains the release PR (lockstep version bump across all packages + CHANGELOG); the Weekly Release workflow merges it Mondays 08:00 UTC (or dispatch manually for "release now"). Merging it tags the release and publishes all four packages to GitHub Packages.
+- **Releases**: release-please maintains the release PR (lockstep version bump across all packages + CHANGELOG); the Weekly Release workflow merges it Mondays 08:00 UTC (or dispatch manually for "release now"). Merging it tags the release and publishes all six packages to GitHub Packages.
 - Main is protected in spirit: all changes land via squash-merged PR, CI green first.
 - Root markdown is `README.md`, `CLAUDE.md`, and the devclaw onboarding set (`AGENTS.md`); `CHANGELOG.md` is release-please-owned. No session artifacts or ad-hoc docs at the root — durable docs go to `docs/`.
 
