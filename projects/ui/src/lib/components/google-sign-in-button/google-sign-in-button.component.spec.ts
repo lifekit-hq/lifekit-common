@@ -99,4 +99,25 @@ describe('GoogleSignInButtonComponent', () => {
     fixture.destroy();
     expect(id.cancel).toHaveBeenCalledTimes(1);
   });
+
+  it('passes the locale input into the rendered configuration', () => {
+    fixture.componentRef.setInput('locale', 'uk');
+    fixture.detectChanges();
+    const config = id.renderButton.mock.calls[0][1] as GoogleSignInButtonConfiguration;
+    expect(config.locale).toBe('uk');
+    expect(config.type).toBe('standard');
+  });
+
+  it('lets the locale input override a locale in the supplied configuration', () => {
+    fixture.componentRef.setInput('buttonConfiguration', {type: 'standard', locale: 'en'});
+    fixture.componentRef.setInput('locale', 'de');
+    fixture.detectChanges();
+    expect((id.renderButton.mock.calls[0][1] as GoogleSignInButtonConfiguration).locale).toBe('de');
+  });
+
+  it('leaves the configuration locale untouched when no locale input is set', () => {
+    fixture.componentRef.setInput('buttonConfiguration', {type: 'standard', locale: 'en'});
+    fixture.detectChanges();
+    expect((id.renderButton.mock.calls[0][1] as GoogleSignInButtonConfiguration).locale).toBe('en');
+  });
 });

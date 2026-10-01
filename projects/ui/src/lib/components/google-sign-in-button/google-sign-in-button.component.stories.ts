@@ -1,6 +1,10 @@
-import type {Meta, StoryObj} from '@storybook/angular';
+import {componentWrapperDecorator, type Meta, type StoryObj} from '@storybook/angular';
 
 import {GoogleSignInButtonComponent} from './google-sign-in-button.component';
+
+const darkSurface = componentWrapperDecorator(
+  story => `<div class="bg-surface-bg p-cmn-4">${story}</div>`
+);
 
 const meta: Meta<GoogleSignInButtonComponent> = {
   title: 'Components/GoogleSignInButton',
@@ -46,4 +50,22 @@ export const CustomWidth: Story = {
       width: 240,
     },
   },
+};
+
+/** The `locale` input pins the button language instead of following the browser. */
+export const Locale: Story = {
+  render: args => ({
+    props: args,
+    template: '<cmn-google-sign-in-button [clientId]="clientId" [locale]="locale" />',
+  }),
+  args: {
+    clientId: 'your-google-client-id.apps.googleusercontent.com',
+    locale: 'uk',
+  },
+};
+
+export const LocaleDark: Story = {
+  decorators: [darkSurface],
+  ...Locale,
+  globals: {theme: 'dark'},
 };
