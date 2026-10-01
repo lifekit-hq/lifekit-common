@@ -47,6 +47,12 @@ describe('TopBarComponent', () => {
     expect(emitted.length).toBe(1);
   });
 
+  it('should give the icon buttons accessible names', () => {
+    const host = fixture.nativeElement as HTMLElement;
+    expect(host.querySelector('button[aria-label="Search"]')).toBeTruthy();
+    expect(host.querySelector('button[aria-label="Toggle theme"]')).toBeTruthy();
+  });
+
   it('should show avatar initial from avatarLabel', () => {
     fixture.componentRef.setInput('avatarLabel', 'Denys');
     fixture.detectChanges();

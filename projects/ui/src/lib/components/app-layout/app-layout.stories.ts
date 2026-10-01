@@ -12,6 +12,23 @@ const NAV_ITEMS: NavItem[] = [
   {label: 'Settings', icon: 'Settings', route: '/settings'},
 ];
 
+const UNREAD_ALERTS = 7;
+
+/** A fuller nav, as an app with more destinations than fit on a phone bar would pass. */
+const PHONE_NAV_ITEMS: NavItem[] = [
+  {label: 'Home', icon: 'House', route: '/dashboard'},
+  {label: 'Accounts', icon: 'Building2', route: '/accounts'},
+  {label: 'Transactions', icon: 'ArrowLeftRight', route: '/transactions'},
+  {label: 'Budgets', icon: 'Zap', route: '/budgets'},
+  {label: 'Subscriptions', icon: 'Repeat', route: '/subscriptions'},
+  {label: 'Alerts', icon: 'Bell', route: '/alerts', badge: () => UNREAD_ALERTS},
+  {label: 'Settings', icon: 'Settings', route: '/settings'},
+];
+
+const PHONE_TAB_ROUTES = ['/dashboard', '/accounts', '/transactions', '/alerts'];
+
+const PHONE = {viewport: {value: 'mobile2', isRotated: false}};
+
 const AVATAR_MENU: MenuItem[] = [
   {id: 'profile', label: 'Profile', icon: 'User'},
   {id: 'logout', label: 'Log out', icon: 'LogOut', destructive: true},
@@ -42,6 +59,7 @@ const meta: Meta<AppLayoutComponent> = {
         [avatarLabel]="avatarLabel"
         [avatarMenuItems]="avatarMenuItems"
         [versionLabel]="versionLabel"
+        [tabRoutes]="tabRoutes"
       >${BODY}</cmn-app-layout>
     `,
   }),
@@ -53,6 +71,7 @@ const meta: Meta<AppLayoutComponent> = {
     avatarLabel: 'D',
     avatarMenuItems: AVATAR_MENU,
     versionLabel: 'v0.3.2',
+    tabRoutes: [],
   },
 };
 
@@ -104,4 +123,42 @@ export const ScrollingContent: Story = {
       </cmn-app-layout>
     `,
   }),
+};
+
+/** Desktop shell in the dark theme. */
+export const Dark: Story = {
+  args: {isDark: true},
+  globals: {theme: 'dark'},
+};
+
+/**
+ * Below the md breakpoint the sidebar gives way to a bottom tab bar: the four `tabRoutes`
+ * as tabs (Alerts with its unread badge) and the rest under More. The top bar compacts to
+ * the title, an icon search button, the theme toggle, and the avatar.
+ */
+export const Phone: Story = {
+  args: {navItems: PHONE_NAV_ITEMS, tabRoutes: PHONE_TAB_ROUTES, title: 'Home'},
+  globals: PHONE,
+};
+
+export const PhoneDark: Story = {
+  args: {navItems: PHONE_NAV_ITEMS, tabRoutes: PHONE_TAB_ROUTES, title: 'Home', isDark: true},
+  globals: {...PHONE, theme: 'dark'},
+};
+
+/** The active page is under More, so the More tab carries the highlight. */
+export const PhoneActiveInMore: Story = {
+  args: {
+    navItems: PHONE_NAV_ITEMS,
+    tabRoutes: PHONE_TAB_ROUTES,
+    activeRoute: '/budgets',
+    title: 'Budgets',
+  },
+  globals: PHONE,
+};
+
+/** Without `tabRoutes` the first four nav items become the tabs. */
+export const PhoneDefaultTabs: Story = {
+  args: {navItems: PHONE_NAV_ITEMS, title: 'Home'},
+  globals: PHONE,
 };

@@ -39,6 +39,17 @@ describe('SidebarNavComponent', () => {
     expect(fixture.componentInstance.collapsed()).toBe(true);
   });
 
+  it('should give the collapse control an accessible name that tracks its state', () => {
+    const btn = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>(
+      'button[aria-label="Collapse sidebar"]'
+    );
+    expect(btn?.getAttribute('aria-expanded')).toBe('true');
+    btn?.click();
+    fixture.detectChanges();
+    expect(btn?.getAttribute('aria-label')).toBe('Expand sidebar');
+    expect(btn?.getAttribute('aria-expanded')).toBe('false');
+  });
+
   it('should emit navClick when a nav item is clicked', () => {
     const emitted: NavItem[] = [];
     fixture.componentInstance.navClick.subscribe((item: NavItem) => emitted.push(item));
