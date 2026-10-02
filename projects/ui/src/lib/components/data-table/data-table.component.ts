@@ -154,7 +154,12 @@ type ListSlotColumns = Record<CmnListSlot, CmnColumnComponent[]>;
           <table [dataSource]="rows()" cdk-table class="w-full text-cmn-sm">
             @for (col of columns(); track col.key()) {
               <ng-container [cdkColumnDef]="col.key()">
-                <th *cdkHeaderCellDef [class]="headerCellClass(col.align())" cdk-header-cell>
+                <th
+                  *cdkHeaderCellDef
+                  [class]="headerCellClass(col.align())"
+                  [style.width]="col.width()"
+                  cdk-header-cell
+                >
                   @if (col.headerCell(); as h) {
                     <ng-container *ngTemplateOutlet="h.template" />
                   } @else {
@@ -164,6 +169,7 @@ type ListSlotColumns = Record<CmnListSlot, CmnColumnComponent[]>;
                 <td
                   *cdkCellDef="let row; let i = index"
                   [class]="dataCellClass(col.align())"
+                  [style.width]="col.width()"
                   cdk-cell
                 >
                   <ng-container

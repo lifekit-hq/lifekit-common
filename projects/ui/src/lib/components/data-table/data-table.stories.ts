@@ -105,6 +105,21 @@ export const Loading: Story = {
   render: args => ({props: args, template: TEMPLATE}),
 };
 
+const FIXED_WIDTHS_TEMPLATE = `
+  <cmn-data-table [rows]="rows">
+    <cmn-column key="date" header="Date" width="8rem" />
+    <cmn-column key="description" header="Description" />
+    <cmn-column key="amount" header="Amount" align="right" width="9rem" />
+    <cmn-column key="status" header="Status" align="center" width="7rem" />
+  </cmn-data-table>
+`;
+
+/** Per-column `width` pins trailing columns; the unsized column takes the remaining space. */
+export const FixedColumnWidths: Story = {
+  args: {rows: ROWS},
+  render: args => ({props: args, template: FIXED_WIDTHS_TEMPLATE}),
+};
+
 const PAGINATED_TEMPLATE = `
   <cmn-data-table [rows]="rows" [pagination]="pagination">
     <cmn-column key="date" header="Date">

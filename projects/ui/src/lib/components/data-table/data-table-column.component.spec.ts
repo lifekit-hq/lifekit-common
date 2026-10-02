@@ -13,7 +13,7 @@ interface Row {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CmnColumnComponent, CmnCellDirective, CmnHeaderCellDirective],
   template: `
-    <cmn-column [key]="key" [header]="header" [align]="align">
+    <cmn-column [key]="key" [header]="header" [align]="align" [width]="width">
       @if (withHeaderTemplate) {
         <ng-template cmnHeaderCell><span class="custom-header">Amount</span></ng-template>
       }
@@ -31,6 +31,7 @@ class HostComponent {
   public key = 'amount';
   public header = 'Amount';
   public align: CmnColumnAlign = 'left';
+  public width: string | null = null;
   public withCellTemplate = true;
   public withHeaderTemplate = true;
 }
@@ -62,6 +63,17 @@ describe('CmnColumnComponent', () => {
     fixture.detectChanges();
     expect(host.column().align()).toBe('left');
     expect(host.column().header()).toBe('');
+  });
+
+  it('defaults width to null', () => {
+    fixture.detectChanges();
+    expect(host.column().width()).toBeNull();
+  });
+
+  it('exposes a given width', () => {
+    host.width = '8rem';
+    fixture.detectChanges();
+    expect(host.column().width()).toBe('8rem');
   });
 
   it('picks up the projected cell and header templates', () => {

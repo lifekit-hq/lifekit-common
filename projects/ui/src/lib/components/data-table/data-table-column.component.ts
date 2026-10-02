@@ -24,6 +24,8 @@ export class CmnColumnComponent<T = any> {
   public readonly header = input<string>('');
   public readonly align = input<CmnColumnAlign>('left');
   public readonly listSlot = input<CmnListSlot | null>(null);
+  /** Any CSS width (`8rem`, `15%`) applied to the header and cells in table layout; list rows ignore it. */
+  public readonly width = input<string | null>(null);
 
   public readonly cell = contentChild(CmnCellDirective<T>);
   public readonly headerCell = contentChild(CmnHeaderCellDirective);
