@@ -12,15 +12,19 @@ import {chartFontFamily, cssVar, fontFamily} from './utils';
 
 Chart.register(DoughnutController, ArcElement, Tooltip, Legend);
 
-const DEFAULT_COLORS = [
+/**
+ * Ordered so neighbours (including the wrap from last back to first) sit far
+ * apart on the colour wheel; the brand indigo leads.
+ */
+export const DEFAULT_COLORS = [
   '#4f46e5',
   '#10b981',
   '#f59e0b',
+  '#a855f7',
+  '#06b6d4',
   '#ef4444',
-  '#6366f1',
-  '#34d399',
-  '#fbbf24',
-  '#a78bfa',
+  '#84cc16',
+  '#ec4899',
 ];
 const PERCENT_MULTIPLIER = 100;
 
