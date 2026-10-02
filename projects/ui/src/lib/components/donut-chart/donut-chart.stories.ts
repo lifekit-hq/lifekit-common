@@ -9,6 +9,17 @@ const SAMPLE_SEGMENTS: DonutSegment[] = [
   {label: 'Crypto', value: 84320},
 ];
 
+const MANY_SEGMENTS: DonutSegment[] = [
+  'Brokerage',
+  'Banks',
+  'Crypto',
+  'Retirement',
+  'Real estate',
+  'Cash',
+  'Bonds',
+  'Other',
+].map((label, i) => ({label, value: 800000 - i * 90000}));
+
 const meta: Meta<DonutChartComponent> = {
   title: 'Components/DonutChart',
   component: DonutChartComponent,
@@ -65,5 +76,15 @@ export const EmptyDark: Story = {
 
 export const EmbeddedDark: Story = {
   ...Embedded,
+  globals: {theme: 'dark'},
+};
+
+/** Every default palette stop in use; neighbours stay clearly distinct in hue. */
+export const ManySegments: Story = {
+  args: {segments: MANY_SEGMENTS, label: 'Allocation', currency: 'USD'},
+};
+
+export const ManySegmentsDark: Story = {
+  args: ManySegments.args,
   globals: {theme: 'dark'},
 };

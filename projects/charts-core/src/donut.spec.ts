@@ -40,6 +40,42 @@ function tooltipLabel(
   return callbacks?.label?.({parsed, dataset: {data}}) ?? '';
 }
 
+function hue(hex: string): number {
+  const [r, g, b] = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255);
+  const max = Math.max(r, g, b);
+  const d = max - Math.min(r, g, b);
+  const h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return (h * 60 + 360) % 360;
+}
+
+describe('default segment colors', () => {
+  const SEGMENT_COUNT = 8;
+  const MIN_HUE_GAP = 40;
+  const FULL_TURN = 360;
+
+  const colors = buildDonutChartConfig(
+    Array.from({length: SEGMENT_COUNT}, (_, i) => ({label: `S${i}`, value: i + 1})),
+    TOKENS,
+    'USD',
+    false
+  ).data.datasets[0].backgroundColor as string[];
+
+  it('keeps neighbouring slices (including the wrap-around) clearly different in hue', () => {
+    colors.forEach((color, i) => {
+      const next = colors[(i + 1) % colors.length];
+      const diff = Math.abs(hue(color) - hue(next));
+      expect(Math.min(diff, FULL_TURN - diff), `${color} vs ${next}`).toBeGreaterThanOrEqual(
+        MIN_HUE_GAP
+      );
+    });
+  });
+
+  it('gives every slice its own color and leads with the brand indigo', () => {
+    expect(new Set(colors).size).toBe(SEGMENT_COUNT);
+    expect(colors[0]).toBe('#4f46e5');
+  });
+});
+
 describe('buildDonutChartConfig', () => {
   it('maps every segment onto a label and a value', () => {
     const config = buildDonutChartConfig(SEGMENTS, TOKENS, 'USD', true);
