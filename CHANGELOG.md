@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.0](https://github.com/lifekit-hq/lifekit-common/compare/v0.5.1...v0.6.0) (2026-10-02)
+
+
+### Features
+
+* **ui:** add phoneOverlay edge-to-edge phone layout to app-layout ([#60](https://github.com/lifekit-hq/lifekit-common/issues/60)) ([3427409](https://github.com/lifekit-hq/lifekit-common/commit/3427409a3c68240ef7ce87cef21b6981e2254f58))
+* **ui:** add showThemeToggle input to app-layout ([#58](https://github.com/lifekit-hq/lifekit-common/issues/58)) ([cd30982](https://github.com/lifekit-hq/lifekit-common/commit/cd309824f56821e1efda16dd06591329c78720f3))
+
 ## [0.5.1](https://github.com/lifekit-hq/lifekit-common/compare/v0.5.0...v0.5.1) (2026-10-01)
 
 
