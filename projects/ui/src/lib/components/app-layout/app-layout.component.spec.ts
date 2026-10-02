@@ -187,8 +187,35 @@ describe('AppLayoutComponent', () => {
       const main = el('main').classList;
       expect(main).toContain('max-md:pt-[calc(3.5rem+env(safe-area-inset-top))]');
       expect(main).toContain('max-md:scroll-pt-[calc(3.5rem+env(safe-area-inset-top))]');
-      expect(main).toContain('max-md:pb-[calc(64px+16px+env(safe-area-inset-bottom))]');
-      expect(main).toContain('max-md:scroll-pb-[calc(64px+16px+env(safe-area-inset-bottom))]');
+      expect(main).toContain(
+        'max-md:pb-[calc(64px+16px+env(safe-area-inset-bottom)+var(--cmn-fab-clearance,0px))]'
+      );
+      expect(main).toContain(
+        'max-md:scroll-pb-[calc(64px+16px+env(safe-area-inset-bottom)+var(--cmn-fab-clearance,0px))]'
+      );
+    });
+
+    it('should reserve no floating action clearance by default', () => {
+      fixture.componentRef.setInput('phoneOverlay', true);
+      fixture.detectChanges();
+      expect(el('main').style.getPropertyValue('--cmn-fab-clearance')).toBe('');
+    });
+
+    it('should expose the floating action clearance in px to the bottom padding', () => {
+      fixture.componentRef.setInput('phoneOverlay', true);
+      fixture.componentRef.setInput('floatingActionClearance', 56);
+      fixture.detectChanges();
+      expect(el('main').style.getPropertyValue('--cmn-fab-clearance')).toBe('56px');
+    });
+
+    it('should ignore the clearance without phoneOverlay or without a tab bar', () => {
+      fixture.componentRef.setInput('floatingActionClearance', 56);
+      fixture.detectChanges();
+      expect(el('main').style.getPropertyValue('--cmn-fab-clearance')).toBe('');
+      fixture.componentRef.setInput('phoneOverlay', true);
+      fixture.componentRef.setInput('navItems', []);
+      fixture.detectChanges();
+      expect(el('main').style.getPropertyValue('--cmn-fab-clearance')).toBe('');
     });
 
     it('should skip the bottom padding when there is no tab bar to clear', () => {

@@ -73,6 +73,27 @@ for (const theme of THEMES) {
     });
   }
 
+  for (const rootFont of ROOT_FONT_SIZES) {
+    test(`phone overlay floating action, ${theme}, ${rootFont} root: last row clears the button`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({width: PHONE.width, height: PHONE.height - IOS_STATUS_BAR});
+      await open(page, 'phone-overlay-floating-action', theme, rootFont);
+
+      const main = page.locator('cmn-app-layout main');
+      await main.evaluate(el => el.scrollTo(0, el.scrollHeight));
+      const last = await page.getByText('Last item clears the tab bar').boundingBox();
+      const fab = await page.getByRole('button', {name: 'Ask Ledger'}).boundingBox();
+      const nav = await page.locator('cmn-bottom-tab-bar nav').boundingBox();
+      expect(last && fab && nav).toBeTruthy();
+      // Fully above the button and the pill at scroll end, nothing hidden behind either.
+      expect((last?.y ?? 0) + (last?.height ?? 0)).toBeLessThanOrEqual(fab?.y ?? 0);
+      expect((last?.y ?? 0) + (last?.height ?? 0)).toBeLessThanOrEqual(nav?.y ?? 0);
+      expect(await documentOverflow(page)).toEqual({doc: 0, body: 0});
+      await shot(page, `phone-fab-${theme}-${rootFont}`);
+    });
+  }
+
   for (const [name, size] of [
     ['tablet', TABLET],
     ['desktop', DESKTOP],
@@ -86,6 +107,14 @@ for (const theme of THEMES) {
       const main = page.locator('cmn-app-layout main');
       expect(await main.evaluate(el => el.scrollHeight > el.clientHeight)).toBe(true);
       await shot(page, `${name}-${theme}`);
+    });
+
+    test(`${name}, ${theme}: floating action clearance adds no bottom padding`, async ({page}) => {
+      await page.setViewportSize(size);
+      await open(page, 'phone-overlay-floating-action', theme);
+      const main = page.locator('cmn-app-layout main');
+      expect(await main.evaluate(el => getComputedStyle(el).paddingBottom)).toBe('0px');
+      expect(await documentOverflow(page)).toEqual({doc: 0, body: 0});
     });
   }
 }
