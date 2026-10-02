@@ -20,7 +20,8 @@ const NAV_DOCKED_CLASSES =
   'flex border-t border-border-default bg-surface-card pb-[env(safe-area-inset-bottom)]';
 /**
  * Inset pill above the bottom safe-area inset: translucent and blurred so content scrolling
- * under it shows through. Its footprint is FLOATING_TAB_BAR_FOOTPRINT.
+ * under it shows through. Keep its 4rem height and 8px bottom gap in sync with
+ * MAIN_OVERLAY_BOTTOM_CLASSES in app-layout, which pads main to clear it.
  */
 const NAV_FLOATING_CLASSES =
   'mx-cmn-3 mb-[calc(env(safe-area-inset-bottom)+8px)] flex h-16 rounded-cmn-full border border-border-default px-cmn-1 ' +
