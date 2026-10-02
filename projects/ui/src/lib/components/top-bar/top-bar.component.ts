@@ -21,10 +21,12 @@ const HEADER_OVERLAY_CLASSES =
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <header [class]="headerClass()">
-      <!-- Title -->
-      <h1 class="min-w-0 truncate font-headline text-cmn-base font-semibold text-text-primary">
-        {{ title() }}
-      </h1>
+      <!-- Title: omitted when empty so the page owns the only h1 -->
+      @if (title()) {
+        <h1 class="min-w-0 truncate font-headline text-cmn-base font-semibold text-text-primary">
+          {{ title() }}
+        </h1>
+      }
 
       <!-- Spacer -->
       <div class="flex-1"></div>
