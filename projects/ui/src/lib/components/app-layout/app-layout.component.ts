@@ -26,6 +26,8 @@ const MAIN_OVERLAY_BOTTOM_CLASSES =
   imports: [BottomTabBarComponent, SidebarNavComponent, TopBarComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
+    <!-- Pinned with fixed/inset-0, not viewport units: h-screen/h-dvh overshoot the real
+         viewport in iOS home-screen apps, which scrolls the document -->
     <div class="fixed inset-0 flex overflow-hidden bg-surface-bg">
       <!-- Sidebar from md up; below md the bottom tab bar takes over -->
       <cmn-sidebar-nav

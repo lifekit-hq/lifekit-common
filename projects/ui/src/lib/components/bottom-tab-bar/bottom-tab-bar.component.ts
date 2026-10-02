@@ -20,8 +20,9 @@ const NAV_DOCKED_CLASSES =
   'flex border-t border-border-default bg-surface-card pb-[env(safe-area-inset-bottom)]';
 /**
  * Inset pill above the bottom safe-area inset: translucent and blurred so content scrolling
- * under it shows through. Keep its 64px height (px, so the host root font size cannot shrink it) and 8px bottom gap in sync with
- * MAIN_OVERLAY_BOTTOM_CLASSES in app-layout, which pads main to clear it.
+ * under it shows through. Keep its 64px height (px, so the host root font size cannot shrink
+ * it) and 8px bottom gap in sync with MAIN_OVERLAY_BOTTOM_CLASSES in app-layout, which pads
+ * main to clear it.
  */
 const NAV_FLOATING_CLASSES =
   'mx-cmn-3 mb-[calc(env(safe-area-inset-bottom)+8px)] flex h-[64px] rounded-cmn-full border border-border-default px-cmn-1 ' +
