@@ -3,7 +3,6 @@ import {describe, expect, it} from 'vitest';
 
 import {
   buildDonutChartConfig,
-  DEFAULT_COLORS,
   type DonutChartTokens,
   isDonutEmpty,
   resolveDonutChartTokens,
@@ -49,13 +48,21 @@ function hue(hex: string): number {
   return (h * 60 + 360) % 360;
 }
 
-describe('DEFAULT_COLORS', () => {
+describe('default segment colors', () => {
+  const SEGMENT_COUNT = 8;
   const MIN_HUE_GAP = 40;
   const FULL_TURN = 360;
 
-  it('keeps neighbouring colors (including the wrap-around) clearly different in hue', () => {
-    DEFAULT_COLORS.forEach((color, i) => {
-      const next = DEFAULT_COLORS[(i + 1) % DEFAULT_COLORS.length];
+  const colors = buildDonutChartConfig(
+    Array.from({length: SEGMENT_COUNT}, (_, i) => ({label: `S${i}`, value: i + 1})),
+    TOKENS,
+    'USD',
+    false
+  ).data.datasets[0].backgroundColor as string[];
+
+  it('keeps neighbouring slices (including the wrap-around) clearly different in hue', () => {
+    colors.forEach((color, i) => {
+      const next = colors[(i + 1) % colors.length];
       const diff = Math.abs(hue(color) - hue(next));
       expect(Math.min(diff, FULL_TURN - diff), `${color} vs ${next}`).toBeGreaterThanOrEqual(
         MIN_HUE_GAP
@@ -63,9 +70,9 @@ describe('DEFAULT_COLORS', () => {
     });
   });
 
-  it('has no duplicates and leads with the brand indigo', () => {
-    expect(new Set(DEFAULT_COLORS).size).toBe(DEFAULT_COLORS.length);
-    expect(DEFAULT_COLORS[0]).toBe('#4f46e5');
+  it('gives every slice its own color and leads with the brand indigo', () => {
+    expect(new Set(colors).size).toBe(SEGMENT_COUNT);
+    expect(colors[0]).toBe('#4f46e5');
   });
 });
 

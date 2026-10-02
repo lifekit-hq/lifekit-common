@@ -16,7 +16,7 @@ Chart.register(DoughnutController, ArcElement, Tooltip, Legend);
  * Ordered so neighbours (including the wrap from last back to first) sit far
  * apart on the colour wheel; the brand indigo leads.
  */
-export const DEFAULT_COLORS = [
+const DEFAULT_COLORS = [
   '#4f46e5',
   '#10b981',
   '#f59e0b',
