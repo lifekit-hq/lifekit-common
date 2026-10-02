@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.7.0](https://github.com/lifekit-hq/lifekit-common/compare/v0.6.1...v0.7.0) (2026-10-02)
+
+
+### Features
+
+* **ui:** add floatingActionClearance to app-layout phone overlay ([#65](https://github.com/lifekit-hq/lifekit-common/issues/65)) ([bd34faf](https://github.com/lifekit-hq/lifekit-common/commit/bd34fafe4c4eb4176fe5642c2f2325b8372167bd))
+* **ui:** add per-column width input to cmn-column ([#67](https://github.com/lifekit-hq/lifekit-common/issues/67)) ([58ccfe3](https://github.com/lifekit-hq/lifekit-common/commit/58ccfe3e22bf8917815b0ce52273b9791b65e02f))
+
+
+### Bug Fixes
+
+* **charts-core:** begin stacked area chart value axis at zero ([#66](https://github.com/lifekit-hq/lifekit-common/issues/66)) ([989f738](https://github.com/lifekit-hq/lifekit-common/commit/989f7380b671ee7e360c0c423465bdd27b57df9e))
+* **charts-core:** reorder donut default palette so adjacent slices differ in hue ([#70](https://github.com/lifekit-hq/lifekit-common/issues/70)) ([759c966](https://github.com/lifekit-hq/lifekit-common/commit/759c966d6ac177c815284f4560b8b348b2ee9b9c))
+* **charts-core:** thin x ticks on narrow charts so labels never collide ([#69](https://github.com/lifekit-hq/lifekit-common/issues/69)) ([7de7ee3](https://github.com/lifekit-hq/lifekit-common/commit/7de7ee33c4b845cd6b725aa8180519ad7e1a6b58))
+* **ui:** omit cmn-top-bar title heading when no title is set ([#68](https://github.com/lifekit-hq/lifekit-common/issues/68)) ([f93f474](https://github.com/lifekit-hq/lifekit-common/commit/f93f4748b57b3ea06f4ae2404ee4973d6621e07f))
+* **ui:** render two-letter initials in top-bar avatar ([#63](https://github.com/lifekit-hq/lifekit-common/issues/63)) ([3b20390](https://github.com/lifekit-hq/lifekit-common/commit/3b2039027b293d92ba84eab56dfef185c1a49cd3))
+
 ## [0.6.1](https://github.com/lifekit-hq/lifekit-common/compare/v0.6.0...v0.6.1) (2026-10-02)
 
 
