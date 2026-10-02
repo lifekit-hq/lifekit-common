@@ -11,7 +11,7 @@ export const MAX_BOTTOM_TABS = 4;
 const TAB_BASE_CLASSES =
   'flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-0.5 pb-cmn-1 pt-cmn-2 ' +
   'transition-colors focus:outline-none focus-visible:bg-surface-raised';
-const TAB_FLOATING_CLASSES = 'my-cmn-1 rounded-cmn-full';
+const TAB_FLOATING_CLASSES = 'my-0.5 rounded-cmn-full';
 const TAB_ACTIVE_CLASSES = 'text-accent-default';
 const TAB_FLOATING_ACTIVE_CLASSES = 'bg-accent-subtle';
 const TAB_INACTIVE_CLASSES = 'text-text-secondary hover:text-text-primary';
@@ -20,11 +20,12 @@ const NAV_DOCKED_CLASSES =
   'flex border-t border-border-default bg-surface-card pb-[env(safe-area-inset-bottom)]';
 /**
  * Inset pill above the bottom safe-area inset: translucent and blurred so content scrolling
- * under it shows through. Keep its 4rem height and 8px bottom gap in sync with
- * MAIN_OVERLAY_BOTTOM_CLASSES in app-layout, which pads main to clear it.
+ * under it shows through. Keep its 64px height (px, so the host root font size cannot shrink
+ * it) and 8px bottom gap in sync with MAIN_OVERLAY_BOTTOM_CLASSES in app-layout, which pads
+ * main to clear it.
  */
 const NAV_FLOATING_CLASSES =
-  'mx-cmn-3 mb-[calc(env(safe-area-inset-bottom)+8px)] flex h-16 rounded-cmn-full border border-border-default px-cmn-1 ' +
+  'mx-cmn-3 mb-[calc(env(safe-area-inset-bottom)+8px)] flex h-[64px] rounded-cmn-full border border-border-default px-cmn-1 ' +
   'bg-[color-mix(in_srgb,var(--color-surface-card)_80%,transparent)] shadow-cmn-md backdrop-blur-md';
 
 const SHEET_ITEM_BASE_CLASSES =
@@ -54,7 +55,9 @@ const SHEET_ITEM_INACTIVE_CLASSES = 'text-text-primary hover:bg-surface-raised';
             <cmn-badge [count]="item.badge ? item.badge() : 0" status="error">
               <cmn-icon [name]="item.icon" size="md" aria-hidden="true" />
             </cmn-badge>
-            <span class="max-w-full truncate font-label text-[11px] font-medium leading-tight">
+            <span
+              class="max-w-full shrink-0 truncate font-label text-[11px] font-medium leading-tight"
+            >
               {{ item.label }}
             </span>
           </button>
@@ -71,7 +74,8 @@ const SHEET_ITEM_INACTIVE_CLASSES = 'text-text-primary hover:bg-surface-raised';
             <cmn-badge [dot]="moreHasBadge()" status="error">
               <cmn-icon name="Ellipsis" size="md" aria-hidden="true" />
             </cmn-badge>
-            <span class="max-w-full truncate font-label text-[11px] font-medium leading-tight"
+            <span
+              class="max-w-full shrink-0 truncate font-label text-[11px] font-medium leading-tight"
               >More</span
             >
           </button>

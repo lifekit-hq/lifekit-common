@@ -15,18 +15,20 @@ const MAIN_BASE_CLASSES = 'flex-1 overflow-y-auto';
 const MAIN_OVERLAY_TOP_CLASSES =
   'max-md:pt-[calc(3.5rem+env(safe-area-inset-top))] max-md:scroll-pt-[calc(3.5rem+env(safe-area-inset-top))]';
 /**
- * Clears the floating tab bar: its 4rem height, the 8px gap under it, the bottom safe-area
+ * Clears the floating tab bar: its 64px height, the 8px gap under it, the bottom safe-area
  * inset, and 8px of breathing room so the last item scrolls clear of the pill.
  */
 const MAIN_OVERLAY_BOTTOM_CLASSES =
-  'max-md:pb-[calc(4rem+16px+env(safe-area-inset-bottom))] max-md:scroll-pb-[calc(4rem+16px+env(safe-area-inset-bottom))]';
+  'max-md:pb-[calc(64px+16px+env(safe-area-inset-bottom))] max-md:scroll-pb-[calc(64px+16px+env(safe-area-inset-bottom))]';
 
 @Component({
   selector: 'cmn-app-layout',
   imports: [BottomTabBarComponent, SidebarNavComponent, TopBarComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="flex h-screen h-dvh overflow-hidden bg-surface-bg">
+    <!-- Pinned with fixed/inset-0, not viewport units: h-screen/h-dvh overshoot the real
+         viewport in iOS home-screen apps, which scrolls the document -->
+    <div class="fixed inset-0 flex overflow-hidden bg-surface-bg">
       <!-- Sidebar from md up; below md the bottom tab bar takes over -->
       <cmn-sidebar-nav
         [items]="navItems()"
