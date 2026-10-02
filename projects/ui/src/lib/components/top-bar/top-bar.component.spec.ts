@@ -66,6 +66,28 @@ describe('TopBarComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('D');
   });
 
+  it.each([
+    ['DT', 'DT'],
+    ['dt', 'DT'],
+    ['D', 'D'],
+    ['Al', 'AL'],
+    ['Denys', 'D'],
+    ['Denys Taran', 'DT'],
+    ['Al Smith', 'AS'],
+    ['Denys Ivanovych Taran', 'DI'],
+    ['  Denys   Taran  ', 'DT'],
+    ['', '?'],
+    ['   ', '?'],
+  ])('should render avatar "%s" as "%s"', (label, expected) => {
+    fixture.componentRef.setInput('avatarLabel', label);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.avatarInitial()).toBe(expected);
+    const trigger = fixture.nativeElement.querySelector(
+      'button[aria-label="Account menu"]'
+    ) as HTMLElement | null;
+    expect(trigger?.textContent?.trim()).toBe(expected);
+  });
+
   it('should render the avatar menu trigger and open the menu on click', () => {
     fixture.componentRef.setInput('avatarLabel', 'Denys');
     fixture.detectChanges();

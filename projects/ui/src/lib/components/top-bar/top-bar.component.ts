@@ -3,6 +3,7 @@ import {ChangeDetectionStrategy, Component, computed, input, output} from '@angu
 import {IconComponent} from '../icon/icon.component';
 import {MenuComponent, type MenuItem} from '../menu/menu.component';
 
+const MAX_INITIALS = 2;
 const HEADER_BASE_CLASSES =
   'flex h-14 items-center gap-cmn-2 border-b border-border-default px-cmn-4 md:gap-cmn-4 md:px-cmn-6';
 const HEADER_SOLID_CLASSES = 'bg-surface-card';
@@ -73,6 +74,12 @@ export class TopBarComponent {
   public readonly title = input<string>('');
   public readonly isDark = input<boolean>(false);
   public readonly showThemeToggle = input<boolean>(true);
+  /**
+   * Text shown in the avatar. A label of up to two characters without spaces is treated as
+   * initials and shown as given, uppercased ('dt' → 'DT', 'Al' → 'AL'); a longer single word shows
+   * its first letter ('Denys' → 'D'); several words show the first letters of the first two
+   * ('Denys Taran' → 'DT'); an empty label shows '?'.
+   */
   public readonly avatarLabel = input<string>('');
   public readonly avatarMenuItems = input<MenuItem[]>([]);
   /** Phone overlay styling: translucent, blurred, and padded by the top safe-area inset below md. */
@@ -87,6 +94,16 @@ export class TopBarComponent {
   );
 
   public avatarInitial(): string {
-    return this.avatarLabel().charAt(0).toUpperCase() || '?';
+    const label = this.avatarLabel().trim();
+    const words = label.split(/\s+/).filter(Boolean);
+    if (words.length > 1) {
+      return words
+        .slice(0, MAX_INITIALS)
+        .map(word => word.charAt(0))
+        .join('')
+        .toUpperCase();
+    }
+    const single = label.length <= MAX_INITIALS ? label : label.charAt(0);
+    return single.toUpperCase() || '?';
   }
 }
