@@ -55,7 +55,7 @@ export class AreaChartComponent implements AfterViewInit, OnDestroy {
   public readonly currency = input<string>('USD');
   /** Shown in place of the plot when there is nothing to draw. */
   public readonly emptyMessage = input<string>('No data yet');
-  /** `true` stacks the bands into a cumulative total; `false` draws independent, unfilled lines. */
+  /** `true` stacks the bands into a cumulative total from a zero baseline; `false` draws independent, unfilled lines. */
   public readonly stacked = input<boolean>(true);
   protected readonly isEmpty = computed(() => isSeriesEmpty(this.series()));
 
