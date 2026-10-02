@@ -66,6 +66,14 @@ describe('DataTableComponent', () => {
     expect(text).toContain('Amount');
   });
 
+  it('should leave widths unset when no column declares one', () => {
+    fixture.componentRef.setInput('rows', ROWS);
+    fixture.detectChanges();
+    const cells = fixture.nativeElement.querySelectorAll('th, td') as NodeListOf<HTMLElement>;
+    expect(cells.length).toBeGreaterThan(0);
+    cells.forEach(cell => expect(cell.style.width).toBe(''));
+  });
+
   it('should render row data via projected cell templates', () => {
     fixture.componentRef.setInput('rows', ROWS);
     fixture.detectChanges();
@@ -272,5 +280,58 @@ describe('DataTableComponent list-row mode', () => {
     plain.componentRef.setInput('rows', ROWS);
     plain.detectChanges();
     expect((plain.nativeElement as HTMLElement).querySelector('table')).not.toBeNull();
+  });
+});
+
+@Component({
+  selector: 'cmn-test-width-host',
+  imports: [CmnCellDirective, CmnColumnComponent, DataTableComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <cmn-data-table [rows]="rows()">
+      <cmn-column key="name" header="Name" />
+      <cmn-column [width]="amountWidth()" key="amount" align="right" header="Amount" />
+    </cmn-data-table>
+  `,
+})
+class WidthHostComponent {
+  public readonly rows = input<Row[]>([]);
+  public readonly amountWidth = input<string | null>('7rem');
+}
+
+describe('DataTableComponent column widths', () => {
+  let fixture: ComponentFixture<WidthHostComponent>;
+  let el: HTMLElement;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({imports: [WidthHostComponent]}).compileComponents();
+    fixture = TestBed.createComponent(WidthHostComponent);
+    fixture.componentRef.setInput('rows', ROWS);
+    fixture.detectChanges();
+    el = fixture.nativeElement as HTMLElement;
+  });
+
+  function cellsOf(column: string): HTMLElement[] {
+    return Array.from(el.querySelectorAll<HTMLElement>(`.cdk-column-${column}`));
+  }
+
+  it('applies the width to the header and every cell of that column', () => {
+    const cells = cellsOf('amount');
+    expect(cells).toHaveLength(ROWS.length + 1);
+    cells.forEach(cell => expect(cell.style.width).toBe('7rem'));
+  });
+
+  it('leaves other columns without a width', () => {
+    cellsOf('name').forEach(cell => expect(cell.style.width).toBe(''));
+  });
+
+  it('updates and clears the width reactively', () => {
+    fixture.componentRef.setInput('amountWidth', '20%');
+    fixture.detectChanges();
+    cellsOf('amount').forEach(cell => expect(cell.style.width).toBe('20%'));
+
+    fixture.componentRef.setInput('amountWidth', null);
+    fixture.detectChanges();
+    cellsOf('amount').forEach(cell => expect(cell.style.width).toBe(''));
   });
 });
