@@ -13,7 +13,7 @@ import {
 } from 'chart.js';
 
 import {type AreaSeries} from './types';
-import {chartFontFamily, cssVar, fontFamily, money} from './utils';
+import {chartFontFamily, cssVar, fontFamily, money, xTickLimitPlugin} from './utils';
 
 Chart.register(
   CategoryScale,
@@ -28,6 +28,8 @@ Chart.register(
 
 const DEFAULT_SERIES_COLORS = ['#10b981', '#6366f1', '#f59e0b', '#64748b', '#ec4899'];
 const FILL_ALPHA = 'cc';
+
+const X_TICK_LIMIT = 8;
 
 export interface AreaChartTokens {
   /** Canvas font stack; defaults to the `--font-sans` token. */
@@ -73,6 +75,7 @@ export function buildAreaChartConfig(
       labels: series[0]?.points.map(p => p.label) ?? [],
       datasets: buildAreaDatasets(series, stacked),
     },
+    plugins: [xTickLimitPlugin(X_TICK_LIMIT)],
     options: {
       responsive: true,
       maintainAspectRatio: false,
@@ -112,7 +115,7 @@ export function buildAreaChartConfig(
             font: {family: fontFamily(tokens), size: 11},
             maxRotation: 0,
             autoSkip: true,
-            maxTicksLimit: 8,
+            maxTicksLimit: X_TICK_LIMIT,
           },
         },
         y: {

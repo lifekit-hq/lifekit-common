@@ -101,6 +101,11 @@ describe('buildBarDatasets', () => {
 });
 
 describe('buildBarChartConfig', () => {
+  it('registers the width-aware x-tick plugin', () => {
+    const config = buildBarChartConfig(SERIES, TOKENS, 'USD', false, 'currency');
+    expect(config.plugins?.some(p => p.id === 'xTickLimit')).toBe(true);
+  });
+
   it('takes the x labels from the first series', () => {
     const config = buildBarChartConfig(SERIES, TOKENS, 'USD', false, 'currency');
     expect(config.data.labels).toEqual(['Jan', 'Feb']);

@@ -15,6 +15,35 @@ const SAMPLE_SERIES: AreaSeries[] = [
   series('Crypto', [180000, 205000, 172000, 198000, 214000, 236000, 221000, 248000]),
 ];
 
+const MONTH_NAMES = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+];
+const YEAR_MONTHS = 24;
+const YEAR_START = 24;
+
+/** Two years of monthly labels ("Mar '26") — the dense range that collided on phone. */
+const LONG_RANGE_SERIES: AreaSeries[] = [
+  ['Banking', 420000, 4000],
+  ['Brokerage', 610000, 9000],
+].map(([label, base, step]) => ({
+  label: label as string,
+  points: Array.from({length: YEAR_MONTHS}, (_, i) => ({
+    label: `${MONTH_NAMES[i % MONTH_NAMES.length]} '${YEAR_START + Math.floor(i / MONTH_NAMES.length)}`,
+    value: (base as number) + i * (step as number),
+  })),
+}));
+
 const meta: Meta<AreaChartComponent> = {
   title: 'Components/AreaChart',
   component: AreaChartComponent,
@@ -53,3 +82,6 @@ export const EmptyDark: Story = {
 export const StackedDark: Story = {
   globals: {theme: 'dark'},
 };
+
+/** Long range: x labels thin out below ~480px so neighbours never touch (resize the viewport to compare). */
+export const LongRange: Story = {args: {series: LONG_RANGE_SERIES}};

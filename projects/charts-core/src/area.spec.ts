@@ -46,7 +46,21 @@ function fills(datasets: readonly unknown[]): unknown[] {
   return datasets.map(d => (d as {fill?: unknown}).fill);
 }
 
+/** Run the config's x-tick plugin against a chart of the given width; return the resulting limit. */
+function xMaxTicks(width: number): number {
+  const config = buildAreaChartConfig(SERIES, TOKENS, 'USD');
+  const chart = {width, options: config.options} as unknown as Chart;
+  const plugin = config.plugins?.find(p => p.id === 'xTickLimit');
+  plugin?.beforeLayout?.(chart as never, {} as never, {});
+  return (config.options?.scales?.['x'] as {ticks: {maxTicksLimit: number}}).ticks.maxTicksLimit;
+}
+
 describe('buildAreaChartConfig', () => {
+  it('thins x ticks on a phone-width chart but keeps 8 on desktop', () => {
+    expect(xMaxTicks(375)).toBeLessThan(xMaxTicks(900));
+    expect(xMaxTicks(900)).toBe(8);
+  });
+
   it('defaults to stacked so existing consumers keep the shipped behaviour', () => {
     const config = buildAreaChartConfig(SERIES, TOKENS, 'USD');
     expect(scaleStacking(config)).toEqual({x: true, y: true});
