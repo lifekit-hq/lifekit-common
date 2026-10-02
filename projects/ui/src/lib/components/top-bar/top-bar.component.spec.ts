@@ -37,6 +37,11 @@ describe('TopBarComponent', () => {
     fixture.componentRef.setInput('title', 'Dashboard');
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Dashboard');
+    expect(fixture.nativeElement.querySelector('h1')?.textContent?.trim()).toBe('Dashboard');
+  });
+
+  it('should render no heading when no title is set', () => {
+    expect(fixture.nativeElement.querySelector('h1, h2, h3, h4, h5, h6')).toBeNull();
   });
 
   it('should emit searchClick when search button is clicked', () => {
