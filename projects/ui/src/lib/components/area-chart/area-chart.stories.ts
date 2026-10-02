@@ -23,7 +23,7 @@ const meta: Meta<AreaChartComponent> = {
     stacked: {
       control: 'boolean',
       description:
-        'Stacks the bands into a cumulative total (`true`, the default) or draws each series as an independent, unfilled line (`false`). Toggling re-renders the existing chart — the series input is untouched.',
+        'Stacks the bands into a cumulative total on a value axis that starts at zero (`true`, the default) or draws each series as an independent, unfilled line (`false`). Toggling re-renders the existing chart — the series input is untouched.',
       table: {defaultValue: {summary: 'true'}},
     },
   },

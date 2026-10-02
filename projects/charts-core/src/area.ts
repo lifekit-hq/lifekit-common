@@ -117,6 +117,8 @@ export function buildAreaChartConfig(
         },
         y: {
           stacked,
+          // A stacked band's height only reads true against a zero baseline.
+          beginAtZero: stacked,
           grid: {color: tokens.borderDefault},
           border: {display: false},
           ticks: {
@@ -141,10 +143,11 @@ export function updateAreaChart(chart: Chart, series: AreaSeries[], stacked = tr
   const scales = chart.options.scales as
     Record<string, {stacked?: boolean} | undefined> | undefined;
   const x = scales?.['x'];
-  const y = scales?.['y'];
+  const y = scales?.['y'] as {stacked?: boolean; beginAtZero?: boolean} | undefined;
   if (x && y) {
     x.stacked = stacked;
     y.stacked = stacked;
+    y.beginAtZero = stacked;
   }
   chart.update('none');
 }
