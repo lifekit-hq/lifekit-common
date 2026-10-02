@@ -16,10 +16,13 @@ const MAIN_OVERLAY_TOP_CLASSES =
   'max-md:pt-[calc(3.5rem+env(safe-area-inset-top))] max-md:scroll-pt-[calc(3.5rem+env(safe-area-inset-top))]';
 /**
  * Clears the floating tab bar: its 64px height, the 8px gap under it, the bottom safe-area
- * inset, and 8px of breathing room so the last item scrolls clear of the pill.
+ * inset, and 8px of breathing room so the last item scrolls clear of the pill. Adds the
+ * consumer's floating action clearance (--cmn-fab-clearance, set on main from
+ * `floatingActionClearance`; 0px when none is declared).
  */
 const MAIN_OVERLAY_BOTTOM_CLASSES =
-  'max-md:pb-[calc(64px+16px+env(safe-area-inset-bottom))] max-md:scroll-pb-[calc(64px+16px+env(safe-area-inset-bottom))]';
+  'max-md:pb-[calc(64px+16px+env(safe-area-inset-bottom)+var(--cmn-fab-clearance,0px))] ' +
+  'max-md:scroll-pb-[calc(64px+16px+env(safe-area-inset-bottom)+var(--cmn-fab-clearance,0px))]';
 
 @Component({
   selector: 'cmn-app-layout',
@@ -51,7 +54,7 @@ const MAIN_OVERLAY_BOTTOM_CLASSES =
           (themeToggle)="themeToggle.emit()"
           (avatarMenuSelect)="avatarMenuSelect.emit($event)"
         />
-        <main [class]="mainClass()">
+        <main [class]="mainClass()" [style.--cmn-fab-clearance.px]="fabClearance()">
           <ng-content />
         </main>
         <cmn-bottom-tab-bar
@@ -88,6 +91,14 @@ export class AppLayoutComponent {
    * (including safe-area insets) so nothing is hidden at rest. Desktop is unchanged.
    */
   public readonly phoneOverlay = input<boolean>(false);
+  /**
+   * Height in px that a consumer's floating action button (e.g. a chat launcher) occupies above
+   * the tab bar, including its own gap to the bar. With `phoneOverlay`, main reserves this much
+   * extra space at the bottom so the last row scrolls clear of the button instead of under it.
+   * 0 (default) reserves nothing; it has no effect at md and up or without `phoneOverlay`,
+   * where the button is expected not to overlap content.
+   */
+  public readonly floatingActionClearance = input<number>(0);
 
   public readonly navClick = output<NavItem>();
   public readonly collapsedChange = output<boolean>();
@@ -116,6 +127,11 @@ export class AppLayoutComponent {
     // The tab bar renders nothing without destinations, so there is nothing to clear below.
     const bottom = this.navItems().length ? ` ${MAIN_OVERLAY_BOTTOM_CLASSES}` : '';
     return `${MAIN_BASE_CLASSES} ${MAIN_OVERLAY_TOP_CLASSES}${bottom}`;
+  });
+
+  protected readonly fabClearance = computed<number | null>(() => {
+    const clearance = this.floatingActionClearance();
+    return this.phoneOverlay() && this.navItems().length && clearance > 0 ? clearance : null;
   });
 
   protected readonly overlayTopBarClasses = OVERLAY_TOP_BAR_CLASSES;

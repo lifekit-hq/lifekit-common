@@ -62,6 +62,7 @@ const meta: Meta<AppLayoutComponent> = {
         [versionLabel]="versionLabel"
         [tabRoutes]="tabRoutes"
         [phoneOverlay]="phoneOverlay"
+        [floatingActionClearance]="floatingActionClearance"
       >${BODY}</cmn-app-layout>
     `,
   }),
@@ -76,6 +77,7 @@ const meta: Meta<AppLayoutComponent> = {
     versionLabel: 'v0.3.2',
     tabRoutes: [],
     phoneOverlay: false,
+    floatingActionClearance: 0,
   },
 };
 
@@ -214,7 +216,16 @@ export const PhoneOverlay: Story = {
         [avatarMenuItems]="avatarMenuItems"
         [tabRoutes]="tabRoutes"
         [phoneOverlay]="phoneOverlay"
-      >${OVERLAY_BODY}</cmn-app-layout>
+        [floatingActionClearance]="floatingActionClearance"
+      >${OVERLAY_BODY}
+        @if (floatingActionClearance) {
+          <button
+            type="button"
+            aria-label="Ask Ledger"
+            class="fixed bottom-[calc(64px+16px+env(safe-area-inset-bottom)+8px)] left-cmn-4 z-20 flex size-12 items-center justify-center rounded-full bg-accent-default text-cmn-xs text-white shadow-cmn-md md:hidden"
+          >Ask</button>
+        }
+      </cmn-app-layout>
     `,
   }),
 };
@@ -229,4 +240,22 @@ export const PhoneOverlayDark: Story = {
 export const PhoneOverlayDesktop: Story = {
   ...PhoneOverlay,
   globals: {},
+};
+
+const FAB_CLEARANCE = 56;
+
+/**
+ * `floatingActionClearance`: a consumer's floating action button (here a 48px "Ask" launcher
+ * 8px above the tab bar, so 56px) is declared to the layout, which reserves that much extra
+ * space at the bottom of main. The last item scrolls clear of the button, not under it.
+ */
+export const PhoneOverlayFloatingAction: Story = {
+  ...PhoneOverlay,
+  args: {...PhoneOverlay.args, floatingActionClearance: FAB_CLEARANCE},
+};
+
+export const PhoneOverlayFloatingActionDark: Story = {
+  ...PhoneOverlayFloatingAction,
+  args: {...PhoneOverlayFloatingAction.args, isDark: true},
+  globals: {...PHONE, theme: 'dark'},
 };
