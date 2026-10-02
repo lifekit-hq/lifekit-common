@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.1](https://github.com/lifekit-hq/lifekit-common/compare/v0.6.0...v0.6.1) (2026-10-02)
+
+
+### Bug Fixes
+
+* **ui:** pin app-layout shell to viewport and keep tab bar labels visible ([#61](https://github.com/lifekit-hq/lifekit-common/issues/61)) ([0ea93a5](https://github.com/lifekit-hq/lifekit-common/commit/0ea93a5434d22943c8d1a4fb988ab2eda54ba274))
+
 ## [0.6.0](https://github.com/lifekit-hq/lifekit-common/compare/v0.5.1...v0.6.0) (2026-10-02)
 
 
