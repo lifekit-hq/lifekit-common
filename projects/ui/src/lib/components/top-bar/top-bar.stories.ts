@@ -24,3 +24,13 @@ export const Overlay: Story = {
   args: {title: 'Dashboard', isDark: false, avatarLabel: 'Denys', overlay: true},
   globals: {viewport: {value: 'mobile2', isRotated: false}},
 };
+
+/** Two-letter initials from the consumer (e.g. `authStore.avatarInitials`) fit the avatar circle. */
+export const TwoLetterInitials: Story = {
+  args: {title: 'Dashboard', isDark: false, avatarLabel: 'DT'},
+};
+
+export const TwoLetterInitialsDark: Story = {
+  args: {title: 'Dashboard', isDark: true, avatarLabel: 'DT'},
+  globals: {viewport: {value: 'mobile2', isRotated: false}},
+};
