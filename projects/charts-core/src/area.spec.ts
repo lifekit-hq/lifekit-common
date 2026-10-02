@@ -35,6 +35,12 @@ function scaleStacking(target: {options?: unknown}): {x?: boolean; y?: boolean} 
   return {x: scales?.['x']?.stacked, y: scales?.['y']?.stacked};
 }
 
+function beginAtZero(target: {options?: unknown}): boolean | undefined {
+  const scales = (target.options as {scales?: Record<string, {beginAtZero?: boolean}>} | undefined)
+    ?.scales;
+  return scales?.['y']?.beginAtZero;
+}
+
 /** `fill` is line-only, so it is absent from the generic dataset union on `Chart`. */
 function fills(datasets: readonly unknown[]): unknown[] {
   return datasets.map(d => (d as {fill?: unknown}).fill);
@@ -57,6 +63,15 @@ describe('buildAreaChartConfig', () => {
     const config = buildAreaChartConfig(SERIES, TOKENS, 'USD', false);
     expect(scaleStacking(config)).toEqual({x: false, y: false});
     expect(fills(config.data.datasets)).toEqual([false, false]);
+  });
+
+  it('begins the value axis at zero when stacked', () => {
+    expect(beginAtZero(buildAreaChartConfig(SERIES, TOKENS, 'USD', true))).toBe(true);
+    expect(beginAtZero(buildAreaChartConfig(SERIES, TOKENS, 'USD'))).toBe(true);
+  });
+
+  it('leaves the value axis auto-ranged when not stacked', () => {
+    expect(beginAtZero(buildAreaChartConfig(SERIES, TOKENS, 'USD', false))).toBe(false);
   });
 
   it('keeps labels, values and colours identical across both modes', () => {
@@ -130,6 +145,16 @@ describe('updateAreaChart', () => {
 
     expect(scaleStacking(chart)).toEqual({x: true, y: true});
     expect(fills(chart.data.datasets)).toEqual([true, true]);
+  });
+
+  it('moves the live value axis baseline with the stacking toggle', () => {
+    const {chart} = fakeChart();
+
+    updateAreaChart(chart, SERIES, false);
+    expect(beginAtZero(chart)).toBe(false);
+
+    updateAreaChart(chart, SERIES, true);
+    expect(beginAtZero(chart)).toBe(true);
   });
 
   it('leaves a chart without cartesian scales alone', () => {
