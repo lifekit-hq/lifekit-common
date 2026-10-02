@@ -7,6 +7,20 @@ import {TopBarComponent} from '../top-bar/top-bar.component';
 
 export {type NavItem} from '../sidebar-nav/sidebar-nav.component';
 
+/** Phone overlay: the bars sit over main below md instead of in flow. */
+const OVERLAY_TOP_BAR_CLASSES = 'max-md:absolute max-md:inset-x-0 max-md:top-0 max-md:z-30';
+const OVERLAY_TAB_BAR_CLASSES = 'max-md:absolute max-md:inset-x-0 max-md:bottom-0 max-md:z-30';
+const MAIN_BASE_CLASSES = 'flex-1 overflow-y-auto';
+/** Clears the top bar: its 3.5rem height plus the top safe-area inset. */
+const MAIN_OVERLAY_TOP_CLASSES =
+  'max-md:pt-[calc(3.5rem+env(safe-area-inset-top))] max-md:scroll-pt-[calc(3.5rem+env(safe-area-inset-top))]';
+/**
+ * Clears the floating tab bar: its 4rem height, the 8px gap under it, the bottom safe-area
+ * inset, and 8px of breathing room so the last item scrolls clear of the pill.
+ */
+const MAIN_OVERLAY_BOTTOM_CLASSES =
+  'max-md:pb-[calc(4rem+16px+env(safe-area-inset-bottom))] max-md:scroll-pb-[calc(4rem+16px+env(safe-area-inset-bottom))]';
+
 @Component({
   selector: 'cmn-app-layout',
   imports: [BottomTabBarComponent, SidebarNavComponent, TopBarComponent],
@@ -22,8 +36,10 @@ export {type NavItem} from '../sidebar-nav/sidebar-nav.component';
         (collapsedChange)="collapsedChange.emit($event)"
         class="hidden md:block"
       />
-      <div class="flex min-w-0 flex-1 flex-col overflow-hidden">
+      <div class="relative flex min-w-0 flex-1 flex-col overflow-hidden">
         <cmn-top-bar
+          [class]="phoneOverlay() ? overlayTopBarClasses : ''"
+          [overlay]="phoneOverlay()"
           [title]="title()"
           [isDark]="isDark()"
           [showThemeToggle]="showThemeToggle()"
@@ -33,13 +49,15 @@ export {type NavItem} from '../sidebar-nav/sidebar-nav.component';
           (themeToggle)="themeToggle.emit()"
           (avatarMenuSelect)="avatarMenuSelect.emit($event)"
         />
-        <main class="flex-1 overflow-y-auto">
+        <main [class]="mainClass()">
           <ng-content />
         </main>
         <cmn-bottom-tab-bar
           [items]="phoneTabs()"
           [moreItems]="phoneMoreItems()"
           [activeRoute]="activeRoute()"
+          [floating]="phoneOverlay()"
+          [class]="phoneOverlay() ? overlayTabBarClasses : ''"
           (navClick)="navClick.emit($event)"
           class="md:hidden"
         />
@@ -62,6 +80,12 @@ export class AppLayoutComponent {
    * most four. Empty means the first four nav items. Every other nav item goes under "More".
    */
   public readonly tabRoutes = input<string[]>([]);
+  /**
+   * Opt-in edge-to-edge phone layout, for PWAs that draw under the status bar: below md the top
+   * bar and a floating tab bar sit translucent over main, which scrolls under both and is padded
+   * (including safe-area insets) so nothing is hidden at rest. Desktop is unchanged.
+   */
+  public readonly phoneOverlay = input<boolean>(false);
 
   public readonly navClick = output<NavItem>();
   public readonly collapsedChange = output<boolean>();
@@ -82,4 +106,16 @@ export class AppLayoutComponent {
     const tabs = this.phoneTabs();
     return this.navItems().filter(item => !tabs.includes(item));
   });
+
+  public readonly mainClass = computed<string>(() => {
+    if (!this.phoneOverlay()) {
+      return MAIN_BASE_CLASSES;
+    }
+    // The tab bar renders nothing without destinations, so there is nothing to clear below.
+    const bottom = this.navItems().length ? ` ${MAIN_OVERLAY_BOTTOM_CLASSES}` : '';
+    return `${MAIN_BASE_CLASSES} ${MAIN_OVERLAY_TOP_CLASSES}${bottom}`;
+  });
+
+  protected readonly overlayTopBarClasses = OVERLAY_TOP_BAR_CLASSES;
+  protected readonly overlayTabBarClasses = OVERLAY_TAB_BAR_CLASSES;
 }

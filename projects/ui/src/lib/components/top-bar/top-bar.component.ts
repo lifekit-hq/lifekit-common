@@ -1,16 +1,25 @@
-import {ChangeDetectionStrategy, Component, input, output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, input, output} from '@angular/core';
 
 import {IconComponent} from '../icon/icon.component';
 import {MenuComponent, type MenuItem} from '../menu/menu.component';
+
+const HEADER_BASE_CLASSES =
+  'flex h-14 items-center gap-cmn-2 border-b border-border-default px-cmn-4 md:gap-cmn-4 md:px-cmn-6';
+const HEADER_SOLID_CLASSES = 'bg-surface-card';
+/**
+ * Below md the bar is translucent and blurred so content scrolling under it shows through, and
+ * it grows by the top safe-area inset so it sits under the status bar of an edge-to-edge PWA.
+ */
+const HEADER_OVERLAY_CLASSES =
+  'bg-surface-card max-md:h-[calc(3.5rem+env(safe-area-inset-top))] max-md:pt-[env(safe-area-inset-top)] ' +
+  'max-md:bg-[color-mix(in_srgb,var(--color-surface-card)_80%,transparent)] max-md:backdrop-blur-md';
 
 @Component({
   selector: 'cmn-top-bar',
   imports: [IconComponent, MenuComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <header
-      class="flex h-14 items-center gap-cmn-2 border-b border-border-default bg-surface-card px-cmn-4 md:gap-cmn-4 md:px-cmn-6"
-    >
+    <header [class]="headerClass()">
       <!-- Title -->
       <h1 class="min-w-0 truncate font-headline text-cmn-base font-semibold text-text-primary">
         {{ title() }}
@@ -66,10 +75,16 @@ export class TopBarComponent {
   public readonly showThemeToggle = input<boolean>(true);
   public readonly avatarLabel = input<string>('');
   public readonly avatarMenuItems = input<MenuItem[]>([]);
+  /** Phone overlay styling: translucent, blurred, and padded by the top safe-area inset below md. */
+  public readonly overlay = input<boolean>(false);
 
   public readonly searchClick = output<void>();
   public readonly themeToggle = output<void>();
   public readonly avatarMenuSelect = output<MenuItem>();
+
+  public readonly headerClass = computed<string>(
+    () => `${HEADER_BASE_CLASSES} ${this.overlay() ? HEADER_OVERLAY_CLASSES : HEADER_SOLID_CLASSES}`
+  );
 
   public avatarInitial(): string {
     return this.avatarLabel().charAt(0).toUpperCase() || '?';

@@ -31,7 +31,12 @@ const meta: Meta<BottomTabBarComponent> = {
     template: `
       <div class="flex h-screen flex-col bg-surface-bg">
         <div class="flex-1 p-cmn-4 text-cmn-sm text-text-secondary">Page content</div>
-        <cmn-bottom-tab-bar [items]="items" [moreItems]="moreItems" [activeRoute]="activeRoute" />
+        <cmn-bottom-tab-bar
+          [items]="items"
+          [moreItems]="moreItems"
+          [activeRoute]="activeRoute"
+          [floating]="floating"
+        />
       </div>
     `,
   }),
@@ -39,6 +44,7 @@ const meta: Meta<BottomTabBarComponent> = {
     items: TABS,
     moreItems: MORE,
     activeRoute: '/dashboard',
+    floating: false,
   },
 };
 
@@ -78,5 +84,15 @@ export const MoreOpen: Story = {
 
 export const MoreOpenDark: Story = {
   ...MoreOpen,
+  globals: {...PHONE, theme: 'dark'},
+};
+
+/** `floating`: an inset, translucent pill with the active tab highlighted, as cmn-app-layout's phone overlay uses. */
+export const Floating: Story = {
+  args: {floating: true},
+};
+
+export const FloatingDark: Story = {
+  args: {floating: true},
   globals: {...PHONE, theme: 'dark'},
 };
