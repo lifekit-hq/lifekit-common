@@ -74,6 +74,12 @@ export class TopBarComponent {
   public readonly title = input<string>('');
   public readonly isDark = input<boolean>(false);
   public readonly showThemeToggle = input<boolean>(true);
+  /**
+   * Text shown in the avatar. A label of up to two characters without spaces is treated as
+   * initials and shown as given, uppercased ('dt' → 'DT', 'Al' → 'AL'); a longer single word shows
+   * its first letter ('Denys' → 'D'); several words show the first letters of the first two
+   * ('Denys Taran' → 'DT'); an empty label shows '?'.
+   */
   public readonly avatarLabel = input<string>('');
   public readonly avatarMenuItems = input<MenuItem[]>([]);
   /** Phone overlay styling: translucent, blurred, and padded by the top safe-area inset below md. */
@@ -87,10 +93,6 @@ export class TopBarComponent {
     () => `${HEADER_BASE_CLASSES} ${this.overlay() ? HEADER_OVERLAY_CLASSES : HEADER_SOLID_CLASSES}`
   );
 
-  /**
-   * Consumer-supplied initials (up to two characters) render as-is; a multi-word name collapses to
-   * its first two word initials; a longer single name falls back to its first letter.
-   */
   public avatarInitial(): string {
     const label = this.avatarLabel().trim();
     const words = label.split(/\s+/).filter(Boolean);

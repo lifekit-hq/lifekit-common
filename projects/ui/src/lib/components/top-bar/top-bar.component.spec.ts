@@ -69,9 +69,15 @@ describe('TopBarComponent', () => {
   it.each([
     ['DT', 'DT'],
     ['dt', 'DT'],
-    ['Denys Taran', 'DT'],
+    ['D', 'D'],
+    ['Al', 'AL'],
     ['Denys', 'D'],
+    ['Denys Taran', 'DT'],
+    ['Al Smith', 'AS'],
+    ['Denys Ivanovych Taran', 'DI'],
+    ['  Denys   Taran  ', 'DT'],
     ['', '?'],
+    ['   ', '?'],
   ])('should render avatar "%s" as "%s"', (label, expected) => {
     fixture.componentRef.setInput('avatarLabel', label);
     fixture.detectChanges();
