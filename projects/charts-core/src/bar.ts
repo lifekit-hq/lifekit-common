@@ -11,12 +11,14 @@ import {
 } from 'chart.js';
 
 import {type BarSeries, type BarValueFormat} from './types';
-import {chartFontFamily, cssVar, fontFamily} from './utils';
+import {chartFontFamily, cssVar, fontFamily, xTickLimitPlugin} from './utils';
 
 Chart.register(CategoryScale, LinearScale, BarController, BarElement, Tooltip, Legend);
 
 const DEFAULT_SERIES_COLORS = ['#10b981', '#ef4444', '#6366f1', '#f59e0b', '#64748b'];
 const BAR_RADIUS = 4;
+
+const X_TICK_LIMIT = 12;
 
 export interface BarChartTokens {
   /** Canvas font stack; defaults to the `--font-sans` token. */
@@ -76,6 +78,7 @@ export function buildBarChartConfig(
       labels: series[0]?.points.map(p => p.label) ?? [],
       datasets: buildBarDatasets(series),
     },
+    plugins: [xTickLimitPlugin(X_TICK_LIMIT)],
     options: {
       responsive: true,
       maintainAspectRatio: false,
@@ -110,7 +113,7 @@ export function buildBarChartConfig(
             font: {family: fontFamily(tokens), size: 11},
             maxRotation: 0,
             autoSkip: true,
-            maxTicksLimit: 12,
+            maxTicksLimit: X_TICK_LIMIT,
           },
         },
         y: {

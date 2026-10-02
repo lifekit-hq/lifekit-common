@@ -1,6 +1,14 @@
 import {describe, expect, it, vi} from 'vitest';
 
-import {chartFontFamily, cssVar, fontFamily, isSeriesEmpty, money} from './utils';
+import {
+  chartFontFamily,
+  cssVar,
+  fontFamily,
+  isSeriesEmpty,
+  money,
+  NARROW_CHART_WIDTH,
+  xTickLimit,
+} from './utils';
 
 describe('cssVar', () => {
   it('returns the CSS custom property value when set', () => {
@@ -58,5 +66,23 @@ describe('chart font and emptiness helpers', () => {
     expect(isSeriesEmpty([])).toBe(true);
     expect(isSeriesEmpty([{points: []}])).toBe(true);
     expect(isSeriesEmpty([{points: [1]}])).toBe(false);
+  });
+});
+
+describe('xTickLimit', () => {
+  const WIDE_LIMIT = 8;
+
+  it('keeps the desktop limit at and above the narrow breakpoint', () => {
+    expect(xTickLimit(NARROW_CHART_WIDTH, WIDE_LIMIT)).toBe(WIDE_LIMIT);
+    expect(xTickLimit(1200, WIDE_LIMIT)).toBe(WIDE_LIMIT);
+  });
+
+  it('thins ticks below the narrow breakpoint', () => {
+    expect(xTickLimit(NARROW_CHART_WIDTH - 1, WIDE_LIMIT)).toBeLessThan(WIDE_LIMIT);
+    expect(xTickLimit(360, WIDE_LIMIT)).toBe(4);
+  });
+
+  it('never raises a wide limit that is already lower', () => {
+    expect(xTickLimit(360, 3)).toBe(3);
   });
 });
