@@ -173,4 +173,36 @@ describe('BottomTabBarComponent', () => {
     fixture.detectChanges();
     expect(moreButton().querySelector('.cmn-badge-indicator')).toBeTruthy();
   });
+
+  describe('floating', () => {
+    function nav(): HTMLElement {
+      return host.querySelector('nav') as HTMLElement;
+    }
+
+    it('docks edge to edge with a safe-area pad by default', () => {
+      expect(nav().classList).toContain('border-t');
+      expect(nav().classList).toContain('pb-[env(safe-area-inset-bottom)]');
+      expect(nav().classList).not.toContain('rounded-cmn-full');
+      expect(tabButtons()[0]?.classList).not.toContain('bg-accent-subtle');
+    });
+
+    it('floats as an inset translucent pill above the safe-area inset', () => {
+      fixture.componentRef.setInput('floating', true);
+      fixture.detectChanges();
+      expect(nav().classList).toContain('rounded-cmn-full');
+      expect(nav().classList).toContain('backdrop-blur-md');
+      expect(nav().classList).toContain('mb-[calc(env(safe-area-inset-bottom)+8px)]');
+      expect(nav().classList).not.toContain('border-t');
+    });
+
+    it('highlights only the active tab with a pill when floating', () => {
+      fixture.componentRef.setInput('floating', true);
+      fixture.detectChanges();
+      const [active, inactive] = tabButtons();
+      expect(active?.classList).toContain('bg-accent-subtle');
+      expect(active?.classList).toContain('rounded-cmn-full');
+      expect(inactive?.classList).not.toContain('bg-accent-subtle');
+      expect(inactive?.classList).toContain('rounded-cmn-full');
+    });
+  });
 });

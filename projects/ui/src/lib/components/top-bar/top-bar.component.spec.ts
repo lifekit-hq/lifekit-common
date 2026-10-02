@@ -77,4 +77,22 @@ describe('TopBarComponent', () => {
     expect(overlayContainer.getContainerElement().textContent).toContain('Settings');
     expect(overlayContainer.getContainerElement().textContent).toContain('Log out');
   });
+
+  it('should render a solid header with no safe-area padding by default', () => {
+    const header = fixture.nativeElement.querySelector('header') as HTMLElement;
+    expect(header.classList).toContain('bg-surface-card');
+    expect(header.className).not.toContain('safe-area-inset-top');
+    expect(header.className).not.toContain('backdrop-blur');
+  });
+
+  it('should render a translucent, blurred, safe-area-padded header below md in overlay mode', () => {
+    fixture.componentRef.setInput('overlay', true);
+    fixture.detectChanges();
+    const header = fixture.nativeElement.querySelector('header') as HTMLElement;
+    expect(header.classList).toContain('max-md:pt-[env(safe-area-inset-top)]');
+    expect(header.classList).toContain('max-md:backdrop-blur-md');
+    expect(header.className).toContain('max-md:bg-[color-mix(');
+    // Desktop keeps the solid surface.
+    expect(header.classList).toContain('bg-surface-card');
+  });
 });

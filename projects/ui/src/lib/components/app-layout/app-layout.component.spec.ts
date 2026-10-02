@@ -147,4 +147,48 @@ describe('AppLayoutComponent', () => {
     expect(fixture.nativeElement.querySelector('button[aria-label="Toggle theme"]')).toBeNull();
     expect(fixture.nativeElement.querySelector('button[aria-label="Search"]')).toBeTruthy();
   });
+
+  describe('phone overlay', () => {
+    function el(selector: string): HTMLElement {
+      return (fixture.nativeElement as HTMLElement).querySelector(selector) as HTMLElement;
+    }
+
+    it('should keep the bars in flow and main unpadded by default', () => {
+      expect(el('cmn-top-bar').className).not.toContain('absolute');
+      expect(el('cmn-bottom-tab-bar').className).not.toContain('absolute');
+      expect(el('main').className).toBe('flex-1 overflow-y-auto');
+      expect(el('cmn-bottom-tab-bar nav').classList).not.toContain('rounded-cmn-full');
+    });
+
+    it('should lay both bars over main below md and float the tab bar', () => {
+      fixture.componentRef.setInput('phoneOverlay', true);
+      fixture.detectChanges();
+      expect(el('cmn-top-bar').classList).toContain('max-md:absolute');
+      expect(el('cmn-top-bar').classList).toContain('max-md:top-0');
+      expect(el('cmn-top-bar header').classList).toContain('max-md:backdrop-blur-md');
+      expect(el('cmn-bottom-tab-bar').classList).toContain('max-md:absolute');
+      expect(el('cmn-bottom-tab-bar').classList).toContain('max-md:bottom-0');
+      // The static breakpoint class survives the class binding.
+      expect(el('cmn-bottom-tab-bar').classList).toContain('md:hidden');
+      expect(el('cmn-bottom-tab-bar nav').classList).toContain('rounded-cmn-full');
+    });
+
+    it('should pad and scroll-pad main by both bar heights plus safe-area insets', () => {
+      fixture.componentRef.setInput('phoneOverlay', true);
+      fixture.detectChanges();
+      const main = el('main').classList;
+      expect(main).toContain('max-md:pt-[calc(3.5rem+env(safe-area-inset-top))]');
+      expect(main).toContain('max-md:scroll-pt-[calc(3.5rem+env(safe-area-inset-top))]');
+      expect(main).toContain('max-md:pb-[calc(4rem+16px+env(safe-area-inset-bottom))]');
+      expect(main).toContain('max-md:scroll-pb-[calc(4rem+16px+env(safe-area-inset-bottom))]');
+    });
+
+    it('should skip the bottom padding when there is no tab bar to clear', () => {
+      fixture.componentRef.setInput('navItems', []);
+      fixture.componentRef.setInput('phoneOverlay', true);
+      fixture.detectChanges();
+      expect(el('main').className).toContain('max-md:pt-');
+      expect(el('main').className).not.toContain('max-md:pb-');
+    });
+  });
 });

@@ -61,6 +61,7 @@ const meta: Meta<AppLayoutComponent> = {
         [avatarMenuItems]="avatarMenuItems"
         [versionLabel]="versionLabel"
         [tabRoutes]="tabRoutes"
+        [phoneOverlay]="phoneOverlay"
       >${BODY}</cmn-app-layout>
     `,
   }),
@@ -74,6 +75,7 @@ const meta: Meta<AppLayoutComponent> = {
     avatarMenuItems: AVATAR_MENU,
     versionLabel: 'v0.3.2',
     tabRoutes: [],
+    phoneOverlay: false,
   },
 };
 
@@ -168,4 +170,63 @@ export const PhoneActiveInMore: Story = {
 export const PhoneDefaultTabs: Story = {
   args: {navItems: PHONE_NAV_ITEMS, title: 'Home'},
   globals: PHONE,
+};
+
+/** Full-bleed cards so content showing through the translucent bars is visible. */
+const OVERLAY_BODY = `
+  <div class="flex flex-col gap-cmn-3 p-cmn-4">
+    @for (row of rows; track row) {
+      <div class="rounded-cmn-lg border border-border-default bg-surface-card p-cmn-4">
+        <p class="font-headline text-cmn-sm font-semibold text-text-primary">Item {{ row }}</p>
+        <p class="text-cmn-xs text-accent-default">Scrolls under the top bar and the tab bar</p>
+      </div>
+    }
+    <p class="text-center text-cmn-xs text-text-secondary">Last item clears the tab bar</p>
+  </div>
+`;
+
+const OVERLAY_ROWS = 30;
+
+/**
+ * `phoneOverlay`: an edge-to-edge phone shell like a native app. The top bar and a floating
+ * tab bar sit translucent and blurred over main, which scrolls under both; main is padded by
+ * the bar heights plus safe-area insets so the first and last items rest clear of the bars.
+ * Desktop widths are unchanged.
+ */
+export const PhoneOverlay: Story = {
+  args: {
+    navItems: PHONE_NAV_ITEMS,
+    tabRoutes: PHONE_TAB_ROUTES,
+    title: 'Transactions',
+    activeRoute: '/transactions',
+    phoneOverlay: true,
+  },
+  globals: PHONE,
+  render: args => ({
+    props: {...args, rows: Array.from({length: OVERLAY_ROWS}, (_, i) => i + 1)},
+    template: `
+      <cmn-app-layout
+        [navItems]="navItems"
+        [activeRoute]="activeRoute"
+        [title]="title"
+        [isDark]="isDark"
+        [avatarLabel]="avatarLabel"
+        [avatarMenuItems]="avatarMenuItems"
+        [tabRoutes]="tabRoutes"
+        [phoneOverlay]="phoneOverlay"
+      >${OVERLAY_BODY}</cmn-app-layout>
+    `,
+  }),
+};
+
+export const PhoneOverlayDark: Story = {
+  ...PhoneOverlay,
+  args: {...PhoneOverlay.args, isDark: true},
+  globals: {...PHONE, theme: 'dark'},
+};
+
+/** `phoneOverlay` at desktop width: identical to the default shell. */
+export const PhoneOverlayDesktop: Story = {
+  ...PhoneOverlay,
+  globals: {},
 };

@@ -11,8 +11,20 @@ export const MAX_BOTTOM_TABS = 4;
 const TAB_BASE_CLASSES =
   'flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-0.5 pb-cmn-1 pt-cmn-2 ' +
   'transition-colors focus:outline-none focus-visible:bg-surface-raised';
+const TAB_FLOATING_CLASSES = 'my-cmn-1 rounded-cmn-full';
 const TAB_ACTIVE_CLASSES = 'text-accent-default';
+const TAB_FLOATING_ACTIVE_CLASSES = 'bg-accent-subtle';
 const TAB_INACTIVE_CLASSES = 'text-text-secondary hover:text-text-primary';
+
+const NAV_DOCKED_CLASSES =
+  'flex border-t border-border-default bg-surface-card pb-[env(safe-area-inset-bottom)]';
+/**
+ * Inset pill above the bottom safe-area inset: translucent and blurred so content scrolling
+ * under it shows through. Its footprint is FLOATING_TAB_BAR_FOOTPRINT.
+ */
+const NAV_FLOATING_CLASSES =
+  'mx-cmn-3 mb-[calc(env(safe-area-inset-bottom)+8px)] flex h-16 rounded-cmn-full border border-border-default px-cmn-1 ' +
+  'bg-[color-mix(in_srgb,var(--color-surface-card)_80%,transparent)] shadow-cmn-md backdrop-blur-md';
 
 const SHEET_ITEM_BASE_CLASSES =
   'flex w-full items-center gap-cmn-3 rounded-cmn-md px-cmn-3 py-cmn-3 text-left transition-colors ' +
@@ -30,10 +42,7 @@ const SHEET_ITEM_INACTIVE_CLASSES = 'text-text-primary hover:bg-surface-raised';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (tabs().length || moreItems().length) {
-      <nav
-        class="flex border-t border-border-default bg-surface-card pb-[env(safe-area-inset-bottom)]"
-        aria-label="Primary"
-      >
+      <nav [class]="navClass()" aria-label="Primary">
         @for (item of tabs(); track item.route) {
           <button
             [class]="tabClass(isActive(item))"
@@ -112,6 +121,8 @@ export class BottomTabBarComponent {
   /** Destinations listed in the "More" sheet; the More tab only renders when there are some. */
   public readonly moreItems = input<NavItem[]>([]);
   public readonly activeRoute = input<string>('');
+  /** Floats the bar as an inset, translucent pill instead of docking it edge to edge. */
+  public readonly floating = input<boolean>(false);
 
   public readonly navClick = output<NavItem>();
 
@@ -123,6 +134,10 @@ export class BottomTabBarComponent {
   );
   public readonly moreHasBadge = computed<boolean>(() =>
     this.moreItems().some(item => (item.badge ? item.badge() : 0) > 0)
+  );
+
+  public readonly navClass = computed<string>(() =>
+    this.floating() ? NAV_FLOATING_CLASSES : NAV_DOCKED_CLASSES
   );
 
   public isActive(item: NavItem): boolean {
@@ -143,7 +158,12 @@ export class BottomTabBarComponent {
   }
 
   public tabClass(active: boolean): string {
-    return `${TAB_BASE_CLASSES} ${active ? TAB_ACTIVE_CLASSES : TAB_INACTIVE_CLASSES}`;
+    const state = active ? TAB_ACTIVE_CLASSES : TAB_INACTIVE_CLASSES;
+    if (!this.floating()) {
+      return `${TAB_BASE_CLASSES} ${state}`;
+    }
+    const floatingState = active ? ` ${TAB_FLOATING_ACTIVE_CLASSES}` : '';
+    return `${TAB_BASE_CLASSES} ${TAB_FLOATING_CLASSES} ${state}${floatingState}`;
   }
 
   public sheetItemClass(active: boolean): string {
