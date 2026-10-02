@@ -43,6 +43,14 @@ describe('AppLayoutComponent', () => {
     expect(fixture.componentInstance).toBeTruthy();
   });
 
+  it('should pin the shell to the viewport without viewport units', () => {
+    const root = (fixture.nativeElement as HTMLElement).firstElementChild?.classList;
+    expect(root).toContain('fixed');
+    expect(root).toContain('inset-0');
+    expect(root).not.toContain('h-screen');
+    expect(root).not.toContain('h-dvh');
+  });
+
   it('should render the sidebar', () => {
     const sidebar = fixture.debugElement.query(By.css('cmn-sidebar-nav'));
     expect(sidebar).toBeTruthy();
@@ -179,8 +187,8 @@ describe('AppLayoutComponent', () => {
       const main = el('main').classList;
       expect(main).toContain('max-md:pt-[calc(3.5rem+env(safe-area-inset-top))]');
       expect(main).toContain('max-md:scroll-pt-[calc(3.5rem+env(safe-area-inset-top))]');
-      expect(main).toContain('max-md:pb-[calc(4rem+16px+env(safe-area-inset-bottom))]');
-      expect(main).toContain('max-md:scroll-pb-[calc(4rem+16px+env(safe-area-inset-bottom))]');
+      expect(main).toContain('max-md:pb-[calc(64px+16px+env(safe-area-inset-bottom))]');
+      expect(main).toContain('max-md:scroll-pb-[calc(64px+16px+env(safe-area-inset-bottom))]');
     });
 
     it('should skip the bottom padding when there is no tab bar to clear', () => {
