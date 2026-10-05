@@ -1,5 +1,6 @@
 import {TestBed} from '@angular/core/testing';
-import {beforeEach, describe, expect, it} from 'vitest';
+import chroma from 'chroma-js';
+import {afterEach, beforeEach, describe, expect, it} from 'vitest';
 
 import {LOCAL_STORAGE, ThemeService} from './theme.service';
 
@@ -32,6 +33,14 @@ class MemoryStorage implements Storage {
 }
 
 const ACCENT_STOPS = 11;
+const MIN_CONTRAST = 4.5;
+const MAX_MID_DELTA_E = 15;
+const LIGHT_SURFACE = '#f8f9fa';
+const DARK_SURFACE = '#111827';
+
+function stopValue(stop: number): string {
+  return document.documentElement.style.getPropertyValue(`--cmn-accent-${stop * 100}`);
+}
 
 function build(seed?: Record<string, string>): {service: ThemeService; storage: Storage} {
   const storage = new MemoryStorage();
@@ -132,5 +141,88 @@ describe('ThemeService', () => {
   it('reports no stored accent on a fresh install', () => {
     const {service} = build();
     expect(service.getStoredAccent()).toBeNull();
+  });
+
+  describe('contrast auto-correction', () => {
+    let surfaces: HTMLStyleElement;
+
+    beforeEach(() => {
+      surfaces = document.createElement('style');
+      surfaces.textContent = `
+        :root { --color-surface-bg: ${LIGHT_SURFACE}; }
+        :root[data-theme='dark'] { --color-surface-bg: ${DARK_SURFACE}; }
+      `;
+      document.head.appendChild(surfaces);
+    });
+
+    afterEach(() => {
+      surfaces.remove();
+    });
+
+    it('darkens failing light stops on a light surface until they pass', () => {
+      const {service} = build();
+      service.setAccent('#4f46e5');
+
+      for (let stop = 1; stop <= ACCENT_STOPS; stop++) {
+        expect(chroma.contrast(stopValue(stop), LIGHT_SURFACE)).toBeGreaterThanOrEqual(
+          MIN_CONTRAST
+        );
+      }
+      // First stop starts near-white (#f8f8f8): corrected darker, never saturating at white.
+      const first = chroma(stopValue(1));
+      expect(first.get('oklch.l')).toBeLessThan(chroma('#f8f8f8').get('oklch.l'));
+      expect(first.hex()).not.toBe('#ffffff');
+    });
+
+    it('lightens failing dark stops on a dark surface until they pass', () => {
+      const {service} = build({'cmn-theme': 'dark'});
+      service.setAccent('#4f46e5');
+
+      for (let stop = 1; stop <= ACCENT_STOPS; stop++) {
+        expect(chroma.contrast(stopValue(stop), DARK_SURFACE)).toBeGreaterThanOrEqual(MIN_CONTRAST);
+      }
+      // Last stop starts near-black (#0a0a0a): corrected lighter, never saturating at black.
+      const last = chroma(stopValue(ACCENT_STOPS));
+      expect(last.get('oklch.l')).toBeGreaterThan(chroma('#0a0a0a').get('oklch.l'));
+      expect(last.hex()).not.toBe('#000000');
+    });
+
+    it('keeps the mid stop recognisably the requested accent', () => {
+      const {service} = build();
+      service.setAccent('#4f46e5');
+
+      expect(chroma.deltaE(stopValue(6), '#4f46e5')).toBeLessThan(MAX_MID_DELTA_E);
+    });
+
+    it('recomputes the ramp against the new surface when the theme changes', () => {
+      const {service} = build();
+      service.setAccent('#4f46e5');
+      const lightLast = stopValue(ACCENT_STOPS);
+      expect(chroma.contrast(lightLast, LIGHT_SURFACE)).toBeGreaterThanOrEqual(MIN_CONTRAST);
+
+      service.setTheme('dark');
+      const darkLast = stopValue(ACCENT_STOPS);
+      expect(darkLast).not.toBe(lightLast);
+      expect(chroma(darkLast).get('oklch.l')).toBeGreaterThan(chroma(lightLast).get('oklch.l'));
+      expect(chroma.contrast(darkLast, DARK_SURFACE)).toBeGreaterThanOrEqual(MIN_CONTRAST);
+
+      service.setTheme('light');
+      expect(stopValue(ACCENT_STOPS)).toBe(lightLast);
+    });
+
+    it('meets AA on every stop for extreme accents on each surface', () => {
+      for (const [theme, surface] of [
+        ['light', LIGHT_SURFACE],
+        ['dark', DARK_SURFACE],
+      ] as const) {
+        for (const accent of ['#ffffff', '#000000', '#808080']) {
+          const {service} = build({'cmn-theme': theme});
+          service.setAccent(accent);
+          for (let stop = 1; stop <= ACCENT_STOPS; stop++) {
+            expect(chroma.contrast(stopValue(stop), surface)).toBeGreaterThanOrEqual(MIN_CONTRAST);
+          }
+        }
+      }
+    });
   });
 });

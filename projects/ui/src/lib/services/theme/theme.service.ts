@@ -14,12 +14,15 @@ const ACCENT_STOP_COUNT = 11;
 const ACCENT_STOP_MULTIPLIER = 100;
 /** Minimum WCAG AA contrast ratio for text on backgrounds. */
 const MIN_WCAG_AA_CONTRAST = 4.5;
-/** Step toward midrange when auto-correcting a failing stop. */
+/** OkLCH lightness step per iteration, moving toward the contrasting extreme. */
 const AUTO_CORRECT_STEP = 0.05;
 /** Iteration limit for contrast auto-correction. */
 const MAX_CORRECT_ITERATIONS = 20;
-/** Lightness midpoint for OkLCH auto-correction direction. */
-const OKLCH_MIDPOINT = 0.5;
+/**
+ * Relative luminance where black and white contrast equally against a surface:
+ * lighter surfaces are corrected darker, darker surfaces lighter.
+ */
+const LUMINANCE_CROSSOVER = 0.179;
 /** Fallback surface background color used when CSS variable is not yet set. */
 const FALLBACK_SURFACE_BG = '#f8f9fa';
 
@@ -63,6 +66,10 @@ export class ThemeService {
 
   public setTheme(theme: Theme): void {
     this.applyTheme(theme);
+    const accent = this.accentSubject$.value;
+    if (accent) {
+      this.applyAccentPalette(accent);
+    }
     this.storage.setItem(THEME_STORAGE_KEY, theme);
     this.themeSubject$.next(theme);
   }
@@ -113,7 +120,10 @@ export class ThemeService {
   private applyAccentPalette(hex: string): void {
     const stops = this.buildPalette(hex);
     const bgVar =
-      this.doc.documentElement.style.getPropertyValue('--color-surface-bg') || FALLBACK_SURFACE_BG;
+      this.doc.defaultView
+        ?.getComputedStyle(this.doc.documentElement)
+        .getPropertyValue('--color-surface-bg')
+        .trim() || FALLBACK_SURFACE_BG;
 
     for (let i = 0; i < stops.length; i++) {
       const stop = (i + 1) * ACCENT_STOP_MULTIPLIER;
@@ -128,13 +138,14 @@ export class ThemeService {
 
   private autoCorrectContrast(color: string, background: string): string {
     let c = chroma(color);
+    const direction = chroma(background).luminance() > LUMINANCE_CROSSOVER ? -1 : 1;
     let iterations = 0;
     while (
       chroma.contrast(c, background) < MIN_WCAG_AA_CONTRAST &&
       iterations < MAX_CORRECT_ITERATIONS
     ) {
       const l = c.get('oklch.l');
-      const target = l < OKLCH_MIDPOINT ? l - AUTO_CORRECT_STEP : l + AUTO_CORRECT_STEP;
+      const target = l + direction * AUTO_CORRECT_STEP;
       c = c.set('oklch.l', Math.max(0, Math.min(1, target)));
       iterations++;
     }
