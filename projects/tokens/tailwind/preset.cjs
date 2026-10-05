@@ -39,9 +39,9 @@ module.exports = {
       },
 
       fontFamily: {
-        base: ['Inter', 'system-ui', 'sans-serif'],
-        headline: ['Inter', 'system-ui', 'sans-serif'],
-        label: ['Inter', 'system-ui', 'sans-serif'],
+        base: ['"Inter Variable"', 'Inter', 'system-ui', 'sans-serif'],
+        headline: ['"Inter Variable"', 'Inter', 'system-ui', 'sans-serif'],
+        label: ['"Inter Variable"', 'Inter', 'system-ui', 'sans-serif'],
         mono: ['ui-monospace', '"SFMono-Regular"', '"Fira Code"', 'monospace'],
       },
 

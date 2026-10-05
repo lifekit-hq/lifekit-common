@@ -5,3 +5,4 @@
 @tailwind utilities;
 
 @import '../../tokens/theme.css';
+@import '../../tokens/fonts.css';

@@ -5,7 +5,7 @@ export function cssVar(name: string, fallback: string): string {
   return value || fallback;
 }
 
-const FALLBACK_FONT_FAMILY = 'Inter, system-ui, sans-serif';
+const FALLBACK_FONT_FAMILY = "'Inter Variable', Inter, system-ui, sans-serif";
 
 /** Canvas text cannot inherit CSS, so charts read the token font stack explicitly. */
 export function chartFontFamily(): string {

@@ -9,7 +9,7 @@
 :root,
 [data-theme='light'] {
   /* Typography — the font stack canvas-drawn text (charts) must match; CSS text uses the Tailwind preset */
-  --font-sans: Inter, system-ui, sans-serif;
+  --font-sans: 'Inter Variable', Inter, system-ui, sans-serif;
 
   /* Surface — cool neutral ground (a whisper of the indigo accent, not a lavender wash) */
   --color-surface-bg: #f7f8fa;

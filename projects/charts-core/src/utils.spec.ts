@@ -51,7 +51,7 @@ describe('money', () => {
 
 describe('chart font and emptiness helpers', () => {
   it('falls back to the sans stack when the token is unset, never a bare family', () => {
-    expect(chartFontFamily()).toBe('Inter, system-ui, sans-serif');
+    expect(chartFontFamily()).toBe("'Inter Variable', Inter, system-ui, sans-serif");
     expect(fontFamily({})).toContain('sans-serif');
     expect(fontFamily({fontFamily: 'Foo'})).toBe('Foo');
   });

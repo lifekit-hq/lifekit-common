@@ -1,0 +1,9 @@
+/*
+ * @lifekit-hq/tokens/fonts.css — self-hosts Inter, the token font (--font-sans).
+ * Variable weight 100–900, normal + italic; per-script unicode-range files, so a browser
+ * downloads only the subsets a page actually renders. No font CDN.
+ *
+ *   @import '@lifekit-hq/tokens/fonts.css';
+ */
+@import '@fontsource-variable/inter/wght.css';
+@import '@fontsource-variable/inter/wght-italic.css';
