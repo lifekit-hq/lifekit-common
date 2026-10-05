@@ -66,6 +66,10 @@ export class ThemeService {
 
   public setTheme(theme: Theme): void {
     this.applyTheme(theme);
+    const accent = this.accentSubject$.value;
+    if (accent) {
+      this.applyAccentPalette(accent);
+    }
     this.storage.setItem(THEME_STORAGE_KEY, theme);
     this.themeSubject$.next(theme);
   }
@@ -116,7 +120,10 @@ export class ThemeService {
   private applyAccentPalette(hex: string): void {
     const stops = this.buildPalette(hex);
     const bgVar =
-      this.doc.documentElement.style.getPropertyValue('--color-surface-bg') || FALLBACK_SURFACE_BG;
+      this.doc.defaultView
+        ?.getComputedStyle(this.doc.documentElement)
+        .getPropertyValue('--color-surface-bg')
+        .trim() || FALLBACK_SURFACE_BG;
 
     for (let i = 0; i < stops.length; i++) {
       const stop = (i + 1) * ACCENT_STOP_MULTIPLIER;

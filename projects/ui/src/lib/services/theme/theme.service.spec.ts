@@ -144,12 +144,22 @@ describe('ThemeService', () => {
   });
 
   describe('contrast auto-correction', () => {
+    let surfaces: HTMLStyleElement;
+
+    beforeEach(() => {
+      surfaces = document.createElement('style');
+      surfaces.textContent = `
+        :root { --color-surface-bg: ${LIGHT_SURFACE}; }
+        :root[data-theme='dark'] { --color-surface-bg: ${DARK_SURFACE}; }
+      `;
+      document.head.appendChild(surfaces);
+    });
+
     afterEach(() => {
-      document.documentElement.style.removeProperty('--color-surface-bg');
+      surfaces.remove();
     });
 
     it('darkens failing light stops on a light surface until they pass', () => {
-      document.documentElement.style.setProperty('--color-surface-bg', LIGHT_SURFACE);
       const {service} = build();
       service.setAccent('#4f46e5');
 
@@ -165,8 +175,7 @@ describe('ThemeService', () => {
     });
 
     it('lightens failing dark stops on a dark surface until they pass', () => {
-      document.documentElement.style.setProperty('--color-surface-bg', DARK_SURFACE);
-      const {service} = build();
+      const {service} = build({'cmn-theme': 'dark'});
       service.setAccent('#4f46e5');
 
       for (let stop = 1; stop <= ACCENT_STOPS; stop++) {
@@ -179,21 +188,38 @@ describe('ThemeService', () => {
     });
 
     it('keeps the mid stop recognisably the requested accent', () => {
-      document.documentElement.style.setProperty('--color-surface-bg', LIGHT_SURFACE);
       const {service} = build();
       service.setAccent('#4f46e5');
 
       expect(chroma.deltaE(stopValue(6), '#4f46e5')).toBeLessThan(MAX_MID_DELTA_E);
     });
 
-    it('terminates on every stop for extreme accents', () => {
-      for (const surface of [LIGHT_SURFACE, DARK_SURFACE]) {
-        document.documentElement.style.setProperty('--color-surface-bg', surface);
+    it('recomputes the ramp against the new surface when the theme changes', () => {
+      const {service} = build();
+      service.setAccent('#4f46e5');
+      const lightLast = stopValue(ACCENT_STOPS);
+      expect(chroma.contrast(lightLast, LIGHT_SURFACE)).toBeGreaterThanOrEqual(MIN_CONTRAST);
+
+      service.setTheme('dark');
+      const darkLast = stopValue(ACCENT_STOPS);
+      expect(darkLast).not.toBe(lightLast);
+      expect(chroma(darkLast).get('oklch.l')).toBeGreaterThan(chroma(lightLast).get('oklch.l'));
+      expect(chroma.contrast(darkLast, DARK_SURFACE)).toBeGreaterThanOrEqual(MIN_CONTRAST);
+
+      service.setTheme('light');
+      expect(stopValue(ACCENT_STOPS)).toBe(lightLast);
+    });
+
+    it('meets AA on every stop for extreme accents on each surface', () => {
+      for (const [theme, surface] of [
+        ['light', LIGHT_SURFACE],
+        ['dark', DARK_SURFACE],
+      ] as const) {
         for (const accent of ['#ffffff', '#000000', '#808080']) {
-          const {service} = build();
+          const {service} = build({'cmn-theme': theme});
           service.setAccent(accent);
           for (let stop = 1; stop <= ACCENT_STOPS; stop++) {
-            expect(stopValue(stop)).toMatch(/^#[0-9a-f]{6}$/i);
+            expect(chroma.contrast(stopValue(stop), surface)).toBeGreaterThanOrEqual(MIN_CONTRAST);
           }
         }
       }
