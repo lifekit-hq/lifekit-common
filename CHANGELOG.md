@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.9.0](https://github.com/lifekit-hq/lifekit-common/compare/v0.8.0...v0.9.0) (2026-10-05)
+
+
+### Features
+
+* **core:** add PushSubscriptionService to @lifekit-hq/core/pwa ([#71](https://github.com/lifekit-hq/lifekit-common/issues/71)) ([bc24124](https://github.com/lifekit-hq/lifekit-common/commit/bc24124461c148242d25a18e3e5bf3bcbd748e97))
+* **tokens:** add lifekit brand mark, browser-chrome standard and self-hosted Inter ([#76](https://github.com/lifekit-hq/lifekit-common/issues/76)) ([9607bd5](https://github.com/lifekit-hq/lifekit-common/commit/9607bd5c4480d19ff19e9d4ba44b500c12a8fdf3))
+* **ui:** add brand input to cmn-sidebar-nav and cmn-app-layout ([#80](https://github.com/lifekit-hq/lifekit-common/issues/80)) ([45679eb](https://github.com/lifekit-hq/lifekit-common/commit/45679ebf8375d7b609302935e17f230165605a57))
+
+
+### Bug Fixes
+
+* **tokens:** route fonts, radii and shadows through CSS custom properties ([#78](https://github.com/lifekit-hq/lifekit-common/issues/78)) ([6639990](https://github.com/lifekit-hq/lifekit-common/commit/66399904281ffb54681535722599e144d3783f5a))
+* **ui:** correct accent contrast toward the passing lightness extreme ([#77](https://github.com/lifekit-hq/lifekit-common/issues/77)) ([42d6cc0](https://github.com/lifekit-hq/lifekit-common/commit/42d6cc091e5bfe654de675da65d42c963d42d85a))
+
 ## [0.8.0](https://github.com/lifekit-hq/lifekit-common/compare/v0.7.0...v0.8.0) (2026-10-05)
 
 
