@@ -26,7 +26,7 @@ export interface NavItem {
       <div class="flex h-14 items-center justify-between px-cmn-4 border-b border-border-default">
         @if (!collapsed()) {
           <span class="font-headline text-cmn-sm font-semibold text-text-primary tracking-tight">
-            Finance Sentry
+            {{ brand() }}
           </span>
         }
         <button
@@ -79,6 +79,8 @@ export class SidebarNavComponent {
   public readonly items = input<NavItem[]>([]);
   public readonly activeRoute = input<string>('');
   public readonly versionLabel = input<string>('');
+  /** Product name shown in the sidebar header while expanded. */
+  public readonly brand = input<string>('Finance Sentry');
 
   public readonly navClick = output<NavItem>();
   public readonly collapsedChange = output<boolean>();

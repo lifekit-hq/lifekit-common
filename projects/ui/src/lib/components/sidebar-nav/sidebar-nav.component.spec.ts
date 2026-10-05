@@ -30,6 +30,18 @@ describe('SidebarNavComponent', () => {
     expect(text).toContain('Accounts');
   });
 
+  it('should show the Finance Sentry brand by default', () => {
+    expect(fixture.nativeElement.textContent).toContain('Finance Sentry');
+  });
+
+  it('should show a custom brand instead of the default', () => {
+    fixture.componentRef.setInput('brand', 'Lifekit Dashboard');
+    fixture.detectChanges();
+    const text: string = fixture.nativeElement.textContent;
+    expect(text).toContain('Lifekit Dashboard');
+    expect(text).not.toContain('Finance Sentry');
+  });
+
   it('should collapse when toggle is clicked', () => {
     const btn: HTMLButtonElement = fixture.nativeElement.querySelector(
       'button[title="Collapse sidebar"]'

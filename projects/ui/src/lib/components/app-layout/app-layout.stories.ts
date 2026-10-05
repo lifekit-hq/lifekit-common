@@ -60,6 +60,7 @@ const meta: Meta<AppLayoutComponent> = {
         [avatarLabel]="avatarLabel"
         [avatarMenuItems]="avatarMenuItems"
         [versionLabel]="versionLabel"
+        [brand]="brand"
         [tabRoutes]="tabRoutes"
         [phoneOverlay]="phoneOverlay"
         [floatingActionClearance]="floatingActionClearance"
@@ -75,6 +76,7 @@ const meta: Meta<AppLayoutComponent> = {
     avatarLabel: 'D',
     avatarMenuItems: AVATAR_MENU,
     versionLabel: 'v0.3.2',
+    brand: 'Finance Sentry',
     tabRoutes: [],
     phoneOverlay: false,
     floatingActionClearance: 0,
@@ -89,6 +91,11 @@ export const Default: Story = {};
 /** A different route is active — the sidebar highlight follows `activeRoute`. */
 export const DifferentActiveRoute: Story = {
   args: {activeRoute: '/budgets', title: 'Budgets'},
+};
+
+/** `brand` replaces the sidebar header text so another app can use the shared shell. */
+export const CustomBrand: Story = {
+  args: {brand: 'Lifekit Dashboard'},
 };
 
 /** The top bar's theme toggle reflects `isDark`. */
