@@ -2,10 +2,12 @@
 // and over every Storybook story (light + dark), then prints the measured bar
 // and compares it with docs/design-baseline.json. Never fails on findings.
 //
-//   node scripts/design-scan.mjs [--source] [--storybook <base-url>] [--write-baseline]
+//   node scripts/design-scan.mjs [--storybook <base-url>] [--write-baseline]
 //
-// With no flags: source scan, plus a Storybook scan if --storybook is given.
+// The source scan always runs; the Storybook scan runs when --storybook is given.
 // The Storybook base URL serves a built catalog (projects/ui/storybook-static).
+// A scan step that fails (non-zero exit, timeout, unparseable output) aborts the
+// run with a non-zero exit and never writes a baseline.
 import {spawn} from 'node:child_process';
 import {readFileSync, writeFileSync, existsSync} from 'node:fs';
 import {resolve, dirname} from 'node:path';
@@ -20,10 +22,14 @@ const CONCURRENCY = 4;
 const SCAN_TIMEOUT_MS = 300_000;
 
 const args = process.argv.slice(2);
-const flag = name => args.includes(name);
 const sbIdx = args.indexOf('--storybook');
-const storybook = sbIdx >= 0 ? args[sbIdx + 1].replace(/\/$/, '') : null;
-const writeBaseline = flag('--write-baseline');
+const sbUrl = sbIdx >= 0 ? args[sbIdx + 1] : null;
+if (sbIdx >= 0 && (!sbUrl || sbUrl.startsWith('--'))) {
+  console.error('--storybook requires a base URL');
+  process.exit(2);
+}
+const storybook = sbUrl ? sbUrl.replace(/\/$/, '') : null;
+const writeBaseline = args.includes('--write-baseline');
 
 // Rule groups reported as the measured bar.
 const GROUPS = {
@@ -41,20 +47,29 @@ const GROUPS = {
 };
 
 const detect = (targets, extra) =>
-  new Promise(done => {
+  new Promise((done, fail) => {
     const child = spawn(DETECTOR, ['detect', '--json', ...extra, ...targets], {
       cwd: ROOT,
       env: {...process.env, TMPDIR: '/tmp'},
     });
     let out = '';
+    let err = '';
     child.stdout.on('data', c => (out += c));
+    child.stderr.on('data', c => (err += c));
     const timer = setTimeout(() => child.kill('SIGKILL'), SCAN_TIMEOUT_MS);
-    child.on('close', () => {
+    const label = `detect ${targets[0]}${targets.length > 1 ? ` (+${targets.length - 1})` : ''}`;
+    child.on('error', e => {
       clearTimeout(timer);
+      fail(new Error(`${label}: ${e.message}`));
+    });
+    child.on('close', (code, signal) => {
+      clearTimeout(timer);
+      if (code !== 0)
+        return fail(new Error(`${label} failed (${signal ?? `exit ${code}`}): ${err.trim()}`));
       try {
-        done(JSON.parse(out || '[]'));
-      } catch {
-        done([]);
+        done(JSON.parse(out));
+      } catch (e) {
+        fail(new Error(`${label} produced unparseable output: ${e.message}`));
       }
     });
   });
@@ -71,7 +86,9 @@ const tally = findings => {
 const scanSource = async () => tally(await detect(['projects'], []));
 
 const scanStorybook = async base => {
-  const index = await (await fetch(`${base}/index.json`)).json();
+  const res = await fetch(`${base}/index.json`);
+  if (!res.ok) throw new Error(`${base}/index.json responded ${res.status}`);
+  const index = await res.json();
   const ids = Object.values(index.entries)
     .filter(e => e.type === 'story')
     .map(e => e.id);
@@ -94,8 +111,13 @@ const scanStorybook = async base => {
 const result = {
   detector: readFileSync(resolve(ROOT, '.claude/skills/impeccable/scripts/VERSION'), 'utf8').trim(),
 };
-result.source = await scanSource();
-if (storybook) result.storybook = await scanStorybook(storybook);
+try {
+  result.source = await scanSource();
+  if (storybook) result.storybook = await scanStorybook(storybook);
+} catch (e) {
+  console.error(`design scan failed: ${e.message}`);
+  process.exit(1);
+}
 
 const baseline = existsSync(BASELINE) ? JSON.parse(readFileSync(BASELINE, 'utf8')) : null;
 for (const area of ['source', 'storybook']) {
