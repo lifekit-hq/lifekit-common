@@ -43,7 +43,7 @@ export class LkAccountMenu extends LitElement {
     :host {
       display: inline-block;
       position: relative;
-      font-family: Inter, sans-serif;
+      font-family: var(--font-sans);
       font-size: 0.875rem;
     }
 
@@ -89,10 +89,10 @@ export class LkAccountMenu extends LitElement {
       max-width: 20rem;
       padding: var(--space-3, 0.75rem);
       border: 1px solid var(--color-border-default, #e4e7ec);
-      border-radius: var(--radius-lg, 0.5rem);
+      border-radius: var(--radius-lg);
       background: var(--color-surface-card, #ffffff);
       color: var(--color-text-primary, #101828);
-      box-shadow: var(--shadow-md, 0 8px 32px rgba(25, 28, 29, 0.08));
+      box-shadow: var(--shadow-md);
     }
 
     .name {
@@ -112,7 +112,7 @@ export class LkAccountMenu extends LitElement {
       margin-top: var(--space-3, 0.75rem);
       padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
       border: 1px solid var(--color-border-default, #e4e7ec);
-      border-radius: var(--radius-md, 0.375rem);
+      border-radius: var(--radius-md);
       color: inherit;
       text-align: center;
       text-decoration: none;
