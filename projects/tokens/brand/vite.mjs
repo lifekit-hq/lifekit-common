@@ -12,6 +12,8 @@ import {join} from 'node:path';
 
 import {BRAND_FILES, brandAssetsDir, brandManifest} from './standard.mjs';
 
+const MANIFEST_FILE = 'manifest.webmanifest';
+
 const CONTENT_TYPES = {
   '.svg': 'image/svg+xml',
   '.ico': 'image/x-icon',
@@ -21,15 +23,23 @@ const CONTENT_TYPES = {
 
 /**
  * @param {{app: string, manifest?: {name: string, shortName?: string}}} options
+ * @param {(path: string) => Buffer} [readFile] file reader, injectable for tests
  */
-export function lifekitBrand({app, manifest}) {
+export function lifekitBrand({app, manifest}, readFile = readFileSync) {
   const dir = brandAssetsDir(app);
-  const files = () => {
-    const out = new Map(BRAND_FILES.map(file => [file, readFileSync(join(dir, file))]));
-    if (manifest) {
-      out.set('manifest.webmanifest', JSON.stringify(brandManifest(manifest), null, 2) + '\n');
+  const names = manifest ? [...BRAND_FILES, MANIFEST_FILE] : [...BRAND_FILES];
+  const cache = new Map();
+  const source = name => {
+    if (!names.includes(name)) return undefined;
+    if (!cache.has(name)) {
+      cache.set(
+        name,
+        name === MANIFEST_FILE
+          ? JSON.stringify(brandManifest(manifest), null, 2) + '\n'
+          : readFile(join(dir, name))
+      );
     }
-    return out;
+    return cache.get(name);
   };
 
   return {
@@ -37,15 +47,15 @@ export function lifekitBrand({app, manifest}) {
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
         const name = (req.url ?? '').replace(/[?#].*$/, '').replace(/^\//, '');
-        const source = files().get(name);
-        if (source === undefined) return next();
+        const body = source(name);
+        if (body === undefined) return next();
         res.setHeader('Content-Type', CONTENT_TYPES[name.slice(name.lastIndexOf('.'))]);
-        res.end(source);
+        res.end(body);
       });
     },
     generateBundle() {
-      for (const [fileName, source] of files()) {
-        this.emitFile({type: 'asset', fileName, source});
+      for (const fileName of names) {
+        this.emitFile({type: 'asset', fileName, source: source(fileName)});
       }
     },
   };

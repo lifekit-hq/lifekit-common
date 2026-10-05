@@ -47,6 +47,36 @@ describe('lifekitBrand (Vite plugin)', () => {
     assert.equal(serve(plugin, '/src/main.ts').passed, true);
   });
 
+  it('ignores unrelated requests without reading any file', () => {
+    const reads = [];
+    const plugin = lifekitBrand({app: 'fs'}, path => reads.push(path));
+    for (const url of [
+      '/src/main.ts',
+      '/@vite/client',
+      '/../package.json',
+      '/manifest.webmanifest',
+    ]) {
+      assert.equal(serve(plugin, url).passed, true, url);
+    }
+    assert.deepEqual(reads, []);
+  });
+
+  it('reads a brand file lazily on first request and serves it from memory after', () => {
+    const reads = [];
+    const plugin = lifekitBrand({app: 'fs'}, path => {
+      reads.push(path);
+      return readFileSync(path);
+    });
+    assert.deepEqual(reads, []);
+    const first = serve(plugin, '/icon-192.png');
+    const second = serve(plugin, '/icon-192.png');
+    const expected = readFileSync(join(brandAssetsDir('fs'), 'icon-192.png'));
+    assert.ok(first.res.body.equals(expected));
+    assert.ok(second.res.body.equals(expected));
+    assert.equal(second.res.headers['Content-Type'], 'image/png');
+    assert.deepEqual(reads, [join(brandAssetsDir('fs'), 'icon-192.png')]);
+  });
+
   it('rejects an unknown app', () => {
     assert.throws(() => lifekitBrand({app: 'zz'}), /Unknown lifekit app/);
   });

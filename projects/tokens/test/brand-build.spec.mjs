@@ -8,8 +8,6 @@ import {BRAND_APPS, BRAND_FILES, brandColors, markSvg} from '../brand/index.mjs'
 import {buildBrand} from '../scripts/build-brand.mjs';
 import {decodePng, isPng, pngSize} from './png.mjs';
 
-const MARK_SOURCE = readFileSync(new URL('../brand/mark.mjs', import.meta.url), 'utf8');
-
 function hexToRgb(hex) {
   return [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16));
 }
@@ -40,8 +38,24 @@ describe('brand colours', () => {
     assert.throws(() => brandColors("[data-theme='light'] {}"), /--color-accent-700/);
   });
 
-  it('are never hard-coded in the mark source', () => {
-    assert.doesNotMatch(MARK_SOURCE, /#[0-9a-f]{3,8}\b/i);
+  it('drive the emitted SVG and PNG', () => {
+    const dirs = [1, 2].map(() => mkdtempSync(join(tmpdir(), 'lk-brand-colors-')));
+    try {
+      const custom = {...brandColors(), tile: '#112233', ink: '#ffeedd'};
+      buildBrand({outDir: dirs[0]});
+      buildBrand({outDir: dirs[1], colors: custom});
+      const [base, changed] = dirs.map(dir => join(dir, 'lk'));
+      for (const name of ['favicon.svg', 'icon-192.png']) {
+        assert.notDeepEqual(
+          readFileSync(join(base, name)),
+          readFileSync(join(changed, name)),
+          name
+        );
+      }
+      assert.match(readFileSync(join(changed, 'favicon.svg'), 'utf8'), /#112233/);
+    } finally {
+      for (const dir of dirs) rmSync(dir, {recursive: true, force: true});
+    }
   });
 });
 
