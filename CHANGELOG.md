@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/lifekit-hq/lifekit-common/compare/v0.7.0...v0.8.0) (2026-10-05)
+
+
+### Features
+
+* **elements:** add lk-account-menu signed-in user menu with sign out ([#73](https://github.com/lifekit-hq/lifekit-common/issues/73)) ([b003570](https://github.com/lifekit-hq/lifekit-common/commit/b0035704d750f1173bb8d00daa7440274db8746a))
+
 ## [0.7.0](https://github.com/lifekit-hq/lifekit-common/compare/v0.6.1...v0.7.0) (2026-10-02)
 
 
