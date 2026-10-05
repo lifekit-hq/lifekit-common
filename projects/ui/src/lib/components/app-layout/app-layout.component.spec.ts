@@ -56,6 +56,21 @@ describe('AppLayoutComponent', () => {
     expect(sidebar).toBeTruthy();
   });
 
+  it('should brand the sidebar as Finance Sentry by default', () => {
+    expect(
+      fixture.debugElement.query(By.css('cmn-sidebar-nav')).nativeElement.textContent
+    ).toContain('Finance Sentry');
+  });
+
+  it('should pass a custom brand through to the sidebar', () => {
+    fixture.componentRef.setInput('brand', 'Lifekit Dashboard');
+    fixture.detectChanges();
+    const text: string = fixture.debugElement.query(By.css('cmn-sidebar-nav')).nativeElement
+      .textContent;
+    expect(text).toContain('Lifekit Dashboard');
+    expect(text).not.toContain('Finance Sentry');
+  });
+
   it('should render the top bar with title', () => {
     expect(fixture.nativeElement.textContent).toContain('Dashboard');
   });
