@@ -1,0 +1,43 @@
+{
+  "detector": "0.1.11",
+  "source": {
+    "total": 17,
+    "groups": {
+      "low-contrast": 0,
+      "undersized-and-tiny-text": 0,
+      "overused-font": 0,
+      "layout-transition": 0,
+      "design-system-drift": 17
+    },
+    "byRule": {
+      "design-system-color": 2,
+      "design-system-font-size": 14,
+      "design-system-radius": 1
+    }
+  },
+  "storybook": {
+    "stories": 278,
+    "scans": 556,
+    "total": 309,
+    "groups": {
+      "low-contrast": 131,
+      "undersized-and-tiny-text": 48,
+      "overused-font": 0,
+      "layout-transition": 64,
+      "design-system-drift": 0
+    },
+    "byRule": {
+      "low-contrast": 131,
+      "layout-transition": 64,
+      "clipped-overflow-container": 28,
+      "gpt-thin-border-wide-shadow": 10,
+      "pulsing-dot": 8,
+      "undersized-ui-text": 48,
+      "skipped-heading": 2,
+      "tight-leading": 4,
+      "script-error": 8,
+      "text-overflow": 4,
+      "em-dash-overuse": 2
+    }
+  }
+}

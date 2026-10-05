@@ -22,6 +22,7 @@ npm run test             # Vitest via @angular/build:unit-test (ci config = cove
 npm run lint             # ESLint (angular-eslint) across all projects
 npm run build            # brand asset build (tokens), then ng-packagr: charts-core, elements, ui, core
 npm run build-storybook  # static catalog (deployed to Pages on merge)
+npm run design:scan      # impeccable detector over source (+ `-- --storybook <url>` for a built catalog); report-only, compares to docs/design-baseline.json
 ```
 
 ## Mandatory gates (same bar as finance-sentry)
@@ -44,7 +45,7 @@ npm run build-storybook  # static catalog (deployed to Pages on merge)
 - **Milestones**: `M<n> — <outcome>`, named for the outcome, never a date.
 - **Releases**: release-please maintains the release PR (lockstep version bump across all packages + CHANGELOG); the Weekly Release workflow merges it Mondays 08:00 UTC (or dispatch manually for "release now"). Merging it tags the release and publishes all six packages to GitHub Packages.
 - Main is protected in spirit: all changes land via squash-merged PR, CI green first.
-- Root markdown is `README.md`, `CLAUDE.md`, and the devclaw onboarding set (`AGENTS.md`); `CHANGELOG.md` is release-please-owned. No session artifacts or ad-hoc docs at the root — durable docs go to `docs/`.
+- Root markdown is `README.md`, `CLAUDE.md`, the devclaw onboarding set (`AGENTS.md`), and the impeccable design context (`PRODUCT.md`, `DESIGN.md` — the engine reads them from the root); `CHANGELOG.md` is release-please-owned. No session artifacts or ad-hoc docs at the root — durable docs go to `docs/`.
 
 ## Storybook-first rule
 
