@@ -2,14 +2,14 @@
 
 Shared design system & Angular component library for the lifekit-hq ecosystem. Six lockstep-versioned packages published to GitHub Packages:
 
-| Package                   | What                                                                                                    | Consumers                               |
-| ------------------------- | ------------------------------------------------------------------------------------------------------- | --------------------------------------- |
-| `@lifekit-hq/tokens`      | Design tokens — `theme.css` (pure custom properties, light/dark) + Tailwind preset. Framework-agnostic. | All lifekit frontends (Angular + React) |
-| `@lifekit-hq/charts-core` | Framework-free Chart.js config builders (zero `@angular/*`)                                             | `ui`, `elements`                        |
-| `@lifekit-hq/elements`    | Framework-free Lit custom elements (`lk-*`) — incl. PWA install/update/offline pieces                   | finance-sentry                          |
-| `@lifekit-hq/ui`          | Angular component library (`cmn-*` selectors), Storybook-first                                          | finance-sentry                          |
-| `@lifekit-hq/core`        | Angular signal-store features & helpers                                                                 | finance-sentry                          |
-| `@lifekit-hq/config`      | ESLint / Prettier / Stylelint / tsconfig presets                                                        | lifekit repos (build-time)              |
+| Package                   | What                                                                                                                                                                | Consumers                               |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| `@lifekit-hq/tokens`      | Design tokens — `theme.css` (light/dark) + Tailwind preset, self-hosted Inter, brand mark + browser-chrome standard (`docs/BROWSER-CHROME.md`). Framework-agnostic. | All lifekit frontends (Angular + React) |
+| `@lifekit-hq/charts-core` | Framework-free Chart.js config builders (zero `@angular/*`)                                                                                                         | `ui`, `elements`                        |
+| `@lifekit-hq/elements`    | Framework-free Lit custom elements (`lk-*`) — incl. PWA install/update/offline pieces                                                                               | finance-sentry                          |
+| `@lifekit-hq/ui`          | Angular component library (`cmn-*` selectors), Storybook-first                                                                                                      | finance-sentry                          |
+| `@lifekit-hq/core`        | Angular signal-store features & helpers                                                                                                                             | finance-sentry                          |
+| `@lifekit-hq/config`      | ESLint / Prettier / Stylelint / tsconfig presets                                                                                                                    | lifekit repos (build-time)              |
 
 Extracted from finance-sentry (`dsdevq-common`) 2026-08-25. Sole developer: Denys.
 
@@ -18,9 +18,9 @@ Extracted from finance-sentry (`dsdevq-common`) 2026-08-25. Sole developer: Deny
 ```bash
 npm ci
 npm run storybook        # THE dev loop — develop components here, not in a host app
-npm run test             # Vitest via @angular/build:unit-test (ci config = coverage gates)
+npm run test             # Vitest via @angular/build:unit-test (ci config = coverage gates) + node:test for tokens brand
 npm run lint             # ESLint (angular-eslint) across all projects
-npm run build            # ng-packagr build of ui + core
+npm run build            # brand asset build (tokens), then ng-packagr: charts-core, elements, ui, core
 npm run build-storybook  # static catalog (deployed to Pages on merge)
 ```
 

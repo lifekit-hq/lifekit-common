@@ -7,9 +7,9 @@ Shared design system, Angular component library, and framework-free element laye
 ```bash
 npm ci
 npm run storybook        # primary dev loop — components developed here
-npm run test             # Vitest via @angular/build:unit-test (CI config = coverage gates)
+npm run test             # Vitest via @angular/build:unit-test (CI config = coverage gates) + node:test for tokens brand (test:tokens)
 npm run lint             # ESLint (angular-eslint) across all projects
-npm run build            # ng-packagr: charts-core → elements → ui → core (order matters)
+npm run build            # build:brand (tokens icons), then ng-packagr: charts-core → elements → ui → core (order matters)
 npm run build-storybook  # static Storybook catalog (deployed to Pages on merge)
 ```
 
@@ -21,6 +21,7 @@ node_modules/.bin/ng test @lifekit-hq/charts-core --configuration ci && \
 node_modules/.bin/ng test @lifekit-hq/elements --configuration ci && \
 node_modules/.bin/ng test @lifekit-hq/ui --configuration ci && \
 node_modules/.bin/ng test @lifekit-hq/core --configuration ci && \
+npm run test:tokens && \
 node_modules/.bin/ng lint && \
 npm run consumer-type-check && \
 node_modules/.bin/ng run "@lifekit-hq/ui:build-storybook"
@@ -32,7 +33,7 @@ node_modules/.bin/ng run "@lifekit-hq/ui:build-storybook"
 
 ```
 projects/
-  tokens/        @lifekit-hq/tokens  — theme.css (CSS custom properties) + Tailwind preset
+  tokens/        @lifekit-hq/tokens  — theme.css + Tailwind preset + fonts.css + brand mark/chrome standard (docs/BROWSER-CHROME.md)
   config/        @lifekit-hq/config  — ESLint / Prettier / tsconfig presets
   ui/            @lifekit-hq/ui      — Angular components (cmn-* selectors), Storybook host
   core/          @lifekit-hq/core    — Angular signal-store features
@@ -56,6 +57,7 @@ specs/           speckit artifacts (spec.md, plan.md, tasks.md per feature)
 ## Further reading
 
 - `CLAUDE.md` — coding conventions, commit style, PR/issue norms
+- `docs/BROWSER-CHROME.md` — brand mark, icon set, theme-color, head/manifest standard and `lifekit-chrome-check`
 - `docs/CONSUMER-GAP-AUDIT.md` — what each consumer needs against what the library provides, and what is unused
 - `projects/elements/README.md` — settled conventions for the Lit element layer
 - `specs/` — speckit feature artifacts
