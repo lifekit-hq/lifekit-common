@@ -28,8 +28,7 @@ const meta: Meta<StoryArgs> = {
     name: 'Ada Lovelace',
     email: 'ada@example.com',
     picture: '',
-    // A non-navigating target so the story stays on the page.
-    signOutUrl: '#signed-out',
+    signOutUrl: '/#signed-out',
   },
   render: args => ({
     props: args,
@@ -39,6 +38,14 @@ const meta: Meta<StoryArgs> = {
       </div>
     `,
   }),
+  play: async ({canvasElement}) => {
+    const menu = canvasElement.querySelector<LkAccountMenu>('lk-account-menu');
+    await menu?.updateComplete;
+    const link = menu?.shadowRoot?.querySelector('a.sign-out');
+    if (link?.textContent?.trim() !== 'Sign out') {
+      throw new Error('lk-account-menu did not render the Sign out link');
+    }
+  },
 };
 
 export default meta;
@@ -48,8 +55,7 @@ export const Initials: Story = {};
 
 export const WithPicture: Story = {
   args: {
-    picture:
-      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Crect width='8' height='8' fill='%236366f1'/%3E%3C/svg%3E",
+    picture: 'https://placehold.co/64x64/6366f1/6366f1.png',
   },
 };
 

@@ -1,7 +1,6 @@
 import {css, html, LitElement, nothing, type PropertyDeclarations, type TemplateResult} from 'lit';
 
 const SAFE_URL = /^(https?:\/\/|\/(?!\/))/i;
-const IMAGE_DATA_URL = /^data:image\//i;
 
 /** Up to two initials from the name (first + last word), falling back to the email, then "?". */
 export function accountInitials(name: string, email: string): string {
@@ -14,10 +13,10 @@ export function accountInitials(name: string, email: string): string {
   return email.trim().charAt(0).toUpperCase() || '?';
 }
 
-/** Only absolute http(s) and root-relative URLs (plus `data:image/` for pictures) are used; anything else is dropped. */
-export function safeUrl(url: string, allowImageData = false): string {
+/** Only absolute http(s) and root-relative URLs are used; anything else is dropped. */
+export function safeUrl(url: string): string {
   const trimmed = url.trim();
-  return SAFE_URL.test(trimmed) || (allowImageData && IMAGE_DATA_URL.test(trimmed)) ? trimmed : '';
+  return SAFE_URL.test(trimmed) ? trimmed : '';
 }
 
 let nextId = 0;
@@ -208,7 +207,7 @@ export class LkAccountMenu extends LitElement {
 
   protected override render(): TemplateResult {
     const label = this.name || this.email || 'Account';
-    const picture = this.pictureFailed ? '' : safeUrl(this.picture, true);
+    const picture = this.pictureFailed ? '' : safeUrl(this.picture);
     const signOut = safeUrl(this.signOutUrl);
     return html`
       <div @keydown=${this.onKeydown} @focusout=${this.onFocusOut}>

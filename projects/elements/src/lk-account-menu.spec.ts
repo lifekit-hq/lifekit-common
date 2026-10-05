@@ -57,11 +57,6 @@ describe('safeUrl', () => {
     expect(safeUrl('//evil.example')).toBe('');
     expect(safeUrl('data:image/png;base64,AAAA')).toBe('');
   });
-
-  it('allows image data URLs only when asked', () => {
-    expect(safeUrl('data:image/png;base64,AAAA', true)).toBe('data:image/png;base64,AAAA');
-    expect(safeUrl('data:text/html,x', true)).toBe('');
-  });
 });
 
 describe('LkAccountMenu', () => {
