@@ -6,7 +6,7 @@
 //
 // The source scan always runs; the Storybook scan runs when --storybook is given.
 // The Storybook base URL serves a built catalog (projects/ui/storybook-static).
-// A scan step that fails (non-zero exit, timeout, unparseable output) aborts the
+// A scan step that fails (exit other than 0/2, timeout, unparseable output) aborts the
 // run with a non-zero exit and never writes a baseline.
 import {spawn} from 'node:child_process';
 import {readFileSync, writeFileSync, existsSync} from 'node:fs';
@@ -20,6 +20,7 @@ const THEMES = ['light', 'dark'];
 const BATCH = 10;
 const CONCURRENCY = 4;
 const SCAN_TIMEOUT_MS = 300_000;
+const FINDINGS_EXIT = 2;
 
 const args = process.argv.slice(2);
 const sbIdx = args.indexOf('--storybook');
@@ -64,7 +65,7 @@ const detect = (targets, extra) =>
     });
     child.on('close', (code, signal) => {
       clearTimeout(timer);
-      if (code !== 0)
+      if (code !== 0 && code !== FINDINGS_EXIT)
         return fail(new Error(`${label} failed (${signal ?? `exit ${code}`}): ${err.trim()}`));
       try {
         done(JSON.parse(out));
