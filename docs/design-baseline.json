@@ -18,23 +18,23 @@
   "storybook": {
     "stories": 278,
     "scans": 556,
-    "total": 270,
+    "total": 309,
     "groups": {
-      "low-contrast": 113,
-      "undersized-and-tiny-text": 42,
+      "low-contrast": 131,
+      "undersized-and-tiny-text": 48,
       "overused-font": 0,
-      "layout-transition": 54,
+      "layout-transition": 64,
       "design-system-drift": 0
     },
     "byRule": {
-      "low-contrast": 113,
-      "layout-transition": 54,
-      "clipped-overflow-container": 26,
+      "low-contrast": 131,
+      "layout-transition": 64,
+      "clipped-overflow-container": 28,
       "gpt-thin-border-wide-shadow": 10,
-      "pulsing-dot": 7,
-      "undersized-ui-text": 42,
+      "pulsing-dot": 8,
+      "undersized-ui-text": 48,
       "skipped-heading": 2,
-      "tight-leading": 2,
+      "tight-leading": 4,
       "script-error": 8,
       "text-overflow": 4,
       "em-dash-overuse": 2
