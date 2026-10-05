@@ -2,12 +2,12 @@
 
 Shared lifekit design system and Angular component library.
 
-| Package              | What it is                                                                                             | Consumers                                  |
-| -------------------- | ------------------------------------------------------------------------------------------------------ | ------------------------------------------ |
-| `@lifekit-hq/tokens` | Design tokens — CSS custom properties (`theme.css`, light/dark) + Tailwind preset. Framework-agnostic. | Every lifekit frontend (Angular and React) |
-| `@lifekit-hq/ui`     | Angular component library (`cmn-*` selectors), developed Storybook-first                               | Angular apps (finance-sentry)              |
-| `@lifekit-hq/core`   | Angular signal-store features and helpers                                                              | Angular apps                               |
-| `@lifekit-hq/config` | Shared tooling presets — ESLint, Prettier, Stylelint, base tsconfig                                    | lifekit repos (build-time only)            |
+| Package              | What it is                                                                                                                                                                                                | Consumers                                  |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| `@lifekit-hq/tokens` | Design tokens — CSS custom properties (`theme.css`, light/dark) + Tailwind preset, self-hosted Inter, and the lifekit brand mark + [browser-chrome standard](docs/BROWSER-CHROME.md). Framework-agnostic. | Every lifekit frontend (Angular and React) |
+| `@lifekit-hq/ui`     | Angular component library (`cmn-*` selectors), developed Storybook-first                                                                                                                                  | Angular apps (finance-sentry)              |
+| `@lifekit-hq/core`   | Angular signal-store features and helpers                                                                                                                                                                 | Angular apps                               |
+| `@lifekit-hq/config` | Shared tooling presets — ESLint, Prettier, Stylelint, base tsconfig                                                                                                                                       | lifekit repos (build-time only)            |
 
 Extracted from [finance-sentry](https://github.com/lifekit-hq/finance-sentry) (`frontend/projects/dsdevq-common`) per lifekit-common#1.
 
@@ -59,7 +59,9 @@ Angular owns the service worker. This repo owns the shared pieces on top of it:
 - `<lk-update-prompt>`, `<lk-offline-banner>` and `<lk-install-hint>` from
   `@lifekit-hq/elements`.
 
-Each app owns its own `manifest.webmanifest`, icons, colours, URL rules and server config.
+Icons, `theme-color`, the manifest's colours and icons, and the head markup follow the
+[browser-chrome standard](docs/BROWSER-CHROME.md), which `@lifekit-hq/tokens` ships and
+`lifekit-chrome-check` enforces. Each app owns its own app name, URL rules and server config.
 Before shipping an app as a PWA, check:
 
 - [ ] **Keep Angular's `assetGroups`.** The generated `ngsw-config.json` caches the app shell

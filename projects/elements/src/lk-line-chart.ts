@@ -44,7 +44,7 @@ export class LkLineChart extends LitElement {
     }
 
     .label {
-      font-family: Inter, sans-serif;
+      font-family: var(--font-sans, 'Inter Variable', Inter, sans-serif);
       font-size: 0.75rem;
       font-weight: 600;
       text-transform: uppercase;

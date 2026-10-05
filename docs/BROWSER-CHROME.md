@@ -1,0 +1,203 @@
+# Browser chrome standard
+
+Every lifekit web app ships the same browser chrome: tab title, tab icon, install icons,
+`theme-color`, web manifest and font. It's all one family, so a user with several lifekit apps
+open sees the same tile and can tell the apps apart by the two letters on it.
+
+Everything comes from `@lifekit-hq/tokens`:
+
+| What                       | Where                                                                                  |
+| -------------------------- | -------------------------------------------------------------------------------------- |
+| Colours                    | `@lifekit-hq/tokens/theme.css` (the only source)                                       |
+| Icon files, per app        | `@lifekit-hq/tokens/brand/<app>/` (on disk: `brand/dist/<app>/`; generated, see below) |
+| Head template              | `@lifekit-hq/tokens/brand/head.html`                                                   |
+| Manifest fields            | `@lifekit-hq/tokens/brand/manifest.fragment.json`                                      |
+| Node helpers + drift check | `@lifekit-hq/tokens/brand`, `lifekit-chrome-check` (bin)                               |
+| Vite plugin                | `@lifekit-hq/tokens/brand/vite`                                                        |
+| Inter                      | `@lifekit-hq/tokens/fonts.css`                                                         |
+
+Apps never commit copies of icon files or colours. They import the package and add the head lines
+below. A mark or colour change then ships as a lifekit-common release and reaches every app on its
+next build.
+
+## The mark
+
+The mark is a lowercase two-letter monogram in white (`--color-text-inverse`) on the lifekit indigo
+tile (`--color-accent-700` `#4f46e5`, corner radius 7 on a 32-unit grid). The tile is the family
+and the letters name the app:
+
+| `<app>` | Apps                           |
+| ------- | ------------------------------ |
+| `lk`    | Lifekit, the lifekit dashboard |
+| `fs`    | Finance Sentry                 |
+
+The mark is pure geometry with no `<text>`, so it renders identically as a favicon, where web
+fonts never load. Stems sit on whole grid units, which keeps them crisp at 16 px.
+
+**One source.** `projects/tokens/brand/mark.mjs` holds the tile and every app's glyph, with
+colours passed in as parameters (read from `theme.css`; never literals). Every other file is derived
+from it by `projects/tokens/scripts/build-brand.mjs`, which runs on `npm run build` and on
+`prepack`, so every published tarball carries fresh output. Generated files are never committed
+or hand-edited.
+
+**Adding an app** means adding one glyph entry to `mark.mjs`: two letters drawn on the 32 grid
+with stems on whole units, kept inside the safe zone (the build tests check it). Everything else
+follows from the build.
+
+## Title
+
+`{Page} · {App}`, for example `Accounts · Finance Sentry`. The landing route uses the bare app
+name.
+
+- The app name goes last so a narrow tab still shows the page.
+- The separator is a middle dot `·` with a space on each side.
+- Set the title per route: an Angular `TitleStrategy`, or `document.title` in React.
+- The static `index.html` title is the bare app name. Inner routes must never keep it.
+
+```ts
+// Angular: provide {provide: TitleStrategy, useClass: AppTitleStrategy}
+@Injectable({providedIn: 'root'})
+export class AppTitleStrategy extends TitleStrategy {
+  private readonly title = inject(Title);
+
+  public override updateTitle(snapshot: RouterStateSnapshot): void {
+    const page = this.buildTitle(snapshot);
+    this.title.setTitle(page ? `${page} · ${APP_NAME}` : APP_NAME);
+  }
+}
+```
+
+## Icon set
+
+Every app serves these files from its site root:
+
+| File                    | Spec                                                                                 | Why                                                                                    |
+| ----------------------- | ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
+| `favicon.svg`           | The mark, 32-unit viewBox.                                                           | Primary tab icon, sharp at every density.                                              |
+| `favicon.ico`           | 16 + 32 px PNGs inside.                                                              | Fallback for browsers and tools without SVG favicons, and for `/favicon.ico` probes.   |
+| `apple-touch-icon.png`  | 180×180, **opaque, full-bleed**: tile colour to the edges, glyph scaled ×4, centred. | iOS home screen. iOS rounds the corners itself, and transparency would render black.   |
+| `icon-192.png`          | The mark (rounded tile, transparent corners).                                        | Manifest `purpose: any`: install prompt, desktop launchers.                            |
+| `icon-512.png`          | The mark (rounded tile, transparent corners).                                        | Manifest `purpose: any`: splash screen, app stores.                                    |
+| `icon-maskable-512.png` | Full-bleed like the touch icon, glyph inside the central 80% safe zone.              | Manifest `purpose: maskable`: Android crops it to circle or squircle without clipping. |
+
+## theme-color
+
+```html
+<meta name="theme-color" content="#f7f8fa" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#0e1120" media="(prefers-color-scheme: dark)" />
+```
+
+These are `--color-surface-bg` for the light and dark themes. The browser bar blends into the page
+and the icon carries the brand; an indigo bar over the dark UI would be loud.
+
+The media queries follow the OS only. An app with an in-app theme toggle also updates both metas
+whenever it changes `data-theme`:
+
+```ts
+const bg = getComputedStyle(document.documentElement).getPropertyValue('--color-surface-bg').trim();
+document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.setAttribute('content', bg));
+```
+
+## Manifest (`manifest.webmanifest`)
+
+| Field                      | Value                                         |
+| -------------------------- | --------------------------------------------- |
+| `name`                     | The app name (= the landing-route title)      |
+| `short_name`               | ≤ 12 characters, so it is never truncated     |
+| `id`, `start_url`, `scope` | `/`                                           |
+| `display`                  | `standalone`                                  |
+| `theme_color`              | `#f7f8fa` (the light `theme-color`)           |
+| `background_color`         | `#f7f8fa` (`--color-surface-bg`, light)       |
+| `icons`                    | the three manifest icons above, and no others |
+
+Off-token colours are not allowed. Other fields (`description`, `lang`, `shortcuts`, …) are fine.
+`brandManifest({name, shortName})` from `@lifekit-hq/tokens/brand` builds this object, and
+`manifest.fragment.json` holds the fixed fields for static manifests.
+
+## Head template
+
+This is `@lifekit-hq/tokens/brand/head.html` with its `{App}` placeholder filled in. Place it
+after `<meta charset>`:
+
+```html
+<title>Finance Sentry</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<meta name="theme-color" content="#f7f8fa" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#0e1120" media="(prefers-color-scheme: dark)" />
+<link rel="icon" href="/favicon.ico" sizes="32x32" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<link rel="manifest" href="/manifest.webmanifest" />
+```
+
+- `viewport-fit=cover` lets the app pad for notches with `env(safe-area-inset-*)`. Never lock zoom.
+- `color-scheme: light dark` gives native controls and scrollbars the right scheme before CSS loads.
+- `sizes="32x32"` on the ICO stops Chrome from choosing it over the SVG.
+- No other icon links, and no `data:,` placeholder.
+
+Keep the pre-paint theme script (as in finance-sentry's `index.html`) so the first paint already
+has the stored or OS theme.
+
+## Fonts and tokens
+
+- Inter is the token font: `--font-sans` in `theme.css`, and the Tailwind `font-base`,
+  `font-headline` and `font-label` families. Load it by importing
+  `@lifekit-hq/tokens/fonts.css` once in the global stylesheet. It self-hosts variable Inter
+  (`@fontsource-variable/inter`, weights 100–900, normal and italic), and per-script
+  `unicode-range` files mean a browser downloads only the subsets a page renders. Without it, every
+  app falls back to `system-ui`. Never load fonts from a CDN.
+- Mono is the preset `font-mono` stack.
+- Colours come only from `@lifekit-hq/tokens/theme.css`, with Tailwind via
+  `@lifekit-hq/tokens/tailwind`. The brand colour is `--color-accent-700` (`#4f46e5`).
+
+```css
+/* global stylesheet */
+@import '@lifekit-hq/tokens/fonts.css';
+@import '@lifekit-hq/tokens/theme.css';
+```
+
+## Adopting it in an app
+
+**Angular** (`angular.json`, build `assets`): serve the app's icon directory from the package at
+the site root.
+
+```json
+{"glob": "**/*", "input": "node_modules/@lifekit-hq/tokens/brand/dist/fs", "output": "/"}
+```
+
+Keep a `manifest.webmanifest` with the fields above, and put the head template in `index.html`.
+
+**Vite**: the plugin serves the icons in dev, emits them into the build, and can emit the
+manifest too. If another plugin owns the manifest (for example vite-plugin-pwa), leave out
+`manifest` and pass that plugin `brandManifest(…)`.
+
+```ts
+import {lifekitBrand} from '@lifekit-hq/tokens/brand/vite';
+
+export default defineConfig({
+  plugins: [lifekitBrand({app: 'lk', manifest: {name: 'Lifekit', shortName: 'Lifekit'}})],
+});
+```
+
+## Drift check
+
+`lifekit-chrome-check` (a bin of `@lifekit-hq/tokens`) checks an app's **built output** against
+this standard. Run it in CI after the build:
+
+```bash
+npx lifekit-chrome-check --app fs --name "Finance Sentry" dist/finance-sentry/browser
+```
+
+It fails (exit 1) and lists every deviation:
+
+- **head**: the title is not the bare app name, the viewport, `color-scheme` or either
+  `theme-color` is missing or wrong, or a required link is missing or an extra one is present;
+- **manifest**: an off-token colour, wrong `display`/`id`/`start_url`/`scope`, a long
+  `short_name`, or an icon list that is not exactly the standard three;
+- **icons**: a served icon file is missing or differs by a single byte from the one this version
+  of the package generated. That catches stale, hand-edited and other-app icons.
+
+The same checks are available as functions from `@lifekit-hq/tokens/brand`: `checkBrowserChrome`,
+`checkHead`, `checkManifest` and `checkIcons`. Each returns `{rule, message}[]`, empty when the app
+complies, for use inside an app's own test suite.
