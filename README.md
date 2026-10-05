@@ -52,10 +52,10 @@ Angular owns the service worker. This repo owns the shared pieces on top of it:
 - `PushSubscriptionService` from `@lifekit-hq/core/pwa` — the browser half of Web Push over
   `SwPush`, as signals: `isSupported`, `isStandalone`, `requiresInstall` (iOS, not installed),
   `permission`, `subscription`. `subscribe(serverPublicKey)` must run from a user gesture and
-  returns the `PushSubscriptionJSON` for the app to POST to its own backend; `matchesKey()` (async, reads the live subscription) detects
-  VAPID rotation, `unsubscribe()` drops the subscription, and `subscriptionChanges` /
-  `notificationClicks` pass through from `SwPush`. It does no HTTP — each app owns its backend,
-  keys and preferences. Inert when the service worker is disabled.
+  returns the `PushSubscriptionJSON` for the app to POST to its own backend; `matchesKey()` (async,
+  reads the live subscription) detects VAPID rotation, `unsubscribe()` drops the subscription, and
+  `subscriptionChanges` / `notificationClicks` pass through from `SwPush`. It does no HTTP — each
+  app owns its backend, keys and preferences. Inert when the service worker is disabled.
 - `<lk-update-prompt>`, `<lk-offline-banner>` and `<lk-install-hint>` from
   `@lifekit-hq/elements`.
 
