@@ -1,7 +1,7 @@
 import {DOCUMENT} from '@angular/common';
 import {computed, DestroyRef, inject, Injectable, type Signal, signal} from '@angular/core';
 import {SwPush} from '@angular/service-worker';
-import type {Observable} from 'rxjs';
+import {firstValueFrom, type Observable} from 'rxjs';
 
 export type PushPermission = 'default' | 'granted' | 'denied';
 
@@ -28,6 +28,16 @@ function decodeBase64Url(value: string): Uint8Array {
   return Uint8Array.from(binary, char => char.charCodeAt(0));
 }
 
+function keyMatches(sub: PushSubscription, serverPublicKey: string): boolean {
+  const key = sub.options.applicationServerKey;
+  if (!key) {
+    return false;
+  }
+  const current = new Uint8Array(key);
+  const expected = decodeBase64Url(serverPublicKey);
+  return current.length === expected.length && current.every((byte, i) => byte === expected[i]);
+}
+
 /**
  * Browser half of Web Push, built from signals on top of Angular's `SwPush`.
  *
@@ -47,7 +57,7 @@ export class PushSubscriptionService {
   private readonly currentSubscription = signal<PushSubscription | null>(null);
 
   /** Service worker enabled and the browser exposes `PushManager` and `Notification`. */
-  public readonly isSupported: boolean = this.detectSupport();
+  public readonly isSupported: Signal<boolean> = signal(this.detectSupport()).asReadonly();
 
   /** True when running as an installed PWA (`display-mode: standalone` or iOS `navigator.standalone`). */
   public readonly isStandalone: Signal<boolean> = this.standalone.asReadonly();
@@ -77,7 +87,7 @@ export class PushSubscriptionService {
   constructor() {
     this.refreshEnvironment();
 
-    if (!this.isSupported) {
+    if (!this.isSupported()) {
       return;
     }
 
@@ -105,11 +115,12 @@ export class PushSubscriptionService {
    * refuse to resubscribe under a new key while the old subscription exists.
    */
   public async subscribe(serverPublicKey: string): Promise<PushSubscriptionJSON> {
-    if (!this.isSupported) {
+    if (!this.isSupported()) {
       throw new Error('Push notifications are not supported in this environment.');
     }
     try {
-      if (this.currentSubscription() && !this.matchesKey(serverPublicKey)) {
+      const existing = await this.resolveSubscription();
+      if (existing && !keyMatches(existing, serverPublicKey)) {
         await this.unsubscribe();
       }
       const sub = await this.swPush.requestSubscription({serverPublicKey});
@@ -121,26 +132,31 @@ export class PushSubscriptionService {
   }
 
   /**
-   * Whether the current subscription was created with `serverPublicKey`. False without a
-   * subscription. Use on app start to resubscribe after VAPID key rotation.
+   * Whether the browser's current subscription was created with `serverPublicKey`. Resolves the
+   * subscription from the service worker rather than the cached signal, so it is accurate on app
+   * start. False without a subscription. Use it to resubscribe after VAPID key rotation.
    */
-  public matchesKey(serverPublicKey: string): boolean {
-    const key = this.currentSubscription()?.options.applicationServerKey;
-    if (!key) {
-      return false;
-    }
-    const current = new Uint8Array(key);
-    const expected = decodeBase64Url(serverPublicKey);
-    return current.length === expected.length && current.every((byte, i) => byte === expected[i]);
+  public async matchesKey(serverPublicKey: string): Promise<boolean> {
+    const sub = await this.resolveSubscription();
+    return !!sub && keyMatches(sub, serverPublicKey);
   }
 
   /** Drops the browser subscription. No-op when unsupported or not subscribed. */
   public async unsubscribe(): Promise<void> {
-    if (!this.isSupported || !this.currentSubscription()) {
+    if (!(await this.resolveSubscription())) {
       return;
     }
     await this.swPush.unsubscribe();
     this.currentSubscription.set(null);
+  }
+
+  private async resolveSubscription(): Promise<PushSubscription | null> {
+    if (!this.isSupported()) {
+      return null;
+    }
+    const sub = await firstValueFrom(this.swPush.subscription);
+    this.currentSubscription.set(sub);
+    return sub;
   }
 
   private detectSupport(): boolean {

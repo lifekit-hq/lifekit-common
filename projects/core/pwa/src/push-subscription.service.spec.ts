@@ -1,7 +1,7 @@
 import {DOCUMENT} from '@angular/common';
 import {TestBed} from '@angular/core/testing';
 import {SwPush} from '@angular/service-worker';
-import {BehaviorSubject, Subject} from 'rxjs';
+import {BehaviorSubject, Observable, Subject} from 'rxjs';
 import {beforeEach, describe, expect, it, vi} from 'vitest';
 
 import {PushSubscriptionService} from './push-subscription.service';
@@ -77,29 +77,29 @@ describe('PushSubscriptionService', () => {
 
   describe('capability detection', () => {
     it('is supported with an enabled worker, PushManager and Notification', () => {
-      expect(create().isSupported).toBe(true);
+      expect(create().isSupported()).toBe(true);
     });
 
     it('is unsupported when the service worker is disabled', () => {
-      expect(create(false).isSupported).toBe(false);
+      expect(create(false).isSupported()).toBe(false);
     });
 
     it('is unsupported without PushManager', () => {
       delete fakeWindow['PushManager'];
-      expect(create().isSupported).toBe(false);
+      expect(create().isSupported()).toBe(false);
     });
 
     it('is unsupported without Notification', () => {
       delete fakeWindow.Notification;
       const service = create();
-      expect(service.isSupported).toBe(false);
+      expect(service.isSupported()).toBe(false);
       expect(service.permission()).toBe('default');
     });
 
     it('is unsupported without a window', () => {
       fakeDocument.defaultView = null;
       const service = create();
-      expect(service.isSupported).toBe(false);
+      expect(service.isSupported()).toBe(false);
       expect(service.isStandalone()).toBe(false);
       expect(service.requiresInstall()).toBe(false);
     });
@@ -248,32 +248,69 @@ describe('PushSubscriptionService', () => {
   });
 
   describe('matchesKey', () => {
-    it('is false without a subscription', () => {
-      expect(create().matchesKey(KEY)).toBe(false);
+    it('is false without a subscription', async () => {
+      expect(await create().matchesKey(KEY)).toBe(false);
     });
 
-    it('is false when the subscription carries no key', () => {
+    it('is false when the subscription carries no key', async () => {
       const service = create();
       subscription$.next(fakeSubscription(null));
-      expect(service.matchesKey(KEY)).toBe(false);
+      expect(await service.matchesKey(KEY)).toBe(false);
     });
 
-    it('is true for the same key', () => {
+    it('is true for the same key', async () => {
       const service = create();
       subscription$.next(fakeSubscription(KEY_BYTES));
-      expect(service.matchesKey(KEY)).toBe(true);
+      expect(await service.matchesKey(KEY)).toBe(true);
     });
 
-    it('is false for a different key of the same length', () => {
+    it('is false for a different key of the same length', async () => {
       const service = create();
       subscription$.next(fakeSubscription([...KEY_BYTES.slice(0, -1), 99]));
-      expect(service.matchesKey(KEY)).toBe(false);
+      expect(await service.matchesKey(KEY)).toBe(false);
     });
 
-    it('is false for a key of a different length', () => {
+    it('is false for a key of a different length', async () => {
       const service = create();
       subscription$.next(fakeSubscription(KEY_BYTES.slice(0, -1)));
-      expect(service.matchesKey(KEY)).toBe(false);
+      expect(await service.matchesKey(KEY)).toBe(false);
+    });
+  });
+
+  describe('subscription not yet cached at startup', () => {
+    function createWithLateSubscription(sub: PushSubscription): PushSubscriptionService {
+      let subscribes = 0;
+      swPush.subscription = new Observable<PushSubscription | null>(subscriber => {
+        subscribes += 1;
+        if (subscribes > 1) {
+          subscriber.next(sub);
+        }
+      }) as unknown as BehaviorSubject<PushSubscription | null>;
+      return create();
+    }
+
+    it('matchesKey resolves the existing subscription', async () => {
+      const service = createWithLateSubscription(fakeSubscription(KEY_BYTES));
+      expect(service.subscription()).toBeNull();
+      expect(await service.matchesKey(KEY)).toBe(true);
+      expect(service.subscription()).not.toBeNull();
+    });
+
+    it('unsubscribe drops the existing subscription', async () => {
+      const service = createWithLateSubscription(fakeSubscription(KEY_BYTES));
+      await service.unsubscribe();
+      expect(swPush.unsubscribe).toHaveBeenCalledOnce();
+      expect(service.subscription()).toBeNull();
+    });
+
+    it('subscribe drops an existing subscription made with a rotated key', async () => {
+      const service = createWithLateSubscription(fakeSubscription([...KEY_BYTES.slice(0, -1), 99]));
+      swPush.requestSubscription.mockResolvedValue(fakeSubscription(KEY_BYTES));
+      await service.subscribe(KEY);
+      expect(swPush.unsubscribe).toHaveBeenCalledOnce();
+      expect(swPush.unsubscribe.mock.invocationCallOrder[0]).toBeLessThan(
+        swPush.requestSubscription.mock.invocationCallOrder[0]
+      );
     });
   });
 
@@ -299,11 +336,11 @@ describe('PushSubscriptionService', () => {
     });
   });
 
-  it('stays inert when the service worker is disabled', () => {
+  it('stays inert when the service worker is disabled', async () => {
     const service = create(false);
     subscription$.next(fakeSubscription(KEY_BYTES));
     setVisibility('visible');
     expect(service.subscription()).toBeNull();
-    expect(service.matchesKey(KEY)).toBe(false);
+    expect(await service.matchesKey(KEY)).toBe(false);
   });
 });
