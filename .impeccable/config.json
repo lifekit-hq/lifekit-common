@@ -1,0 +1,18 @@
+{
+  "hook": {"enabled": false},
+  "detector": {
+    "ignoreFiles": [
+      "dist/**",
+      "**/dist/**",
+      "**/storybook-static/**",
+      "**/node_modules/**",
+      "**/*.spec.ts",
+      "**/*.stories.ts",
+      "**/*.stories.mdx",
+      "specs/**",
+      "fixtures/**",
+      "coverage/**"
+    ],
+    "designSystem": {"enabled": true}
+  }
+}
