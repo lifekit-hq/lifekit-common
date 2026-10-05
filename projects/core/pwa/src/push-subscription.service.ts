@@ -100,13 +100,18 @@ export class PushSubscriptionService {
 
   /**
    * Requests permission (if needed) and subscribes. Call from a user gesture — iOS requires it.
-   * Resolves with the JSON the app POSTs to its backend; performs no HTTP itself.
+   * Resolves with the JSON the app POSTs to its backend; performs no HTTP itself. An existing
+   * subscription made with a different key (VAPID rotation) is dropped first, since browsers
+   * refuse to resubscribe under a new key while the old subscription exists.
    */
   public async subscribe(serverPublicKey: string): Promise<PushSubscriptionJSON> {
     if (!this.isSupported) {
       throw new Error('Push notifications are not supported in this environment.');
     }
     try {
+      if (this.currentSubscription() && !this.matchesKey(serverPublicKey)) {
+        await this.unsubscribe();
+      }
       const sub = await this.swPush.requestSubscription({serverPublicKey});
       this.currentSubscription.set(sub);
       return sub.toJSON();
@@ -131,7 +136,7 @@ export class PushSubscriptionService {
 
   /** Drops the browser subscription. No-op when unsupported or not subscribed. */
   public async unsubscribe(): Promise<void> {
-    if (!this.isSupported) {
+    if (!this.isSupported || !this.currentSubscription()) {
       return;
     }
     await this.swPush.unsubscribe();

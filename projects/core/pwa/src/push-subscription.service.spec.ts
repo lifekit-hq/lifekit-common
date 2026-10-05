@@ -221,6 +221,30 @@ describe('PushSubscriptionService', () => {
       await expect(service.subscribe(KEY)).rejects.toThrow('not supported');
       expect(swPush.requestSubscription).not.toHaveBeenCalled();
     });
+
+    it('drops a subscription made with a rotated key before resubscribing', async () => {
+      const service = create();
+      subscription$.next(fakeSubscription([...KEY_BYTES.slice(0, -1), 99]));
+      swPush.requestSubscription.mockResolvedValue(fakeSubscription(KEY_BYTES));
+
+      await service.subscribe(KEY);
+
+      expect(swPush.unsubscribe).toHaveBeenCalledOnce();
+      expect(swPush.unsubscribe.mock.invocationCallOrder[0]).toBeLessThan(
+        swPush.requestSubscription.mock.invocationCallOrder[0]
+      );
+    });
+
+    it('keeps a subscription that already matches the key', async () => {
+      const service = create();
+      subscription$.next(fakeSubscription(KEY_BYTES));
+      swPush.requestSubscription.mockResolvedValue(fakeSubscription(KEY_BYTES));
+
+      await service.subscribe(KEY);
+
+      expect(swPush.unsubscribe).not.toHaveBeenCalled();
+      expect(swPush.requestSubscription).toHaveBeenCalledOnce();
+    });
   });
 
   describe('matchesKey', () => {
@@ -260,6 +284,12 @@ describe('PushSubscriptionService', () => {
       await service.unsubscribe();
       expect(swPush.unsubscribe).toHaveBeenCalledOnce();
       expect(service.subscription()).toBeNull();
+    });
+
+    it('is a no-op when not subscribed', async () => {
+      const service = create();
+      await service.unsubscribe();
+      expect(swPush.unsubscribe).not.toHaveBeenCalled();
     });
 
     it('is a no-op when unsupported', async () => {
