@@ -14,12 +14,15 @@ const ACCENT_STOP_COUNT = 11;
 const ACCENT_STOP_MULTIPLIER = 100;
 /** Minimum WCAG AA contrast ratio for text on backgrounds. */
 const MIN_WCAG_AA_CONTRAST = 4.5;
-/** Step toward midrange when auto-correcting a failing stop. */
+/** OkLCH lightness step per iteration, moving toward the contrasting extreme. */
 const AUTO_CORRECT_STEP = 0.05;
 /** Iteration limit for contrast auto-correction. */
 const MAX_CORRECT_ITERATIONS = 20;
-/** Lightness midpoint for OkLCH auto-correction direction. */
-const OKLCH_MIDPOINT = 0.5;
+/**
+ * Relative luminance where black and white contrast equally against a surface:
+ * lighter surfaces are corrected darker, darker surfaces lighter.
+ */
+const LUMINANCE_CROSSOVER = 0.179;
 /** Fallback surface background color used when CSS variable is not yet set. */
 const FALLBACK_SURFACE_BG = '#f8f9fa';
 
@@ -128,13 +131,14 @@ export class ThemeService {
 
   private autoCorrectContrast(color: string, background: string): string {
     let c = chroma(color);
+    const direction = chroma(background).luminance() > LUMINANCE_CROSSOVER ? -1 : 1;
     let iterations = 0;
     while (
       chroma.contrast(c, background) < MIN_WCAG_AA_CONTRAST &&
       iterations < MAX_CORRECT_ITERATIONS
     ) {
       const l = c.get('oklch.l');
-      const target = l < OKLCH_MIDPOINT ? l - AUTO_CORRECT_STEP : l + AUTO_CORRECT_STEP;
+      const target = l + direction * AUTO_CORRECT_STEP;
       c = c.set('oklch.l', Math.max(0, Math.min(1, target)));
       iterations++;
     }
