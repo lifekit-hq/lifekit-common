@@ -37,19 +37,19 @@ export class LkLineChart extends LitElement {
       display: flex;
       flex-direction: column;
       gap: var(--space-3, 0.75rem);
-      border-radius: var(--radius-lg, 0.5rem);
+      border-radius: var(--radius-lg);
       border: 1px solid var(--color-border-default, #c7c4d8);
       background: var(--color-surface-card, #ffffff);
       padding: var(--space-4, 1rem);
     }
 
     .label {
-      font-family: var(--font-sans, 'Inter Variable', Inter, sans-serif);
+      font-family: var(--font-sans);
       font-size: 0.75rem;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      color: var(--color-text-secondary, #464555);
+      color: var(--color-text-secondary);
     }
 
     .chart-area {

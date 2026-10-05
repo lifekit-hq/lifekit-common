@@ -7,6 +7,7 @@ module.exports = {
         'surface-bg': 'var(--color-surface-bg)',
         'surface-card': 'var(--color-surface-card)',
         'surface-raised': 'var(--color-surface-raised)',
+        'surface-hover': 'var(--color-surface-hover)',
 
         'text-primary': 'var(--color-text-primary)',
         'text-secondary': 'var(--color-text-secondary)',
@@ -39,10 +40,10 @@ module.exports = {
       },
 
       fontFamily: {
-        base: ['"Inter Variable"', 'Inter', 'system-ui', 'sans-serif'],
-        headline: ['"Inter Variable"', 'Inter', 'system-ui', 'sans-serif'],
-        label: ['"Inter Variable"', 'Inter', 'system-ui', 'sans-serif'],
-        mono: ['ui-monospace', '"SFMono-Regular"', '"Fira Code"', 'monospace'],
+        base: ['var(--font-sans)'],
+        headline: ['var(--font-sans)'],
+        label: ['var(--font-sans)'],
+        mono: ['var(--font-mono)'],
       },
 
       fontSize: {
@@ -57,16 +58,16 @@ module.exports = {
       },
 
       borderRadius: {
-        'cmn-sm': '0.25rem',
-        'cmn-md': '0.5rem',
-        'cmn-lg': '0.75rem',
-        'cmn-full': '9999px',
+        'cmn-sm': 'var(--radius-sm)',
+        'cmn-md': 'var(--radius-md)',
+        'cmn-lg': 'var(--radius-lg)',
+        'cmn-full': 'var(--radius-full)',
       },
 
       boxShadow: {
         'cmn-sm': 'var(--shadow-sm)',
         'cmn-md': 'var(--shadow-md)',
-        'cmn-lg': '0 24px 64px rgba(25, 28, 29, 0.10)',
+        'cmn-lg': 'var(--shadow-lg)',
       },
 
       keyframes: {

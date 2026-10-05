@@ -10,11 +10,21 @@
 [data-theme='light'] {
   /* Typography — the font stack canvas-drawn text (charts) must match; CSS text uses the Tailwind preset */
   --font-sans: 'Inter Variable', Inter, system-ui, sans-serif;
+  --font-mono: ui-monospace, 'SFMono-Regular', 'Fira Code', monospace;
+
+  /* Radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-full: 9999px;
+
+  color-scheme: light;
 
   /* Surface — cool neutral ground (a whisper of the indigo accent, not a lavender wash) */
   --color-surface-bg: #f7f8fa;
   --color-surface-card: #ffffff;
   --color-surface-raised: #eef0f4;
+  --color-surface-hover: #e4e7ec;
 
   /* Text */
   --color-text-primary: #101828;
@@ -66,13 +76,17 @@
   /* Shadow — dual-layer per Finance Sentry design tokens */
   --shadow-sm: 0 1px 4px rgba(25, 28, 29, 0.05), 0 2px 8px rgba(25, 28, 29, 0.04);
   --shadow-md: 0 8px 32px rgba(25, 28, 29, 0.08), 0 2px 8px rgba(25, 28, 29, 0.04);
+  --shadow-lg: 0 24px 64px rgba(25, 28, 29, 0.1);
 }
 
 /* ─── Dark theme ─────────────────────────────────────────────────────────── */
 [data-theme='dark'] {
+  color-scheme: dark;
+
   --color-surface-bg: #0e1120;
   --color-surface-card: #1a1f35;
   --color-surface-raised: #1e2438;
+  --color-surface-hover: #262d46;
 
   --color-text-primary: #e2e3e4;
   --color-text-secondary: #c5c5d3;
@@ -106,6 +120,25 @@
 
   --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.2), 0 2px 8px rgba(0, 0, 0, 0.18);
   --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.35), 0 2px 8px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.5);
+}
+
+/* ─── Document base — canvas follows the active theme ────────────────────── */
+html {
+  background-color: var(--color-surface-bg);
+  color: var(--color-text-primary);
+}
+
+/* ─── Reduced motion ─────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *:not(.animate-spin, .animate-pulse, .animate-cmn-spin, .animate-cmn-pulse),
+  *:not(.animate-spin, .animate-pulse, .animate-cmn-spin, .animate-cmn-pulse)::before,
+  *:not(.animate-spin, .animate-pulse, .animate-cmn-spin, .animate-cmn-pulse)::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* ─── Animations (Finance Sentry design tokens) ──────────────────────────── */
@@ -218,8 +251,8 @@ cmn-drawer-container.cmn-drawer--sheet {
   max-height: 90vh;
   max-height: 90dvh;
   overflow: hidden;
-  border-top-left-radius: 0.75rem;
-  border-top-right-radius: 0.75rem;
+  border-top-left-radius: var(--radius-lg);
+  border-top-right-radius: var(--radius-lg);
   background-color: var(--color-surface-card);
   padding-bottom: env(safe-area-inset-bottom, 0px);
   transform: translateY(100%);
