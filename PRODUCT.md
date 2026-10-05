@@ -2,10 +2,6 @@
 
 <!-- impeccable:product-schema 1 -->
 
-<!-- DRAFT by the impeccable-adopt-scout worker, 2026-10-05. The init interview was NOT held:
-the worker may not address the owner, so every fact below is inferred from repository and vault
-evidence and marked [inferred: <source>]. Confirm or correct before this file is committed. -->
-
 ## Platform
 
 web
@@ -46,7 +42,7 @@ The source of truth for lifekit's look: `@lifekit-hq/tokens` is the theming cont
 
 ## Evidence on Hand
 
-- The Storybook catalog has 278 stories (index in `.scout/sb-index.json` during the scout).
+- The Storybook catalog has 278 stories on 2026-10-05 (`docs/design-baseline.json` records the count at each baseline).
 - finance-sentry's frontend is the only consumer with real usage data. Its e2e fixtures provide demo data, so screenshots never need real financial data.
 - None of the following exists: user research, analytics, or testimonials. Do not fabricate them.
 

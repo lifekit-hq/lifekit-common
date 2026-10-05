@@ -11,6 +11,7 @@ npm run test             # Vitest via @angular/build:unit-test (CI config = cove
 npm run lint             # ESLint (angular-eslint) across all projects
 npm run build            # build:brand (tokens icons), then ng-packagr: charts-core → elements → ui → core (order matters)
 npm run build-storybook  # static Storybook catalog (deployed to Pages on merge)
+npm run design:scan      # report-only impeccable design scan vs docs/design-baseline.json (see CLAUDE.md)
 ```
 
 ## Verify gate
