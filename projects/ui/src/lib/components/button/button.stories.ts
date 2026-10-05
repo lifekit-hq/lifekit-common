@@ -58,6 +58,14 @@ export const Destructive: Story = {
 };
 
 export const Loading: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The spinner keeps animating under `prefers-reduced-motion: reduce` so loading feedback stays visible; transitions and decorative animation are suppressed. Verify by enabling "Emulate CSS media feature prefers-reduced-motion" in browser devtools.',
+      },
+    },
+  },
   render: args => ({
     props: args,
     template: '<cmn-button variant="primary" [loading]="loading">Saving...</cmn-button>',
