@@ -43,4 +43,5 @@ jobs:
       - name: Serve Storybook
         run: python3 -m http.server 6007 -d projects/ui/storybook-static > /dev/null 2>&1 &
       - name: Design scan (report only)
+        shell: bash
         run: npm run design:scan -- --storybook http://127.0.0.1:6007 | tee -a "$GITHUB_STEP_SUMMARY"
