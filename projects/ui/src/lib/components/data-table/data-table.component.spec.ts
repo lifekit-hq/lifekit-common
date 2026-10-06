@@ -126,6 +126,15 @@ describe('DataTableComponent', () => {
     rows.forEach(row => expect(row.querySelectorAll('cmn-skeleton')).toHaveLength(3));
   });
 
+  it('sizes each skeleton bar on its host so the bar is visible in a flex row', () => {
+    const loading = TestBed.createComponent(LoadingHostComponent);
+    loading.detectChanges();
+    const bars = (loading.nativeElement as HTMLElement).querySelectorAll<HTMLElement>(
+      '[data-testid="skeleton-row"] cmn-skeleton'
+    );
+    expect(Array.from(bars).every(bar => bar.style.width !== '')).toBe(true);
+  });
+
   it('pins header cells with the sticky classes', () => {
     const headers = fixture.nativeElement.querySelectorAll('th') as NodeListOf<HTMLElement>;
     expect(headers.length).toBe(2);

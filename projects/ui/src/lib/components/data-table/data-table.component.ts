@@ -164,7 +164,7 @@ type ListSlotColumns = Record<CmnListSlot, CmnColumnComponent[]>;
             @for (_ of skeletonRows; track $index) {
               <div class="flex gap-cmn-4" data-testid="skeleton-row">
                 @for (width of skeletonBarWidths(); track $index) {
-                  <cmn-skeleton [width]="width" height="1rem" />
+                  <cmn-skeleton [style.width]="width" height="1rem" />
                 }
               </div>
             }
