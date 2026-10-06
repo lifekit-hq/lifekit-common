@@ -48,7 +48,7 @@ type ListSlotColumns = Record<CmnListSlot, CmnColumnComponent[]>;
   selector: 'cmn-data-table',
   imports: [ButtonComponent, CdkTableModule, NgTemplateOutlet, SkeletonComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {class: 'block h-full min-h-0'},
+  host: {class: 'flex h-full min-h-0 flex-col'},
   template: `
     <ng-template #cellContent let-col let-row="row" let-i="index">
       @if (col.cell(); as c) {
@@ -157,7 +157,7 @@ type ListSlotColumns = Record<CmnListSlot, CmnColumnComponent[]>;
       </div>
     } @else {
       <div
-        class="max-h-full overflow-auto rounded-cmn-lg border border-border-default bg-surface-card"
+        class="min-h-0 flex-1 overflow-auto rounded-cmn-lg border border-border-default bg-surface-card"
       >
         @if (loading()) {
           <div class="p-cmn-4 space-y-cmn-3" data-testid="table-skeleton">
@@ -331,7 +331,7 @@ export class DataTableComponent<T = Record<string, unknown>> {
   );
 
   public headerCellClass(align: CmnColumnAlign): string {
-    return `sticky top-0 z-10 border-b border-border-default bg-surface-card px-cmn-4 py-cmn-3 font-label text-cmn-xs font-semibold uppercase tracking-wide text-text-secondary ${this.alignClass(align)}`;
+    return `sticky top-0 z-10 bg-surface-card shadow-[inset_0_-1px_0_var(--color-border-default)] px-cmn-4 py-cmn-3 font-label text-cmn-xs font-semibold uppercase tracking-wide text-text-secondary ${this.alignClass(align)}`;
   }
 
   public dataCellClass(align: CmnColumnAlign): string {
