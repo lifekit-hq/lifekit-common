@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.0](https://github.com/lifekit-hq/lifekit-common/compare/v1.1.0...v1.2.0) (2026-10-06)
+
+
+### Features
+
+* **charts-core:** add valueFormat option to the line chart ([#100](https://github.com/lifekit-hq/lifekit-common/issues/100)) ([a99053c](https://github.com/lifekit-hq/lifekit-common/commit/a99053cf4bdb0b0d01ad381141b54028944c2f83))
+* **tokens:** IBM Plex Sans and petrol accent ([#98](https://github.com/lifekit-hq/lifekit-common/issues/98)) ([92eab1e](https://github.com/lifekit-hq/lifekit-common/commit/92eab1ed07c73e576102a72a7c62e095ce27068c))
+
 ## [1.1.0](https://github.com/lifekit-hq/lifekit-common/compare/v1.0.0...v1.1.0) (2026-10-06)
 
 
