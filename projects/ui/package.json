@@ -18,11 +18,6 @@
     "@lifekit-hq/charts-core": "0.9.0",
     "tslib": "^2.3.0"
   },
-  "peerDependenciesMeta": {
-    "deep-chat": {
-      "optional": true
-    }
-  },
   "sideEffects": false,
   "license": "MIT",
   "repository": {

@@ -2,6 +2,10 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.0.
 
+## Peer dependencies
+
+Consumers must install these alongside `@lifekit-hq/ui`: `@angular/cdk`, `chart.js`, `chroma-js`, `deep-chat`, `lucide-angular`, `rxjs`.
+
 ## Code scaffolding
 
 Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
