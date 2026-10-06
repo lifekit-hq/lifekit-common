@@ -92,7 +92,7 @@ describe('buildLineChartConfig value format', () => {
   it('renders percent values with a percent sign', () => {
     const {tooltip, tick} = formatters(buildLineChartConfig(POINTS, TOKENS, 'USD', 'percent'));
     expect(tooltip(62.45)).toBe('62.5%');
-    expect(tick(62.45)).toBe('62%');
+    expect(tick(62.45)).toBe('62.5%');
   });
 
   it('delegates to a consumer formatter, flagging ticks as compact', () => {

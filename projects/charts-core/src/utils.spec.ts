@@ -102,9 +102,19 @@ describe('plainNumber', () => {
 });
 
 describe('percent', () => {
-  it('uses one decimal, or none when compact', () => {
+  it('uses one decimal', () => {
     expect(percent(62.45)).toBe('62.5%');
-    expect(percent(62.45, true)).toBe('62%');
+  });
+
+  it('keeps at most one decimal when compact, dropping a trailing .0', () => {
+    expect(percent(62, true)).toBe('62%');
+    expect(percent(62.45, true)).toBe('62.5%');
+  });
+
+  it('renders narrow-range ticks as distinct compact labels', () => {
+    const labels = [62.2, 62.4, 62.6].map((tick) => percent(tick, true));
+    expect(labels).toEqual(['62.2%', '62.4%', '62.6%']);
+    expect(new Set(labels).size).toBe(labels.length);
   });
 });
 

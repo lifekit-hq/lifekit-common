@@ -71,9 +71,12 @@ export function plainNumber(value: number, compact = false): string {
   }).format(value);
 }
 
-/** A percentage, where `value` is already in percent units (62.5 renders as `62.5%`). */
+/** A percentage, where `value` is already in percent units (62.5 renders as `62.5%`); compact axis ticks keep at most one decimal, dropping a trailing `.0`. */
 export function percent(value: number, compact = false): string {
-  return `${value.toFixed(compact ? 0 : 1)}%`;
+  if (compact) {
+    return `${new Intl.NumberFormat('en-US', { maximumFractionDigits: NUMBER_COMPACT_DIGITS }).format(value)}%`;
+  }
+  return `${value.toFixed(1)}%`;
 }
 
 /** Resolves a `ChartValueFormat` to the formatter every tick and tooltip of a chart shares. */
