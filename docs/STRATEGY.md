@@ -102,13 +102,14 @@ All components listed below are ported-from-production unless otherwise noted.
 | skeleton | ported-from-production | simple-leaf | element-rewrite | Animate-pulse div; trivially simple |
 | stat-card | ported-from-production | interactive | keep-own | Depends on `SkeletonComponent`; delta formatting with trending icons; child-component dependency |
 | status-indicator | ported-from-production | simple-leaf | element-rewrite | Status badge + dot + optional timestamp; pure token CSS |
+| stepper-dialog | new (added for multi-step flows, #39) | interactive | keep-own | `contentChildren` of `cmnStep` templates with `model()` step index, progress list and Back/Next/Finish actions; depends on `button` and `dialog-actions`; Angular template-outlet composition |
 | tab-group | ported-from-production | interactive | keep-own | `model()` two-way binding for `activeTab`; `aria-selected`; Angular-idiomatic tab panel |
 | tag | ported-from-production | simple-leaf | element-rewrite | Five-variant badge; trivially simple |
 | toast | ported-from-production | interactive | keep-own | Dismiss event + aria role + `toast.service.ts` service layer; keep Angular until service strategy is decided |
 | toggle | ported-from-production | interactive | element-rewrite | Switch button + thumb animation + `aria-checked`; `role="switch"` + boolean attribute = clean Lit mapping |
 | top-bar | ported-from-production | interactive | keep-own | Uses `MenuComponent`; event orchestration (search/theme/avatar); app-shell concern |
 
-**Summary:** 27 keep-own · 19 element-rewrite · 1 wrap-base · 0 delete
+**Summary:** 28 keep-own · 19 element-rewrite · 1 wrap-base · 0 delete
 
 ---
 
