@@ -60,8 +60,8 @@ export class LkAccountMenu extends LitElement {
       padding: 0;
       border: 1px solid var(--color-border-default, #e4e7ec);
       border-radius: 50%;
-      background: var(--color-accent-subtle, #ede9fe);
-      color: var(--color-accent-default, #4f46e5);
+      background: var(--color-accent-subtle, #e3f1f4);
+      color: var(--color-accent-default, #175a6d);
       font: inherit;
       font-weight: 600;
       cursor: pointer;
@@ -76,7 +76,7 @@ export class LkAccountMenu extends LitElement {
 
     button:focus-visible,
     a:focus-visible {
-      outline: 2px solid var(--color-border-focus, #4f46e5);
+      outline: 2px solid var(--color-border-focus, #175a6d);
       outline-offset: 2px;
     }
 
@@ -91,7 +91,7 @@ export class LkAccountMenu extends LitElement {
       border: 1px solid var(--color-border-default, #e4e7ec);
       border-radius: var(--radius-lg);
       background: var(--color-surface-card, #ffffff);
-      color: var(--color-text-primary, #101828);
+      color: var(--color-text-primary, #0f1a1f);
       box-shadow: var(--shadow-md);
     }
 
@@ -103,7 +103,7 @@ export class LkAccountMenu extends LitElement {
 
     .email {
       margin: 0;
-      color: var(--color-text-secondary, #556070);
+      color: var(--color-text-secondary, #46565e);
       overflow-wrap: anywhere;
     }
 

@@ -27,7 +27,7 @@ export class LkUpdatePrompt extends LitElement {
       justify-content: space-between;
       gap: var(--space-3, 0.75rem);
       border-radius: var(--radius-lg);
-      border: 1px solid var(--color-border-default, #c7c4d8);
+      border: 1px solid var(--color-border-default, #d9e0e3);
       background: var(--color-surface-card, #ffffff);
       color: var(--color-text-primary);
       padding: var(--space-3, 0.75rem) var(--space-4, 1rem);
@@ -38,7 +38,7 @@ export class LkUpdatePrompt extends LitElement {
     button {
       border: 0;
       border-radius: var(--radius-md);
-      background: var(--color-primary, #4f46e5);
+      background: var(--color-primary, #175a6d);
       color: var(--color-on-primary, #ffffff);
       padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
       font: inherit;

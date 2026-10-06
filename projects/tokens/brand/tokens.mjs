@@ -27,7 +27,7 @@ function required(vars, name, theme) {
 
 /**
  * The brand palette, from `theme.css`:
- * - `tile` — the mark's tile, `--color-accent-700` (light): the lifekit indigo.
+ * - `tile` — the mark's tile, `--color-accent-700` (light): the lifekit petrol.
  * - `ink` — the glyph, `--color-text-inverse` (light).
  * - `surfaceLight` / `surfaceDark` — `--color-surface-bg` per theme: theme-color and
  *   manifest background.

@@ -71,7 +71,7 @@ interface PaletteGroup {
             [value]="query()"
             (input)="query.set($any($event.target).value)"
             placeholder="Search pages, actions…"
-            class="flex-1 border-none bg-transparent text-[15px] text-text-primary outline-none placeholder:text-text-disabled"
+            class="flex-1 border-none bg-transparent text-[15px] text-text-primary outline-none placeholder:text-text-placeholder"
           />
           <kbd
             class="shrink-0 rounded border border-border-default px-1.5 py-0.5 font-mono text-cmn-xs text-text-disabled"

@@ -15,10 +15,10 @@ function hexToRgb(hex) {
 describe('brand colours', () => {
   it('come from theme.css tokens', () => {
     assert.deepEqual(brandColors(), {
-      tile: '#4f46e5',
+      tile: '#175a6d',
       ink: '#ffffff',
-      surfaceLight: '#f7f8fa',
-      surfaceDark: '#0e1120',
+      surfaceLight: '#f3f5f6',
+      surfaceDark: '#0c1113',
     });
   });
 
@@ -61,9 +61,9 @@ describe('brand colours', () => {
 
 describe('markSvg', () => {
   it('draws the tile and glyph in the given colours', () => {
-    const svg = markSvg({app: 'lk', tile: '#4f46e5', ink: '#ffffff'});
+    const svg = markSvg({app: 'lk', tile: '#175a6d', ink: '#ffffff'});
     assert.match(svg, /^<svg [^>]*viewBox="0 0 32 32"/);
-    assert.match(svg, /<rect width="32" height="32" rx="7" fill="#4f46e5"\/>/);
+    assert.match(svg, /<rect width="32" height="32" rx="7" fill="#175a6d"\/>/);
     assert.match(svg, /stroke="#ffffff"/);
   });
 
@@ -169,6 +169,6 @@ describe('buildBrand', () => {
     assert.equal(fragment.theme_color, colors.surfaceLight);
     assert.equal(fragment.icons.length, 3);
     const head = readFileSync(join(out, 'head.html'), 'utf8');
-    assert.match(head, /content="#0e1120" media="\(prefers-color-scheme: dark\)"/);
+    assert.match(head, /content="#0c1113" media="\(prefers-color-scheme: dark\)"/);
   });
 });

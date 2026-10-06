@@ -15,7 +15,7 @@ import {chartFontFamily, cssVar, fontFamily, xTickLimitPlugin} from './utils';
 
 Chart.register(CategoryScale, LinearScale, BarController, BarElement, Tooltip, Legend);
 
-const DEFAULT_SERIES_COLORS = ['#10b981', '#ef4444', '#6366f1', '#f59e0b', '#64748b'];
+const DEFAULT_SERIES_COLORS = ['#10b981', '#ef4444', '#175a6d', '#f59e0b', '#64748b'];
 const BAR_RADIUS = 4;
 
 const X_TICK_LIMIT = 12;
@@ -30,8 +30,8 @@ export interface BarChartTokens {
 export function resolveBarChartTokens(): BarChartTokens {
   return {
     fontFamily: chartFontFamily(),
-    textSecondary: cssVar('--color-text-secondary', '#464555'),
-    borderDefault: cssVar('--color-border-default', '#c7c4d8'),
+    textSecondary: cssVar('--color-text-secondary', '#46565e'),
+    borderDefault: cssVar('--color-border-default', '#d9e0e3'),
   };
 }
 

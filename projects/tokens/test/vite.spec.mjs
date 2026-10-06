@@ -35,7 +35,7 @@ describe('lifekitBrand (Vite plugin)', () => {
     const files = emitted(lifekitBrand({app: 'lk', manifest: {name: 'Lifekit'}}));
     const manifest = JSON.parse(files.get('manifest.webmanifest'));
     assert.equal(manifest.name, 'Lifekit');
-    assert.equal(manifest.background_color, '#f7f8fa');
+    assert.equal(manifest.background_color, '#f3f5f6');
   });
 
   it('serves icons in dev and passes other requests through', () => {

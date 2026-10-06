@@ -1,7 +1,7 @@
 {
   "name": "@lifekit-hq/tokens",
   "version": "1.1.0",
-  "description": "lifekit design tokens — CSS custom properties (light/dark themes), Tailwind preset, the self-hosted Inter font, and the lifekit brand mark + browser-chrome standard. Framework-agnostic.",
+  "description": "lifekit design tokens — CSS custom properties (light/dark themes), Tailwind preset, the self-hosted IBM Plex Sans and Plex Mono fonts, and the lifekit brand mark + browser-chrome standard. Framework-agnostic.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -37,6 +37,7 @@
     "prepack": "node scripts/build-brand.mjs"
   },
   "dependencies": {
-    "@fontsource-variable/inter": "^5.3.0"
+    "@fontsource-variable/ibm-plex-sans": "^5.3.0",
+    "@fontsource/ibm-plex-mono": "^5.3.0"
   }
 }

@@ -15,7 +15,7 @@ export type SearchInputSize = 'sm' | 'md' | 'lg';
 
 const BASE_CLASSES =
   'block w-full rounded-cmn-md border border-border-default bg-surface-card font-base ' +
-  'text-text-primary placeholder:text-text-disabled pl-cmn-8 pr-cmn-8 ' +
+  'text-text-primary placeholder:text-text-placeholder pl-cmn-8 pr-cmn-8 ' +
   'focus:outline-none focus:ring-2 focus:ring-border-focus focus:border-border-focus ' +
   'disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150 ' +
   '[&::-webkit-search-cancel-button]:appearance-none';

@@ -40,7 +40,7 @@ export const Empty: Story = {
 export const CustomColors: Story = {
   args: {
     segments: [
-      {label: 'Banks', value: 412050, color: '#4f46e5'},
+      {label: 'Banks', value: 412050, color: '#175a6d'},
       {label: 'Brokerage', value: 924521, color: '#10b981'},
       {label: 'Crypto', value: 84320, color: '#f59e0b'},
     ],

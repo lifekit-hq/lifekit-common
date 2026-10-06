@@ -6,7 +6,7 @@ import {ButtonComponent} from '../../components/button/button.component';
 import {CardComponent} from '../../components/card/card.component';
 import {type Theme, type ThemePreference, ThemeService} from './theme.service';
 
-const ACCENTS = ['#4f46e5', '#0ea5e9', '#e11d48', '#16a34a', '#f59e0b'];
+const ACCENTS = ['#175a6d', '#0ea5e9', '#e11d48', '#16a34a', '#f59e0b'];
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,66 +1,76 @@
 ---
 name: lifekit
-description: Shared design system for lifekit frontends (tokens, Angular cmn-*, Lit lk-*), token values as implemented at 0.8.0; target direction A - Instrument
+description: Shared design system for lifekit frontends (tokens, Angular cmn-*, Lit lk-*); direction A - Instrument (IBM Plex Sans, petrol accent, cool graphite)
 colors:
-  accent: "#4f46e5"
-  accent-hover: "#4338ca"
-  accent-active: "#3730a3"
-  accent-subtle: "#ede9fe"
-  surface-bg: "#f7f8fa"
+  accent: "#175a6d"
+  accent-hover: "#134858"
+  accent-active: "#0f3846"
+  accent-subtle: "#e3f1f4"
+  surface-bg: "#f3f5f6"
   surface-card: "#ffffff"
-  surface-raised: "#eef0f4"
-  text-primary: "#101828"
-  text-secondary: "#556070"
-  text-disabled: "#98a2b3"
+  surface-raised: "#e8edef"
+  surface-hover: "#dce3e6"
+  text-primary: "#0f1a1f"
+  text-secondary: "#46565e"
+  text-disabled: "#66757c"
+  text-placeholder: "#5c6b72"
   text-inverse: "#ffffff"
-  border-default: "#e4e7ec"
-  border-strong: "#98a2b3"
-  status-info: "#6366f1"
-  status-success: "#10b981"
-  status-warning: "#f59e0b"
-  status-error: "#ef4444"
-  dark-surface-bg: "#0e1120"
-  dark-surface-card: "#1a1f35"
-  dark-surface-raised: "#1e2438"
-  dark-text-primary: "#e2e3e4"
-  dark-text-secondary: "#c5c5d3"
-  dark-text-disabled: "#6b6b7d"
-  dark-accent: "#818cf8"
-  dark-border-default: "#2e3452"
+  border-default: "#d9e0e3"
+  border-strong: "#7d8c93"
+  status-info: "#2557b0"
+  status-success: "#0e7446"
+  status-warning: "#955400"
+  status-error: "#bb2530"
+  dark-surface-bg: "#0c1113"
+  dark-surface-card: "#141b1e"
+  dark-surface-raised: "#1b2428"
+  dark-surface-hover: "#243036"
+  dark-text-primary: "#e4ebed"
+  dark-text-secondary: "#a7b5bb"
+  dark-text-disabled: "#8a989e"
+  dark-text-placeholder: "#8a989e"
+  dark-text-inverse: "#0a2830"
+  dark-accent: "#5aa9bb"
+  dark-accent-hover: "#93cad6"
+  dark-border-default: "#27333a"
+  dark-border-strong: "#62727a"
+  dark-status-info: "#8ab4f8"
+  dark-status-success: "#4cc38a"
+  dark-status-warning: "#e8a33c"
+  dark-status-error: "#f27b83"
 typography:
   display:
-    fontFamily: "'Inter Variable', Inter, system-ui, sans-serif"
+    fontFamily: "'IBM Plex Sans Variable', 'IBM Plex Sans', system-ui, sans-serif"
     fontSize: "2.25rem"
     fontWeight: 700
     lineHeight: 1.1
   headline:
-    fontFamily: "'Inter Variable', Inter, system-ui, sans-serif"
+    fontFamily: "'IBM Plex Sans Variable', 'IBM Plex Sans', system-ui, sans-serif"
     fontSize: "1.5rem"
     fontWeight: 600
     lineHeight: 1.25
   title:
-    fontFamily: "'Inter Variable', Inter, system-ui, sans-serif"
+    fontFamily: "'IBM Plex Sans Variable', 'IBM Plex Sans', system-ui, sans-serif"
     fontSize: "1.125rem"
     fontWeight: 600
     lineHeight: 1.5
   body:
-    fontFamily: "'Inter Variable', Inter, system-ui, sans-serif"
+    fontFamily: "'IBM Plex Sans Variable', 'IBM Plex Sans', system-ui, sans-serif"
     fontSize: "0.875rem"
     fontWeight: 400
     lineHeight: 1.5
   label:
-    fontFamily: "'Inter Variable', Inter, system-ui, sans-serif"
+    fontFamily: "'IBM Plex Sans Variable', 'IBM Plex Sans', system-ui, sans-serif"
     fontSize: "0.75rem"
     fontWeight: 600
     lineHeight: 1.25
-    letterSpacing: "0.025em"
   mono:
-    fontFamily: "ui-monospace, SFMono-Regular, 'Fira Code', monospace"
+    fontFamily: "'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace"
     fontSize: "0.875rem"
 rounded:
-  sm: "0.25rem"
-  md: "0.5rem"
-  lg: "0.75rem"
+  sm: "3px"
+  md: "6px"
+  lg: "8px"
   full: "9999px"
 spacing:
   "1": "4px"
@@ -106,9 +116,7 @@ components:
 
 lifekit's interface is a precision instrument for reading money: flat, quiet surfaces, one engineered sans family, a single petrol accent, and figures that line up. Nothing decorates; every pixel serves reading a balance, a transaction or a status correctly at a glance. Density serves daily checking on desktop and phone, in light and dark.
 
-**Status of this document.** The token front matter above records the values shipped in 0.8.0 (Inter, indigo accent, 8px radius). The direction chosen on 2026-10-05 is A - Instrument, and the rules below describe that target. The token values change in a later step (IBM Plex Sans, petrol accent), not in the PR that introduces this file. Until then, treat the front matter as "today" and this prose as "where we are going".
-
-**Target characteristics:**
+**Characteristics:**
 - One family: IBM Plex Sans (variable 100-700, self-hosted, Cyrillic) for every role; Plex Mono for code only. Money is set in the text face.
 - Tabular figures everywhere, so amount columns align even where a component forgets `tabular-nums`.
 - Petrol accent (`#175a6d`, dark `#5aa9bb`) on cool graphite; status colours at text grade: blue `#2557b0`, green `#0e7446`, amber `#955400`, red `#bb2530`. Info has its own hue and never reads as a second accent.
@@ -121,8 +129,8 @@ Cool graphite neutrals with a single petrol voice (restrained: accent only for t
 
 ### Named Rules
 **The Token-Only Rule.** Components use only `--color-*` tokens; no colour literals in components.
-**The Text-Grade Rule.** Body and placeholder text reach 4.5:1 in both themes. Text on accent or status fills uses `text-inverse`, never hard-coded white.
-**The Placeholder Rule.** `text-disabled` is never placeholder or secondary text; a dedicated placeholder token carries at least 4.5:1.
+**The Text-Grade Rule.** Body and placeholder text reach 4.5:1 in both themes, and status colours reach 4.68:1 as text on their own 15% tint. Text on accent or status fills uses `text-inverse`, never hard-coded white.
+**The Placeholder Rule.** Placeholder text uses `text-placeholder` (at least 4.5:1 in both themes), never `text-disabled`.
 
 ## Typography
 
@@ -148,7 +156,7 @@ Flat by default: hairline border on `surface-card`. Shadows are for overlays onl
 
 ## Shapes
 
-Radius 3 / 6 / 8px by role; full pills for chips, tags and badges. No off-scale literals.
+Radius 3 / 6 / 8px by role (`--radius-sm/md/lg`); full pills for chips, tags and badges. No off-scale literals.
 
 ## Motion
 

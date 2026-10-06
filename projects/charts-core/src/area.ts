@@ -26,7 +26,7 @@ Chart.register(
   Filler
 );
 
-const DEFAULT_SERIES_COLORS = ['#10b981', '#6366f1', '#f59e0b', '#64748b', '#ec4899'];
+const DEFAULT_SERIES_COLORS = ['#10b981', '#175a6d', '#f59e0b', '#64748b', '#ec4899'];
 const FILL_ALPHA = 'cc';
 
 const X_TICK_LIMIT = 8;
@@ -41,8 +41,8 @@ export interface AreaChartTokens {
 export function resolveAreaChartTokens(): AreaChartTokens {
   return {
     fontFamily: chartFontFamily(),
-    textSecondary: cssVar('--color-text-secondary', '#464555'),
-    borderDefault: cssVar('--color-border-default', '#c7c4d8'),
+    textSecondary: cssVar('--color-text-secondary', '#46565e'),
+    borderDefault: cssVar('--color-border-default', '#d9e0e3'),
   };
 }
 

@@ -70,9 +70,9 @@ describe('default segment colors', () => {
     });
   });
 
-  it('gives every slice its own color and leads with the brand indigo', () => {
+  it('gives every slice its own color and leads with the brand petrol', () => {
     expect(new Set(colors).size).toBe(SEGMENT_COUNT);
-    expect(colors[0]).toBe('#4f46e5');
+    expect(colors[0]).toBe('#175a6d');
   });
 });
 

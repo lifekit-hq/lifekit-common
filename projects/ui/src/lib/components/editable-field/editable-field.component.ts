@@ -20,7 +20,7 @@ const EMPTY_CLASSES = 'text-text-secondary';
 
 const INPUT_CLASSES =
   'min-h-cmn-10 w-full rounded-cmn-md border border-border-default bg-surface-card ' +
-  'px-cmn-3 py-cmn-2 text-cmn-sm text-text-primary placeholder:text-text-disabled ' +
+  'px-cmn-3 py-cmn-2 text-cmn-sm text-text-primary placeholder:text-text-placeholder ' +
   'focus:border-border-focus focus:outline-none focus:ring-2 focus:ring-border-focus';
 
 const ACTION_CLASSES =
