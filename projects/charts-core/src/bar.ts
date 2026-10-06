@@ -15,7 +15,7 @@ import {chartFontFamily, cssVar, fontFamily, xTickLimitPlugin} from './utils';
 
 Chart.register(CategoryScale, LinearScale, BarController, BarElement, Tooltip, Legend);
 
-const DEFAULT_SERIES_COLORS = ['#10b981', '#ef4444', '#6366f1', '#f59e0b', '#64748b'];
+const DEFAULT_SERIES_COLORS = ['#10b981', '#ef4444', '#175a6d', '#f59e0b', '#64748b'];
 const BAR_RADIUS = 4;
 
 const X_TICK_LIMIT = 12;

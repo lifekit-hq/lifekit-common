@@ -26,7 +26,7 @@ Chart.register(
   Filler
 );
 
-const DEFAULT_SERIES_COLORS = ['#10b981', '#6366f1', '#f59e0b', '#64748b', '#ec4899'];
+const DEFAULT_SERIES_COLORS = ['#10b981', '#175a6d', '#f59e0b', '#64748b', '#ec4899'];
 const FILL_ALPHA = 'cc';
 
 const X_TICK_LIMIT = 8;
