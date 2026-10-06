@@ -71,7 +71,7 @@ const INDEX_OFFSET = 1;
 })
 export class StepperDialogComponent {
   private readonly heading = viewChild<ElementRef<HTMLElement>>('heading');
-  private hasRendered = false;
+  private lastStep: number | null = null;
 
   public readonly step = model<number>(0);
   public readonly busy = input<boolean>(false);
@@ -96,13 +96,12 @@ export class StepperDialogComponent {
   constructor() {
     // Move focus to the new step's heading so screen-reader / keyboard users land on it.
     effect(() => {
-      this.step();
-      const heading = this.heading()?.nativeElement;
+      const step = this.step();
       untracked(() => {
-        if (this.hasRendered) {
-          heading?.focus();
+        if (this.lastStep !== null && this.lastStep !== step) {
+          this.heading()?.nativeElement.focus();
         }
-        this.hasRendered = true;
+        this.lastStep = step;
       });
     });
   }

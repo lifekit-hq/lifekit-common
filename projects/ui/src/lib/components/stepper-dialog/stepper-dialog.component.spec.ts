@@ -107,6 +107,10 @@ describe('StepperDialogComponent', () => {
     expect(nextBtn().disabled).toBe(true);
   });
 
+  it('does not move focus to the heading on initial render', () => {
+    expect(document.activeElement).not.toBe(el.querySelector('h3'));
+  });
+
   it('moves focus to the step heading after the step changes', () => {
     click(nextBtn());
     fixture.detectChanges();
