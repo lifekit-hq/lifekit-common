@@ -108,8 +108,9 @@ All components listed below are ported-from-production unless otherwise noted.
 | toast | ported-from-production | interactive | keep-own | Dismiss event + aria role + `toast.service.ts` service layer; keep Angular until service strategy is decided |
 | toggle | ported-from-production | interactive | element-rewrite | Switch button + thumb animation + `aria-checked`; `role="switch"` + boolean attribute = clean Lit mapping |
 | top-bar | ported-from-production | interactive | keep-own | Uses `MenuComponent`; event orchestration (search/theme/avatar); app-shell concern |
+| usage-chip | new (added for usage meter chip, #37) | simple-leaf | element-rewrite | `role="meter"` pill with token-coloured fill and readout; pure token CSS, no framework logic |
 
-**Summary:** 28 keep-own · 19 element-rewrite · 1 wrap-base · 0 delete
+**Summary:** 28 keep-own · 20 element-rewrite · 1 wrap-base · 0 delete
 
 ---
 
