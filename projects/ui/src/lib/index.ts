@@ -66,6 +66,7 @@ export * from './components/toast/toast.component';
 export * from './components/toast/toast.service';
 export * from './components/toggle/toggle.component';
 export * from './components/top-bar/top-bar.component';
+export * from './components/usage-chip/usage-chip.component';
 
 // Directives
 export * from './directives/skeleton/skeleton.directive';
