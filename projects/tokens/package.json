@@ -1,6 +1,6 @@
 {
   "name": "@lifekit-hq/tokens",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "lifekit design tokens — CSS custom properties (light/dark themes), Tailwind preset, the self-hosted Inter font, and the lifekit brand mark + browser-chrome standard. Framework-agnostic.",
   "license": "MIT",
   "repository": {

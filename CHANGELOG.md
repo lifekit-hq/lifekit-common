@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/lifekit-hq/lifekit-common/compare/v1.0.0...v1.1.0) (2026-10-06)
+
+
+### Features
+
+* **core:** withUrlSync nested fields, csv codec and same-route URL following ([#96](https://github.com/lifekit-hq/lifekit-common/issues/96)) ([332a2d8](https://github.com/lifekit-hq/lifekit-common/commit/332a2d83ec2fe63857d96a2f5754664d7f6c731c))
+
 ## [1.0.0](https://github.com/lifekit-hq/lifekit-common/compare/v0.9.0...v1.0.0) (2026-10-06)
 
 
