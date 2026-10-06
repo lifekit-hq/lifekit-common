@@ -44,6 +44,16 @@ describe('LkLineChart', () => {
     expect(el.currency).toBe('USD');
   });
 
+  it('defaults valueFormat to currency', () => {
+    expect(el.valueFormat).toBe('currency');
+  });
+
+  it('reads the value-format attribute', async () => {
+    el.setAttribute('value-format', 'number');
+    await el.updateComplete;
+    expect(el.valueFormat).toBe('number');
+  });
+
   it('defaults points to empty array', () => {
     expect(el.points).toEqual([]);
   });

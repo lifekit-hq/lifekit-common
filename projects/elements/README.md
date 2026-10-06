@@ -104,14 +104,17 @@ Renders a Chart.js line chart inside shadow DOM. Themed via `@lifekit/tokens` CS
 properties. Data flows in via the `points` property; no user-interaction events are emitted
 in this pilot.
 
-| Property   | Type           | Default | Description                          |
-| ---------- | -------------- | ------- | ------------------------------------ |
-| `points`   | `ChartPoint[]` | `[]`    | Data series — `{label, value}` pairs |
-| `label`    | `string`       | `''`    | Card title rendered above the chart  |
-| `currency` | `string`       | `'USD'` | ISO 4217 code for tooltip formatting |
+| Property      | Type                                                                | Default      | Description                                                                                                                                                                           |
+| ------------- | ------------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `points`      | `ChartPoint[]`                                                      | `[]`         | Data series — `{label, value}` pairs                                                                                                                                                  |
+| `label`       | `string`                                                            | `''`         | Card title rendered above the chart                                                                                                                                                   |
+| `currency`    | `string`                                                            | `'USD'`      | ISO 4217 code, used when `valueFormat` is `'currency'`                                                                                                                                |
+| `valueFormat` | `'currency' \| 'number' \| 'percent' \| (value, compact) => string` | `'currency'` | How ticks and tooltips render values. `'number'` and `'percent'` carry no currency symbol; a function (property only) gets `compact: true` for axis ticks. Attribute: `value-format`. |
 
 ```html
 <lk-line-chart label="Net Worth" currency="USD"></lk-line-chart>
+<!-- unit-less series, e.g. a score of 25 renders as "25", not "$25" -->
+<lk-line-chart label="Health score" value-format="number"></lk-line-chart>
 <script>
   document.querySelector('lk-line-chart').points = [
     {label: 'Jan', value: 1_400_000},

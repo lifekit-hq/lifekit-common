@@ -1,5 +1,7 @@
 import {type Plugin} from 'chart.js';
 
+import {type ChartValueFormat, type ChartValueFormatter} from './types';
+
 export function cssVar(name: string, fallback: string): string {
   const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   return value || fallback;
@@ -56,4 +58,40 @@ export function money(value: number, currency: string, compact = false): string 
     minimumFractionDigits: 0,
     maximumFractionDigits: compact ? 1 : 0,
   }).format(value);
+}
+
+const NUMBER_DIGITS = 2;
+const NUMBER_COMPACT_DIGITS = 1;
+const COMPACT_THRESHOLD = 1000;
+
+/** A plain unit-less number: no currency symbol, up to two decimals (one when compact and 1000 or above). */
+export function plainNumber(value: number, compact = false): string {
+  const abbreviate = compact && Math.abs(value) >= COMPACT_THRESHOLD;
+  return new Intl.NumberFormat('en-US', {
+    notation: abbreviate ? 'compact' : 'standard',
+    maximumFractionDigits: abbreviate ? NUMBER_COMPACT_DIGITS : NUMBER_DIGITS,
+  }).format(value);
+}
+
+/** A percentage, where `value` is already in percent units (62.5 renders as `62.5%`); compact axis ticks keep at most one decimal, dropping a trailing `.0`. */
+export function percent(value: number, compact = false): string {
+  if (compact) {
+    return `${new Intl.NumberFormat('en-US', {maximumFractionDigits: NUMBER_COMPACT_DIGITS}).format(value)}%`;
+  }
+  return `${value.toFixed(1)}%`;
+}
+
+/** Resolves a `ChartValueFormat` to the formatter every tick and tooltip of a chart shares. */
+export function valueFormatter(format: ChartValueFormat, currency: string): ChartValueFormatter {
+  if (typeof format === 'function') {
+    return format;
+  }
+  switch (format) {
+    case 'number':
+      return plainNumber;
+    case 'percent':
+      return percent;
+    default:
+      return (value, compact) => money(value, currency, compact);
+  }
 }
