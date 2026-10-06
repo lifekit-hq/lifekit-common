@@ -27,7 +27,7 @@ const BASE_CLASSES =
   template: `
     <span
       [class]="classes()"
-      [attr.aria-label]="label()"
+      [attr.aria-label]="label() || null"
       [attr.aria-valuemax]="total()"
       [attr.aria-valuenow]="clampedUsed()"
       [attr.aria-valuetext]="readout()"
@@ -57,9 +57,12 @@ export class UsageChipComponent {
 
   public readonly clampedUsed = computed(() => Math.min(Math.max(this.used(), 0), this.total()));
 
-  public readonly ratio = computed(() =>
-    this.total() > 0 ? this.clampedUsed() / this.total() : 0
-  );
+  public readonly ratio = computed(() => {
+    if (this.total() > 0) {
+      return this.clampedUsed() / this.total();
+    }
+    return this.used() > 0 ? 1 : 0;
+  });
 
   public readonly percent = computed(() => this.ratio() * PERCENT);
 

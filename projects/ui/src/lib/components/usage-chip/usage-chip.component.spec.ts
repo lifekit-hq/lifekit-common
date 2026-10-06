@@ -83,6 +83,26 @@ describe('UsageChipComponent', () => {
     expect(fill().style.width).toBe('0%');
   });
 
+  it('treats any usage against a zero total as exhausted', () => {
+    host.used.set(5);
+    host.total.set(0);
+    fixture.detectChanges();
+    expect(fill().className).toContain('bg-status-error');
+    expect(fill().style.width).toBe('100%');
+    expect(meter().textContent).toContain('5 of 0');
+  });
+
+  it('keeps the success tone when nothing is used against a zero total', () => {
+    host.used.set(0);
+    host.total.set(0);
+    fixture.detectChanges();
+    expect(fill().className).toContain('bg-status-success');
+  });
+
+  it('omits aria-label when no label is given', () => {
+    expect(meter().hasAttribute('aria-label')).toBe(false);
+  });
+
   it('clamps negative usage to zero', () => {
     host.used.set(-5);
     fixture.detectChanges();
