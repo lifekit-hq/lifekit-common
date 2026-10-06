@@ -1,6 +1,7 @@
 import type {Meta, StoryObj} from '@storybook/angular';
 import {moduleMetadata} from '@storybook/angular';
 
+import {CardComponent} from '../card/card.component';
 import {InstitutionAvatarComponent} from '../institution-avatar/institution-avatar.component';
 import {DataTableComponent} from './data-table.component';
 import {CmnCellDirective, CmnHeaderCellDirective} from './data-table-cell.directive';
@@ -59,6 +60,7 @@ const meta: Meta<DataTableComponent<Transaction>> = {
   decorators: [
     moduleMetadata({
       imports: [
+        CardComponent,
         CmnCellDirective,
         CmnColumnComponent,
         CmnHeaderCellDirective,
@@ -103,6 +105,87 @@ export const Empty: Story = {
 export const Loading: Story = {
   args: {rows: [], loading: true},
   render: args => ({props: args, template: TEMPLATE}),
+};
+
+const CLICKABLE_TEMPLATE = `
+  <cmn-data-table [rows]="rows" (rowClick)="onRowClick($event)">
+    <cmn-column key="date" header="Date" />
+    <cmn-column key="description" header="Description" />
+    <cmn-column key="amount" header="Amount" align="right" />
+  </cmn-data-table>
+`;
+
+/**
+ * A \`rowClick\` subscriber makes rows actionable: pointer cursor, hover highlight, and
+ * focusable with a visible focus ring. Tab to a row and press Enter or Space to activate it.
+ */
+export const ClickableRows: Story = {
+  args: {rows: ROWS},
+  render: args => ({props: {...args, onRowClick: () => undefined}, template: CLICKABLE_TEMPLATE}),
+};
+
+const READ_ONLY_TEMPLATE = `
+  <cmn-data-table [rows]="rows">
+    <cmn-column key="date" header="Date" />
+    <cmn-column key="description" header="Description" />
+    <cmn-column key="amount" header="Amount" align="right" />
+  </cmn-data-table>
+`;
+
+/** Without a \`rowClick\` subscriber rows are inert: no hover highlight, pointer cursor or tab stop. */
+export const ReadOnlyRows: Story = {
+  args: {rows: ROWS},
+  render: args => ({props: args, template: READ_ONLY_TEMPLATE}),
+};
+
+/** The loading skeleton mirrors the declared columns: three columns, three bars per row. */
+export const ThreeColumnLoading: Story = {
+  args: {rows: [], loading: true},
+  render: args => ({
+    props: args,
+    template: READ_ONLY_TEMPLATE.replace('[rows]="rows"', '[rows]="rows" [loading]="loading"'),
+  }),
+};
+
+const MANY_ROWS: Transaction[] = Array.from({length: 40}, (_, i) => ({
+  ...ROWS[i % ROWS.length],
+  description: `${ROWS[i % ROWS.length].description} #${i + 1}`,
+}));
+
+/**
+ * Inside a height-constrained \`<cmn-card fill>\` the table scrolls internally and the
+ * header row stays pinned to the top.
+ */
+export const ManyRowsScrolling: Story = {
+  args: {rows: MANY_ROWS},
+  render: args => ({
+    props: args,
+    template: `
+      <div style="height: 20rem" class="flex">
+        <cmn-card [fill]="true" padding="none">
+          <cmn-data-table [rows]="rows">
+            <cmn-column key="date" header="Date" />
+            <cmn-column key="description" header="Description" />
+            <cmn-column key="amount" header="Amount" align="right" />
+          </cmn-data-table>
+        </cmn-card>
+      </div>
+    `,
+  }),
+};
+
+const ALIGNED_TEMPLATE = `
+  <cmn-data-table [rows]="rows">
+    <cmn-column key="description" header="Left" align="left" />
+    <cmn-column key="status" header="Center" align="center" />
+    <cmn-column key="amount" header="Right" align="right" />
+  </cmn-data-table>
+`;
+
+/** Left, center and right column alignment in one table (header and cells agree). */
+export const AlignedColumns: Story = {
+  args: {rows: ROWS},
+  render: args => ({props: args, template: ALIGNED_TEMPLATE}),
 };
 
 const FIXED_WIDTHS_TEMPLATE = `
