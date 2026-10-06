@@ -240,8 +240,9 @@ This audit confirms that verdict stands (see §select verdict above).
 ## UX continuity policy
 
 Every lifekit product applies one policy for how a screen behaves while data loads, refreshes or
-is absent. The policy lives here and ships with the primitives that implement it
-(`cmn-skeleton`, `cmn-async-state`, `cmn-empty-state`, `cmn-page-container`).
+is absent. The policy lives here; the primitives (`cmn-skeleton`, `cmn-async-state`,
+`cmn-empty-state`, `cmn-page-container`) enforce some rules today and the rest are targets they
+grow into (see the status table below).
 
 1. **Skeletons, not spinners or "Loading…" text.** A first load shows a skeleton shaped like the
    final content, so the page does not reflow when data arrives.
@@ -259,7 +260,18 @@ is absent. The policy lives here and ships with the primitives that implement it
 7. **One page frame.** Pages sit in `cmn-page-container` (1200px max width,
    `p-cmn-4 md:p-cmn-8`) so width and padding match across products.
 
-Apps adopt these through `cmn-async-state` and `cmn-skeleton` rather than local loading markup.
+| Rule                                 | Status   | Where                                                                          |
+| ------------------------------------ | -------- | ------------------------------------------------------------------------------ |
+| 1. Skeletons, not spinners           | Enforced | `cmn-async-state` renders `cmn-skeleton` while `loading`                       |
+| 2. Loading is not empty              | Enforced | `cmn-async-state` shows empty only when `success` and `isEmpty`                |
+| 3. Keep cached data while refreshing | Target   | `loading` always replaces content with a skeleton                              |
+| 4. No micro-flashes                  | Target   | no indicator delay or minimum display time                                     |
+| 5. No layout shift                   | Partial  | stable page width via `cmn-page-container`; skeleton height is caller-supplied |
+| 6. Errors keep context               | Target   | the error branch replaces content with an alert, no retry or last-good data    |
+| 7. One page frame                    | Enforced | `cmn-page-container` defaults                                                  |
+
+Apps use `cmn-async-state` and `cmn-skeleton` rather than local loading markup; rules marked
+Target are not yet guaranteed by the primitives and must be handled in the app until they are.
 
 ---
 

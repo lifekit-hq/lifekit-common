@@ -35,12 +35,12 @@
   background: transparent;
 }
 
-a {
+:where(a) {
   color: var(--color-accent-default);
   text-decoration: none;
 }
 
-a:hover {
+:where(a:hover) {
   color: var(--color-accent-hover);
   text-decoration: underline;
 }
