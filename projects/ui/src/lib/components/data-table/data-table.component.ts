@@ -22,6 +22,20 @@ import {type CmnTablePagination} from './data-table-pagination.model';
 
 const SKELETON_ROWS = 5;
 
+/** Bar widths cycled across a skeleton row, one bar per declared column. */
+const SKELETON_BAR_WIDTHS = ['20%', '35%', '25%'];
+
+const ALIGN_CLASSES: Record<CmnColumnAlign, string> = {
+  left: 'text-left',
+  center: 'text-center',
+  right: 'text-right',
+};
+
+const ROW_BASE_CLASS = 'transition-colors';
+const ROW_ACTIONABLE_CLASS =
+  'cursor-pointer hover:bg-surface-raised focus:outline-none focus-visible:bg-surface-raised ' +
+  'focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-border-focus';
+
 /**
  * `responsive` (default) renders list rows below `md` when at least one column
  * declares a `listSlot`, and the table otherwise; `table` and `list` pin one layout.
@@ -34,6 +48,7 @@ type ListSlotColumns = Record<CmnListSlot, CmnColumnComponent[]>;
   selector: 'cmn-data-table',
   imports: [ButtonComponent, CdkTableModule, NgTemplateOutlet, SkeletonComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {class: 'flex h-full min-h-0 flex-col'},
   template: `
     <ng-template #cellContent let-col let-row="row" let-i="index">
       @if (col.cell(); as c) {
@@ -61,8 +76,11 @@ type ListSlotColumns = Record<CmnListSlot, CmnColumnComponent[]>;
           <ul class="divide-y divide-border-default" role="list">
             @for (row of rows(); track trackRow($index, row); let i = $index) {
               <li
+                [attr.tabindex]="rowsActionable() ? 0 : null"
+                [class]="listRowClass()"
                 (click)="rowClick.emit(row)"
-                class="flex items-center gap-cmn-3 px-cmn-4 py-cmn-3 transition-colors hover:bg-surface-raised"
+                (keydown.enter)="onRowKey($event, row)"
+                (keydown.space)="onRowKey($event, row)"
                 data-testid="list-row"
               >
                 @for (col of listColumns().leading; track col.key()) {
@@ -138,15 +156,16 @@ type ListSlotColumns = Record<CmnListSlot, CmnColumnComponent[]>;
         }
       </div>
     } @else {
-      <div class="overflow-x-auto rounded-cmn-lg border border-border-default bg-surface-card">
+      <div
+        class="min-h-0 flex-1 overflow-auto rounded-cmn-lg border border-border-default bg-surface-card"
+      >
         @if (loading()) {
-          <div class="p-cmn-4 space-y-cmn-3">
+          <div class="p-cmn-4 space-y-cmn-3" data-testid="table-skeleton">
             @for (_ of skeletonRows; track $index) {
-              <div class="flex gap-cmn-4">
-                <cmn-skeleton height="1rem" width="20%" />
-                <cmn-skeleton height="1rem" width="35%" />
-                <cmn-skeleton height="1rem" width="25%" />
-                <cmn-skeleton height="1rem" width="20%" />
+              <div class="flex gap-cmn-4" data-testid="skeleton-row">
+                @for (width of skeletonBarWidths(); track $index) {
+                  <cmn-skeleton [style.width]="width" height="1rem" />
+                }
               </div>
             }
           </div>
@@ -179,16 +198,15 @@ type ListSlotColumns = Record<CmnListSlot, CmnColumnComponent[]>;
               </ng-container>
             }
 
-            <tr
-              *cdkHeaderRowDef="columnKeys()"
-              cdk-header-row
-              class="border-b border-border-default"
-            ></tr>
+            <tr *cdkHeaderRowDef="columnKeys()" cdk-header-row></tr>
             <tr
               *cdkRowDef="let row; columns: columnKeys()"
+              [attr.tabindex]="rowsActionable() ? 0 : null"
+              [class]="tableRowClass()"
               (click)="rowClick.emit(row)"
+              (keydown.enter)="onRowKey($event, row)"
+              (keydown.space)="onRowKey($event, row)"
               cdk-row
-              class="border-b border-border-default last:border-0 transition-colors hover:bg-surface-raised"
             ></tr>
 
             <tr *cdkNoDataRow class="cdk-row">
@@ -251,6 +269,14 @@ export class DataTableComponent<T = Record<string, unknown>> {
   public readonly trackBy = input<TrackByFunction<T> | null>(null);
   public readonly pagination = input<CmnTablePagination | null>(null);
 
+  /**
+   * Opt in when `rowClick` is handled: rows become focusable with a pointer cursor,
+   * hover highlight and focus ring, and activate on Enter/Space. Off by default so
+   * read-only rows stay inert.
+   */
+  public readonly rowsActionable = input<boolean>(false);
+
+  /** Emits when a row is clicked, or activated with Enter/Space while `rowsActionable` is set. */
   public readonly rowClick = output<T>();
   public readonly previousPage = output<void>();
   public readonly nextPage = output<void>();
@@ -287,14 +313,38 @@ export class DataTableComponent<T = Record<string, unknown>> {
     return slots;
   });
 
+  protected readonly tableRowClass = computed(
+    () =>
+      `border-b border-border-default last:border-0 ${ROW_BASE_CLASS}${this.rowsActionable() ? ' ' + ROW_ACTIONABLE_CLASS : ''}`
+  );
+
+  protected readonly listRowClass = computed(
+    () =>
+      `flex items-center gap-cmn-3 px-cmn-4 py-cmn-3 ${ROW_BASE_CLASS}${this.rowsActionable() ? ' ' + ROW_ACTIONABLE_CLASS : ''}`
+  );
+
   protected readonly skeletonRows = Array.from({length: SKELETON_ROWS});
 
+  /** One bar per column so the loading state matches the table's shape. */
+  protected readonly skeletonBarWidths = computed(() =>
+    this.columns().map((_, i) => SKELETON_BAR_WIDTHS[i % SKELETON_BAR_WIDTHS.length])
+  );
+
   public headerCellClass(align: CmnColumnAlign): string {
-    return `px-cmn-4 py-cmn-3 font-label text-cmn-xs font-semibold uppercase tracking-wide text-text-secondary ${this.alignClass(align)}`;
+    return `sticky top-0 z-10 bg-surface-card shadow-[inset_0_-1px_0_var(--color-border-default)] px-cmn-4 py-cmn-3 font-label text-cmn-xs font-semibold uppercase tracking-wide text-text-secondary ${this.alignClass(align)}`;
   }
 
   public dataCellClass(align: CmnColumnAlign): string {
     return `px-cmn-4 py-cmn-3 text-text-primary ${this.alignClass(align)}`;
+  }
+
+  protected onRowKey(event: Event, row: T): void {
+    // Keys pressed inside a cell control (button, link) belong to that control.
+    if (!this.rowsActionable() || event.target !== event.currentTarget) {
+      return;
+    }
+    event.preventDefault();
+    this.rowClick.emit(row);
   }
 
   protected trackRow(index: number, row: T): unknown {
@@ -322,6 +372,6 @@ export class DataTableComponent<T = Record<string, unknown>> {
   }
 
   private alignClass(align: CmnColumnAlign): string {
-    return `text-${align}`;
+    return ALIGN_CLASSES[align];
   }
 }

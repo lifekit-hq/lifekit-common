@@ -18,7 +18,7 @@ interface Row {
   imports: [CmnCellDirective, CmnColumnComponent, CmnHeaderCellDirective, DataTableComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <cmn-data-table [rows]="rows()" [emptyMessage]="emptyMessage()">
+    <cmn-data-table [rows]="rows()" [emptyMessage]="emptyMessage()" [rowsActionable]="actionable()">
       <cmn-column key="name" header="Name">
         <ng-template let-row cmnCell>{{ row.name }}</ng-template>
       </cmn-column>
@@ -32,7 +32,22 @@ interface Row {
 class TestHostComponent {
   public readonly rows = input<Row[]>([]);
   public readonly emptyMessage = input<string>('No data');
+  public readonly actionable = input(false);
 }
+
+@Component({
+  selector: 'cmn-test-loading-host',
+  imports: [CmnColumnComponent, DataTableComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <cmn-data-table [loading]="true">
+      <cmn-column key="a" header="A" />
+      <cmn-column key="b" header="B" />
+      <cmn-column key="c" header="C" />
+    </cmn-data-table>
+  `,
+})
+class LoadingHostComponent {}
 
 const ROWS: Row[] = [
   {name: 'Groceries', amount: 54},
@@ -81,6 +96,63 @@ describe('DataTableComponent', () => {
     expect(text).toContain('Groceries');
     expect(text).toContain('$5000');
   });
+
+  it('keeps rows inert by default', () => {
+    fixture.componentRef.setInput('rows', ROWS);
+    fixture.detectChanges();
+    const row = fixture.nativeElement.querySelector('tr[cdk-row]') as HTMLElement;
+    expect(row.hasAttribute('tabindex')).toBe(false);
+    expect(row.className).not.toContain('hover:');
+    expect(row.className).not.toContain('cursor-pointer');
+  });
+
+  it('makes rows focusable and actionable when rowsActionable is set', () => {
+    fixture.componentRef.setInput('rows', ROWS);
+    fixture.componentRef.setInput('actionable', true);
+    fixture.detectChanges();
+    const row = fixture.nativeElement.querySelector('tr[cdk-row]') as HTMLElement;
+    expect(row.getAttribute('tabindex')).toBe('0');
+    expect(row.className).toContain('hover:bg-surface-raised');
+    expect(row.className).toContain('cursor-pointer');
+  });
+
+  it('renders one skeleton bar per column in every loading row', () => {
+    const loading = TestBed.createComponent(LoadingHostComponent);
+    loading.detectChanges();
+    const rows = (loading.nativeElement as HTMLElement).querySelectorAll(
+      '[data-testid="skeleton-row"]'
+    );
+    expect(rows.length).toBeGreaterThan(0);
+    rows.forEach(row => expect(row.querySelectorAll('cmn-skeleton')).toHaveLength(3));
+  });
+
+  it('sizes each skeleton bar on its host so the bar is visible in a flex row', () => {
+    const loading = TestBed.createComponent(LoadingHostComponent);
+    loading.detectChanges();
+    const bars = (loading.nativeElement as HTMLElement).querySelectorAll<HTMLElement>(
+      '[data-testid="skeleton-row"] cmn-skeleton'
+    );
+    expect(Array.from(bars).every(bar => bar.style.width !== '')).toBe(true);
+  });
+
+  it('pins header cells with the sticky classes', () => {
+    const headers = fixture.nativeElement.querySelectorAll('th') as NodeListOf<HTMLElement>;
+    expect(headers.length).toBe(2);
+    headers.forEach(th => {
+      expect(th.classList).toContain('sticky');
+      expect(th.classList).toContain('top-0');
+    });
+  });
+
+  it.each([
+    ['left', 'text-left'],
+    ['center', 'text-center'],
+    ['right', 'text-right'],
+  ] as const)('maps %s alignment to the literal %s class', (align, expected) => {
+    const table = fixture.debugElement.children[0].componentInstance as DataTableComponent;
+    expect(table.headerCellClass(align)).toContain(expected);
+    expect(table.dataCellClass(align)).toContain(expected);
+  });
 });
 
 interface Txn {
@@ -103,6 +175,7 @@ interface Txn {
       [mode]="mode()"
       [pagination]="pagination()"
       [rows]="rows()"
+      [rowsActionable]="actionable()"
       [trackBy]="trackById"
       (rowClick)="clicked = $event"
       emptyMessage="No transactions"
@@ -125,6 +198,7 @@ class ListHostComponent {
   public readonly rows = input<Txn[]>([]);
   public readonly mode = input<'responsive' | 'table' | 'list'>('responsive');
   public readonly loading = input(false);
+  public readonly actionable = input(true);
   public readonly pagination = input<CmnTablePagination | null>(null);
   public clicked: Txn | null = null;
 
@@ -233,6 +307,59 @@ describe('DataTableComponent list-row mode', () => {
     fixture.detectChanges();
     expect(el.querySelector('table')).not.toBeNull();
     expect(el.textContent).toContain('Pending');
+  });
+
+  it('makes table rows focusable and actionable when rowsActionable is set', () => {
+    const row = el.querySelector('tr[cdk-row]') as HTMLElement;
+    expect(row.getAttribute('tabindex')).toBe('0');
+    expect(row.className).toContain('hover:bg-surface-raised');
+    expect(row.className).toContain('cursor-pointer');
+  });
+
+  it.each(['Enter', ' '])('emits rowClick when a table row receives %j', key => {
+    const row = el.querySelector('tr[cdk-row]') as HTMLElement;
+    const event = new KeyboardEvent('keydown', {key, bubbles: true, cancelable: true});
+    row.dispatchEvent(event);
+    expect(fixture.componentInstance.clicked?.merchant).toBe('Whole Foods');
+    expect(event.defaultPrevented).toBe(true);
+  });
+
+  it('ignores other keys and keys pressed inside a cell control', () => {
+    const row = el.querySelector('tr[cdk-row]') as HTMLElement;
+    row.dispatchEvent(new KeyboardEvent('keydown', {key: 'a', bubbles: true}));
+    expect(fixture.componentInstance.clicked).toBeNull();
+
+    const cell = row.querySelector('td') as HTMLElement;
+    cell.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter', bubbles: true}));
+    expect(fixture.componentInstance.clicked).toBeNull();
+  });
+
+  it('keeps table and list rows inert and silent when rowsActionable is off', () => {
+    fixture.componentRef.setInput('actionable', false);
+    fixture.detectChanges();
+    const row = el.querySelector('tr[cdk-row]') as HTMLElement;
+    expect(row.hasAttribute('tabindex')).toBe(false);
+    expect(row.className).not.toContain('cursor-pointer');
+    row.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter', bubbles: true}));
+    expect(fixture.componentInstance.clicked).toBeNull();
+
+    fixture.componentRef.setInput('mode', 'list');
+    fixture.detectChanges();
+    const [first] = listRows();
+    expect(first.hasAttribute('tabindex')).toBe(false);
+    expect(first.className).not.toContain('hover:');
+    first.dispatchEvent(new KeyboardEvent('keydown', {key: ' ', bubbles: true}));
+    expect(fixture.componentInstance.clicked).toBeNull();
+  });
+
+  it('makes list rows focusable and emits on Enter', () => {
+    fixture.componentRef.setInput('mode', 'list');
+    fixture.detectChanges();
+    const [first] = listRows();
+    expect(first.getAttribute('tabindex')).toBe('0');
+    expect(first.className).toContain('hover:bg-surface-raised');
+    first.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter', bubbles: true}));
+    expect(fixture.componentInstance.clicked?.merchant).toBe('Whole Foods');
   });
 
   it('emits rowClick from a list row', () => {

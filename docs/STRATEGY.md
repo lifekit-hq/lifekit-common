@@ -153,7 +153,8 @@ not ng-zorro.
 **What it does today:** Wraps `CdkTableModule` for row/header rendering. Column definitions
 are projected via `contentChildren(CmnColumnComponent)`, which carry `CmnCellDirective` and
 `CmnHeaderCellDirective` templates. Adds token-based styling, skeleton loading state, pagination
-controls (previous/next), empty-row handling, and row-click events. Generic over the row type `T`.
+controls (previous/next), empty-row handling, a sticky header, and row-click events (rows are
+keyboard-activatable and highlighted only when `rowsActionable` is set). Generic over the row type `T`.
 Below `md` (768px), columns that declare a `listSlot` render as stacked list rows (leading,
 primary, secondary, trailing, trailing-secondary) instead of table rows; `mode` pins either layout.
 
