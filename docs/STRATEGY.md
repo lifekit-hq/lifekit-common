@@ -38,7 +38,15 @@ Components are split by whether they carry framework behaviour. This replaces th
    Their inputs, events and slots are named to the `lk-*` element conventions so a later port
    is mechanical.
 4. **CI enforcement.** A new component classed `simple-leaf` cannot land as an Angular
-   component.
+   component. `scripts/check-strategy-coverage.mjs` fails when a directory under
+   `projects/ui/src/lib/components/` has `simple-leaf` in the **Complexity** column and is not on
+   the frozen `LEGACY_SIMPLE_LEAVES` list in that script. How a component is classed:
+   `simple-leaf` means presentational only (inputs and slots, token CSS, no forms integration,
+   overlay, focus management, service or router use); `interactive` means it owns behaviour
+   (events, state, `ControlValueAccessor`, CDK); `templated` means it composes projected
+   templates or slots. Class the component honestly in the inventory table: a simple leaf is
+   built in `projects/elements`, not added here. The legacy list only shrinks, and the check
+   also fails if an entry outlives its directory or classification.
 5. **Revisit trigger.** The behavioural half is reconsidered only when a second framework
    consumer is real and not deferred.
 
