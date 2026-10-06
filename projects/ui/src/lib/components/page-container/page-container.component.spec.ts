@@ -25,30 +25,31 @@ describe('PageContainerComponent', () => {
 
   it('should render the outer padding container', () => {
     const outer: HTMLElement | null = fixture.nativeElement.querySelector('div');
-    expect(outer?.classList).toContain('p-cmn-6');
+    expect(outer?.classList).toContain('p-cmn-4');
+    expect(outer?.classList).toContain('md:p-cmn-8');
   });
 
   // Inner queries anchor on the padding class rather than 'div > div': the Vitest runner
   // mounts the fixture on a <div> host, which makes a bare div-hierarchy selector ambiguous.
   it('should apply default max-width and spacing to the inner container', () => {
-    const inner: HTMLElement | null = fixture.nativeElement.querySelector('.p-cmn-6 > div');
+    const inner: HTMLElement | null = fixture.nativeElement.querySelector('.p-cmn-4 > div');
     expect(inner?.classList).toContain('mx-auto');
-    expect(inner?.classList).toContain('max-w-screen-lg');
+    expect(inner?.classList).toContain('max-w-[1200px]');
     expect(inner?.classList).toContain('space-y-cmn-5');
   });
 
   it('should apply a custom maxWidth class to the inner container', () => {
     fixture.componentRef.setInput('maxWidth', 'max-w-[900px]');
     fixture.detectChanges();
-    const inner: HTMLElement | null = fixture.nativeElement.querySelector('.p-cmn-6 > div');
+    const inner: HTMLElement | null = fixture.nativeElement.querySelector('.p-cmn-4 > div');
     expect(inner?.classList).toContain('max-w-[900px]');
-    expect(inner?.classList).not.toContain('max-w-screen-lg');
+    expect(inner?.classList).not.toContain('max-w-[1200px]');
   });
 
   it('should apply lg spacing class when spacing is "lg"', () => {
     fixture.componentRef.setInput('spacing', 'lg');
     fixture.detectChanges();
-    const inner: HTMLElement | null = fixture.nativeElement.querySelector('.p-cmn-6 > div');
+    const inner: HTMLElement | null = fixture.nativeElement.querySelector('.p-cmn-4 > div');
     expect(inner?.classList).toContain('space-y-cmn-10');
     expect(inner?.classList).not.toContain('space-y-cmn-5');
   });
@@ -56,7 +57,7 @@ describe('PageContainerComponent', () => {
   it('should apply md spacing class when spacing is "md"', () => {
     fixture.componentRef.setInput('spacing', 'md');
     fixture.detectChanges();
-    const inner: HTMLElement | null = fixture.nativeElement.querySelector('.p-cmn-6 > div');
+    const inner: HTMLElement | null = fixture.nativeElement.querySelector('.p-cmn-4 > div');
     expect(inner?.classList).toContain('space-y-cmn-5');
   });
 });

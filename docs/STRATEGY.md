@@ -237,6 +237,32 @@ This audit confirms that verdict stands (see §select verdict above).
 
 ---
 
+## UX continuity policy
+
+Every lifekit product applies one policy for how a screen behaves while data loads, refreshes or
+is absent. The policy lives here and ships with the primitives that implement it
+(`cmn-skeleton`, `cmn-async-state`, `cmn-empty-state`, `cmn-page-container`).
+
+1. **Skeletons, not spinners or "Loading…" text.** A first load shows a skeleton shaped like the
+   final content, so the page does not reflow when data arrives.
+2. **Loading is not empty.** An empty state is shown only after a load has succeeded with no
+   results. Never flash "nothing here" before the data lands.
+3. **Keep cached data while refreshing.** A refetch, poll or revalidation keeps the previous
+   data on screen and signals progress unobtrusively. Replace content with a skeleton only when
+   there is nothing to show yet.
+4. **No micro-flashes.** Delay a loading indicator briefly so a fast response never flickers
+   in, and once shown keep it for a minimum time so it does not blink away.
+5. **No layout shift.** Reserve space for async content (skeleton dimensions, fixed row heights,
+   stable page width) so nothing jumps as it resolves.
+6. **Errors keep context.** A failed refresh keeps the last good data and offers a retry; a
+   failed first load shows an error state in place of the skeleton.
+7. **One page frame.** Pages sit in `cmn-page-container` (1200px max width,
+   `p-cmn-4 md:p-cmn-8`) so width and padding match across products.
+
+Apps adopt these through `cmn-async-state` and `cmn-skeleton` rather than local loading markup.
+
+---
+
 ## Sequencing note — what unblocks issue #3
 
 Issue #3 is the look-and-feel pass (typography, spacing, colour, motion tokens applied
