@@ -1,5 +1,7 @@
 import {ChangeDetectionStrategy, Component, signal} from '@angular/core';
 import {type ComponentFixture, TestBed} from '@angular/core/testing';
+import {provideRouter, Router} from '@angular/router';
+import {RouterTestingHarness} from '@angular/router/testing';
 import {beforeEach, describe, expect, it} from 'vitest';
 
 import {type CmnTab, TabGroupComponent} from './tab-group.component';
@@ -208,5 +210,67 @@ describe('TabGroupComponent — content projection', () => {
     expect(tablistIdx).toBeGreaterThanOrEqual(0);
     expect(panelIdx).toBeGreaterThanOrEqual(0);
     expect(tablistIdx).toBeLessThan(panelIdx);
+  });
+});
+
+@Component({changeDetection: ChangeDetectionStrategy.OnPush, template: ''})
+class StubPageComponent {}
+
+@Component({
+  imports: [TabGroupComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: '<cmn-tab-group [tabs]="tabs" ariaLabel="Sections" />',
+})
+class RoutedHostComponent {
+  public readonly tabs: CmnTab[] = [
+    {id: 'one', label: 'One', link: '/one'},
+    {id: 'two', label: 'Two', link: ['/two']},
+  ];
+}
+
+describe('TabGroupComponent — routed mode', () => {
+  let fixture: ComponentFixture<RoutedHostComponent>;
+  let links: HTMLAnchorElement[];
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [RoutedHostComponent],
+      providers: [
+        provideRouter([
+          {path: 'one', component: StubPageComponent},
+          {path: 'two', component: StubPageComponent},
+        ]),
+      ],
+    }).compileComponents();
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/one');
+    fixture = TestBed.createComponent(RoutedHostComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    links = Array.from(fixture.nativeElement.querySelectorAll('a'));
+  });
+
+  it('should render a labelled nav of links instead of a tablist', () => {
+    const el: HTMLElement = fixture.nativeElement;
+    expect(el.querySelector('[role="tablist"]')).toBeNull();
+    expect(el.querySelector('nav')?.getAttribute('aria-label')).toBe('Sections');
+    expect(links.map(a => a.getAttribute('href'))).toEqual(['/one', '/two']);
+  });
+
+  it('should mark the link matching the URL as active with aria-current', () => {
+    expect(links[0].getAttribute('aria-current')).toBe('page');
+    expect(links[0].classList).toContain('border-accent-default');
+    expect(links[1].getAttribute('aria-current')).toBeNull();
+    expect(links[1].classList).toContain('border-transparent');
+  });
+
+  it('should move the active state when the route changes', async () => {
+    await TestBed.inject(Router).navigateByUrl('/two');
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(links[1].getAttribute('aria-current')).toBe('page');
+    expect(links[1].classList).toContain('border-accent-default');
+    expect(links[0].getAttribute('aria-current')).toBeNull();
   });
 });

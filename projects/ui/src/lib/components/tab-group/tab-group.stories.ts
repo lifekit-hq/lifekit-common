@@ -1,4 +1,6 @@
-import type {Meta, StoryObj} from '@storybook/angular';
+import {ChangeDetectionStrategy, Component} from '@angular/core';
+import {provideRouter} from '@angular/router';
+import {applicationConfig, type Meta, type StoryObj} from '@storybook/angular';
 
 import {TabGroupComponent} from './tab-group.component';
 
@@ -107,4 +109,30 @@ export const HoldingsStyle: Story = {
       active: 'holdings',
     },
   }),
+};
+
+@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: '<p class="p-cmn-4 text-cmn-sm text-text-secondary">Routed panel</p>',
+})
+class RoutedPanelComponent {}
+
+export const Routed: Story = {
+  decorators: [
+    applicationConfig({
+      providers: [
+        provideRouter([
+          {path: 'allocation', component: RoutedPanelComponent},
+          {path: 'positions', component: RoutedPanelComponent},
+        ]),
+      ],
+    }),
+  ],
+  args: {
+    ariaLabel: 'Holdings views',
+    tabs: [
+      {id: 'allocation', label: 'Allocation', link: '/allocation'},
+      {id: 'positions', label: 'Positions', link: '/positions'},
+    ],
+  },
 };
