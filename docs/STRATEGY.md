@@ -76,6 +76,7 @@ All components listed below are ported-from-production unless otherwise noted.
 | command-palette | ported-from-production | interactive | keep-own | Grouped keyboard navigation + real-time search; CDK Dialog integration; bespoke interaction model for lifekit navigation |
 | data-table | ported-from-production | templated | keep-own | CDK table is the correct foundation; column projection via `contentChildren` is Angular-idiomatic; see §"Expensive components" below |
 | dialog | ported-from-production | templated | keep-own | Extends `CdkDialogContainer`; focus-trap, `aria-modal`, keyboard dismiss come from CDK; see §"Expensive components" |
+| date-range | new (added for ledger filter bar) | interactive | keep-own | `ControlValueAccessor` over two native `type=date` inputs emitting `{from, to}`; Angular forms integration, same native-control rationale as `input`/`select` |
 | disclosure-row | ported-from-production | templated | keep-own | Named `ng-content` slots (status/actions) over native `<details>`; institution+amount is a finance-domain pattern; reasonable Lit target later once slot API is stable |
 | donut-chart | ported-from-production | simple-leaf | element-rewrite | charts-core Lit path; chrome/legend variants map to attributes and slots |
 | drawer | ported-from-production | templated | keep-own | CDK portal + entering/open/closing state machine + `beforeClose$` subscription; a11y focus management via CDK; see §"Expensive components" |
@@ -89,10 +90,12 @@ All components listed below are ported-from-production unless otherwise noted.
 | line-chart | ported-from-production | simple-leaf | element-rewrite | Lit replacement `lk-line-chart` already exists in `projects/elements` (#10); this Angular wrapper is the primary strangler target |
 | list-item-row | ported-from-production | templated | keep-own | Four named `ng-content` slots (avatar/meta/amount/actions); finance-specific layout; slot combinatorics map awkwardly to Lit today |
 | menu | ported-from-production | interactive | keep-own | `CdkConnectedOverlay` for smart positioning + viewport clamping; keyboard escape; overlay lifecycle |
+| multi-select | new (added for ledger filter bar) | interactive | keep-own | `ControlValueAccessor` with `CdkConnectedOverlay` checklist panel; overlay + forms integration is Angular-specific, same CDK reasoning as `menu`; revisit with a Lit combobox per §"select" |
 | month-stepper | new (added for Budgets and Flow breakdown) | interactive | keep-own | `model()` two-way `Date` binding with min/max clamping and arrow-key stepping; depends on `icon` |
 | page-container | ported-from-production | simple-leaf | element-rewrite | Layout wrapper + token CSS; no logic |
 | page-header | ported-from-production | interactive | keep-own | Depends on `ButtonComponent` internally; action button with loading/disabled state |
 | password-strength | ported-from-production | simple-leaf | element-rewrite | Four-segment progress bar; pure CSS, no framework logic |
+| search-input | new (added for ledger filter bar) | interactive | keep-own | `ControlValueAccessor` over native `type=search` with leading icon and clear button; Angular forms integration, depends on `icon` |
 | select | ported-from-production | interactive | keep-own | Deliberate native `<select>` — see §"finance-sentry#319 history" |
 | selectable-card | ported-from-production | interactive | element-rewrite | Button + named slots (leading/body/trailing) + `aria-pressed`; maps cleanly to Lit |
 | sidebar-nav | ported-from-production | interactive | keep-own | Collapsible nav with collapsed signal, badge support, responsive width transition; app-shell concern |
@@ -105,7 +108,7 @@ All components listed below are ported-from-production unless otherwise noted.
 | toggle | ported-from-production | interactive | element-rewrite | Switch button + thumb animation + `aria-checked`; `role="switch"` + boolean attribute = clean Lit mapping |
 | top-bar | ported-from-production | interactive | keep-own | Uses `MenuComponent`; event orchestration (search/theme/avatar); app-shell concern |
 
-**Summary:** 24 keep-own · 19 element-rewrite · 1 wrap-base · 0 delete
+**Summary:** 27 keep-own · 19 element-rewrite · 1 wrap-base · 0 delete
 
 ---
 
