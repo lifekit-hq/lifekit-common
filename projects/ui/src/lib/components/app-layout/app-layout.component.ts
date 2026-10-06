@@ -1,11 +1,40 @@
-import {ChangeDetectionStrategy, Component, computed, input, output} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  input,
+  output,
+} from '@angular/core';
+import {toSignal} from '@angular/core/rxjs-interop';
+import {NavigationEnd, Router} from '@angular/router';
+import {filter, map} from 'rxjs';
 
+import {CmnDialogService} from '../../services/dialog/dialog.service';
+import {ThemeService} from '../../services/theme/theme.service';
 import {BottomTabBarComponent, MAX_BOTTOM_TABS} from '../bottom-tab-bar/bottom-tab-bar.component';
+import {CommandPaletteComponent} from '../command-palette/command-palette.component';
+import {
+  type CommandPaletteItem,
+  type PaletteResult,
+} from '../command-palette/command-palette-item.model';
+import {CmnDialogBareContainerComponent} from '../dialog/dialog-bare-container.component';
 import {type MenuItem} from '../menu/menu.component';
 import {type NavItem, SidebarNavComponent} from '../sidebar-nav/sidebar-nav.component';
 import {TopBarComponent} from '../top-bar/top-bar.component';
 
 export {type NavItem} from '../sidebar-nav/sidebar-nav.component';
+
+/** Palette action id the layout handles itself: toggles the theme. */
+export const PALETTE_THEME_ACTION = '_theme';
+
+/** The signed-in account shown as the top bar avatar and its menu. */
+export interface AppLayoutAccount {
+  /** Avatar text: initials, a name, or an email; the top bar reduces it to initials. */
+  label: string;
+  menuItems: MenuItem[];
+}
 
 /** Phone overlay: the bars sit over main below md instead of in flow. */
 const OVERLAY_TOP_BAR_CLASSES = 'max-md:absolute max-md:inset-x-0 max-md:top-0 max-md:z-30';
@@ -28,6 +57,7 @@ const MAIN_OVERLAY_BOTTOM_CLASSES =
   selector: 'cmn-app-layout',
   imports: [BottomTabBarComponent, SidebarNavComponent, TopBarComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {'(window:keydown)': 'onWindowKeydown($event)'},
   template: `
     <!-- Pinned with fixed/inset-0, not viewport units: h-screen/h-dvh overshoot the real
          viewport in iOS home-screen apps, which scrolls the document -->
@@ -35,7 +65,7 @@ const MAIN_OVERLAY_BOTTOM_CLASSES =
       <!-- Sidebar from md up; below md the bottom tab bar takes over -->
       <cmn-sidebar-nav
         [items]="navItems()"
-        [activeRoute]="activeRoute()"
+        [activeRoute]="effectiveActiveRoute()"
         [versionLabel]="versionLabel()"
         [brand]="brand()"
         (navClick)="navClick.emit($event)"
@@ -47,12 +77,12 @@ const MAIN_OVERLAY_BOTTOM_CLASSES =
           [class]="phoneOverlay() ? overlayTopBarClasses : ''"
           [overlay]="phoneOverlay()"
           [title]="title()"
-          [isDark]="isDark()"
+          [isDark]="effectiveIsDark()"
           [showThemeToggle]="showThemeToggle()"
-          [avatarLabel]="avatarLabel()"
-          [avatarMenuItems]="avatarMenuItems()"
-          (searchClick)="searchClick.emit()"
-          (themeToggle)="themeToggle.emit()"
+          [avatarLabel]="effectiveAvatarLabel()"
+          [avatarMenuItems]="effectiveAvatarMenuItems()"
+          (searchClick)="onSearchClick()"
+          (themeToggle)="onThemeToggle()"
           (avatarMenuSelect)="avatarMenuSelect.emit($event)"
         />
         <main [class]="mainClass()" [style.--cmn-fab-clearance.px]="fabClearance()">
@@ -61,7 +91,7 @@ const MAIN_OVERLAY_BOTTOM_CLASSES =
         <cmn-bottom-tab-bar
           [items]="phoneTabs()"
           [moreItems]="phoneMoreItems()"
-          [activeRoute]="activeRoute()"
+          [activeRoute]="effectiveActiveRoute()"
           [floating]="phoneOverlay()"
           [class]="phoneOverlay() ? overlayTabBarClasses : ''"
           (navClick)="navClick.emit($event)"
@@ -72,14 +102,46 @@ const MAIN_OVERLAY_BOTTOM_CLASSES =
   `,
 })
 export class AppLayoutComponent {
+  private readonly router = inject(Router);
+  private readonly dialog = inject(CmnDialogService);
+  private readonly themeService = inject(ThemeService);
+  private readonly destroyRef = inject(DestroyRef);
+  private paletteOpen = false;
+
+  private readonly routerUrl = toSignal(
+    this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      map(event => event.urlAfterRedirects)
+    ),
+    {initialValue: this.router.url}
+  );
+  private readonly theme = toSignal(this.themeService.activeTheme$, {initialValue: 'light'});
+
   public readonly navItems = input<NavItem[]>([]);
-  public readonly activeRoute = input<string>('');
+  /**
+   * Route (from `navItems`) shown as active. Left unset, the layout derives it from the router's
+   * current URL; set it only to override that.
+   */
+  public readonly activeRoute = input<string | undefined>(undefined);
   public readonly title = input<string>('');
-  public readonly isDark = input<boolean>(false);
+  /**
+   * Dark-theme flag for the top bar toggle. Left unset, the layout follows `ThemeService` and
+   * the toggle switches the theme itself; set it to own the theme yourself, in which case the
+   * toggle only emits `themeToggle`.
+   */
+  public readonly isDark = input<boolean | undefined>(undefined);
   /** Renders the top bar's theme toggle (both desktop and phone); false removes it. */
   public readonly showThemeToggle = input<boolean>(true);
+  /** The signed-in account; takes precedence over `avatarLabel` and `avatarMenuItems`. */
+  public readonly account = input<AppLayoutAccount | undefined>(undefined);
   public readonly avatarLabel = input<string>('');
   public readonly avatarMenuItems = input<MenuItem[]>([]);
+  /**
+   * Entries for the command palette. When non-empty the layout owns the palette: the search
+   * button and Cmd/Ctrl-K open it, and choosing a page entry navigates there. Empty leaves the
+   * palette to the consumer, who handles `searchClick` and the shortcut.
+   */
+  public readonly paletteItems = input<CommandPaletteItem[]>([]);
   public readonly versionLabel = input<string>('');
   /** Product name shown in the sidebar header; defaults to "Lifekit". */
   public readonly brand = input<string>('Lifekit');
@@ -108,6 +170,8 @@ export class AppLayoutComponent {
   public readonly searchClick = output<void>();
   public readonly themeToggle = output<void>();
   public readonly avatarMenuSelect = output<MenuItem>();
+  /** A palette action entry was chosen (the built-in theme toggle is handled by the layout). */
+  public readonly paletteAction = output<string>();
 
   public readonly phoneTabs = computed<NavItem[]>(() => {
     const items = this.navItems();
@@ -132,6 +196,27 @@ export class AppLayoutComponent {
     return `${MAIN_BASE_CLASSES} ${MAIN_OVERLAY_TOP_CLASSES}${bottom}`;
   });
 
+  protected readonly effectiveIsDark = computed<boolean>(
+    () => this.isDark() ?? this.theme() === 'dark'
+  );
+
+  protected readonly effectiveActiveRoute = computed<string>(() => {
+    const explicit = this.activeRoute();
+    if (explicit !== undefined) {
+      return explicit;
+    }
+    const url = this.routerUrl();
+    return this.navItems().find(item => url.startsWith(item.route))?.route ?? '';
+  });
+
+  protected readonly effectiveAvatarLabel = computed<string>(
+    () => this.account()?.label ?? this.avatarLabel()
+  );
+
+  protected readonly effectiveAvatarMenuItems = computed<MenuItem[]>(
+    () => this.account()?.menuItems ?? this.avatarMenuItems()
+  );
+
   protected readonly fabClearance = computed<number | null>(() => {
     const clearance = this.floatingActionClearance();
     return this.phoneOverlay() && this.navItems().length && clearance > 0 ? clearance : null;
@@ -139,4 +224,68 @@ export class AppLayoutComponent {
 
   protected readonly overlayTopBarClasses = OVERLAY_TOP_BAR_CLASSES;
   protected readonly overlayTabBarClasses = OVERLAY_TAB_BAR_CLASSES;
+
+  protected onWindowKeydown(event: KeyboardEvent): void {
+    if (
+      (event.metaKey || event.ctrlKey) &&
+      event.key.toLowerCase() === 'k' &&
+      this.managesPalette()
+    ) {
+      event.preventDefault();
+      this.openPalette();
+    }
+  }
+
+  protected onSearchClick(): void {
+    this.searchClick.emit();
+    if (this.managesPalette()) {
+      this.openPalette();
+    }
+  }
+
+  protected onThemeToggle(): void {
+    this.themeToggle.emit();
+    if (this.isDark() === undefined) {
+      this.themeService.toggle();
+    }
+  }
+
+  private managesPalette(): boolean {
+    return this.paletteItems().length > 0;
+  }
+
+  private openPalette(): void {
+    if (this.paletteOpen) {
+      return;
+    }
+    this.paletteOpen = true;
+    const ref = this.dialog.open<PaletteResult | undefined, CommandPaletteItem[]>(
+      CommandPaletteComponent,
+      {
+        data: this.paletteItems(),
+        container: CmnDialogBareContainerComponent,
+        hasBackdrop: false,
+        panelClass: [],
+        autoFocus: false,
+        disableClose: true,
+      }
+    );
+    this.destroyRef.onDestroy(() => ref.close());
+    ref.afterClosed().subscribe(result => {
+      this.paletteOpen = false;
+      if (result) {
+        this.handlePaletteResult(result);
+      }
+    });
+  }
+
+  private handlePaletteResult(result: PaletteResult): void {
+    if (result.type === 'navigate') {
+      void this.router.navigateByUrl(result.id);
+    } else if (result.id === PALETTE_THEME_ACTION && this.isDark() === undefined) {
+      this.themeService.toggle();
+    } else {
+      this.paletteAction.emit(result.id);
+    }
+  }
 }

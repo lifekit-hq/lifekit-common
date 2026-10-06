@@ -1,5 +1,6 @@
 import type {Meta, StoryObj} from '@storybook/angular';
 
+import type {CommandPaletteItem} from '../command-palette/command-palette-item.model';
 import type {MenuItem} from '../menu/menu.component';
 import type {NavItem} from '../sidebar-nav/sidebar-nav.component';
 import {AppLayoutComponent} from './app-layout.component';
@@ -265,4 +266,37 @@ export const PhoneOverlayFloatingActionDark: Story = {
   ...PhoneOverlayFloatingAction,
   args: {...PhoneOverlayFloatingAction.args, isDark: true},
   globals: {...PHONE, theme: 'dark'},
+};
+
+const PALETTE_ITEMS: CommandPaletteItem[] = [
+  {id: '/dashboard', label: 'Dashboard', icon: 'LayoutDashboard', group: 'Pages'},
+  {id: '/budgets', label: 'Budgets', icon: 'Zap', group: 'Pages'},
+  {id: '_theme', label: 'Toggle theme', icon: 'Sun', group: 'Actions'},
+];
+
+/**
+ * The shell owns its own glue: with no `activeRoute` and no `isDark` it follows the router and
+ * the theme service, and with `paletteItems` it opens the command palette from the search button
+ * and Cmd/Ctrl-K. The app passes only nav items, a brand and an `account` (label and menu). Try
+ * the theme toggle and Cmd-K; choosing "Toggle theme" in the palette flips the theme.
+ */
+export const LibraryManaged: Story = {
+  render: args => ({
+    props: args,
+    template: `
+      <cmn-app-layout
+        [navItems]="navItems"
+        [title]="title"
+        [brand]="brand"
+        [account]="account"
+        [paletteItems]="paletteItems"
+      >${BODY}</cmn-app-layout>
+    `,
+  }),
+  args: {
+    title: 'Dashboard',
+    brand: 'Lifekit',
+    account: {label: 'Ada Lovelace', menuItems: AVATAR_MENU},
+    paletteItems: PALETTE_ITEMS,
+  },
 };
