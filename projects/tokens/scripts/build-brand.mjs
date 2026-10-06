@@ -8,6 +8,8 @@
  *                    icon-192.png, icon-512.png, icon-maskable-512.png
  *   brand/dist/manifest.fragment.json   standard manifest fields (same for every app)
  *   brand/dist/head.html                head template (title placeholder)
+ *   brand/dist/theme-init.js            the pre-paint theme script (inline it)
+ *   brand/dist/theme-init.csp-hash.txt  its CSP `script-src` hash expression
  */
 import {mkdirSync, rmSync, writeFileSync} from 'node:fs';
 import {join} from 'node:path';
@@ -17,6 +19,7 @@ import {Resvg} from '@resvg/resvg-js';
 
 import {BRAND_APPS, fullBleedSvg, markSvg} from '../brand/mark.mjs';
 import {headMarkup, manifestFragment} from '../brand/standard.mjs';
+import {THEME_SCRIPT, themeScriptCspHash} from '../brand/theme-script.mjs';
 import {brandColors} from '../brand/tokens.mjs';
 import {encodeIco} from './ico.mjs';
 
@@ -56,6 +59,8 @@ export function buildBrand({outDir = DEFAULT_OUT_DIR, colors = brandColors()} = 
     `${JSON.stringify(manifestFragment(colors), null, 2)}\n`
   );
   writeFileSync(join(outDir, 'head.html'), `${headMarkup({title: '{App}'}, colors)}\n`);
+  writeFileSync(join(outDir, 'theme-init.js'), `${THEME_SCRIPT}\n`);
+  writeFileSync(join(outDir, 'theme-init.csp-hash.txt'), `${themeScriptCspHash()}\n`);
   return outDir;
 }
 

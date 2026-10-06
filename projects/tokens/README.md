@@ -4,8 +4,8 @@ Design tokens for the lifekit ecosystem, framework-agnostic.
 
 - `theme.css`: CSS custom properties. The light theme is the default (`:root` and
   `[data-theme='light']`); the dark theme applies under `[data-theme='dark']`. The file has no
-  `prefers-color-scheme` media query. To follow the OS, the app sets `data-theme` on `<html>`, as
-  finance-sentry's pre-paint script does. It also owns the font (`--font-sans`, `--font-mono`),
+  `prefers-color-scheme` media query. To follow the OS, the app sets `data-theme` on `<html>`: the
+  pre-paint script in `brand` does it before first paint, and `ThemeService` keeps it live. It also owns the font (`--font-sans`, `--font-mono`),
   radius (`--radius-sm/md/lg/full`) and shadow (`--shadow-sm/md/lg`) tokens and
   `--color-surface-hover`, each light and dark where themed. It sets `color-scheme` per theme, and
   the `html` background and text colour, so the canvas follows the active theme. A
@@ -15,7 +15,8 @@ Design tokens for the lifekit ecosystem, framework-agnostic.
   shadows read the `theme.css` custom properties, so a value change lands in `theme.css` only.
 - `fonts.css`: self-hosted variable Inter, the `--font-sans` font. No font CDN.
 - `brand`: the lifekit mark and the browser-chrome standard. That covers per-app icon sets under
-  `brand/<app>/`, `brand/head.html`, `brand/manifest.fragment.json`, Node helpers, a Vite plugin
+  `brand/<app>/`, `brand/head.html`, `brand/manifest.fragment.json`, the pre-paint theme script
+  (`brand/theme-init.js`) with its CSP hash, Node helpers, a Vite plugin
   (`brand/vite`) and the `lifekit-chrome-check` drift check. See
   [`docs/BROWSER-CHROME.md`](../../docs/BROWSER-CHROME.md).
 

@@ -17,6 +17,7 @@
     "./tailwind": "./tailwind/preset.cjs",
     "./brand": "./brand/index.mjs",
     "./brand/vite": "./brand/vite.mjs",
+    "./brand/theme-script": "./brand/theme-script.mjs",
     "./brand/*": "./brand/dist/*",
     "./package.json": "./package.json"
   },

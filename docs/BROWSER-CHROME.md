@@ -90,13 +90,9 @@ Every app serves these files from its site root:
 These are `--color-surface-bg` for the light and dark themes. The browser bar blends into the page
 and the icon carries the brand; an indigo bar over the dark UI would be loud.
 
-The media queries follow the OS only. An app with an in-app theme toggle also updates both metas
-whenever it changes `data-theme`:
-
-```ts
-const bg = getComputedStyle(document.documentElement).getPropertyValue('--color-surface-bg').trim();
-document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.setAttribute('content', bg));
-```
+The media queries follow the OS only. `ThemeService` (`@lifekit-hq/ui`) closes the gap: whenever
+it applies a theme, whether from a toggle, a stored choice or an OS change, it points every
+`theme-color` meta at the active `--color-surface-bg`. Apps write no sync code of their own.
 
 ## Manifest (`manifest.webmanifest`)
 
@@ -136,8 +132,26 @@ after `<meta charset>`:
 - `sizes="32x32"` on the ICO stops Chrome from choosing it over the SVG.
 - No other icon links, and no `data:,` placeholder.
 
-Keep the pre-paint theme script (as in finance-sentry's `index.html`) so the first paint already
-has the stored or OS theme.
+Add the pre-paint theme script too, so the first paint already has the stored or OS theme. Never
+copy it by hand: `@lifekit-hq/tokens` ships it, along with the hash your CSP needs.
+
+```html
+<script>
+  /* the contents of @lifekit-hq/tokens/brand/theme-init.js, unedited */
+</script>
+```
+
+- **Inline it from the package.** `brand/theme-init.js` is the exact script (the tag content is the file minus its trailing newline). `themeScriptTag()` and
+  `THEME_SCRIPT` from `@lifekit-hq/tokens/brand` give the same text for a build step or Vite
+  `transformIndexHtml`.
+- **Pin its hash in the CSP.** `brand/theme-init.csp-hash.txt` (or `themeScriptCspHash()`) is the
+  `script-src` source expression, e.g. `'sha256-…'`. The hash covers the exact bytes between the
+  tags (a newline, the script, a newline, as `themeScriptTag()` writes it), so inline it unedited. The hash only
+  changes in a release that edits the script, and the release notes say so. Compare the pinned
+  value against the package in CI and bump both together.
+- **What it does.** It reads the `cmn-theme` key `ThemeService` writes (`light` | `dark`), falls
+  back to the OS `prefers-color-scheme`, and sets `data-theme` on `<html>`. No stored choice means
+  the `system` preference, which `ThemeService` then follows live.
 
 ## Fonts and tokens
 
