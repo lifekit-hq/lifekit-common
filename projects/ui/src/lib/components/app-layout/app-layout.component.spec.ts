@@ -1,7 +1,11 @@
 import {type ComponentFixture, TestBed} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
-import {beforeEach, describe, expect, it} from 'vitest';
+import {provideRouter, Router} from '@angular/router';
+import {beforeEach, describe, expect, it, vi} from 'vitest';
 
+import {CmnDialogService} from '../../services/dialog/dialog.service';
+import {ThemeService} from '../../services/theme/theme.service';
+import {type CommandPaletteItem} from '../command-palette/command-palette-item.model';
 import {type MenuItem} from '../menu/menu.component';
 import {AppLayoutComponent, type NavItem} from './app-layout.component';
 
@@ -29,6 +33,7 @@ describe('AppLayoutComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AppLayoutComponent],
+      providers: [provideRouter([{path: '**', children: []}])],
     }).compileComponents();
     fixture = TestBed.createComponent(AppLayoutComponent);
     fixture.componentRef.setInput('navItems', NAV_ITEMS);
@@ -239,6 +244,186 @@ describe('AppLayoutComponent', () => {
       fixture.detectChanges();
       expect(el('main').className).toContain('max-md:pt-');
       expect(el('main').className).not.toContain('max-md:pb-');
+    });
+  });
+
+  describe('shell glue', () => {
+    const PALETTE_ITEMS: CommandPaletteItem[] = [
+      {id: '/accounts', label: 'Accounts', icon: 'Building2', group: 'Pages'},
+      {id: '_theme', label: 'Toggle theme', icon: 'Sun', group: 'Actions'},
+      {id: '_logout', label: 'Log out', icon: 'LogOut', group: 'Actions'},
+    ];
+
+    const keydown = (init: KeyboardEventInit): KeyboardEvent => {
+      const event = new KeyboardEvent('keydown', {cancelable: true, ...init});
+      window.dispatchEvent(event);
+      return event;
+    };
+
+    const stubPalette = (result: unknown): {open: ReturnType<typeof vi.fn>} => {
+      const open = vi.fn(() => ({
+        afterClosed: () => ({subscribe: (fn: (r: unknown) => void) => fn(result)}),
+        close: vi.fn(),
+      }));
+      vi.spyOn(TestBed.inject(CmnDialogService), 'open').mockImplementation(open as never);
+      return {open};
+    };
+
+    const topBarText = (): string =>
+      (fixture.debugElement.query(By.css('cmn-top-bar')).nativeElement as HTMLElement)
+        .textContent ?? '';
+
+    beforeEach(() => {
+      localStorage.clear();
+    });
+
+    it('should match the active route on segment boundaries, longest first', async () => {
+      const items: NavItem[] = [
+        {label: 'Budgets', route: '/budgets', icon: 'Zap'},
+        {label: 'Recurring', route: '/budgets/recurring', icon: 'Zap'},
+      ];
+      fixture.componentRef.setInput('activeRoute', undefined);
+      fixture.componentRef.setInput('navItems', items);
+      const router = TestBed.inject(Router);
+      const active = (): string =>
+        fixture.debugElement.query(By.css('cmn-sidebar-nav')).componentInstance.activeRoute();
+      await router.navigateByUrl('/budgets/recurring/1?tab=a#top');
+      fixture.detectChanges();
+      expect(active()).toBe('/budgets/recurring');
+      await router.navigateByUrl('/budgets-archive');
+      fixture.detectChanges();
+      expect(active()).toBe('');
+      await router.navigateByUrl('/budgets?x=1');
+      fixture.detectChanges();
+      expect(active()).toBe('/budgets');
+    });
+
+    it('should derive the active route from the router when none is passed', async () => {
+      fixture.componentRef.setInput('activeRoute', undefined);
+      fixture.componentRef.setInput('navItems', NAV_ITEMS);
+      await TestBed.inject(Router).navigateByUrl('/accounts/list');
+      fixture.detectChanges();
+      const sidebar = fixture.debugElement.query(By.css('cmn-sidebar-nav'));
+      expect(sidebar.componentInstance.activeRoute()).toBe('/accounts');
+    });
+
+    it('should leave the active route empty when no nav item matches the URL', async () => {
+      fixture.componentRef.setInput('activeRoute', undefined);
+      await TestBed.inject(Router).navigateByUrl('/elsewhere');
+      fixture.detectChanges();
+      expect(
+        fixture.debugElement.query(By.css('cmn-sidebar-nav')).componentInstance.activeRoute()
+      ).toBe('');
+    });
+
+    it('should prefer an explicit active route over the router', async () => {
+      await TestBed.inject(Router).navigateByUrl('/accounts');
+      fixture.detectChanges();
+      expect(
+        fixture.debugElement.query(By.css('cmn-sidebar-nav')).componentInstance.activeRoute()
+      ).toBe('/dashboard');
+    });
+
+    it('should follow the theme service and toggle it', () => {
+      const theme = TestBed.inject(ThemeService);
+      theme.setTheme('light');
+      const topBar = fixture.debugElement.query(By.css('cmn-top-bar')).componentInstance;
+      fixture.detectChanges();
+      expect(topBar.isDark()).toBe(false);
+      fixture.componentInstance.themeToggle.subscribe(() => undefined);
+      topBar.themeToggle.emit();
+      fixture.detectChanges();
+      expect(theme.getTheme()).toBe('dark');
+      expect(topBar.isDark()).toBe(true);
+    });
+
+    it('should show the account label and menu, ahead of the legacy inputs', () => {
+      fixture.componentRef.setInput('account', {
+        label: 'Ada Lovelace',
+        menuItems: AVATAR_MENU_ITEMS,
+      });
+      fixture.detectChanges();
+      const topBar = fixture.debugElement.query(By.css('cmn-top-bar')).componentInstance;
+      expect(topBar.avatarLabel()).toBe('Ada Lovelace');
+      expect(topBar.avatarMenuItems()).toBe(AVATAR_MENU_ITEMS);
+      expect(topBarText()).toContain('AL');
+    });
+
+    it('should open the palette on Cmd-K and Ctrl-K, preventing the browser default', () => {
+      const {open} = stubPalette(undefined);
+      fixture.componentRef.setInput('paletteItems', PALETTE_ITEMS);
+      fixture.detectChanges();
+      expect(keydown({key: 'k', metaKey: true}).defaultPrevented).toBe(true);
+      expect(keydown({key: 'K', ctrlKey: true}).defaultPrevented).toBe(true);
+      expect(open).toHaveBeenCalledTimes(2);
+      expect(open.mock.calls[0]).toEqual([
+        expect.anything(),
+        expect.objectContaining({data: PALETTE_ITEMS}),
+      ]);
+    });
+
+    it('should ignore plain k and other shortcuts', () => {
+      const {open} = stubPalette(undefined);
+      fixture.componentRef.setInput('paletteItems', PALETTE_ITEMS);
+      fixture.detectChanges();
+      expect(keydown({key: 'k'}).defaultPrevented).toBe(false);
+      expect(keydown({key: 'j', metaKey: true}).defaultPrevented).toBe(false);
+      expect(open).not.toHaveBeenCalled();
+    });
+
+    it('should open the palette from the search button and still emit searchClick', () => {
+      const {open} = stubPalette(undefined);
+      fixture.componentRef.setInput('paletteItems', PALETTE_ITEMS);
+      fixture.detectChanges();
+      let searches = 0;
+      fixture.componentInstance.searchClick.subscribe(() => searches++);
+      fixture.debugElement.query(By.css('cmn-top-bar')).componentInstance.searchClick.emit();
+      expect(open).toHaveBeenCalledTimes(1);
+      expect(searches).toBe(1);
+    });
+
+    it('should navigate when a page entry is chosen', () => {
+      stubPalette({type: 'navigate', id: '/accounts'});
+      const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl');
+      fixture.componentRef.setInput('paletteItems', PALETTE_ITEMS);
+      fixture.detectChanges();
+      keydown({key: 'k', metaKey: true});
+      expect(navigate).toHaveBeenCalledWith('/accounts');
+    });
+
+    it('should toggle the theme for the built-in theme action', () => {
+      stubPalette({type: 'action', id: '_theme'});
+      const theme = TestBed.inject(ThemeService);
+      theme.setTheme('light');
+      fixture.componentRef.setInput('paletteItems', PALETTE_ITEMS);
+      fixture.detectChanges();
+      keydown({key: 'k', metaKey: true});
+      expect(theme.getTheme()).toBe('dark');
+    });
+
+    it('should emit other palette actions and nothing when the palette is dismissed', () => {
+      const actions: string[] = [];
+      fixture.componentInstance.paletteAction.subscribe(id => actions.push(id));
+      fixture.componentRef.setInput('paletteItems', PALETTE_ITEMS);
+      fixture.detectChanges();
+      stubPalette({type: 'action', id: '_logout'});
+      keydown({key: 'k', metaKey: true});
+      stubPalette(undefined);
+      keydown({key: 'k', ctrlKey: true});
+      expect(actions).toEqual(['_logout']);
+    });
+
+    it('should not stack a second palette while one is open', () => {
+      const open = vi.fn(() => ({
+        afterClosed: () => ({subscribe: () => undefined}),
+        close: vi.fn(),
+      }));
+      vi.spyOn(TestBed.inject(CmnDialogService), 'open').mockImplementation(open as never);
+      fixture.componentRef.setInput('paletteItems', PALETTE_ITEMS);
+      fixture.detectChanges();
+      keydown({key: 'k', metaKey: true});
+      keydown({key: 'k', metaKey: true});
+      expect(open).toHaveBeenCalledTimes(1);
     });
   });
 });
