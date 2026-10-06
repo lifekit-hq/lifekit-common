@@ -49,7 +49,7 @@ jobs:
         run: |
           npm publish ./dist/lifekit-hq/charts-core
           npm publish ./dist/lifekit-hq/elements
-          npm publish ./dist/lifekit-hq/ui
           npm publish ./dist/lifekit-hq/core
+          npm publish ./dist/lifekit-hq/ui
           npm publish ./projects/tokens
           npm publish ./projects/config

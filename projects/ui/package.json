@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@lifekit-hq/charts-core": "0.9.0",
+    "@lifekit-hq/core": "0.9.0",
     "tslib": "^2.3.0"
   },
   "sideEffects": false,

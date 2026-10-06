@@ -1,7 +1,7 @@
 {
   "$schema": "../../node_modules/ng-packagr/ng-package.schema.json",
   "dest": "../../dist/lifekit-hq/ui",
-  "allowedNonPeerDependencies": ["@lifekit-hq/charts-core"],
+  "allowedNonPeerDependencies": ["@lifekit-hq/charts-core", "@lifekit-hq/core"],
   "lib": {
     "entryFile": "src/public-api.ts",
     "cssUrl": "inline",
