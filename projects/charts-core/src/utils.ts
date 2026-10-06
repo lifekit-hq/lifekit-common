@@ -76,7 +76,7 @@ export function plainNumber(value: number, compact = false): string {
 /** A percentage, where `value` is already in percent units (62.5 renders as `62.5%`); compact axis ticks keep at most one decimal, dropping a trailing `.0`. */
 export function percent(value: number, compact = false): string {
   if (compact) {
-    return `${new Intl.NumberFormat('en-US', { maximumFractionDigits: NUMBER_COMPACT_DIGITS }).format(value)}%`;
+    return `${new Intl.NumberFormat('en-US', {maximumFractionDigits: NUMBER_COMPACT_DIGITS}).format(value)}%`;
   }
   return `${value.toFixed(1)}%`;
 }

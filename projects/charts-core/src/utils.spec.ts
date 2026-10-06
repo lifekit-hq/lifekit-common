@@ -102,7 +102,7 @@ describe('plainNumber', () => {
   });
 
   it('keeps two decimals below 1000 when compact so narrow-range ticks stay distinct', () => {
-    const labels = [0.8, 0.85, 0.9].map((tick) => plainNumber(tick, true));
+    const labels = [0.8, 0.85, 0.9].map(tick => plainNumber(tick, true));
     expect(labels).toEqual(['0.8', '0.85', '0.9']);
     expect(new Set(labels).size).toBe(labels.length);
     expect(plainNumber(999.5, true)).toBe('999.5');
@@ -120,7 +120,7 @@ describe('percent', () => {
   });
 
   it('renders narrow-range ticks as distinct compact labels', () => {
-    const labels = [62.2, 62.4, 62.6].map((tick) => percent(tick, true));
+    const labels = [62.2, 62.4, 62.6].map(tick => percent(tick, true));
     expect(labels).toEqual(['62.2%', '62.4%', '62.6%']);
     expect(new Set(labels).size).toBe(labels.length);
   });
