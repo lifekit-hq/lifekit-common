@@ -135,7 +135,7 @@ after `<meta charset>`:
 Add the pre-paint theme script too, so the first paint already has the stored or OS theme. Never
 copy it by hand: `@lifekit-hq/tokens` ships it, along with the hash your CSP needs.
 
-```html
+```text
 <script>/* the contents of @lifekit-hq/tokens/brand/theme-init.js, unedited, no added whitespace */</script>
 ```
 
