@@ -77,7 +77,7 @@ const MAIN_OVERLAY_BOTTOM_CLASSES =
           [class]="phoneOverlay() ? overlayTopBarClasses : ''"
           [overlay]="phoneOverlay()"
           [title]="title()"
-          [isDark]="effectiveIsDark()"
+          [isDark]="isDark()"
           [showThemeToggle]="showThemeToggle()"
           [avatarLabel]="effectiveAvatarLabel()"
           [avatarMenuItems]="effectiveAvatarMenuItems()"
@@ -124,22 +124,18 @@ export class AppLayoutComponent {
    */
   public readonly activeRoute = input<string | undefined>(undefined);
   public readonly title = input<string>('');
-  /**
-   * Dark-theme flag for the top bar toggle. Left unset, the layout follows `ThemeService` and
-   * the toggle switches the theme itself; set it to own the theme yourself, in which case the
-   * toggle only emits `themeToggle`.
-   */
-  public readonly isDark = input<boolean | undefined>(undefined);
   /** Renders the top bar's theme toggle (both desktop and phone); false removes it. */
   public readonly showThemeToggle = input<boolean>(true);
   /** The signed-in account; takes precedence over `avatarLabel` and `avatarMenuItems`. */
   public readonly account = input<AppLayoutAccount | undefined>(undefined);
+  /** @deprecated Goes once both apps pass `account`; `account` takes precedence. */
   public readonly avatarLabel = input<string>('');
+  /** @deprecated Goes once both apps pass `account`; `account` takes precedence. */
   public readonly avatarMenuItems = input<MenuItem[]>([]);
   /**
-   * Entries for the command palette. When non-empty the layout owns the palette: the search
-   * button and Cmd/Ctrl-K open it, and choosing a page entry navigates there. Empty leaves the
-   * palette to the consumer, who handles `searchClick` and the shortcut.
+   * Entries for the command palette, which the layout owns: the search button and Cmd/Ctrl-K
+   * open it, choosing a page entry navigates there, and the built-in theme action toggles the
+   * theme.
    */
   public readonly paletteItems = input<CommandPaletteItem[]>([]);
   public readonly versionLabel = input<string>('');
@@ -196,17 +192,21 @@ export class AppLayoutComponent {
     return `${MAIN_BASE_CLASSES} ${MAIN_OVERLAY_TOP_CLASSES}${bottom}`;
   });
 
-  protected readonly effectiveIsDark = computed<boolean>(
-    () => this.isDark() ?? this.theme() === 'dark'
-  );
+  protected readonly isDark = computed<boolean>(() => this.theme() === 'dark');
 
   protected readonly effectiveActiveRoute = computed<string>(() => {
     const explicit = this.activeRoute();
     if (explicit !== undefined) {
       return explicit;
     }
-    const url = this.routerUrl();
-    return this.navItems().find(item => url.startsWith(item.route))?.route ?? '';
+    const path = this.routerUrl().split(/[?#]/, 1)[0];
+    return this.navItems().reduce(
+      (best, {route}) =>
+        (path === route || path.startsWith(`${route}/`)) && route.length > best.length
+          ? route
+          : best,
+      ''
+    );
   });
 
   protected readonly effectiveAvatarLabel = computed<string>(
@@ -226,11 +226,7 @@ export class AppLayoutComponent {
   protected readonly overlayTabBarClasses = OVERLAY_TAB_BAR_CLASSES;
 
   protected onWindowKeydown(event: KeyboardEvent): void {
-    if (
-      (event.metaKey || event.ctrlKey) &&
-      event.key.toLowerCase() === 'k' &&
-      this.managesPalette()
-    ) {
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
       event.preventDefault();
       this.openPalette();
     }
@@ -238,20 +234,12 @@ export class AppLayoutComponent {
 
   protected onSearchClick(): void {
     this.searchClick.emit();
-    if (this.managesPalette()) {
-      this.openPalette();
-    }
+    this.openPalette();
   }
 
   protected onThemeToggle(): void {
     this.themeToggle.emit();
-    if (this.isDark() === undefined) {
-      this.themeService.toggle();
-    }
-  }
-
-  private managesPalette(): boolean {
-    return this.paletteItems().length > 0;
+    this.themeService.toggle();
   }
 
   private openPalette(): void {
@@ -282,7 +270,7 @@ export class AppLayoutComponent {
   private handlePaletteResult(result: PaletteResult): void {
     if (result.type === 'navigate') {
       void this.router.navigateByUrl(result.id);
-    } else if (result.id === PALETTE_THEME_ACTION && this.isDark() === undefined) {
+    } else if (result.id === PALETTE_THEME_ACTION) {
       this.themeService.toggle();
     } else {
       this.paletteAction.emit(result.id);

@@ -56,7 +56,6 @@ const meta: Meta<AppLayoutComponent> = {
         [navItems]="navItems"
         [activeRoute]="activeRoute"
         [title]="title"
-        [isDark]="isDark"
         [showThemeToggle]="showThemeToggle"
         [avatarLabel]="avatarLabel"
         [avatarMenuItems]="avatarMenuItems"
@@ -72,7 +71,6 @@ const meta: Meta<AppLayoutComponent> = {
     navItems: NAV_ITEMS,
     activeRoute: '/dashboard',
     title: 'Dashboard',
-    isDark: false,
     showThemeToggle: true,
     avatarLabel: 'D',
     avatarMenuItems: AVATAR_MENU,
@@ -97,11 +95,6 @@ export const DifferentActiveRoute: Story = {
 /** `brand` replaces the sidebar header text so another app can use the shared shell. */
 export const CustomBrand: Story = {
   args: {brand: 'Lifekit Dashboard'},
-};
-
-/** The top bar's theme toggle reflects `isDark`. */
-export const DarkToggleOn: Story = {
-  args: {isDark: true},
 };
 
 /** `showThemeToggle: false` removes the top bar's theme toggle (desktop and phone). */
@@ -146,7 +139,6 @@ export const ScrollingContent: Story = {
 
 /** Desktop shell in the dark theme. */
 export const Dark: Story = {
-  args: {isDark: true},
   globals: {theme: 'dark'},
 };
 
@@ -161,7 +153,7 @@ export const Phone: Story = {
 };
 
 export const PhoneDark: Story = {
-  args: {navItems: PHONE_NAV_ITEMS, tabRoutes: PHONE_TAB_ROUTES, title: 'Home', isDark: true},
+  args: {navItems: PHONE_NAV_ITEMS, tabRoutes: PHONE_TAB_ROUTES, title: 'Home'},
   globals: {...PHONE, theme: 'dark'},
 };
 
@@ -219,7 +211,6 @@ export const PhoneOverlay: Story = {
         [navItems]="navItems"
         [activeRoute]="activeRoute"
         [title]="title"
-        [isDark]="isDark"
         [avatarLabel]="avatarLabel"
         [avatarMenuItems]="avatarMenuItems"
         [tabRoutes]="tabRoutes"
@@ -240,7 +231,7 @@ export const PhoneOverlay: Story = {
 
 export const PhoneOverlayDark: Story = {
   ...PhoneOverlay,
-  args: {...PhoneOverlay.args, isDark: true},
+  args: {...PhoneOverlay.args},
   globals: {...PHONE, theme: 'dark'},
 };
 
@@ -264,7 +255,7 @@ export const PhoneOverlayFloatingAction: Story = {
 
 export const PhoneOverlayFloatingActionDark: Story = {
   ...PhoneOverlayFloatingAction,
-  args: {...PhoneOverlayFloatingAction.args, isDark: true},
+  args: {...PhoneOverlayFloatingAction.args},
   globals: {...PHONE, theme: 'dark'},
 };
 
@@ -275,7 +266,7 @@ const PALETTE_ITEMS: CommandPaletteItem[] = [
 ];
 
 /**
- * The shell owns its own glue: with no `activeRoute` and no `isDark` it follows the router and
+ * The shell owns its own glue: with no `activeRoute` it follows the router, the theme toggle drives
  * the theme service, and with `paletteItems` it opens the command palette from the search button
  * and Cmd/Ctrl-K. The app passes only nav items, a brand and an `account` (label and menu). Try
  * the theme toggle and Cmd-K; choosing "Toggle theme" in the palette flips the theme.

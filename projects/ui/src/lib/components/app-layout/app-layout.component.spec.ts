@@ -277,6 +277,27 @@ describe('AppLayoutComponent', () => {
       localStorage.clear();
     });
 
+    it('should match the active route on segment boundaries, longest first', async () => {
+      const items: NavItem[] = [
+        {label: 'Budgets', route: '/budgets', icon: 'Zap'},
+        {label: 'Recurring', route: '/budgets/recurring', icon: 'Zap'},
+      ];
+      fixture.componentRef.setInput('activeRoute', undefined);
+      fixture.componentRef.setInput('navItems', items);
+      const router = TestBed.inject(Router);
+      const active = (): string =>
+        fixture.debugElement.query(By.css('cmn-sidebar-nav')).componentInstance.activeRoute();
+      await router.navigateByUrl('/budgets/recurring/1?tab=a#top');
+      fixture.detectChanges();
+      expect(active()).toBe('/budgets/recurring');
+      await router.navigateByUrl('/budgets-archive');
+      fixture.detectChanges();
+      expect(active()).toBe('');
+      await router.navigateByUrl('/budgets?x=1');
+      fixture.detectChanges();
+      expect(active()).toBe('/budgets');
+    });
+
     it('should derive the active route from the router when none is passed', async () => {
       fixture.componentRef.setInput('activeRoute', undefined);
       fixture.componentRef.setInput('navItems', NAV_ITEMS);
@@ -303,7 +324,7 @@ describe('AppLayoutComponent', () => {
       ).toBe('/dashboard');
     });
 
-    it('should follow the theme service and toggle it when isDark is not passed', () => {
+    it('should follow the theme service and toggle it', () => {
       const theme = TestBed.inject(ThemeService);
       theme.setTheme('light');
       const topBar = fixture.debugElement.query(By.css('cmn-top-bar')).componentInstance;
@@ -314,18 +335,6 @@ describe('AppLayoutComponent', () => {
       fixture.detectChanges();
       expect(theme.getTheme()).toBe('dark');
       expect(topBar.isDark()).toBe(true);
-    });
-
-    it('should only emit themeToggle when the consumer owns the theme via isDark', () => {
-      const theme = TestBed.inject(ThemeService);
-      theme.setTheme('light');
-      fixture.componentRef.setInput('isDark', false);
-      fixture.detectChanges();
-      let emitted = 0;
-      fixture.componentInstance.themeToggle.subscribe(() => emitted++);
-      fixture.debugElement.query(By.css('cmn-top-bar')).componentInstance.themeToggle.emit();
-      expect(emitted).toBe(1);
-      expect(theme.getTheme()).toBe('light');
     });
 
     it('should show the account label and menu, ahead of the legacy inputs', () => {
@@ -359,16 +368,6 @@ describe('AppLayoutComponent', () => {
       fixture.detectChanges();
       expect(keydown({key: 'k'}).defaultPrevented).toBe(false);
       expect(keydown({key: 'j', metaKey: true}).defaultPrevented).toBe(false);
-      expect(open).not.toHaveBeenCalled();
-    });
-
-    it('should leave Cmd-K and search to the consumer without palette items', () => {
-      const {open} = stubPalette(undefined);
-      let searches = 0;
-      fixture.componentInstance.searchClick.subscribe(() => searches++);
-      expect(keydown({key: 'k', metaKey: true}).defaultPrevented).toBe(false);
-      fixture.debugElement.query(By.css('cmn-top-bar')).componentInstance.searchClick.emit();
-      expect(searches).toBe(1);
       expect(open).not.toHaveBeenCalled();
     });
 
