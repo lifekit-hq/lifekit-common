@@ -245,7 +245,7 @@ export function checkIcons(distDir, app, {assetsDir = brandAssetsDir(app)} = {})
 }
 
 /**
- * Full drift check of an app's build output directory (served at the site root): the
+ * Full drift check of an app's build output directory (served at the site root or `basePath`): the
  * index.html head, the manifest it links, and every icon file.
  * @param {{distDir: string, app: string, appName?: string, index?: string,
  *   assetsDir?: string, colors?: object, basePath?: string}} options
