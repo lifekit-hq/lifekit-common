@@ -14,17 +14,17 @@ Chart.register(DoughnutController, ArcElement, Tooltip, Legend);
 
 /**
  * Ordered so neighbours (including the wrap from last back to first) sit far
- * apart on the colour wheel; the brand indigo leads.
+ * apart on the colour wheel; the brand petrol leads.
  */
 const DEFAULT_COLORS = [
-  '#4f46e5',
-  '#10b981',
+  '#175a6d',
   '#f59e0b',
   '#a855f7',
-  '#06b6d4',
-  '#ef4444',
   '#84cc16',
   '#ec4899',
+  '#3b82f6',
+  '#10b981',
+  '#ef4444',
 ];
 const PERCENT_MULTIPLIER = 100;
 
@@ -37,7 +37,7 @@ export interface DonutChartTokens {
 export function resolveDonutChartTokens(): DonutChartTokens {
   return {
     fontFamily: chartFontFamily(),
-    textSecondary: cssVar('--color-text-secondary', '#464555'),
+    textSecondary: cssVar('--color-text-secondary', '#46565e'),
   };
 }
 

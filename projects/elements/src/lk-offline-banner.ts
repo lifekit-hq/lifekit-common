@@ -19,7 +19,7 @@ export class LkOfflineBanner extends LitElement {
 
     .banner {
       border-radius: var(--radius-lg);
-      border: 1px solid var(--color-border-default, #c7c4d8);
+      border: 1px solid var(--color-border-default, #d9e0e3);
       background: var(--color-surface-card, #ffffff);
       color: var(--color-text-primary);
       padding: var(--space-3, 0.75rem) var(--space-4, 1rem);

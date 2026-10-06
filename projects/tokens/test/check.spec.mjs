@@ -37,7 +37,7 @@ describe('checkHead', () => {
     const head = headMarkup({title: APP_NAME})
       .replace('href="/favicon.svg" type="image/svg+xml"', "type='image/svg+xml' href=favicon.svg")
       .replace('href="/manifest.webmanifest"', 'href="./manifest.webmanifest"')
-      .replace('content="#0e1120"', 'content="#0E1120"');
+      .replace('content="#0c1113"', 'content="#0C1113"');
     assert.deepEqual(checkHead(indexHtml(head), {appName: APP_NAME}), []);
   });
 
@@ -51,8 +51,8 @@ describe('checkHead', () => {
     ['wrong title', h => h.replace(`<title>${APP_NAME}`, '<title>Accounts'), 'title'],
     ['no title', h => h.replace(/<title>.*<\/title>/, ''), 'title'],
     [
-      'brand-indigo theme-color',
-      h => h.replace('content="#f7f8fa"', 'content="#4f46e5"'),
+      'brand-petrol theme-color',
+      h => h.replace('content="#f3f5f6"', 'content="#175a6d"'),
       'theme-color',
     ],
     [
@@ -62,7 +62,7 @@ describe('checkHead', () => {
     ],
     [
       'extra theme-color',
-      h => `${h}\n<meta name="theme-color" content="#f7f8fa" />`,
+      h => `${h}\n<meta name="theme-color" content="#f3f5f6" />`,
       'theme-color',
     ],
     ['missing color-scheme', h => h.replace(/<meta name="color-scheme"[^>]*>/, ''), 'color-scheme'],
@@ -103,7 +103,7 @@ describe('checkManifest', () => {
 
   const drift = [
     ['off-token background', m => ({...m, background_color: '#06080f'}), /background_color/],
-    ['brand-indigo theme_color', m => ({...m, theme_color: '#4f46e5'}), /theme_color/],
+    ['brand-petrol theme_color', m => ({...m, theme_color: '#175a6d'}), /theme_color/],
     ['browser display', m => ({...m, display: 'browser'}), /display/],
     ['long short_name', m => ({...m, short_name: 'Finance Sentry'}), /short_name/],
     ['wrong name', m => ({...m, name: 'Finance'}), /`name`/],

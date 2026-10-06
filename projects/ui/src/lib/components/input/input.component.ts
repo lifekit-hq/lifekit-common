@@ -13,7 +13,7 @@ export type InputSize = 'sm' | 'md' | 'lg';
 
 const BASE_CLASSES =
   'block w-full rounded-cmn-md border font-base bg-surface-card text-text-primary ' +
-  'placeholder:text-text-disabled ' +
+  'placeholder:text-text-placeholder ' +
   'focus:outline-none focus:ring-2 focus:ring-border-focus focus:border-border-focus ' +
   'disabled:opacity-50 disabled:cursor-not-allowed ' +
   'read-only:bg-surface-raised read-only:cursor-default ' +

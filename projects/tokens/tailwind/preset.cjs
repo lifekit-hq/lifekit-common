@@ -12,6 +12,7 @@ module.exports = {
         'text-primary': 'var(--color-text-primary)',
         'text-secondary': 'var(--color-text-secondary)',
         'text-disabled': 'var(--color-text-disabled)',
+        'text-placeholder': 'var(--color-text-placeholder)',
         'text-inverse': 'var(--color-text-inverse)',
 
         'accent-100': 'var(--color-accent-100)',
@@ -40,6 +41,7 @@ module.exports = {
       },
 
       fontFamily: {
+        sans: ['var(--font-sans)'],
         base: ['var(--font-sans)'],
         headline: ['var(--font-sans)'],
         label: ['var(--font-sans)'],

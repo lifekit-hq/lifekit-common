@@ -35,9 +35,9 @@ export interface LineChartTokens {
 export function resolveLineChartTokens(): LineChartTokens {
   return {
     fontFamily: chartFontFamily(),
-    accent: cssVar('--color-accent-default', '#4f46e5'),
-    textSecondary: cssVar('--color-text-secondary', '#464555'),
-    borderDefault: cssVar('--color-border-default', '#c7c4d8'),
+    accent: cssVar('--color-accent-default', '#175a6d'),
+    textSecondary: cssVar('--color-text-secondary', '#46565e'),
+    borderDefault: cssVar('--color-border-default', '#d9e0e3'),
   };
 }
 

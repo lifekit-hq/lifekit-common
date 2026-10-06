@@ -14,7 +14,7 @@ Everything comes from `@lifekit-hq/tokens`:
 | Manifest fields            | `@lifekit-hq/tokens/brand/manifest.fragment.json`                                      |
 | Node helpers + drift check | `@lifekit-hq/tokens/brand`, `lifekit-chrome-check` (bin)                               |
 | Vite plugin                | `@lifekit-hq/tokens/brand/vite`                                                        |
-| Inter                      | `@lifekit-hq/tokens/fonts.css`                                                         |
+| IBM Plex Sans / Mono       | `@lifekit-hq/tokens/fonts.css`                                                         |
 
 Apps never commit copies of icon files or colours. They import the package and add the head lines
 below. A mark or colour change then ships as a lifekit-common release and reaches every app on its
@@ -153,13 +153,13 @@ copy it by hand: `@lifekit-hq/tokens` ships it, along with the hash your CSP nee
 
 ## Fonts and tokens
 
-- Inter is the token font: `--font-sans` in `theme.css`, and the Tailwind `font-base`,
+- IBM Plex Sans is the token font: `--font-sans` in `theme.css`, and the Tailwind `font-base`,
   `font-headline` and `font-label` families. Load it by importing
-  `@lifekit-hq/tokens/fonts.css` once in the global stylesheet. It self-hosts variable Inter
-  (`@fontsource-variable/inter`, weights 100–900, normal and italic), and per-script
+  `@lifekit-hq/tokens/fonts.css` once in the global stylesheet. It self-hosts variable Plex Sans
+  (`@fontsource-variable/ibm-plex-sans`, weights 100–700, normal and italic), and per-script
   `unicode-range` files mean a browser downloads only the subsets a page renders. Without it, every
   app falls back to `system-ui`. Never load fonts from a CDN.
-- Mono is the preset `font-mono` stack.
+- Mono is IBM Plex Mono (`--font-mono`, regular and medium, same `fonts.css`), for code only.
 - Colours come only from `@lifekit-hq/tokens/theme.css`, with Tailwind via
   `@lifekit-hq/tokens/tailwind`. The brand colour is `--color-accent-700` (`#4f46e5`).
 

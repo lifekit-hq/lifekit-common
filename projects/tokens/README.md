@@ -13,7 +13,7 @@ Design tokens for the lifekit ecosystem, framework-agnostic.
   indicators (`animate-spin`, `animate-pulse`, `animate-cmn-spin`, `animate-cmn-pulse`) are exempt.
 - `tailwind`: a Tailwind preset mapping the tokens onto the `cmn-*` scale. Its fonts, radii and
   shadows read the `theme.css` custom properties, so a value change lands in `theme.css` only.
-- `fonts.css`: self-hosted variable Inter, the `--font-sans` font. No font CDN.
+- `fonts.css`: self-hosted IBM Plex Sans (variable), the `--font-sans` font, and IBM Plex Mono for code (`--font-mono`). No font CDN.
 - `brand`: the lifekit mark and the browser-chrome standard. That covers per-app icon sets under
   `brand/<app>/`, `brand/head.html`, `brand/manifest.fragment.json`, the pre-paint theme script
   (`brand/theme-init.js`) with its CSP hash, Node helpers, a Vite plugin

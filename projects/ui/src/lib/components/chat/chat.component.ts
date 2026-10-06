@@ -128,7 +128,7 @@ export class ChatComponent {
 
   public readonly auxiliaryStyle = `
     ::-webkit-scrollbar { width: 8px; }
-    ::-webkit-scrollbar-thumb { background-color: var(--color-border-strong); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background-color: var(--color-border-strong); border-radius: var(--radius-sm); }
     ::-webkit-scrollbar-track { background: transparent; }
   `;
 

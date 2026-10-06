@@ -1,9 +1,12 @@
 /*
- * @lifekit-hq/tokens/fonts.css — self-hosts Inter, the token font (--font-sans).
- * Variable weight 100–900, normal + italic; per-script unicode-range files, so a browser
- * downloads only the subsets a page actually renders. No font CDN.
+ * @lifekit-hq/tokens/fonts.css — self-hosts IBM Plex Sans (--font-sans) and IBM Plex Mono
+ * (--font-mono, code only). Plex Sans is variable, weight 100–700, normal + italic; Plex Mono
+ * ships regular and medium. Per-script unicode-range files, so a browser downloads only the
+ * subsets a page actually renders (Latin, Cyrillic, …). No font CDN.
  *
  *   @import '@lifekit-hq/tokens/fonts.css';
  */
-@import '@fontsource-variable/inter/wght.css';
-@import '@fontsource-variable/inter/wght-italic.css';
+@import '@fontsource-variable/ibm-plex-sans/wght.css';
+@import '@fontsource-variable/ibm-plex-sans/wght-italic.css';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/500.css';
