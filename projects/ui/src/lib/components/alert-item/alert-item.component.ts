@@ -1,4 +1,5 @@
 import {ChangeDetectionStrategy, Component, computed, input, output} from '@angular/core';
+import {formatRelativeTime} from '@lifekit-hq/core/format';
 
 import {type Nullable} from '../../types';
 import {IconComponent, type LucideIconName} from '../icon/icon.component';
@@ -18,32 +19,6 @@ const SEVERITY_ICON: Record<AlertItemSeverity, LucideIconName> = {
   warning: 'TriangleAlert',
   info: 'Info',
 };
-
-const MS_PER_MINUTE = 60_000;
-const MINUTES_PER_HOUR = 60;
-const HOURS_PER_DAY = 24;
-
-function formatRelativeTime(value: Nullable<string | number | Date>): string {
-  if (!value) {
-    return '';
-  }
-  const ts = value instanceof Date ? value.getTime() : new Date(value).getTime();
-  if (Number.isNaN(ts)) {
-    return '';
-  }
-  const mins = Math.floor((Date.now() - ts) / MS_PER_MINUTE);
-  if (mins < 1) {
-    return 'just now';
-  }
-  if (mins < MINUTES_PER_HOUR) {
-    return `${mins}m ago`;
-  }
-  const hrs = Math.floor(mins / MINUTES_PER_HOUR);
-  if (hrs < HOURS_PER_DAY) {
-    return `${hrs}h ago`;
-  }
-  return `${Math.floor(hrs / HOURS_PER_DAY)}d ago`;
-}
 
 @Component({
   selector: 'cmn-alert-item',

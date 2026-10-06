@@ -6,7 +6,7 @@
   "scripts": {
     "ng": "ng",
     "build:brand": "node projects/tokens/scripts/build-brand.mjs",
-    "build": "npm run build:brand && ng build @lifekit-hq/charts-core && ng build @lifekit-hq/elements && ng build @lifekit-hq/ui && ng build @lifekit-hq/core",
+    "build": "npm run build:brand && ng build @lifekit-hq/charts-core && ng build @lifekit-hq/elements && ng build @lifekit-hq/core && ng build @lifekit-hq/ui",
     "pretest": "playwright install chromium",
     "test": "ng test @lifekit-hq/charts-core --configuration ci && ng test @lifekit-hq/elements --configuration ci && ng test @lifekit-hq/ui --configuration ci && ng test @lifekit-hq/core --configuration ci && npm run test:tokens",
     "test:tokens": "npm run build:brand && node --test \"projects/tokens/test/*.spec.mjs\"",

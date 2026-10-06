@@ -8,5 +8,5 @@
     "declarationMap": true,
     "types": ["vitest/globals"]
   },
-  "include": ["src/**/*.ts", "pwa/**/*.ts"]
+  "include": ["src/**/*.ts", "pwa/**/*.ts", "format/**/*.ts"]
 }

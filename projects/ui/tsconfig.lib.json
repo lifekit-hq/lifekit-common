@@ -10,7 +10,8 @@
     "declarationMap": true,
     "types": ["google.accounts"],
     "paths": {
-      "@lifekit-hq/charts-core": ["../../dist/lifekit-hq/charts-core"]
+      "@lifekit-hq/charts-core": ["../../dist/lifekit-hq/charts-core"],
+      "@lifekit-hq/core/format": ["../../dist/lifekit-hq/core/format"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts"],

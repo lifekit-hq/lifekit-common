@@ -106,7 +106,8 @@
             "tsConfig": "projects/core/tsconfig.spec.json",
             "include": [
               "**/*.spec.ts",
-              "../pwa/**/*.spec.ts"
+              "../pwa/**/*.spec.ts",
+              "../format/**/*.spec.ts"
             ],
             "coverage": true,
             "browsers": [
@@ -133,7 +134,8 @@
             "eslintConfig": "projects/core/eslint.config.mjs",
             "lintFilePatterns": [
               "projects/core/src/**/*.ts",
-              "projects/core/pwa/**/*.ts"
+              "projects/core/pwa/**/*.ts",
+              "projects/core/format/**/*.ts"
             ]
           }
         }
