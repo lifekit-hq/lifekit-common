@@ -166,3 +166,136 @@ describe('withUrlSync', () => {
     expect(currentUrl()).toContain('q=coffee');
   });
 });
+
+describe('withUrlSync - nested fields and CSV', () => {
+  interface FilterState {
+    filters: {category: string[]; type: string; range: {min: number}};
+    page: number;
+  }
+
+  const FilterStore = signalStore(
+    {providedIn: 'root', protectedState: false},
+    withState<FilterState>({filters: {category: [], type: '', range: {min: 0}}, page: 1}),
+    withUrlSync<FilterState>({
+      'filters.category': {param: 'category', default: [], codec: 'csv'},
+      'filters.type': {param: 'type', default: ''},
+      'filters.range.min': {param: 'min', default: 0, codec: 'number'},
+      page: {param: 'page', default: 1, codec: 'number'},
+    })
+  );
+
+  async function open(url: string): Promise<InstanceType<typeof FilterStore>> {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [provideRouter([{path: '**', component: BlankComponent}])],
+    });
+    const router = TestBed.inject(Router);
+    TestBed.createComponent(BlankComponent).detectChanges();
+    await router.navigateByUrl(url);
+    const store = TestBed.inject(FilterStore);
+    TestBed.inject(ApplicationRef).tick();
+    return store;
+  }
+
+  it('hydrates several params into one nested filters object', async () => {
+    const store = await open('/ledger?category=food,travel&type=debit&min=5&page=2');
+    expect(store.filters()).toEqual({
+      category: ['food', 'travel'],
+      type: 'debit',
+      range: {min: 5},
+    });
+    expect(store.page()).toBe(2);
+  });
+
+  it('writes the nested object back as flat ?category= and ?type= params, byte for byte', async () => {
+    const store = await open('/ledger');
+    patchState(store, {filters: {category: ['food', 'travel'], type: 'debit', range: {min: 0}}});
+    await settle();
+    expect(currentUrl()).toBe('/ledger?category=food,travel&type=debit');
+  });
+
+  it('leaves sibling nested fields alone when only one param is present', async () => {
+    const store = await open('/ledger?type=credit');
+    expect(store.filters()).toEqual({category: [], type: 'credit', range: {min: 0}});
+  });
+
+  it('drops a nested param once its field returns to the default', async () => {
+    const store = await open('/ledger?category=food&type=debit');
+    patchState(store, {filters: {...store.filters(), type: ''}});
+    await settle();
+    expect(currentUrl()).toBe('/ledger?category=food');
+  });
+
+  it('reads a repeated param through the csv codec', async () => {
+    const store = await open('/ledger?category=food&category=travel,fun');
+    expect(store.filters.category()).toEqual(['food', 'travel', 'fun']);
+  });
+
+  it('reads an empty csv param as an empty array', async () => {
+    const store = await open('/ledger?category=');
+    expect(store.filters.category()).toEqual([]);
+  });
+
+  it('encodes an array that differs from its default as one csv param', async () => {
+    const store = await open('/ledger');
+    patchState(store, {filters: {...store.filters(), category: ['a']}});
+    await settle();
+    expect(currentUrl()).toBe('/ledger?category=a');
+  });
+});
+
+describe('withUrlSync - following the URL after init', () => {
+  async function open(url: string): Promise<InstanceType<typeof LedgerStore>> {
+    return navigateTo(url);
+  }
+
+  async function follow(url: string): Promise<void> {
+    await TestBed.inject(Router).navigateByUrl(url);
+    TestBed.inject(ApplicationRef).tick();
+  }
+
+  it('picks up a changed param on same-route navigation', async () => {
+    const store = await open('/ledger?q=coffee');
+    await follow('/ledger?q=tea');
+    expect(store.query()).toBe('tea');
+  });
+
+  it('replaces a stale filter when the next link carries a different value', async () => {
+    const store = await open('/transactions?q=debit');
+    await follow('/transactions?q=credit');
+    expect(store.query()).toBe('credit');
+  });
+
+  it('falls back to the default when a followed link drops the param', async () => {
+    const store = await open('/ledger?q=coffee&page=3&tags=a,b');
+    await follow('/ledger');
+    expect(store.query()).toBe('');
+    expect(store.page()).toBe(1);
+    expect(store.tags()).toEqual([]);
+  });
+
+  it('does not rewrite the URL it just followed', async () => {
+    await open('/ledger?q=coffee');
+    await follow('/ledger?q=tea');
+    await settle();
+    expect(currentUrl()).toBe('/ledger?q=tea');
+  });
+
+  it('does not let the echo of its own write clobber a newer state', async () => {
+    const store = await open('/ledger');
+    patchState(store, {query: 'a'});
+    TestBed.inject(ApplicationRef).tick();
+    patchState(store, {query: 'ab'});
+    await settle();
+    expect(store.query()).toBe('ab');
+    expect(currentUrl()).toContain('q=ab');
+  });
+
+  it('keeps following after its own writes', async () => {
+    const store = await open('/ledger');
+    patchState(store, {query: 'coffee'});
+    await settle();
+    await follow('/ledger?q=tea');
+    expect(store.query()).toBe('tea');
+  });
+});
