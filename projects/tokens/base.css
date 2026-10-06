@@ -35,12 +35,14 @@
   background: transparent;
 }
 
-:where(a) {
+/* Only class-less anchors: outranks Tailwind preflight's `a` reset regardless of import
+   order, while utility-styled anchors keep their own styling. */
+a:not([class]) {
   color: var(--color-accent-default);
   text-decoration: none;
 }
 
-:where(a:hover) {
+a:not([class]):hover {
   color: var(--color-accent-hover);
   text-decoration: underline;
 }
