@@ -56,19 +56,19 @@ describe('AppLayoutComponent', () => {
     expect(sidebar).toBeTruthy();
   });
 
-  it('should brand the sidebar as Finance Sentry by default', () => {
+  it('should brand the sidebar as Lifekit by default', () => {
     expect(
       fixture.debugElement.query(By.css('cmn-sidebar-nav')).nativeElement.textContent
-    ).toContain('Finance Sentry');
+    ).toContain('Lifekit');
   });
 
   it('should pass a custom brand through to the sidebar', () => {
-    fixture.componentRef.setInput('brand', 'Lifekit Dashboard');
+    fixture.componentRef.setInput('brand', 'Acme Console');
     fixture.detectChanges();
     const text: string = fixture.debugElement.query(By.css('cmn-sidebar-nav')).nativeElement
       .textContent;
-    expect(text).toContain('Lifekit Dashboard');
-    expect(text).not.toContain('Finance Sentry');
+    expect(text).toContain('Acme Console');
+    expect(text).not.toContain('Lifekit');
   });
 
   it('should render the top bar with title', () => {

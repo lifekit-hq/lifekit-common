@@ -80,7 +80,7 @@ export class SidebarNavComponent {
   public readonly activeRoute = input<string>('');
   public readonly versionLabel = input<string>('');
   /** Product name shown in the sidebar header while expanded. */
-  public readonly brand = input<string>('Finance Sentry');
+  public readonly brand = input<string>('Lifekit');
 
   public readonly navClick = output<NavItem>();
   public readonly collapsedChange = output<boolean>();

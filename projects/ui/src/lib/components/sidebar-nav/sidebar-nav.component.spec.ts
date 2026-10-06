@@ -30,16 +30,16 @@ describe('SidebarNavComponent', () => {
     expect(text).toContain('Accounts');
   });
 
-  it('should show the Finance Sentry brand by default', () => {
-    expect(fixture.nativeElement.textContent).toContain('Finance Sentry');
+  it('should show the Lifekit brand by default', () => {
+    expect(fixture.nativeElement.textContent).toContain('Lifekit');
   });
 
   it('should show a custom brand instead of the default', () => {
-    fixture.componentRef.setInput('brand', 'Lifekit Dashboard');
+    fixture.componentRef.setInput('brand', 'Acme Console');
     fixture.detectChanges();
     const text: string = fixture.nativeElement.textContent;
-    expect(text).toContain('Lifekit Dashboard');
-    expect(text).not.toContain('Finance Sentry');
+    expect(text).toContain('Acme Console');
+    expect(text).not.toContain('Lifekit');
   });
 
   it('should collapse when toggle is clicked', () => {

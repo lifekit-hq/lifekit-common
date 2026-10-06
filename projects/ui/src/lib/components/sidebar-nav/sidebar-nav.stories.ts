@@ -23,7 +23,7 @@ export const Default: Story = {
   args: {items: NAV_ITEMS, activeRoute: '/dashboard'},
 };
 
-/** `brand` replaces the default "Finance Sentry" header text. */
+/** `brand` replaces the default "Lifekit" header text. */
 export const CustomBrand: Story = {
   args: {items: NAV_ITEMS, activeRoute: '/dashboard', brand: 'Lifekit Dashboard'},
 };
