@@ -7,6 +7,9 @@ import {
   isSeriesEmpty,
   money,
   NARROW_CHART_WIDTH,
+  percent,
+  plainNumber,
+  valueFormatter,
   xTickLimit,
 } from './utils';
 
@@ -84,5 +87,37 @@ describe('xTickLimit', () => {
 
   it('never raises a wide limit that is already lower', () => {
     expect(xTickLimit(360, 3)).toBe(3);
+  });
+});
+
+describe('plainNumber', () => {
+  it('has no currency symbol and keeps up to two decimals', () => {
+    expect(plainNumber(25)).toBe('25');
+    expect(plainNumber(1234.567)).toBe('1,234.57');
+  });
+
+  it('compacts large values to one decimal', () => {
+    expect(plainNumber(12_400, true)).toBe('12.4K');
+  });
+});
+
+describe('percent', () => {
+  it('uses one decimal, or none when compact', () => {
+    expect(percent(62.45)).toBe('62.5%');
+    expect(percent(62.45, true)).toBe('62%');
+  });
+});
+
+describe('valueFormatter', () => {
+  it('resolves each built-in kind', () => {
+    expect(valueFormatter('currency', 'USD')(25, false)).toBe(money(25, 'USD'));
+    expect(valueFormatter('currency', 'USD')(12_400, true)).toBe(money(12_400, 'USD', true));
+    expect(valueFormatter('number', 'USD')(25, false)).toBe('25');
+    expect(valueFormatter('percent', 'USD')(25, false)).toBe('25.0%');
+  });
+
+  it('returns a consumer formatter untouched', () => {
+    const custom = (v: number): string => `#${v}`;
+    expect(valueFormatter(custom, 'USD')).toBe(custom);
   });
 });

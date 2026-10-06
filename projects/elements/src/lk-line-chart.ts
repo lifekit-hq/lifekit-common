@@ -1,13 +1,14 @@
 import {
   buildLineChartConfig,
   type ChartPoint,
+  type ChartValueFormat,
   resolveLineChartTokens,
   updateLineChart,
 } from '@lifekit-hq/charts-core';
 import {Chart} from 'chart.js';
 import {css, html, LitElement, type PropertyDeclarations, type TemplateResult} from 'lit';
 
-export type {ChartPoint} from '@lifekit-hq/charts-core';
+export type {ChartPoint, ChartValueFormat} from '@lifekit-hq/charts-core';
 
 /**
  * Framework-free line chart powered by Chart.js and themed via @lifekit/tokens CSS custom
@@ -17,6 +18,9 @@ export type {ChartPoint} from '@lifekit-hq/charts-core';
  * Data flows in via the `points` property (array — must be set as a DOM property, not an
  * attribute). Theming is passive: import `@lifekit-hq/tokens/theme.css` in the host page and the
  * element resolves the correct values automatically.
+ *
+ * Values render as currency by default; set `valueFormat` (`value-format` attribute) to `number`
+ * or `percent` for unit-less series, or assign a `(value, compact) => string` function property.
  *
  * @example
  * <lk-line-chart label="Net Worth" currency="USD"></lk-line-chart>
@@ -68,17 +72,20 @@ export class LkLineChart extends LitElement {
     points: {type: Array},
     label: {type: String},
     currency: {type: String},
+    valueFormat: {attribute: 'value-format'},
   };
 
   declare public points: ChartPoint[];
   declare public label: string;
   declare public currency: string;
+  declare public valueFormat: ChartValueFormat;
 
   constructor() {
     super();
     this.points = [];
     this.label = '';
     this.currency = 'USD';
+    this.valueFormat = 'currency';
   }
 
   protected override firstUpdated(): void {
@@ -89,13 +96,19 @@ export class LkLineChart extends LitElement {
     }
     this.chart = new Chart(
       ctx,
-      buildLineChartConfig(this.points, resolveLineChartTokens(), this.currency)
+      buildLineChartConfig(this.points, resolveLineChartTokens(), this.currency, this.valueFormat)
     );
   }
 
   public override updated(changed: Map<string, unknown>): void {
-    if (this.chart && (changed.has('points') || changed.has('currency'))) {
-      updateLineChart(this.chart, this.points);
+    if (
+      this.chart &&
+      (changed.has('points') || changed.has('currency') || changed.has('valueFormat'))
+    ) {
+      updateLineChart(this.chart, this.points, {
+        currency: this.currency,
+        valueFormat: this.valueFormat,
+      });
     }
   }
 

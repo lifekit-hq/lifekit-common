@@ -12,12 +12,13 @@ import {
 import {
   buildLineChartConfig,
   type ChartPoint,
+  type ChartValueFormat,
   resolveLineChartTokens,
   updateLineChart,
 } from '@lifekit-hq/charts-core';
 import {Chart} from 'chart.js';
 
-export type {ChartPoint} from '@lifekit-hq/charts-core';
+export type {ChartPoint, ChartValueFormat} from '@lifekit-hq/charts-core';
 
 @Component({
   selector: 'cmn-line-chart',
@@ -52,6 +53,11 @@ export class LineChartComponent implements AfterViewInit, OnDestroy {
   public readonly data = input<ChartPoint[]>([]);
   public readonly label = input<string>('');
   public readonly currency = input<string>('USD');
+  /**
+   * How values render in ticks and tooltips: `'currency'` (default, uses `currency`), `'number'`,
+   * `'percent'`, or a `(value, compact) => string` formatter for anything else.
+   */
+  public readonly valueFormat = input<ChartValueFormat>('currency');
   /** Shown in place of the plot when there is nothing to draw. */
   public readonly emptyMessage = input<string>('No data yet');
   protected readonly isEmpty = computed(() => this.data().length === 0);
@@ -59,8 +65,9 @@ export class LineChartComponent implements AfterViewInit, OnDestroy {
   constructor() {
     effect(() => {
       const points = this.data();
+      const format = {currency: this.currency(), valueFormat: this.valueFormat()};
       if (this.chart) {
-        updateLineChart(this.chart, points);
+        updateLineChart(this.chart, points, format);
       }
     });
   }
@@ -81,7 +88,12 @@ export class LineChartComponent implements AfterViewInit, OnDestroy {
     }
     this.chart = new Chart(
       ctx,
-      buildLineChartConfig(this.data(), resolveLineChartTokens(), this.currency())
+      buildLineChartConfig(
+        this.data(),
+        resolveLineChartTokens(),
+        this.currency(),
+        this.valueFormat()
+      )
     );
   }
 }

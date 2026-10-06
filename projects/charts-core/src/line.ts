@@ -11,8 +11,8 @@ import {
   Tooltip,
 } from 'chart.js';
 
-import {type ChartPoint} from './types';
-import {chartFontFamily, cssVar, fontFamily, money} from './utils';
+import {type ChartPoint, type ChartValueFormat} from './types';
+import {chartFontFamily, cssVar, fontFamily, valueFormatter} from './utils';
 
 Chart.register(
   CategoryScale,
@@ -57,8 +57,10 @@ function buildLineDataset(points: ChartPoint[], accent: string): ChartDataset<'l
 export function buildLineChartConfig(
   points: ChartPoint[],
   tokens: LineChartTokens,
-  currency: string
+  currency: string,
+  valueFormat: ChartValueFormat = 'currency'
 ): ChartConfiguration<'line'> {
+  const format = valueFormatter(valueFormat, currency);
   return {
     type: 'line',
     data: {
@@ -75,7 +77,7 @@ export function buildLineChartConfig(
           mode: 'index',
           intersect: false,
           callbacks: {
-            label: ctx => money(ctx.parsed.y as number, currency),
+            label: ctx => format(ctx.parsed.y as number, false),
           },
         },
       },
@@ -89,7 +91,7 @@ export function buildLineChartConfig(
           ticks: {
             color: tokens.textSecondary,
             font: {family: fontFamily(tokens), size: 11},
-            callback: val => money(val as number, currency, true),
+            callback: val => format(val as number, true),
           },
         },
       },
@@ -97,10 +99,31 @@ export function buildLineChartConfig(
   };
 }
 
-export function updateLineChart(chart: Chart, points: ChartPoint[]): void {
+/** The value-format inputs a live chart can be re-pointed at without being rebuilt. */
+export interface LineChartFormat {
+  currency: string;
+  valueFormat?: ChartValueFormat;
+}
+
+export function updateLineChart(
+  chart: Chart,
+  points: ChartPoint[],
+  format?: LineChartFormat
+): void {
   // eslint-disable-next-line no-param-reassign
   chart.data.labels = points.map(p => p.label);
   // eslint-disable-next-line no-param-reassign
   chart.data.datasets[0].data = points.map(p => p.value);
+  if (format) {
+    const formatter = valueFormatter(format.valueFormat ?? 'currency', format.currency);
+    const callbacks = chart.options.plugins?.tooltip?.callbacks;
+    if (callbacks) {
+      callbacks.label = ctx => formatter(ctx.parsed.y as number, false);
+    }
+    const ticks = chart.options.scales?.['y']?.ticks;
+    if (ticks) {
+      ticks.callback = val => formatter(val as number, true);
+    }
+  }
   chart.update('none');
 }

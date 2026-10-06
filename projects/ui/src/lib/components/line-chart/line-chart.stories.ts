@@ -18,10 +18,26 @@ const SAMPLE_DATA: ChartPoint[] = [
   {label: 'Apr', value: 1420892},
 ];
 
+const SCORE_DATA: ChartPoint[] = [
+  {label: 'May', value: 12},
+  {label: 'Jun', value: 18},
+  {label: 'Jul', value: 15},
+  {label: 'Aug', value: 22},
+  {label: 'Sep', value: 25},
+];
+
 const meta: Meta<LineChartComponent> = {
   title: 'Components/LineChart',
   component: LineChartComponent,
   tags: ['autodocs'],
+  argTypes: {
+    valueFormat: {
+      control: 'inline-radio',
+      options: ['currency', 'number', 'percent'],
+      description:
+        "How ticks and tooltips render values: a kind (`'currency'` default, `'number'`, `'percent'`) or a `(value, compact) => string` function.",
+    },
+  },
 };
 
 export default meta;
@@ -29,6 +45,32 @@ type Story = StoryObj<LineChartComponent>;
 
 export const Default: Story = {
   args: {data: SAMPLE_DATA, label: 'Net Worth Performance', currency: 'USD'},
+};
+
+/** Unit-less series (a score): ticks and tooltip carry no currency symbol. */
+export const NumberFormat: Story = {
+  args: {data: SCORE_DATA, label: 'Health score', valueFormat: 'number'},
+};
+
+export const PercentFormat: Story = {
+  args: {
+    data: [
+      {label: 'May', value: 41.5},
+      {label: 'Jun', value: 44},
+      {label: 'Jul', value: 43.2},
+      {label: 'Aug', value: 47.8},
+    ],
+    label: 'Savings rate',
+    valueFormat: 'percent',
+  },
+};
+
+export const CustomFormatter: Story = {
+  args: {
+    data: SCORE_DATA,
+    label: 'Health score',
+    valueFormat: (value: number) => `${value} pts`,
+  },
 };
 
 export const Empty: Story = {

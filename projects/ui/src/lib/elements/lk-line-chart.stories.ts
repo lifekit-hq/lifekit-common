@@ -35,6 +35,7 @@ interface StoryArgs {
   points: ChartPoint[];
   label: string;
   currency: string;
+  valueFormat?: 'currency' | 'number' | 'percent';
 }
 
 const meta: Meta<StoryArgs> = {
@@ -52,11 +53,13 @@ const meta: Meta<StoryArgs> = {
         [points]="points"
         [label]="label"
         [currency]="currency"
+        [valueFormat]="valueFormat ?? 'currency'"
       ></lk-line-chart>
     `,
   }),
   argTypes: {
     currency: {control: 'select', options: ['USD', 'EUR', 'GBP']},
+    valueFormat: {control: 'inline-radio', options: ['currency', 'number', 'percent']},
   },
 };
 
@@ -73,4 +76,20 @@ export const Empty: Story = {
 
 export const NoLabel: Story = {
   args: {points: SAMPLE_DATA, label: '', currency: 'USD'},
+};
+
+/** Unit-less series: ticks and tooltip carry no currency symbol. */
+export const NumberFormat: Story = {
+  args: {
+    points: [
+      {label: 'May', value: 12},
+      {label: 'Jun', value: 18},
+      {label: 'Jul', value: 15},
+      {label: 'Aug', value: 22},
+      {label: 'Sep', value: 25},
+    ],
+    label: 'Health score',
+    currency: 'USD',
+    valueFormat: 'number',
+  },
 };

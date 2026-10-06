@@ -34,4 +34,15 @@ describe('LineChartComponent', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('[data-testid="chart-empty"]')).toBeNull();
   });
+
+  it('defaults valueFormat to currency', () => {
+    expect(fixture.componentInstance.valueFormat()).toBe('currency');
+  });
+
+  it('accepts a unit-less valueFormat', () => {
+    fixture.componentRef.setInput('valueFormat', 'number');
+    fixture.componentRef.setInput('data', [{label: 'May', value: 25}]);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.valueFormat()).toBe('number');
+  });
 });
