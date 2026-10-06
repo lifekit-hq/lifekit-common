@@ -48,6 +48,10 @@ describe('lifekitBrand (Vite plugin)', () => {
       ['/console/', '/console/', '/console/']
     );
     assert.equal(manifest.basePath, undefined);
+    assert.deepEqual(
+      manifest.icons.map(i => i.src),
+      ['/console/icon-192.png', '/console/icon-512.png', '/console/icon-maskable-512.png']
+    );
   });
 
   it('serves icons in dev and passes other requests through', () => {

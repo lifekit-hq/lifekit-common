@@ -18,7 +18,7 @@ export const BRAND_FILES = Object.freeze([
   'icon-maskable-512.png',
 ]);
 
-/** Manifest `icons`, in the order apps list them. */
+/** Manifest `icons` for an app served at the site root, in the order apps list them. */
 export const MANIFEST_ICONS = Object.freeze([
   Object.freeze({src: '/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any'}),
   Object.freeze({src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any'}),
@@ -74,10 +74,15 @@ export function normalizeBasePath(basePath = DEFAULT_BASE_PATH) {
   return segments.length ? `/${segments.join('/')}/` : DEFAULT_BASE_PATH;
 }
 
+/** URL of a file served from the app's base path: `/console/` + `icon-192.png`. */
+export function baseUrl(base, file) {
+  return `${base}${file}`;
+}
+
 /**
  * The standard's manifest fields: colours, icons, display and scope. Apps add `name`
  * and `short_name` (see {@link brandManifest}). `basePath` is where the app is served
- * (default `/`) and sets `id`, `start_url` and `scope`.
+ * (default `/`): it sets `id`, `start_url` and `scope`, and prefixes the icon `src`s.
  */
 export function manifestFragment(colors = brandColors(), {basePath} = {}) {
   const base = normalizeBasePath(basePath);
@@ -88,7 +93,7 @@ export function manifestFragment(colors = brandColors(), {basePath} = {}) {
     display: 'standalone',
     theme_color: colors.surfaceLight,
     background_color: colors.surfaceLight,
-    icons: MANIFEST_ICONS.map(icon => ({...icon})),
+    icons: MANIFEST_ICONS.map(icon => ({...icon, src: baseUrl(base, icon.src.slice(1))})),
   };
 }
 
@@ -109,18 +114,22 @@ function escapeHtml(text) {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-/** The head lines every app's `index.html` carries, after `<meta charset>`. */
-export function headMarkup({title}, colors = brandColors()) {
+/**
+ * The head lines every app's `index.html` carries, after `<meta charset>`. `basePath` is
+ * where the app is served (default `/`); the icon and manifest links follow it.
+ */
+export function headMarkup({title, basePath}, colors = brandColors()) {
   const {light, dark} = themeColors(colors);
+  const base = normalizeBasePath(basePath);
   return [
     `<title>${escapeHtml(title)}</title>`,
     `<meta name="viewport" content="${VIEWPORT}" />`,
     '<meta name="color-scheme" content="light dark" />',
     `<meta name="theme-color" content="${light}" media="(prefers-color-scheme: light)" />`,
     `<meta name="theme-color" content="${dark}" media="(prefers-color-scheme: dark)" />`,
-    '<link rel="icon" href="/favicon.ico" sizes="32x32" />',
-    '<link rel="icon" href="/favicon.svg" type="image/svg+xml" />',
-    '<link rel="apple-touch-icon" href="/apple-touch-icon.png" />',
-    '<link rel="manifest" href="/manifest.webmanifest" />',
+    `<link rel="icon" href="${baseUrl(base, 'favicon.ico')}" sizes="32x32" />`,
+    `<link rel="icon" href="${baseUrl(base, 'favicon.svg')}" type="image/svg+xml" />`,
+    `<link rel="apple-touch-icon" href="${baseUrl(base, 'apple-touch-icon.png')}" />`,
+    `<link rel="manifest" href="${baseUrl(base, 'manifest.webmanifest')}" />`,
   ].join('\n');
 }

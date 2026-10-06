@@ -113,14 +113,18 @@ Off-token colours are not allowed. Other fields (`description`, `lang`, `shortcu
 An app served under a sub-path (the devclaw console at `/console/`) passes that base path, and
 `id`, `start_url` and `scope` all become it. The value is normalised to `/segment/` form
 (`console` and `/console` both give `/console/`); anything that is not a plain path (a URL, a
-query, `..`, whitespace) is rejected. Nothing else in the standard changes.
+query, `..`, whitespace) is rejected. The manifest icons follow it too: each `src` is prefixed with
+the base path (`/console/icon-192.png`), so they resolve inside the scope. With the default `/` the
+output is unchanged.
 
 ```js
-brandManifest({name: 'Devclaw', basePath: '/console/'}); // id, start_url, scope: '/console/'
+brandManifest({name: 'Devclaw', basePath: '/console/'});
+// id, start_url, scope: '/console/'; icons: '/console/icon-192.png', …
 ```
 
-The static `manifest.fragment.json` always carries the default `/`; set those three fields by
-hand in a static manifest.
+The static `manifest.fragment.json` always carries the default `/`; set those three fields and the
+icon `src`s by hand in a static manifest. The icon files themselves stay at the root of the build
+output, which is served under the base path.
 
 ## Head template
 
@@ -138,6 +142,10 @@ after `<meta charset>`:
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 <link rel="manifest" href="/manifest.webmanifest" />
 ```
+
+An app served under a base path prefixes the four link `href`s with it
+(`/console/favicon.ico`, …); `headMarkup({title, basePath})` emits that form, and the generated
+`head.html` is the root form shown above.
 
 - `viewport-fit=cover` lets the app pad for notches with `env(safe-area-inset-*)`. Never lock zoom.
 - `color-scheme: light dark` gives native controls and scrollbars the right scheme before CSS loads.
@@ -214,7 +222,9 @@ npx lifekit-chrome-check --app fs --name "Finance Sentry" dist/finance-sentry/br
 ```
 
 An app served under a sub-path adds `--base-path` (default `/`), which is the expected `id`,
-`start_url` and `scope`. A malformed value exits 2:
+`start_url` and `scope`, and the prefix every head link `href` and manifest icon `src` must
+resolve to (`/console/favicon.ico`). A relative URL resolves against the base path, so
+`favicon.ico` passes and a root-absolute `/favicon.ico` fails. A malformed value exits 2:
 
 ```bash
 npx lifekit-chrome-check --app dc --name "Devclaw" --base-path /console/ dist/console/browser
@@ -230,6 +240,6 @@ It fails (exit 1) and lists every deviation:
   of the package generated. That catches stale, hand-edited and other-app icons.
 
 The same checks are available as functions from `@lifekit-hq/tokens/brand`: `checkBrowserChrome`,
-`checkHead`, `checkManifest` and `checkIcons`. `checkBrowserChrome` and `checkManifest` take
-`{basePath}`. Each returns `{rule, message}[]`, empty when the app
+`checkHead`, `checkManifest` and `checkIcons`. `checkBrowserChrome`, `checkHead` and
+`checkManifest` take `{basePath}`. Each returns `{rule, message}[]`, empty when the app
 complies, for use inside an app's own test suite.

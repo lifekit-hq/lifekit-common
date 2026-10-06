@@ -8,8 +8,10 @@ import {join} from 'node:path';
 
 import {
   BRAND_FILES,
+  baseUrl,
   brandAssetsDir,
   manifestFragment,
+  normalizeBasePath,
   SHORT_NAME_MAX,
   themeColors,
   TITLE_SEPARATOR,
@@ -47,12 +49,17 @@ function tags(head, name) {
   );
 }
 
-/** Site-root-relative path of an href (`/a.png`, `./a.png`, `a.png` → `a.png`). */
-function rootPath(href) {
+/**
+ * The path a browser requests for an href in a document served under `base`: root-absolute
+ * as written, relative resolved against `base`, query and hash dropped. External and
+ * `data:` URLs have none (`null`).
+ */
+function effectiveUrl(href, base) {
   if (href === undefined || /^[a-z][a-z\d+.-]*:/i.test(href) || href.startsWith('//')) {
     return null;
   }
-  return href.replace(/^\.?\//, '').replace(/[?#].*$/, '');
+  const path = href.replace(/[?#].*$/, '');
+  return path.startsWith('/') ? path : baseUrl(base, path.replace(/^\.\//, ''));
 }
 
 function sameColor(a, b) {
@@ -75,10 +82,12 @@ function relList(attrs) {
 /**
  * Checks an `index.html` against the head template.
  * @param {string} html
- * @param {{appName?: string, colors?: object}} [options]
+ * @param {{appName?: string, colors?: object, basePath?: string}} [options] `basePath`: where
+ *   the app is served (default `/`); the icon and manifest links must resolve under it
  * @returns {{rule: string, message: string}[]}
  */
-export function checkHead(html, {appName, colors = brandColors()} = {}) {
+export function checkHead(html, {appName, colors = brandColors(), basePath} = {}) {
+  const base = normalizeBasePath(basePath);
   const problems = [];
   const report = (rule, message) => problems.push({rule, message});
   const head = /<head\b[^>]*>([\s\S]*?)<\/head>/i.exec(html)?.[1];
@@ -135,7 +144,9 @@ export function checkHead(html, {appName, colors = brandColors()} = {}) {
 
   const links = tags(head, 'link');
   for (const {rel, file, attrs} of REQUIRED_LINKS) {
-    const found = links.filter(l => relList(l).includes(rel) && rootPath(l.href) === file);
+    const found = links.filter(
+      l => relList(l).includes(rel) && effectiveUrl(l.href, base) === baseUrl(base, file)
+    );
     const ok =
       found.length === 1 &&
       Object.entries(attrs).every(([k, v]) => (found[0][k] ?? '').toLowerCase() === v);
@@ -143,14 +154,14 @@ export function checkHead(html, {appName, colors = brandColors()} = {}) {
       const extra = Object.entries(attrs)
         .map(([k, v]) => ` ${k}="${v}"`)
         .join('');
-      report('links', `expected one <link rel="${rel}" href="/${file}"${extra}>`);
+      report('links', `expected one <link rel="${rel}" href="${baseUrl(base, file)}"${extra}>`);
     }
   }
-  const allowedIcons = new Set(REQUIRED_LINKS.map(l => `${l.rel}|${l.file}`));
+  const allowedIcons = new Set(REQUIRED_LINKS.map(l => `${l.rel}|${baseUrl(base, l.file)}`));
   for (const link of links) {
     for (const rel of relList(link)) {
       if (!['icon', 'apple-touch-icon', 'mask-icon', 'manifest'].includes(rel)) continue;
-      if (!allowedIcons.has(`${rel}|${rootPath(link.href)}`)) {
+      if (!allowedIcons.has(`${rel}|${effectiveUrl(link.href, base)}`)) {
         report('links', `unexpected <link rel="${rel}" href="${link.href ?? ''}">`);
       }
     }
@@ -162,7 +173,7 @@ export function checkHead(html, {appName, colors = brandColors()} = {}) {
  * Checks a parsed web manifest against the standard.
  * @param {object} manifest
  * @param {{appName?: string, colors?: object, basePath?: string}} [options] `basePath`: where
- *   the app is served (default `/`), the expected `id`, `start_url` and `scope`
+ *   the app is served (default `/`), the expected `id`, `start_url`, `scope` and icon `src`s
  * @returns {{rule: string, message: string}[]}
  */
 export function checkManifest(manifest, {appName, colors = brandColors(), basePath} = {}) {
@@ -192,7 +203,9 @@ export function checkManifest(manifest, {appName, colors = brandColors(), basePa
     }
   }
 
-  const iconKey = i => `${rootPath(i?.src)}|${i?.sizes}|${i?.type}|${(i?.purpose ?? 'any').trim()}`;
+  const base = normalizeBasePath(basePath);
+  const iconKey = i =>
+    `${effectiveUrl(i?.src, base)}|${i?.sizes}|${i?.type}|${(i?.purpose ?? 'any').trim()}`;
   const actual = Array.isArray(manifest.icons) ? manifest.icons.map(iconKey) : [];
   const wanted = expectedIcons.map(iconKey);
   const missing = wanted.filter(k => !actual.includes(k));
@@ -251,7 +264,7 @@ export function checkBrowserChrome({
   if (!existsSync(indexPath)) {
     return [{rule: 'head', message: `${indexPath} does not exist`}];
   }
-  const problems = checkHead(readFileSync(indexPath, 'utf8'), {appName, colors});
+  const problems = checkHead(readFileSync(indexPath, 'utf8'), {appName, colors, basePath});
 
   const manifestPath = join(distDir, 'manifest.webmanifest');
   if (!existsSync(manifestPath)) {
