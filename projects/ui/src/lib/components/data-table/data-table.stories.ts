@@ -108,7 +108,7 @@ export const Loading: Story = {
 };
 
 const CLICKABLE_TEMPLATE = `
-  <cmn-data-table [rows]="rows" (rowClick)="onRowClick($event)">
+  <cmn-data-table [rows]="rows" [rowsActionable]="true" (rowClick)="onRowClick($event)">
     <cmn-column key="date" header="Date" />
     <cmn-column key="description" header="Description" />
     <cmn-column key="amount" header="Amount" align="right" />
@@ -116,7 +116,7 @@ const CLICKABLE_TEMPLATE = `
 `;
 
 /**
- * A \`rowClick\` subscriber makes rows actionable: pointer cursor, hover highlight, and
+ * Setting \`rowsActionable\` alongside a \`rowClick\` handler makes rows actionable: pointer cursor, hover highlight, and
  * focusable with a visible focus ring. Tab to a row and press Enter or Space to activate it.
  */
 export const ClickableRows: Story = {
@@ -132,7 +132,7 @@ const READ_ONLY_TEMPLATE = `
   </cmn-data-table>
 `;
 
-/** Without a \`rowClick\` subscriber rows are inert: no hover highlight, pointer cursor or tab stop. */
+/** With \`rowsActionable\` left at its default (false) rows are inert: no hover highlight, pointer cursor or tab stop. */
 export const ReadOnlyRows: Story = {
   args: {rows: ROWS},
   render: args => ({props: args, template: READ_ONLY_TEMPLATE}),

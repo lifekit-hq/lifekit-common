@@ -8,9 +8,7 @@ import {
   contentChildren,
   inject,
   input,
-  OnInit,
   output,
-  signal,
   TrackByFunction,
 } from '@angular/core';
 import {toSignal} from '@angular/core/rxjs-interop';
@@ -78,7 +76,7 @@ type ListSlotColumns = Record<CmnListSlot, CmnColumnComponent[]>;
           <ul class="divide-y divide-border-default" role="list">
             @for (row of rows(); track trackRow($index, row); let i = $index) {
               <li
-                [attr.tabindex]="actionable() ? 0 : null"
+                [attr.tabindex]="rowsActionable() ? 0 : null"
                 [class]="listRowClass()"
                 (click)="rowClick.emit(row)"
                 (keydown.enter)="onRowKey($event, row)"
@@ -203,7 +201,7 @@ type ListSlotColumns = Record<CmnListSlot, CmnColumnComponent[]>;
             <tr *cdkHeaderRowDef="columnKeys()" cdk-header-row></tr>
             <tr
               *cdkRowDef="let row; columns: columnKeys()"
-              [attr.tabindex]="actionable() ? 0 : null"
+              [attr.tabindex]="rowsActionable() ? 0 : null"
               [class]="tableRowClass()"
               (click)="rowClick.emit(row)"
               (keydown.enter)="onRowKey($event, row)"
@@ -257,7 +255,7 @@ type ListSlotColumns = Record<CmnListSlot, CmnColumnComponent[]>;
     }
   `,
 })
-export class DataTableComponent<T = Record<string, unknown>> implements OnInit {
+export class DataTableComponent<T = Record<string, unknown>> {
   private readonly breakpoints = inject(BreakpointObserver);
   private readonly isWide = toSignal(
     this.breakpoints.observe(CMN_MEDIA_MD).pipe(map(state => state.matches)),
@@ -272,9 +270,13 @@ export class DataTableComponent<T = Record<string, unknown>> implements OnInit {
   public readonly pagination = input<CmnTablePagination | null>(null);
 
   /**
-   * Emits when a row is clicked, or activated with Enter/Space. Rows are only
-   * focusable and styled as actionable when something subscribes.
+   * Opt in when `rowClick` is handled: rows become focusable with a pointer cursor,
+   * hover highlight and focus ring, and activate on Enter/Space. Off by default so
+   * read-only rows stay inert.
    */
+  public readonly rowsActionable = input<boolean>(false);
+
+  /** Emits when a row is clicked, or activated with Enter/Space while `rowsActionable` is set. */
   public readonly rowClick = output<T>();
   public readonly previousPage = output<void>();
   public readonly nextPage = output<void>();
@@ -311,17 +313,14 @@ export class DataTableComponent<T = Record<string, unknown>> implements OnInit {
     return slots;
   });
 
-  /** True when a `rowClick` listener is attached; gates the hover, pointer and keyboard affordances. */
-  protected readonly actionable = signal(false);
-
   protected readonly tableRowClass = computed(
     () =>
-      `border-b border-border-default last:border-0 ${ROW_BASE_CLASS}${this.actionable() ? ' ' + ROW_ACTIONABLE_CLASS : ''}`
+      `border-b border-border-default last:border-0 ${ROW_BASE_CLASS}${this.rowsActionable() ? ' ' + ROW_ACTIONABLE_CLASS : ''}`
   );
 
   protected readonly listRowClass = computed(
     () =>
-      `flex items-center gap-cmn-3 px-cmn-4 py-cmn-3 ${ROW_BASE_CLASS}${this.actionable() ? ' ' + ROW_ACTIONABLE_CLASS : ''}`
+      `flex items-center gap-cmn-3 px-cmn-4 py-cmn-3 ${ROW_BASE_CLASS}${this.rowsActionable() ? ' ' + ROW_ACTIONABLE_CLASS : ''}`
   );
 
   protected readonly skeletonRows = Array.from({length: SKELETON_ROWS});
@@ -330,13 +329,6 @@ export class DataTableComponent<T = Record<string, unknown>> implements OnInit {
   protected readonly skeletonBarWidths = computed(() =>
     this.columns().map((_, i) => SKELETON_BAR_WIDTHS[i % SKELETON_BAR_WIDTHS.length])
   );
-
-  public ngOnInit(): void {
-    // Output listeners are attached to the ref before the first init hook; `listeners`
-    // is Angular's runtime-only record of subscribers (no public `observed` API).
-    const ref = this.rowClick as unknown as {listeners?: unknown[] | null};
-    this.actionable.set((ref.listeners?.length ?? 0) > 0);
-  }
 
   public headerCellClass(align: CmnColumnAlign): string {
     return `sticky top-0 z-10 border-b border-border-default bg-surface-card px-cmn-4 py-cmn-3 font-label text-cmn-xs font-semibold uppercase tracking-wide text-text-secondary ${this.alignClass(align)}`;
@@ -348,7 +340,7 @@ export class DataTableComponent<T = Record<string, unknown>> implements OnInit {
 
   protected onRowKey(event: Event, row: T): void {
     // Keys pressed inside a cell control (button, link) belong to that control.
-    if (!this.actionable() || event.target !== event.currentTarget) {
+    if (!this.rowsActionable() || event.target !== event.currentTarget) {
       return;
     }
     event.preventDefault();

@@ -18,7 +18,7 @@ interface Row {
   imports: [CmnCellDirective, CmnColumnComponent, CmnHeaderCellDirective, DataTableComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <cmn-data-table [rows]="rows()" [emptyMessage]="emptyMessage()">
+    <cmn-data-table [rows]="rows()" [emptyMessage]="emptyMessage()" [rowsActionable]="actionable()">
       <cmn-column key="name" header="Name">
         <ng-template let-row cmnCell>{{ row.name }}</ng-template>
       </cmn-column>
@@ -32,6 +32,7 @@ interface Row {
 class TestHostComponent {
   public readonly rows = input<Row[]>([]);
   public readonly emptyMessage = input<string>('No data');
+  public readonly actionable = input(false);
 }
 
 @Component({
@@ -96,13 +97,23 @@ describe('DataTableComponent', () => {
     expect(text).toContain('$5000');
   });
 
-  it('keeps rows inert when nothing subscribes to rowClick', () => {
+  it('keeps rows inert by default', () => {
     fixture.componentRef.setInput('rows', ROWS);
     fixture.detectChanges();
     const row = fixture.nativeElement.querySelector('tr[cdk-row]') as HTMLElement;
     expect(row.hasAttribute('tabindex')).toBe(false);
     expect(row.className).not.toContain('hover:');
     expect(row.className).not.toContain('cursor-pointer');
+  });
+
+  it('makes rows focusable and actionable when rowsActionable is set', () => {
+    fixture.componentRef.setInput('rows', ROWS);
+    fixture.componentRef.setInput('actionable', true);
+    fixture.detectChanges();
+    const row = fixture.nativeElement.querySelector('tr[cdk-row]') as HTMLElement;
+    expect(row.getAttribute('tabindex')).toBe('0');
+    expect(row.className).toContain('hover:bg-surface-raised');
+    expect(row.className).toContain('cursor-pointer');
   });
 
   it('renders one skeleton bar per column in every loading row', () => {
@@ -155,6 +166,7 @@ interface Txn {
       [mode]="mode()"
       [pagination]="pagination()"
       [rows]="rows()"
+      [rowsActionable]="actionable()"
       [trackBy]="trackById"
       (rowClick)="clicked = $event"
       emptyMessage="No transactions"
@@ -177,6 +189,7 @@ class ListHostComponent {
   public readonly rows = input<Txn[]>([]);
   public readonly mode = input<'responsive' | 'table' | 'list'>('responsive');
   public readonly loading = input(false);
+  public readonly actionable = input(true);
   public readonly pagination = input<CmnTablePagination | null>(null);
   public clicked: Txn | null = null;
 
@@ -287,7 +300,7 @@ describe('DataTableComponent list-row mode', () => {
     expect(el.textContent).toContain('Pending');
   });
 
-  it('makes table rows focusable and actionable when rowClick has a subscriber', () => {
+  it('makes table rows focusable and actionable when rowsActionable is set', () => {
     const row = el.querySelector('tr[cdk-row]') as HTMLElement;
     expect(row.getAttribute('tabindex')).toBe('0');
     expect(row.className).toContain('hover:bg-surface-raised');
@@ -309,6 +322,24 @@ describe('DataTableComponent list-row mode', () => {
 
     const cell = row.querySelector('td') as HTMLElement;
     cell.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter', bubbles: true}));
+    expect(fixture.componentInstance.clicked).toBeNull();
+  });
+
+  it('keeps table and list rows inert and silent when rowsActionable is off', () => {
+    fixture.componentRef.setInput('actionable', false);
+    fixture.detectChanges();
+    const row = el.querySelector('tr[cdk-row]') as HTMLElement;
+    expect(row.hasAttribute('tabindex')).toBe(false);
+    expect(row.className).not.toContain('cursor-pointer');
+    row.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter', bubbles: true}));
+    expect(fixture.componentInstance.clicked).toBeNull();
+
+    fixture.componentRef.setInput('mode', 'list');
+    fixture.detectChanges();
+    const [first] = listRows();
+    expect(first.hasAttribute('tabindex')).toBe(false);
+    expect(first.className).not.toContain('hover:');
+    first.dispatchEvent(new KeyboardEvent('keydown', {key: ' ', bubbles: true}));
     expect(fixture.componentInstance.clicked).toBeNull();
   });
 
