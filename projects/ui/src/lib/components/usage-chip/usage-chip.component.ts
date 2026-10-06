@@ -6,9 +6,9 @@ const PERCENT = 100;
 const WARN_AT = 0.8;
 
 const TONE_FILL: Record<UsageChipTone, string> = {
-  success: 'bg-status-success/25',
-  warning: 'bg-status-warning/25',
-  error: 'bg-status-error/25',
+  success: 'bg-status-success opacity-25',
+  warning: 'bg-status-warning opacity-25',
+  error: 'bg-status-error opacity-25',
 };
 
 const TONE_TEXT: Record<UsageChipTone, string> = {
