@@ -54,7 +54,7 @@ const POSITIONS: ConnectedPosition[] = [
       multi: true,
     },
   ],
-  host: {class: 'block w-full'},
+  host: {class: 'block'},
   template: `
     <button
       #origin="cdkOverlayOrigin"

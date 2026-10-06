@@ -38,7 +38,7 @@ const SIZE_CLASSES: Record<SearchInputSize, string> = {
       multi: true,
     },
   ],
-  host: {class: 'relative block w-full'},
+  host: {class: 'relative block'},
   template: `
     <cmn-icon
       class="pointer-events-none absolute left-cmn-2 top-1/2 -translate-y-1/2 text-text-secondary"
