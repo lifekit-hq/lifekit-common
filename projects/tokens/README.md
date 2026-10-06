@@ -36,7 +36,7 @@ module.exports = {
 ```
 
 `base.css` is optional plain CSS over the theme variables: box-sizing, thin theme-aware
-scrollbars, accent links, a heading margin reset and a pointer cursor on buttons. Import it
+scrollbars, accent colour on class-less links, a heading margin reset and a pointer cursor on buttons. Import it
 after `theme.css` so every app scrolls and links the same way.
 
 The icons, head template and manifest fragment under `brand/` are generated from
