@@ -106,7 +106,7 @@ Counts are a point-in-time measurement; re-measure before relying on them for a 
 | stat-card | fs 4 · dash 1 | interactive | keep-own | Depends on `SkeletonComponent`; delta formatting with trending icons; child-component dependency |
 | status-indicator | fs 0 · dash 0 | simple-leaf | element-rewrite | Status badge + dot + optional timestamp; pure token CSS |
 | stepper-dialog | new (added for multi-step flows, #39); fs 0 · dash 0 | interactive | keep-own | `contentChildren` of `cmnStep` templates with `model()` step index, progress list and Back/Next/Finish actions; depends on `button` and `dialog-actions`; Angular template-outlet composition |
-| tab-group | fs 0 · dash 0 | interactive | keep-own | `model()` two-way binding for `activeTab`; `aria-selected`; Angular-idiomatic tab panel |
+| tab-group | fs 0 · dash 0 | interactive | keep-own | `model()` two-way binding for `activeTab`; `aria-selected`; Angular-idiomatic tab panel; routed mode (`routerLink` tabs in a `nav`, `aria-current`) uses `RouterLink`/`RouterLinkActive`, so it stays Angular |
 | tag | fs 15 · dash 1 | simple-leaf | element-rewrite | Five-variant badge; trivially simple |
 | toast | fs 5 · dash 0 | interactive | keep-own | Dismiss event + aria role + `toast.service.ts` service layer; keep Angular until service strategy is decided |
 | toggle | fs 2 · dash 1 | interactive | element-rewrite | Switch button + thumb animation + `aria-checked`; `role="switch"` + boolean attribute = clean Lit mapping |
