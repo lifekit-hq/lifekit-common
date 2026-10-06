@@ -1,6 +1,6 @@
 {
   "name": "@lifekit-hq/elements",
-  "version": "0.9.0",
+  "version": "1.0.0",
   "description": "Framework-free Lit custom elements — the long-term UI substrate for the lifekit ecosystem",
   "sideEffects": [
     "./fesm2022/lifekit-hq-elements.mjs"
@@ -15,7 +15,7 @@
     "registry": "https://npm.pkg.github.com"
   },
   "dependencies": {
-    "@lifekit-hq/charts-core": "0.9.0"
+    "@lifekit-hq/charts-core": "1.0.0"
   },
   "peerDependencies": {
     "chart.js": "^4.5.1",

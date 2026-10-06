@@ -1,5 +1,37 @@
 # Changelog
 
+## [1.0.0](https://github.com/lifekit-hq/lifekit-common/compare/v0.9.0...v1.0.0) (2026-10-06)
+
+
+### ⚠ BREAKING CHANGES
+
+* **ui:** app-layout owns Cmd-K, palette, active route, theme and account glue ([#89](https://github.com/lifekit-hq/lifekit-common/issues/89))
+
+### Features
+
+* **ci:** fail when a new simple-leaf component lands as Angular ([#94](https://github.com/lifekit-hq/lifekit-common/issues/94)) ([3ca60cc](https://github.com/lifekit-hq/lifekit-common/commit/3ca60cc798b1d65e78a1aba865d227bff64347e3))
+* **core:** add framework-free relative-time formatter ([#85](https://github.com/lifekit-hq/lifekit-common/issues/85)) ([5fdc93d](https://github.com/lifekit-hq/lifekit-common/commit/5fdc93dbda5267e3df1e07aa4c3f34cb1945a5f3))
+* **tokens:** add base.css, page-container defaults and UX continuity policy ([#91](https://github.com/lifekit-hq/lifekit-common/issues/91)) ([48cc200](https://github.com/lifekit-hq/lifekit-common/commit/48cc200dce0a9905a5dcf9c6efce3d75482faf7d))
+* **tokens:** add dc (devclaw) brand glyph ([#95](https://github.com/lifekit-hq/lifekit-common/issues/95)) ([e1b26e7](https://github.com/lifekit-hq/lifekit-common/commit/e1b26e73c9f22dda47d826572d17567ad6b3c3c3))
+* **tokens:** ship pre-paint theme script and add system theme mode to ThemeService ([#86](https://github.com/lifekit-hq/lifekit-common/issues/86)) ([8f746ad](https://github.com/lifekit-hq/lifekit-common/commit/8f746ad6524f960900271fe3db5a32724b0b302f))
+* **ui:** add routed mode to cmn-tab-group ([#93](https://github.com/lifekit-hq/lifekit-common/issues/93)) ([4aa2f2f](https://github.com/lifekit-hq/lifekit-common/commit/4aa2f2f065a0e82f18b5d16611f9bff1a9682d36))
+* **ui:** add search-input, multi-select and date-range filter primitives ([#83](https://github.com/lifekit-hq/lifekit-common/issues/83)) ([0a216bd](https://github.com/lifekit-hq/lifekit-common/commit/0a216bd825175ad3edb9f184392f8ae2a35e9952))
+* **ui:** add stepper-dialog multi-step component ([#88](https://github.com/lifekit-hq/lifekit-common/issues/88)) ([da669a6](https://github.com/lifekit-hq/lifekit-common/commit/da669a67f9b7fb9ccc45dc1f15396a2181b43777))
+* **ui:** add usage chip and live pulse to status indicator ([#87](https://github.com/lifekit-hq/lifekit-common/issues/87)) ([066919f](https://github.com/lifekit-hq/lifekit-common/commit/066919f18b6d26a3beb961b97dec184e06c9d293))
+* **ui:** app-layout owns Cmd-K, palette, active route, theme and account glue ([#89](https://github.com/lifekit-hq/lifekit-common/issues/89)) ([6ffb1e6](https://github.com/lifekit-hq/lifekit-common/commit/6ffb1e600ca6cdc5052247dd5369fb6720ebbeaa))
+* **ui:** make data-table rows keyboard-accessible and tighten table states ([#84](https://github.com/lifekit-hq/lifekit-common/issues/84)) ([2abf1fe](https://github.com/lifekit-hq/lifekit-common/commit/2abf1fe37e9cc9571a9cded2baf6aac8bf4e2245))
+
+
+### Bug Fixes
+
+* **ui:** declare runtime peer dependencies and default brand to Lifekit ([#81](https://github.com/lifekit-hq/lifekit-common/issues/81)) ([a1d092c](https://github.com/lifekit-hq/lifekit-common/commit/a1d092c86c4708d7a9f8ee150443d6138127766b))
+
+
+### Documentation
+
+* **strategy:** fill usage-evidence column with consumer counts ([#90](https://github.com/lifekit-hq/lifekit-common/issues/90)) ([6ee7fab](https://github.com/lifekit-hq/lifekit-common/commit/6ee7fab2fdcb4d5534dbf8a9ee1da199dea66d92))
+* **strategy:** replace web-components-long-term with layered substrate rule ([#92](https://github.com/lifekit-hq/lifekit-common/issues/92)) ([8b3533a](https://github.com/lifekit-hq/lifekit-common/commit/8b3533ae837c8c19dffb4e10fc1bc81acb91e452))
+
 ## [0.9.0](https://github.com/lifekit-hq/lifekit-common/compare/v0.8.0...v0.9.0) (2026-10-05)
 
 
