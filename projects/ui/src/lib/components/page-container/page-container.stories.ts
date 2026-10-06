@@ -29,7 +29,7 @@ export const Default: Story = {
     template:
       '<cmn-page-container [maxWidth]="maxWidth" [spacing]="spacing"><p class="text-text-primary">Page content goes here.</p></cmn-page-container>',
   }),
-  args: {maxWidth: 'max-w-screen-lg', spacing: 'md'},
+  args: {maxWidth: 'max-w-[1200px]', spacing: 'md'},
 };
 
 export const NarrowMaxWidth: Story = {

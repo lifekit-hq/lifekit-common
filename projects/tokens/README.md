@@ -32,7 +32,12 @@ module.exports = {
 /* global stylesheet */
 @import '@lifekit-hq/tokens/fonts.css';
 @import '@lifekit-hq/tokens/theme.css';
+@import '@lifekit-hq/tokens/base.css';
 ```
+
+`base.css` is optional plain CSS over the theme variables: box-sizing, thin theme-aware
+scrollbars, accent colour on class-less links, a heading margin reset and a pointer cursor on buttons. Import it
+after `theme.css` so every app scrolls and links the same way.
 
 The icons, head template and manifest fragment under `brand/` are generated from
 `brand/mark.mjs` and `theme.css` by `scripts/build-brand.mjs` (`npm run build:brand` at the

@@ -238,6 +238,44 @@ This audit confirms that verdict stands (see §select verdict above).
 
 ---
 
+## UX continuity policy
+
+Every lifekit product applies one policy for how a screen behaves while data loads, refreshes or
+is absent. The policy lives here; the primitives (`cmn-skeleton`, `cmn-async-state`,
+`cmn-empty-state`, `cmn-page-container`) enforce some rules today and the rest are targets they
+grow into (see the status table below).
+
+1. **Skeletons, not spinners or "Loading…" text.** A first load shows a skeleton shaped like the
+   final content, so the page does not reflow when data arrives.
+2. **Loading is not empty.** An empty state is shown only after a load has succeeded with no
+   results. Never flash "nothing here" before the data lands.
+3. **Keep cached data while refreshing.** A refetch, poll or revalidation keeps the previous
+   data on screen and signals progress unobtrusively. Replace content with a skeleton only when
+   there is nothing to show yet.
+4. **No micro-flashes.** Delay a loading indicator briefly so a fast response never flickers
+   in, and once shown keep it for a minimum time so it does not blink away.
+5. **No layout shift.** Reserve space for async content (skeleton dimensions, fixed row heights,
+   stable page width) so nothing jumps as it resolves.
+6. **Errors keep context.** A failed refresh keeps the last good data and offers a retry; a
+   failed first load shows an error state in place of the skeleton.
+7. **One page frame.** Pages sit in `cmn-page-container` (1200px max width,
+   `p-cmn-4 md:p-cmn-8`) so width and padding match across products.
+
+| Rule                                 | Status   | Where                                                                          |
+| ------------------------------------ | -------- | ------------------------------------------------------------------------------ |
+| 1. Skeletons, not spinners           | Enforced | `cmn-async-state` renders `cmn-skeleton` while `loading`                       |
+| 2. Loading is not empty              | Enforced | `cmn-async-state` shows empty only when `success` and `isEmpty`                |
+| 3. Keep cached data while refreshing | Target   | `loading` always replaces content with a skeleton                              |
+| 4. No micro-flashes                  | Target   | no indicator delay or minimum display time                                     |
+| 5. No layout shift                   | Partial  | stable page width via `cmn-page-container`; skeleton height is caller-supplied |
+| 6. Errors keep context               | Target   | the error branch replaces content with an alert, no retry or last-good data    |
+| 7. One page frame                    | Enforced | `cmn-page-container` defaults                                                  |
+
+Apps use `cmn-async-state` and `cmn-skeleton` rather than local loading markup; rules marked
+Target are not yet guaranteed by the primitives and must be handled in the app until they are.
+
+---
+
 ## Sequencing note — what unblocks issue #3
 
 Issue #3 is the look-and-feel pass (typography, spacing, colour, motion tokens applied

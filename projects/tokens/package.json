@@ -14,6 +14,7 @@
   "exports": {
     "./theme.css": "./theme.css",
     "./fonts.css": "./fonts.css",
+    "./base.css": "./base.css",
     "./tailwind": "./tailwind/preset.cjs",
     "./brand": "./brand/index.mjs",
     "./brand/vite": "./brand/vite.mjs",
@@ -27,6 +28,7 @@
   "files": [
     "theme.css",
     "fonts.css",
+    "base.css",
     "tailwind/",
     "brand/",
     "bin/"

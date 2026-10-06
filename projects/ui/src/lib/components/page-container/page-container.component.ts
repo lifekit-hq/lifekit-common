@@ -12,7 +12,7 @@ const SPACING_CLASSES: Record<PageContainerSpacing, string> = {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {style: 'display: block'},
   template: `
-    <div class="p-cmn-6">
+    <div class="p-cmn-4 md:p-cmn-8">
       <div [class]="innerClasses()">
         <ng-content />
       </div>
@@ -20,7 +20,7 @@ const SPACING_CLASSES: Record<PageContainerSpacing, string> = {
   `,
 })
 export class PageContainerComponent {
-  public readonly maxWidth = input<string>('max-w-screen-lg');
+  public readonly maxWidth = input<string>('max-w-[1200px]');
   public readonly spacing = input<PageContainerSpacing>('md');
 
   public readonly innerClasses = computed(
