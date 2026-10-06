@@ -7,7 +7,7 @@ import {StatusIndicatorComponent, type StatusIndicatorVariant} from './status-in
   imports: [StatusIndicatorComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <cmn-status-indicator [variant]="variant()" [timestampLabel]="timestamp()">
+    <cmn-status-indicator [variant]="variant()" [timestampLabel]="timestamp()" [live]="live()">
       {{ label() }}
     </cmn-status-indicator>
   `,
@@ -16,6 +16,7 @@ class HostComponent {
   public readonly variant = signal<StatusIndicatorVariant>('neutral');
   public readonly timestamp = signal<string | null>(null);
   public readonly label = signal('Synced');
+  public readonly live = signal(false);
 }
 
 describe('StatusIndicatorComponent', () => {
@@ -82,5 +83,17 @@ describe('StatusIndicatorComponent', () => {
     host.timestamp.set('');
     fixture.detectChanges();
     expect(querySpans()).toHaveLength(2);
+  });
+
+  it('does not pulse the dot by default', () => {
+    const [, dotSpan] = querySpans();
+    expect(dotSpan.className).not.toContain('animate-cmn-pulse');
+  });
+
+  it('pulses the dot when live', () => {
+    host.live.set(true);
+    fixture.detectChanges();
+    const [, dotSpan] = querySpans();
+    expect(dotSpan.className).toContain('animate-cmn-pulse');
   });
 });

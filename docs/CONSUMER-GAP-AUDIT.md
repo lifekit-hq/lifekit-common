@@ -150,28 +150,28 @@ single inline UI kit at `src/ui.tsx`. Consumes none of the four packages.
 
 ### 4.1 Local components that map onto library components
 
-| Local (`src/ui.tsx` unless noted) | Library equivalent                          | Notes                                                                                                           |
-| --------------------------------- | ------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `StatusDot`                       | `cmn-status-indicator`                      | devclaw adds a `live` pulse variant the library lacks.                                                          |
-| `Badge`                           | `cmn-tag` / `cmn-badge`                     |                                                                                                                 |
-| `TieredDisclosure`                | `cmn-disclosure-row`                        | Currently used by **no** consumer — see §5.                                                                     |
-| `Tabs<T>`                         | `cmn-tab-group`                             | Currently used by no consumer.                                                                                  |
-| `Modal`                           | `CmnDialogService` + `cmn-dialog-container` |                                                                                                                 |
-| `EmptyState`                      | `cmn-empty-state`                           |                                                                                                                 |
-| `Loading`                         | `cmn-skeleton` / `cmn-async-state`          |                                                                                                                 |
-| `ErrorNote`                       | `cmn-alert` (`variant="error"`)             |                                                                                                                 |
-| `Trend` (+ `TrendPoint`)          | `cmn-line-chart` / `cmn-area-chart`         | Hand-drawn inline SVG sparkline.                                                                                |
-| `UsageChip`                       | —                                           | **Genuinely missing.** A compact "n of m used" meter chip. `cmn-chip` is a selectable filter pill, not a meter. |
-| `SectionLabel`                    | `cmnTypography="label"`                     | Directive exists; adds a collapse affordance the directive lacks.                                               |
-| `components/AppShell.tsx`         | `cmn-app-layout`                            |                                                                                                                 |
-| `components/AttentionCard.tsx`    | `cmn-card` + `cmn-alert-item`               | Domain composition.                                                                                             |
-| `components/VerdictList.tsx`      | `cmn-data-table` / `cmn-list-item-row`      | Domain composition.                                                                                             |
-| `src/icons.tsx` (19 inline SVGs)  | `cmn-icon` + `provideCustomIcons`           | The registry provider is exactly this use case.                                                                 |
-| `src/theme.ts`                    | `ThemeService`                              | **Already compatible** — see below.                                                                             |
-| `src/util/time.ts`                | see §2.2                                    | Fourth copy of relative-time.                                                                                   |
+| Local (`src/ui.tsx` unless noted) | Library equivalent                          | Notes                                                                                                  |
+| --------------------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `StatusDot`                       | `cmn-status-indicator`                      | `live` input pulses the dot (added in #37).                                                            |
+| `Badge`                           | `cmn-tag` / `cmn-badge`                     |                                                                                                        |
+| `TieredDisclosure`                | `cmn-disclosure-row`                        | Currently used by **no** consumer — see §5.                                                            |
+| `Tabs<T>`                         | `cmn-tab-group`                             | Currently used by no consumer.                                                                         |
+| `Modal`                           | `CmnDialogService` + `cmn-dialog-container` |                                                                                                        |
+| `EmptyState`                      | `cmn-empty-state`                           |                                                                                                        |
+| `Loading`                         | `cmn-skeleton` / `cmn-async-state`          |                                                                                                        |
+| `ErrorNote`                       | `cmn-alert` (`variant="error"`)             |                                                                                                        |
+| `Trend` (+ `TrendPoint`)          | `cmn-line-chart` / `cmn-area-chart`         | Hand-drawn inline SVG sparkline.                                                                       |
+| `UsageChip`                       | `cmn-usage-chip`                            | Added in #37. A compact "n of m used" meter chip; `cmn-chip` is a selectable filter pill, not a meter. |
+| `SectionLabel`                    | `cmnTypography="label"`                     | Directive exists; adds a collapse affordance the directive lacks.                                      |
+| `components/AppShell.tsx`         | `cmn-app-layout`                            |                                                                                                        |
+| `components/AttentionCard.tsx`    | `cmn-card` + `cmn-alert-item`               | Domain composition.                                                                                    |
+| `components/VerdictList.tsx`      | `cmn-data-table` / `cmn-list-item-row`      | Domain composition.                                                                                    |
+| `src/icons.tsx` (19 inline SVGs)  | `cmn-icon` + `provideCustomIcons`           | The registry provider is exactly this use case.                                                        |
+| `src/theme.ts`                    | `ThemeService`                              | **Already compatible** — see below.                                                                    |
+| `src/util/time.ts`                | see §2.2                                    | Fourth copy of relative-time.                                                                          |
 
-**`UsageChip` and the `live` pulse on `StatusDot` are the only two things
-devclaw has that the library genuinely does not.** Everything else is a React
+**`UsageChip` and the `live` pulse on `StatusDot` were the only two things
+devclaw had that the library did not (both added in #37).** Everything else is a React
 re-implementation of a component the library already ships in Angular.
 
 ### 4.2 The one thing that already lines up
@@ -259,7 +259,7 @@ These are new components or behaviour changes, outside this issue's boundary:
 | [#34](https://github.com/lifekit-hq/lifekit-common/issues/34) | Close the framework gap — two of three consumers are React and cannot use `@lifekit-hq/ui`. `@lifekit-hq/elements` is the existing seam.                                                                                             |
 | [#35](https://github.com/lifekit-hq/lifekit-common/issues/35) | A Tailwind v4 token entry point; the current preset is v3-only.                                                                                                                                                                      |
 | [#36](https://github.com/lifekit-hq/lifekit-common/issues/36) | Radius, font and layout tokens as CSS custom properties, so non-Tailwind consumers can reach them.                                                                                                                                   |
-| [#37](https://github.com/lifekit-hq/lifekit-common/issues/37) | A usage/meter chip, and a `live` pulse on `cmn-status-indicator` — the two things devclaw has that the library lacks.                                                                                                                |
+| [#37](https://github.com/lifekit-hq/lifekit-common/issues/37) | A usage/meter chip, and a `live` pulse on `cmn-status-indicator` — the two things devclaw had that the library lacked. **Delivered:** `cmn-usage-chip` and `cmn-status-indicator`'s `live` input.                                    |
 | [#38](https://github.com/lifekit-hq/lifekit-common/issues/38) | One canonical relative-time formatter in `@lifekit-hq/core`, replacing the four copies.                                                                                                                                              |
 | [#39](https://github.com/lifekit-hq/lifekit-common/issues/39) | A stepper / multi-step-dialog component (finance-sentry's connect flow).                                                                                                                                                             |
 | [#40](https://github.com/lifekit-hq/lifekit-common/issues/40) | Fill in `docs/STRATEGY.md`'s usage-evidence column from §5. That table is a DRAFT awaiting ratification and its decisions are issue #5's call, so this change leaves it untouched.                                                   |

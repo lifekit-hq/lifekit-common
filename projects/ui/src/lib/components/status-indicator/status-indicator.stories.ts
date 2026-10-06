@@ -7,6 +7,7 @@ interface Args {
   variant: StatusIndicatorVariant;
   label: string;
   timestampLabel: string;
+  live: boolean;
 }
 
 const meta: Meta<Args> = {
@@ -20,6 +21,7 @@ const meta: Meta<Args> = {
     },
     label: {control: 'text'},
     timestampLabel: {control: 'text'},
+    live: {control: 'boolean'},
   },
 };
 
@@ -30,7 +32,7 @@ export const Default: Story = {
   render: args => ({
     props: args,
     template:
-      '<cmn-status-indicator [variant]="variant" [timestampLabel]="timestampLabel">{{ label }}</cmn-status-indicator>',
+      '<cmn-status-indicator [variant]="variant" [timestampLabel]="timestampLabel" [live]="live">{{ label }}</cmn-status-indicator>',
   }),
   args: {variant: 'success', label: 'Synced', timestampLabel: '3 mins ago'},
 };
@@ -51,5 +53,17 @@ export const AllVariants: Story = {
 export const NoTimestamp: Story = {
   render: () => ({
     template: '<cmn-status-indicator variant="success">Synced</cmn-status-indicator>',
+  }),
+};
+
+export const Live: Story = {
+  render: () => ({
+    template: `
+      <div class="flex flex-col gap-3">
+        <cmn-status-indicator variant="success" [live]="true">Syncing</cmn-status-indicator>
+        <cmn-status-indicator variant="warning" [live]="true">Retrying</cmn-status-indicator>
+        <cmn-status-indicator variant="neutral">Idle</cmn-status-indicator>
+      </div>
+    `,
   }),
 };

@@ -37,10 +37,13 @@ const STATUS_BASE =
 export class StatusIndicatorComponent {
   public readonly variant = input<StatusIndicatorVariant>('neutral');
   public readonly timestampLabel = input<string | null>(null);
+  /** Pulses the dot to signal a source that is currently updating. */
+  public readonly live = input<boolean>(false);
 
   public readonly statusClasses = computed(() => `${STATUS_BASE} ${VARIANT_TEXT[this.variant()]}`);
 
   public readonly dotClasses = computed(
-    () => `w-1 h-1 rounded-full ${VARIANT_DOT[this.variant()]}`
+    () =>
+      `w-1 h-1 rounded-full ${VARIANT_DOT[this.variant()]}${this.live() ? ' animate-cmn-pulse' : ''}`
   );
 }
