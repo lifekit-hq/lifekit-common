@@ -76,7 +76,7 @@ const meta: Meta<AppLayoutComponent> = {
     avatarLabel: 'D',
     avatarMenuItems: AVATAR_MENU,
     versionLabel: 'v0.3.2',
-    brand: 'Finance Sentry',
+    brand: 'Lifekit',
     tabRoutes: [],
     phoneOverlay: false,
     floatingActionClearance: 0,

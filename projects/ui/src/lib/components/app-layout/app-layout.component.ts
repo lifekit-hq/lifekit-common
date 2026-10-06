@@ -81,8 +81,8 @@ export class AppLayoutComponent {
   public readonly avatarLabel = input<string>('');
   public readonly avatarMenuItems = input<MenuItem[]>([]);
   public readonly versionLabel = input<string>('');
-  /** Product name shown in the sidebar header; defaults to "Finance Sentry". */
-  public readonly brand = input<string>('Finance Sentry');
+  /** Product name shown in the sidebar header; defaults to "Lifekit". */
+  public readonly brand = input<string>('Lifekit');
   /**
    * Routes (from `navItems`) shown as bottom tabs below the md breakpoint, in this order, at
    * most four. Empty means the first four nav items. Every other nav item goes under "More".
