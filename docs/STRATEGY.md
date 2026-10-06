@@ -12,8 +12,7 @@
 The 2026-08-26 ruling (`system/proposals.md → 2026-08-26-lifekit-common-reuse-boundary`) closed
 two questions that were in scope of this audit:
 
-- **Substrate:** web components long-term. New simple-leaf components are born as Lit elements in
-  `projects/elements`. Existing Angular components convert strangler-style when touched.
+- **Substrate:** layered, not "web components long-term" (see §"Layered substrate rule" below).
   `@lifekit-hq/tokens` is the ecosystem theming contract.
 - **Charting:** Chart.js behind the framework-free `charts-core` package. Pilot: `lk-line-chart`
   in `projects/elements` (issue #10). Angular chart wrappers (`area-chart`, `bar-chart`, etc.) are
@@ -21,6 +20,27 @@ two questions that were in scope of this audit:
 
 This document covers only the **remaining decisions** for the Angular components in
 `projects/ui/src/lib/components/`.
+
+## Layered substrate rule
+
+Components are split by whether they carry framework behaviour. This replaces the earlier
+"web components long-term" wording and the strict rule that every component converts to Lit.
+
+1. **Use-anywhere layer.** Tokens, CSS and `charts-core` stay framework-free, so any consumer,
+   Angular or not, can use them directly.
+2. **New simple leaves are born as Lit elements.** A new simple-leaf component (no framework
+   behaviour: button, badge, card, chip, icon, prompts, charts) is created as a Lit element in
+   `projects/elements`. Angular consumes it natively as a custom element, with no wrapper.
+   Existing simple leaves convert only when they are touched, in strangler order.
+3. **Behavioural and templated components stay Angular.** Components such as data-table,
+   dialog, app-layout, command-palette, async-state and forms-bound controls stay in
+   `projects/ui`, built on Angular Aria and the CDK. They get no Lit twin and no wrapper layer.
+   Their inputs, events and slots are named to the `lk-*` element conventions so a later port
+   is mechanical.
+4. **CI enforcement.** A new component classed `simple-leaf` cannot land as an Angular
+   component.
+5. **Revisit trigger.** The behavioural half is reconsidered only when a second framework
+   consumer is real and not deferred.
 
 ---
 
@@ -167,8 +187,8 @@ primary, secondary, trailing, trailing-secondary) instead of table rows; `mode` 
 DOM diffing for table rows without prescribing styles. The custom layer adds our token-based
 styling and the column-projection API. A third-party table (ng-zorro `nz-table`, Angular Material
 `mat-table`) would be larger, opinionated about its own theming, and harder to override. The
-current CDK-backed approach is correct. The long-term path (element-rewrite) requires a new
-slot/content-query model for column definitions that does not exist in the Lit ecosystem yet.
+current CDK-backed approach is correct. It stays Angular under the layered rule; a port is revisited only once a second framework consumer is real,
+and would need a slot/content-query model for column definitions that does not exist in the Lit ecosystem yet.
 
 ---
 
