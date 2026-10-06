@@ -1,9 +1,10 @@
 import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import type {Meta, StoryObj} from '@storybook/angular';
 
 import {ButtonComponent} from '../../components/button/button.component';
 import {CardComponent} from '../../components/card/card.component';
-import {type Theme, ThemeService} from './theme.service';
+import {type Theme, type ThemePreference, ThemeService} from './theme.service';
 
 const ACCENTS = ['#4f46e5', '#0ea5e9', '#e11d48', '#16a34a', '#f59e0b'];
 
@@ -16,8 +17,11 @@ const ACCENTS = ['#4f46e5', '#0ea5e9', '#e11d48', '#16a34a', '#f59e0b'];
       <div class="flex flex-wrap items-center gap-cmn-3">
         <cmn-button (clicked)="setTheme('light')" variant="secondary">light</cmn-button>
         <cmn-button (clicked)="setTheme('dark')" variant="secondary">dark</cmn-button>
+        <cmn-button (clicked)="setPreference('system')" variant="secondary">system</cmn-button>
         <cmn-button (clicked)="toggle()">toggle</cmn-button>
-        <span class="text-cmn-sm text-text-secondary">active: {{ theme() }}</span>
+        <span class="text-cmn-sm text-text-secondary">
+          preference: {{ preference() }}, active: {{ theme() }}
+        </span>
       </div>
 
       <div class="flex flex-wrap items-center gap-cmn-2">
@@ -54,17 +58,25 @@ class StoryThemePanelComponent {
   private readonly themeService = inject(ThemeService);
 
   protected readonly theme = signal<Theme>(this.themeService.getTheme());
+  protected readonly preference = signal<ThemePreference>(this.themeService.getPreference());
   protected readonly accent = signal<string | null>(this.themeService.getStoredAccent());
   protected readonly accents = ACCENTS;
 
+  constructor() {
+    this.themeService.activeTheme$.pipe(takeUntilDestroyed()).subscribe(t => this.theme.set(t));
+    this.themeService.preference$.pipe(takeUntilDestroyed()).subscribe(p => this.preference.set(p));
+  }
+
   protected setTheme(theme: Theme): void {
     this.themeService.setTheme(theme);
-    this.theme.set(this.themeService.getTheme());
+  }
+
+  protected setPreference(preference: ThemePreference): void {
+    this.themeService.setPreference(preference);
   }
 
   protected toggle(): void {
     this.themeService.toggle();
-    this.theme.set(this.themeService.getTheme());
   }
 
   protected setAccent(hex: string): void {
@@ -88,7 +100,7 @@ export default meta;
 type Story = StoryObj<StoryThemePanelComponent>;
 
 /**
- * Both themes and a runtime accent override. The accent ramp is generated in
+ * Light, dark and system (follows the OS live; flip your OS theme to watch it) plus a runtime accent override. The accent ramp is generated in
  * OkLCH and auto-corrected to WCAG AA against the current surface, so a light
  * accent stays legible.
  */

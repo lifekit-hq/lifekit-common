@@ -2,7 +2,7 @@ import {TestBed} from '@angular/core/testing';
 import chroma from 'chroma-js';
 import {afterEach, beforeEach, describe, expect, it} from 'vitest';
 
-import {LOCAL_STORAGE, ThemeService} from './theme.service';
+import {LOCAL_STORAGE, PREFERS_DARK, ThemeService} from './theme.service';
 
 class MemoryStorage implements Storage {
   private readonly map = new Map<string, string>();
@@ -42,16 +42,37 @@ function stopValue(stop: number): string {
   return document.documentElement.style.getPropertyValue(`--cmn-accent-${stop * 100}`);
 }
 
-function build(seed?: Record<string, string>): {service: ThemeService; storage: Storage} {
+class FakeMediaQuery extends EventTarget {
+  public matches: boolean;
+
+  constructor(matches: boolean) {
+    super();
+    this.matches = matches;
+  }
+
+  public setMatches(matches: boolean): void {
+    this.matches = matches;
+    this.dispatchEvent(new Event('change'));
+  }
+}
+
+function build(
+  seed?: Record<string, string>,
+  osDark = false
+): {service: ThemeService; storage: Storage; os: FakeMediaQuery} {
   const storage = new MemoryStorage();
+  const os = new FakeMediaQuery(osDark);
   for (const [k, v] of Object.entries(seed ?? {})) {
     storage.setItem(k, v);
   }
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
-    providers: [{provide: LOCAL_STORAGE, useValue: storage}],
+    providers: [
+      {provide: LOCAL_STORAGE, useValue: storage},
+      {provide: PREFERS_DARK, useValue: os},
+    ],
   });
-  return {service: TestBed.inject(ThemeService), storage};
+  return {service: TestBed.inject(ThemeService), storage, os};
 }
 
 describe('ThemeService', () => {
@@ -96,6 +117,158 @@ describe('ThemeService', () => {
     expect(service.getTheme()).toBe('dark');
     service.toggle();
     expect(service.getTheme()).toBe('light');
+  });
+
+  describe('system preference', () => {
+    it('follows the OS when nothing is stored', () => {
+      const {service} = build({}, true);
+      expect(service.getPreference()).toBe('system');
+      expect(service.getTheme()).toBe('dark');
+      expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+    });
+
+    it('lets a stored choice win over the OS', () => {
+      const {service} = build({'cmn-theme': 'light'}, true);
+      expect(service.getPreference()).toBe('light');
+      expect(service.getTheme()).toBe('light');
+    });
+
+    it('follows OS changes live without persisting them', () => {
+      const {service, storage, os} = build();
+      const seen: string[] = [];
+      service.activeTheme$.subscribe(t => seen.push(t));
+
+      os.setMatches(true);
+      expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+      os.setMatches(false);
+      expect(document.documentElement.getAttribute('data-theme')).toBe('light');
+      expect(seen).toEqual(['light', 'dark', 'light']);
+      expect(storage.getItem('cmn-theme')).toBeNull();
+    });
+
+    it('ignores OS changes once a theme is pinned', () => {
+      const {service, os} = build();
+      service.setTheme('light');
+      os.setMatches(true);
+      expect(service.getTheme()).toBe('light');
+      expect(document.documentElement.getAttribute('data-theme')).toBe('light');
+    });
+
+    it('returns to the OS theme and clears the stored choice', () => {
+      const {service, storage, os} = build({'cmn-theme': 'light'}, true);
+      const prefs: string[] = [];
+      service.preference$.subscribe(p => prefs.push(p));
+
+      service.setPreference('system');
+      expect(storage.getItem('cmn-theme')).toBeNull();
+      expect(service.getTheme()).toBe('dark');
+
+      os.setMatches(false);
+      expect(service.getTheme()).toBe('light');
+      expect(prefs).toEqual(['light', 'system']);
+    });
+
+    it('pins the opposite of the resolved theme on toggle', () => {
+      const {service, storage} = build({}, true);
+      service.toggle();
+      expect(service.getPreference()).toBe('light');
+      expect(storage.getItem('cmn-theme')).toBe('light');
+    });
+
+    it('stops listening when destroyed', () => {
+      const {service, os} = build();
+      TestBed.resetTestingModule();
+      os.setMatches(true);
+      expect(service.getTheme()).toBe('light');
+    });
+
+    it('falls back to light without matchMedia', () => {
+      const storage = new MemoryStorage();
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          {provide: LOCAL_STORAGE, useValue: storage},
+          {provide: PREFERS_DARK, useValue: null},
+        ],
+      });
+      expect(TestBed.inject(ThemeService).getTheme()).toBe('light');
+    });
+
+    it('survives blocked storage', () => {
+      const blocked = new MemoryStorage();
+      const boom = (): never => {
+        throw new Error('blocked');
+      };
+      blocked.getItem = boom;
+      blocked.setItem = boom;
+      blocked.removeItem = boom;
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          {provide: LOCAL_STORAGE, useValue: blocked},
+          {provide: PREFERS_DARK, useValue: new FakeMediaQuery(true)},
+        ],
+      });
+      const service = TestBed.inject(ThemeService);
+      expect(service.getTheme()).toBe('dark');
+      service.setTheme('light');
+      service.setPreference('system');
+      service.setAccent('#4f46e5');
+      service.resetAccent();
+      expect(service.getStoredAccent()).toBeNull();
+    });
+  });
+
+  describe('theme-color metas', () => {
+    let style: HTMLStyleElement;
+    let metas: HTMLMetaElement[];
+
+    beforeEach(() => {
+      style = document.createElement('style');
+      style.textContent = `
+        :root { --color-surface-bg: #f7f8fa; }
+        :root[data-theme='dark'] { --color-surface-bg: #0e1120; }
+      `;
+      document.head.appendChild(style);
+      metas = ['light', 'dark'].map(scheme => {
+        const meta = document.createElement('meta');
+        meta.name = 'theme-color';
+        meta.content = '#000000';
+        meta.media = `(prefers-color-scheme: ${scheme})`;
+        document.head.appendChild(meta);
+        return meta;
+      });
+    });
+
+    afterEach(() => {
+      style.remove();
+      metas.forEach(meta => meta.remove());
+    });
+
+    it('points every meta at the active surface on construction', () => {
+      build({'cmn-theme': 'dark'});
+      expect(metas.map(m => m.content)).toEqual(['#0e1120', '#0e1120']);
+    });
+
+    it('follows theme changes, including OS-driven ones', () => {
+      const {service, os} = build();
+      expect(metas.map(m => m.content)).toEqual(['#f7f8fa', '#f7f8fa']);
+
+      service.setTheme('dark');
+      expect(metas.map(m => m.content)).toEqual(['#0e1120', '#0e1120']);
+
+      service.setPreference('system');
+      os.setMatches(true);
+      expect(metas.map(m => m.content)).toEqual(['#0e1120', '#0e1120']);
+      os.setMatches(false);
+      expect(metas.map(m => m.content)).toEqual(['#f7f8fa', '#f7f8fa']);
+    });
+
+    it('leaves the metas alone when the surface token is not loaded', () => {
+      style.remove();
+      build();
+      expect(metas.map(m => m.content)).toEqual(['#000000', '#000000']);
+    });
   });
 
   it('writes a full accent ramp as inline custom properties', () => {

@@ -18,3 +18,9 @@ export {
   VIEWPORT,
 } from './standard.mjs';
 export {brandColors} from './tokens.mjs';
+export {
+  THEME_SCRIPT,
+  THEME_STORAGE_KEY,
+  themeScriptCspHash,
+  themeScriptTag,
+} from './theme-script.mjs';
