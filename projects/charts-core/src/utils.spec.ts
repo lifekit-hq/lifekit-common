@@ -98,6 +98,14 @@ describe('plainNumber', () => {
 
   it('compacts large values to one decimal', () => {
     expect(plainNumber(12_400, true)).toBe('12.4K');
+    expect(plainNumber(-12_400, true)).toBe('-12.4K');
+  });
+
+  it('keeps two decimals below 1000 when compact so narrow-range ticks stay distinct', () => {
+    const labels = [0.8, 0.85, 0.9].map((tick) => plainNumber(tick, true));
+    expect(labels).toEqual(['0.8', '0.85', '0.9']);
+    expect(new Set(labels).size).toBe(labels.length);
+    expect(plainNumber(999.5, true)).toBe('999.5');
   });
 });
 

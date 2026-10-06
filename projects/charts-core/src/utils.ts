@@ -62,12 +62,14 @@ export function money(value: number, currency: string, compact = false): string 
 
 const NUMBER_DIGITS = 2;
 const NUMBER_COMPACT_DIGITS = 1;
+const COMPACT_THRESHOLD = 1000;
 
-/** A plain unit-less number: no currency symbol, up to two decimals (one when compact). */
+/** A plain unit-less number: no currency symbol, up to two decimals (one when compact and 1000 or above). */
 export function plainNumber(value: number, compact = false): string {
+  const abbreviate = compact && Math.abs(value) >= COMPACT_THRESHOLD;
   return new Intl.NumberFormat('en-US', {
-    notation: compact ? 'compact' : 'standard',
-    maximumFractionDigits: compact ? NUMBER_COMPACT_DIGITS : NUMBER_DIGITS,
+    notation: abbreviate ? 'compact' : 'standard',
+    maximumFractionDigits: abbreviate ? NUMBER_COMPACT_DIGITS : NUMBER_DIGITS,
   }).format(value);
 }
 
