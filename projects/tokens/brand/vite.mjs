@@ -22,7 +22,7 @@ const CONTENT_TYPES = {
 };
 
 /**
- * @param {{app: string, manifest?: {name: string, shortName?: string}}} options
+ * @param {{app: string, manifest?: {name: string, shortName?: string, basePath?: string}}} options
  * @param {(path: string) => Buffer} [readFile] file reader, injectable for tests
  */
 export function lifekitBrand({app, manifest}, readFile = readFileSync) {

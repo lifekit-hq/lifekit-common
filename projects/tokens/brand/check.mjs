@@ -161,10 +161,11 @@ export function checkHead(html, {appName, colors = brandColors()} = {}) {
 /**
  * Checks a parsed web manifest against the standard.
  * @param {object} manifest
- * @param {{appName?: string, colors?: object}} [options]
+ * @param {{appName?: string, colors?: object, basePath?: string}} [options] `basePath`: where
+ *   the app is served (default `/`), the expected `id`, `start_url` and `scope`
  * @returns {{rule: string, message: string}[]}
  */
-export function checkManifest(manifest, {appName, colors = brandColors()} = {}) {
+export function checkManifest(manifest, {appName, colors = brandColors(), basePath} = {}) {
   const problems = [];
   const report = message => problems.push({rule: 'manifest', message});
   if (manifest === null || typeof manifest !== 'object' || Array.isArray(manifest)) {
@@ -183,7 +184,7 @@ export function checkManifest(manifest, {appName, colors = brandColors()} = {}) 
     report(`\`short_name\` "${manifest.short_name}" exceeds ${SHORT_NAME_MAX} characters`);
   }
 
-  const {icons: expectedIcons, ...fields} = manifestFragment(colors);
+  const {icons: expectedIcons, ...fields} = manifestFragment(colors, {basePath});
   for (const [key, value] of Object.entries(fields)) {
     const ok = key.endsWith('_color') ? sameColor(manifest[key], value) : manifest[key] === value;
     if (!ok) {
@@ -234,7 +235,7 @@ export function checkIcons(distDir, app, {assetsDir = brandAssetsDir(app)} = {})
  * Full drift check of an app's build output directory (served at the site root): the
  * index.html head, the manifest it links, and every icon file.
  * @param {{distDir: string, app: string, appName?: string, index?: string,
- *   assetsDir?: string, colors?: object}} options
+ *   assetsDir?: string, colors?: object, basePath?: string}} options
  * @returns {{rule: string, message: string}[]} empty when the app follows the standard
  */
 export function checkBrowserChrome({
@@ -244,6 +245,7 @@ export function checkBrowserChrome({
   index = 'index.html',
   assetsDir,
   colors = brandColors(),
+  basePath,
 }) {
   const indexPath = join(distDir, index);
   if (!existsSync(indexPath)) {
@@ -261,7 +263,8 @@ export function checkBrowserChrome({
     } catch (error) {
       problems.push({rule: 'manifest', message: `manifest.webmanifest: ${error.message}`});
     }
-    if (manifest !== undefined) problems.push(...checkManifest(manifest, {appName, colors}));
+    if (manifest !== undefined)
+      problems.push(...checkManifest(manifest, {appName, colors, basePath}));
   }
 
   problems.push(...checkIcons(distDir, app, assetsDir ? {assetsDir} : {}));

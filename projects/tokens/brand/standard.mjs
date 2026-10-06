@@ -54,15 +54,37 @@ export function themeColors(colors = brandColors()) {
   return {light: colors.surfaceLight, dark: colors.surfaceDark};
 }
 
+/** Where an app is served when it does not live under a sub-path. */
+export const DEFAULT_BASE_PATH = '/';
+
+/**
+ * Normalises the path an app is served under to `/segment/…/`: a missing leading or
+ * trailing slash is added and repeated slashes collapse. Anything that is not a plain
+ * path (empty, a URL, a query or fragment, whitespace, backslashes, `.`/`..` segments)
+ * throws, so a typo cannot silently become the manifest scope.
+ */
+export function normalizeBasePath(basePath = DEFAULT_BASE_PATH) {
+  if (typeof basePath !== 'string' || !basePath.trim()) {
+    throw new Error('base path must be a non-empty string such as "/console/"');
+  }
+  if (!/^[\w\-.~%/]+$/.test(basePath) || basePath.split('/').some(s => s === '.' || s === '..')) {
+    throw new Error(`invalid base path "${basePath}": expected a plain path such as "/console/"`);
+  }
+  const segments = basePath.split('/').filter(Boolean);
+  return segments.length ? `/${segments.join('/')}/` : DEFAULT_BASE_PATH;
+}
+
 /**
  * The standard's manifest fields: colours, icons, display and scope. Apps add `name`
- * and `short_name` (see {@link brandManifest}).
+ * and `short_name` (see {@link brandManifest}). `basePath` is where the app is served
+ * (default `/`) and sets `id`, `start_url` and `scope`.
  */
-export function manifestFragment(colors = brandColors()) {
+export function manifestFragment(colors = brandColors(), {basePath} = {}) {
+  const base = normalizeBasePath(basePath);
   return {
-    id: '/',
-    start_url: '/',
-    scope: '/',
+    id: base,
+    start_url: base,
+    scope: base,
     display: 'standalone',
     theme_color: colors.surfaceLight,
     background_color: colors.surfaceLight,
@@ -74,13 +96,13 @@ export function manifestFragment(colors = brandColors()) {
  * A complete `manifest.webmanifest` for an app. Extra fields (description, lang,
  * shortcuts, …) pass through; the standard's own fields always win.
  */
-export function brandManifest({name, shortName, ...extra}) {
+export function brandManifest({name, shortName, basePath, ...extra}) {
   if (!name) throw new Error('brandManifest: `name` is required');
   const short = shortName ?? name;
   if (short.length > SHORT_NAME_MAX) {
     throw new Error(`brandManifest: short_name "${short}" exceeds ${SHORT_NAME_MAX} characters`);
   }
-  return {name, short_name: short, ...extra, ...manifestFragment()};
+  return {name, short_name: short, ...extra, ...manifestFragment(undefined, {basePath})};
 }
 
 function escapeHtml(text) {

@@ -13,6 +13,8 @@ import {
   checkHead,
   checkManifest,
   headMarkup,
+  manifestFragment,
+  normalizeBasePath,
 } from '../brand/index.mjs';
 import {buildBrand} from '../scripts/build-brand.mjs';
 import {packagedAssets} from './packaged.mjs';
@@ -129,6 +131,64 @@ describe('checkManifest', () => {
     assert.equal(checkManifest([]).length, 1);
   });
 
+  describe('base path', () => {
+    const scoped = () =>
+      brandManifest({name: APP_NAME, shortName: 'Finance', basePath: '/console/'});
+
+    it('defaults to the site root', () => {
+      const {id, start_url: startUrl, scope} = manifest();
+      assert.deepEqual([id, startUrl, scope], ['/', '/', '/']);
+      assert.deepEqual(manifestFragment(), manifestFragment(undefined, {basePath: '/'}));
+    });
+
+    it('derives id, start_url and scope from brandManifest', () => {
+      const {id, start_url: startUrl, scope, ...rest} = scoped();
+      assert.deepEqual([id, startUrl, scope], ['/console/', '/console/', '/console/']);
+      assert.equal(rest.basePath, undefined);
+      assert.equal(rest.display, 'standalone');
+    });
+
+    it('accepts a manifest served under the base path', () => {
+      assert.deepEqual(checkManifest(scoped(), {appName: APP_NAME, basePath: '/console/'}), []);
+    });
+
+    it('flags a root-scoped manifest when a base path is set, and the reverse', () => {
+      const wrong = checkManifest(manifest(), {basePath: '/console/'});
+      assert.equal(wrong.length, 3, JSON.stringify(wrong));
+      assert.match(wrong[0].message, /`id` is "\/", expected "\/console\/"/);
+      const reverse = checkManifest(scoped());
+      assert.equal(reverse.length, 3, JSON.stringify(reverse));
+    });
+
+    it('normalises the value', () => {
+      for (const input of ['/console/', '/console', 'console', 'console/', '//console//']) {
+        assert.equal(normalizeBasePath(input), '/console/', input);
+      }
+      assert.equal(normalizeBasePath('/a/b'), '/a/b/');
+      assert.equal(normalizeBasePath(undefined), '/');
+      assert.equal(normalizeBasePath('/'), '/');
+    });
+
+    it('rejects a malformed value', () => {
+      for (const input of [
+        '',
+        '  ',
+        'https://x.test/console/',
+        '/con sole/',
+        '/a/../b/',
+        '/a/./',
+        '/c?x=1',
+        '/c#h',
+        '\\c\\',
+        null,
+      ]) {
+        assert.throws(() => normalizeBasePath(input), /base path/, String(input));
+      }
+      assert.throws(() => brandManifest({name: 'App', basePath: '../x'}), /base path/);
+      assert.throws(() => checkManifest({}, {basePath: '/a b/'}), /base path/);
+    });
+  });
+
   it('brandManifest refuses an over-long short_name', () => {
     assert.throws(() => brandManifest({name: 'Finance Sentry'}), /short_name/);
   });
@@ -203,6 +263,29 @@ describe('checkBrowserChrome (built output)', () => {
       assert.equal(result.status, 1);
       assert.match(result.stderr, /\[title\]/);
       assert.match(result.stderr, /\[icons\] favicon\.ico is missing/);
+    });
+
+    it('checks the manifest scope against --base-path', () => {
+      for (const file of BRAND_FILES) {
+        copyFileSync(join(packagedAssets(app), file), join(dist, file));
+      }
+      const result = run('--app', app, '--name', APP_NAME, '--base-path', '/console/', dist);
+      assert.equal(result.status, 1);
+      assert.match(result.stderr, /`scope` is "\/", expected "\/console\/"/);
+
+      writeFileSync(
+        join(dist, 'manifest.webmanifest'),
+        JSON.stringify(brandManifest({name: APP_NAME, shortName: 'Finance', basePath: 'console'}))
+      );
+      const ok = run('--app', app, '--name', APP_NAME, '--base-path', '/console', dist);
+      assert.equal(ok.status, 0, ok.stderr);
+      assert.equal(run('--app', app, '--name', APP_NAME, dist).status, 1);
+    });
+
+    it('exits 2 on a malformed --base-path', () => {
+      const result = run('--app', app, '--base-path', 'https://x.test/', dist);
+      assert.equal(result.status, 2);
+      assert.match(result.stderr, /--base-path: invalid base path/);
     });
 
     it('exits 2 on bad usage', () => {

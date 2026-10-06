@@ -100,7 +100,7 @@ it applies a theme, whether from a toggle, a stored choice or an OS change, it p
 | -------------------------- | --------------------------------------------- |
 | `name`                     | The app name (= the landing-route title)      |
 | `short_name`               | ≤ 12 characters, so it is never truncated     |
-| `id`, `start_url`, `scope` | `/`                                           |
+| `id`, `start_url`, `scope` | `/`, or the base path the app is served under |
 | `display`                  | `standalone`                                  |
 | `theme_color`              | `#f7f8fa` (the light `theme-color`)           |
 | `background_color`         | `#f7f8fa` (`--color-surface-bg`, light)       |
@@ -109,6 +109,18 @@ it applies a theme, whether from a toggle, a stored choice or an OS change, it p
 Off-token colours are not allowed. Other fields (`description`, `lang`, `shortcuts`, …) are fine.
 `brandManifest({name, shortName})` from `@lifekit-hq/tokens/brand` builds this object, and
 `manifest.fragment.json` holds the fixed fields for static manifests.
+
+An app served under a sub-path (the devclaw console at `/console/`) passes that base path, and
+`id`, `start_url` and `scope` all become it. The value is normalised to `/segment/` form
+(`console` and `/console` both give `/console/`); anything that is not a plain path (a URL, a
+query, `..`, whitespace) is rejected. Nothing else in the standard changes.
+
+```js
+brandManifest({name: 'Devclaw', basePath: '/console/'}); // id, start_url, scope: '/console/'
+```
+
+The static `manifest.fragment.json` always carries the default `/`; set those three fields by
+hand in a static manifest.
 
 ## Head template
 
@@ -201,6 +213,13 @@ this standard. Run it in CI after the build:
 npx lifekit-chrome-check --app fs --name "Finance Sentry" dist/finance-sentry/browser
 ```
 
+An app served under a sub-path adds `--base-path` (default `/`), which is the expected `id`,
+`start_url` and `scope`. A malformed value exits 2:
+
+```bash
+npx lifekit-chrome-check --app dc --name "Devclaw" --base-path /console/ dist/console/browser
+```
+
 It fails (exit 1) and lists every deviation:
 
 - **head**: the title is not the bare app name, the viewport, `color-scheme` or either
@@ -211,5 +230,6 @@ It fails (exit 1) and lists every deviation:
   of the package generated. That catches stale, hand-edited and other-app icons.
 
 The same checks are available as functions from `@lifekit-hq/tokens/brand`: `checkBrowserChrome`,
-`checkHead`, `checkManifest` and `checkIcons`. Each returns `{rule, message}[]`, empty when the app
+`checkHead`, `checkManifest` and `checkIcons`. `checkBrowserChrome` and `checkManifest` take
+`{basePath}`. Each returns `{rule, message}[]`, empty when the app
 complies, for use inside an app's own test suite.

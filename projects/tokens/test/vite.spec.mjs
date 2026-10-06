@@ -38,6 +38,18 @@ describe('lifekitBrand (Vite plugin)', () => {
     assert.equal(manifest.background_color, '#f3f5f6');
   });
 
+  it('scopes the emitted manifest to a base path', () => {
+    const files = emitted(
+      lifekitBrand({app: 'dc', manifest: {name: 'Devclaw', basePath: '/console/'}})
+    );
+    const manifest = JSON.parse(files.get('manifest.webmanifest'));
+    assert.deepEqual(
+      [manifest.id, manifest.start_url, manifest.scope],
+      ['/console/', '/console/', '/console/']
+    );
+    assert.equal(manifest.basePath, undefined);
+  });
+
   it('serves icons in dev and passes other requests through', () => {
     const plugin = lifekitBrand({app: 'fs'});
     const hit = serve(plugin, '/favicon.ico?v=2');
