@@ -27,6 +27,11 @@ const GLYPHS = {
     `<path d="M9 26 V11 a4 4 0 0 1 4 -4 h1.5" fill="none" stroke="${ink}" stroke-width="4"/>` +
     `<rect x="5" y="13" width="9" height="3.5" rx="1" fill="${ink}"/>` +
     `<path d="M26.5 13 H20 a2.5 2.5 0 0 0 0 5 h3.5 a2.5 2.5 0 0 1 0 5 H17" fill="none" stroke="${ink}" stroke-width="3.5"/>`,
+  // dc — devclaw: d (ring bowl + full-height stem) and an open c, sharing a 20.5 centre line.
+  dc: ink =>
+    `<circle cx="9.5" cy="20.5" r="4" fill="none" stroke="${ink}" stroke-width="3"/>` +
+    `<rect x="12" y="6" width="3" height="20" fill="${ink}"/>` +
+    `<path d="M25.3 17.7 A4 4 0 1 0 25.3 23.3" fill="none" stroke="${ink}" stroke-width="3"/>`,
 };
 
 /** Every app initials pair the mark is drawn for. */
