@@ -138,11 +138,14 @@ export class MultiSelectComponent implements ControlValueAccessor {
 
   public readonly hasSelection = computed(() => this.value().length > 0);
   public readonly summary = computed(() => {
-    const selected = this.options().filter(o => this.value().includes(o.value));
+    const selected = this.value();
     if (selected.length === 0) {
       return this.placeholder();
     }
-    return selected.length === 1 ? selected[0].label : `${selected.length} selected`;
+    if (selected.length === 1) {
+      return this.options().find(o => o.value === selected[0])?.label ?? '1 selected';
+    }
+    return `${selected.length} selected`;
   });
   public readonly triggerClasses = computed(() =>
     [

@@ -21,7 +21,11 @@ const FIELD_CLASSES =
   'text-text-primary focus:outline-none focus:ring-2 focus:ring-border-focus ' +
   'focus:border-border-focus disabled:opacity-50 disabled:cursor-not-allowed transition-colors';
 
-/** Two native date inputs bound as one `{from, to}` value; flags an inverted range as invalid. */
+/**
+ * Two native date inputs bound as one `{from, to}` value. An inverted range (`from > to`) is only
+ * flagged visually (`aria-invalid` and an error border); it is still emitted and the control has no
+ * validator, so consumers must validate `from <= to` themselves.
+ */
 @Component({
   selector: 'cmn-date-range',
   changeDetection: ChangeDetectionStrategy.OnPush,

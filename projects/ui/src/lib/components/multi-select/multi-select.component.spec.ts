@@ -57,6 +57,17 @@ describe('MultiSelectComponent', () => {
     expect(fixture.componentInstance.summary()).toBe('2 selected');
   });
 
+  it('never shows the placeholder while values outside the options are selected', () => {
+    fixture.componentInstance.writeValue(['unknown']);
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.summary()).toBe('1 selected');
+    expect(trigger().textContent).not.toContain('All categories');
+
+    fixture.componentInstance.writeValue(['rent', 'unknown']);
+    expect(fixture.componentInstance.summary()).toBe('2 selected');
+  });
+
   it('opens a panel listing every option and toggles aria-expanded', () => {
     open();
 

@@ -34,6 +34,16 @@ export const Prefilled: Story = {
 };
 
 export const InvertedRange: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'An inverted range is only flagged visually (`aria-invalid` and an error border). The ' +
+          'inverted `{from, to}` is still emitted and the control has no validator, so consumers ' +
+          'must validate `from <= to` themselves.',
+      },
+    },
+  },
   render: () => ({
     props: {range: {from: '2026-03-10', to: '2026-03-01'}},
     template: '<div class="w-96"><cmn-date-range [(ngModel)]="range" /></div>',
