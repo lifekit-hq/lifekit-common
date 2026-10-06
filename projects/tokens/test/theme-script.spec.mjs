@@ -53,18 +53,10 @@ describe('theme script', () => {
 });
 
 describe('theme script CSP hash', () => {
-  it('hashes exactly the text between the tags', () => {
-    const body = themeScriptTag()
-      .replace(/^<script>/, '')
-      .replace(/<\/script>$/, '');
-    const expected = `'sha256-${createHash('sha256').update(body).digest('base64')}'`;
-    assert.equal(themeScriptCspHash(), expected);
-  });
-
   // A script edit changes the hash every app pins in its CSP. Update this value
   // deliberately, in the same change, and say so in the release notes.
   it('is pinned', () => {
-    assert.equal(themeScriptCspHash(), "'sha256-ehnGtkrAJzJLwjKmsfKTp4UqIig7dXYgLNw+GsdTysM='");
+    assert.equal(themeScriptCspHash(), "'sha256-wqBF3++fqVx+m/jDAaLLzcRKrwRmnQtSd1SzrbvjlOY='");
   });
 });
 
@@ -77,10 +69,17 @@ describe('theme script build output', () => {
   after(() => rmSync(outDir, {recursive: true, force: true}));
 
   it('ships the script and its hash', () => {
-    assert.equal(readFileSync(join(outDir, 'theme-init.js'), 'utf8'), `${THEME_SCRIPT}\n`);
+    assert.equal(readFileSync(join(outDir, 'theme-init.js'), 'utf8'), THEME_SCRIPT);
     assert.equal(
       readFileSync(join(outDir, 'theme-init.csp-hash.txt'), 'utf8'),
       `${themeScriptCspHash()}\n`
     );
+  });
+
+  it('publishes the hash of the shipped file bytes, so inlining it verbatim matches', () => {
+    const shipped = readFileSync(join(outDir, 'theme-init.js'));
+    const published = readFileSync(join(outDir, 'theme-init.csp-hash.txt'), 'utf8').trim();
+    assert.equal(published, `'sha256-${createHash('sha256').update(shipped).digest('base64')}'`);
+    assert.equal(themeScriptTag(shipped.toString('utf8')), `<script>${shipped}</script>`);
   });
 });

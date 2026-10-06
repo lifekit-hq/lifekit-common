@@ -136,17 +136,15 @@ Add the pre-paint theme script too, so the first paint already has the stored or
 copy it by hand: `@lifekit-hq/tokens` ships it, along with the hash your CSP needs.
 
 ```html
-<script>
-  /* the contents of @lifekit-hq/tokens/brand/theme-init.js, unedited */
-</script>
+<script>/* the contents of @lifekit-hq/tokens/brand/theme-init.js, unedited, no added whitespace */</script>
 ```
 
-- **Inline it from the package.** `brand/theme-init.js` is the exact script (the tag content is the file minus its trailing newline). `themeScriptTag()` and
+- **Inline it from the package.** `brand/theme-init.js` is the exact script (the tag content is the file, byte for byte). `themeScriptTag()` and
   `THEME_SCRIPT` from `@lifekit-hq/tokens/brand` give the same text for a build step or Vite
   `transformIndexHtml`.
 - **Pin its hash in the CSP.** `brand/theme-init.csp-hash.txt` (or `themeScriptCspHash()`) is the
   `script-src` source expression, e.g. `'sha256-…'`. The hash covers the exact bytes between the
-  tags (a newline, the script, a newline, as `themeScriptTag()` writes it), so inline it unedited. The hash only
+  tags, which are the bytes of `theme-init.js`, so inline the file unedited. The hash only
   changes in a release that edits the script, and the release notes say so. Compare the pinned
   value against the package in CI and bump both together.
 - **What it does.** It reads the `cmn-theme` key `ThemeService` writes (`light` | `dark`), falls

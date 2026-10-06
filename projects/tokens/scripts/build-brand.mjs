@@ -59,7 +59,7 @@ export function buildBrand({outDir = DEFAULT_OUT_DIR, colors = brandColors()} = 
     `${JSON.stringify(manifestFragment(colors), null, 2)}\n`
   );
   writeFileSync(join(outDir, 'head.html'), `${headMarkup({title: '{App}'}, colors)}\n`);
-  writeFileSync(join(outDir, 'theme-init.js'), `${THEME_SCRIPT}\n`);
+  writeFileSync(join(outDir, 'theme-init.js'), THEME_SCRIPT);
   writeFileSync(join(outDir, 'theme-init.csp-hash.txt'), `${themeScriptCspHash()}\n`);
   return outDir;
 }

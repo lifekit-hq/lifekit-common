@@ -15,7 +15,10 @@ import {createHash} from 'node:crypto';
 /** localStorage key shared with `ThemeService`. */
 export const THEME_STORAGE_KEY = 'cmn-theme';
 
-/** Exact text between `<script>` and `</script>`. */
+/**
+ * Exact text between `<script>` and `</script>`, and byte for byte the shipped
+ * `theme-init.js`, so the file inlined verbatim matches {@link themeScriptCspHash}.
+ */
 export const THEME_SCRIPT = `// Apply the stored/OS theme before first paint so pages never flash light.
 (function () {
   var theme = 'light';
@@ -25,18 +28,19 @@ export const THEME_SCRIPT = `// Apply the stored/OS theme before first paint so 
     else if (window.matchMedia('(prefers-color-scheme: dark)').matches) theme = 'dark';
   } catch (e) {}
   document.documentElement.setAttribute('data-theme', theme);
-})();`;
+})();
+`;
 
 /** The script as an HTML element, ready for `index.html`. */
 export function themeScriptTag(script = THEME_SCRIPT) {
-  return `<script>\n${script}\n</script>`;
+  return `<script>${script}</script>`;
 }
 
 /**
  * The CSP `script-src` source expression admitting the inline script, e.g.
- * `'sha256-…'`. The browser hashes the text between the tags, so the tag must hold
- * exactly `\n${script}\n` as {@link themeScriptTag} writes it.
+ * `'sha256-…'`. The browser hashes the text between the tags, which is exactly `script`
+ * (and so exactly the bytes of the shipped `theme-init.js`).
  */
 export function themeScriptCspHash(script = THEME_SCRIPT) {
-  return `'sha256-${createHash('sha256').update(`\n${script}\n`).digest('base64')}'`;
+  return `'sha256-${createHash('sha256').update(script).digest('base64')}'`;
 }
