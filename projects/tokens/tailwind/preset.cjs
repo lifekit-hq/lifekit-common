@@ -34,6 +34,13 @@ module.exports = {
         'status-success': 'var(--color-status-success)',
         'status-warning': 'var(--color-status-warning)',
         'status-error': 'var(--color-status-error)',
+        'status-info-subtle': 'var(--color-status-info-subtle)',
+        'status-success-subtle': 'var(--color-status-success-subtle)',
+        'status-warning-subtle': 'var(--color-status-warning-subtle)',
+        'status-error-subtle': 'var(--color-status-error-subtle)',
+
+        'delta-up': 'var(--color-delta-up)',
+        'delta-down': 'var(--color-delta-down)',
 
         'border-default': 'var(--color-border-default)',
         'border-strong': 'var(--color-border-strong)',

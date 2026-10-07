@@ -20,6 +20,16 @@ Design tokens for the lifekit ecosystem, framework-agnostic.
   (`brand/theme-init.js`) with its CSP hash, Node helpers, a Vite plugin
   (`brand/vite`) and the `lifekit-chrome-check` drift check. See
   [`docs/BROWSER-CHROME.md`](../../docs/BROWSER-CHROME.md).
+- `engine`: the seed engine, plain zero-dependency ES modules with types
+  (`@lifekit-hq/tokens/engine`). `derive({seed, intensity, mode, contrast})` turns one colour into
+  the whole `--color-*` palette, every pair solved to its WCAG floor. It also exports the app
+  seeds, the picker presets and the per-device storage helpers that `ThemeService.setSeed()`,
+  `<lk-theme-picker>` and the pre-paint script share. What each role is for and where the accent
+  may appear: [`docs/design/patterns.md`](../../docs/design/patterns.md#colour).
+- `seeds/<app>.css`: each app's palette (`fs`, `lk`, `dc`) for light, dark and
+  `prefers-contrast: more`, generated from the engine by `scripts/build-seeds.mjs`
+  (`npm run build:seeds`). Import it after `theme.css`; with none, the app gets the default
+  (finance-sentry's petrol) palette.
 - `drift`: `lifekit-chrome-check drift <path>…`, a static scan of an app's source for what
   bypasses these tokens (font, colour, text size, radius, root font size, layout transitions). Run
   it in CI; it exits 1 on any finding. Rules and options: the last section of
@@ -38,6 +48,7 @@ module.exports = {
 /* global stylesheet */
 @import '@lifekit-hq/tokens/fonts.css';
 @import '@lifekit-hq/tokens/theme.css';
+@import '@lifekit-hq/tokens/seeds/lk.css'; /* your app's seed, after theme.css */
 @import '@lifekit-hq/tokens/base.css';
 ```
 

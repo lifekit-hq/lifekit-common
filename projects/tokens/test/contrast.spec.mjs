@@ -8,6 +8,8 @@ const css = readFileSync(new URL('../theme.css', import.meta.url), 'utf8').repla
 );
 
 const BODY_MIN = 4.5;
+const MARK_MIN = 3;
+const CHART_SERIES = 9;
 const STATUS_TINT_MIN = 4.68;
 const TINT_ALPHA = 0.15;
 const STATUS = ['info', 'success', 'warning', 'error'];
@@ -65,6 +67,15 @@ for (const [theme, vars] of Object.entries(themes)) {
     it('keeps accent text and the inverse label on an accent fill at 4.5:1', () => {
       assert.ok(contrast(color('accent-default'), color('surface-card')) >= BODY_MIN);
       assert.ok(contrast(color('text-inverse'), color('accent-default')) >= BODY_MIN);
+    });
+
+    it('draws every chart series at 3:1 on a card and the ground (WCAG 1.4.11)', () => {
+      for (let i = 1; i <= CHART_SERIES; i++) {
+        for (const surface of ['surface-card', 'surface-bg']) {
+          const ratio = contrast(color(`chart-series-${i}`), color(surface));
+          assert.ok(ratio >= MARK_MIN, `chart-series-${i} on ${surface} is ${ratio.toFixed(2)}`);
+        }
+      }
     });
 
     for (const status of STATUS) {

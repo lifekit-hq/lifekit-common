@@ -12,18 +12,18 @@ import {
 
 import {type BarSeries, type BarValueFormat} from './types';
 import {
+  CATEGORICAL_STEPS,
   CHART_FONT_SIZE,
   chartFontFamily,
   cssVar,
   fontFamily,
-  SERIES,
   seriesColor,
   xTickLimitPlugin,
 } from './utils';
 
 Chart.register(CategoryScale, LinearScale, BarController, BarElement, Tooltip, Legend);
 
-const DEFAULT_SERIES_STEPS = [SERIES.green, SERIES.red, SERIES.accent, SERIES.amber, SERIES.slate];
+const DEFAULT_SERIES_STEPS = CATEGORICAL_STEPS;
 const BAR_RADIUS = 4;
 
 const X_TICK_LIMIT = 12;

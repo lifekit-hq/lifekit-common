@@ -1,7 +1,7 @@
 {
   "name": "@lifekit-hq/tokens",
   "version": "2.3.0",
-  "description": "lifekit design tokens — CSS custom properties (light/dark themes), Tailwind preset, the self-hosted IBM Plex Sans and Plex Mono fonts, and the lifekit brand mark + browser-chrome standard. Framework-agnostic.",
+  "description": "lifekit design tokens — CSS custom properties (light/dark themes), Tailwind preset, the seed engine that derives a whole palette from one colour, the self-hosted IBM Plex Sans and Plex Mono fonts, and the lifekit brand mark + browser-chrome standard. Framework-agnostic.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -16,6 +16,11 @@
     "./fonts.css": "./fonts.css",
     "./base.css": "./base.css",
     "./tailwind": "./tailwind/preset.cjs",
+    "./engine": {
+      "types": "./engine/index.d.mts",
+      "default": "./engine/index.mjs"
+    },
+    "./seeds/*": "./seeds/*",
     "./brand": "./brand/index.mjs",
     "./brand/vite": "./brand/vite.mjs",
     "./brand/theme-script": "./brand/theme-script.mjs",
@@ -30,6 +35,8 @@
     "fonts.css",
     "base.css",
     "tailwind/",
+    "engine/",
+    "seeds/",
     "brand/",
     "drift/",
     "bin/",

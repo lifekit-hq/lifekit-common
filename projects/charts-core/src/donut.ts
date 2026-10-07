@@ -8,24 +8,19 @@ import {
 } from 'chart.js';
 
 import {type DonutSegment} from './types';
-import {CHART_FONT_SIZE, chartFontFamily, cssVar, fontFamily, SERIES, seriesColor} from './utils';
+import {
+  CATEGORICAL_STEPS,
+  CHART_FONT_SIZE,
+  chartFontFamily,
+  cssVar,
+  fontFamily,
+  seriesColor,
+} from './utils';
 
 Chart.register(DoughnutController, ArcElement, Tooltip, Legend);
 
-/**
- * Ordered so neighbours (including the wrap from last back to first) sit far
- * apart on the colour wheel; the brand petrol leads.
- */
-const DEFAULT_COLOR_STEPS = [
-  SERIES.accent,
-  SERIES.amber,
-  SERIES.violet,
-  SERIES.lime,
-  SERIES.pink,
-  SERIES.blue,
-  SERIES.green,
-  SERIES.red,
-];
+/** The accent leads; the ramp after it already keeps neighbours apart on the wheel. */
+const DEFAULT_COLOR_STEPS = CATEGORICAL_STEPS;
 const PERCENT_MULTIPLIER = 100;
 
 export interface DonutChartTokens {

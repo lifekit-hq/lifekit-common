@@ -174,7 +174,10 @@ copy it by hand: `@lifekit-hq/tokens` ships it, along with the hash your CSP nee
   value against the package in CI and bump both together.
 - **What it does.** It reads the `cmn-theme` key `ThemeService` writes (`light` | `dark`), falls
   back to the OS `prefers-color-scheme`, and sets `data-theme` on `<html>`. No stored choice means
-  the `system` preference, which `ThemeService` then follows live.
+  the `system` preference, which `ThemeService` then follows live. When the user picked their own
+  colour on this device (`cmn-theme-seed`), it also sets that palette inline on `<html>`, the
+  variant for the active theme and `prefers-contrast`, so a custom colour never flashes the app's
+  default first. The palette is set through the CSSOM, so `style-src` needs nothing new.
 
 ## Fonts and tokens
 
@@ -186,7 +189,8 @@ copy it by hand: `@lifekit-hq/tokens` ships it, along with the hash your CSP nee
   app falls back to `system-ui`. Never load fonts from a CDN.
 - Mono is IBM Plex Mono (`--font-mono`, regular and medium, same `fonts.css`), for code only.
 - Colours come only from `@lifekit-hq/tokens/theme.css`, with Tailwind via
-  `@lifekit-hq/tokens/tailwind`. The brand colour is `--color-accent-700` (`#175a6d`).
+  `@lifekit-hq/tokens/tailwind`. An app with its own seed imports `@lifekit-hq/tokens/seeds/<app>.css`
+  right after it (see `docs/design/patterns.md`, Colour). The brand colour is `--color-accent-700` (`#175a6d`).
 
 ```css
 /* global stylesheet */
