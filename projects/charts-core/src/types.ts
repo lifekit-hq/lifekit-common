@@ -1,7 +1,21 @@
 export interface ChartPoint {
   label: string;
   value: number;
+  /** Timestamp (epoch ms) of the point; a line chart with `xSpacing: 'time'` places the point by it. */
+  time?: number;
 }
+
+/** A fixed value-axis range; an omitted bound stays auto-scaled to the data. */
+export interface ChartDomain {
+  min?: number;
+  max?: number;
+}
+
+/**
+ * How a line chart spaces its points along x: `'even'` (default) gives each point an equal slot,
+ * `'time'` places each by its `time`, so a burst of points reads as a burst.
+ */
+export type ChartXSpacing = 'even' | 'time';
 
 /** One stacked band; all series in a chart share x labels (index-aligned). */
 export interface AreaSeries {

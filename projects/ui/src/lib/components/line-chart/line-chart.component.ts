@@ -11,14 +11,21 @@ import {
 } from '@angular/core';
 import {
   buildLineChartConfig,
+  type ChartDomain,
   type ChartPoint,
   type ChartValueFormat,
+  type ChartXSpacing,
   resolveLineChartTokens,
   updateLineChart,
 } from '@lifekit-hq/charts-core';
 import {Chart} from 'chart.js';
 
-export type {ChartPoint, ChartValueFormat} from '@lifekit-hq/charts-core';
+export type {
+  ChartDomain,
+  ChartPoint,
+  ChartValueFormat,
+  ChartXSpacing,
+} from '@lifekit-hq/charts-core';
 
 @Component({
   selector: 'cmn-line-chart',
@@ -60,6 +67,7 @@ export class LineChartComponent implements AfterViewInit, OnDestroy {
   private readonly canvasRef = viewChild.required<ElementRef<HTMLCanvasElement>>('chartCanvas');
   private chart: Chart | null = null;
   private builtCompact = false;
+  private builtXSpacing: ChartXSpacing = 'even';
 
   public readonly data = input<ChartPoint[]>([]);
   public readonly label = input<string>('');
@@ -76,6 +84,13 @@ export class LineChartComponent implements AfterViewInit, OnDestroy {
    * tooltip, and no animation. Size it with a `height` on `cmn-line-chart` (min 2rem).
    */
   public readonly compact = input<boolean>(false);
+  /** Fixes the y range (`{min?, max?}`) instead of auto-scaling it to the data; an omitted bound stays auto. */
+  public readonly yDomain = input<ChartDomain | undefined>(undefined);
+  /**
+   * `'time'` places each point by the epoch-ms `time` on it instead of in an equal slot, so a
+   * burst of points reads as a burst; points without a `time` are then left out. Default `'even'`.
+   */
+  public readonly xSpacing = input<ChartXSpacing>('even');
   protected readonly isEmpty = computed(() => this.data().length === 0);
 
   constructor() {
@@ -83,13 +98,14 @@ export class LineChartComponent implements AfterViewInit, OnDestroy {
       const points = this.data();
       const format = {currency: this.currency(), valueFormat: this.valueFormat()};
       const compact = this.compact();
+      const scale = {yDomain: this.yDomain(), xSpacing: this.xSpacing()};
       if (!this.chart) {
         return;
       }
-      if (compact === this.builtCompact) {
-        updateLineChart(this.chart, points, format);
+      if (compact === this.builtCompact && scale.xSpacing === this.builtXSpacing) {
+        updateLineChart(this.chart, points, format, scale);
       } else {
-        // `compact` shapes the whole chart config, so changing it rebuilds the chart.
+        // `compact` and `xSpacing` shape the whole chart config, so changing one rebuilds the chart.
         this.chart.destroy();
         this.buildChart();
       }
@@ -111,6 +127,7 @@ export class LineChartComponent implements AfterViewInit, OnDestroy {
       return;
     }
     this.builtCompact = this.compact();
+    this.builtXSpacing = this.xSpacing();
     this.chart = new Chart(
       ctx,
       buildLineChartConfig(
@@ -118,7 +135,8 @@ export class LineChartComponent implements AfterViewInit, OnDestroy {
         resolveLineChartTokens(),
         this.currency(),
         this.valueFormat(),
-        this.compact()
+        this.compact(),
+        {yDomain: this.yDomain(), xSpacing: this.xSpacing()}
       )
     );
   }
