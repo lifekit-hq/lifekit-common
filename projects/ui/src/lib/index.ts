@@ -72,6 +72,9 @@ export * from './components/usage-chip/usage-chip.component';
 export * from './directives/skeleton/skeleton.directive';
 export * from './directives/typography/typography.directive';
 
+// Pipes
+export * from './pipes/relative-time/relative-time.pipe';
+
 // Services
 export * from './services/dialog/dialog.service';
 export * from './services/drawer/drawer.service';
