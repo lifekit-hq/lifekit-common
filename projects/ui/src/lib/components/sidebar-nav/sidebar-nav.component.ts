@@ -1,5 +1,5 @@
 import {NgClass} from '@angular/common';
-import {ChangeDetectionStrategy, Component, input, output, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, input, output, signal} from '@angular/core';
 
 import {BadgeComponent} from '../badge/badge.component';
 import {IconComponent, LucideIconName} from '../icon/icon.component';
@@ -21,26 +21,28 @@ export interface NavItem {
     <aside
       [ngClass]="[
         'flex flex-col h-full border-r border-border-default bg-surface-card',
-        collapsed() ? 'w-16' : 'w-60',
+        isCollapsed() ? 'w-16' : 'w-60',
       ]"
     >
       <!-- Logo / toggle -->
       <div class="flex h-14 items-center justify-between px-cmn-4 border-b border-border-default">
-        @if (!collapsed()) {
+        @if (!isCollapsed()) {
           <span class="font-headline text-cmn-sm font-semibold text-text-primary tracking-tight">
             {{ brand() }}
           </span>
         }
-        <button
-          [title]="collapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
-          [attr.aria-label]="collapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
-          [attr.aria-expanded]="!collapsed()"
-          (click)="toggleCollapsed()"
-          type="button"
-          class="ml-auto flex h-8 w-8 items-center justify-center rounded-cmn-md text-text-secondary hover:bg-surface-raised hover:text-text-primary transition-colors"
-        >
-          <cmn-icon [name]="collapsed() ? 'PanelLeftOpen' : 'PanelLeftClose'" size="sm" />
-        </button>
+        @if (!rail()) {
+          <button
+            [title]="collapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
+            [attr.aria-label]="collapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
+            [attr.aria-expanded]="!collapsed()"
+            (click)="toggleCollapsed()"
+            type="button"
+            class="ml-auto flex h-8 w-8 items-center justify-center rounded-cmn-md text-text-secondary hover:bg-surface-raised hover:text-text-primary transition-colors"
+          >
+            <cmn-icon [name]="collapsed() ? 'PanelLeftOpen' : 'PanelLeftClose'" size="sm" />
+          </button>
+        }
       </div>
 
       <!-- Nav items -->
@@ -48,13 +50,13 @@ export interface NavItem {
         @for (item of items(); track item.route) {
           <button
             [ngClass]="navItemClass(item)"
-            [title]="collapsed() ? item.label : ''"
+            [title]="isCollapsed() ? item.label : ''"
             (click)="navClick.emit(item)"
           >
             <cmn-badge [count]="item.badge ? item.badge() : 0" status="error">
               <cmn-icon [name]="item.icon" size="md" />
             </cmn-badge>
-            @if (!collapsed()) {
+            @if (!isCollapsed()) {
               <span class="truncate font-label text-cmn-sm font-medium">{{ item.label }}</span>
             }
           </button>
@@ -64,10 +66,10 @@ export interface NavItem {
       <!-- Version footer -->
       @if (versionLabel()) {
         <div
-          [title]="collapsed() ? versionLabel() : ''"
+          [title]="isCollapsed() ? versionLabel() : ''"
           class="border-t border-border-default px-cmn-4 py-cmn-2 text-cmn-xs text-text-secondary"
         >
-          @if (!collapsed()) {
+          @if (!isCollapsed()) {
             {{ versionLabel() }}
           } @else {
             <cmn-icon name="Info" size="sm" />
@@ -87,7 +89,15 @@ export class SidebarNavComponent {
   public readonly navClick = output<NavItem>();
   public readonly collapsedChange = output<boolean>();
 
+  /**
+   * Shows the sidebar as a navigation rail: collapsed to icons, with no toggle to widen it. The
+   * reader's own collapsed choice is kept and applies again once the rail is off.
+   */
+  public readonly rail = input<boolean>(false);
+
   public readonly collapsed = signal<boolean>(false);
+
+  protected readonly isCollapsed = computed<boolean>(() => this.rail() || this.collapsed());
 
   public toggleCollapsed(): void {
     const next = !this.collapsed();

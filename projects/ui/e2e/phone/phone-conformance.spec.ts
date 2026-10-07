@@ -12,8 +12,9 @@ const MIN_TEXT = 12;
 const SCROLL_PROBE = 300;
 const SURFACE_TOLERANCE = 1;
 
-// `touchChrome`: the shell is in its phone layout here, so every control must be touch-sized. The
-// other two widths still get the desktop sidebar (L8), whose controls are report-only until then.
+// `touchChrome`: the shell is in its phone layout with the phone's touch-sized top bar, so every
+// control must be touch-sized. The landscape phone keeps the tab bar, but its top bar still has the
+// desktop density at that width, so its controls stay report-only.
 const VIEWPORTS = [
   {name: 'phone 390x844', width: 390, height: 844, tabs: true, touchChrome: true},
   {name: 'landscape 844x390', width: 844, height: 390, tabs: true, touchChrome: false},
@@ -202,7 +203,7 @@ for (const vp of VIEWPORTS) {
         if (!vp.tabs && visible) {
           problems.push(`tab bar shown at ${vp.width}x${vp.height}, expected the rail`);
         }
-        report(problems);
+        report(problems, true);
       });
     }
 
@@ -334,6 +335,60 @@ test.describe(`phone ${NARROW_PHONE.width}x${NARROW_PHONE.height}`, () => {
     expect(await undersizedTargets(page, MIN_TARGET)).toEqual([]);
   });
 });
+
+// The shell follows the device: the tab bar for a phone (landscape too), the sidebar as a rail from
+// 600px, the full sidebar from 840px. `isMobile` + `hasTouch` make Chromium report a coarse pointer.
+const RAIL_WIDTH = 64;
+const SIDEBAR_WIDTH = 240;
+const SHELLS = [
+  {name: 'phone 390x844', width: 390, height: 844, touch: true, shell: 'tabs'},
+  {name: 'phone 599x900', width: 599, height: 900, touch: true, shell: 'tabs'},
+  {name: 'landscape phone 844x390', width: 844, height: 390, touch: true, shell: 'tabs'},
+  {name: 'landscape phone 932x430', width: 932, height: 430, touch: true, shell: 'tabs'},
+  {name: 'tablet 600x900', width: 600, height: 900, touch: true, shell: 'rail'},
+  {name: 'tablet portrait 820x1180', width: 820, height: 1180, touch: true, shell: 'rail'},
+  {name: 'tablet 839x1000', width: 839, height: 1000, touch: true, shell: 'rail'},
+  {name: 'tablet 840x1000', width: 840, height: 1000, touch: true, shell: 'sidebar'},
+  {name: 'tablet landscape 1180x820', width: 1180, height: 820, touch: true, shell: 'sidebar'},
+  {name: 'desktop 1440x900', width: 1440, height: 900, touch: false, shell: 'sidebar'},
+  // A short window with a mouse is a small desktop window, not a phone.
+  {name: 'short desktop window 844x390', width: 844, height: 390, touch: false, shell: 'sidebar'},
+] as const;
+
+for (const device of SHELLS) {
+  test.describe(`shell by device | ${device.name}`, () => {
+    test.use({
+      viewport: {width: device.width, height: device.height},
+      hasTouch: device.touch,
+      isMobile: device.touch,
+    });
+
+    test(`shows ${device.shell}`, async ({page}) => {
+      await open(page, layoutStory('phone'));
+      const tabs = page.locator('cmn-bottom-tab-bar nav');
+      const sidebar = page.locator('cmn-sidebar-nav aside');
+      if (device.shell === 'tabs') {
+        await expect(tabs).toBeVisible();
+        await expect(sidebar).toBeHidden();
+        return;
+      }
+      await expect(tabs).toBeHidden();
+      await expect(sidebar).toBeVisible();
+      const width = (await sidebar.boundingBox())?.width;
+      expect(width).toBe(device.shell === 'rail' ? RAIL_WIDTH : SIDEBAR_WIDTH);
+      // The rail is icons only: no toggle widens it.
+      const toggle = page.getByRole('button', {name: /(Collapse|Expand) sidebar/});
+      await expect(toggle).toHaveCount(device.shell === 'rail' ? 0 : 1);
+    });
+
+    test('keeps the page from scrolling sideways', async ({page}) => {
+      await open(page, layoutStory('phone-overlay'));
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)
+      ).toBe(false);
+    });
+  });
+}
 
 const NOTICE_WIDTHS = [NARROW_PHONE, {width: 390, height: 844}] as const;
 
