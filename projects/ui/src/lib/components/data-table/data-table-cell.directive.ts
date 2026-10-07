@@ -14,6 +14,8 @@ export class CmnCellDirective<T = any> {
 
   public static ngTemplateContextGuard<T>(
     _dir: CmnCellDirective<T>,
+    // Referenced only by the `ctx is …` type predicate, which typescript-eslint >=8.58 counts as unused.
+    // eslint-disable-next-line unused-imports/no-unused-vars
     ctx: unknown
   ): ctx is CmnCellContext<T> {
     return true;

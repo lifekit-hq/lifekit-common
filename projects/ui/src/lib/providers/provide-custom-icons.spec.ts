@@ -1,4 +1,4 @@
-import {provideHttpClient} from '@angular/common/http';
+import {provideHttpClient, withXhr} from '@angular/common/http';
 import {HttpTestingController, provideHttpClientTesting} from '@angular/common/http/testing';
 import {TestBed} from '@angular/core/testing';
 import {firstValueFrom} from 'rxjs';
@@ -12,7 +12,11 @@ const SVG = '<svg viewBox="0 0 16 16"><rect width="16" height="16" /></svg>';
 function setup(config: CustomIconsConfig): CmnIconRegistry {
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
-    providers: [provideHttpClient(), provideHttpClientTesting(), provideCustomIcons(config)],
+    providers: [
+      provideHttpClient(withXhr()),
+      provideHttpClientTesting(),
+      provideCustomIcons(config),
+    ],
   });
   // The registration runs in an app initializer, so force one.
   return TestBed.inject(CmnIconRegistry);
