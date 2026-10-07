@@ -100,7 +100,7 @@ Counts are a point-in-time measurement; re-measure before relying on them for a 
 | alert-item            | fs 2 · dash 0                                                                   | interactive | keep-own        | Relative-time formatting, read/dismiss events, inline dynamic colours; finance-sentry notification pattern; too complex to convert before simpler leaves are done                                             |
 | app-layout            | fs 1 · dash 1                                                                   | templated   | keep-own        | Angular app-shell orchestrator (SidebarNav + TopBar + BottomTabBar composition, router/event concerns); convert only once the app shell itself migrates to elements                                           |
 | area-chart            | fs 1 · dash 0                                                                   | simple-leaf | element-rewrite | charts-core Lit path established by `lk-line-chart` pilot (#10); canvas + Chart.js has no Angular deps — next in the chart rewrite queue                                                                      |
-| async-state           | fs 0 · dash 0                                                                   | templated   | keep-own        | Signal-based state machine whose branches converge on a single `ng-content` outlet; no Lit slot equivalent pattern decided yet                                                                                |
+| async-state           | fs 0 · dash 0                                                                   | templated   | keep-own        | Signal-based state machine; its named slots (`skeleton`, `empty`, `error-action`) fall back to built-in markup when nothing is projected, the same contract as a Lit `<slot>` with fallback content           |
 | badge                 | fs 0 · dash 0                                                                   | simple-leaf | element-rewrite | Pure CSS + slot wrapper, no framework logic; textbook custom-element target                                                                                                                                   |
 | bar-chart             | fs 1 · dash 0                                                                   | simple-leaf | element-rewrite | Same charts-core Lit path as `area-chart`                                                                                                                                                                     |
 | bottom-tab-bar        | new (added for app-layout phone mode); fs 0 · dash 0 (composed by `app-layout`) | interactive | keep-own        | Phone navigation for `app-layout` below md: primary tabs plus a More sheet (CDK focus trap, badge support); app-shell concern, moves with the shell                                                           |
@@ -297,15 +297,15 @@ grow into (see the status table below).
 7. **One page frame.** Pages sit in `cmn-page-container` (1200px max width,
    `p-cmn-4 md:p-cmn-8`) so width and padding match across products.
 
-| Rule                                 | Status   | Where                                                                          |
-| ------------------------------------ | -------- | ------------------------------------------------------------------------------ |
-| 1. Skeletons, not spinners           | Enforced | `cmn-async-state` renders `cmn-skeleton` while `loading`                       |
-| 2. Loading is not empty              | Enforced | `cmn-async-state` shows empty only when `success` and `isEmpty`                |
-| 3. Keep cached data while refreshing | Target   | `loading` always replaces content with a skeleton                              |
-| 4. No micro-flashes                  | Target   | no indicator delay or minimum display time                                     |
-| 5. No layout shift                   | Partial  | stable page width via `cmn-page-container`; skeleton height is caller-supplied |
-| 6. Errors keep context               | Target   | the error branch replaces content with an alert, no retry or last-good data    |
-| 7. One page frame                    | Enforced | `cmn-page-container` defaults                                                  |
+| Rule                                 | Status   | Where                                                                         |
+| ------------------------------------ | -------- | ----------------------------------------------------------------------------- |
+| 1. Skeletons, not spinners           | Enforced | `cmn-async-state` renders `cmn-skeleton` or its `[skeleton]` slot             |
+| 2. Loading is not empty              | Enforced | `cmn-async-state` never shows empty while `idle` or `loading`                 |
+| 3. Keep cached data while refreshing | Target   | `loading` always replaces content with a skeleton                             |
+| 4. No micro-flashes                  | Target   | no indicator delay or minimum display time                                    |
+| 5. No layout shift                   | Partial  | stable page width via `cmn-page-container`; skeleton shape is caller-supplied |
+| 6. Errors keep context               | Partial  | `errorPlacement="above"` keeps content; `[error-action]` holds Retry          |
+| 7. One page frame                    | Enforced | `cmn-page-container` defaults                                                 |
 
 Apps use `cmn-async-state` and `cmn-skeleton` rather than local loading markup; rules marked
 Target are not yet guaranteed by the primitives and must be handled in the app until they are.
