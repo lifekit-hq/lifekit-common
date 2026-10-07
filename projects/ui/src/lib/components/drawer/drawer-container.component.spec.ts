@@ -1,5 +1,5 @@
 import {type OverlayRef} from '@angular/cdk/overlay';
-import {provideHttpClient} from '@angular/common/http';
+import {provideHttpClient, withXhr} from '@angular/common/http';
 import {provideHttpClientTesting} from '@angular/common/http/testing';
 import {type ComponentFixture, TestBed} from '@angular/core/testing';
 import {beforeEach, describe, expect, it, vi} from 'vitest';
@@ -20,7 +20,7 @@ describe('CmnDrawerContainerComponent', () => {
     await TestBed.configureTestingModule({
       imports: [CmnDrawerContainerComponent],
       providers: [
-        provideHttpClient(),
+        provideHttpClient(withXhr()),
         provideHttpClientTesting(),
         {provide: CmnDrawerRef, useValue: drawerRef},
       ],
@@ -123,7 +123,7 @@ describe('CmnDrawerContainerComponent as a bottom sheet', () => {
     await TestBed.configureTestingModule({
       imports: [CmnDrawerContainerComponent],
       providers: [
-        provideHttpClient(),
+        provideHttpClient(withXhr()),
         provideHttpClientTesting(),
         {provide: CmnDrawerRef, useValue: drawerRef},
       ],

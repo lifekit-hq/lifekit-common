@@ -1,5 +1,5 @@
 import {DialogRef} from '@angular/cdk/dialog';
-import {provideHttpClient} from '@angular/common/http';
+import {provideHttpClient, withXhr} from '@angular/common/http';
 import {provideHttpClientTesting} from '@angular/common/http/testing';
 import {type ComponentFixture, TestBed} from '@angular/core/testing';
 import {beforeEach, describe, expect, it, vi} from 'vitest';
@@ -24,7 +24,7 @@ describe('CommandPaletteComponent', () => {
     await TestBed.configureTestingModule({
       imports: [CommandPaletteComponent],
       providers: [
-        provideHttpClient(),
+        provideHttpClient(withXhr()),
         provideHttpClientTesting(),
         {provide: DialogRef, useValue: {close}},
         {provide: CMN_DIALOG_DATA, useValue: ITEMS},
