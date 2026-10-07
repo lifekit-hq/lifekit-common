@@ -1,5 +1,7 @@
 import {expect, test} from '@playwright/test';
 
+import {openStory} from './open-story';
+
 const STORIES = [
   'default',
   'small',
@@ -12,16 +14,13 @@ const STORIES = [
 
 for (const story of STORIES) {
   test(`icon/${story} — light`, async ({page}) => {
-    await page.goto(`/iframe.html?id=components-icon--${story}&viewMode=story`);
+    await openStory(page, `components-icon--${story}`, 'light');
     await page.waitForSelector('cmn-icon', {timeout: 10000}).catch(() => null);
     await expect(page).toHaveScreenshot(`icon-${story}-light.png`);
   });
 
   test(`icon/${story} — dark`, async ({page}) => {
-    await page.goto(`/iframe.html?id=components-icon--${story}&viewMode=story`);
-    await page.evaluate(() => {
-      document.documentElement.setAttribute('data-theme', 'dark');
-    });
+    await openStory(page, `components-icon--${story}`, 'dark');
     await page.waitForSelector('cmn-icon', {timeout: 10000}).catch(() => null);
     await expect(page).toHaveScreenshot(`icon-${story}-dark.png`);
   });
