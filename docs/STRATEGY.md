@@ -13,7 +13,6 @@ The 2026-08-26 ruling (`system/proposals.md → 2026-08-26-lifekit-common-reuse-
 two questions that were in scope of this audit:
 
 - **Substrate:** layered, not "web components long-term" (see §"Layered substrate rule" below).
-  The shell and `cmn-*` stay Angular; `lk-*` web components are for framework-free leaves only.
   `@lifekit-hq/tokens` is the ecosystem theming contract.
 - **Charting:** Chart.js behind the framework-free `charts-core` package. Pilot: `lk-line-chart`
   in `projects/elements` (issue #10). Angular chart wrappers (`area-chart`, `bar-chart`, etc.) are
@@ -27,10 +26,10 @@ This document covers only the **remaining decisions** for the Angular components
 Components are split by whether they carry framework behaviour. This replaces the earlier
 "web components long-term" wording and the strict rule that every component converts to Lit.
 The app shell (`cmn-app-layout`, top bar, tab bar, sheets) and every `cmn-*` component stay
-Angular, because both consumers are Angular and a web-component shell would rebuild the router,
-focus and overlay handling Angular and the CDK already provide. `lk-*` elements are only for
-framework-free leaves, such as the install, offline and update prompts. How the shell behaves on a
-phone is in [PHONE-CONTRACT.md](PHONE-CONTRACT.md).
+Angular, because `@lifekit-hq/ui` has only Angular consumers and a web-component shell would
+rebuild the router, focus and overlay handling Angular and the CDK already provide. `lk-*`
+elements are only for framework-free leaves, such as the install, offline and update prompts. How
+the shell behaves on a phone is in [PHONE-CONTRACT.md](PHONE-CONTRACT.md).
 
 1. **Use-anywhere layer.** Tokens, CSS and `charts-core` stay framework-free, so any consumer,
    Angular or not, can use them directly.
