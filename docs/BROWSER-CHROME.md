@@ -22,14 +22,15 @@ next build.
 
 ## The mark
 
-The mark is a lowercase two-letter monogram in white (`--color-text-inverse`) on the lifekit indigo
-tile (`--color-accent-700` `#4f46e5`, corner radius 7 on a 32-unit grid). The tile is the family
+The mark is a lowercase two-letter monogram in white (`--color-text-inverse`) on the lifekit petrol
+tile (`--color-accent-700` `#175a6d`, corner radius 7 on a 32-unit grid). The tile is the family
 and the letters name the app:
 
 | `<app>` | Apps                           |
 | ------- | ------------------------------ |
 | `lk`    | Lifekit, the lifekit dashboard |
 | `fs`    | Finance Sentry                 |
+| `dc`    | Devclaw                        |
 
 The mark is pure geometry with no `<text>`, so it renders identically as a favicon, where web
 fonts never load. Stems sit on whole grid units, which keeps them crisp at 16 px.
@@ -83,12 +84,12 @@ Every app serves these files from its site root:
 ## theme-color
 
 ```html
-<meta name="theme-color" content="#f7f8fa" media="(prefers-color-scheme: light)" />
-<meta name="theme-color" content="#0e1120" media="(prefers-color-scheme: dark)" />
+<meta name="theme-color" content="#f3f5f6" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#0c1113" media="(prefers-color-scheme: dark)" />
 ```
 
 These are `--color-surface-bg` for the light and dark themes. The browser bar blends into the page
-and the icon carries the brand; an indigo bar over the dark UI would be loud.
+and the icon carries the brand; a petrol bar over the dark UI would be loud.
 
 The media queries follow the OS only. `ThemeService` (`@lifekit-hq/ui`) closes the gap: whenever
 it applies a theme, whether from a toggle, a stored choice or an OS change, it points every
@@ -102,8 +103,8 @@ it applies a theme, whether from a toggle, a stored choice or an OS change, it p
 | `short_name`               | ≤ 12 characters, so it is never truncated     |
 | `id`, `start_url`, `scope` | `/`, or the base path the app is served under |
 | `display`                  | `standalone`                                  |
-| `theme_color`              | `#f7f8fa` (the light `theme-color`)           |
-| `background_color`         | `#f7f8fa` (`--color-surface-bg`, light)       |
+| `theme_color`              | `#f3f5f6` (the light `theme-color`)           |
+| `background_color`         | `#f3f5f6` (`--color-surface-bg`, light)       |
 | `icons`                    | the three manifest icons above, and no others |
 
 Off-token colours are not allowed. Other fields (`description`, `lang`, `shortcuts`, …) are fine.
@@ -135,8 +136,8 @@ after `<meta charset>`:
 <title>Finance Sentry</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="color-scheme" content="light dark" />
-<meta name="theme-color" content="#f7f8fa" media="(prefers-color-scheme: light)" />
-<meta name="theme-color" content="#0e1120" media="(prefers-color-scheme: dark)" />
+<meta name="theme-color" content="#f3f5f6" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#0c1113" media="(prefers-color-scheme: dark)" />
 <link rel="icon" href="/favicon.ico" sizes="32x32" />
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -181,7 +182,7 @@ copy it by hand: `@lifekit-hq/tokens` ships it, along with the hash your CSP nee
   app falls back to `system-ui`. Never load fonts from a CDN.
 - Mono is IBM Plex Mono (`--font-mono`, regular and medium, same `fonts.css`), for code only.
 - Colours come only from `@lifekit-hq/tokens/theme.css`, with Tailwind via
-  `@lifekit-hq/tokens/tailwind`. The brand colour is `--color-accent-700` (`#4f46e5`).
+  `@lifekit-hq/tokens/tailwind`. The brand colour is `--color-accent-700` (`#175a6d`).
 
 ```css
 /* global stylesheet */
