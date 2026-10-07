@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.1.0](https://github.com/lifekit-hq/lifekit-common/compare/v3.0.0...v3.1.0) (2026-10-07)
+
+
+### Features
+
+* **tokens:** add fixed-meaning colours for asset classes, gain/loss and cash flow ([#142](https://github.com/lifekit-hq/lifekit-common/issues/142)) ([7e82bce](https://github.com/lifekit-hq/lifekit-common/commit/7e82bce2b767556fae46e90a88c11e8e6d4a3c85))
+
 ## [3.0.0](https://github.com/lifekit-hq/lifekit-common/compare/v2.3.0...v3.0.0) (2026-10-07)
 
 
