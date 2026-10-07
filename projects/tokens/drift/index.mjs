@@ -3,7 +3,8 @@
  * It finds what bypasses the tokens, with no browser (contrast needs one and is not checked here):
  *
  *   font-family           a font stack that does not start from var(--font-*)
- *   color                 a colour literal in CSS or TS (not templates) that matches no --color-* token
+ *   color                 a colour literal in CSS or TS (not templates, inline `template:` included)
+ *                         that is not the var(--x, #hex) fallback mirroring its own token
  *   text-size             text below 12px, or off the cmn-* type ramp
  *   radius                a radius off the --radius-* scale
  *   root-font-size        `html { font-size }`: the rem scale assumes the 16px root
@@ -16,8 +17,10 @@ import {extname, join, relative, sep} from 'node:path';
 
 import {
   blank,
+  blankCallMirrors,
   colourLiterals,
   fontFamilyMessage,
+  fontShorthandParts,
   layoutTransitionMessage,
   radiusMessage,
   rootFontSizeMessage,
@@ -57,6 +60,7 @@ const TS_KEY = new RegExp(
   `(?<![\\w$.-])(${TS_KEYS.join('|')})\\s*:\\s*(?:(['"\`])((?:\\\\.|(?!\\2)[^\\\\])*)\\2|(\\d+(?:\\.\\d+)?)(?![\\w.%]))`,
   'g'
 );
+const TS_TEMPLATE = /(?<![\w$.-])template\s*:\s*['"`]/g;
 const CHART_FONT = /(?<![\w$.-])font\s*:\s*\{[^{}]*\}/g;
 const kebab = name => name.replace(/[A-Z]/g, c => `-${c.toLowerCase()}`);
 
@@ -64,13 +68,19 @@ const kebab = name => name.replace(/[A-Z]/g, c => `-${c.toLowerCase()}`);
 function declarationProblems({selector = '', atRules = [], prop, value}) {
   const problems = [];
   const add = (rule, message) => message && problems.push({rule, message});
+  const addSize = size => {
+    const root = rootFontSizeMessage(selector, size);
+    if (root) add('root-font-size', root);
+    else add('text-size', textSizeMessage(size));
+  };
   if (atRules.some(rule => rule.startsWith('@font-face'))) return problems;
   if (prop === 'font-family') add('font-family', fontFamilyMessage(value));
-  else if (prop === 'font-size') {
-    const root = rootFontSizeMessage(selector, value);
-    if (root) add('root-font-size', root);
-    else if (!selector || !/^(?:html|:root)\b/.test(selector.trim())) {
-      add('text-size', textSizeMessage(value));
+  else if (prop === 'font-size') addSize(value);
+  else if (prop === 'font') {
+    const parts = fontShorthandParts(value);
+    if (parts) {
+      addSize(parts.size);
+      add('font-family', fontFamilyMessage(parts.family));
     }
   } else if (RADIUS_PROP.test(prop)) add('radius', radiusMessage(value));
   else if (prop === 'transition' || prop === 'transition-property') {
@@ -125,7 +135,7 @@ function colourProblems(values) {
   return values.flatMap(({text, line}) =>
     colourLiterals(blank(text, /--[\w-]+\s*:[^;}]*/g)).map(({literal, index}) => ({
       rule: 'color',
-      message: `colour literal ${literal} matches no --color-* token; use one`,
+      message: `colour literal ${literal} bypasses the tokens; use var(--color-*)`,
       line: line + lineAt(text, index) - 1,
     }))
   );
@@ -174,7 +184,10 @@ function scanTypeScript(text) {
     for (const check of checks)
       if (check?.[1]) found.push({rule: check[0], message: check[1], line});
   }
-  const strings = extractStrings(text);
+  const templates = new Set(
+    [...masked.matchAll(TS_TEMPLATE)].map(match => match.index + match[0].length - 1)
+  );
+  const strings = extractStrings(blankCallMirrors(text));
   for (const {text: body, line} of strings) {
     for (const declaration of parseDeclarations(body, {firstLine: line})) {
       for (const problem of declarationProblems(declaration)) {
@@ -189,7 +202,7 @@ function scanTypeScript(text) {
       });
     }
   }
-  found.push(...colourProblems(strings));
+  found.push(...colourProblems(strings.filter(({start}) => !templates.has(start))));
   for (const match of masked.matchAll(/documentElement\.style\.fontSize\s*=/g)) {
     found.push({
       rule: 'root-font-size',

@@ -42,6 +42,27 @@ describe('font-family', () => {
     assert.deepEqual(scan('a.html', `<p class="font-['Inter']">x</p>`), ['font-family:1']);
   });
 
+  it('reads the font shorthand: its family and its size', () => {
+    assert.deepEqual(scan('a.css', 'a { font: 14px Arial, sans-serif; }'), ['font-family:1']);
+    assert.deepEqual(scan('a.css', 'a { font: italic 700 14px/1.5 "Inter", serif; }'), [
+      'font-family:1',
+    ]);
+    assert.deepEqual(scan('a.css', 'a { font: 10px var(--font-sans); }'), ['text-size:1']);
+    assert.deepEqual(scan('a.css', 'a { font: 10px Arial; }'), ['font-family:1', 'text-size:1']);
+    assert.deepEqual(scan('a.css', 'a { font: small Arial; }'), ['font-family:1', 'text-size:1']);
+    assert.deepEqual(scan('a.css', 'html { font: 14px var(--font-sans); }'), ['root-font-size:1']);
+    assert.deepEqual(scan('a.html', '<p style="font: 10px Arial">x</p>'), [
+      'font-family:1',
+      'text-size:1',
+    ]);
+    clean(
+      'a.css',
+      'a { font: 14px/1.5 var(--font-sans); } b { font: bold 12px var(--font-mono), monospace; }'
+    );
+    clean('a.css', 'a { font: caption; } b { font: inherit; } c { font: var(--font-body); }');
+    clean('a.css', 'a { font: 0.875rem var(--font-sans); }');
+  });
+
   it('accepts tokens, inherit, interpolations and @font-face', () => {
     clean('a.css', 'a { font-family: var(--font-sans); }');
     clean('a.css', 'a { font-family: var(--font-mono), monospace; }');
@@ -60,6 +81,7 @@ describe('color', () => {
     assert.deepEqual(scan('a.css', 'a { color: var(--color-text-primary, #123456); }'), [
       'color:1',
     ]);
+    assert.deepEqual(scan('a.css', 'a { color: var(--color-nope, #175a6d); }'), ['color:1']);
     assert.deepEqual(
       scan('a.css', 'a { background: linear-gradient(#abcdef, hsl(10 20% 30%)); }'),
       ['color:1', 'color:1']
@@ -73,11 +95,34 @@ describe('color', () => {
     ]);
   });
 
-  it('accepts token values, tokens, custom-property definitions and non-colours', () => {
+  it('flags a token value used bare, and a fallback that mirrors another token', () => {
+    assert.deepEqual(scan('a.css', 'a { color: #175a6d; background: #FFF; }'), [
+      'color:1',
+      'color:1',
+    ]);
+    assert.deepEqual(scan('a.css', 'a { color: var(--color-text-primary, #175a6d); }'), [
+      'color:1',
+    ]);
+    assert.deepEqual(scan('a.ts', "const o = {color: '#175a6d'};"), ['color:1']);
+    assert.deepEqual(scan('a.ts', "const c = cssVar('--color-text-primary', '#175a6d');"), [
+      'color:1',
+    ]);
+    assert.deepEqual(scan('a.ts', "const c = [cssVar('--color-accent-default'), '#175a6d'];"), [
+      'color:1',
+    ]);
+  });
+
+  it('accepts a fallback that mirrors its own token, tokens, definitions and non-colours', () => {
     clean(
       'a.css',
-      'a { color: #175a6d; background: #FFF; border-color: var(--color-border-default); }'
+      'a { color: var(--color-accent-default, #175a6d); border-color: var(--color-border-default); }'
     );
+    clean('a.css', 'a { background: var(--color-surface-card, #FFFFFF); }');
+    clean('a.css', 'a { color: var(--color-accent-default, #5aa9bb); }');
+    clean('a.css', 'a { border: 1px solid var( --color-border-default , #d9e0e3 ); }');
+    clean('a.ts', 'const s = css`a { color: var(--color-accent-default, #175a6d); }`;');
+    clean('a.ts', "const c = cssVar('--color-chart-series-2', '#f59e0b');");
+    clean('a.ts', 'const c = this.readToken(\n  "--color-surface-bg",\n  "#f3f5f6"\n);');
     clean(
       'a.css',
       'a { color: rgb(var(--rgb) / 0.5); box-shadow: 0 0 0 1px var(--color-border-focus); }'
@@ -96,8 +141,20 @@ describe('color', () => {
     clean('a.css', '/* #123456 */ a { color: var(--c); } // rgb(0 0 0)');
   });
 
-  it('flags colour inside an inline template string in TS', () => {
+  it('leaves colour in an Angular inline template alone, and flags it in any other TS string', () => {
+    clean('a.ts', '@Component({template: `<i class="bg-[#123456]" style="color: #123456"></i>`})');
+    clean('a.ts', "@Component({selector: 'a', template: '<i style=\"color: #123456\"></i>'})");
     assert.deepEqual(scan('a.ts', 'const t = `<i class="bg-[#123456]"></i>`;'), ['color:1']);
+    assert.deepEqual(
+      scan('a.ts', '@Component({template: `<i></i>`, styles: `a { color: #123456 }`})'),
+      ['color:1']
+    );
+  });
+
+  it('still reads the other rules in an inline template', () => {
+    assert.deepEqual(scan('a.ts', '@Component({template: `<p style="font-size: 10px">x</p>`})'), [
+      'text-size:1',
+    ]);
   });
 });
 
@@ -191,6 +248,13 @@ describe('root-font-size', () => {
     ]);
   });
 
+  it('reads a descendant of html as an ordinary text size, not as a pass', () => {
+    assert.deepEqual(scan('a.css', 'html body { font-size: 10px; }'), ['text-size:1']);
+    assert.deepEqual(scan('a.css', 'html .x { font-size: 15px; }'), ['text-size:1']);
+    assert.deepEqual(scan('a.css', 'html body { font-size: 62.5%; }'), ['text-size:1']);
+    assert.deepEqual(scan('a.css', ':root > body { font-size: 0.5rem; }'), ['text-size:1']);
+  });
+
   it('accepts the 16px contract and other selectors', () => {
     clean(
       'a.css',
@@ -200,6 +264,7 @@ describe('root-font-size', () => {
       'a.css',
       'body { font-size: 14px; } html body { font-size: 14px; } .html { font-size: 14px; }'
     );
+    clean('a.css', 'html { font-size: 100%; } html .x { font-size: 1rem; }');
     clean('a.css', 'html { color: var(--c); background: var(--b); }');
   });
 });
@@ -210,6 +275,7 @@ describe('layout-transition', () => {
     assert.deepEqual(scan('a.css', 'a { transition: opacity 1s, max-height 1s; }'), [
       'layout-transition:1',
     ]);
+    assert.deepEqual(scan('a.css', 'a { transition: all 1s, width 1s; }'), ['layout-transition:1']);
     assert.deepEqual(scan('a.css', 'a { transition-property: min-width; }'), [
       'layout-transition:1',
     ]);

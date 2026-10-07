@@ -76,7 +76,7 @@ export class LkAccountMenu extends LitElement {
 
     button:focus-visible,
     a:focus-visible {
-      outline: 2px solid var(--color-border-focus, #175a6d);
+      outline: 2px solid var(--color-border-focus, #1d6f85);
       outline-offset: 2px;
     }
 

@@ -38,8 +38,8 @@ export class LkUpdatePrompt extends LitElement {
     button {
       border: 0;
       border-radius: var(--radius-md);
-      background: var(--color-primary, #175a6d);
-      color: var(--color-on-primary, #ffffff);
+      background: var(--color-accent-default, #175a6d);
+      color: var(--color-text-inverse, #ffffff);
       padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
       font: inherit;
       font-weight: 600;

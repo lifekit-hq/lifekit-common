@@ -13,7 +13,7 @@ Everything comes from `@lifekit-hq/tokens`:
 | Head template              | `@lifekit-hq/tokens/brand/head.html`                                                   |
 | Manifest fields            | `@lifekit-hq/tokens/brand/manifest.fragment.json`                                      |
 | Node helpers + drift check | `@lifekit-hq/tokens/brand`, `lifekit-chrome-check` (bin)                               |
-| Design drift check         | `lifekit-chrome-check drift`, `@lifekit-hq/tokens/drift` (see the last section)        |
+| Design drift check         | `lifekit-chrome-check drift` (see the last section)                                    |
 | Vite plugin                | `@lifekit-hq/tokens/brand/vite`                                                        |
 | IBM Plex Sans / Mono       | `@lifekit-hq/tokens/fonts.css`                                                         |
 
@@ -265,14 +265,14 @@ dot-directories, `*.spec.*`, `*.test.*`, `*.stories.*` and `*.d.ts`. It prints e
 `file:line [rule] message`, exits 1 when there is any, 2 on a usage error. There is no ignore list
 and no baseline: a finding is fixed, not suppressed.
 
-| Rule                | Flags                                                                                                                                                                                                                                              |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `font-family`       | A `font-family` that does not start from `var(--font-*)` (or `inherit`): CSS, a Lit `css` template, `fontFamily:` and Chart.js `font: {family}` in TS, `style="…"`, `font-['X']`                                                                   |
-| `color`             | A colour literal in CSS or TS (never in templates) that matches no token: a hex outside the `theme.css` palette, or `rgb()`/`hsl()`/`oklch()`/… not built from a `var()`. A hex equal to a token value (a `var()` fallback that mirrors it) passes |
-| `text-size`         | Text below 12px, or off the `cmn-*` ramp (12/14/16/18/20/24/30/36px): `font-size`, `fontSize:`, Chart.js `font: {size}`, `text-[…]`. Sizes in a `var()` pass                                                                                       |
-| `radius`            | A radius off the `--radius-*` scale (3/6/8px, pill): `border-radius` and its longhands, `borderRadius:`, `rounded-[…]`. `0`, `50%` and `var()` pass                                                                                                |
-| `root-font-size`    | `font-size` on `html` or `:root` other than `100%`/`16px`/`1rem`, or `documentElement.style.fontSize`. The rem scale assumes the 16px root, so no app resizes it                                                                                   |
-| `layout-transition` | A `transition` / `transition-property` / `transition-[…]` on `width`, `height` or their `min-`/`max-` forms. `transition: all` is left alone                                                                                                       |
+| Rule                | Flags                                                                                                                                                                                                                                                                                                                                                       |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `font-family`       | A `font-family` (or the family in a `font` shorthand) that does not start from `var(--font-*)` (or `inherit`): CSS, a Lit `css` template, `fontFamily:` and Chart.js `font: {family}` in TS, `style="…"`, `font-['X']`                                                                                                                                      |
+| `color`             | A colour literal in CSS or TS (never in templates, Angular inline `template:` included): any hex, or `rgb()`/`hsl()`/`oklch()`/… not built from a `var()`. The one exception is the documented fallback that mirrors its own token: `var(--x, #hex)` in CSS, or `cssVar('--x', '#hex')` (any call of that shape) in TS, where the hex is that token's value |
+| `text-size`         | Text below 12px, or off the `cmn-*` ramp (12/14/16/18/20/24/30/36px): `font-size` and the size in a `font` shorthand, `fontSize:`, Chart.js `font: {size}`, `text-[…]`. Sizes in a `var()` pass. A descendant of `html` (`html body`) is an ordinary rule, not a root one                                                                                   |
+| `radius`            | A radius off the `--radius-*` scale (3/6/8px, pill): `border-radius` and its longhands, `borderRadius:`, `rounded-[…]`. `0`, `50%` and `var()` pass                                                                                                                                                                                                         |
+| `root-font-size`    | `font-size` on `html` or `:root` other than `100%`/`16px`/`1rem`, or `documentElement.style.fontSize`. The rem scale assumes the 16px root, so no app resizes it                                                                                                                                                                                            |
+| `layout-transition` | A `transition` / `transition-property` / `transition-[…]` that names `width`, `height` or their `min-`/`max-` forms, even beside `all`. A bare `transition: all` is left alone                                                                                                                                                                              |
 
 The type ramp and the radius scale are read from the package itself (the preset's `cmn-*` font
 sizes and the `--radius-*` values in `theme.css`), so they cannot disagree with the tokens.
@@ -280,10 +280,6 @@ sizes and the `--radius-*` values in `theme.css`), so they cannot disagree with 
 Token definitions are the contract, not drift: `--custom-property: …` declarations, SCSS `$variables`
 and `@font-face` blocks are never flagged. Contrast needs a rendered page and is not checked here;
 lifekit-common runs it against Storybook (`npm run design:scan`).
-
-The checks are available as functions from `@lifekit-hq/tokens/drift`: `checkDrift(paths)` returns
-`{files, findings}`, and `scanSource(file, text)` returns the findings in one file's text. A finding
-is `{file, line, rule, message}`.
 
 The rule logic is adapted from [impeccable](https://github.com/pbakaus/impeccable) (Apache-2.0).
 See [`NOTICE.md`](../projects/tokens/NOTICE.md).

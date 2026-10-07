@@ -20,7 +20,6 @@
     "./brand/vite": "./brand/vite.mjs",
     "./brand/theme-script": "./brand/theme-script.mjs",
     "./brand/*": "./brand/dist/*",
-    "./drift": "./drift/index.mjs",
     "./package.json": "./package.json"
   },
   "bin": {

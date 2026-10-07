@@ -50,8 +50,9 @@ const EXPRESSION = 'var(--ts-expression)';
 
 /**
  * The bodies of every string and template literal in TypeScript source, with the 1-based line
- * each starts on. A `${…}` interpolation becomes a `var(--ts-expression)` placeholder (it is a
- * value the scan cannot see, so it is never a literal). Ordinary quotes end at the newline.
+ * and the offset of the opening quote each starts at. A `${…}` interpolation becomes a
+ * `var(--ts-expression)` placeholder (it is a value the scan cannot see, so it is never a literal).
+ * Ordinary quotes end at the newline.
  */
 export function extractStrings(source) {
   const text = maskComments(source);
@@ -104,7 +105,7 @@ export function extractStrings(source) {
       body += d;
       j++;
     }
-    if (closed) strings.push({text: body, line: startLine});
+    if (closed) strings.push({text: body, line: startLine, start: i});
     i = closed ? j + 1 : j;
   }
   return strings;
