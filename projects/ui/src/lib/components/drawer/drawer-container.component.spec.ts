@@ -272,6 +272,21 @@ describe('CmnDrawerContainerComponent as a bottom sheet', () => {
       expect(host.style.transform).toBe('');
     });
 
+    it('leaves the stop alone when the grabber is swiped up', () => {
+      fixture.componentInstance.stop.set('full');
+      pointer('pointerdown', DISMISS_DRAG_PX, grabber());
+      pointer('pointermove', 0, grabber());
+      pointer('pointerup', 0, grabber());
+      expect(fixture.componentInstance.stop()).toBe('full');
+    });
+
+    it('leaves the stop alone when a grabber press is cancelled', () => {
+      pointer('pointerdown', 0, grabber());
+      pointer('pointercancel', 0, grabber());
+      expect(fixture.componentInstance.stop()).toBe('half');
+      expect(fixture.componentInstance.dragging()).toBe(false);
+    });
+
     it('still dismisses by dragging the grabber past the threshold, from either stop', () => {
       const spy = vi.spyOn(drawerRef, 'close');
       tapGrabber();

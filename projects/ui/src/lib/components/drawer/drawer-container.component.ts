@@ -42,7 +42,7 @@ const SHEET_DISMISS_DISTANCE_PX = 96;
     <div class="flex h-full min-h-0 flex-1 flex-col bg-surface-card" style="min-width: 0">
       <div
         [class.touch-none]="sheet()"
-        (pointercancel)="onDragEnd()"
+        (pointercancel)="onDragCancel()"
         (pointerdown)="onDragStart($event)"
         (pointermove)="onDragMove($event)"
         (pointerup)="onDragEnd()"
@@ -90,6 +90,7 @@ export class CmnDrawerContainerComponent implements AfterViewInit {
   private state: DrawerState = 'entering';
   private dragStartY: number | null = null;
   private dragStartedOnGrabber = false;
+  private dragTravel = 0;
 
   public readonly title = signal('');
   /** Bottom-sheet presentation (phone width); set by `CmnDrawerService`. */
@@ -120,6 +121,7 @@ export class CmnDrawerContainerComponent implements AfterViewInit {
     }
     this.dragStartedOnGrabber = !!target?.closest('.cmn-drawer-grabber');
     this.dragStartY = event.clientY;
+    this.dragTravel = 0;
     this.dragging.set(true);
     try {
       (event.currentTarget as Element).setPointerCapture(event.pointerId);
@@ -132,15 +134,25 @@ export class CmnDrawerContainerComponent implements AfterViewInit {
     if (this.dragStartY === null) {
       return;
     }
-    this.dragOffset.set(Math.max(0, event.clientY - this.dragStartY));
+    const delta = event.clientY - this.dragStartY;
+    this.dragTravel = Math.max(this.dragTravel, Math.abs(delta));
+    this.dragOffset.set(Math.max(0, delta));
   }
 
   public onDragEnd(): void {
+    this.finishDrag(false);
+  }
+
+  public onDragCancel(): void {
+    this.finishDrag(true);
+  }
+
+  private finishDrag(cancelled: boolean): void {
     if (this.dragStartY === null) {
       return;
     }
     const offset = this.dragOffset();
-    const tapped = this.dragStartedOnGrabber && offset < GRABBER_TAP_SLOP_PX;
+    const tapped = !cancelled && this.dragStartedOnGrabber && this.dragTravel < GRABBER_TAP_SLOP_PX;
     this.dragStartY = null;
     this.dragStartedOnGrabber = false;
     this.dragging.set(false);
