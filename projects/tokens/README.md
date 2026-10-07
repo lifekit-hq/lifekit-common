@@ -26,6 +26,9 @@ Design tokens for the lifekit ecosystem, framework-agnostic.
   seeds, the picker presets (used by `<lk-theme-picker>`) and the per-device storage helpers that
   `ThemeService.setSeed()` and the pre-paint script share. What each role is for and where the accent
   may appear: [`docs/design/patterns.md`](../../docs/design/patterns.md#colour).
+- Fixed-meaning colours (`--color-asset-equity|crypto|cash`, `--color-gain|loss`,
+  `--color-flow-in|out`, also Tailwind colours of the same name): set in `theme.css` for light and
+  dark, never derived by the engine or set by a seed. `FIXED_COLOUR_NAMES` from `engine` lists them.
 - `seeds/<app>.css`: each app's palette (`fs`, `lk`, `dc`) for light, dark and
   `prefers-contrast: more`, generated from the engine by `scripts/build-seeds.mjs`
   (`npm run build:seeds`). Import it after `theme.css`; with none, the app gets the default

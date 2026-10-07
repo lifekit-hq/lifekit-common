@@ -119,6 +119,20 @@
   --color-chart-series-9: #636a6d;
   --color-chart-grid: var(--color-border-default);
 
+  /* Fixed meaning — colours that carry a meaning and so never follow the seed: the engine does not
+     derive them, seeds/<app>.css does not set them, and test/fixed-colours.spec.mjs holds that.
+     Each keeps one hue (OKLCH) in light and dark; only lightness moves, the least that clears the
+     floor on every surface the engine can produce (marks 3:1, text 4.5:1, WCAG 1.4.11 / 1.4.3).
+     Asset classes are pre-#971 finance-sentry's: equity the petrol accent, crypto amber, cash green.
+     Gain and loss keep the status hues for a change of value; in and out are cash flow, same colours. */
+  --color-asset-equity: #175a6d;
+  --color-asset-crypto: #ba7600;
+  --color-asset-cash: #009768;
+  --color-gain: #00673c;
+  --color-loss: #af1426;
+  --color-flow-in: var(--color-gain);
+  --color-flow-out: var(--color-loss);
+
   /* Accent scale ends — the near-white and near-black a generated accent ramp runs between */
   --color-accent-scale-light: #f8f8f8;
   --color-accent-scale-dark: #0a0a0a;
@@ -179,6 +193,12 @@
   --color-chart-series-7: #e39fe4;
   --color-chart-series-8: #1cb9ad;
   --color-chart-series-9: #98a0a3;
+
+  --color-asset-equity: #367588;
+  --color-asset-crypto: #f59e0b;
+  --color-asset-cash: #10b981;
+  --color-gain: #57af7d;
+  --color-loss: #ff6d6c;
 
   --color-border-default: #27333a;
   --color-border-strong: #62727a;

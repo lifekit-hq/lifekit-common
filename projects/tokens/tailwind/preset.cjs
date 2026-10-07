@@ -42,6 +42,14 @@ module.exports = {
         'delta-up': 'var(--color-delta-up)',
         'delta-down': 'var(--color-delta-down)',
 
+        'asset-equity': 'var(--color-asset-equity)',
+        'asset-crypto': 'var(--color-asset-crypto)',
+        'asset-cash': 'var(--color-asset-cash)',
+        gain: 'var(--color-gain)',
+        loss: 'var(--color-loss)',
+        'flow-in': 'var(--color-flow-in)',
+        'flow-out': 'var(--color-flow-out)',
+
         'border-default': 'var(--color-border-default)',
         'border-strong': 'var(--color-border-strong)',
         'border-focus': 'var(--color-border-focus)',
