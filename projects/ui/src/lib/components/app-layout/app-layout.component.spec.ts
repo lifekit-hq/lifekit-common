@@ -1,10 +1,12 @@
 import {Location} from '@angular/common';
+import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {type ComponentFixture, TestBed} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
 import {provideRouter, Router, type Routes} from '@angular/router';
 import {beforeEach, describe, expect, it, vi} from 'vitest';
 
 import {CmnDialogService} from '../../services/dialog/dialog.service';
+import {CmnDrawerService} from '../../services/drawer/drawer.service';
 import {CmnPageActionsService} from '../../services/page-actions/page-actions.service';
 import {ThemeService} from '../../services/theme/theme.service';
 import {type CommandPaletteItem} from '../command-palette/command-palette-item.model';
@@ -28,6 +30,13 @@ const AVATAR_MENU_ITEMS: MenuItem[] = [
   {id: '/settings', label: 'Settings', icon: 'Settings2'},
   {id: '_logout', label: 'Log out', icon: 'LogOut', destructive: true},
 ];
+
+@Component({
+  selector: 'cmn-test-sheet-content',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: '<p>Sheet</p>',
+})
+class SheetContentComponent {}
 
 describe('AppLayoutComponent', () => {
   let fixture: ComponentFixture<AppLayoutComponent>;
@@ -352,6 +361,59 @@ describe('AppLayoutComponent', () => {
       fixture.detectChanges();
       expect(el('main').className).toContain('max-md:pt-');
       expect(el('main').className).not.toContain('max-md:pb-');
+    });
+  });
+
+  describe('notices and floating action slots', () => {
+    @Component({
+      imports: [AppLayoutComponent],
+      changeDetection: ChangeDetectionStrategy.OnPush,
+      template: `
+        <cmn-app-layout [phoneOverlay]="true" [floatingActionClearance]="56">
+          <div cmnAppLayoutNotice class="notice">Offline</div>
+          <button cmnAppLayoutFab class="fab" type="button">Ask</button>
+          <p>Body</p>
+        </cmn-app-layout>
+      `,
+    })
+    class HostComponent {}
+
+    let host: ComponentFixture<HostComponent>;
+
+    function q(selector: string): HTMLElement {
+      return (host.nativeElement as HTMLElement).querySelector(selector) as HTMLElement;
+    }
+
+    beforeEach(() => {
+      host = TestBed.createComponent(HostComponent);
+      host.detectChanges();
+    });
+
+    it('should render notices inside main, stuck below the top bar', () => {
+      const notices = q('main .notice').parentElement as HTMLElement;
+      expect(notices.classList).toContain('sticky');
+      expect(notices.classList).toContain('max-md:top-[calc(3.5rem+env(safe-area-inset-top))]');
+      expect(q('cmn-top-bar').contains(notices)).toBe(false);
+      expect(q('cmn-bottom-tab-bar').contains(notices)).toBe(false);
+    });
+
+    it('should stick at the top of main without the phone overlay', () => {
+      const plain = TestBed.createComponent(AppLayoutComponent);
+      plain.detectChanges();
+      const classes = (plain.nativeElement as HTMLElement).querySelector('main > div')?.classList;
+      expect(classes).toContain('sticky');
+      expect(classes).toContain('top-0');
+      expect(classes).not.toContain('max-md:top-[calc(3.5rem+env(safe-area-inset-top))]');
+    });
+
+    it('should show the floating action while no sheet is open', () => {
+      expect((q('.fab').parentElement as HTMLElement).classList).toContain('contents');
+    });
+
+    it('should hide the floating action while a bottom sheet is open', () => {
+      TestBed.inject(CmnDrawerService).open(SheetContentComponent, {mode: 'sheet'});
+      host.detectChanges();
+      expect((q('.fab').parentElement as HTMLElement).classList).toContain('hidden');
     });
   });
 

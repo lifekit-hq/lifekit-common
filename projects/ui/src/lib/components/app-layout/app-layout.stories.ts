@@ -1,9 +1,46 @@
+import {ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA, inject} from '@angular/core';
+import {LkInstallHint, LkOfflineBanner, LkUpdatePrompt} from '@lifekit-hq/elements';
 import type {Meta, StoryObj} from '@storybook/angular';
+import {moduleMetadata} from '@storybook/angular';
 
+import {CmnDrawerService} from '../../services/drawer/drawer.service';
 import type {CommandPaletteItem} from '../command-palette/command-palette-item.model';
 import type {MenuItem} from '../menu/menu.component';
 import type {NavItem} from '../sidebar-nav/sidebar-nav.component';
 import {AppLayoutComponent} from './app-layout.component';
+
+// Imported by name so a bundler cannot tree-shake the customElements.define() calls.
+for (const [tag, element] of [
+  ['lk-install-hint', LkInstallHint],
+  ['lk-offline-banner', LkOfflineBanner],
+  ['lk-update-prompt', LkUpdatePrompt],
+] as const) {
+  if (!customElements.get(tag)) {
+    customElements.define(tag, element);
+  }
+}
+
+@Component({
+  selector: 'cmn-story-sheet-content',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: '<p class="p-cmn-6 text-cmn-sm text-text-secondary">A bottom sheet is open.</p>',
+})
+class StorySheetContentComponent {}
+
+/** Opens a bottom sheet from the story, so the FAB slot can be seen hiding behind it. */
+@Component({
+  selector: 'cmn-story-sheet-launcher',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template:
+    '<button (click)="open()" type="button" class="cmn-story-open-sheet">Open sheet</button>',
+})
+class StorySheetLauncherComponent {
+  private readonly drawer = inject(CmnDrawerService);
+
+  protected open(): void {
+    this.drawer.open(StorySheetContentComponent, {mode: 'sheet', title: 'Sheet'});
+  }
+}
 
 const NAV_ITEMS: NavItem[] = [
   {label: 'Dashboard', icon: 'LayoutDashboard', route: '/dashboard'},
@@ -51,6 +88,12 @@ const meta: Meta<AppLayoutComponent> = {
   title: 'Components/App Layout',
   component: AppLayoutComponent,
   tags: ['autodocs'],
+  decorators: [
+    moduleMetadata({
+      imports: [StorySheetLauncherComponent],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA],
+    }),
+  ],
   parameters: {layout: 'fullscreen'},
   render: args => ({
     props: args,
@@ -231,6 +274,7 @@ export const PhoneOverlay: Story = {
       >${OVERLAY_BODY}
         @if (floatingActionClearance) {
           <button
+            cmnAppLayoutFab
             type="button"
             aria-label="Ask Ledger"
             class="fixed bottom-[calc(64px+16px+env(safe-area-inset-bottom)+8px)] left-cmn-4 z-20 flex size-12 items-center justify-center rounded-full bg-accent-default text-cmn-xs text-text-inverse shadow-cmn-md md:hidden"
@@ -269,6 +313,85 @@ export const PhoneOverlayFloatingActionDark: Story = {
   ...PhoneOverlayFloatingAction,
   args: {...PhoneOverlayFloatingAction.args},
   globals: {...PHONE, theme: 'dark'},
+};
+
+const NOTICES = `
+  <lk-offline-banner cmnAppLayoutNotice></lk-offline-banner>
+  <lk-update-prompt cmnAppLayoutNotice ready></lk-update-prompt>
+`;
+
+const NOTICES_FAB = `
+  <button
+    cmnAppLayoutFab
+    type="button"
+    aria-label="Ask Ledger"
+    class="fixed bottom-[calc(64px+16px+env(safe-area-inset-bottom)+8px)] left-cmn-4 z-20 flex size-12 items-center justify-center rounded-full bg-accent-default text-cmn-xs text-text-inverse shadow-cmn-md md:hidden"
+  >Ask</button>
+`;
+
+/**
+ * Notices project into `[cmnAppLayoutNotice]`: the offline banner and the update prompt (the
+ * install hint goes the same way) render in flow at the top of main, stuck just below the top
+ * bar, never over it or the tab bar. Here the device is forced offline so the banner shows.
+ */
+export const PhoneOverlayNotices: Story = {
+  args: {
+    ...PhoneOverlay.args,
+    floatingActionClearance: FAB_CLEARANCE,
+  },
+  globals: PHONE,
+  play: () => {
+    window.dispatchEvent(new Event('offline'));
+  },
+  render: args => ({
+    props: {...args, rows: Array.from({length: OVERLAY_ROWS}, (_, i) => i + 1)},
+    template: `
+      <cmn-app-layout
+        [navItems]="navItems"
+        [activeRoute]="activeRoute"
+        [title]="title"
+        [avatarLabel]="avatarLabel"
+        [avatarMenuItems]="avatarMenuItems"
+        [tabRoutes]="tabRoutes"
+        [moreRoute]="moreRoute"
+        [phoneOverlay]="phoneOverlay"
+        [floatingActionClearance]="floatingActionClearance"
+      >${OVERLAY_BODY}${NOTICES}${NOTICES_FAB}</cmn-app-layout>
+    `,
+  }),
+};
+
+export const PhoneOverlayNoticesDark: Story = {
+  ...PhoneOverlayNotices,
+  globals: {...PHONE, theme: 'dark'},
+};
+
+/**
+ * A bottom sheet is open: the layout hides the `[cmnAppLayoutFab]` slot until it closes, so the
+ * floating button never sits over the sheet's rows.
+ */
+export const PhoneOverlaySheetOpen: Story = {
+  ...PhoneOverlayNotices,
+  play: async ({canvasElement}) => {
+    window.dispatchEvent(new Event('offline'));
+    canvasElement.querySelector<HTMLButtonElement>('.cmn-story-open-sheet')?.click();
+  },
+  render: args => ({
+    props: {...args, rows: Array.from({length: OVERLAY_ROWS}, (_, i) => i + 1)},
+    template: `
+      <cmn-app-layout
+        [navItems]="navItems"
+        [activeRoute]="activeRoute"
+        [title]="title"
+        [avatarLabel]="avatarLabel"
+        [avatarMenuItems]="avatarMenuItems"
+        [tabRoutes]="tabRoutes"
+        [moreRoute]="moreRoute"
+        [phoneOverlay]="phoneOverlay"
+        [floatingActionClearance]="floatingActionClearance"
+      ><cmn-story-sheet-launcher />${NOTICES}${NOTICES_FAB}</cmn-app-layout>
+    `,
+  }),
 };
 
 const PALETTE_ITEMS: CommandPaletteItem[] = [
