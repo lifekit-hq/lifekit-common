@@ -66,7 +66,7 @@ export const FilterRow: Story = {
       },
     },
     template: `
-      <div class="flex flex-wrap gap-cmn-2">
+      <div class="flex flex-wrap gap-x-cmn-2 gap-y-cmn-3">
         @for (filter of filters; track filter) {
           <lk-dismissible-chip
             [label]="filter"

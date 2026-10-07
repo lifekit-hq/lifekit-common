@@ -143,7 +143,8 @@ Removable chip for an applied filter or a picked value: the label plus a remove 
 chip with its own remove affordance, so a host never nests an icon in a selectable chip to fake one.
 The remove button is a native `<button>` (Tab reaches it, Enter and Space press it), at least 44px
 square (`--size-touch`) while the pill around the label stays chip-sized, with a `--color-border-focus`
-ring on keyboard focus.
+ring on keyboard focus. A host laying chips out in wrapping rows needs a row gap of at least 12px,
+so the remove targets of chips on adjacent rows never overlap.
 
 | Property      | Attribute      | Type      | Default | Description                                                                                           |
 | ------------- | -------------- | --------- | ------- | ----------------------------------------------------------------------------------------------------- |

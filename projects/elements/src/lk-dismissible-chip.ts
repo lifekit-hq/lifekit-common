@@ -27,7 +27,8 @@ const CROSS = svg`
  * when the bare label is not enough, e.g. "Remove Category: Groceries" for a chip that reads
  * "Groceries"). Its hit area is `--size-touch` square at least; the pill drawn around the label
  * stays chip-sized, with the hit area reaching past it, so a row of chips looks the same on a
- * phone as on a desktop.
+ * phone as on a desktop. A host laying chips out in wrapping rows needs a row gap of at least 12px,
+ * so the remove targets of chips on adjacent rows never overlap.
  *
  * The element does not remove itself: it fires `lk-dismissible-chip-remove` and the host drops the
  * chip from its own state. After a remove the host should move focus somewhere sensible (the
