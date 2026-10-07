@@ -1,11 +1,29 @@
 import {ChangeDetectionStrategy, Component, computed, input, output} from '@angular/core';
 
+import {type PageAction} from '../app-layout/page-chrome';
 import {IconComponent} from '../icon/icon.component';
 import {MenuComponent, type MenuItem} from '../menu/menu.component';
+
+/**
+ * How the bar shows its title. `none`: the bar's title is the page heading (h1). With a large
+ * title in the content, the bar's copy is a plain label: hidden while the large title is in view
+ * (`visible`) and faded in once it has scrolled under the bar (`collapsed`).
+ */
+export type TopBarLargeTitle = 'none' | 'visible' | 'collapsed';
 
 const MAX_INITIALS = 2;
 const HEADER_BASE_CLASSES =
   'flex h-14 items-center gap-cmn-2 border-b border-border-default px-cmn-4 md:gap-cmn-4 md:px-cmn-6';
+/** Page chrome (back, actions) meets the 44px touch target below md, desktop density from md. */
+const CHROME_BUTTON_CLASSES =
+  'flex h-11 w-11 shrink-0 items-center justify-center rounded-cmn-md text-text-secondary ' +
+  'transition-colors hover:bg-surface-raised hover:text-text-primary md:h-8 md:w-8';
+/** The chevron's glyph sits on the content edge below md, as on iOS. */
+const BACK_BUTTON_CLASSES = `${CHROME_BUTTON_CLASSES} -ml-cmn-2 md:ml-0`;
+const INLINE_TITLE_CLASSES =
+  'min-w-0 truncate font-headline text-cmn-base font-semibold text-text-primary';
+/** The inline copy of a large title fades, never slides; Reduce Motion drops the fade. */
+const INLINE_LABEL_CLASSES = `${INLINE_TITLE_CLASSES} transition-opacity duration-150 motion-reduce:transition-none`;
 const HEADER_SOLID_CLASSES = 'bg-surface-card';
 /**
  * Below md the bar is translucent and blurred so content scrolling under it shows through, and
@@ -21,15 +39,50 @@ const HEADER_OVERLAY_CLASSES =
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <header [class]="headerClass()">
-      <!-- Title: omitted when empty so the page owns the only h1 -->
+      <!-- Back: a chevron only, no "Back" text -->
+      @if (showBack()) {
+        <button
+          [class]="backButtonClasses"
+          (click)="backClick.emit()"
+          type="button"
+          aria-label="Back"
+        >
+          <cmn-icon name="ChevronLeft" size="md" />
+        </button>
+      }
+
+      <!-- Title: omitted when empty so the page owns the only h1. Beside a large title it is a
+           plain label (the large title is the h1), shown once the large title scrolls away -->
       @if (title()) {
-        <h1 class="min-w-0 truncate font-headline text-cmn-base font-semibold text-text-primary">
-          {{ title() }}
-        </h1>
+        @if (largeTitle() === 'none') {
+          <h1 [class]="inlineTitleClasses">{{ title() }}</h1>
+        } @else {
+          <p
+            [class]="inlineLabelClasses"
+            [class.opacity-0]="largeTitle() === 'visible'"
+            aria-hidden="true"
+            data-inline-title
+          >
+            {{ title() }}
+          </p>
+        }
       }
 
       <!-- Spacer -->
       <div class="flex-1"></div>
+
+      <!-- Page actions, declared by the page in route data -->
+      @for (action of actions(); track action.id) {
+        <button
+          [class]="chromeButtonClasses"
+          [attr.aria-label]="action.label"
+          [title]="action.label"
+          (click)="actionClick.emit(action)"
+          type="button"
+        >
+          <cmn-icon [name]="action.icon" size="sm" />
+        </button>
+      }
 
       <!-- Search trigger: icon-only below md -->
       <button
@@ -86,7 +139,14 @@ export class TopBarComponent {
   public readonly avatarMenuItems = input<MenuItem[]>([]);
   /** Phone overlay styling: translucent, blurred, and padded by the top safe-area inset below md. */
   public readonly overlay = input<boolean>(false);
+  /** Renders the back chevron at the leading edge; pressing it emits `backClick`. */
+  public readonly showBack = input<boolean>(false);
+  /** Trailing page actions, rendered as icon buttons before the search trigger. */
+  public readonly actions = input<PageAction[]>([]);
+  public readonly largeTitle = input<TopBarLargeTitle>('none');
 
+  public readonly backClick = output<void>();
+  public readonly actionClick = output<PageAction>();
   public readonly searchClick = output<void>();
   public readonly themeToggle = output<void>();
   public readonly avatarMenuSelect = output<MenuItem>();
@@ -94,6 +154,11 @@ export class TopBarComponent {
   public readonly headerClass = computed<string>(
     () => `${HEADER_BASE_CLASSES} ${this.overlay() ? HEADER_OVERLAY_CLASSES : HEADER_SOLID_CLASSES}`
   );
+
+  protected readonly backButtonClasses = BACK_BUTTON_CLASSES;
+  protected readonly chromeButtonClasses = CHROME_BUTTON_CLASSES;
+  protected readonly inlineTitleClasses = INLINE_TITLE_CLASSES;
+  protected readonly inlineLabelClasses = INLINE_LABEL_CLASSES;
 
   public avatarInitial(): string {
     const label = this.avatarLabel().trim();

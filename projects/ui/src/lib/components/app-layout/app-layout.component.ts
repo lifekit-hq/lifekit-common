@@ -1,17 +1,23 @@
+import {Location} from '@angular/common';
 import {
+  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
   computed,
   DestroyRef,
+  type ElementRef,
   inject,
   input,
   output,
+  signal,
+  viewChild,
 } from '@angular/core';
 import {toSignal} from '@angular/core/rxjs-interop';
-import {NavigationEnd, Router} from '@angular/router';
+import {createUrlTreeFromSnapshot, NavigationEnd, Router} from '@angular/router';
 import {filter, map} from 'rxjs';
 
 import {CmnDialogService} from '../../services/dialog/dialog.service';
+import {CmnPageActionsService} from '../../services/page-actions/page-actions.service';
 import {ThemeService} from '../../services/theme/theme.service';
 import {BottomTabBarComponent, MAX_BOTTOM_TABS} from '../bottom-tab-bar/bottom-tab-bar.component';
 import {CommandPaletteComponent} from '../command-palette/command-palette.component';
@@ -22,9 +28,18 @@ import {
 import {CmnDialogBareContainerComponent} from '../dialog/dialog-bare-container.component';
 import {type MenuItem} from '../menu/menu.component';
 import {type NavItem, SidebarNavComponent} from '../sidebar-nav/sidebar-nav.component';
-import {TopBarComponent} from '../top-bar/top-bar.component';
+import {TopBarComponent, type TopBarLargeTitle} from '../top-bar/top-bar.component';
+import {
+  type BackTarget,
+  leafRoute,
+  type PageAction,
+  type PageChromeData,
+  readPageChrome,
+  resolveBack,
+} from './page-chrome';
 
 export {type NavItem} from '../sidebar-nav/sidebar-nav.component';
+export * from './page-chrome';
 
 /** Palette action id the layout handles itself: toggles the theme. */
 export const PALETTE_THEME_ACTION = '_theme';
@@ -35,6 +50,10 @@ export interface AppLayoutAccount {
   label: string;
   menuItems: MenuItem[];
 }
+
+/** The large title lines up with `cmn-page-container`'s default box; the page's own top padding spaces it. */
+const LARGE_TITLE_BOX_CLASSES =
+  'mx-auto w-full max-w-[1200px] px-cmn-4 pt-cmn-4 md:px-cmn-8 md:pt-cmn-8';
 
 /** Phone overlay: the bars sit over main below md instead of in flow. */
 const OVERLAY_TOP_BAR_CLASSES = 'max-md:absolute max-md:inset-x-0 max-md:top-0 max-md:z-30';
@@ -76,7 +95,10 @@ const MAIN_OVERLAY_BOTTOM_CLASSES =
         <cmn-top-bar
           [class]="phoneOverlay() ? overlayTopBarClasses : ''"
           [overlay]="phoneOverlay()"
-          [title]="title()"
+          [title]="barTitle()"
+          [showBack]="back() !== null"
+          [actions]="pageActions()"
+          [largeTitle]="largeTitleMode()"
           [isDark]="isDark()"
           [showThemeToggle]="showThemeToggle()"
           [avatarLabel]="effectiveAvatarLabel()"
@@ -84,8 +106,21 @@ const MAIN_OVERLAY_BOTTOM_CLASSES =
           (searchClick)="onSearchClick()"
           (themeToggle)="onThemeToggle()"
           (avatarMenuSelect)="avatarMenuSelect.emit($event)"
+          (backClick)="onBack()"
+          (actionClick)="onPageAction($event)"
         />
-        <main [class]="mainClass()" [style.--cmn-fab-clearance.px]="fabClearance()">
+        <main #main [class]="mainClass()" [style.--cmn-fab-clearance.px]="fabClearance()">
+          <!-- The page's large title, declared in route data; shrinks into the top bar on scroll -->
+          @if (largeTitle(); as text) {
+            <div [class]="largeTitleBoxClasses">
+              <h1
+                #largeTitle
+                class="font-headline text-cmn-3xl break-words font-semibold text-text-primary"
+              >
+                {{ text }}
+              </h1>
+            </div>
+          }
           <ng-content />
         </main>
         <cmn-bottom-tab-bar
@@ -105,8 +140,15 @@ export class AppLayoutComponent {
   private readonly router = inject(Router);
   private readonly dialog = inject(CmnDialogService);
   private readonly themeService = inject(ThemeService);
+  private readonly location = inject(Location);
+  private readonly pageActionsService = inject(CmnPageActionsService);
   private readonly destroyRef = inject(DestroyRef);
   private paletteOpen = false;
+
+  private readonly main = viewChild.required<ElementRef<HTMLElement>>('main');
+  private readonly largeTitleRef = viewChild<ElementRef<HTMLElement>>('largeTitle');
+  /** The large title has scrolled under the top bar; set by an IntersectionObserver only. */
+  private readonly largeTitleScrolledAway = signal(false);
 
   private readonly routerUrl = toSignal(
     this.router.events.pipe(
@@ -114,6 +156,14 @@ export class AppLayoutComponent {
       map(event => event.urlAfterRedirects)
     ),
     {initialValue: this.router.url}
+  );
+  /** The page being shown (deepest primary route), whose data declares the chrome. */
+  private readonly page = toSignal(
+    this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      map(() => leafRoute(this.router.routerState.snapshot.root))
+    ),
+    {initialValue: leafRoute(this.router.routerState.snapshot.root)}
   );
   private readonly theme = toSignal(this.themeService.activeTheme$, {initialValue: 'light'});
 
@@ -123,6 +173,7 @@ export class AppLayoutComponent {
    * current URL; set it only to override that.
    */
   public readonly activeRoute = input<string | undefined>(undefined);
+  /** Top-bar title for pages that declare none in route data (`data.title` takes precedence). */
   public readonly title = input<string>('');
   /** Renders the top bar's theme toggle (both desktop and phone); false removes it. */
   public readonly showThemeToggle = input<boolean>(true);
@@ -168,6 +219,11 @@ export class AppLayoutComponent {
   public readonly avatarMenuSelect = output<MenuItem>();
   /** A palette action entry was chosen (the built-in theme toggle is handled by the layout). */
   public readonly paletteAction = output<string>();
+  /**
+   * A top-bar action the page declared in `data.actions` was pressed (also delivered to the page
+   * through `CmnPageActionsService`).
+   */
+  public readonly pageAction = output<string>();
 
   public readonly phoneTabs = computed<NavItem[]>(() => {
     const items = this.navItems();
@@ -191,6 +247,32 @@ export class AppLayoutComponent {
     const bottom = this.navItems().length ? ` ${MAIN_OVERLAY_BOTTOM_CLASSES}` : '';
     return `${MAIN_BASE_CLASSES} ${MAIN_OVERLAY_TOP_CLASSES}${bottom}`;
   });
+
+  /** What the current page declares in route data, or null when it declares nothing. */
+  protected readonly chrome = computed<PageChromeData | null>(() =>
+    readPageChrome(this.page().data)
+  );
+
+  protected readonly back = computed<BackTarget>(() => {
+    const path = this.routerUrl().split(/[?#]/, 1)[0];
+    return resolveBack(this.chrome(), {
+      isTabRoot: this.navItems().some(item => item.route === path),
+      hasHistory: !!this.router.lastSuccessfulNavigation()?.previousNavigation,
+    });
+  });
+
+  protected readonly largeTitle = computed<string>(() => this.chrome()?.title ?? '');
+
+  protected readonly barTitle = computed<string>(() => this.largeTitle() || this.title());
+
+  protected readonly largeTitleMode = computed<TopBarLargeTitle>(() => {
+    if (!this.largeTitle()) {
+      return 'none';
+    }
+    return this.largeTitleScrolledAway() ? 'collapsed' : 'visible';
+  });
+
+  protected readonly pageActions = computed<PageAction[]>(() => this.chrome()?.actions ?? []);
 
   protected readonly isDark = computed<boolean>(() => this.theme() === 'dark');
 
@@ -222,8 +304,41 @@ export class AppLayoutComponent {
     return this.phoneOverlay() && this.navItems().length && clearance > 0 ? clearance : null;
   });
 
+  protected readonly largeTitleBoxClasses = LARGE_TITLE_BOX_CLASSES;
   protected readonly overlayTopBarClasses = OVERLAY_TOP_BAR_CLASSES;
   protected readonly overlayTabBarClasses = OVERLAY_TAB_BAR_CLASSES;
+
+  constructor() {
+    afterRenderEffect(onCleanup => {
+      const title = this.largeTitleRef()?.nativeElement;
+      const main = this.main().nativeElement;
+      if (!title || typeof IntersectionObserver === 'undefined') {
+        return;
+      }
+      let observer: IntersectionObserver | undefined;
+      // Rebuilt when main resizes: under the phone overlay the top bar covers main's top padding,
+      // so the title counts as gone once it passes under the bar, and that padding is per size.
+      const resize = new ResizeObserver(() => {
+        observer?.disconnect();
+        const covered = parseFloat(getComputedStyle(main).paddingTop) || 0;
+        observer = new IntersectionObserver(
+          ([entry]) => {
+            const rootTop = entry.rootBounds?.top ?? 0;
+            this.largeTitleScrolledAway.set(
+              !entry.isIntersecting && entry.boundingClientRect.bottom <= rootTop
+            );
+          },
+          {root: main, rootMargin: `-${covered}px 0px 0px 0px`}
+        );
+        observer.observe(title);
+      });
+      resize.observe(main);
+      onCleanup(() => {
+        resize.disconnect();
+        observer?.disconnect();
+      });
+    });
+  }
 
   protected onWindowKeydown(event: KeyboardEvent): void {
     if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
@@ -235,6 +350,23 @@ export class AppLayoutComponent {
   protected onSearchClick(): void {
     this.searchClick.emit();
     this.openPalette();
+  }
+
+  protected onBack(): void {
+    const back = this.back();
+    if (back?.kind === 'parent') {
+      this.navigateFromPage(back.parent);
+    } else if (back?.kind === 'history') {
+      this.location.back();
+    }
+  }
+
+  protected onPageAction(action: PageAction): void {
+    if (action.route) {
+      this.navigateFromPage(action.route);
+    }
+    this.pageActionsService.press(action.id);
+    this.pageAction.emit(action.id);
   }
 
   protected onThemeToggle(): void {
@@ -265,6 +397,11 @@ export class AppLayoutComponent {
         this.handlePaletteResult(result);
       }
     });
+  }
+
+  /** Navigates to an absolute path, or one relative to the current page (`..`). */
+  private navigateFromPage(path: string): void {
+    void this.router.navigateByUrl(createUrlTreeFromSnapshot(this.page(), [path]));
   }
 
   private handlePaletteResult(result: PaletteResult): void {

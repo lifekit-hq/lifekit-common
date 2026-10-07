@@ -76,6 +76,7 @@ export * from './directives/typography/typography.directive';
 export * from './services/dialog/dialog.service';
 export * from './services/drawer/drawer.service';
 export * from './services/icon-registry/icon-registry.service';
+export * from './services/page-actions/page-actions.service';
 export * from './services/theme/theme.service';
 
 // Providers
