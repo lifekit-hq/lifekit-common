@@ -1,7 +1,8 @@
+import {Component, signal} from '@angular/core';
 import {type ComponentFixture, TestBed} from '@angular/core/testing';
 import {Chart} from 'chart.js';
 
-import {AreaChartComponent, type AreaSeries} from './area-chart.component';
+import {AreaChartComponent, type AreaSeries, type ChartPointClick} from './area-chart.component';
 
 const SAMPLE: AreaSeries[] = [
   {
@@ -183,6 +184,117 @@ describe('AreaChartComponent', () => {
       fixture.componentRef.setInput('stacked', false);
       fixture.detectChanges();
       expect(fixture.nativeElement.querySelector('canvas')).toBeTruthy();
+    });
+  });
+
+  describe('pointClick output', () => {
+    @Component({
+      imports: [AreaChartComponent],
+      template: `<cmn-area-chart
+        [series]="series"
+        [stacked]="stacked()"
+        (pointClick)="clicks.push($event)"
+      />`,
+    })
+    class BoundHostComponent {
+      public series = SAMPLE;
+      public readonly stacked = signal(true);
+      public readonly clicks: ChartPointClick[] = [];
+    }
+
+    /** Settles the chart at its final geometry; `y` of each series' point at `index`, in canvas px. */
+    function settle(root: HTMLElement, index: number) {
+      const canvas = root.querySelector('canvas') as HTMLCanvasElement;
+      const chart = Chart.getChart(canvas) as Chart;
+      // A still-running entrance animation would overwrite the final geometry read below.
+      chart.stop();
+      chart.update('none');
+      const tops = chart.data.datasets.map(
+        (_, i) => (chart.getDatasetMeta(i).data[index] as unknown as {x: number; y: number}).y
+      );
+      const x = (chart.getDatasetMeta(0).data[index] as unknown as {x: number}).x;
+      return {canvas, chart, x, tops, bottom: chart.chartArea.bottom, top: chart.chartArea.top};
+    }
+
+    /** Chart.js handles pointer events on the next animation frame, so wait one out. */
+    async function pointer(
+      canvas: HTMLCanvasElement,
+      type: string,
+      x: number,
+      y: number
+    ): Promise<void> {
+      const rect = canvas.getBoundingClientRect();
+      canvas.dispatchEvent(
+        new MouseEvent(type, {clientX: rect.left + x, clientY: rect.top + y, bubbles: true})
+      );
+      await new Promise<void>(resolve => {
+        requestAnimationFrame(() => resolve());
+      });
+    }
+
+    function bound(): {
+      host: BoundHostComponent;
+      root: HTMLElement;
+      hostFixture: ComponentFixture<BoundHostComponent>;
+    } {
+      const hostFixture = TestBed.createComponent(BoundHostComponent);
+      hostFixture.detectChanges();
+      return {host: hostFixture.componentInstance, root: hostFixture.nativeElement, hostFixture};
+    }
+
+    it('emits the stacked band under the pointer with its own value, not the running total', async () => {
+      const {host, root} = bound();
+      const {canvas, x, tops, bottom} = settle(root, 1);
+
+      // Lower band (Banking) sits between the baseline and its top; upper band (Crypto) above it.
+      await pointer(canvas, 'click', x, (tops[0] + bottom) / 2);
+      await pointer(canvas, 'click', x, (tops[0] + tops[1]) / 2);
+
+      expect(host.clicks).toEqual([
+        {index: 1, seriesIndex: 0, label: 'Feb', seriesLabel: 'Banking', value: 120},
+        {index: 1, seriesIndex: 1, label: 'Feb', seriesLabel: 'Crypto', value: 55},
+      ]);
+    });
+
+    it('picks the nearest line when unstacked', async () => {
+      const {host, root, hostFixture} = bound();
+      host.stacked.set(false);
+      hostFixture.detectChanges();
+      const {canvas, x, tops} = settle(root, 0);
+
+      await pointer(canvas, 'click', x, tops[1] - 1);
+      await pointer(canvas, 'click', x, tops[0] - 1);
+
+      expect(host.clicks.map(c => [c.seriesLabel, c.value])).toEqual([
+        ['Crypto', 40],
+        ['Banking', 100],
+      ]);
+    });
+
+    it('emits nothing outside the plot area', async () => {
+      const {host, root} = bound();
+      const {canvas, x, bottom} = settle(root, 0);
+      await pointer(canvas, 'click', x, bottom + 14);
+
+      expect(host.clicks).toEqual([]);
+    });
+
+    it('shows a pointer cursor over the plot when bound', async () => {
+      const {root} = bound();
+      const {canvas, x, tops, bottom} = settle(root, 0);
+      await pointer(canvas, 'mousemove', x, (tops[0] + bottom) / 2);
+      expect(canvas.style.cursor).toBe('pointer');
+    });
+
+    it('stays inert when nothing listens: no emission, no pointer cursor', async () => {
+      fixture.componentRef.setInput('series', SAMPLE);
+      fixture.detectChanges();
+      const {canvas, x, tops, bottom} = settle(fixture.nativeElement, 1);
+      const y = (tops[0] + bottom) / 2;
+
+      await expect(pointer(canvas, 'click', x, y)).resolves.toBeUndefined();
+      await pointer(canvas, 'mousemove', x, y);
+      expect(canvas.style.cursor).toBe('');
     });
   });
 });

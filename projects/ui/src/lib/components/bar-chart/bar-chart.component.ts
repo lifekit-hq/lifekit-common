@@ -7,19 +7,25 @@ import {
   ElementRef,
   input,
   OnDestroy,
+  output,
   viewChild,
 } from '@angular/core';
 import {
   type BarSeries,
   type BarValueFormat,
+  bindChartClick,
   buildBarChartConfig,
+  type ChartPointClick,
   isSeriesEmpty,
   resolveBarChartTokens,
+  resolveBarClick,
   updateBarChart,
 } from '@lifekit-hq/charts-core';
 import {Chart} from 'chart.js';
 
-export type {BarSeries, BarValueFormat} from '@lifekit-hq/charts-core';
+import {isOutputObserved} from '../../chart-click/output-observed';
+
+export type {BarSeries, BarValueFormat, ChartPointClick} from '@lifekit-hq/charts-core';
 
 @Component({
   selector: 'cmn-bar-chart',
@@ -56,6 +62,12 @@ export class BarChartComponent implements AfterViewInit, OnDestroy {
   public readonly emptyMessage = input<string>('No data yet');
   public readonly stacked = input<boolean>(false);
   public readonly valueFormat = input<BarValueFormat>('currency');
+  /**
+   * Emits the bar a click landed on: its x position, its series and the bar's value. Binding it
+   * makes the bars clickable (pointer cursor); unbound, the chart behaves as before.
+   * Pointer only - the canvas has no focusable items, so offer a keyboard-reachable equivalent.
+   */
+  public readonly barClick = output<ChartPointClick>();
   protected readonly isEmpty = computed(() => isSeriesEmpty(this.series()));
 
   constructor() {
@@ -81,15 +93,18 @@ export class BarChartComponent implements AfterViewInit, OnDestroy {
     if (!ctx) {
       return;
     }
-    this.chart = new Chart(
-      ctx,
-      buildBarChartConfig(
-        this.series(),
-        resolveBarChartTokens(),
-        this.currency(),
-        this.stacked(),
-        this.valueFormat()
-      )
+    const config = buildBarChartConfig(
+      this.series(),
+      resolveBarChartTokens(),
+      this.currency(),
+      this.stacked(),
+      this.valueFormat()
     );
+    const bound = bindChartClick(config, {
+      resolve: resolveBarClick,
+      isActive: () => isOutputObserved(this.barClick),
+      emit: hit => this.barClick.emit(hit),
+    });
+    this.chart = new Chart(ctx, bound);
   }
 }
