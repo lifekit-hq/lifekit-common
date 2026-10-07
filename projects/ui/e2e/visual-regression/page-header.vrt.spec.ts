@@ -1,5 +1,7 @@
 import {expect, test} from '@playwright/test';
 
+import {openStory} from './open-story';
+
 const STORIES = [
   'title-only',
   'with-subtitle',
@@ -13,16 +15,13 @@ const STORIES = [
 
 for (const story of STORIES) {
   test(`page-header/${story} — light`, async ({page}) => {
-    await page.goto(`/iframe.html?id=components-pageheader--${story}&viewMode=story`);
+    await openStory(page, `components-pageheader--${story}`, 'light');
     await page.waitForSelector('cmn-page-header', {timeout: 10000});
     await expect(page).toHaveScreenshot(`page-header-${story}-light.png`);
   });
 
   test(`page-header/${story} — dark`, async ({page}) => {
-    await page.goto(`/iframe.html?id=components-pageheader--${story}&viewMode=story`);
-    await page.evaluate(() => {
-      document.documentElement.setAttribute('data-theme', 'dark');
-    });
+    await openStory(page, `components-pageheader--${story}`, 'dark');
     await page.waitForSelector('cmn-page-header', {timeout: 10000});
     await expect(page).toHaveScreenshot(`page-header-${story}-dark.png`);
   });

@@ -1,5 +1,7 @@
 import {expect, test} from '@playwright/test';
 
+import {openStory} from './open-story';
+
 const STORIES = [
   'default',
   'with-hint',
@@ -11,16 +13,13 @@ const STORIES = [
 
 for (const story of STORIES) {
   test(`form-field/${story} — light`, async ({page}) => {
-    await page.goto(`/iframe.html?id=components-form-field--${story}&viewMode=story`);
+    await openStory(page, `components-formfield--${story}`, 'light');
     await page.waitForSelector('cmn-form-field, label', {timeout: 10000}).catch(() => null);
     await expect(page).toHaveScreenshot(`form-field-${story}-light.png`);
   });
 
   test(`form-field/${story} — dark`, async ({page}) => {
-    await page.goto(`/iframe.html?id=components-form-field--${story}&viewMode=story`);
-    await page.evaluate(() => {
-      document.documentElement.setAttribute('data-theme', 'dark');
-    });
+    await openStory(page, `components-formfield--${story}`, 'dark');
     await page.waitForSelector('cmn-form-field, label', {timeout: 10000}).catch(() => null);
     await expect(page).toHaveScreenshot(`form-field-${story}-dark.png`);
   });
