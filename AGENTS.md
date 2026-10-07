@@ -1,17 +1,29 @@
 # lifekit-common — AGENTS.md
 
-Shared design system, Angular component library, and framework-free element layer for the lifekit ecosystem.
+Shared design system & Angular component library for the lifekit-hq ecosystem. Six lockstep-versioned packages published to GitHub Packages:
+
+| Package                   | What                                                                                                                                                                        | Consumers                               |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| `@lifekit-hq/tokens`      | Design tokens — `theme.css` (light/dark) + Tailwind preset, self-hosted IBM Plex Sans, brand mark + browser-chrome standard (`docs/BROWSER-CHROME.md`). Framework-agnostic. | All lifekit frontends (Angular + React) |
+| `@lifekit-hq/charts-core` | Framework-free Chart.js config builders (zero `@angular/*`)                                                                                                                 | `ui`, `elements`                        |
+| `@lifekit-hq/elements`    | Framework-free Lit custom elements (`lk-*`) — incl. PWA install/update/offline pieces                                                                                       | finance-sentry                          |
+| `@lifekit-hq/ui`          | Angular component library (`cmn-*` selectors), Storybook-first                                                                                                              | finance-sentry                          |
+| `@lifekit-hq/core`        | Angular signal-store features & helpers                                                                                                                                     | finance-sentry                          |
+| `@lifekit-hq/config`      | ESLint / Prettier / Stylelint / tsconfig presets                                                                                                                            | lifekit repos (build-time)              |
+
+Extracted from finance-sentry (`dsdevq-common`) 2026-08-25. Sole developer: Denys.
 
 ## Commands
 
 ```bash
 npm ci
-npm run storybook        # primary dev loop — components developed here
+npm run storybook        # THE dev loop — develop components here, not in a host app
 npm run test             # Vitest via @angular/build:unit-test (CI config = coverage gates) + node:test for tokens brand (test:tokens)
 npm run lint             # ESLint (angular-eslint) across all projects
 npm run build            # build:brand (tokens icons), then ng-packagr: charts-core → elements → ui → core (order matters)
 npm run build-storybook  # static Storybook catalog (deployed to Pages on merge)
-npm run design:scan      # report-only impeccable design scan vs docs/design-baseline.json (see CLAUDE.md)
+npm run check:drift      # static design-drift scan of source (font/colour/size/radius/root-size/transition literals outside tokens); CI fails on any finding, no baseline — rules in docs/BROWSER-CHROME.md
+npm run design:scan      # impeccable detector over source (+ `-- --storybook <url>` for a built catalog); report-only, compares to docs/design-baseline.json
 ```
 
 ## Verify gate
@@ -34,19 +46,44 @@ node_modules/.bin/ng run "@lifekit-hq/ui:build-storybook"
 
 ```
 projects/
-  tokens/        @lifekit-hq/tokens  — theme.css + Tailwind preset + fonts.css + brand mark/chrome standard (docs/BROWSER-CHROME.md)
-  config/        @lifekit-hq/config  — ESLint / Prettier / tsconfig presets
-  ui/            @lifekit-hq/ui      — Angular components (cmn-* selectors), Storybook host
-  core/          @lifekit-hq/core    — Angular signal-store features
-  charts-core/   @lifekit-hq/charts-core — framework-free Chart.js builders (zero @angular/*)
-  elements/      @lifekit-hq/elements    — Lit custom elements (zero @angular/*)
+  tokens/        @lifekit-hq/tokens
+  config/        @lifekit-hq/config
+  ui/            @lifekit-hq/ui (also the Storybook host)
+  core/          @lifekit-hq/core
+  charts-core/   @lifekit-hq/charts-core
+  elements/      @lifekit-hq/elements
 fixtures/        consumer-type-check harness (npm pack → compile)
 specs/           speckit artifacts (spec.md, plan.md, tasks.md per feature)
 ```
 
+## Mandatory gates (same bar as finance-sentry)
+
+- After modifying any `.ts` file: `npx eslint <file>` from the repo root — zero errors before moving on. `inject()` only, `ChangeDetectionStrategy.OnPush`, no `standalone: true` boilerplate, explicit access modifiers, no magic numbers, `cmn-` selector prefix.
+- Every component ships with: `*.spec.ts` (Vitest, meaningful branches covered) **and** `*.stories.ts` (Storybook). No component lands without both.
+- `npm run test` and `npm run build-storybook` green before any PR.
+- Prettier via `prettier.config.mjs` (re-exports `@lifekit-hq/config/prettier`) — never add a local override.
+
+## Design-token discipline
+
+`projects/tokens/theme.css` is the canonical token file and stays **framework-agnostic**: pure CSS custom properties + keyframes. No Tailwind directives, no framework imports — those live in each consumer's entry stylesheet (Storybook's is `projects/ui/.storybook/storybook.css`). `projects/ui/src/styles/theme.css` is a thin re-export; edit tokens only in the tokens package.
+
+## Conventions (ecosystem-standard)
+
+- **Branch**: `<type>/<issue#>-<slug>` (e.g. `feat/2-publish-pipeline`); create via `gh issue develop <n>`.
+- **Commits / PR titles**: conventional commits — release-please parses them into the CHANGELOG. Scope = package or area: `feat(ui): …`, `fix(tokens): …`.
+- **PR body**: what + why, then a **Validation** section stating exactly what was run and green.
+- **Issues**: imperative title, no priority prefix — priority lives in the `P1`/`P2` label. P1 issues carry acceptance criteria; P2/P3 stay one-liners until promoted.
+- **Milestones**: `M<n> — <outcome>`, named for the outcome, never a date.
+- **Releases**: release-please maintains the release PR (lockstep version bump across all packages + CHANGELOG); the Weekly Release workflow merges it Mondays 00:07 UTC (or dispatch manually for "release now"). Merging it tags the release and publishes all six packages to GitHub Packages.
+- Main is protected in spirit: all changes land via squash-merged PR, CI green first.
+- Root markdown is `README.md`, `CLAUDE.md`, the devclaw onboarding set (`AGENTS.md`), and the impeccable design context (`PRODUCT.md`, `DESIGN.md` — the engine reads them from the root); `CHANGELOG.md` is release-please-owned. No session artifacts or ad-hoc docs at the root — durable docs go to `docs/`.
+
+## Storybook-first rule
+
+New components and component changes are developed and reviewed **in Storybook**, not by running a consuming app. If a change can't be demonstrated in a story, add the story that demonstrates it. The hosted catalog (GitHub Pages) is the reference other lifekit projects design against.
+
 ## Key conventions
 
-- Angular: `ChangeDetectionStrategy.OnPush`, `inject()` only, `cmn-` selector prefix, no `standalone: true` boilerplate.
 - Elements: Lit, token-only theming (`var(--token, fallback)`), no Tailwind in shadow DOM. See `projects/elements/README.md`.
 - Build order: charts-core must be built before elements; elements before ui (tsconfig `paths` point at `dist/`).
 - `sideEffects` in `projects/elements/package.json` must name the _built_ bundle (`./fesm2022/lifekit-hq-elements.mjs`), not `src/` paths — ng-packagr copies the field verbatim, and `sideEffects: false` (or non-matching paths) silently drops `customElements.define` calls in Rollup/Vite production builds.
@@ -57,7 +94,6 @@ specs/           speckit artifacts (spec.md, plan.md, tasks.md per feature)
 
 ## Further reading
 
-- `CLAUDE.md` — coding conventions, commit style, PR/issue norms
 - `docs/BROWSER-CHROME.md` — brand mark, icon set, theme-color, head/manifest standard and `lifekit-chrome-check`
 - `docs/PHONE-CONTRACT.md` — what the app shell guarantees on a phone and what a page declares (title, parent, actions, sheet vs page, state pattern)
 - `docs/CONSUMER-GAP-AUDIT.md` — what each consumer needs against what the library provides, and what is unused
