@@ -38,8 +38,10 @@ library, and it is reverted: there is no jsdom configuration left to fall back t
 
 Browser-rendered proof above the unit layer lives in Playwright suites under `projects/ui/e2e/`
 (`playwright.smoke.config.ts` against the built Storybook bundle, `playwright.config.ts` for
-visual regression). Those run against the catalog, not the sources, and are not part of
-`npm run test`.
+visual regression, `playwright.phone.config.ts` for the phone conformance suite via
+`npm run test:phone`). Those run against the catalog, not the sources, and are not part of
+`npm run test`. The phone suite checks `docs/PHONE-CONTRACT.md`; it is report-only until
+`PHONE_CONFORMANCE=gate` is set.
 
 ## PWA checklist
 
