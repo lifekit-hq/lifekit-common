@@ -297,6 +297,7 @@ counter-example (see [Chart period and scrub](#chart-period-and-scrub)). **Owner
 | Borders      | `border-default`, `border-strong`, `border-focus`                                              | `border-default` is a decorative hairline. A boundary that must be seen (an input) uses `border-strong`, 3:1. Focus is 3:1.        |
 | Status       | `status-{info,success,warning,error}`, `status-…-subtle`                                       | Fixed hues whatever the seed, so red always means a problem. Status text is 4.5:1 on the surfaces and on its own `-subtle` tint.   |
 | Delta        | `delta-up`, `delta-down`                                                                       | A value's change. Aliases of success and error.                                                                                    |
+| Fixed        | `asset-equity`, `asset-crypto`, `asset-cash`, `gain`, `loss`, `flow-in`, `flow-out`            | A colour that carries a meaning, so no seed changes it. See [Fixed-meaning colour](#fixed-meaning-colour).                         |
 | Chart        | `chart-series-1`…`chart-series-8`, `chart-series-9`, `chart-grid`                              | Series 1 is the accent, 2-8 are categories, 9 is the neutral (an "other" or a baseline). Every mark is 3:1 on the card and page.   |
 
 ### Where the accent may appear
@@ -326,6 +327,21 @@ They are never a category:
 - A chart that shows one gain or loss, such as a sparkline coloured by its trend, uses the delta
   tokens.
 - Colour is never the only signal: a change also carries its sign or an arrow.
+
+### Fixed-meaning colour
+
+A few colours mean one thing in every app and under every seed, so the engine does not derive
+them and no seed stylesheet sets them: equity (`asset-equity`, the petrol of the original
+finance-sentry), crypto (`asset-crypto`, amber), cash (`asset-cash`, green), a change of value
+(`gain`, `loss`) and cash flow (`flow-in`, `flow-out`, the same colours as gain and loss).
+
+- Light and dark share the hue; only lightness moves, and only as far as contrast needs: 3:1 for
+  a mark (a donut slice, a legend dot), 4.5:1 for `gain` and `loss` as text, on every surface the
+  engine can produce. `test/fixed-colours.spec.mjs` holds this.
+- Use them for the thing they name and nothing else. A category that is not an asset class still
+  takes a chart series. `asset-cash` is a green, so it is told apart from `gain` by its label, as
+  colour is never the only signal.
+- `delta-up` and `delta-down` stay the status-derived pair that follows the seed's surfaces.
 
 ### Seeds and intensity
 

@@ -19,6 +19,7 @@ export {
   toCss,
   toDeclarations,
 } from './derive.mjs';
+export {FIXED_COLOUR_NAMES} from './fixed.mjs';
 export {APP_SEEDS, DEFAULT_INTENSITY, INTENSITY_STOPS, PRESETS} from './presets.mjs';
 export {
   applySeedDeclarations,

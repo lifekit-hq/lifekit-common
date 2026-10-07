@@ -9,6 +9,7 @@ import {
   clearStoredSeed,
   DEFAULT_INTENSITY,
   derive,
+  FIXED_COLOUR_NAMES,
   hexToOklch,
   hueDistance,
   normalizeHex,
@@ -59,9 +60,11 @@ describe('derive', () => {
     assert.deepEqual(derive({seed: '#fff'}).tokens, derive({seed: 'ffffff'}).tokens);
   });
 
-  it('emits every colour token theme.css themes, so a seed replaces the whole palette', () => {
+  it('emits every colour token theme.css themes but the fixed ones, so a seed replaces the whole palette', () => {
     const themed = new Set(
-      [...THEME_CSS.matchAll(/--color-([\w-]+):\s*#/g)].map(([, name]) => name)
+      [...THEME_CSS.matchAll(/--color-([\w-]+):\s*#/g)]
+        .map(([, name]) => name)
+        .filter(name => !FIXED_COLOUR_NAMES.includes(name))
     );
     const derived = new Set(Object.keys(derive({seed: '#175a6d'}).tokens));
     assert.deepEqual(

@@ -57,6 +57,9 @@ export function toCss(selector: string, tokens: Record<string, string>, indent?:
 
 export const DEFAULT_INTENSITY: number;
 export const INTENSITY_STOPS: Readonly<{quiet: number; tinted: number; immersive: number}>;
+/** Colours with a fixed meaning (asset classes, gain/loss, in/out): no seed rewrites them. */
+export const FIXED_COLOUR_NAMES: readonly string[];
+
 export const APP_SEEDS: Readonly<
   Record<'fs' | 'lk' | 'dc', Readonly<{name: string; seed: string; intensity: number}>>
 >;
