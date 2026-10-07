@@ -217,6 +217,12 @@ export default defineConfig({
 });
 ```
 
+## PWA sign-in checklist
+
+If your app uses Google Sign-In and is installed as a PWA, add each app origin (including the PWA's installed origin) as an **Authorized JavaScript origin** on the Google OAuth client. Sign-in will fail with `Error 400 origin_mismatch` if an origin is missing.
+
+When sign-in flows through an identity provider (such as Logto), the Google OAuth client should instead list that provider's origin and callback URL, not the app's origin. Verify the provider's documentation for which origins to register.
+
 ## Drift check
 
 `lifekit-chrome-check` (a bin of `@lifekit-hq/tokens`) checks an app's **built output** against
