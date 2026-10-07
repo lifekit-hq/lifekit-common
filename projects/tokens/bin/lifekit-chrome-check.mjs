@@ -4,15 +4,18 @@
  * (docs/BROWSER-CHROME.md in lifekit-common). Run it in CI after the app build:
  *
  *   lifekit-chrome-check --app fs --name "Finance Sentry" dist/finance-sentry/browser
+ *
+ * An app served under a sub-path passes it with `--base-path /console/`.
  */
 import {parseArgs} from 'node:util';
 
 import {checkBrowserChrome} from '../brand/check.mjs';
 import {BRAND_APPS} from '../brand/mark.mjs';
+import {normalizeBasePath} from '../brand/standard.mjs';
 
 const USAGE =
   `usage: lifekit-chrome-check --app <${BRAND_APPS.join('|')}> [--name "<App name>"] ` +
-  '[--index index.html] <dist-dir>';
+  '[--index index.html] [--base-path /] <dist-dir>';
 
 let parsed;
 try {
@@ -22,6 +25,7 @@ try {
       app: {type: 'string'},
       name: {type: 'string'},
       index: {type: 'string', default: 'index.html'},
+      'base-path': {type: 'string', default: '/'},
       help: {type: 'boolean', short: 'h'},
     },
   });
@@ -40,11 +44,20 @@ if (!values.app || !BRAND_APPS.includes(values.app) || positionals.length !== 1)
   process.exit(2);
 }
 
+let basePath;
+try {
+  basePath = normalizeBasePath(values['base-path']);
+} catch (error) {
+  console.error(`--base-path: ${error.message}\n${USAGE}`);
+  process.exit(2);
+}
+
 const problems = checkBrowserChrome({
   distDir: positionals[0],
   app: values.app,
   appName: values.name,
   index: values.index,
+  basePath,
 });
 
 if (problems.length) {

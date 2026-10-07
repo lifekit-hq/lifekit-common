@@ -18,7 +18,7 @@ export const BRAND_FILES = Object.freeze([
   'icon-maskable-512.png',
 ]);
 
-/** Manifest `icons`, in the order apps list them. */
+/** Manifest `icons` for an app served at the site root, in the order apps list them. */
 export const MANIFEST_ICONS = Object.freeze([
   Object.freeze({src: '/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any'}),
   Object.freeze({src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any'}),
@@ -54,19 +54,46 @@ export function themeColors(colors = brandColors()) {
   return {light: colors.surfaceLight, dark: colors.surfaceDark};
 }
 
+/** Where an app is served when it does not live under a sub-path. */
+export const DEFAULT_BASE_PATH = '/';
+
+/**
+ * Normalises the path an app is served under to `/segment/…/`: a missing leading or
+ * trailing slash is added and repeated slashes collapse. Anything that is not a plain
+ * path (empty, a URL, a query or fragment, whitespace, backslashes, `.`/`..` segments)
+ * throws, so a typo cannot silently become the manifest scope.
+ */
+export function normalizeBasePath(basePath = DEFAULT_BASE_PATH) {
+  if (typeof basePath !== 'string' || !basePath.trim()) {
+    throw new Error('base path must be a non-empty string such as "/console/"');
+  }
+  if (!/^[\w\-.~%/]+$/.test(basePath) || basePath.split('/').some(s => s === '.' || s === '..')) {
+    throw new Error(`invalid base path "${basePath}": expected a plain path such as "/console/"`);
+  }
+  const segments = basePath.split('/').filter(Boolean);
+  return segments.length ? `/${segments.join('/')}/` : DEFAULT_BASE_PATH;
+}
+
+/** URL of a file served from the app's base path: `/console/` + `icon-192.png`. */
+export function baseUrl(base, file) {
+  return `${base}${file}`;
+}
+
 /**
  * The standard's manifest fields: colours, icons, display and scope. Apps add `name`
- * and `short_name` (see {@link brandManifest}).
+ * and `short_name` (see {@link brandManifest}). `basePath` is where the app is served
+ * (default `/`): it sets `id`, `start_url` and `scope`, and prefixes the icon `src`s.
  */
-export function manifestFragment(colors = brandColors()) {
+export function manifestFragment(colors = brandColors(), {basePath} = {}) {
+  const base = normalizeBasePath(basePath);
   return {
-    id: '/',
-    start_url: '/',
-    scope: '/',
+    id: base,
+    start_url: base,
+    scope: base,
     display: 'standalone',
     theme_color: colors.surfaceLight,
     background_color: colors.surfaceLight,
-    icons: MANIFEST_ICONS.map(icon => ({...icon})),
+    icons: MANIFEST_ICONS.map(icon => ({...icon, src: baseUrl(base, icon.src.slice(1))})),
   };
 }
 
@@ -74,31 +101,35 @@ export function manifestFragment(colors = brandColors()) {
  * A complete `manifest.webmanifest` for an app. Extra fields (description, lang,
  * shortcuts, …) pass through; the standard's own fields always win.
  */
-export function brandManifest({name, shortName, ...extra}) {
+export function brandManifest({name, shortName, basePath, ...extra}) {
   if (!name) throw new Error('brandManifest: `name` is required');
   const short = shortName ?? name;
   if (short.length > SHORT_NAME_MAX) {
     throw new Error(`brandManifest: short_name "${short}" exceeds ${SHORT_NAME_MAX} characters`);
   }
-  return {name, short_name: short, ...extra, ...manifestFragment()};
+  return {name, short_name: short, ...extra, ...manifestFragment(undefined, {basePath})};
 }
 
 function escapeHtml(text) {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-/** The head lines every app's `index.html` carries, after `<meta charset>`. */
-export function headMarkup({title}, colors = brandColors()) {
+/**
+ * The head lines every app's `index.html` carries, after `<meta charset>`. `basePath` is
+ * where the app is served (default `/`); the icon and manifest links follow it.
+ */
+export function headMarkup({title, basePath}, colors = brandColors()) {
   const {light, dark} = themeColors(colors);
+  const base = normalizeBasePath(basePath);
   return [
     `<title>${escapeHtml(title)}</title>`,
     `<meta name="viewport" content="${VIEWPORT}" />`,
     '<meta name="color-scheme" content="light dark" />',
     `<meta name="theme-color" content="${light}" media="(prefers-color-scheme: light)" />`,
     `<meta name="theme-color" content="${dark}" media="(prefers-color-scheme: dark)" />`,
-    '<link rel="icon" href="/favicon.ico" sizes="32x32" />',
-    '<link rel="icon" href="/favicon.svg" type="image/svg+xml" />',
-    '<link rel="apple-touch-icon" href="/apple-touch-icon.png" />',
-    '<link rel="manifest" href="/manifest.webmanifest" />',
+    `<link rel="icon" href="${baseUrl(base, 'favicon.ico')}" sizes="32x32" />`,
+    `<link rel="icon" href="${baseUrl(base, 'favicon.svg')}" type="image/svg+xml" />`,
+    `<link rel="apple-touch-icon" href="${baseUrl(base, 'apple-touch-icon.png')}" />`,
+    `<link rel="manifest" href="${baseUrl(base, 'manifest.webmanifest')}" />`,
   ].join('\n');
 }
