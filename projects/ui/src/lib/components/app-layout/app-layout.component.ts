@@ -37,9 +37,11 @@ import {
   readPageChrome,
   resolveBack,
 } from './page-chrome';
+import {matchTab, ShellNavigationService} from './shell-navigation.service';
 
 export {type NavItem} from '../sidebar-nav/sidebar-nav.component';
 export * from './page-chrome';
+export {LAST_TAB_STORAGE_KEY} from './shell-navigation.service';
 
 /** Palette action id the layout handles itself: toggles the theme. */
 export const PALETTE_THEME_ACTION = '_theme';
@@ -58,7 +60,8 @@ const LARGE_TITLE_BOX_CLASSES =
 /** Phone overlay: the bars sit over main below md instead of in flow. */
 const OVERLAY_TOP_BAR_CLASSES = 'max-md:absolute max-md:inset-x-0 max-md:top-0 max-md:z-30';
 const OVERLAY_TAB_BAR_CLASSES = 'max-md:absolute max-md:inset-x-0 max-md:bottom-0 max-md:z-30';
-const MAIN_BASE_CLASSES = 'flex-1 overflow-y-auto';
+/** Overscroll stops at main: it never chains to the browser (pull-to-refresh, page bounce). */
+const MAIN_BASE_CLASSES = 'flex-1 overflow-y-auto overscroll-y-contain';
 /** Clears the top bar: its 3.5rem height plus the top safe-area inset. */
 const MAIN_OVERLAY_TOP_CLASSES =
   'max-md:pt-[calc(3.5rem+env(safe-area-inset-top))] max-md:scroll-pt-[calc(3.5rem+env(safe-area-inset-top))]';
@@ -76,6 +79,7 @@ const MAIN_OVERLAY_BOTTOM_CLASSES =
   selector: 'cmn-app-layout',
   imports: [BottomTabBarComponent, SidebarNavComponent, TopBarComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [ShellNavigationService],
   host: {'(window:keydown)': 'onWindowKeydown($event)'},
   template: `
     <!-- Pinned with fixed/inset-0, not viewport units: h-screen/h-dvh overshoot the real
@@ -129,7 +133,7 @@ const MAIN_OVERLAY_BOTTOM_CLASSES =
           [activeRoute]="effectiveActiveRoute()"
           [floating]="phoneOverlay()"
           [class]="phoneOverlay() ? overlayTabBarClasses : ''"
-          (navClick)="navClick.emit($event)"
+          (navClick)="onTabClick($event)"
           class="md:hidden"
         />
       </div>
@@ -143,6 +147,7 @@ export class AppLayoutComponent {
   private readonly location = inject(Location);
   private readonly pageActionsService = inject(CmnPageActionsService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly shell = inject(ShellNavigationService);
   private paletteOpen = false;
 
   private readonly main = viewChild.required<ElementRef<HTMLElement>>('main');
@@ -212,6 +217,11 @@ export class AppLayoutComponent {
    */
   public readonly floatingActionClearance = input<number>(0);
 
+  /**
+   * A nav item was pressed. A notification for the sidebar, which leaves navigating to the app;
+   * on the phone tab bar the shell also navigates (the tab's last screen, or its root on a
+   * re-tap), so an app must not navigate on this event itself or it fights the shell.
+   */
   public readonly navClick = output<NavItem>();
   public readonly collapsedChange = output<boolean>();
   public readonly searchClick = output<void>();
@@ -281,13 +291,9 @@ export class AppLayoutComponent {
     if (explicit !== undefined) {
       return explicit;
     }
-    const path = this.routerUrl().split(/[?#]/, 1)[0];
-    return this.navItems().reduce(
-      (best, {route}) =>
-        (path === route || path.startsWith(`${route}/`)) && route.length > best.length
-          ? route
-          : best,
-      ''
+    return matchTab(
+      this.routerUrl(),
+      this.navItems().map(({route}) => route)
     );
   });
 
@@ -309,6 +315,11 @@ export class AppLayoutComponent {
   protected readonly overlayTabBarClasses = OVERLAY_TAB_BAR_CLASSES;
 
   constructor() {
+    this.shell.connect({
+      scroller: () => this.main().nativeElement,
+      tabs: () => this.navItems().map(({route}) => route),
+      activeTab: () => this.effectiveActiveRoute(),
+    });
     afterRenderEffect(onCleanup => {
       const title = this.largeTitleRef()?.nativeElement;
       const main = this.main().nativeElement;
@@ -350,6 +361,15 @@ export class AppLayoutComponent {
   protected onSearchClick(): void {
     this.searchClick.emit();
     this.openPalette();
+  }
+
+  /**
+   * A bottom tab was pressed. `navClick` still reports it, but the shell moves: it reopens the
+   * tab's last screen, or on the active tab scrolls to the top and then pops to the tab root.
+   */
+  protected onTabClick(item: NavItem): void {
+    this.navClick.emit(item);
+    this.shell.selectTab(item.route);
   }
 
   protected onBack(): void {

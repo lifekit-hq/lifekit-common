@@ -224,5 +224,13 @@ export const ActionsDark: Story = {
   globals: {...PHONE, theme: 'dark'},
 };
 
+/**
+ * The shell owns the scroll and the tabs' memory. Open Checking, scroll it, press Budgets and
+ * then Accounts: Checking returns, scrolled where you left it. Press Accounts again to scroll to
+ * the top, and once more to pop to the Accounts list. Back (the chevron or the browser) restores
+ * the list's scroll. Reloading from `/` reopens the last tab.
+ */
+export const TabState: Story = {args: {path: ['/accounts', '/accounts/checking']}, globals: PHONE};
+
 /** From md up the same chrome sits in the solid desktop bar beside the sidebar. */
 export const Desktop: Story = {args: {path: ['/accounts', '/accounts/checking']}};

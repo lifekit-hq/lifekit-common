@@ -39,6 +39,27 @@ A page gets all of this without writing any code for it.
 | Appearance     | Follows the system light or dark setting by default. The override lives in Settings. `theme-color` matches the surface, per the browser chrome standard.                                    |
 | Motion         | Brief and purposeful. Everything fades or stops under Reduce Motion.                                                                                                                        |
 
+### Scroll and tab state
+
+The shell does this itself, in `cmn-app-layout`, with no page code and no router feature to enable
+(the router's `withInMemoryScrolling` only sees the window, and the scroller here is `<main>`):
+
+- **Back and forward** restore the scroll of the screen they return to. Any other navigation
+  starts a new screen at the top; a change of query or fragment only keeps the scroll. A restore
+  waits for content that loads late, and gives way as soon as the reader scrolls.
+- **Each tab remembers its last screen**, scrolled where it was left, for the session.
+- **Re-tapping the active tab** scrolls to the top; once there, a second tap pops to the tab root
+  and the tab forgets the popped screen. Under Reduce Motion the scroll is instant.
+- **Launch restores the last tab.** The last tab is kept in `localStorage` (`cmn-last-tab`, ignored
+  when storage is blocked) and reopened when the app starts at `/`. A deep link is never
+  redirected.
+- `<main>` sets `overscroll-behavior-y: contain`, and the top bar, tab bar and sidebar are not
+  text-selectable.
+
+On the phone tab bar `navClick` is a notification: the shell does the navigating. An app that also
+navigates on that event fights the shell (a re-tap would pop to the root before it can scroll to the
+top), so it should drop that handler. The sidebar still leaves navigating to the app.
+
 ## What a page declares
 
 Pages declare these in route data and templates. No per-page header, back or sheet code.
@@ -110,6 +131,6 @@ guarantee above is only gating once its check exists.
 | ------------------------------------------------ | ------------------------------------------------------------------------------------ |
 | Tab bar, sheets, safe areas                      | Partial: tab bar and `cmn-drawer` exist, with two sheet implementations and no stops |
 | Top bar title, back, actions                     | Built: route data `title`, `parent`, `actions`; no suite check yet                   |
-| Shell-owned scroll and tab state                 | Target                                                                               |
+| Shell-owned scroll and tab state                 | Built: checked by the suite's "back restores scroll"; see "Scroll and tab state"     |
 | One state pattern                                | Target (policy rules 1, 2 enforced by `cmn-async-state`)                             |
 | Touch size, overlays, layout by size, appearance | Target                                                                               |

@@ -58,6 +58,15 @@ describe('AppLayoutComponent', () => {
     expect(root).not.toContain('h-dvh');
   });
 
+  it('should keep overscroll inside main and chrome text unselectable', () => {
+    const host = fixture.nativeElement as HTMLElement;
+    expect(host.querySelector('main')?.classList).toContain('overscroll-y-contain');
+    for (const chrome of ['cmn-top-bar', 'cmn-sidebar-nav', 'cmn-bottom-tab-bar']) {
+      const el = host.querySelector(chrome) as HTMLElement;
+      expect(el.classList, chrome).toContain('select-none');
+    }
+  });
+
   it('should render the sidebar', () => {
     const sidebar = fixture.debugElement.query(By.css('cmn-sidebar-nav'));
     expect(sidebar).toBeTruthy();
@@ -186,7 +195,7 @@ describe('AppLayoutComponent', () => {
     it('should keep the bars in flow and main unpadded by default', () => {
       expect(el('cmn-top-bar').className).not.toContain('absolute');
       expect(el('cmn-bottom-tab-bar').className).not.toContain('absolute');
-      expect(el('main').className).toBe('flex-1 overflow-y-auto');
+      expect(el('main').className).toBe('flex-1 overflow-y-auto overscroll-y-contain');
       expect(el('cmn-bottom-tab-bar nav').classList).not.toContain('rounded-cmn-full');
     });
 

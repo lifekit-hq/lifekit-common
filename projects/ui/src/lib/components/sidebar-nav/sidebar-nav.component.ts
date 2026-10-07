@@ -15,6 +15,8 @@ export interface NavItem {
   selector: 'cmn-sidebar-nav',
   imports: [NgClass, IconComponent, BadgeComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  // Chrome is for pressing: a long press on a label selects nothing
+  host: {class: 'select-none'},
   template: `
     <aside
       [ngClass]="[
