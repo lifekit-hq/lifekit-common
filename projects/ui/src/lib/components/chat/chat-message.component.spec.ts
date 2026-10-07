@@ -76,6 +76,13 @@ describe('ChatMessageComponent', () => {
       expect(link.textContent).toBe('https://example.com/f');
     });
 
+    it('should show the target host after a labelled external link', () => {
+      render('[the filing](https://example.com/f)');
+      const [link] = anchors();
+      expect(link.getAttribute('href')).toBe('https://example.com/f');
+      expect(link.textContent).toBe('the filing (example.com)');
+    });
+
     it('should render an in-app markdown link through the router without a new tab', () => {
       render('Open [AAPL](/holdings/AAPL?tab=lots)');
       const [link] = anchors();

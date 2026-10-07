@@ -58,8 +58,30 @@ describe('parseChatLinks', () => {
     it('should link a markdown https link with its label', () => {
       expect(parseChatLinks('Open [the filing](https://example.com/f).')).toEqual([
         text('Open '),
-        external('https://example.com/f', 'the filing'),
+        external('https://example.com/f', 'the filing (example.com)'),
         text('.'),
+      ]);
+    });
+
+    it('should show the real host after a label that names another site', () => {
+      expect(parseChatLinks('[https://schwab.com/login](https://evil.example/x)')).toEqual([
+        external('https://evil.example/x', 'https://schwab.com/login (evil.example)'),
+      ]);
+    });
+
+    it('should render a markdown link whose label is the same URL as a bare link', () => {
+      expect(parseChatLinks('[https://example.com/a](https://example.com/a)')).toEqual([
+        external('https://example.com/a'),
+      ]);
+    });
+
+    it('should keep balanced parens in a markdown target', () => {
+      expect(parseChatLinks('[Foo](https://en.wikipedia.org/wiki/Foo_(bar)) next')).toEqual([
+        external('https://en.wikipedia.org/wiki/Foo_(bar)', 'Foo (en.wikipedia.org)'),
+        text(' next'),
+      ]);
+      expect(parseChatLinks('[Foo](/holdings/Foo_(bar))')).toEqual([
+        internal('/holdings/Foo_(bar)', 'Foo'),
       ]);
     });
 
@@ -88,6 +110,7 @@ describe('parseChatLinks', () => {
       ['bare relative', '[x](holdings/AAPL)'],
       ['credentials', '[x](https://bank.com@evil.com)'],
       ['https without host', '[x](https://)'],
+      ['malformed percent-encoding', '[AAPL](/%)'],
     ])('should leave a %s markdown target as plain text', (_name, input) => {
       expect(parseChatLinks(input)).toEqual([text(input)]);
     });

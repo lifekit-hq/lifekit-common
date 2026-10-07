@@ -135,10 +135,6 @@ export class ChatMessageComponent {
     if (!segment.internal) {
       return {kind: 'external', label: segment.label, href: segment.href};
     }
-    try {
-      return {kind: 'internal', label: segment.label, tree: this.router.parseUrl(segment.href)};
-    } catch {
-      return {kind: 'text', text: segment.label};
-    }
+    return {kind: 'internal', label: segment.label, tree: this.router.parseUrl(segment.href)};
   }
 }

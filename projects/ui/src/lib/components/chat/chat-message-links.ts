@@ -19,28 +19,36 @@ export type ChatSegment = ChatTextSegment | ChatLinkSegment;
 
 // Markdown `[label](target)` first so a bare URL inside one is not matched twice; then a bare
 // `https://` URL. Both stay on one line, so a stray `[` can never swallow a paragraph.
-const LINK_PATTERN = /\[([^\]\n]+)\]\(([^()\s]+)\)|https:\/\/[^\s<>"]+/g;
+const LINK_PATTERN = /\[([^\]\n]+)\]\(((?:[^()\s]|\([^()\s]*\))+)\)|https:\/\/[^\s<>"]+/g;
 const TRAILING_PUNCTUATION = /[.,;:!?'"*_\]]$/;
 // Anything but printable ASCII / non-ASCII text (so no whitespace or control characters), or a backslash.
 const UNSAFE_CHARACTER = /[^\u0021-\u007e\u00a1-\uffff]|\\/;
 
 /** In-app path: one leading `/`, not protocol-relative (`//host`), no backslash tricks (`/\host`). */
 function isInternalPath(target: string): boolean {
-  return target.startsWith('/') && !target.startsWith('//') && !UNSAFE_CHARACTER.test(target);
-}
-
-/** Absolute `https://` URL with a host and no embedded credentials (`https://bank.com@evil.com`). */
-function isHttpsUrl(target: string): boolean {
-  if (UNSAFE_CHARACTER.test(target)) {
+  if (!target.startsWith('/') || target.startsWith('//') || UNSAFE_CHARACTER.test(target)) {
     return false;
   }
   try {
-    const url = new URL(target);
-    return (
-      url.protocol === 'https:' && url.hostname !== '' && url.username === '' && url.password === ''
-    );
+    decodeURI(target);
+    return true;
   } catch {
     return false;
+  }
+}
+
+/** Absolute `https://` URL with a host and no embedded credentials (`https://bank.com@evil.com`). */
+function parseHttpsUrl(target: string): URL | null {
+  if (UNSAFE_CHARACTER.test(target)) {
+    return null;
+  }
+  try {
+    const url = new URL(target);
+    const safe =
+      url.protocol === 'https:' && url.hostname !== '' && url.username === '' && url.password === '';
+    return safe ? url : null;
+  } catch {
+    return null;
   }
 }
 
@@ -51,10 +59,13 @@ function toLink(label: string, target: string): ChatLinkSegment | null {
   if (isInternalPath(target)) {
     return {kind: 'link', label, href: target, internal: true};
   }
-  if (isHttpsUrl(target)) {
-    return {kind: 'link', label, href: target, internal: false};
+  const url = parseHttpsUrl(target);
+  if (!url) {
+    return null;
   }
-  return null;
+  // A label that is not the URL itself could pose as another site, so the real host is shown with it.
+  const shown = label === target ? label : `${label} (${url.host})`;
+  return {kind: 'link', label: shown, href: target, internal: false};
 }
 
 function count(value: string, char: string): number {
@@ -90,7 +101,7 @@ function pushText(segments: ChatSegment[], text: string): void {
 /**
  * Splits message text into plain-text and safe-link segments. Only in-app paths and `https://`
  * URLs become links; any other target (`javascript:`, `data:`, `http:`, `//host`, `mailto:`)
- * stays as the original text. The output is data, never markup — the caller builds the nodes.
+ * stays as the original text. A labelled `https://` link shows its host after the label. The output is data, never markup — the caller builds the nodes.
  */
 export function parseChatLinks(text: string): ChatSegment[] {
   const segments: ChatSegment[] = [];
