@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.0](https://github.com/lifekit-hq/lifekit-common/compare/v2.2.0...v2.3.0) (2026-10-07)
+
+
+### Features
+
+* add lk-segmented period control and scrub-to-read for line and area charts ([#130](https://github.com/lifekit-hq/lifekit-common/issues/130)) ([5900ec7](https://github.com/lifekit-hq/lifekit-common/commit/5900ec78ca5185e70a3ea80812da551121737ce9))
+
 ## [2.2.0](https://github.com/lifekit-hq/lifekit-common/compare/v2.1.0...v2.2.0) (2026-10-07)
 
 
