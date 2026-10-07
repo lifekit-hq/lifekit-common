@@ -61,13 +61,13 @@ const LARGE_TITLE_BOX_CLASSES =
 /** Phone overlay: the bars sit over main below md instead of in flow. */
 const OVERLAY_TOP_BAR_CLASSES = 'max-md:absolute max-md:inset-x-0 max-md:top-0 max-md:z-30';
 const OVERLAY_TAB_BAR_CLASSES = 'max-md:absolute max-md:inset-x-0 max-md:bottom-0 max-md:z-30';
-/** Overscroll stops at main: it never chains to the browser (pull-to-refresh, page bounce). */
 /**
  * Notices (install hint, offline banner, update prompt) pin to the top of main, in flow below
  * the top bar. Sticky offsets are measured from main's content box, which main's overlay
  * padding already shifts below the bar, so top-0 is flush under it on every size.
  */
 const NOTICES_BASE_CLASSES = 'sticky top-0 z-20 flex flex-col empty:hidden';
+/** Overscroll stops at main: it never chains to the browser (pull-to-refresh, page bounce). */
 const MAIN_BASE_CLASSES = 'flex-1 overflow-y-auto overscroll-y-contain';
 /** Clears the top bar: its 3.5rem height plus the top safe-area inset. */
 const MAIN_OVERLAY_TOP_CLASSES =
