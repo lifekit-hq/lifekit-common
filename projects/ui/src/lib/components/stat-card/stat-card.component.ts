@@ -18,7 +18,7 @@ const NEUTRAL_DELTA_CLASSES = 'text-text-secondary';
       <div class="flex items-center justify-between gap-cmn-2">
         <span
           title="{{ label() }}"
-          class="min-w-0 truncate font-label text-cmn-xs font-semibold uppercase tracking-wide text-text-secondary"
+          class="min-w-0 truncate font-label text-cmn-xs font-semibold text-text-secondary"
         >
           {{ label() }}
         </span>
@@ -37,7 +37,7 @@ const NEUTRAL_DELTA_CLASSES = 'text-text-secondary';
       } @else {
         <span
           title="{{ value() }}"
-          class="truncate font-mono text-cmn-2xl font-semibold tabular-nums text-text-primary"
+          class="truncate text-cmn-2xl font-semibold tabular-nums text-text-primary"
         >
           {{ value() }}
         </span>

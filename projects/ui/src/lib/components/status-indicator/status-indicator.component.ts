@@ -16,8 +16,7 @@ const VARIANT_DOT: Record<StatusIndicatorVariant, string> = {
   neutral: 'bg-text-secondary',
 };
 
-const STATUS_BASE =
-  'inline-flex items-center gap-1.5 font-bold text-[10px] uppercase tracking-wide';
+const STATUS_BASE = 'inline-flex items-center gap-1.5 font-bold text-cmn-xs';
 
 @Component({
   selector: 'cmn-status-indicator',
@@ -29,7 +28,7 @@ const STATUS_BASE =
         <ng-content />
       </span>
       @if (timestampLabel()) {
-        <span class="text-[10px] text-text-secondary font-medium">{{ timestampLabel() }}</span>
+        <span class="text-cmn-xs text-text-secondary font-medium">{{ timestampLabel() }}</span>
       }
     </div>
   `,

@@ -56,7 +56,7 @@ const SHEET_ITEM_INACTIVE_CLASSES = 'text-text-primary hover:bg-surface-raised';
               <cmn-icon [name]="item.icon" size="md" aria-hidden="true" />
             </cmn-badge>
             <span
-              class="max-w-full shrink-0 truncate font-label text-[11px] font-medium leading-tight"
+              class="max-w-full shrink-0 truncate font-label text-cmn-xs font-medium leading-tight"
             >
               {{ item.label }}
             </span>
@@ -75,7 +75,7 @@ const SHEET_ITEM_INACTIVE_CLASSES = 'text-text-primary hover:bg-surface-raised';
               <cmn-icon name="Ellipsis" size="md" aria-hidden="true" />
             </cmn-badge>
             <span
-              class="max-w-full shrink-0 truncate font-label text-[11px] font-medium leading-tight"
+              class="max-w-full shrink-0 truncate font-label text-cmn-xs font-medium leading-tight"
               >More</span
             >
           </button>

@@ -67,13 +67,13 @@ export const StructuralDirective: Story = {
     template: `
       <div class="flex max-w-md flex-col gap-cmn-6">
         <section>
-          <p class="mb-cmn-2 text-cmn-xs uppercase text-text-secondary">loading</p>
+          <p class="mb-cmn-2 text-cmn-xs text-text-secondary">loading</p>
           <ng-container *cmnSkeleton="{loading: true, count: 3, height: '1rem'}">
             <p class="text-cmn-sm text-text-primary">Loaded content</p>
           </ng-container>
         </section>
         <section>
-          <p class="mb-cmn-2 text-cmn-xs uppercase text-text-secondary">loaded</p>
+          <p class="mb-cmn-2 text-cmn-xs text-text-secondary">loaded</p>
           <ng-container *cmnSkeleton="{loading: false}">
             <p class="text-cmn-sm text-text-primary">Loaded content</p>
           </ng-container>

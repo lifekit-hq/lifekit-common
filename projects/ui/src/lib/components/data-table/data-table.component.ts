@@ -331,7 +331,7 @@ export class DataTableComponent<T = Record<string, unknown>> {
   );
 
   public headerCellClass(align: CmnColumnAlign): string {
-    return `sticky top-0 z-10 bg-surface-card shadow-[inset_0_-1px_0_var(--color-border-default)] px-cmn-4 py-cmn-3 font-label text-cmn-xs font-semibold uppercase tracking-wide text-text-secondary ${this.alignClass(align)}`;
+    return `sticky top-0 z-10 bg-surface-card shadow-[inset_0_-1px_0_var(--color-border-default)] px-cmn-4 py-cmn-3 font-label text-cmn-xs font-semibold text-text-secondary ${this.alignClass(align)}`;
   }
 
   public dataCellClass(align: CmnColumnAlign): string {

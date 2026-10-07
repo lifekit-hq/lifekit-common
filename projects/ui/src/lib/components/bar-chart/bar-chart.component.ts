@@ -28,9 +28,7 @@ export type {BarSeries, BarValueFormat} from '@lifekit-hq/charts-core';
     <div
       class="flex w-full flex-col gap-cmn-3 rounded-cmn-lg border border-border-default bg-surface-card p-cmn-4"
     >
-      <span
-        class="font-label text-cmn-xs font-semibold uppercase tracking-wide text-text-secondary"
-      >
+      <span class="font-label text-cmn-xs font-semibold text-text-secondary">
         {{ label() }}
       </span>
       <div class="relative h-64">

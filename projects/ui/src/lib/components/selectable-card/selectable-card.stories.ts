@@ -40,7 +40,7 @@ export const HorizontalConnected: Story = {
           <span class="font-medium text-text-primary">Monobank</span>
           <span class="text-cmn-xs text-text-secondary">Connect Monobank cards using a personal API token</span>
           <span trailing
-                class="text-cmn-xs text-status-success font-semibold uppercase tracking-wide">
+                class="text-cmn-xs text-status-success font-semibold">
             Connected
           </span>
         </cmn-selectable-card>

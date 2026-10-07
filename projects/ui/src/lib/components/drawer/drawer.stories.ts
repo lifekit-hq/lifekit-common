@@ -27,11 +27,11 @@ interface TransactionData {
     <div class="flex flex-col gap-cmn-4 p-cmn-6">
       <dl class="flex flex-col gap-cmn-3">
         <div>
-          <dt class="text-cmn-xs uppercase text-text-secondary">Description</dt>
+          <dt class="text-cmn-xs text-text-secondary">Description</dt>
           <dd class="text-cmn-md text-text-primary">{{ data?.description ?? '—' }}</dd>
         </div>
         <div>
-          <dt class="text-cmn-xs uppercase text-text-secondary">Amount</dt>
+          <dt class="text-cmn-xs text-text-secondary">Amount</dt>
           <dd class="text-cmn-md text-text-primary">{{ data?.amount ?? '—' }}</dd>
         </div>
       </dl>

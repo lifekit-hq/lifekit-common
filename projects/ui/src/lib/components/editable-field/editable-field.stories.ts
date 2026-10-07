@@ -60,7 +60,7 @@ export const InCard: Story = {
   render: () => ({
     template: `
       <div class="max-w-md rounded-cmn-md border border-border-default bg-surface-card p-cmn-4">
-        <p class="mb-cmn-2 text-cmn-xs font-medium uppercase text-text-secondary">Budget label</p>
+        <p class="mb-cmn-2 text-cmn-xs font-medium text-text-secondary">Budget label</p>
         <cmn-editable-field
           [(value)]="value"
           ariaLabel="budget label"

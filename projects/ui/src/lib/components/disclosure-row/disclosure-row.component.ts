@@ -26,7 +26,7 @@ import {InstitutionAvatarComponent} from '../institution-avatar/institution-avat
         </div>
         <ng-content select="[status]" />
         @if (amount() !== null) {
-          <div class="font-mono tabular-nums font-medium text-text-primary text-right min-w-[7rem]">
+          <div class="tabular-nums font-medium text-text-primary text-right min-w-[7rem]">
             @if (currency()) {
               {{ currency() }}
             }

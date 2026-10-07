@@ -12,7 +12,7 @@ const VARIANT_CLASSES: Record<TagVariant, string> = {
 
 const BASE_CLASSES =
   'inline-flex items-center rounded-cmn-full px-cmn-2 py-0.5 ' +
-  'text-cmn-xs font-label font-semibold uppercase tracking-wide';
+  'text-cmn-xs font-label font-semibold';
 
 @Component({
   selector: 'cmn-tag',

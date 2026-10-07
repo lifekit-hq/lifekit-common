@@ -58,7 +58,7 @@ describe('BadgeComponent', () => {
   });
 
   it.each<[BadgeStatus, string]>([
-    ['default', 'bg-neutral-500'],
+    ['default', 'bg-text-secondary'],
     ['success', 'bg-status-success'],
     ['processing', 'bg-status-info'],
     ['error', 'bg-status-error'],

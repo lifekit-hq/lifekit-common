@@ -89,7 +89,8 @@ interface PaletteGroup {
             @for (group of groupedItems(); track group.group) {
               <div>
                 <div
-                  class="px-cmn-4 pb-1 pt-1.5 text-[10px] font-bold uppercase tracking-[0.08em] text-text-disabled"
+                  data-group-heading
+                  class="px-cmn-4 pb-1 pt-1.5 text-cmn-xs font-semibold text-text-disabled"
                 >
                   {{ group.group }}
                 </div>
@@ -123,7 +124,7 @@ interface PaletteGroup {
                     @if (entry.idx === selectedIndex()) {
                       <div class="ml-auto">
                         <kbd
-                          class="rounded border border-border-default px-1.5 py-0.5 font-mono text-[10px] text-text-disabled"
+                          class="rounded border border-border-default px-1.5 py-0.5 font-mono text-cmn-xs text-text-disabled"
                           >↵</kbd
                         >
                       </div>
@@ -140,10 +141,10 @@ interface PaletteGroup {
           @for (hint of KEY_HINTS; track hint[0]) {
             <div class="flex items-center gap-1">
               <kbd
-                class="rounded border border-border-default px-1 py-0.5 font-mono text-[10px] text-text-disabled"
+                class="rounded border border-border-default px-1 py-0.5 font-mono text-cmn-xs text-text-disabled"
                 >{{ hint[0] }}</kbd
               >
-              <span class="text-[11px] text-text-disabled">{{ hint[1] }}</span>
+              <span class="text-cmn-xs text-text-disabled">{{ hint[1] }}</span>
             </div>
           }
         </div>

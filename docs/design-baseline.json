@@ -1,43 +1,43 @@
 {
   "detector": "0.1.11",
   "source": {
-    "total": 17,
+    "total": 4,
     "groups": {
       "low-contrast": 0,
       "undersized-and-tiny-text": 0,
       "overused-font": 0,
       "layout-transition": 0,
-      "design-system-drift": 17
+      "design-system-drift": 4
     },
     "byRule": {
       "design-system-color": 2,
-      "design-system-font-size": 14,
-      "design-system-radius": 1
+      "design-system-radius": 1,
+      "design-system-font-size": 1
     }
   },
   "storybook": {
-    "stories": 278,
-    "scans": 556,
-    "total": 309,
+    "stories": 312,
+    "scans": 624,
+    "total": 128,
     "groups": {
-      "low-contrast": 131,
-      "undersized-and-tiny-text": 48,
+      "low-contrast": 45,
+      "undersized-and-tiny-text": 0,
       "overused-font": 0,
-      "layout-transition": 64,
+      "layout-transition": 38,
       "design-system-drift": 0
     },
     "byRule": {
-      "low-contrast": 131,
-      "layout-transition": 64,
-      "clipped-overflow-container": 28,
-      "gpt-thin-border-wide-shadow": 10,
-      "pulsing-dot": 8,
-      "undersized-ui-text": 48,
-      "skipped-heading": 2,
-      "tight-leading": 4,
+      "low-contrast": 45,
+      "text-occlusion": 2,
+      "layout-transition": 38,
+      "clipped-overflow-container": 16,
+      "pulsing-dot": 7,
+      "gpt-thin-border-wide-shadow": 5,
+      "skipped-heading": 3,
+      "tight-leading": 2,
       "script-error": 8,
-      "text-overflow": 4,
-      "em-dash-overuse": 2
+      "text-overflow": 1,
+      "em-dash-overuse": 1
     }
   }
 }
