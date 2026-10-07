@@ -27,6 +27,7 @@ const NARROW_PHONE = {width: 320, height: 568};
 // Room for roughly "Che…" beside the glyphs; a title narrower than this has collapsed.
 const MIN_TOP_BAR_TITLE = 64;
 const TOP_BAR_STORY = 'components-topbar--back-and-actions';
+const TOP_BAR_MANY_STORY = 'components-topbar--many-actions';
 
 const STORIES = ['phone', 'phone-overlay'] as const;
 // Layout stories that differ in their tab labels (up to four tabs and More).
@@ -333,6 +334,57 @@ test.describe(`phone ${NARROW_PHONE.width}x${NARROW_PHONE.height}`, () => {
     expect(bar.ellipsis).toBe(true);
     expect(bar.overflowsBar).toBe(false);
     expect(await undersizedTargets(page, MIN_TARGET)).toEqual([]);
+  });
+
+  // Back, three page actions, search and avatar. Below 360px the actions past the first move into
+  // the "More actions" menu; the title keeps >= MIN_TOP_BAR_TITLE at 320, 359 and 360 alike.
+  for (const width of [320, 359, 360]) {
+    test(`top bar | three actions at ${width}px keep the title readable`, async ({page}) => {
+      await page.setViewportSize({width, height: NARROW_PHONE.height});
+      await open(page, TOP_BAR_MANY_STORY, 'light', 'cmn-top-bar header');
+      const bar = await page.evaluate(() => {
+        const visible = (el: Element) => el.getClientRects().length > 0;
+        const title = document.querySelector('cmn-top-bar h1')?.getBoundingClientRect();
+        return {
+          titleWidth: title ? Math.round(title.width) : 0,
+          inline: [...document.querySelectorAll('cmn-top-bar header button')]
+            .filter(visible)
+            .map(b => b.getAttribute('aria-label')),
+          overflowsBar: document.documentElement.scrollWidth > window.innerWidth,
+        };
+      });
+      expect(bar.titleWidth).toBeGreaterThanOrEqual(MIN_TOP_BAR_TITLE);
+      expect(bar.overflowsBar).toBe(false);
+      if (width < 360) {
+        expect(bar.inline).toEqual(['Back', 'Edit', 'More actions', 'Search', 'Account menu']);
+      } else {
+        expect(bar.inline).toContain('Archive');
+        expect(bar.inline).not.toContain('Toggle theme');
+        expect(bar.inline).not.toContain('More actions');
+      }
+      expect(await undersizedTargets(page, MIN_TARGET)).toEqual([]);
+    });
+  }
+
+  test('top bar | overflow menu opens by keyboard, keeps disabled, returns focus', async ({
+    page,
+  }) => {
+    await open(page, TOP_BAR_MANY_STORY, 'light', 'cmn-top-bar header');
+    const trigger = page.getByRole('button', {name: 'More actions'});
+    await trigger.focus();
+    await page.keyboard.press('Enter');
+    const menu = page.getByRole('menu', {name: 'More actions'});
+    await expect(menu).toBeVisible();
+    await expect(page.getByRole('menuitem', {name: 'Share'})).toBeFocused();
+    await expect(page.getByRole('menuitem', {name: 'Archive'})).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
+    const box = await menu.boundingBox();
+    expect(box && box.x >= 0 && box.x + box.width <= NARROW_PHONE.width).toBe(true);
+    await page.keyboard.press('Escape');
+    await expect(menu).toBeHidden();
+    await expect(trigger).toBeFocused();
   });
 });
 

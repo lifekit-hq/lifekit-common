@@ -42,6 +42,12 @@ A page gets all of this without writing any code for it.
 Below 360px, a page with two or more actions loses the top bar's theme toggle so the title stays
 readable. The app must offer the theme override in Settings.
 
+Below 360px, a page with more than two actions keeps only its first action inline and moves the
+rest into a "More actions" menu (Angular CDK menu: arrow keys, Escape, focus returns to the
+trigger). Each item keeps its action id, `route` and `disabled`. With back, search and avatar the
+title keeps at least 64px at 320px, 359px and 360px; from 360px every action stays inline, and
+the theme toggle yields until 400px so three inline actions never squeeze the title.
+
 ### Scroll and tab state
 
 The shell does this itself, in `cmn-app-layout`, with no page code and no router feature to enable

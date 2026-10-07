@@ -53,6 +53,26 @@ export const BackAndActions: Story = {
   globals: {viewport: {value: 'mobile2', isRotated: false}},
 };
 
+/**
+ * Back, three page actions, search and avatar: from 360px all three actions sit inline. Below
+ * 360px only the first stays and the rest move into the "More actions" menu, so the title keeps
+ * the same room as with two actions. Narrow the canvas under 360px to see it.
+ */
+export const ManyActions: Story = {
+  parameters: {layout: 'fullscreen'},
+  args: {
+    title: 'Checking account',
+    avatarLabel: 'DT',
+    showBack: true,
+    actions: [
+      {id: 'edit', label: 'Edit', icon: 'Pencil'},
+      {id: 'share', label: 'Share', icon: 'Share'},
+      {id: 'archive', label: 'Archive', icon: 'Archive', disabled: true},
+    ],
+  },
+  globals: {viewport: {value: 'mobile2', isRotated: false}},
+};
+
 /** `largeTitle: 'visible'`: the page's large title is in view, so the bar's copy stays hidden. */
 export const LargeTitleVisible: Story = {
   args: {title: 'Accounts', avatarLabel: 'DT', largeTitle: 'visible'},

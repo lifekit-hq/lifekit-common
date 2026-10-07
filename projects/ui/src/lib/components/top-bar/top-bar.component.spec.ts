@@ -226,4 +226,80 @@ describe('TopBarComponent', () => {
       expect(query('[data-inline-title]')?.classList).not.toContain('opacity-0');
     });
   });
+
+  describe('page action overflow', () => {
+    const ACTIONS: PageAction[] = [
+      {id: 'edit', label: 'Edit', icon: 'Pencil'},
+      {id: 'share', label: 'Share', icon: 'Share', route: '/share'},
+      {id: 'archive', label: 'Archive', icon: 'Archive', disabled: true},
+    ];
+    const host = () => fixture.nativeElement as HTMLElement;
+    const inline = (label: string) =>
+      host().querySelector(`button[aria-label="${label}"]`) as HTMLButtonElement;
+    const trigger = () => host().querySelector<HTMLButtonElement>('button[data-overflow-trigger]');
+
+    it('should hide the theme toggle until 400px once a page declares over two actions', () => {
+      fixture.componentRef.setInput('actions', ACTIONS);
+      fixture.detectChanges();
+      expect(inline('Toggle theme').className).toContain('max-[399px]:hidden');
+    });
+
+    it('should render no overflow trigger for two actions or fewer', () => {
+      fixture.componentRef.setInput('actions', ACTIONS.slice(0, 2));
+      fixture.detectChanges();
+      expect(trigger()).toBeNull();
+      expect(inline('Share').className).not.toContain('max-[359px]:hidden');
+    });
+
+    it('should keep every action inline from 360px and hide all but the first below it', () => {
+      fixture.componentRef.setInput('actions', ACTIONS);
+      fixture.detectChanges();
+      expect(inline('Edit').className).not.toContain('max-[359px]:hidden');
+      expect(inline('Share').className).toContain('max-[359px]:hidden');
+      expect(inline('Archive').className).toContain('max-[359px]:hidden');
+      expect(trigger()?.className).toContain('min-[360px]:hidden');
+    });
+
+    it('should label the trigger and open a menu holding the overflowed actions', () => {
+      fixture.componentRef.setInput('actions', ACTIONS);
+      fixture.detectChanges();
+      expect(trigger()?.getAttribute('aria-label')).toBe('More actions');
+      trigger()?.click();
+      fixture.detectChanges();
+      const overlay = overlayContainer.getContainerElement();
+      expect(overlay.querySelector('[role="menu"]')).toBeTruthy();
+      const items = Array.from(overlay.querySelectorAll('[role="menuitem"]'));
+      expect(items.map(item => item.textContent?.trim())).toEqual(['Share', 'Archive']);
+    });
+
+    it('should emit the original action when an item is chosen and return focus', async () => {
+      fixture.componentRef.setInput('actions', ACTIONS);
+      fixture.detectChanges();
+      const emitted: PageAction[] = [];
+      fixture.componentInstance.actionClick.subscribe(action => emitted.push(action));
+      document.body.appendChild(host());
+      trigger()?.focus();
+      trigger()?.click();
+      fixture.detectChanges();
+      (
+        overlayContainer.getContainerElement().querySelector('[role="menuitem"]') as HTMLElement
+      ).click();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(emitted).toEqual([ACTIONS[1]]);
+      expect(document.activeElement).toBe(trigger());
+      host().remove();
+    });
+
+    it('should carry disabled into the inline button and the menu item', () => {
+      fixture.componentRef.setInput('actions', ACTIONS);
+      fixture.detectChanges();
+      expect(inline('Archive').disabled).toBe(true);
+      trigger()?.click();
+      fixture.detectChanges();
+      const items = overlayContainer.getContainerElement().querySelectorAll('[role="menuitem"]');
+      expect(items[1]?.getAttribute('aria-disabled')).toBe('true');
+      expect(items[0]?.getAttribute('aria-disabled')).not.toBe('true');
+    });
+  });
 });
