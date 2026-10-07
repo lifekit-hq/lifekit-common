@@ -53,7 +53,10 @@ function parseHttpsUrl(target: string): URL | null {
   try {
     const url = new URL(target);
     const safe =
-      url.protocol === 'https:' && url.hostname !== '' && url.username === '' && url.password === '';
+      url.protocol === 'https:' &&
+      url.hostname !== '' &&
+      url.username === '' &&
+      url.password === '';
     return safe ? url : null;
   } catch {
     return null;
@@ -109,7 +112,8 @@ function pushText(segments: ChatSegment[], text: string): void {
 /**
  * Splits message text into plain-text and safe-link segments. Only in-app paths and `https://`
  * URLs become links; any other target (`javascript:`, `data:`, `http:`, `//host`, `mailto:`)
- * stays as the original text. A labelled `https://` link shows its host after the label. The output is data, never markup — the caller builds the nodes.
+ * stays as the original text. A labelled `https://` link shows its host after the label. The output
+ * is data, never markup — the caller builds the nodes.
  */
 export function parseChatLinks(text: string): ChatSegment[] {
   const segments: ChatSegment[] = [];
