@@ -22,6 +22,17 @@ export const AssistantMessage: Story = {
   },
 };
 
+export const WithLinks: Story = {
+  args: {
+    role: 'assistant',
+    text: 'Your largest drift is [AAPL](/holdings/AAPL) — see the filing at https://www.sec.gov/edgar and the [rebalance guide](https://example.com/rebalance). [Unsafe](javascript:alert(1)) targets stay plain text.',
+  },
+};
+
+export const UserLink: Story = {
+  args: {role: 'user', text: 'Is https://example.com/report still current?'},
+};
+
 export const WithToolProgress: Story = {
   args: {
     role: 'assistant',

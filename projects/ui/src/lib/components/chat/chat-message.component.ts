@@ -1,4 +1,7 @@
-import {ChangeDetectionStrategy, Component, computed, input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angular/core';
+import {Router, RouterLink, type UrlTree} from '@angular/router';
+
+import {type ChatSegment, parseChatLinks} from './chat-message-links';
 
 export type ChatMessageRole = 'user' | 'assistant';
 
@@ -14,18 +17,50 @@ export interface ChatToolActivity {
 const BUBBLE_BASE =
   'w-fit rounded-cmn-lg px-cmn-4 py-cmn-3 text-cmn-md font-base whitespace-pre-wrap break-words';
 
+const LINK_CLASSES =
+  'underline underline-offset-2 rounded-cmn-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus';
+const USER_LINK = 'text-text-inverse';
+const ASSISTANT_LINK = 'text-accent-default';
+
+/** A parsed segment ready to render; in-app links carry the router `UrlTree` their directive needs. */
+type RenderedSegment =
+  | {kind: 'text'; text: string}
+  | {kind: 'internal'; label: string; tree: UrlTree}
+  | {kind: 'external'; label: string; href: string};
+
 const USER_BUBBLE = 'bg-accent-default text-text-inverse';
 const ASSISTANT_BUBBLE = 'bg-surface-raised text-text-primary border border-border-default';
 
 @Component({
   selector: 'cmn-chat-message',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [RouterLink],
   template: `
     <div [class]="rowClasses()">
       <div [class.items-end]="isUser()" class="flex flex-col gap-cmn-2 max-w-[85%]">
         <div [class]="bubbleClasses()">
           @if (text()) {
-            <span>{{ text() }}</span>
+            <span>
+              @for (segment of segments(); track $index) {
+                @switch (segment.kind) {
+                  @case ('internal') {
+                    <a [routerLink]="segment.tree" [class]="linkClasses()">{{ segment.label }}</a>
+                  }
+                  @case ('external') {
+                    <a
+                      [href]="segment.href"
+                      [class]="linkClasses()"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      >{{ segment.label }}</a
+                    >
+                  }
+                  @default {
+                    <ng-container>{{ segment.text }}</ng-container>
+                  }
+                }
+              }
+            </span>
           }
           @if (streaming() && !text()) {
             <span class="inline-flex gap-1" aria-label="Thinking">
@@ -63,6 +98,8 @@ const ASSISTANT_BUBBLE = 'bg-surface-raised text-text-primary border border-bord
   `,
 })
 export class ChatMessageComponent {
+  private readonly router = inject(Router);
+
   public readonly role = input<ChatMessageRole>('assistant');
   public readonly text = input<string>('');
   public readonly streaming = input<boolean>(false);
@@ -78,7 +115,30 @@ export class ChatMessageComponent {
     () => `${BUBBLE_BASE} ${this.isUser() ? USER_BUBBLE : ASSISTANT_BUBBLE}`
   );
 
+  public readonly linkClasses = computed(
+    () => `${LINK_CLASSES} ${this.isUser() ? USER_LINK : ASSISTANT_LINK}`
+  );
+
+  /** Text split into plain runs and safe links; anything unsafe or unparseable stays text. */
+  protected readonly segments = computed<RenderedSegment[]>(() =>
+    parseChatLinks(this.text()).map(segment => this.render(segment))
+  );
+
   public dotClass(running: boolean): string {
     return running ? 'bg-status-info' : 'bg-status-success';
+  }
+
+  private render(segment: ChatSegment): RenderedSegment {
+    if (segment.kind === 'text') {
+      return segment;
+    }
+    if (!segment.internal) {
+      return {kind: 'external', label: segment.label, href: segment.href};
+    }
+    try {
+      return {kind: 'internal', label: segment.label, tree: this.router.parseUrl(segment.href)};
+    } catch {
+      return {kind: 'text', text: segment.label};
+    }
   }
 }
