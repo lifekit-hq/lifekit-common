@@ -19,6 +19,10 @@
   --radius-lg: 8px;
   --radius-full: 9999px;
 
+  /* Touch target — the smallest pressable area of any chrome control (44pt, px so a host's
+     root font size cannot shrink it) */
+  --size-touch: 44px;
+
   color-scheme: light;
 
   /* Surface — cool graphite ground */

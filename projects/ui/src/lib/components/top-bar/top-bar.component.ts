@@ -13,11 +13,25 @@ export type TopBarLargeTitle = 'none' | 'visible' | 'collapsed';
 
 const MAX_INITIALS = 2;
 const HEADER_BASE_CLASSES =
-  'flex h-14 items-center gap-cmn-2 border-b border-border-default px-cmn-4 md:gap-cmn-4 md:px-cmn-6';
-/** Page chrome (back, actions) meets the 44px touch target below md, desktop density from md. */
+  'flex h-14 items-center border-b border-border-default px-cmn-4 md:gap-cmn-4 md:px-cmn-6';
+/**
+ * Every chrome control meets the touch target (`--size-touch`) below md, desktop density from md.
+ * The targets abut below md, so the bar has no gap there: the glyphs still sit a target apart.
+ */
 const CHROME_BUTTON_CLASSES =
-  'flex h-11 w-11 shrink-0 items-center justify-center rounded-cmn-md text-text-secondary ' +
-  'transition-colors hover:bg-surface-raised hover:text-text-primary md:h-8 md:w-8';
+  'flex h-cmn-touch w-cmn-touch shrink-0 items-center justify-center rounded-cmn-md ' +
+  'text-text-secondary transition-colors hover:bg-surface-raised hover:text-text-primary ' +
+  'md:h-8 md:w-8';
+/** The avatar's disc stays 32px inside its touch-sized, invisible button. */
+const AVATAR_TRIGGER_CLASSES =
+  'group h-cmn-touch w-cmn-touch shrink-0 rounded-cmn-full md:h-8 md:w-8';
+const AVATAR_DISC_CLASSES =
+  'flex h-8 w-8 items-center justify-center rounded-cmn-full bg-accent-default text-cmn-xs ' +
+  'font-semibold text-text-inverse transition-opacity group-hover:opacity-90';
+/** Keyboard hints mean nothing without a keyboard: hidden wherever hover is unavailable. */
+const KEY_HINT_CLASSES =
+  'ml-cmn-2 hidden rounded border border-border-default px-1 py-0.5 font-mono text-cmn-xs ' +
+  'text-text-secondary md:inline [@media(hover:none)]:hidden';
 /** The chevron's glyph sits on the content edge below md, as on iOS. */
 const BACK_BUTTON_CLASSES = `${CHROME_BUTTON_CLASSES} -ml-cmn-2 md:ml-0`;
 const INLINE_TITLE_CLASSES =
@@ -89,24 +103,20 @@ const HEADER_OVERLAY_CLASSES =
       <!-- Search trigger: icon-only below md -->
       <button
         (click)="searchClick.emit()"
-        class="flex h-8 w-8 shrink-0 items-center justify-center gap-cmn-2 rounded-cmn-md text-cmn-sm text-text-secondary transition-colors hover:bg-surface-raised hover:text-text-primary md:h-auto md:w-auto md:border md:border-border-default md:bg-surface-bg md:px-cmn-3 md:py-1.5 md:hover:border-border-strong md:hover:bg-surface-bg"
+        class="flex h-cmn-touch w-cmn-touch shrink-0 items-center justify-center gap-cmn-2 rounded-cmn-md text-cmn-sm text-text-secondary transition-colors hover:bg-surface-raised hover:text-text-primary md:h-auto md:w-auto md:border md:border-border-default md:bg-surface-bg md:px-cmn-3 md:py-1.5 md:hover:border-border-strong md:hover:bg-surface-bg"
         type="button"
         aria-label="Search"
       >
         <cmn-icon name="Search" size="sm" />
         <span class="hidden md:inline">Search…</span>
-        <kbd
-          class="ml-cmn-2 hidden rounded border border-border-default px-1 py-0.5 font-mono text-cmn-xs text-text-secondary md:inline"
-        >
-          ⌘K
-        </kbd>
+        <kbd [class]="keyHintClasses">⌘K</kbd>
       </button>
 
       <!-- Theme toggle -->
       @if (showThemeToggle()) {
         <button
+          [class]="chromeButtonClasses"
           (click)="themeToggle.emit()"
-          class="flex h-8 w-8 shrink-0 items-center justify-center rounded-cmn-md text-text-secondary hover:bg-surface-raised hover:text-text-primary transition-colors"
           type="button"
           title="Toggle theme"
           aria-label="Toggle theme"
@@ -118,11 +128,11 @@ const HEADER_OVERLAY_CLASSES =
       <!-- Avatar -->
       <cmn-menu
         [items]="avatarMenuItems()"
+        [triggerClass]="avatarTriggerClasses"
         (itemSelect)="avatarMenuSelect.emit($event)"
         ariaLabel="Account menu"
-        triggerClass="h-8 w-8 shrink-0 rounded-cmn-full bg-accent-default text-cmn-xs font-semibold text-text-inverse hover:opacity-90 transition-opacity"
       >
-        {{ avatarInitial() }}
+        <span [class]="avatarDiscClasses">{{ avatarInitial() }}</span>
       </cmn-menu>
     </header>
   `,
@@ -159,6 +169,9 @@ export class TopBarComponent {
 
   protected readonly backButtonClasses = BACK_BUTTON_CLASSES;
   protected readonly chromeButtonClasses = CHROME_BUTTON_CLASSES;
+  protected readonly avatarTriggerClasses = AVATAR_TRIGGER_CLASSES;
+  protected readonly avatarDiscClasses = AVATAR_DISC_CLASSES;
+  protected readonly keyHintClasses = KEY_HINT_CLASSES;
   protected readonly inlineTitleClasses = INLINE_TITLE_CLASSES;
   protected readonly inlineLabelClasses = INLINE_LABEL_CLASSES;
 

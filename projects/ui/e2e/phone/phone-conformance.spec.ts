@@ -2,7 +2,8 @@ import {expect, type Page, test} from '@playwright/test';
 
 // Checks docs/PHONE-CONTRACT.md against the built app-layout stories. Report-only by default:
 // a violation becomes a `violation` annotation (collected by summary-reporter.ts) and the test
-// stays green. PHONE_CONFORMANCE=gate turns every violation into a failure.
+// stays green. PHONE_CONFORMANCE=gate turns every violation into a failure. Checks marked
+// `enforce` below always fail: the guarantee behind them is built, so they only ever raise the bar.
 
 const GATING = process.env['PHONE_CONFORMANCE'] === 'gate';
 
@@ -11,13 +12,20 @@ const MIN_TEXT = 12;
 const SCROLL_PROBE = 300;
 const SURFACE_TOLERANCE = 1;
 
+// `touchChrome`: the shell is in its phone layout here, so every control must be touch-sized. The
+// other two widths still get the desktop sidebar (L8), whose controls are report-only until then.
 const VIEWPORTS = [
-  {name: 'phone 390x844', width: 390, height: 844, tabs: true},
-  {name: 'landscape 844x390', width: 844, height: 390, tabs: true},
-  {name: 'tablet 820x1180', width: 820, height: 1180, tabs: false},
+  {name: 'phone 390x844', width: 390, height: 844, tabs: true, touchChrome: true},
+  {name: 'landscape 844x390', width: 844, height: 390, tabs: true, touchChrome: false},
+  {name: 'tablet 820x1180', width: 820, height: 1180, tabs: false, touchChrome: false},
 ] as const;
 
+// The narrowest phone still sold (iPhone SE): the tab bar must hold its labels at this width.
+const NARROW_PHONE = {width: 320, height: 568};
+
 const STORIES = ['phone', 'phone-overlay'] as const;
+// Layout stories that differ in their tab labels (up to four tabs and More).
+const TAB_STORIES = ['phone', 'phone-overlay', 'phone-default-tabs', 'phone-active-in-more'];
 
 const THEME_COLOR_METAS = [
   {content: '#f3f5f6', media: '(prefers-color-scheme: light)'},
@@ -28,8 +36,18 @@ type Theme = 'light' | 'dark';
 
 const layoutStory = (story: string) => `components-app-layout--${story}`;
 const ROUTED_STORY = 'conformance-routed-app-layout--routed';
+// Chips and a link in a card: small controls the layout stories do not hold.
+const TARGETS_STORY = 'conformance-touch-targets--targets';
+const PALETTE_STORY = 'components-command-palette--playground';
+const LAYOUT_READY = 'cmn-app-layout > div';
+const TARGETS_READY = 'cmn-touch-targets';
 
-async function open(page: Page, storyId: string, theme: Theme = 'light') {
+async function open(
+  page: Page,
+  storyId: string,
+  theme: Theme = 'light',
+  ready: string = LAYOUT_READY
+) {
   // The head carries the browser chrome metas, as an app's index.html does.
   await page.addInitScript(metas => {
     document.addEventListener('DOMContentLoaded', () => {
@@ -43,17 +61,56 @@ async function open(page: Page, storyId: string, theme: Theme = 'light') {
     });
   }, THEME_COLOR_METAS);
   await page.goto(`/iframe.html?id=${storyId}&viewMode=story&globals=theme:${theme}`);
-  await page.waitForSelector('cmn-app-layout > div', {state: 'visible'});
+  await page.waitForSelector(ready, {state: 'visible'});
 }
 
-/** Records violations; fails only when gating. */
-function report(violations: string[]) {
+/** Records violations; fails when gating, or when this check always enforces. */
+function report(violations: string[], enforce = false) {
   for (const detail of violations) {
     test.info().annotations.push({type: 'violation', description: detail});
   }
-  if (GATING) {
+  if (GATING || enforce) {
     expect(violations).toEqual([]);
   }
+}
+
+/** Interactive controls that measure under `min` px in either direction, hit-slop included. */
+async function undersizedTargets(page: Page, min: number): Promise<string[]> {
+  return page.evaluate(limit => {
+    const found: string[] = [];
+    const selector = 'button, a[href], [role=button], [role=tab], input, select';
+    for (const el of document.querySelectorAll(selector)) {
+      const r = el.getBoundingClientRect();
+      // A control may press wider than it draws: `.cmn-hit-slop` paints its target in ::after
+      const slop = getComputedStyle(el, '::after');
+      const slopped = slop.content !== 'none' && slop.position === 'absolute';
+      const width = Math.max(r.width, slopped ? parseFloat(slop.width) : 0);
+      const height = Math.max(r.height, slopped ? parseFloat(slop.height) : 0);
+      if (r.width && r.height && (width < limit || height < limit)) {
+        const label = (el.getAttribute('aria-label') ?? el.textContent ?? '').trim();
+        found.push(
+          `${el.tagName.toLowerCase()}[${label.slice(0, 24)}] ${Math.round(width)}x${Math.round(height)}`
+        );
+      }
+    }
+    return found;
+  }, min);
+}
+
+/** Keyboard hints (`kbd`) that are on screen. */
+async function visibleKeyHints(page: Page): Promise<string[]> {
+  return page.evaluate(() =>
+    [...document.querySelectorAll('kbd')]
+      .filter(el => el.getClientRects().length > 0)
+      .map(el => `kbd[${el.textContent?.trim()}]`)
+  );
+}
+
+/** Opens the palette from its story's launcher. */
+async function openPalette(page: Page) {
+  await open(page, PALETTE_STORY, 'light', 'cmn-story-palette-launcher');
+  await page.getByRole('button', {name: 'Open palette'}).click();
+  await page.waitForSelector('input[placeholder^="Search pages"]', {state: 'visible'});
 }
 
 for (const vp of VIEWPORTS) {
@@ -69,21 +126,11 @@ for (const vp of VIEWPORTS) {
 
       test(`${id} | targets >= 44`, async ({page}) => {
         await open(page, layoutStory(story));
-        const small = await page.evaluate(min => {
-          const found: string[] = [];
-          const selector = 'button, a[href], [role=button], [role=tab], input, select';
-          for (const el of document.querySelectorAll(selector)) {
-            const r = el.getBoundingClientRect();
-            if (r.width && r.height && (r.width < min || r.height < min)) {
-              const label = (el.getAttribute('aria-label') ?? el.textContent ?? '').trim();
-              found.push(
-                `${el.tagName.toLowerCase()}[${label.slice(0, 24)}] ${Math.round(r.width)}x${Math.round(r.height)}`
-              );
-            }
-          }
-          return found;
-        }, MIN_TARGET);
-        report(small.map(s => `target under ${MIN_TARGET}: ${s}`));
+        const small = await undersizedTargets(page, MIN_TARGET);
+        report(
+          small.map(s => `target under ${MIN_TARGET}: ${s}`),
+          vp.touchChrome
+        );
       });
 
       test(`${id} | text >= 12px`, async ({page}) => {
@@ -155,6 +202,26 @@ for (const vp of VIEWPORTS) {
       });
     }
 
+    test(`${vp.name} | touch-targets | targets >= 44`, async ({page}) => {
+      await open(page, TARGETS_STORY, 'light', TARGETS_READY);
+      const small = await undersizedTargets(page, MIN_TARGET);
+      report(
+        small.map(s => `target under ${MIN_TARGET}: ${s}`),
+        vp.touchChrome
+      );
+    });
+
+    test(`${vp.name} | keyboard hints hidden on touch`, async ({page}) => {
+      await open(page, layoutStory('phone-overlay'));
+      const hints = await visibleKeyHints(page);
+      await openPalette(page);
+      hints.push(...(await visibleKeyHints(page)));
+      report(
+        hints.map(h => `keyboard hint shown on touch: ${h}`),
+        true
+      );
+    });
+
     test(`${vp.name} | back restores scroll`, async ({page}) => {
       await open(page, ROUTED_STORY);
       const main = page.locator('cmn-app-layout main');
@@ -212,3 +279,46 @@ for (const vp of VIEWPORTS) {
     }
   });
 }
+
+test.describe(`phone ${NARROW_PHONE.width}x${NARROW_PHONE.height}`, () => {
+  test.use({viewport: NARROW_PHONE, hasTouch: true, isMobile: true});
+
+  for (const story of TAB_STORIES) {
+    test(`${story} | tab labels never truncate`, async ({page}) => {
+      await open(page, layoutStory(story));
+      const cut = await page.evaluate(() => {
+        const found: string[] = [];
+        const nav = document.querySelector('cmn-bottom-tab-bar nav');
+        const navBox = nav?.getBoundingClientRect();
+        for (const label of document.querySelectorAll('cmn-bottom-tab-bar nav button > span')) {
+          const box = label.getBoundingClientRect();
+          const tab = label.parentElement?.getBoundingClientRect();
+          const text = label.textContent?.trim() ?? '';
+          const clipped = label.scrollWidth > label.clientWidth;
+          const ellipsis = getComputedStyle(label).textOverflow === 'ellipsis';
+          const outside =
+            !!tab &&
+            !!navBox &&
+            (box.left < Math.max(tab.left, navBox.left) - 0.5 ||
+              box.right > Math.min(tab.right, navBox.right) + 0.5);
+          if (clipped || ellipsis || outside) {
+            found.push(`tab label "${text}" is cut (${Math.round(box.width)}px in its tab)`);
+          }
+        }
+        return found;
+      });
+      report(cut, true);
+    });
+  }
+});
+
+test.describe('desktop pointer', () => {
+  test.use({viewport: {width: 1280, height: 800}});
+
+  // Guards the touch check against passing because hints are never rendered at all
+  test('palette | keyboard hints shown with a pointer', async ({page}) => {
+    await openPalette(page);
+    const hints = await visibleKeyHints(page);
+    expect(hints).toContain('kbd[ESC]');
+  });
+});

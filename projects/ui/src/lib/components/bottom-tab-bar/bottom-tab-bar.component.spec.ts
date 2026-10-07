@@ -49,11 +49,21 @@ describe('BottomTabBarComponent', () => {
   }
 
   function labels(): (string | undefined)[] {
-    return tabButtons().map(b => b.querySelector('span.truncate')?.textContent?.trim());
+    return tabButtons().map(b => b.querySelector(':scope > span')?.textContent?.trim());
   }
 
   it('renders each tab plus a More tab', () => {
     expect(labels()).toEqual(['Home', 'Accounts', 'Transactions', 'Alerts', 'More']);
+  });
+
+  it('never truncates a label and keeps a touch-sized tab at least as wide as its label', () => {
+    for (const button of tabButtons()) {
+      const label = button.querySelector(':scope > span');
+      expect(label?.classList).toContain('whitespace-nowrap');
+      expect(label?.classList).not.toContain('truncate');
+      expect(button.classList).toContain('min-w-fit');
+      expect(button.classList).toContain('min-h-cmn-touch');
+    }
   });
 
   it('caps the primary tabs at four', () => {
