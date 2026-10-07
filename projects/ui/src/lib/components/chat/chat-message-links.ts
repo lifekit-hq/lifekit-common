@@ -24,9 +24,17 @@ const TRAILING_PUNCTUATION = /[.,;:!?'"*_\]]$/;
 // Anything but printable ASCII / non-ASCII text (so no whitespace or control characters), or a backslash.
 const UNSAFE_CHARACTER = /[^\u0021-\u007e\u00a1-\uffff]|\\/;
 
-/** In-app path: one leading `/`, not protocol-relative (`//host`), no backslash tricks (`/\host`). */
+/**
+ * In-app path: one leading `/`, not protocol-relative (`//host`), no backslash tricks (`/\host`),
+ * and no parens (the router reads `(...)` as outlet syntax, so the path would not round-trip).
+ */
 function isInternalPath(target: string): boolean {
-  if (!target.startsWith('/') || target.startsWith('//') || UNSAFE_CHARACTER.test(target)) {
+  if (
+    !target.startsWith('/') ||
+    target.startsWith('//') ||
+    UNSAFE_CHARACTER.test(target) ||
+    /[()]/.test(target)
+  ) {
     return false;
   }
   try {

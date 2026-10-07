@@ -80,9 +80,6 @@ describe('parseChatLinks', () => {
         external('https://en.wikipedia.org/wiki/Foo_(bar)', 'Foo (en.wikipedia.org)'),
         text(' next'),
       ]);
-      expect(parseChatLinks('[Foo](/holdings/Foo_(bar))')).toEqual([
-        internal('/holdings/Foo_(bar)', 'Foo'),
-      ]);
     });
 
     it('should link a markdown in-app path as internal', () => {
@@ -111,6 +108,7 @@ describe('parseChatLinks', () => {
       ['credentials', '[x](https://bank.com@evil.com)'],
       ['https without host', '[x](https://)'],
       ['malformed percent-encoding', '[AAPL](/%)'],
+      ['in-app path with parens', '[Foo](/holdings/Foo_(bar))'],
     ])('should leave a %s markdown target as plain text', (_name, input) => {
       expect(parseChatLinks(input)).toEqual([text(input)]);
     });

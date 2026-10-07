@@ -91,6 +91,19 @@ describe('ChatMessageComponent', () => {
       expect(link.hasAttribute('target')).toBe(false);
     });
 
+    it('should keep an in-app link with parens as plain text', () => {
+      render('See [Foo](/holdings/Foo_(bar)) here');
+      expect(anchors()).toHaveLength(0);
+      expect(fixture.nativeElement.textContent).toContain('See [Foo](/holdings/Foo_(bar)) here');
+    });
+
+    it('should render an external link with parens in its target', () => {
+      render('[Foo](https://en.wikipedia.org/wiki/Foo_(bar))');
+      const [link] = anchors();
+      expect(link.getAttribute('href')).toBe('https://en.wikipedia.org/wiki/Foo_(bar)');
+      expect(link.textContent).toBe('Foo (en.wikipedia.org)');
+    });
+
     it('should not render anchors for rejected targets', () => {
       render('[a](javascript:alert(1)) [b](http://x.com) [c](//evil.com) [d](data:text/html,x)');
       expect(anchors()).toHaveLength(0);
