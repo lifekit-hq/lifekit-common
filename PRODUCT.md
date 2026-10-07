@@ -17,7 +17,7 @@ One shared design language and component set for every lifekit frontend, so the 
 
 ## Positioning
 
-The source of truth for lifekit's look: `@lifekit-hq/tokens` is the theming contract for Angular and React consumers alike, and framework-free Lit elements (`lk-*`) are the long-term substrate. It is not a general-purpose UI kit and does not chase external adoption. [inferred: docs/STRATEGY.md "What is already settled"]
+The source of truth for lifekit's look: `@lifekit-hq/tokens` is the theming contract for Angular and React consumers alike. The substrate is layered: the shell and `cmn-*` components stay Angular; tokens, CSS and `charts-core` are the framework-free layer; new simple leaves are Lit elements (`lk-*`). It is not a general-purpose UI kit and does not chase external adoption. [inferred: docs/STRATEGY.md "What is already settled"]
 
 ## Operating Context
 

@@ -59,6 +59,7 @@ specs/           speckit artifacts (spec.md, plan.md, tasks.md per feature)
 
 - `CLAUDE.md` — coding conventions, commit style, PR/issue norms
 - `docs/BROWSER-CHROME.md` — brand mark, icon set, theme-color, head/manifest standard and `lifekit-chrome-check`
+- `docs/PHONE-CONTRACT.md` — what the app shell guarantees on a phone and what a page declares (title, parent, actions, sheet vs page, state pattern)
 - `docs/CONSUMER-GAP-AUDIT.md` — what each consumer needs against what the library provides, and what is unused
 - `projects/elements/README.md` — settled conventions for the Lit element layer
 - `specs/` — speckit feature artifacts

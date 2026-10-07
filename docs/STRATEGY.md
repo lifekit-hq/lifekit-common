@@ -25,6 +25,11 @@ This document covers only the **remaining decisions** for the Angular components
 
 Components are split by whether they carry framework behaviour. This replaces the earlier
 "web components long-term" wording and the strict rule that every component converts to Lit.
+The app shell (`cmn-app-layout`, top bar, tab bar, sheets) and every `cmn-*` component stay
+Angular, because `@lifekit-hq/ui` has only Angular consumers and a web-component shell would
+rebuild the router, focus and overlay handling Angular and the CDK already provide. `lk-*`
+elements are only for framework-free leaves, such as the install, offline and update prompts. How
+the shell behaves on a phone is in [PHONE-CONTRACT.md](PHONE-CONTRACT.md).
 
 1. **Use-anywhere layer.** Tokens, CSS and `charts-core` stay framework-free, so any consumer,
    Angular or not, can use them directly.
@@ -304,6 +309,9 @@ grow into (see the status table below).
 
 Apps use `cmn-async-state` and `cmn-skeleton` rather than local loading markup; rules marked
 Target are not yet guaranteed by the primitives and must be handled in the app until they are.
+
+The phone chapter of this policy (what the shell guarantees and what a page declares on a phone)
+is [PHONE-CONTRACT.md](PHONE-CONTRACT.md). Where the two overlap, the rules above win.
 
 ---
 
