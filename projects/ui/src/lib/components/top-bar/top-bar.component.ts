@@ -22,6 +22,12 @@ const CHROME_BUTTON_CLASSES =
   'flex h-cmn-touch w-cmn-touch shrink-0 items-center justify-center rounded-cmn-md ' +
   'text-text-secondary transition-colors hover:bg-surface-raised hover:text-text-primary ' +
   'md:h-8 md:w-8';
+/**
+ * On a 320px phone the fullest bar (back, two actions, search, avatar) leaves the title ~23px, so
+ * the theme toggle yields below 360px once a page declares more than one action. It stays in the
+ * DOM, hidden, so no control ever shrinks under its touch target to make room.
+ */
+const NARROW_HIDDEN_CLASSES = 'max-[359px]:hidden';
 /** The avatar's disc stays 32px inside its touch-sized, invisible button. */
 const AVATAR_TRIGGER_CLASSES =
   'group h-cmn-touch w-cmn-touch shrink-0 rounded-cmn-full md:h-8 md:w-8';
@@ -115,7 +121,7 @@ const HEADER_OVERLAY_CLASSES =
       <!-- Theme toggle -->
       @if (showThemeToggle()) {
         <button
-          [class]="chromeButtonClasses"
+          [class]="themeToggleClasses()"
           (click)="themeToggle.emit()"
           type="button"
           title="Toggle theme"
@@ -167,6 +173,11 @@ export class TopBarComponent {
     () => `${HEADER_BASE_CLASSES} ${this.overlay() ? HEADER_OVERLAY_CLASSES : HEADER_SOLID_CLASSES}`
   );
 
+  protected readonly themeToggleClasses = computed<string>(() =>
+    this.actions().length > 1
+      ? `${CHROME_BUTTON_CLASSES} ${NARROW_HIDDEN_CLASSES}`
+      : CHROME_BUTTON_CLASSES
+  );
   protected readonly backButtonClasses = BACK_BUTTON_CLASSES;
   protected readonly chromeButtonClasses = CHROME_BUTTON_CLASSES;
   protected readonly avatarTriggerClasses = AVATAR_TRIGGER_CLASSES;
