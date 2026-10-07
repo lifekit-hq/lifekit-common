@@ -88,3 +88,19 @@ export const ManySegmentsDark: Story = {
   args: ManySegments.args,
   globals: {theme: 'dark'},
 };
+
+/**
+ * Bind `(segmentClick)` and the ring segments become clickable (pointer cursor); the event
+ * carries the segment's `index`, `label` and `value`. Left unbound the chart is inert, as in
+ * every other story.
+ */
+export const Clickable: Story = {
+  args: {segments: SAMPLE_SEGMENTS, label: 'Allocation', currency: 'USD'},
+  render: args => ({
+    props: {...args, last: 'Click a segment'},
+    template: `
+      <cmn-donut-chart [segments]="segments" [label]="label" [currency]="currency" (segmentClick)="last = $event.label + ': ' + $event.value" />
+      <p class="mt-cmn-3 text-cmn-sm text-text-secondary" data-testid="last-click">{{ last }}</p>
+    `,
+  }),
+};

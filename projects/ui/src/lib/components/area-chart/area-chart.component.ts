@@ -12,15 +12,20 @@ import {
 } from '@angular/core';
 import {
   type AreaSeries,
+  bindChartClick,
   buildAreaChartConfig,
+  type ChartPointClick,
   type ChartScrubPoint,
   isSeriesEmpty,
   resolveAreaChartTokens,
+  resolveAreaClick,
   updateAreaChart,
 } from '@lifekit-hq/charts-core';
 import {Chart} from 'chart.js';
 
-export type {AreaSeries, ChartScrubPoint} from '@lifekit-hq/charts-core';
+import {isOutputObserved} from '../chart-click/output-observed';
+
+export type {AreaSeries, ChartPointClick, ChartScrubPoint} from '@lifekit-hq/charts-core';
 
 @Component({
   selector: 'cmn-area-chart',
@@ -68,6 +73,12 @@ export class AreaChartComponent implements AfterViewInit, OnDestroy {
   public readonly scrub = output<ChartScrubPoint>();
   /** The pointer lifted or left the chart: snap the headline back. */
   public readonly scrubEnd = output<void>();
+  /**
+   * Emits the point a click landed on: its x position, its series and the series' value there.
+   * Binding it makes the plot clickable (pointer cursor); unbound, the chart behaves as before.
+   * Pointer only - the canvas has no focusable items, so offer a keyboard-reachable equivalent.
+   */
+  public readonly pointClick = output<ChartPointClick>();
   protected readonly isEmpty = computed(() => isSeriesEmpty(this.series()));
 
   constructor() {
@@ -103,20 +114,23 @@ export class AreaChartComponent implements AfterViewInit, OnDestroy {
       return;
     }
     this.builtScrubbable = this.scrubbable();
-    this.chart = new Chart(
-      ctx,
-      buildAreaChartConfig(
-        this.series(),
-        resolveAreaChartTokens(),
-        this.currency(),
-        this.stacked(),
-        this.scrubbable()
-          ? {
-              onScrub: point => this.scrub.emit(point),
-              onRelease: () => this.scrubEnd.emit(),
-            }
-          : undefined
-      )
+    const config = buildAreaChartConfig(
+      this.series(),
+      resolveAreaChartTokens(),
+      this.currency(),
+      this.stacked(),
+      this.scrubbable()
+        ? {
+            onScrub: point => this.scrub.emit(point),
+            onRelease: () => this.scrubEnd.emit(),
+          }
+        : undefined
     );
+    const bound = bindChartClick(config, {
+      resolve: (chart, event) => resolveAreaClick(chart, event, this.stacked()),
+      isActive: () => isOutputObserved(this.pointClick),
+      emit: hit => this.pointClick.emit(hit),
+    });
+    this.chart = new Chart(ctx, bound);
   }
 }

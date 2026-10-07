@@ -91,3 +91,20 @@ export const LongRange: Story = {args: {series: LONG_RANGE_SERIES}};
  * finger and `(scrub)` reports every band at the point, with the stacked total as its `y`.
  */
 export const Scrubbable: Story = {args: {scrubbable: true}};
+
+/**
+ * Bind `(pointClick)` and the plot becomes clickable (pointer cursor); the event carries the
+ * clicked column and the series band under the pointer: `index`, `label`, `seriesIndex`,
+ * `seriesLabel` and that series' own `value` (never the stacked total).
+ * Left unbound the chart is inert, as in every other story.
+ */
+export const Clickable: Story = {
+  args: {series: SAMPLE_SERIES, label: 'Net worth by sleeve'},
+  render: args => ({
+    props: {...args, last: 'Click the chart'},
+    template: `
+      <cmn-area-chart [series]="series" [label]="label" (pointClick)="last = $event.seriesLabel + ', ' + $event.label + ': ' + $event.value" />
+      <p class="mt-cmn-3 text-cmn-sm text-text-secondary" data-testid="last-click">{{ last }}</p>
+    `,
+  }),
+};

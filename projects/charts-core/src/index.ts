@@ -1,5 +1,6 @@
 export * from './area';
 export * from './bar';
+export * from './click';
 export * from './donut';
 export * from './line';
 export * from './scrub';

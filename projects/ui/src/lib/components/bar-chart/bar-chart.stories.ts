@@ -84,3 +84,19 @@ export const EmptyDark: Story = {
   args: Empty.args,
   globals: {theme: 'dark'},
 };
+
+/**
+ * Bind `(barClick)` and the bars become clickable (pointer cursor); the event carries the bar's
+ * `index`, `label`, `seriesIndex`, `seriesLabel` and `value`, enough to drill into that month.
+ * Left unbound the chart is inert, as in every other story.
+ */
+export const Clickable: Story = {
+  args: {series: [INCOME, SPENDING], label: 'Income vs Spending'},
+  render: args => ({
+    props: {...args, last: 'Click a bar'},
+    template: `
+      <cmn-bar-chart [series]="series" [label]="label" (barClick)="last = $event.seriesLabel + ', ' + $event.label + ': ' + $event.value" />
+      <p class="mt-cmn-3 text-cmn-sm text-text-secondary" data-testid="last-click">{{ last }}</p>
+    `,
+  }),
+};

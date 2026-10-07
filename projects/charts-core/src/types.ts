@@ -86,3 +86,25 @@ export interface ChartDelta {
   change: number;
   percent: number | null;
 }
+
+/** The point a click landed on in a bar or area chart: its column, its series and the raw value. */
+export interface ChartPointClick {
+  /** Index of the clicked x position; index-aligned with every series' `points`. */
+  index: number;
+  /** Index of the clicked series in the chart's `series` input. */
+  seriesIndex: number;
+  /** x label of the clicked position. */
+  label: string;
+  /** Label of the clicked series. */
+  seriesLabel: string;
+  /** The series' own value at that position (never the stacked running total). */
+  value: number;
+}
+
+/** The segment a click landed on in a donut chart. */
+export interface DonutSegmentClick {
+  /** Index of the clicked segment in the chart's `segments` input. */
+  index: number;
+  label: string;
+  value: number;
+}

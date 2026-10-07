@@ -7,18 +7,24 @@ import {
   ElementRef,
   input,
   OnDestroy,
+  output,
   viewChild,
 } from '@angular/core';
 import {
+  bindChartClick,
   buildDonutChartConfig,
   type DonutSegment,
+  type DonutSegmentClick,
   isDonutEmpty,
   resolveDonutChartTokens,
+  resolveDonutClick,
   updateDonutChart,
 } from '@lifekit-hq/charts-core';
 import {Chart} from 'chart.js';
 
-export type {DonutSegment} from '@lifekit-hq/charts-core';
+import {isOutputObserved} from '../chart-click/output-observed';
+
+export type {DonutSegment, DonutSegmentClick} from '@lifekit-hq/charts-core';
 
 @Component({
   selector: 'cmn-donut-chart',
@@ -74,6 +80,12 @@ export class DonutChartComponent implements AfterViewInit, OnDestroy {
   public readonly showLegend = input<boolean>(true);
   /** Shown in place of the ring when there is nothing to draw. */
   public readonly emptyMessage = input<string>('No data yet');
+  /**
+   * Emits the ring segment a click landed on: its index, label and value. Binding it makes the
+   * segments clickable (pointer cursor); unbound, the chart behaves as before.
+   * Pointer only - the canvas has no focusable items, so offer a keyboard-reachable equivalent.
+   */
+  public readonly segmentClick = output<DonutSegmentClick>();
   protected readonly isEmpty = computed(() => isDonutEmpty(this.segments()));
 
   constructor() {
@@ -99,14 +111,17 @@ export class DonutChartComponent implements AfterViewInit, OnDestroy {
     if (!ctx) {
       return;
     }
-    this.chart = new Chart(
-      ctx,
-      buildDonutChartConfig(
-        this.segments(),
-        resolveDonutChartTokens(),
-        this.currency(),
-        this.showLegend()
-      )
+    const config = buildDonutChartConfig(
+      this.segments(),
+      resolveDonutChartTokens(),
+      this.currency(),
+      this.showLegend()
     );
+    const bound = bindChartClick(config, {
+      resolve: resolveDonutClick,
+      isActive: () => isOutputObserved(this.segmentClick),
+      emit: hit => this.segmentClick.emit(hit),
+    });
+    this.chart = new Chart(ctx, bound);
   }
 }
