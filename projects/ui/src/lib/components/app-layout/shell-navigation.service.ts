@@ -69,6 +69,7 @@ interface FinishedNavigation {
  * - Scroll lives in the layout's `<main>`, which the router's own scroll restoration (window
  *   only) cannot see. Leaving a screen stores its scroll under its navigation id, and back and
  *   forward put it back; any other navigation starts a new screen at the top.
+ *   A page's back chevron (`returnTo`) is a return too, so it restores the screen it goes back to.
  * - Each tab remembers the screen it was last showing and where that was scrolled.
  * - Re-tapping the active tab scrolls to the top first, then pops to the tab root.
  * - The last tab is persisted, and a launch (the first navigation, from `/`) reopens it.
@@ -86,6 +87,8 @@ export class ShellNavigationService {
   private currentPath = '';
   private currentTab = '';
   private readonly scrollByNavigation = new Map<number, number>();
+  /** Where each screen was last left, for a return that is not a history pop. */
+  private readonly scrollByPath = new Map<string, number>();
   private readonly tabs = new Map<string, TabEntry>();
   /** A tab switch in flight: the screen it returns to and where to scroll it. */
   private returningTo?: TabEntry;
@@ -148,6 +151,12 @@ export class ShellNavigationService {
     void this.router.navigateByUrl(remembered?.url ?? route);
   }
 
+  /** A page's back chevron: opens `url` as a return, scrolled where the reader left it. */
+  public returnTo(url: string): void {
+    this.returningTo = {url, scroll: this.scrollByPath.get(pathOf(url)) ?? 0};
+    void this.router.navigateByUrl(url);
+  }
+
   private onStart(event: NavigationStart): void {
     this.saveScroll();
     this.pendingHistory =
@@ -161,6 +170,7 @@ export class ShellNavigationService {
       return;
     }
     this.scrollByNavigation.set(this.currentId, scroller.scrollTop);
+    this.scrollByPath.set(this.currentPath, scroller.scrollTop);
     const entry = this.tabs.get(this.currentTab);
     if (entry) {
       entry.scroll = scroller.scrollTop;

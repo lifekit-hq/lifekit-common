@@ -375,7 +375,9 @@ export class AppLayoutComponent {
   protected onBack(): void {
     const back = this.back();
     if (back?.kind === 'parent') {
-      this.navigateFromPage(back.parent);
+      this.shell.returnTo(
+        this.router.serializeUrl(createUrlTreeFromSnapshot(this.page(), [back.parent]))
+      );
     } else if (back?.kind === 'history') {
       this.location.back();
     }

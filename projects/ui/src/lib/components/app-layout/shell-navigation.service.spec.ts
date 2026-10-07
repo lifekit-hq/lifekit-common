@@ -145,6 +145,20 @@ describe('ShellNavigationService', () => {
       expect(main.scrollTop).toBe(SCROLLED_PX);
     });
 
+    it("should restore the list's scroll when the top bar's back goes to the parent", async () => {
+      await go('/accounts');
+      await scrollTo(SCROLLED_PX);
+      await go('/accounts/1');
+      (fixture.nativeElement as HTMLElement)
+        .querySelector<HTMLButtonElement>('cmn-top-bar button[aria-label="Back"]')
+        ?.click();
+      await fixture.whenStable();
+      fixture.detectChanges();
+      await settle();
+      expect(router.url).toBe('/accounts');
+      expect(main.scrollTop).toBe(SCROLLED_PX);
+    });
+
     it('should keep a separate position for each screen in the history', async () => {
       await go('/accounts');
       await scrollTo(SCROLLED_PX);
