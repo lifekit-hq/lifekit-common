@@ -14,6 +14,9 @@ import {
 import {type ChartPoint, type ChartValueFormat} from './types';
 import {CHART_FONT_SIZE, chartFontFamily, cssVar, fontFamily, valueFormatter} from './utils';
 
+/** Inset (px) that keeps a compact chart's 2px stroke from being clipped at the canvas edge. */
+const COMPACT_PADDING = 2;
+
 Chart.register(
   CategoryScale,
   LinearScale,
@@ -54,11 +57,16 @@ function buildLineDataset(points: ChartPoint[], accent: string): ChartDataset<'l
   };
 }
 
+/**
+ * `compact` renders a sparkline: no axes, ticks, gridlines or tooltip, no animation, and it
+ * fills whatever box its canvas is given.
+ */
 export function buildLineChartConfig(
   points: ChartPoint[],
   tokens: LineChartTokens,
   currency: string,
-  valueFormat: ChartValueFormat = 'currency'
+  valueFormat: ChartValueFormat = 'currency',
+  compact = false
 ): ChartConfiguration<'line'> {
   const format = valueFormatter(valueFormat, currency);
   return {
@@ -70,10 +78,15 @@ export function buildLineChartConfig(
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      // A compact chart is a still glyph: no animation, no hover, no tooltip.
+      ...(compact
+        ? {animation: false as const, events: [], layout: {padding: COMPACT_PADDING}}
+        : {}),
       interaction: {mode: 'index', intersect: false},
       plugins: {
         legend: {display: false},
         tooltip: {
+          enabled: !compact,
           mode: 'index',
           intersect: false,
           callbacks: {
@@ -83,6 +96,7 @@ export function buildLineChartConfig(
       },
       scales: {
         x: {
+          display: !compact,
           grid: {color: tokens.borderDefault},
           ticks: {
             color: tokens.textSecondary,
@@ -90,6 +104,7 @@ export function buildLineChartConfig(
           },
         },
         y: {
+          display: !compact,
           grid: {color: tokens.borderDefault},
           ticks: {
             color: tokens.textSecondary,

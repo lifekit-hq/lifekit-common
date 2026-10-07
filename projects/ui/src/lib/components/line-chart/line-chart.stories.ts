@@ -73,6 +73,16 @@ export const CustomFormatter: Story = {
   },
 };
 
+/** A sparkline: only the line, filling the host (here 12rem x 2.5rem) - no title, frame, axes or animation. Size it with a `height` on the element. */
+export const Compact: Story = {
+  args: {data: SAMPLE_DATA, compact: true},
+  render: args => ({
+    props: args,
+    template:
+      '<div style="display:flex;align-items:center;gap:1rem"><span>Trend</span><cmn-line-chart [data]="data" [compact]="compact" style="width:12rem;height:2.5rem"></cmn-line-chart></div>',
+  }),
+};
+
 export const Empty: Story = {
   args: {data: [], label: 'Net Worth Performance', currency: 'USD'},
 };

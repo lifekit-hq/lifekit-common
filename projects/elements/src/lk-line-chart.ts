@@ -22,6 +22,10 @@ export type {ChartPoint, ChartValueFormat} from '@lifekit-hq/charts-core';
  * Values render as currency by default; set `valueFormat` (`value-format` attribute) to `number`
  * or `percent` for unit-less series, or assign a `(value, compact) => string` function property.
  *
+ * Set `compact` (attribute) for a sparkline: only the line, filling the host - no title, frame,
+ * axes, gridlines or tooltip, and no animation. Size it with a `height` on the element (it
+ * defaults to 2rem).
+ *
  * @example
  * <lk-line-chart label="Net Worth" currency="USD"></lk-line-chart>
  * <script>
@@ -45,6 +49,26 @@ export class LkLineChart extends LitElement {
       border: 1px solid var(--color-border-default, #d9e0e3);
       background: var(--color-surface-card, #ffffff);
       padding: var(--space-4, 1rem);
+    }
+
+    :host([compact]) {
+      min-height: 2rem;
+    }
+
+    :host([compact]) .wrapper {
+      height: 100%;
+      min-height: inherit;
+      gap: 0;
+      border: 0;
+      border-radius: 0;
+      background: none;
+      padding: 0;
+    }
+
+    :host([compact]) .chart-area {
+      flex: 1;
+      height: auto;
+      min-height: inherit;
     }
 
     .label {
@@ -71,12 +95,14 @@ export class LkLineChart extends LitElement {
     label: {type: String},
     currency: {type: String},
     valueFormat: {attribute: 'value-format'},
+    compact: {type: Boolean, reflect: true},
   };
 
   declare public points: ChartPoint[];
   declare public label: string;
   declare public currency: string;
   declare public valueFormat: ChartValueFormat;
+  declare public compact: boolean;
 
   constructor() {
     super();
@@ -84,6 +110,7 @@ export class LkLineChart extends LitElement {
     this.label = '';
     this.currency = 'USD';
     this.valueFormat = 'currency';
+    this.compact = false;
   }
 
   protected override firstUpdated(): void {
@@ -94,11 +121,22 @@ export class LkLineChart extends LitElement {
     }
     this.chart = new Chart(
       ctx,
-      buildLineChartConfig(this.points, resolveLineChartTokens(), this.currency, this.valueFormat)
+      buildLineChartConfig(
+        this.points,
+        resolveLineChartTokens(),
+        this.currency,
+        this.valueFormat,
+        this.compact
+      )
     );
   }
 
   public override updated(changed: Map<string, unknown>): void {
+    // `compact` shapes the chart config, so a later change rebuilds it (the first update already built it).
+    if (this.chart && changed.has('compact') && changed.get('compact') !== undefined) {
+      this.rebuildChart();
+      return;
+    }
     if (
       this.chart &&
       (changed.has('points') || changed.has('currency') || changed.has('valueFormat'))
@@ -110,6 +148,12 @@ export class LkLineChart extends LitElement {
     }
   }
 
+  private rebuildChart(): void {
+    this.chart?.destroy();
+    this.chart = null;
+    this.firstUpdated();
+  }
+
   public override disconnectedCallback(): void {
     super.disconnectedCallback();
     this.chart?.destroy();
@@ -119,7 +163,7 @@ export class LkLineChart extends LitElement {
   protected override render(): TemplateResult {
     return html`
       <div class="wrapper">
-        ${this.label ? html`<span class="label">${this.label}</span>` : ''}
+        ${this.label && !this.compact ? html`<span class="label">${this.label}</span>` : ''}
         <div class="chart-area">
           <canvas></canvas>
         </div>
