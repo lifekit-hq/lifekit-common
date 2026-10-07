@@ -1,5 +1,37 @@
 # Changelog
 
+## [3.0.0](https://github.com/lifekit-hq/lifekit-common/compare/v2.3.0...v3.0.0) (2026-10-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* @lifekit-hq/ui no longer exports EditableFieldComponent, @lifekit-hq/elements no longer exports LkAccountMenu, and @lifekit-hq/core no longer exports withFilters, withSorting and withPagination.
+
+### Features
+
+* **elements:** add lk-dismissible-chip with an accessible remove button ([#140](https://github.com/lifekit-hq/lifekit-common/issues/140)) ([3ffbdc3](https://github.com/lifekit-hq/lifekit-common/commit/3ffbdc36354ec717e0939dea4d0a945e68a40356))
+* **tokens:** derive each app's palette from one seed colour ([#134](https://github.com/lifekit-hq/lifekit-common/issues/134)) ([0f787cd](https://github.com/lifekit-hq/lifekit-common/commit/0f787cd88a5491bb6ae3c09bbe54f03ef73cf82a))
+* **ui:** add click outputs to the area, bar and donut charts ([#129](https://github.com/lifekit-hq/lifekit-common/issues/129)) ([38acdf7](https://github.com/lifekit-hq/lifekit-common/commit/38acdf75b83a8be67c2b1ec9edbb0c9245b0c848))
+* **ui:** make cmn-async-state the one state pattern ([#138](https://github.com/lifekit-hq/lifekit-common/issues/138)) ([5b0f1a7](https://github.com/lifekit-hq/lifekit-common/commit/5b0f1a7fc380631723559da1a5e4ebabc60248cc))
+* **ui:** move top-bar actions past two into a More actions menu below 360px ([#139](https://github.com/lifekit-hq/lifekit-common/issues/139)) ([26b5f00](https://github.com/lifekit-hq/lifekit-common/commit/26b5f00a8bbff8f554d62c5304fdbf4988dea44e))
+* **ui:** render safe clickable links in cmn-chat-message ([#132](https://github.com/lifekit-hq/lifekit-common/issues/132)) ([9891e32](https://github.com/lifekit-hq/lifekit-common/commit/9891e32922183c00b9c599f80994e85186ff2f9b))
+
+
+### Bug Fixes
+
+* **ui:** keep phone notices below the top bar and hide the FAB under sheets ([#135](https://github.com/lifekit-hq/lifekit-common/issues/135)) ([cb8db9c](https://github.com/lifekit-hq/lifekit-common/commit/cb8db9c7347c144e3f233ec8c7fff9a592211d51))
+* **ui:** pick the app shell by device, not width only ([#137](https://github.com/lifekit-hq/lifekit-common/issues/137)) ([612fa25](https://github.com/lifekit-hq/lifekit-common/commit/612fa25ad2f7943aee4ad6d064c1b7d6eca3a67b))
+
+
+### Documentation
+
+* **design:** pin the reference registry and add per-pattern compare-against sections ([#136](https://github.com/lifekit-hq/lifekit-common/issues/136)) ([fc230cf](https://github.com/lifekit-hq/lifekit-common/commit/fc230cfd21ba3fca4fb470b11cfe40933fcd13b6))
+
+
+### Maintenance
+
+* remove unused surface ([#141](https://github.com/lifekit-hq/lifekit-common/issues/141)) ([db8d6d9](https://github.com/lifekit-hq/lifekit-common/commit/db8d6d98fc985813718dfa2e8c5bc1a364f24152))
+
 ## [2.3.0](https://github.com/lifekit-hq/lifekit-common/compare/v2.2.0...v2.3.0) (2026-10-07)
 
 
