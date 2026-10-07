@@ -19,6 +19,8 @@ import {
   cssVar,
   fontFamily,
   money,
+  SERIES,
+  seriesColor,
   xTickLimitPlugin,
 } from './utils';
 
@@ -33,7 +35,7 @@ Chart.register(
   Filler
 );
 
-const DEFAULT_SERIES_COLORS = ['#10b981', '#175a6d', '#f59e0b', '#64748b', '#ec4899'];
+const DEFAULT_SERIES_STEPS = [SERIES.green, SERIES.accent, SERIES.amber, SERIES.slate, SERIES.pink];
 const FILL_ALPHA = 'cc';
 
 const X_TICK_LIMIT = 8;
@@ -55,7 +57,7 @@ export function resolveAreaChartTokens(): AreaChartTokens {
 
 export function buildAreaDatasets(series: AreaSeries[], stacked = true): ChartDataset<'line'>[] {
   return series.map((s, i) => {
-    const color = s.color ?? DEFAULT_SERIES_COLORS[i % DEFAULT_SERIES_COLORS.length];
+    const color = s.color ?? seriesColor(DEFAULT_SERIES_STEPS[i % DEFAULT_SERIES_STEPS.length]);
     return {
       label: s.label,
       data: s.points.map(p => p.value),

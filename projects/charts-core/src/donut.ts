@@ -8,7 +8,7 @@ import {
 } from 'chart.js';
 
 import {type DonutSegment} from './types';
-import {CHART_FONT_SIZE, chartFontFamily, cssVar, fontFamily} from './utils';
+import {CHART_FONT_SIZE, chartFontFamily, cssVar, fontFamily, SERIES, seriesColor} from './utils';
 
 Chart.register(DoughnutController, ArcElement, Tooltip, Legend);
 
@@ -16,15 +16,15 @@ Chart.register(DoughnutController, ArcElement, Tooltip, Legend);
  * Ordered so neighbours (including the wrap from last back to first) sit far
  * apart on the colour wheel; the brand petrol leads.
  */
-const DEFAULT_COLORS = [
-  '#175a6d',
-  '#f59e0b',
-  '#a855f7',
-  '#84cc16',
-  '#ec4899',
-  '#3b82f6',
-  '#10b981',
-  '#ef4444',
+const DEFAULT_COLOR_STEPS = [
+  SERIES.accent,
+  SERIES.amber,
+  SERIES.violet,
+  SERIES.lime,
+  SERIES.pink,
+  SERIES.blue,
+  SERIES.green,
+  SERIES.red,
 ];
 const PERCENT_MULTIPLIER = 100;
 
@@ -47,7 +47,9 @@ export function isDonutEmpty(segments: readonly DonutSegment[]): boolean {
 }
 
 function segmentColors(segments: DonutSegment[]): string[] {
-  return segments.map((s, i) => s.color ?? DEFAULT_COLORS[i % DEFAULT_COLORS.length]);
+  return segments.map(
+    (s, i) => s.color ?? seriesColor(DEFAULT_COLOR_STEPS[i % DEFAULT_COLOR_STEPS.length])
+  );
 }
 
 export function buildDonutChartConfig(

@@ -64,7 +64,7 @@ describe('color', () => {
       scan('a.css', 'a { background: linear-gradient(#abcdef, hsl(10 20% 30%)); }'),
       ['color:1', 'color:1']
     );
-    assert.deepEqual(scan('a.ts', "const c = ['#10b981', `rgba(1, 2, 3, 0.4)`];"), [
+    assert.deepEqual(scan('a.ts', "const c = ['#0a1b2c', `rgba(1, 2, 3, 0.4)`];"), [
       'color:1',
       'color:1',
     ]);

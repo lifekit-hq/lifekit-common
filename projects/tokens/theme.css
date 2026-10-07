@@ -75,6 +75,22 @@
   --color-scrim-dialog: rgb(0 0 0 / 0.55);
   --color-scrim-drawer: rgb(0 0 0 / 0.35);
 
+  /* Chart series — default colours for series that name none, as they shipped; the same in both
+     themes. A retune to the Instrument direction is a separate design call. */
+  --color-chart-series-1: #175a6d;
+  --color-chart-series-2: #f59e0b;
+  --color-chart-series-3: #a855f7;
+  --color-chart-series-4: #84cc16;
+  --color-chart-series-5: #ec4899;
+  --color-chart-series-6: #3b82f6;
+  --color-chart-series-7: #10b981;
+  --color-chart-series-8: #ef4444;
+  --color-chart-series-9: #64748b;
+
+  /* Accent scale ends — the near-white and near-black a generated accent ramp runs between */
+  --color-accent-scale-light: #f8f8f8;
+  --color-accent-scale-dark: #0a0a0a;
+
   /* Border — cool grey */
   --color-border-default: #d9e0e3;
   --color-border-strong: #7d8c93;

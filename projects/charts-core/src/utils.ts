@@ -10,6 +10,37 @@ export function cssVar(name: string, fallback: string): string {
 /** Canvas text size (px): the 12px floor, the smallest step of the type ramp. */
 export const CHART_FONT_SIZE = 12;
 
+/** `--color-chart-series-N` as shipped; used only where the token is unavailable at runtime. */
+const FALLBACK_SERIES_COLORS = [
+  '#175a6d',
+  '#f59e0b',
+  '#a855f7',
+  '#84cc16',
+  '#ec4899',
+  '#3b82f6',
+  '#10b981',
+  '#ef4444',
+  '#64748b',
+];
+
+/** Named steps of the series palette, so a chart's default order reads as colours, not numbers. */
+export const SERIES = {
+  accent: 1,
+  amber: 2,
+  violet: 3,
+  lime: 4,
+  pink: 5,
+  blue: 6,
+  green: 7,
+  red: 8,
+  slate: 9,
+} as const;
+
+/** Default colour of series step `step` (1-based): its `--color-chart-series-N` token. */
+export function seriesColor(step: number): string {
+  return cssVar(`--color-chart-series-${step}`, FALLBACK_SERIES_COLORS[step - 1]);
+}
+
 const FALLBACK_FONT_FAMILY = "'IBM Plex Sans Variable', 'IBM Plex Sans', system-ui, sans-serif";
 
 /** Canvas text cannot inherit CSS, so charts read the token font stack explicitly. */

@@ -29,6 +29,8 @@ const MAX_CORRECT_ITERATIONS = 20;
 const LUMINANCE_CROSSOVER = 0.179;
 /** Fallback surface background color used when CSS variable is not yet set. */
 const FALLBACK_SURFACE_BG = '#f3f5f6';
+const FALLBACK_SCALE_LIGHT = '#f8f8f8';
+const FALLBACK_SCALE_DARK = '#0a0a0a';
 
 export const DOCUMENT = new InjectionToken<Document>('DOCUMENT', {
   providedIn: 'root',
@@ -228,11 +230,7 @@ export class ThemeService {
 
   private applyAccentPalette(hex: string): void {
     const stops = this.buildPalette(hex);
-    const bgVar =
-      this.doc.defaultView
-        ?.getComputedStyle(this.doc.documentElement)
-        .getPropertyValue('--color-surface-bg')
-        .trim() || FALLBACK_SURFACE_BG;
+    const bgVar = this.readToken('--color-surface-bg', FALLBACK_SURFACE_BG);
 
     for (let i = 0; i < stops.length; i++) {
       const stop = (i + 1) * ACCENT_STOP_MULTIPLIER;
@@ -242,7 +240,17 @@ export class ThemeService {
   }
 
   private buildPalette(hex: string): string[] {
-    return chroma.scale(['#f8f8f8', hex, '#0a0a0a']).mode('oklch').colors(ACCENT_STOP_COUNT);
+    const light = this.readToken('--color-accent-scale-light', FALLBACK_SCALE_LIGHT);
+    const dark = this.readToken('--color-accent-scale-dark', FALLBACK_SCALE_DARK);
+    return chroma.scale([light, hex, dark]).mode('oklch').colors(ACCENT_STOP_COUNT);
+  }
+
+  private readToken(name: string, fallback: string): string {
+    const value = this.doc.defaultView
+      ?.getComputedStyle(this.doc.documentElement)
+      .getPropertyValue(name)
+      .trim();
+    return value || fallback;
   }
 
   private autoCorrectContrast(color: string, background: string): string {
