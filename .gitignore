@@ -22,3 +22,5 @@ projects/tokens/brand/dist/
 # impeccable: engine binary is downloaded on first run; local overrides stay private
 .claude/skills/impeccable/bin/
 .impeccable/config.local.json
+projects/ui/e2e/phone/results.json
+projects/ui/e2e/phone/.output
