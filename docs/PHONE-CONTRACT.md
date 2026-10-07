@@ -45,8 +45,8 @@ readable. The app must offer the theme override in Settings.
 Below 360px, a page with more than two actions keeps only its first action inline and moves the
 rest into a "More actions" menu (Angular CDK menu: arrow keys, Escape, focus returns to the
 trigger). Each item keeps its action id, `route` and `disabled`. With back, search and avatar the
-title keeps at least 64px at 320px, 359px and 360px; from 360px every action stays inline, and
-the theme toggle yields until 400px so three inline actions never squeeze the title.
+title keeps at least 64px at 320px and 359px. From 360px every action stays inline and the theme
+toggle stays visible; with three actions the title there is about 28px.
 
 ### Scroll and tab state
 

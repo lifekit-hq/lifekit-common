@@ -30,11 +30,6 @@ const CHROME_BUTTON_CLASSES =
  */
 const NARROW_HIDDEN_CLASSES = 'max-[359px]:hidden';
 /**
- * Three actions inline (360px and up) plus the theme toggle would leave a 360px title ~28px, so
- * with more than two actions the theme toggle yields until 400px, where it fits beside a 64px title.
- */
-const THEME_HIDDEN_OVER_THRESHOLD_CLASSES = 'max-[399px]:hidden';
-/**
  * Below 360px a page with more than two actions keeps only its first one inline and moves the rest
  * into an overflow menu, so back, action, overflow, search and avatar (five targets) leave the same
  * ~76px title as two actions do. From 360px nothing moves: every action stays inline.
@@ -231,13 +226,11 @@ export class TopBarComponent {
     () => `${HEADER_BASE_CLASSES} ${this.overlay() ? HEADER_OVERLAY_CLASSES : HEADER_SOLID_CLASSES}`
   );
 
-  protected readonly themeToggleClasses = computed<string>(() => {
-    const count = this.actions().length;
-    if (count > OVERFLOW_THRESHOLD) {
-      return `${CHROME_BUTTON_CLASSES} ${THEME_HIDDEN_OVER_THRESHOLD_CLASSES}`;
-    }
-    return count > 1 ? `${CHROME_BUTTON_CLASSES} ${NARROW_HIDDEN_CLASSES}` : CHROME_BUTTON_CLASSES;
-  });
+  protected readonly themeToggleClasses = computed<string>(() =>
+    this.actions().length > 1
+      ? `${CHROME_BUTTON_CLASSES} ${NARROW_HIDDEN_CLASSES}`
+      : CHROME_BUTTON_CLASSES
+  );
   /** The actions behind the overflow button: all but the first once a page declares over two. */
   protected readonly overflowActions = computed<PageAction[]>(() =>
     this.actions().length > OVERFLOW_THRESHOLD ? this.actions().slice(OVERFLOW_INLINE_COUNT) : []

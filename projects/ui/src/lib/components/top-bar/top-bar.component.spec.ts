@@ -238,12 +238,6 @@ describe('TopBarComponent', () => {
       host().querySelector(`button[aria-label="${label}"]`) as HTMLButtonElement;
     const trigger = () => host().querySelector<HTMLButtonElement>('button[data-overflow-trigger]');
 
-    it('should hide the theme toggle until 400px once a page declares over two actions', () => {
-      fixture.componentRef.setInput('actions', ACTIONS);
-      fixture.detectChanges();
-      expect(inline('Toggle theme').className).toContain('max-[399px]:hidden');
-    });
-
     it('should render no overflow trigger for two actions or fewer', () => {
       fixture.componentRef.setInput('actions', ACTIONS.slice(0, 2));
       fixture.detectChanges();
