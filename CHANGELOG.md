@@ -1,5 +1,27 @@
 # Changelog
 
+## [2.1.0](https://github.com/lifekit-hq/lifekit-common/compare/v2.0.0...v2.1.0) (2026-10-07)
+
+
+### Features
+
+* **ui:** add a compact sparkline variant to the line chart ([#126](https://github.com/lifekit-hq/lifekit-common/issues/126)) ([20fb065](https://github.com/lifekit-hq/lifekit-common/commit/20fb06550ca7d34a9ca75f1d524b368b53700d70))
+
+
+### Bug Fixes
+
+* **ui:** keep the top-bar title readable at 320px ([#120](https://github.com/lifekit-hq/lifekit-common/issues/120)) ([17df61b](https://github.com/lifekit-hq/lifekit-common/commit/17df61bcec7bba630b1784f16ea9959002514727))
+
+
+### Performance
+
+* **ui:** drop afterRenderEffect from the app layout ([#122](https://github.com/lifekit-hq/lifekit-common/issues/122)) ([0f8f3a4](https://github.com/lifekit-hq/lifekit-common/commit/0f8f3a4e065e7804d87e37169b8d65e26a599030))
+
+
+### Documentation
+
+* **agents:** merge CLAUDE.md into AGENTS.md as the single instruction file ([#124](https://github.com/lifekit-hq/lifekit-common/issues/124)) ([28de650](https://github.com/lifekit-hq/lifekit-common/commit/28de650e6f5e17064c0724a401c3f20ece7a0856))
+
 ## [2.0.0](https://github.com/lifekit-hq/lifekit-common/compare/v1.2.0...v2.0.0) (2026-10-07)
 
 
