@@ -1,4 +1,5 @@
-import type {Meta, StoryObj} from '@storybook/angular';
+import {provideRouter, withHashLocation} from '@angular/router';
+import {applicationConfig, type Meta, type StoryObj} from '@storybook/angular';
 
 import {ChatMessageComponent} from './chat-message.component';
 
@@ -6,6 +7,8 @@ const meta: Meta<ChatMessageComponent> = {
   title: 'Components/Chat/ChatMessage',
   component: ChatMessageComponent,
   tags: ['autodocs'],
+  // In-app links use `routerLink`, which needs a router; hash location keeps clicks inside the iframe.
+  decorators: [applicationConfig({providers: [provideRouter([], withHashLocation())]})],
 };
 
 export default meta;
