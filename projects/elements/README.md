@@ -117,11 +117,11 @@ in this pilot.
 
 **Scrub-to-read.** With `scrubbable`, a crosshair and a dot follow a held pointer - a hovering mouse
 or pen, or a finger pressed on the chart (a horizontal drag reads the chart, a vertical one still
-scrolls the page). `lk-line-chart-scrub` fires when the point under the pointer changes, with a
-`ChartScrubPoint` as `detail` (`index`, `label`, `x`, `y`, `total`, `values`), and
-`lk-line-chart-scrub-end` fires on release. The host swaps its headline number and delta while
-scrubbing and restores them on the end event; `chartDelta(from, to)` from `@lifekit-hq/charts-core`
-gives the change and percent. Colour the delta text only - the chart never repaints.
+scrolls the page). `lk-line-chart-scrub` fires when the point under the pointer changes, or when
+the data under a held pointer does, with a `ChartScrubPoint` as `detail` (`index`, `label`, `x`,
+`y`, `total`, `values`), and `lk-line-chart-scrub-end` fires on release. The host swaps its
+headline number and delta while scrubbing and restores them on the end event;
+`chartDelta(from, to)` from `@lifekit-hq/charts-core` gives the change and percent. Colour the delta text only - the chart never repaints.
 
 ```html
 <lk-line-chart label="Net Worth" currency="USD"></lk-line-chart>

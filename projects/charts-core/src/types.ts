@@ -72,7 +72,10 @@ export interface ChartScrubPoint {
 
 /** What a chart tells its host while a pointer reads it. */
 export interface ChartScrubHandlers {
-  /** The held pointer moved onto a different point (fires once on touch-down, then on change). */
+  /**
+   * The held pointer moved onto a different point, or the data under it changed (fires once on
+   * touch-down, then on each change).
+   */
   onScrub(point: ChartScrubPoint): void;
   /** The pointer lifted or left the chart: the host snaps back to its resting value. */
   onRelease(): void;
