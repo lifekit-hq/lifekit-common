@@ -64,11 +64,10 @@ const OVERLAY_TAB_BAR_CLASSES = 'max-md:absolute max-md:inset-x-0 max-md:bottom-
 /** Overscroll stops at main: it never chains to the browser (pull-to-refresh, page bounce). */
 /**
  * Notices (install hint, offline banner, update prompt) pin to the top of main, in flow below
- * the top bar: under the phone overlay they stick below the bar's height plus the safe-area
- * inset, so they never cover the chrome.
+ * the top bar. Sticky offsets are measured from main's content box, which main's overlay
+ * padding already shifts below the bar, so top-0 is flush under it on every size.
  */
 const NOTICES_BASE_CLASSES = 'sticky top-0 z-20 flex flex-col empty:hidden';
-const NOTICES_OVERLAY_CLASSES = 'max-md:top-[calc(3.5rem+env(safe-area-inset-top))]';
 const MAIN_BASE_CLASSES = 'flex-1 overflow-y-auto overscroll-y-contain';
 /** Clears the top bar: its 3.5rem height plus the top safe-area inset. */
 const MAIN_OVERLAY_TOP_CLASSES =
@@ -133,7 +132,7 @@ const MAIN_OVERLAY_BOTTOM_CLASSES =
               </h1>
             </div>
           }
-          <div [class]="noticesClasses()"><ng-content select="[cmnAppLayoutNotice]" /></div>
+          <div [class]="noticesClasses"><ng-content select="[cmnAppLayoutNotice]" /></div>
           <ng-content />
         </main>
         <!-- Hidden while a bottom sheet is open; the slot's own element keeps its fixed position -->
@@ -365,11 +364,7 @@ export class AppLayoutComponent {
     return this.phoneOverlay() && this.hasTabBar() && clearance > 0 ? clearance : null;
   });
 
-  protected readonly noticesClasses = computed<string>(() =>
-    this.phoneOverlay()
-      ? `${NOTICES_BASE_CLASSES} ${NOTICES_OVERLAY_CLASSES}`
-      : NOTICES_BASE_CLASSES
-  );
+  protected readonly noticesClasses = NOTICES_BASE_CLASSES;
 
   protected readonly sheetOpen = inject(CmnDrawerService).sheetOpen;
 

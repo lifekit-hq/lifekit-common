@@ -361,6 +361,8 @@ for (const size of NOTICE_WIDTHS) {
           banner: await box('lk-offline-banner .banner'),
           prompt: await box('lk-update-prompt .prompt'),
         };
+        // Flush under the bar: no strip of scrolling content between them, no row hidden behind.
+        expect(boxes.banner?.top).toBeLessThanOrEqual((boxes.bar?.bottom ?? 0) + SURFACE_TOLERANCE);
         for (const notice of [boxes.banner, boxes.prompt]) {
           expect(notice).not.toBeNull();
           expect(notice?.top).toBeGreaterThanOrEqual((boxes.bar?.bottom ?? 0) - SURFACE_TOLERANCE);

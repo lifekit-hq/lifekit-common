@@ -392,7 +392,8 @@ describe('AppLayoutComponent', () => {
     it('should render notices inside main, stuck below the top bar', () => {
       const notices = q('main .notice').parentElement as HTMLElement;
       expect(notices.classList).toContain('sticky');
-      expect(notices.classList).toContain('max-md:top-[calc(3.5rem+env(safe-area-inset-top))]');
+      expect(notices.classList).toContain('top-0');
+      expect(notices.className).not.toContain('max-md:top-');
       expect(q('cmn-top-bar').contains(notices)).toBe(false);
       expect(q('cmn-bottom-tab-bar').contains(notices)).toBe(false);
     });
