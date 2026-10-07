@@ -72,6 +72,16 @@ function drawnPoints(points: ChartPoint[], xSpacing: ChartXSpacing): ChartPoint[
     .sort((a, b) => (a.time as number) - (b.time as number));
 }
 
+/**
+ * A time-spaced x tick's date. Linear ticks fall on round timestamps, not day boundaries, so a
+ * short span repeats a date across several ticks; only the first of a run is labelled.
+ */
+function timeTick(val: string | number, index: number, ticks: {value: number}[]): string | null {
+  const label = TIME_TICK_FORMAT.format(Number(val));
+  const previous = index > 0 ? ticks[index - 1] : undefined;
+  return previous && TIME_TICK_FORMAT.format(previous.value) === label ? null : label;
+}
+
 function lineData(points: ChartPoint[], xSpacing: ChartXSpacing): ChartDataset<'line'>['data'] {
   return xSpacing === 'time'
     ? points.map(p => ({x: p.time as number, y: p.value}))
@@ -153,9 +163,7 @@ export function buildLineChartConfig(
           ticks: {
             color: tokens.textSecondary,
             font: {family: fontFamily(tokens), size: CHART_FONT_SIZE},
-            ...(timed
-              ? {callback: (val: string | number) => TIME_TICK_FORMAT.format(Number(val))}
-              : {}),
+            ...(timed ? {callback: timeTick} : {}),
           },
         },
         y: {

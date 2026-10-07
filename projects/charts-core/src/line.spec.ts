@@ -150,6 +150,11 @@ describe('buildLineChartConfig compact', () => {
 
 const DAY = 86_400_000;
 const T0 = Date.UTC(2026, 0, 1);
+const HOUR = 3_600_000;
+// Midday UTC is the same calendar date in every timezone from UTC-11 to UTC+11.
+const NOON = 12 * HOUR;
+
+type TimeTickCb = (value: number, index: number, ticks: {value: number}[]) => string | null;
 
 // Two signals on day 0, then a long gap: even spacing would draw these as equals.
 const TIMED: ChartPoint[] = [
@@ -234,9 +239,19 @@ describe('buildLineChartConfig xSpacing time', () => {
     ) => string;
     // Sorted by time, so index 0 is the earliest point.
     expect(title([{dataIndex: 0}])).toBe('A');
-    const tick = (config.options?.scales?.['x'] as {ticks: {callback: (v: number) => string}}).ticks
-      .callback;
-    expect(tick(T0)).toBe('Jan 1');
+    const tick = (config.options?.scales?.['x'] as {ticks: {callback: TimeTickCb}}).ticks.callback;
+    expect(tick(T0 + NOON, 0, [{value: T0 + NOON}])).toBe('Jan 1');
+  });
+
+  it('labels a date once when several x ticks fall on the same day', () => {
+    const config = build(TIMED);
+    const tick = (config.options?.scales?.['x'] as {ticks: {callback: TimeTickCb}}).ticks.callback;
+    const ticks = [T0 + NOON - 2 * HOUR, T0 + NOON, T0 + NOON + 2 * HOUR, T0 + DAY + NOON].map(
+      value => ({
+        value,
+      })
+    );
+    expect(ticks.map((t, i) => tick(t.value, i, ticks))).toEqual(['Jan 1', null, null, 'Jan 2']);
   });
 
   it('works in compact mode: no axes, still time-spaced', () => {
