@@ -1,3 +1,4 @@
+import {BreakpointObserver} from '@angular/cdk/layout';
 import {Location} from '@angular/common';
 import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {type ComponentFixture, TestBed} from '@angular/core/testing';
@@ -8,6 +9,7 @@ import {beforeEach, describe, expect, it, vi} from 'vitest';
 import {CmnDialogService} from '../../services/dialog/dialog.service';
 import {CmnDrawerService} from '../../services/drawer/drawer.service';
 import {CmnPageActionsService} from '../../services/page-actions/page-actions.service';
+import {PinnedBreakpointObserver} from '../../services/shell/pinned-breakpoints';
 import {ThemeService} from '../../services/theme/theme.service';
 import {type CommandPaletteItem} from '../command-palette/command-palette-item.model';
 import {type MenuItem} from '../menu/menu.component';
@@ -40,11 +42,16 @@ class SheetContentComponent {}
 
 describe('AppLayoutComponent', () => {
   let fixture: ComponentFixture<AppLayoutComponent>;
+  let viewport: PinnedBreakpointObserver;
 
   beforeEach(async () => {
+    viewport = new PinnedBreakpointObserver('sidebar');
     await TestBed.configureTestingModule({
       imports: [AppLayoutComponent],
-      providers: [provideRouter([{path: '**', children: []}])],
+      providers: [
+        provideRouter([{path: '**', children: []}]),
+        {provide: BreakpointObserver, useValue: viewport},
+      ],
     }).compileComponents();
     fixture = TestBed.createComponent(AppLayoutComponent);
     fixture.componentRef.setInput('navItems', NAV_ITEMS);
@@ -122,10 +129,44 @@ describe('AppLayoutComponent', () => {
       return items.map(item => item.route);
     }
 
-    it('should render a bottom tab bar alongside the sidebar, each limited by breakpoint', () => {
+    it('should show the sidebar and hide the tab bar on a wide window', () => {
       const host = fixture.nativeElement as HTMLElement;
-      expect(host.querySelector('cmn-bottom-tab-bar')?.classList).toContain('md:hidden');
-      expect(host.querySelector('cmn-sidebar-nav')?.classList).toContain('md:block');
+      expect(host.querySelector('cmn-bottom-tab-bar')?.classList).toContain('hidden');
+      expect(host.querySelector('cmn-sidebar-nav')?.classList).not.toContain('hidden');
+    });
+
+    it('should show the tab bar and hide the sidebar on a phone', () => {
+      viewport.pin('phone');
+      fixture.detectChanges();
+      const host = fixture.nativeElement as HTMLElement;
+      expect(host.querySelector('cmn-bottom-tab-bar')?.classList).not.toContain('hidden');
+      expect(host.querySelector('cmn-sidebar-nav')?.classList).toContain('hidden');
+    });
+
+    it('should keep the tab bar on a landscape phone, however wide', () => {
+      viewport.pin('phone-landscape');
+      fixture.detectChanges();
+      const host = fixture.nativeElement as HTMLElement;
+      expect(host.querySelector('cmn-bottom-tab-bar')?.classList).not.toContain('hidden');
+      expect(host.querySelector('cmn-sidebar-nav')?.classList).toContain('hidden');
+    });
+
+    it('should show the sidebar as a rail in the medium window class', () => {
+      viewport.pin('rail');
+      fixture.detectChanges();
+      const host = fixture.nativeElement as HTMLElement;
+      expect(host.querySelector('cmn-bottom-tab-bar')?.classList).toContain('hidden');
+      expect(host.querySelector('cmn-sidebar-nav')?.classList).not.toContain('hidden');
+      expect(host.querySelector('cmn-sidebar-nav aside')?.classList).toContain('w-16');
+      expect(host.querySelector('cmn-sidebar-nav button[aria-label$="sidebar"]')).toBeNull();
+    });
+
+    it('should open the full sidebar in the expanded window class', () => {
+      const host = fixture.nativeElement as HTMLElement;
+      expect(host.querySelector('cmn-sidebar-nav aside')?.classList).toContain('w-60');
+      expect(
+        host.querySelector('cmn-sidebar-nav button[aria-label="Collapse sidebar"]')
+      ).toBeTruthy();
     });
 
     it('should use the first four nav items as tabs by default', () => {
@@ -298,6 +339,11 @@ describe('AppLayoutComponent', () => {
       return (fixture.nativeElement as HTMLElement).querySelector(selector) as HTMLElement;
     }
 
+    beforeEach(() => {
+      viewport.pin('phone');
+      fixture.detectChanges();
+    });
+
     it('should keep the bars in flow and main unpadded by default', () => {
       expect(el('cmn-top-bar').className).not.toContain('absolute');
       expect(el('cmn-bottom-tab-bar').className).not.toContain('absolute');
@@ -305,30 +351,52 @@ describe('AppLayoutComponent', () => {
       expect(el('cmn-bottom-tab-bar nav').classList).not.toContain('rounded-cmn-full');
     });
 
-    it('should lay both bars over main below md and float the tab bar', () => {
+    it('should lay both bars over main in the phone shell and float the tab bar', () => {
       fixture.componentRef.setInput('phoneOverlay', true);
       fixture.detectChanges();
-      expect(el('cmn-top-bar').classList).toContain('max-md:absolute');
-      expect(el('cmn-top-bar').classList).toContain('max-md:top-0');
-      expect(el('cmn-top-bar header').classList).toContain('max-md:backdrop-blur-md');
-      expect(el('cmn-bottom-tab-bar').classList).toContain('max-md:absolute');
-      expect(el('cmn-bottom-tab-bar').classList).toContain('max-md:bottom-0');
-      // The static breakpoint class survives the class binding.
-      expect(el('cmn-bottom-tab-bar').classList).toContain('md:hidden');
+      expect(el('cmn-top-bar').classList).toContain('absolute');
+      expect(el('cmn-top-bar').classList).toContain('top-0');
+      expect(el('cmn-top-bar header').classList).toContain('backdrop-blur-md');
+      expect(el('cmn-bottom-tab-bar').classList).toContain('absolute');
+      expect(el('cmn-bottom-tab-bar').classList).toContain('bottom-0');
       expect(el('cmn-bottom-tab-bar nav').classList).toContain('rounded-cmn-full');
     });
+
+    it('should lay the bars over main on a landscape phone too', () => {
+      fixture.componentRef.setInput('phoneOverlay', true);
+      viewport.pin('phone-landscape');
+      fixture.detectChanges();
+      expect(el('cmn-top-bar').classList).toContain('absolute');
+      expect(el('cmn-bottom-tab-bar').classList).toContain('absolute');
+      expect(el('main').className).toContain('pt-[calc(');
+    });
+
+    it.each(['rail', 'sidebar'] as const)(
+      'should keep the bars in flow and main unpadded in the %s shell',
+      shell => {
+        fixture.componentRef.setInput('phoneOverlay', true);
+        fixture.componentRef.setInput('floatingActionClearance', 56);
+        viewport.pin(shell);
+        fixture.detectChanges();
+        expect(el('cmn-top-bar').className).not.toContain('absolute');
+        expect(el('cmn-top-bar header').className).not.toContain('backdrop-blur');
+        expect(el('cmn-bottom-tab-bar').className).not.toContain('absolute');
+        expect(el('main').className).toBe('flex-1 overflow-y-auto overscroll-y-contain');
+        expect(el('main').style.getPropertyValue('--cmn-fab-clearance')).toBe('');
+      }
+    );
 
     it('should pad and scroll-pad main by both bar heights plus safe-area insets', () => {
       fixture.componentRef.setInput('phoneOverlay', true);
       fixture.detectChanges();
       const main = el('main').classList;
-      expect(main).toContain('max-md:pt-[calc(3.5rem+env(safe-area-inset-top))]');
-      expect(main).toContain('max-md:scroll-pt-[calc(3.5rem+env(safe-area-inset-top))]');
+      expect(main).toContain('pt-[calc(3.5rem+env(safe-area-inset-top))]');
+      expect(main).toContain('scroll-pt-[calc(3.5rem+env(safe-area-inset-top))]');
       expect(main).toContain(
-        'max-md:pb-[calc(64px+16px+env(safe-area-inset-bottom)+var(--cmn-fab-clearance,0px))]'
+        'pb-[calc(64px+16px+env(safe-area-inset-bottom)+var(--cmn-fab-clearance,0px))]'
       );
       expect(main).toContain(
-        'max-md:scroll-pb-[calc(64px+16px+env(safe-area-inset-bottom)+var(--cmn-fab-clearance,0px))]'
+        'scroll-pb-[calc(64px+16px+env(safe-area-inset-bottom)+var(--cmn-fab-clearance,0px))]'
       );
     });
 
@@ -359,8 +427,8 @@ describe('AppLayoutComponent', () => {
       fixture.componentRef.setInput('navItems', []);
       fixture.componentRef.setInput('phoneOverlay', true);
       fixture.detectChanges();
-      expect(el('main').className).toContain('max-md:pt-');
-      expect(el('main').className).not.toContain('max-md:pb-');
+      expect(el('main').className).toContain('pt-[calc(');
+      expect(el('main').className).not.toContain('pb-[calc(');
     });
   });
 

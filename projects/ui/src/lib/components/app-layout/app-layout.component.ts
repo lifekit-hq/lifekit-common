@@ -19,6 +19,7 @@ import {filter, map} from 'rxjs';
 import {CmnDialogService} from '../../services/dialog/dialog.service';
 import {CmnDrawerService} from '../../services/drawer/drawer.service';
 import {CmnPageActionsService} from '../../services/page-actions/page-actions.service';
+import {CmnShellService} from '../../services/shell/shell.service';
 import {ThemeService} from '../../services/theme/theme.service';
 import {BottomTabBarComponent, MAX_BOTTOM_TABS} from '../bottom-tab-bar/bottom-tab-bar.component';
 import {CommandPaletteComponent} from '../command-palette/command-palette.component';
@@ -58,9 +59,12 @@ export interface AppLayoutAccount {
 const LARGE_TITLE_BOX_CLASSES =
   'mx-auto w-full max-w-[1200px] px-cmn-4 pt-cmn-4 md:px-cmn-8 md:pt-cmn-8';
 
-/** Phone overlay: the bars sit over main below md instead of in flow. */
-const OVERLAY_TOP_BAR_CLASSES = 'max-md:absolute max-md:inset-x-0 max-md:top-0 max-md:z-30';
-const OVERLAY_TAB_BAR_CLASSES = 'max-md:absolute max-md:inset-x-0 max-md:bottom-0 max-md:z-30';
+/** Only the phone shell shows the tab bar; the other shells show the sidebar or its rail. */
+const PHONE_ONLY_CLASSES = 'hidden';
+
+/** Phone overlay: in the phone shell the bars sit over main instead of in flow. */
+const OVERLAY_TOP_BAR_CLASSES = 'absolute inset-x-0 top-0 z-30';
+const OVERLAY_TAB_BAR_CLASSES = 'absolute inset-x-0 bottom-0 z-30';
 /**
  * Notices (install hint, offline banner, update prompt) pin to the top of main, in flow below
  * the top bar. Sticky offsets are measured from main's content box, which main's overlay
@@ -71,7 +75,7 @@ const NOTICES_BASE_CLASSES = 'sticky top-0 z-20 flex flex-col empty:hidden';
 const MAIN_BASE_CLASSES = 'flex-1 overflow-y-auto overscroll-y-contain';
 /** Clears the top bar: its 3.5rem height plus the top safe-area inset. */
 const MAIN_OVERLAY_TOP_CLASSES =
-  'max-md:pt-[calc(3.5rem+env(safe-area-inset-top))] max-md:scroll-pt-[calc(3.5rem+env(safe-area-inset-top))]';
+  'pt-[calc(3.5rem+env(safe-area-inset-top))] scroll-pt-[calc(3.5rem+env(safe-area-inset-top))]';
 /**
  * Clears the floating tab bar: its 64px height, the 8px gap under it, the bottom safe-area
  * inset, and 8px of breathing room so the last item scrolls clear of the pill. Adds the
@@ -79,8 +83,8 @@ const MAIN_OVERLAY_TOP_CLASSES =
  * `floatingActionClearance`; 0px when none is declared).
  */
 const MAIN_OVERLAY_BOTTOM_CLASSES =
-  'max-md:pb-[calc(64px+16px+env(safe-area-inset-bottom)+var(--cmn-fab-clearance,0px))] ' +
-  'max-md:scroll-pb-[calc(64px+16px+env(safe-area-inset-bottom)+var(--cmn-fab-clearance,0px))]';
+  'pb-[calc(64px+16px+env(safe-area-inset-bottom)+var(--cmn-fab-clearance,0px))] ' +
+  'scroll-pb-[calc(64px+16px+env(safe-area-inset-bottom)+var(--cmn-fab-clearance,0px))]';
 
 @Component({
   selector: 'cmn-app-layout',
@@ -92,20 +96,21 @@ const MAIN_OVERLAY_BOTTOM_CLASSES =
     <!-- Pinned with fixed/inset-0, not viewport units: h-screen/h-dvh overshoot the real
          viewport in iOS home-screen apps, which scrolls the document -->
     <div class="fixed inset-0 flex overflow-hidden bg-surface-bg">
-      <!-- Sidebar from md up; below md the bottom tab bar takes over -->
+      <!-- The sidebar, or its rail, outside the phone shell; the phone shell has the bottom tab bar -->
       <cmn-sidebar-nav
         [items]="navItems()"
         [activeRoute]="effectiveActiveRoute()"
         [versionLabel]="versionLabel()"
         [brand]="brand()"
+        [rail]="shellMode() === 'rail'"
+        [class]="sidebarClasses()"
         (navClick)="navClick.emit($event)"
         (collapsedChange)="collapsedChange.emit($event)"
-        class="hidden md:block"
       />
       <div class="relative flex min-w-0 flex-1 flex-col overflow-hidden">
         <cmn-top-bar
-          [class]="phoneOverlay() ? overlayTopBarClasses : ''"
-          [overlay]="phoneOverlay()"
+          [class]="overlay() ? overlayTopBarClasses : ''"
+          [overlay]="overlay()"
           [title]="barTitle()"
           [showBack]="back() !== null"
           [actions]="pageActions()"
@@ -143,10 +148,9 @@ const MAIN_OVERLAY_BOTTOM_CLASSES =
           [items]="phoneTabs()"
           [more]="phoneMore()"
           [activeRoute]="phoneActiveRoute()"
-          [floating]="phoneOverlay()"
-          [class]="phoneOverlay() ? overlayTabBarClasses : ''"
+          [floating]="overlay()"
+          [class]="tabBarClasses()"
           (navClick)="onTabClick($event)"
-          class="md:hidden"
         />
       </div>
     </div>
@@ -160,6 +164,7 @@ export class AppLayoutComponent {
   private readonly pageActionsService = inject(CmnPageActionsService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly shell = inject(ShellNavigationService);
+  private readonly shellService = inject(CmnShellService);
   private paletteOpen = false;
 
   private readonly main = viewChild.required<ElementRef<HTMLElement>>('main');
@@ -226,7 +231,7 @@ export class AppLayoutComponent {
   /** Product name shown in the sidebar header; defaults to "Lifekit". */
   public readonly brand = input<string>('Lifekit');
   /**
-   * Routes (from `navItems`) shown as bottom tabs below the md breakpoint, in this order, at
+   * Routes (from `navItems`) shown as bottom tabs in the phone shell, in this order, at
    * most four. Empty means the first four nav items. Every other nav item is reached from the
    * More page (`moreRoute`).
    */
@@ -237,20 +242,21 @@ export class AppLayoutComponent {
    * anything else), with its title and back declared in route data like every page. The tab is
    * active on this route and on any nav item that is not a tab; a dot marks it while one of
    * those items has a badge. Left empty there is no More tab, so nav items past the tabs are not
-   * reachable on a phone. Below md only: the sidebar never lists it.
+   * reachable on a phone. The phone shell only: the sidebar never lists it.
    */
   public readonly moreRoute = input<string>('');
   /**
-   * Opt-in edge-to-edge phone layout, for PWAs that draw under the status bar: below md the top
+   * Opt-in edge-to-edge phone layout, for PWAs that draw under the status bar: in the phone shell the top
    * bar and a floating tab bar sit translucent over main, which scrolls under both and is padded
-   * (including safe-area insets) so nothing is hidden at rest. Desktop is unchanged.
+   * (including safe-area insets) so nothing is hidden at rest. Only the phone shell (see
+   * `CmnShellService`) takes the overlay; the rail and the sidebar are unchanged.
    */
   public readonly phoneOverlay = input<boolean>(false);
   /**
    * Height in px that a consumer's floating action button (e.g. a chat launcher) occupies above
    * the tab bar, including its own gap to the bar. With `phoneOverlay`, main reserves this much
    * extra space at the bottom so the last row scrolls clear of the button instead of under it.
-   * 0 (default) reserves nothing; it has no effect at md and up or without `phoneOverlay`,
+   * 0 (default) reserves nothing; it has no effect outside the phone shell or without `phoneOverlay`,
    * where the button is expected not to overlap content. Project the button into the
    * `[cmnAppLayoutFab]` slot and the layout hides it while a bottom sheet is open. Banners
    * project into `[cmnAppLayoutNotice]`: they render in flow below the top bar, never over it.
@@ -300,13 +306,21 @@ export class AppLayoutComponent {
   });
 
   public readonly mainClass = computed<string>(() => {
-    if (!this.phoneOverlay()) {
+    if (!this.overlay()) {
       return MAIN_BASE_CLASSES;
     }
     // The tab bar renders nothing without destinations, so there is nothing to clear below.
     const bottom = this.hasTabBar() ? ` ${MAIN_OVERLAY_BOTTOM_CLASSES}` : '';
     return `${MAIN_BASE_CLASSES} ${MAIN_OVERLAY_TOP_CLASSES}${bottom}`;
   });
+
+  /** The shell this window and device call for: tab bar, rail or sidebar. */
+  protected readonly shellMode = this.shellService.mode;
+
+  /** The phone overlay applies: opted in, and the phone shell is showing. */
+  protected readonly overlay = computed<boolean>(
+    () => this.phoneOverlay() && this.shellService.isPhone()
+  );
 
   /** What the current page declares in route data, or null when it declares nothing. */
   protected readonly chrome = computed<PageChromeData | null>(() =>
@@ -361,7 +375,18 @@ export class AppLayoutComponent {
 
   protected readonly fabClearance = computed<number | null>(() => {
     const clearance = this.floatingActionClearance();
-    return this.phoneOverlay() && this.hasTabBar() && clearance > 0 ? clearance : null;
+    return this.overlay() && this.hasTabBar() && clearance > 0 ? clearance : null;
+  });
+
+  protected readonly sidebarClasses = computed<string>(() =>
+    this.shellService.isPhone() ? PHONE_ONLY_CLASSES : 'block'
+  );
+
+  protected readonly tabBarClasses = computed<string>(() => {
+    if (!this.shellService.isPhone()) {
+      return PHONE_ONLY_CLASSES;
+    }
+    return this.overlay() ? OVERLAY_TAB_BAR_CLASSES : '';
   });
 
   protected readonly noticesClasses = NOTICES_BASE_CLASSES;

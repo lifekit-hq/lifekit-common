@@ -19,7 +19,7 @@ export const DarkMode: Story = {
   args: {title: 'Dashboard', isDark: true, avatarLabel: 'Denys'},
 };
 
-/** `overlay`: below md the bar turns translucent and blurred and pads by the top safe-area inset. */
+/** `overlay`: the bar turns translucent and blurred and pads by the top safe-area inset; the app layout sets it in the phone shell. */
 export const Overlay: Story = {
   args: {title: 'Dashboard', isDark: false, avatarLabel: 'Denys', overlay: true},
   globals: {viewport: {value: 'mobile2', isRotated: false}},

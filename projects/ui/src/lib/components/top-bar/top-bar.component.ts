@@ -46,12 +46,12 @@ const INLINE_TITLE_CLASSES =
 const INLINE_LABEL_CLASSES = `${INLINE_TITLE_CLASSES} transition-opacity duration-150 motion-reduce:transition-none`;
 const HEADER_SOLID_CLASSES = 'bg-surface-card';
 /**
- * Below md the bar is translucent and blurred so content scrolling under it shows through, and
- * it grows by the top safe-area inset so it sits under the status bar of an edge-to-edge PWA.
+ * In overlay mode the bar is translucent and blurred so content scrolling under it shows through,
+ * and it grows by the top safe-area inset so it sits under the status bar of an edge-to-edge PWA.
  */
 const HEADER_OVERLAY_CLASSES =
-  'bg-surface-card max-md:h-[calc(3.5rem+env(safe-area-inset-top))] max-md:pt-[env(safe-area-inset-top)] ' +
-  'max-md:bg-[color-mix(in_srgb,var(--color-surface-card)_80%,transparent)] max-md:backdrop-blur-md';
+  'h-[calc(3.5rem+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] ' +
+  'bg-[color-mix(in_srgb,var(--color-surface-card)_80%,transparent)] backdrop-blur-md';
 
 @Component({
   selector: 'cmn-top-bar',
@@ -155,7 +155,10 @@ export class TopBarComponent {
    */
   public readonly avatarLabel = input<string>('');
   public readonly avatarMenuItems = input<MenuItem[]>([]);
-  /** Phone overlay styling: translucent, blurred, and padded by the top safe-area inset below md. */
+  /**
+   * Phone overlay styling: translucent, blurred, and padded by the top safe-area inset. The
+   * bar applies it whenever set; `cmn-app-layout` sets it only in the phone shell.
+   */
   public readonly overlay = input<boolean>(false);
   /** Renders the back chevron at the leading edge; pressing it emits `backClick`. */
   public readonly showBack = input<boolean>(false);

@@ -81,4 +81,34 @@ describe('SidebarNavComponent', () => {
     expect(emitted.length).toBe(1);
     expect(emitted[0].route).toBe('/dashboard');
   });
+
+  describe('as a rail', () => {
+    beforeEach(() => {
+      fixture.componentRef.setInput('rail', true);
+      fixture.detectChanges();
+    });
+
+    it('should collapse to icons, titled by label, with no brand text', () => {
+      const host = fixture.nativeElement as HTMLElement;
+      expect(host.querySelector('aside')?.classList).toContain('w-16');
+      expect(host.textContent).not.toContain('Dashboard');
+      expect(host.textContent).not.toContain('Lifekit');
+      expect(host.querySelector('nav button')?.getAttribute('title')).toBe('Dashboard');
+    });
+
+    it('should offer no toggle to widen it', () => {
+      expect(fixture.nativeElement.querySelector('button[aria-label$="sidebar"]')).toBeNull();
+    });
+
+    it('should give the reader their own collapsed choice back once it is no longer a rail', () => {
+      fixture.componentRef.setInput('rail', false);
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelector('aside')?.classList).toContain('w-60');
+      fixture.componentInstance.toggleCollapsed();
+      fixture.componentRef.setInput('rail', true);
+      fixture.componentRef.setInput('rail', false);
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelector('aside')?.classList).toContain('w-16');
+    });
+  });
 });

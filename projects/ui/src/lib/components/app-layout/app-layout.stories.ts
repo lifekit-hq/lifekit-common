@@ -1,9 +1,11 @@
+import {BreakpointObserver} from '@angular/cdk/layout';
 import {ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA, inject} from '@angular/core';
 import {LkInstallHint, LkOfflineBanner, LkUpdatePrompt} from '@lifekit-hq/elements';
 import type {Meta, StoryObj} from '@storybook/angular';
 import {moduleMetadata} from '@storybook/angular';
 
 import {CmnDrawerService} from '../../services/drawer/drawer.service';
+import {PinnedBreakpointObserver} from '../../services/shell/pinned-breakpoints';
 import type {CommandPaletteItem} from '../command-palette/command-palette-item.model';
 import type {MenuItem} from '../menu/menu.component';
 import type {NavItem} from '../sidebar-nav/sidebar-nav.component';
@@ -70,6 +72,13 @@ const MORE_ROUTE = '/more';
 
 const PHONE = {viewport: {value: 'mobile2', isRotated: false}};
 
+/** Devices the shell stories are measured at, beside the toolbar's own phone presets. */
+const SHELL_VIEWPORTS = {
+  phoneLandscape: {name: 'Phone landscape', styles: {width: '844px', height: '390px'}},
+  tabletPortrait: {name: 'Tablet portrait', styles: {width: '820px', height: '1180px'}},
+  tabletLandscape: {name: 'Tablet landscape', styles: {width: '1180px', height: '820px'}},
+};
+
 const AVATAR_MENU: MenuItem[] = [
   {id: 'profile', label: 'Profile', icon: 'User'},
   {id: 'logout', label: 'Log out', icon: 'LogOut', destructive: true},
@@ -94,7 +103,7 @@ const meta: Meta<AppLayoutComponent> = {
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
     }),
   ],
-  parameters: {layout: 'fullscreen'},
+  parameters: {layout: 'fullscreen', viewport: {options: SHELL_VIEWPORTS}},
   render: args => ({
     props: args,
     template: `
@@ -191,7 +200,7 @@ export const Dark: Story = {
 };
 
 /**
- * Below the md breakpoint the sidebar gives way to a bottom tab bar: the four `tabRoutes`
+ * In the phone shell (under 600px, or a landscape phone) the sidebar gives way to a bottom tab bar: the four `tabRoutes`
  * as tabs, then a More tab because the app declares `moreRoute`. More is a page the app builds,
  * not a sheet; the shell only gives it a tab, the active highlight and a dot when a nav item
  * that is not a tab has a badge. The top bar compacts to the title, an icon search button, the
@@ -210,6 +219,39 @@ export const Phone: Story = {
 export const PhoneDark: Story = {
   args: {...Phone.args},
   globals: {...PHONE, theme: 'dark'},
+};
+
+/**
+ * The shell follows the device, not the width alone. A landscape phone (844x390, wider than the
+ * 600px medium class) keeps the tab bar because the viewport is short and the pointer coarse.
+ * Storybook's viewport cannot make the pointer coarse, so this story pins the device with
+ * `PinnedBreakpointObserver`; `e2e/phone` checks the real media queries on an emulated phone.
+ */
+export const PhoneLandscape: Story = {
+  args: {...Phone.args},
+  decorators: [
+    moduleMetadata({
+      providers: [
+        {provide: BreakpointObserver, useValue: new PinnedBreakpointObserver('phone-landscape')},
+      ],
+    }),
+  ],
+  globals: {viewport: {value: 'phoneLandscape', isRotated: false}},
+};
+
+/**
+ * The medium window class (600-839px, here a 820px portrait tablet) shows the sidebar as a
+ * rail: collapsed to icons, titled by label, with no toggle to widen it.
+ */
+export const TabletPortraitRail: Story = {
+  args: {...Phone.args},
+  globals: {viewport: {value: 'tabletPortrait', isRotated: false}},
+};
+
+/** The expanded window class (840px and up, here a 1180px landscape tablet) opens the full sidebar. */
+export const TabletLandscapeSidebar: Story = {
+  args: {...Phone.args},
+  globals: {viewport: {value: 'tabletLandscape', isRotated: false}},
 };
 
 /**
