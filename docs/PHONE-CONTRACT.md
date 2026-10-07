@@ -65,7 +65,7 @@ top), so it should drop that handler. The sidebar still leaves navigating to the
 
 ### The More tab
 
-Below 600px the tab bar shows up to four destinations and, when the app sets `moreRoute`, a last
+In the phone shell (under 600px, or a landscape phone) the tab bar shows up to four destinations and, when the app sets `moreRoute`, a last
 **More** tab. More is an ordinary page that the app declares as a route and fills itself; the shell
 supplies no content for it.
 
@@ -83,7 +83,7 @@ supplies no content for it.
   re-tap scrolls to top, then pops to the root, like any other tab.
 - The More tab is highlighted on the More page and on any nav item that is not a tab. It shows a dot
   while any of those items has a badge.
-- Nav items left off `tabRoutes` stay in the sidebar (600px and up). On a phone they are reached
+- Nav items left off `tabRoutes` stay in the sidebar or rail. On a phone they are reached
   from the More page, which links to them. Pages reached from More set `parent: '/more'`.
 - Without `moreRoute` there is no More tab, and a nav item beyond the fourth is not reachable from
   the tab bar.
@@ -162,4 +162,5 @@ guarantee above is only gating once its check exists.
 | Shell-owned scroll and tab state        | Built: checked by the suite's "back restores scroll"; see "Scroll and tab state"                  |
 | One state pattern                       | Target (policy rules 1, 2 enforced by `cmn-async-state`)                                          |
 | Touch size (44pt chrome, labels, hints) | Built: `--size-touch`, `.cmn-hit-slop`; the suite enforces 44x44 at 390x844, labels at 320, hints |
-| Overlays, layout by size, appearance    | Target                                                                                            |
+| Layout by size                          | Built: `CmnShellService` picks tab bar, rail or sidebar; the suite checks each width and device   |
+| Overlays, appearance                    | Target                                                                                            |
