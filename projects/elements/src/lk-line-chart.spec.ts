@@ -89,6 +89,54 @@ describe('LkLineChart', () => {
     expect(chart?.options.scales['y'].display).toBe(false);
   });
 
+  it('defaults to auto-scaled y and even x spacing', () => {
+    expect(el.yDomain).toBeUndefined();
+    expect(el.xSpacing).toBe('even');
+  });
+
+  it('reads the x-spacing attribute', async () => {
+    el.setAttribute('x-spacing', 'time');
+    await el.updateComplete;
+    expect(el.xSpacing).toBe('time');
+  });
+
+  interface BuiltChart {
+    options: {scales: Record<string, {type?: string; min?: number; max?: number}>};
+    data: {datasets: {data: unknown[]}[]};
+  }
+  const builtChart = (): BuiltChart | null => (el as unknown as {chart: BuiltChart | null}).chart;
+
+  it('fixes the y range of a compact chart and follows later changes', async () => {
+    el.compact = true;
+    el.yDomain = {min: 0, max: 3};
+    await el.updateComplete;
+    expect(builtChart()?.options.scales['y'].min).toBe(0);
+    expect(builtChart()?.options.scales['y'].max).toBe(3);
+    el.yDomain = {min: 1};
+    await el.updateComplete;
+    expect(builtChart()?.options.scales['y'].min).toBe(1);
+    expect(builtChart()?.options.scales['y'].max).toBeUndefined();
+  });
+
+  it('places points by time once x-spacing is time, rebuilding the chart', async () => {
+    el.points = [
+      {label: 'a', value: 1, time: 1_000},
+      {label: 'b', value: 2, time: 9_000},
+    ];
+    await el.updateComplete;
+    expect(builtChart()?.options.scales['x'].type).toBe('category');
+    el.xSpacing = 'time';
+    await el.updateComplete;
+    expect(builtChart()?.options.scales['x'].type).toBe('linear');
+    expect(builtChart()?.data.datasets[0].data).toEqual([
+      {x: 1_000, y: 1},
+      {x: 9_000, y: 2},
+    ]);
+    el.points = [{label: 'c', value: 5, time: 4_000}];
+    await el.updateComplete;
+    expect(builtChart()?.data.datasets[0].data).toEqual([{x: 4_000, y: 5}]);
+  });
+
   it('defaults points to empty array', () => {
     expect(el.points).toEqual([]);
   });

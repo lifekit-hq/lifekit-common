@@ -31,6 +31,12 @@ const meta: Meta<LineChartComponent> = {
   component: LineChartComponent,
   tags: ['autodocs'],
   argTypes: {
+    xSpacing: {
+      control: 'inline-radio',
+      options: ['even', 'time'],
+      description:
+        "`'even'` (default) gives each point an equal slot; `'time'` places each by the epoch-ms `time` on it.",
+    },
     valueFormat: {
       control: 'inline-radio',
       options: ['currency', 'number', 'percent'],
@@ -81,6 +87,43 @@ export const Compact: Story = {
     template:
       '<div style="display:flex;align-items:center;gap:1rem"><span>Trend</span><cmn-line-chart [data]="data" [compact]="compact" style="width:12rem;height:2.5rem"></cmn-line-chart></div>',
   }),
+};
+
+const DAY_MS = 86_400_000;
+const FIRST_SIGNAL = Date.UTC(2026, 5, 1);
+const SIGNAL_LEVELS = [1, 2, 2, 3, 1, 2];
+// A burst of signals on the first days, then a long quiet gap, then a late pair.
+const SIGNAL_DAYS = [0, 1, 2, 3, 70, 71];
+
+const SIGNAL_TREND: ChartPoint[] = SIGNAL_LEVELS.map((value, i) => ({
+  label: `Signal ${i + 1}`,
+  value,
+  time: FIRST_SIGNAL + SIGNAL_DAYS[i] * DAY_MS,
+}));
+
+/**
+ * A sparkline that keeps what the trend means: `yDomain` pins low/medium/high (1-3) to fixed
+ * heights, so a low-to-medium series does not draw like a medium-to-high one, and
+ * `xSpacing="time"` places each point by its timestamp, so the burst stays a burst.
+ */
+export const CompactFixedDomainTimeSpaced: Story = {
+  args: {data: SIGNAL_TREND, compact: true, yDomain: {min: 1, max: 3}, xSpacing: 'time'},
+  render: args => ({
+    props: args,
+    template:
+      '<div style="display:flex;align-items:center;gap:1rem"><span>Signals</span><cmn-line-chart [data]="data" [compact]="compact" [yDomain]="yDomain" [xSpacing]="xSpacing" style="width:12rem;height:2.5rem"></cmn-line-chart></div>',
+  }),
+};
+
+/** The same options on the full chart: the y axis spans the fixed domain and x ticks read as dates. */
+export const FixedDomainTimeSpaced: Story = {
+  args: {
+    data: SIGNAL_TREND,
+    label: 'Radar signals',
+    valueFormat: 'number',
+    yDomain: {min: 0, max: 4},
+    xSpacing: 'time',
+  },
 };
 
 export const Empty: Story = {

@@ -1,14 +1,21 @@
 import {
   buildLineChartConfig,
+  type ChartDomain,
   type ChartPoint,
   type ChartValueFormat,
+  type ChartXSpacing,
   resolveLineChartTokens,
   updateLineChart,
 } from '@lifekit-hq/charts-core';
 import {Chart} from 'chart.js';
 import {css, html, LitElement, type PropertyDeclarations, type TemplateResult} from 'lit';
 
-export type {ChartPoint, ChartValueFormat} from '@lifekit-hq/charts-core';
+export type {
+  ChartDomain,
+  ChartPoint,
+  ChartValueFormat,
+  ChartXSpacing,
+} from '@lifekit-hq/charts-core';
 
 /**
  * Framework-free line chart powered by Chart.js and themed via @lifekit/tokens CSS custom
@@ -25,6 +32,12 @@ export type {ChartPoint, ChartValueFormat} from '@lifekit-hq/charts-core';
  * Set `compact` (attribute) for a sparkline: only the line, filling the host - no title, frame,
  * axes, gridlines or tooltip, and no animation. Size it with a `height` on the element (it
  * defaults to 2rem).
+ *
+ * Two optional, additive scale controls work in both modes. `yDomain` (`{min?, max?}`, property
+ * only) fixes the y range instead of auto-scaling it to the data, so a series keeps its height
+ * against a known scale. `xSpacing="time"` (`x-spacing` attribute) places each point by the
+ * epoch-ms `time` on it instead of in an equal slot, so a burst of points reads as a burst;
+ * points without a `time` are then left out.
  *
  * @example
  * <lk-line-chart label="Net Worth" currency="USD"></lk-line-chart>
@@ -96,6 +109,8 @@ export class LkLineChart extends LitElement {
     currency: {type: String},
     valueFormat: {attribute: 'value-format'},
     compact: {type: Boolean, reflect: true},
+    yDomain: {attribute: false},
+    xSpacing: {attribute: 'x-spacing'},
   };
 
   declare public points: ChartPoint[];
@@ -103,6 +118,8 @@ export class LkLineChart extends LitElement {
   declare public currency: string;
   declare public valueFormat: ChartValueFormat;
   declare public compact: boolean;
+  declare public yDomain: ChartDomain | undefined;
+  declare public xSpacing: ChartXSpacing;
 
   constructor() {
     super();
@@ -111,6 +128,8 @@ export class LkLineChart extends LitElement {
     this.currency = 'USD';
     this.valueFormat = 'currency';
     this.compact = false;
+    this.yDomain = undefined;
+    this.xSpacing = 'even';
   }
 
   protected override firstUpdated(): void {
@@ -126,25 +145,36 @@ export class LkLineChart extends LitElement {
         resolveLineChartTokens(),
         this.currency,
         this.valueFormat,
-        this.compact
+        this.compact,
+        {yDomain: this.yDomain, xSpacing: this.xSpacing}
       )
     );
   }
 
   public override updated(changed: Map<string, unknown>): void {
-    // `compact` shapes the chart config, so a later change rebuilds it (the first update already built it).
-    if (this.chart && changed.has('compact') && changed.get('compact') !== undefined) {
+    // `compact` and `xSpacing` shape the chart config, so a later change rebuilds it (the first
+    // update already built it).
+    if (
+      this.chart &&
+      ((changed.has('compact') && changed.get('compact') !== undefined) ||
+        (changed.has('xSpacing') && changed.get('xSpacing') !== undefined))
+    ) {
       this.rebuildChart();
       return;
     }
     if (
       this.chart &&
-      (changed.has('points') || changed.has('currency') || changed.has('valueFormat'))
+      (changed.has('points') ||
+        changed.has('currency') ||
+        changed.has('valueFormat') ||
+        changed.has('yDomain'))
     ) {
-      updateLineChart(this.chart, this.points, {
-        currency: this.currency,
-        valueFormat: this.valueFormat,
-      });
+      updateLineChart(
+        this.chart,
+        this.points,
+        {currency: this.currency, valueFormat: this.valueFormat},
+        {yDomain: this.yDomain, xSpacing: this.xSpacing}
+      );
     }
   }
 

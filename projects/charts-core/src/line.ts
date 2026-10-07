@@ -11,7 +11,12 @@ import {
   Tooltip,
 } from 'chart.js';
 
-import {type ChartPoint, type ChartValueFormat} from './types';
+import {
+  type ChartDomain,
+  type ChartPoint,
+  type ChartValueFormat,
+  type ChartXSpacing,
+} from './types';
 import {CHART_FONT_SIZE, chartFontFamily, cssVar, fontFamily, valueFormatter} from './utils';
 
 /** Inset (px) that keeps a compact chart's 2px stroke from being clipped at the canvas edge. */
@@ -44,9 +49,57 @@ export function resolveLineChartTokens(): LineChartTokens {
   };
 }
 
-function buildLineDataset(points: ChartPoint[], accent: string): ChartDataset<'line'> {
+/** The scale options a line chart takes on top of its points: all optional, all additive. */
+export interface LineChartScale {
+  /** Fixes the y range instead of auto-scaling it to the data; an omitted bound stays auto. */
+  yDomain?: ChartDomain;
+  /** `'time'` places points by `ChartPoint.time` rather than in equal slots; default `'even'`. */
+  xSpacing?: ChartXSpacing;
+}
+
+const TIME_TICK_FORMAT = new Intl.DateTimeFormat('en-US', {month: 'short', day: 'numeric'});
+
+/**
+ * The points a chart draws. Time spacing needs a timestamp, so points without a finite `time`
+ * are left out, and the rest are ordered by it so the line never doubles back.
+ */
+function drawnPoints(points: ChartPoint[], xSpacing: ChartXSpacing): ChartPoint[] {
+  if (xSpacing !== 'time') {
+    return points;
+  }
+  return points
+    .filter(p => Number.isFinite(p.time))
+    .sort((a, b) => (a.time as number) - (b.time as number));
+}
+
+/**
+ * A time-spaced x tick's date. Linear ticks fall on round timestamps, not day boundaries, so a
+ * short span repeats a date across several ticks; only the first of a run is labelled.
+ */
+function timeTick(val: string | number, index: number, ticks: {value: number}[]): string | null {
+  const label = TIME_TICK_FORMAT.format(Number(val));
+  const previous = index > 0 ? ticks[index - 1] : undefined;
+  return previous && TIME_TICK_FORMAT.format(previous.value) === label ? null : label;
+}
+
+function lineData(points: ChartPoint[], xSpacing: ChartXSpacing): ChartDataset<'line'>['data'] {
+  return xSpacing === 'time'
+    ? points.map(p => ({x: p.time as number, y: p.value}))
+    : points.map(p => p.value);
+}
+
+/** Tooltip title of a time-spaced point: its label, since the x value is a bare timestamp. */
+function timeTitle(points: ChartPoint[]): (items: {dataIndex: number}[]) => string {
+  return items => points[items[0]?.dataIndex]?.label ?? '';
+}
+
+function buildLineDataset(
+  points: ChartPoint[],
+  accent: string,
+  xSpacing: ChartXSpacing
+): ChartDataset<'line'> {
   return {
-    data: points.map(p => p.value),
+    data: lineData(points, xSpacing),
     borderColor: accent,
     backgroundColor: `${accent}1a`,
     borderWidth: 2,
@@ -66,14 +119,19 @@ export function buildLineChartConfig(
   tokens: LineChartTokens,
   currency: string,
   valueFormat: ChartValueFormat = 'currency',
-  compact = false
+  compact = false,
+  scale: LineChartScale = {}
 ): ChartConfiguration<'line'> {
   const format = valueFormatter(valueFormat, currency);
+  const xSpacing = scale.xSpacing ?? 'even';
+  const timed = xSpacing === 'time';
+  const drawn = drawnPoints(points, xSpacing);
   return {
     type: 'line',
     data: {
-      labels: points.map(p => p.label),
-      datasets: [buildLineDataset(points, tokens.accent)],
+      // A time-spaced chart reads x from the data, so it has no category labels.
+      ...(timed ? {} : {labels: drawn.map(p => p.label)}),
+      datasets: [buildLineDataset(drawn, tokens.accent, xSpacing)],
     },
     options: {
       responsive: true,
@@ -90,21 +148,28 @@ export function buildLineChartConfig(
           mode: 'index',
           intersect: false,
           callbacks: {
+            ...(timed ? {title: timeTitle(drawn)} : {}),
             label: ctx => format(ctx.parsed.y as number, false),
           },
         },
       },
       scales: {
         x: {
+          // Linear rather than a time scale: timestamps need no date adapter, and `bounds: 'data'`
+          // makes the line span the whole width instead of rounding out to tick values.
+          ...(timed ? {type: 'linear' as const, bounds: 'data' as const} : {}),
           display: !compact,
           grid: {color: tokens.borderDefault},
           ticks: {
             color: tokens.textSecondary,
             font: {family: fontFamily(tokens), size: CHART_FONT_SIZE},
+            ...(timed ? {callback: timeTick} : {}),
           },
         },
         y: {
           display: !compact,
+          min: scale.yDomain?.min,
+          max: scale.yDomain?.max,
           grid: {color: tokens.borderDefault},
           ticks: {
             color: tokens.textSecondary,
@@ -123,18 +188,35 @@ export interface LineChartFormat {
   valueFormat?: ChartValueFormat;
 }
 
+/**
+ * Re-points a live chart at new points, format and y domain. `scale.xSpacing` must match what the
+ * chart was built with: it changes the x scale type, so a change means building a new chart.
+ */
 export function updateLineChart(
   chart: Chart,
   points: ChartPoint[],
-  format?: LineChartFormat
+  format?: LineChartFormat,
+  scale: LineChartScale = {}
 ): void {
+  const xSpacing = scale.xSpacing ?? 'even';
+  const drawn = drawnPoints(points, xSpacing);
+  if (xSpacing !== 'time') {
+    // eslint-disable-next-line no-param-reassign
+    chart.data.labels = drawn.map(p => p.label);
+  }
   // eslint-disable-next-line no-param-reassign
-  chart.data.labels = points.map(p => p.label);
-  // eslint-disable-next-line no-param-reassign
-  chart.data.datasets[0].data = points.map(p => p.value);
+  chart.data.datasets[0].data = lineData(drawn, xSpacing);
+  const callbacks = chart.options?.plugins?.tooltip?.callbacks;
+  if (xSpacing === 'time' && callbacks) {
+    callbacks.title = timeTitle(drawn);
+  }
+  const yScale = chart.options?.scales?.['y'];
+  if (yScale) {
+    yScale.min = scale.yDomain?.min;
+    yScale.max = scale.yDomain?.max;
+  }
   if (format) {
     const formatter = valueFormatter(format.valueFormat ?? 'currency', format.currency);
-    const callbacks = chart.options.plugins?.tooltip?.callbacks;
     if (callbacks) {
       callbacks.label = ctx => formatter(ctx.parsed.y as number, false);
     }

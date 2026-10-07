@@ -106,11 +106,13 @@ in this pilot.
 
 | Property      | Type                                                                | Default      | Description                                                                                                                                                                           |
 | ------------- | ------------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `points`      | `ChartPoint[]`                                                      | `[]`         | Data series — `{label, value}` pairs                                                                                                                                                  |
+| `points`      | `ChartPoint[]`                                                      | `[]`         | Data series — `{label, value, time?}` points                                                                                                                                          |
 | `label`       | `string`                                                            | `''`         | Card title rendered above the chart                                                                                                                                                   |
 | `currency`    | `string`                                                            | `'USD'`      | ISO 4217 code, used when `valueFormat` is `'currency'`                                                                                                                                |
 | `valueFormat` | `'currency' \| 'number' \| 'percent' \| (value, compact) => string` | `'currency'` | How ticks and tooltips render values. `'number'` and `'percent'` carry no currency symbol; a function (property only) gets `compact: true` for axis ticks. Attribute: `value-format`. |
 | `compact`     | `boolean`                                                           | `false`      | Sparkline: just the line and fill - no title, frame, axes, gridlines or tooltip, no animation. Height follows a `height` on the element (min `2rem`).                                 |
+| `yDomain`     | `{min?: number, max?: number}`                                      | `undefined`  | Fixes the y range instead of auto-scaling it to the data; an omitted bound stays auto. Property only. Works in compact mode.                                                          |
+| `xSpacing`    | `'even' \| 'time'`                                                  | `'even'`     | `'time'` places each point by the epoch-ms `time` on it instead of in an equal slot (points without one are left out). Attribute: `x-spacing`. Works in compact mode.                 |
 
 ```html
 <lk-line-chart label="Net Worth" currency="USD"></lk-line-chart>

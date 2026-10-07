@@ -90,4 +90,53 @@ describe('LineChartComponent', () => {
       expect(options.scales['y'].display).toBe(false);
     });
   });
+
+  describe('yDomain and xSpacing', () => {
+    interface BuiltChart {
+      options: {scales: Record<string, {type?: string; min?: number; max?: number}>};
+      data: {datasets: {data: unknown[]}[]};
+    }
+    const chart = (): BuiltChart =>
+      (fixture.componentInstance as unknown as {chart: BuiltChart}).chart;
+    const TIMED = [
+      {label: 'a', value: 1, time: 1_000},
+      {label: 'b', value: 2, time: 9_000},
+    ];
+
+    it('defaults to an auto-scaled y and even x spacing', () => {
+      expect(fixture.componentInstance.yDomain()).toBeUndefined();
+      expect(fixture.componentInstance.xSpacing()).toBe('even');
+      expect(chart().options.scales['y'].min).toBeUndefined();
+      expect(chart().options.scales['x'].type).toBe('category');
+    });
+
+    it('fixes the y range, in compact mode too, and follows later changes', async () => {
+      fixture.componentRef.setInput('compact', true);
+      fixture.componentRef.setInput('yDomain', {min: 0, max: 3});
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(chart().options.scales['y'].min).toBe(0);
+      expect(chart().options.scales['y'].max).toBe(3);
+      fixture.componentRef.setInput('yDomain', {min: 1, max: 4});
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(chart().options.scales['y'].max).toBe(4);
+    });
+
+    it('rebuilds on a time x scale when xSpacing turns to time', async () => {
+      fixture.componentRef.setInput('data', TIMED);
+      fixture.componentRef.setInput('xSpacing', 'time');
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(chart().options.scales['x'].type).toBe('linear');
+      expect(chart().data.datasets[0].data).toEqual([
+        {x: 1_000, y: 1},
+        {x: 9_000, y: 2},
+      ]);
+      fixture.componentRef.setInput('data', [{label: 'c', value: 5, time: 4_000}]);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(chart().data.datasets[0].data).toEqual([{x: 4_000, y: 5}]);
+    });
+  });
 });
