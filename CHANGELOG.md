@@ -1,5 +1,38 @@
 # Changelog
 
+## [2.0.0](https://github.com/lifekit-hq/lifekit-common/compare/v1.2.0...v2.0.0) (2026-10-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* **ui:** cmn-bottom-tab-bar drops moreItems for a more NavItem input, and cmn-app-layout drops phoneMoreItems. Apps set moreRoute and build their own More page.
+
+### Features
+
+* **tokens:** brand assets follow the new tokens ([#104](https://github.com/lifekit-hq/lifekit-common/issues/104)) ([e26b5b1](https://github.com/lifekit-hq/lifekit-common/commit/e26b5b177d43018b50c518b94ca986838a8a19d2))
+* **tokens:** design drift check in lifekit-chrome-check ([#111](https://github.com/lifekit-hq/lifekit-common/issues/111)) ([9644f55](https://github.com/lifekit-hq/lifekit-common/commit/9644f55260b5bc4409da460b9213e83091b4dc7f))
+* **tokens:** support base-path apps in the browser-chrome standard and drift check ([#101](https://github.com/lifekit-hq/lifekit-common/issues/101)) ([63d1bab](https://github.com/lifekit-hq/lifekit-common/commit/63d1babed314dab235b97a10023451af72fd5ac0))
+* **ui:** add cmnRelativeTime pipe ([#118](https://github.com/lifekit-hq/lifekit-common/issues/118)) ([f90f5e0](https://github.com/lifekit-hq/lifekit-common/commit/f90f5e0cc38ab071f6e0e350310c4e3a2fe7b74a))
+* **ui:** async-state skeleton, empty and error-action slots ([#116](https://github.com/lifekit-hq/lifekit-common/issues/116)) ([6cbfa42](https://github.com/lifekit-hq/lifekit-common/commit/6cbfa420292a03a820965be0164133e5ab94cc0d))
+* **ui:** one sheet, with More as an app-filled page ([#115](https://github.com/lifekit-hq/lifekit-common/issues/115)) ([626f88f](https://github.com/lifekit-hq/lifekit-common/commit/626f88fde8e57541983225be34d177d92ba411b3))
+* **ui:** page-container matches finance-sentry's page frame, adds none spacing and fill mode ([#103](https://github.com/lifekit-hq/lifekit-common/issues/103)) ([62cee60](https://github.com/lifekit-hq/lifekit-common/commit/62cee609c87a0964894fed07dab8c0a612fd0c83))
+* **ui:** shell owns the scroll ([#114](https://github.com/lifekit-hq/lifekit-common/issues/114)) ([bda393f](https://github.com/lifekit-hq/lifekit-common/commit/bda393fcfeb13004e60065848336e93b974cfcdc))
+* **ui:** top bar owns title, back and actions ([#110](https://github.com/lifekit-hq/lifekit-common/issues/110)) ([d8bd74a](https://github.com/lifekit-hq/lifekit-common/commit/d8bd74a4e5d426675ca301a6201f60fddf8179b0))
+
+
+### Bug Fixes
+
+* **ui:** legible status, labels and money ([#108](https://github.com/lifekit-hq/lifekit-common/issues/108)) ([75b2181](https://github.com/lifekit-hq/lifekit-common/commit/75b2181d9f0560e45af5821548acca8b6dcd8f0f))
+* **ui:** one container rule and calmer motion ([#106](https://github.com/lifekit-hq/lifekit-common/issues/106)) ([32644d2](https://github.com/lifekit-hq/lifekit-common/commit/32644d25af91b4e76f698796843e21e4b7672758))
+* **ui:** touch-sized chrome ([#119](https://github.com/lifekit-hq/lifekit-common/issues/119)) ([fe6d95f](https://github.com/lifekit-hq/lifekit-common/commit/fe6d95fcd6b28bb566ccf589bf28a78d84204009))
+
+
+### Documentation
+
+* add phone app contract ([#105](https://github.com/lifekit-hq/lifekit-common/issues/105)) ([788de97](https://github.com/lifekit-hq/lifekit-common/commit/788de9777756fad1a84fd70aaf870afd33f54ab5))
+* **tokens:** PWA sign-in checklist for Google OAuth origins ([#113](https://github.com/lifekit-hq/lifekit-common/issues/113)) ([f555e9f](https://github.com/lifekit-hq/lifekit-common/commit/f555e9f524f7a43717b1bddcbc94ed88d778175c))
+* **ui:** add foundations stories for type ramp, colour tokens and money specimen ([#107](https://github.com/lifekit-hq/lifekit-common/issues/107)) ([a6b1c9a](https://github.com/lifekit-hq/lifekit-common/commit/a6b1c9a2c439ac9b5f34bf5565641c9d4ebaedb3))
+
 ## [1.2.0](https://github.com/lifekit-hq/lifekit-common/compare/v1.1.0...v1.2.0) (2026-10-06)
 
 
