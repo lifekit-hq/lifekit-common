@@ -1,10 +1,10 @@
 import {Location} from '@angular/common';
 import {
-  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
   computed,
   DestroyRef,
+  effect,
   type ElementRef,
   inject,
   input,
@@ -360,12 +360,14 @@ export class AppLayoutComponent {
       tabs: () => this.destinations(),
       activeTab: () => this.effectiveActiveRoute(),
     });
-    afterRenderEffect(onCleanup => {
+    // A plain effect, not afterRenderEffect: the title element exists once its query resolves, the
+    // observers report asynchronously, and afterRenderEffect costs every consumer ~1.8 kB of runtime.
+    effect(onCleanup => {
       const title = this.largeTitleRef()?.nativeElement;
-      const main = this.main().nativeElement;
       if (!title || typeof IntersectionObserver === 'undefined') {
         return;
       }
+      const main = this.main().nativeElement;
       let observer: IntersectionObserver | undefined;
       // Rebuilt when main resizes: under the phone overlay the top bar covers main's top padding,
       // so the title counts as gone once it passes under the bar, and that padding is per size.
