@@ -17,6 +17,12 @@ import {CmnDrawerRef} from './drawer-ref';
 
 type DrawerState = 'entering' | 'open' | 'closing';
 
+/** The heights a bottom sheet rests at: up to half the viewport, or nearly all of it. */
+export type CmnSheetStop = 'half' | 'full';
+
+/** A press that moves less than this (px) is a tap on the grabber, not a drag. */
+const GRABBER_TAP_SLOP_PX = 8;
+
 /** How far (px) a sheet must be dragged down before release dismisses it. */
 const SHEET_DISMISS_DISTANCE_PX = 96;
 
@@ -28,6 +34,7 @@ const SHEET_DISMISS_DISTANCE_PX = 96;
     '[class.cmn-drawer--open]': 'isOpen',
     '[class.cmn-drawer--closing]': 'isClosing',
     '[class.cmn-drawer--sheet]': 'sheet()',
+    '[class.cmn-drawer--full]': "sheet() && stop() === 'full'",
     '[class.cmn-drawer--dragging]': 'dragging()',
     '[style.transform]': 'dragTransform()',
   },
@@ -42,9 +49,16 @@ const SHEET_DISMISS_DISTANCE_PX = 96;
         class="shrink-0"
       >
         @if (sheet()) {
-          <!-- Drag handle: pull the sheet down to dismiss it -->
-          <div class="flex justify-center pt-cmn-2" data-testid="drawer-handle">
-            <span class="h-1 w-10 rounded-full bg-border-strong" aria-hidden="true"></span>
+          <!-- Grabber: tap it to cycle the half and full stops, pull the sheet down to dismiss it -->
+          <div class="flex justify-center" data-testid="drawer-handle">
+            <button
+              [attr.aria-label]="stop() === 'half' ? 'Expand sheet' : 'Collapse sheet'"
+              (click)="onGrabberClick($event)"
+              class="cmn-drawer-grabber flex h-cmn-8 w-full items-center justify-center"
+              type="button"
+            >
+              <span class="h-1 w-10 rounded-full bg-border-strong" aria-hidden="true"></span>
+            </button>
           </div>
         }
         <!-- Header -->
@@ -75,10 +89,13 @@ export class CmnDrawerContainerComponent implements AfterViewInit {
   private readonly destroyRef = inject(DestroyRef);
   private state: DrawerState = 'entering';
   private dragStartY: number | null = null;
+  private dragStartedOnGrabber = false;
 
   public readonly title = signal('');
   /** Bottom-sheet presentation (phone width); set by `CmnDrawerService`. */
   public readonly sheet = signal(false);
+  /** Where the sheet rests: `half` (content up to half the viewport) or `full`. */
+  public readonly stop = signal<CmnSheetStop>('half');
   public readonly disableClose = signal(false);
   public readonly dragging = signal(false);
   public readonly dragOffset = signal(0);
@@ -98,9 +115,10 @@ export class CmnDrawerContainerComponent implements AfterViewInit {
 
   public onDragStart(event: PointerEvent): void {
     const target = event.target as Element | null;
-    if (!this.sheet() || this.isClosing || target?.closest('button')) {
+    if (!this.sheet() || this.isClosing || target?.closest('button:not(.cmn-drawer-grabber)')) {
       return;
     }
+    this.dragStartedOnGrabber = !!target?.closest('.cmn-drawer-grabber');
     this.dragStartY = event.clientY;
     this.dragging.set(true);
     try {
@@ -122,12 +140,27 @@ export class CmnDrawerContainerComponent implements AfterViewInit {
       return;
     }
     const offset = this.dragOffset();
+    const tapped = this.dragStartedOnGrabber && offset < GRABBER_TAP_SLOP_PX;
     this.dragStartY = null;
+    this.dragStartedOnGrabber = false;
     this.dragging.set(false);
     this.dragOffset.set(0);
-    if (offset >= SHEET_DISMISS_DISTANCE_PX && !this.disableClose()) {
+    if (tapped) {
+      this.cycleStop();
+    } else if (offset >= SHEET_DISMISS_DISTANCE_PX && !this.disableClose()) {
       this.drawerRef.close();
     }
+  }
+
+  /** Keyboard activation of the grabber; a pointer tap is handled in `onDragEnd`. */
+  public onGrabberClick(event: MouseEvent): void {
+    if (event.detail === 0) {
+      this.cycleStop();
+    }
+  }
+
+  public cycleStop(): void {
+    this.stop.update(stop => (stop === 'half' ? 'full' : 'half'));
   }
 
   public ngAfterViewInit(): void {

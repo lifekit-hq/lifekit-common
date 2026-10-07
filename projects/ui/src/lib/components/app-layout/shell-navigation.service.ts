@@ -39,7 +39,7 @@ function prefersReducedMotion(): boolean {
 export interface ShellNavigationHost {
   /** The element that scrolls pages: the layout's `<main>`. */
   scroller: () => HTMLElement | undefined;
-  /** Every destination route the shell lists, tab bar and "More" alike. */
+  /** Every destination route the shell lists, the tab bar, the More page and the rest alike. */
   tabs: () => readonly string[];
   /** The route shown as active. */
   activeTab: () => string;

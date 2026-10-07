@@ -28,6 +28,9 @@ const PHONE_NAV_ITEMS: NavItem[] = [
 
 const PHONE_TAB_ROUTES = ['/dashboard', '/accounts', '/transactions', '/alerts'];
 
+/** The page the app builds for the More tab; the shell only needs its route. */
+const MORE_ROUTE = '/more';
+
 const PHONE = {viewport: {value: 'mobile2', isRotated: false}};
 
 const AVATAR_MENU: MenuItem[] = [
@@ -62,6 +65,7 @@ const meta: Meta<AppLayoutComponent> = {
         [versionLabel]="versionLabel"
         [brand]="brand"
         [tabRoutes]="tabRoutes"
+        [moreRoute]="moreRoute"
         [phoneOverlay]="phoneOverlay"
         [floatingActionClearance]="floatingActionClearance"
       >${BODY}</cmn-app-layout>
@@ -77,6 +81,7 @@ const meta: Meta<AppLayoutComponent> = {
     versionLabel: 'v0.3.2',
     brand: 'Lifekit',
     tabRoutes: [],
+    moreRoute: '',
     phoneOverlay: false,
     floatingActionClearance: 0,
   },
@@ -144,31 +149,36 @@ export const Dark: Story = {
 
 /**
  * Below the md breakpoint the sidebar gives way to a bottom tab bar: the four `tabRoutes`
- * as tabs (Alerts with its unread badge) and the rest under More. The top bar compacts to
- * the title, an icon search button, the theme toggle, and the avatar.
+ * as tabs, then a More tab because the app declares `moreRoute`. More is a page the app builds,
+ * not a sheet; the shell only gives it a tab, the active highlight and a dot when a nav item
+ * that is not a tab has a badge. The top bar compacts to the title, an icon search button, the
+ * theme toggle, and the avatar.
  */
 export const Phone: Story = {
-  args: {navItems: PHONE_NAV_ITEMS, tabRoutes: PHONE_TAB_ROUTES, title: 'Home'},
-  globals: PHONE,
-};
-
-export const PhoneDark: Story = {
-  args: {navItems: PHONE_NAV_ITEMS, tabRoutes: PHONE_TAB_ROUTES, title: 'Home'},
-  globals: {...PHONE, theme: 'dark'},
-};
-
-/** The active page is under More, so the More tab carries the highlight. */
-export const PhoneActiveInMore: Story = {
   args: {
     navItems: PHONE_NAV_ITEMS,
     tabRoutes: PHONE_TAB_ROUTES,
-    activeRoute: '/budgets',
-    title: 'Budgets',
+    moreRoute: MORE_ROUTE,
+    title: 'Home',
   },
   globals: PHONE,
 };
 
-/** Without `tabRoutes` the first four nav items become the tabs. */
+export const PhoneDark: Story = {
+  args: {...Phone.args},
+  globals: {...PHONE, theme: 'dark'},
+};
+
+/**
+ * The active page is not a tab (Budgets), so the More tab carries the highlight. It does the
+ * same on the More page itself.
+ */
+export const PhoneActiveInMore: Story = {
+  args: {...Phone.args, activeRoute: '/budgets', title: 'Budgets'},
+  globals: PHONE,
+};
+
+/** Without `tabRoutes` the first four nav items become the tabs; no `moreRoute`, no More tab. */
 export const PhoneDefaultTabs: Story = {
   args: {navItems: PHONE_NAV_ITEMS, title: 'Home'},
   globals: PHONE,
@@ -199,6 +209,7 @@ export const PhoneOverlay: Story = {
   args: {
     navItems: PHONE_NAV_ITEMS,
     tabRoutes: PHONE_TAB_ROUTES,
+    moreRoute: MORE_ROUTE,
     title: 'Transactions',
     activeRoute: '/transactions',
     phoneOverlay: true,
@@ -214,6 +225,7 @@ export const PhoneOverlay: Story = {
         [avatarLabel]="avatarLabel"
         [avatarMenuItems]="avatarMenuItems"
         [tabRoutes]="tabRoutes"
+        [moreRoute]="moreRoute"
         [phoneOverlay]="phoneOverlay"
         [floatingActionClearance]="floatingActionClearance"
       >${OVERLAY_BODY}

@@ -43,6 +43,29 @@ class RoutedListPageComponent {
 class RoutedDetailPageComponent {}
 
 @Component({
+  selector: 'cmn-routed-more-page',
+  imports: [RouterLink],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <nav class="flex flex-col p-cmn-4" aria-label="More">
+      @for (link of links; track link.route) {
+        <a
+          [routerLink]="link.route"
+          class="border-b border-border-default py-cmn-3 text-cmn-sm text-text-primary"
+          >{{ link.label }}</a
+        >
+      }
+    </nav>
+  `,
+})
+class RoutedMorePageComponent {
+  protected readonly links = [
+    {label: 'List', route: '/list'},
+    {label: 'Detail', route: '/detail'},
+  ];
+}
+
+@Component({
   selector: 'cmn-routed-shell',
   imports: [AppLayoutComponent, RouterOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -88,3 +111,50 @@ const meta: Meta<RoutedShellComponent> = {
 export default meta;
 
 export const Routed: StoryObj<RoutedShellComponent> = {};
+
+@Component({
+  selector: 'cmn-routed-more-shell',
+  imports: [AppLayoutComponent, RouterOutlet],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <cmn-app-layout [navItems]="navItems" [phoneOverlay]="true" moreRoute="/more">
+      <router-outlet />
+    </cmn-app-layout>
+  `,
+})
+class RoutedMoreShellComponent {
+  protected readonly navItems = NAV_ITEMS;
+}
+
+/**
+ * `moreRoute` is the phone More tab: a route the app declares, filled with an ordinary page
+ * (here a list of links). It is a tab root, so it shows its title and no back chevron, and the
+ * shell restores its scroll and handles a re-tap like any other tab.
+ */
+export const RoutedMore: StoryObj<RoutedMoreShellComponent> = {
+  render: () => ({
+    template: '<cmn-routed-more-shell />',
+    moduleMetadata: {imports: [RoutedMoreShellComponent]},
+  }),
+  decorators: [
+    applicationConfig({
+      providers: [
+        provideRouter(
+          [
+            {path: '', redirectTo: 'more', pathMatch: 'full'},
+            {path: 'list', component: RoutedListPageComponent, data: {title: 'List'}},
+            {
+              path: 'detail',
+              component: RoutedDetailPageComponent,
+              data: {title: 'Detail', parent: '/more'},
+            },
+            {path: 'more', component: RoutedMorePageComponent, data: {title: 'More'}},
+          ],
+          withHashLocation()
+        ),
+      ],
+    }),
+  ],
+  parameters: {viewport: {defaultViewport: 'mobile2'}},
+  globals: {viewport: {value: 'mobile2', isRotated: false}},
+};

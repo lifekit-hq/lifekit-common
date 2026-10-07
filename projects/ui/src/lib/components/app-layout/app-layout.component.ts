@@ -129,8 +129,8 @@ const MAIN_OVERLAY_BOTTOM_CLASSES =
         </main>
         <cmn-bottom-tab-bar
           [items]="phoneTabs()"
-          [moreItems]="phoneMoreItems()"
-          [activeRoute]="effectiveActiveRoute()"
+          [more]="phoneMore()"
+          [activeRoute]="phoneActiveRoute()"
           [floating]="phoneOverlay()"
           [class]="phoneOverlay() ? overlayTabBarClasses : ''"
           (navClick)="onTabClick($event)"
@@ -171,6 +171,22 @@ export class AppLayoutComponent {
     {initialValue: leafRoute(this.router.routerState.snapshot.root)}
   );
   private readonly theme = toSignal(this.themeService.activeTheme$, {initialValue: 'light'});
+  /** Nav items that are not phone tabs: they live behind the More page. */
+  private readonly overflowItems = computed<NavItem[]>(() => {
+    const tabs = this.phoneTabs();
+    return this.navItems().filter(item => !tabs.includes(item));
+  });
+
+  private readonly hasTabBar = computed<boolean>(
+    () => this.navItems().length > 0 || this.moreRoute() !== ''
+  );
+
+  /** Every route the shell treats as a destination: the nav items and the More page. */
+  private readonly destinations = computed<string[]>(() => {
+    const more = this.moreRoute();
+    const routes = this.navItems().map(({route}) => route);
+    return more ? [...routes, more] : routes;
+  });
 
   public readonly navItems = input<NavItem[]>([]);
   /**
@@ -199,9 +215,19 @@ export class AppLayoutComponent {
   public readonly brand = input<string>('Lifekit');
   /**
    * Routes (from `navItems`) shown as bottom tabs below the md breakpoint, in this order, at
-   * most four. Empty means the first four nav items. Every other nav item goes under "More".
+   * most four. Empty means the first four nav items. Every other nav item is reached from the
+   * More page (`moreRoute`).
    */
   public readonly tabRoutes = input<string[]>([]);
+  /**
+   * The route of the app's own More page. Set, the phone tab bar ends in a "More" tab that opens
+   * it like any other tab: a page the app fills (the nav items past the tabs, account items,
+   * anything else), with its title and back declared in route data like every page. The tab is
+   * active on this route and on any nav item that is not a tab; a dot marks it while one of
+   * those items has a badge. Left empty there is no More tab, so nav items past the tabs are not
+   * reachable on a phone. Below md only: the sidebar never lists it.
+   */
+  public readonly moreRoute = input<string>('');
   /**
    * Opt-in edge-to-edge phone layout, for PWAs that draw under the status bar: below md the top
    * bar and a floating tab bar sit translucent over main, which scrolls under both and is padded
@@ -244,9 +270,19 @@ export class AppLayoutComponent {
     return tabs.slice(0, MAX_BOTTOM_TABS);
   });
 
-  public readonly phoneMoreItems = computed<NavItem[]>(() => {
-    const tabs = this.phoneTabs();
-    return this.navItems().filter(item => !tabs.includes(item));
+  /** The More tab, or undefined when the app declares no More page. */
+  public readonly phoneMore = computed<NavItem | undefined>(() => {
+    const route = this.moreRoute();
+    if (!route) {
+      return undefined;
+    }
+    const overflow = this.overflowItems();
+    return {
+      label: 'More',
+      icon: 'Ellipsis',
+      route,
+      badge: () => overflow.reduce((total, item) => total + (item.badge?.() ?? 0), 0),
+    };
   });
 
   public readonly mainClass = computed<string>(() => {
@@ -254,7 +290,7 @@ export class AppLayoutComponent {
       return MAIN_BASE_CLASSES;
     }
     // The tab bar renders nothing without destinations, so there is nothing to clear below.
-    const bottom = this.navItems().length ? ` ${MAIN_OVERLAY_BOTTOM_CLASSES}` : '';
+    const bottom = this.hasTabBar() ? ` ${MAIN_OVERLAY_BOTTOM_CLASSES}` : '';
     return `${MAIN_BASE_CLASSES} ${MAIN_OVERLAY_TOP_CLASSES}${bottom}`;
   });
 
@@ -266,7 +302,7 @@ export class AppLayoutComponent {
   protected readonly back = computed<BackTarget>(() => {
     const path = this.routerUrl().split(/[?#]/, 1)[0];
     return resolveBack(this.chrome(), {
-      isTabRoot: this.navItems().some(item => item.route === path),
+      isTabRoot: path === this.moreRoute() || this.navItems().some(item => item.route === path),
       hasHistory: !!this.router.lastSuccessfulNavigation()?.previousNavigation,
     });
   });
@@ -291,10 +327,14 @@ export class AppLayoutComponent {
     if (explicit !== undefined) {
       return explicit;
     }
-    return matchTab(
-      this.routerUrl(),
-      this.navItems().map(({route}) => route)
-    );
+    return matchTab(this.routerUrl(), this.destinations());
+  });
+
+  /** What the tab bar highlights: a nav item behind the More page lights the More tab. */
+  protected readonly phoneActiveRoute = computed<string>(() => {
+    const active = this.effectiveActiveRoute();
+    const more = this.moreRoute();
+    return more && this.overflowItems().some(item => item.route === active) ? more : active;
   });
 
   protected readonly effectiveAvatarLabel = computed<string>(
@@ -307,7 +347,7 @@ export class AppLayoutComponent {
 
   protected readonly fabClearance = computed<number | null>(() => {
     const clearance = this.floatingActionClearance();
-    return this.phoneOverlay() && this.navItems().length && clearance > 0 ? clearance : null;
+    return this.phoneOverlay() && this.hasTabBar() && clearance > 0 ? clearance : null;
   });
 
   protected readonly largeTitleBoxClasses = LARGE_TITLE_BOX_CLASSES;
@@ -317,7 +357,7 @@ export class AppLayoutComponent {
   constructor() {
     this.shell.connect({
       scroller: () => this.main().nativeElement,
-      tabs: () => this.navItems().map(({route}) => route),
+      tabs: () => this.destinations(),
       activeTab: () => this.effectiveActiveRoute(),
     });
     afterRenderEffect(onCleanup => {

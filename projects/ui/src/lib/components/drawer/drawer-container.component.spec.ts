@@ -217,6 +217,89 @@ describe('CmnDrawerContainerComponent as a bottom sheet', () => {
     expect(host.style.transform).toBe('');
   });
 
+  describe('stops', () => {
+    const MOUSE_CLICK_DETAIL = 1;
+
+    function grabber(): HTMLButtonElement {
+      return host.querySelector('button.cmn-drawer-grabber') as HTMLButtonElement;
+    }
+
+    function tapGrabber(): void {
+      pointer('pointerdown', 0, grabber());
+      pointer('pointerup', 0, grabber());
+    }
+
+    function isFull(): boolean {
+      return host.classList.contains('cmn-drawer--full');
+    }
+
+    it('opens at the half stop', () => {
+      expect(fixture.componentInstance.stop()).toBe('half');
+      expect(isFull()).toBe(false);
+      expect(grabber().getAttribute('aria-label')).toBe('Expand sheet');
+    });
+
+    it('cycles half, full, half when the grabber is tapped', () => {
+      tapGrabber();
+      expect(fixture.componentInstance.stop()).toBe('full');
+      expect(isFull()).toBe(true);
+      expect(grabber().getAttribute('aria-label')).toBe('Collapse sheet');
+
+      tapGrabber();
+      expect(fixture.componentInstance.stop()).toBe('half');
+      expect(isFull()).toBe(false);
+    });
+
+    it('does not close the sheet on a tap', () => {
+      const spy = vi.spyOn(drawerRef, 'close');
+      tapGrabber();
+      expect(spy).not.toHaveBeenCalled();
+    });
+
+    it('leaves the stop alone when the header, not the grabber, is tapped', () => {
+      pointer('pointerdown', 0);
+      pointer('pointerup', 0);
+      expect(fixture.componentInstance.stop()).toBe('half');
+    });
+
+    it('treats a drag that starts on the grabber as a drag, not a tap', () => {
+      const spy = vi.spyOn(drawerRef, 'close');
+      pointer('pointerdown', 0, grabber());
+      pointer('pointermove', SHORT_DRAG_PX, grabber());
+      pointer('pointerup', SHORT_DRAG_PX, grabber());
+      expect(fixture.componentInstance.stop()).toBe('half');
+      expect(spy).not.toHaveBeenCalled();
+      expect(host.style.transform).toBe('');
+    });
+
+    it('still dismisses by dragging the grabber past the threshold, from either stop', () => {
+      const spy = vi.spyOn(drawerRef, 'close');
+      tapGrabber();
+      pointer('pointerdown', 0, grabber());
+      pointer('pointermove', DISMISS_DRAG_PX, grabber());
+      pointer('pointerup', DISMISS_DRAG_PX, grabber());
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+
+    it('cycles on a keyboard activation of the grabber', () => {
+      grabber().dispatchEvent(new MouseEvent('click', {detail: 0, bubbles: true}));
+      expect(fixture.componentInstance.stop()).toBe('full');
+    });
+
+    it('does not cycle twice for a pointer click, which the tap already handled', () => {
+      tapGrabber();
+      grabber().dispatchEvent(new MouseEvent('click', {detail: MOUSE_CLICK_DETAIL, bubbles: true}));
+      expect(fixture.componentInstance.stop()).toBe('full');
+    });
+
+    it('carries no full stop class in the side-panel presentation', () => {
+      tapGrabber();
+      fixture.componentInstance.sheet.set(false);
+      fixture.detectChanges();
+      expect(isFull()).toBe(false);
+    });
+  });
+
   it('does not drag in the side-panel presentation', () => {
     fixture.componentInstance.sheet.set(false);
     fixture.detectChanges();
