@@ -230,7 +230,7 @@ export const ColourTokens: Story = {
         </header>
 
         @for (t of themes; track t.theme) {
-          <div [attr.data-theme]="t.theme" class="flex flex-col gap-cmn-6 rounded-cmn-lg border border-border-default bg-surface-bg p-cmn-6">
+          <div [attr.data-theme]="t.theme" class="flex flex-col gap-cmn-6 rounded-cmn-lg border border-border-default bg-surface-bg p-cmn-6 text-text-primary">
             <h2 class="text-cmn-xl font-semibold capitalize">{{ t.theme }}</h2>
 
             <div class="grid gap-cmn-2" style="grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr))">
