@@ -19,6 +19,11 @@ Design tokens for the lifekit ecosystem, framework-agnostic.
   (`brand/theme-init.js`) with its CSP hash, Node helpers, a Vite plugin
   (`brand/vite`) and the `lifekit-chrome-check` drift check. See
   [`docs/BROWSER-CHROME.md`](../../docs/BROWSER-CHROME.md).
+- `drift`: `lifekit-chrome-check drift <path>…`, a static scan of an app's source for what
+  bypasses these tokens (font, colour, text size, radius, root font size, layout transitions). Run
+  it in CI; it exits 1 on any finding. Rules and options: the last section of
+  [`docs/BROWSER-CHROME.md`](../../docs/BROWSER-CHROME.md). Rule logic adapted from impeccable
+  (Apache-2.0), see [`NOTICE.md`](NOTICE.md).
 
 ```js
 // tailwind.config.js

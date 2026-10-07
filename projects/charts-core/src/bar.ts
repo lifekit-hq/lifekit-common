@@ -11,7 +11,7 @@ import {
 } from 'chart.js';
 
 import {type BarSeries, type BarValueFormat} from './types';
-import {chartFontFamily, cssVar, fontFamily, xTickLimitPlugin} from './utils';
+import {CHART_FONT_SIZE, chartFontFamily, cssVar, fontFamily, xTickLimitPlugin} from './utils';
 
 Chart.register(CategoryScale, LinearScale, BarController, BarElement, Tooltip, Legend);
 
@@ -93,7 +93,7 @@ export function buildBarChartConfig(
             boxWidth: 10,
             boxHeight: 10,
             usePointStyle: true,
-            font: {family: fontFamily(tokens), size: 11},
+            font: {family: fontFamily(tokens), size: CHART_FONT_SIZE},
           },
         },
         tooltip: {
@@ -110,7 +110,7 @@ export function buildBarChartConfig(
           border: {display: false},
           ticks: {
             color: tokens.textSecondary,
-            font: {family: fontFamily(tokens), size: 11},
+            font: {family: fontFamily(tokens), size: CHART_FONT_SIZE},
             maxRotation: 0,
             autoSkip: true,
             maxTicksLimit: X_TICK_LIMIT,
@@ -122,7 +122,7 @@ export function buildBarChartConfig(
           border: {display: false},
           ticks: {
             color: tokens.textSecondary,
-            font: {family: fontFamily(tokens), size: 11},
+            font: {family: fontFamily(tokens), size: CHART_FONT_SIZE},
             callback: val => barFormat(val as number, valueFormat, currency, true),
           },
         },

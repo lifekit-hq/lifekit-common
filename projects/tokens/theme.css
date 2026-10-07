@@ -71,6 +71,10 @@
   --color-status-warning: #955400;
   --color-status-error: #bb2530;
 
+  /* Scrim — the veil behind a dialog or drawer; the same in both themes */
+  --color-scrim-dialog: rgb(0 0 0 / 0.55);
+  --color-scrim-drawer: rgb(0 0 0 / 0.35);
+
   /* Border — cool grey */
   --color-border-default: #d9e0e3;
   --color-border-strong: #7d8c93;
@@ -215,12 +219,12 @@ html {
 }
 
 .cmn-dialog-backdrop {
-  background-color: rgb(0 0 0 / 0.55);
+  background-color: var(--color-scrim-dialog);
 }
 
 /* ─── Drawer (cmn-drawer) ───────────────────────────────────────────────────── */
 .cmn-drawer-backdrop {
-  background-color: rgb(0 0 0 / 0.35);
+  background-color: var(--color-scrim-drawer);
 }
 
 .cmn-drawer-panel {

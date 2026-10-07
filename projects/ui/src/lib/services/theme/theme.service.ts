@@ -28,7 +28,7 @@ const MAX_CORRECT_ITERATIONS = 20;
  */
 const LUMINANCE_CROSSOVER = 0.179;
 /** Fallback surface background color used when CSS variable is not yet set. */
-const FALLBACK_SURFACE_BG = '#f8f9fa';
+const FALLBACK_SURFACE_BG = '#f3f5f6';
 
 export const DOCUMENT = new InjectionToken<Document>('DOCUMENT', {
   providedIn: 'root',

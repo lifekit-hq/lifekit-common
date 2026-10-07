@@ -86,7 +86,7 @@ export class ChatComponent {
   public readonly messageStyles = {
     default: {
       shared: {
-        bubble: {maxWidth: '85%', fontSize: '0.9rem', lineHeight: '1.55'},
+        bubble: {maxWidth: '85%', fontSize: '0.875rem', lineHeight: '1.55'},
       },
       user: {
         bubble: {
@@ -139,7 +139,7 @@ export class ChatComponent {
       container: {
         backgroundColor: 'var(--color-surface-bg)',
         border: '1px solid var(--color-border-default)',
-        borderRadius: '10px',
+        borderRadius: 'var(--radius-lg)',
         boxShadow: 'none',
       },
     },

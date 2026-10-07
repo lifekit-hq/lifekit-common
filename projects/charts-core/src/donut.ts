@@ -8,7 +8,7 @@ import {
 } from 'chart.js';
 
 import {type DonutSegment} from './types';
-import {chartFontFamily, cssVar, fontFamily} from './utils';
+import {CHART_FONT_SIZE, chartFontFamily, cssVar, fontFamily} from './utils';
 
 Chart.register(DoughnutController, ArcElement, Tooltip, Legend);
 
@@ -79,7 +79,7 @@ export function buildDonutChartConfig(
           position: 'bottom',
           labels: {
             color: tokens.textSecondary,
-            font: {family: fontFamily(tokens), size: 11},
+            font: {family: fontFamily(tokens), size: CHART_FONT_SIZE},
             boxWidth: 10,
             padding: 12,
           },

@@ -20,6 +20,7 @@
     "./brand/vite": "./brand/vite.mjs",
     "./brand/theme-script": "./brand/theme-script.mjs",
     "./brand/*": "./brand/dist/*",
+    "./drift": "./drift/index.mjs",
     "./package.json": "./package.json"
   },
   "bin": {
@@ -31,7 +32,10 @@
     "base.css",
     "tailwind/",
     "brand/",
-    "bin/"
+    "drift/",
+    "bin/",
+    "LICENSES/",
+    "NOTICE.md"
   ],
   "scripts": {
     "prepack": "node scripts/build-brand.mjs"

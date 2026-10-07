@@ -13,7 +13,14 @@ import {
 } from 'chart.js';
 
 import {type AreaSeries} from './types';
-import {chartFontFamily, cssVar, fontFamily, money, xTickLimitPlugin} from './utils';
+import {
+  CHART_FONT_SIZE,
+  chartFontFamily,
+  cssVar,
+  fontFamily,
+  money,
+  xTickLimitPlugin,
+} from './utils';
 
 Chart.register(
   CategoryScale,
@@ -90,7 +97,7 @@ export function buildAreaChartConfig(
             boxWidth: 10,
             boxHeight: 10,
             usePointStyle: true,
-            font: {family: fontFamily(tokens), size: 11},
+            font: {family: fontFamily(tokens), size: CHART_FONT_SIZE},
           },
         },
         tooltip: {
@@ -112,7 +119,7 @@ export function buildAreaChartConfig(
           border: {display: false},
           ticks: {
             color: tokens.textSecondary,
-            font: {family: fontFamily(tokens), size: 11},
+            font: {family: fontFamily(tokens), size: CHART_FONT_SIZE},
             maxRotation: 0,
             autoSkip: true,
             maxTicksLimit: X_TICK_LIMIT,
@@ -126,7 +133,7 @@ export function buildAreaChartConfig(
           border: {display: false},
           ticks: {
             color: tokens.textSecondary,
-            font: {family: fontFamily(tokens), size: 11},
+            font: {family: fontFamily(tokens), size: CHART_FONT_SIZE},
             callback: val => money(val as number, currency, true),
           },
         },

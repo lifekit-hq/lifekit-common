@@ -7,6 +7,9 @@ export function cssVar(name: string, fallback: string): string {
   return value || fallback;
 }
 
+/** Canvas text size (px): the 12px floor, the smallest step of the type ramp. */
+export const CHART_FONT_SIZE = 12;
+
 const FALLBACK_FONT_FAMILY = "'IBM Plex Sans Variable', 'IBM Plex Sans', system-ui, sans-serif";
 
 /** Canvas text cannot inherit CSS, so charts read the token font stack explicitly. */
