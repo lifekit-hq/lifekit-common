@@ -143,7 +143,7 @@ Counts are a point-in-time measurement; re-measure before relying on them for a 
 | tag | fs 15 · dash 1 | simple-leaf | element-rewrite | Five-variant badge; trivially simple |
 | toast | fs 5 · dash 0 | interactive | keep-own | Dismiss event + aria role + `toast.service.ts` service layer; keep Angular until service strategy is decided |
 | toggle | fs 2 · dash 1 | interactive | element-rewrite | Switch button + thumb animation + `aria-checked`; `role="switch"` + boolean attribute = clean Lit mapping |
-| top-bar | fs 0 · dash 0 (composed by `app-layout`) | interactive | keep-own | Uses `MenuComponent`; event orchestration (search/theme/avatar); app-shell concern |
+| top-bar | fs 0 · dash 0 (composed by `app-layout`) | interactive | keep-own | Uses `MenuComponent`; event orchestration (back/page actions/search/theme/avatar); app-shell concern |
 | usage-chip | new (added for usage meter chip, #37); fs 0 · dash 0 | simple-leaf | element-rewrite | `role="meter"` pill with token-coloured fill and readout; pure token CSS, no framework logic |
 
 **Summary:** 28 keep-own · 20 element-rewrite · 1 wrap-base · 0 delete

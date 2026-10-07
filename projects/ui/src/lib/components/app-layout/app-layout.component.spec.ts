@@ -1,13 +1,15 @@
+import {Location} from '@angular/common';
 import {type ComponentFixture, TestBed} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
-import {provideRouter, Router} from '@angular/router';
+import {provideRouter, Router, type Routes} from '@angular/router';
 import {beforeEach, describe, expect, it, vi} from 'vitest';
 
 import {CmnDialogService} from '../../services/dialog/dialog.service';
+import {CmnPageActionsService} from '../../services/page-actions/page-actions.service';
 import {ThemeService} from '../../services/theme/theme.service';
 import {type CommandPaletteItem} from '../command-palette/command-palette-item.model';
 import {type MenuItem} from '../menu/menu.component';
-import {AppLayoutComponent, type NavItem} from './app-layout.component';
+import {AppLayoutComponent, type NavItem, type PageAction} from './app-layout.component';
 
 const NAV_ITEMS: NavItem[] = [
   {label: 'Dashboard', icon: 'LayoutDashboard', route: '/dashboard'},
@@ -425,5 +427,156 @@ describe('AppLayoutComponent', () => {
       keydown({key: 'k', metaKey: true});
       expect(open).toHaveBeenCalledTimes(1);
     });
+  });
+});
+
+describe('AppLayoutComponent page chrome', () => {
+  const ADD: PageAction = {id: 'add', label: 'Add account', icon: 'Plus'};
+  const NEW: PageAction = {id: 'new', label: 'New note', icon: 'Plus', route: 'new'};
+  const TALL_CONTENT_PX = 3000;
+  const MAIN_HEIGHT_PX = 400;
+  const SCROLL_PAST_TITLE_PX = 600;
+
+  const ROUTES: Routes = [
+    {path: 'dashboard', children: [], data: {title: 'Dashboard'}},
+    {
+      path: 'accounts',
+      children: [
+        {path: '', children: [], data: {title: 'Accounts', actions: [ADD]}},
+        {path: ':id', children: [], data: {title: 'Account', parent: '..'}},
+      ],
+    },
+    {path: 'settings', children: []},
+    {path: 'settings/profile', children: [], data: {title: 'Profile', parent: '/settings'}},
+    {path: 'notes', children: [], data: {title: 'Notes', actions: [NEW]}},
+    {path: 'notes/new', children: []},
+    {path: 'plain', children: []},
+  ];
+
+  let fixture: ComponentFixture<AppLayoutComponent>;
+  let router: Router;
+
+  const host = (): HTMLElement => fixture.nativeElement as HTMLElement;
+  const backButton = (): HTMLButtonElement | null =>
+    host().querySelector('cmn-top-bar button[aria-label="Back"]');
+  const largeTitle = (): HTMLElement | null => host().querySelector('main h1');
+  const inlineTitle = (): HTMLElement | null =>
+    host().querySelector('cmn-top-bar [data-inline-title]');
+
+  async function go(url: string): Promise<void> {
+    await router.navigateByUrl(url);
+    fixture.detectChanges();
+    await fixture.whenStable();
+  }
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [AppLayoutComponent],
+      providers: [provideRouter(ROUTES)],
+    }).compileComponents();
+    router = TestBed.inject(Router);
+    fixture = TestBed.createComponent(AppLayoutComponent);
+    fixture.componentRef.setInput('navItems', NAV_ITEMS);
+    fixture.componentRef.setInput('title', 'Shell title');
+    fixture.detectChanges();
+  });
+
+  it('should keep the layout title and no back on a page that declares nothing', async () => {
+    await go('/dashboard');
+    await go('/plain');
+    expect(host().querySelector('cmn-top-bar h1')?.textContent?.trim()).toBe('Shell title');
+    expect(largeTitle()).toBeNull();
+    expect(backButton()).toBeNull();
+  });
+
+  it('should show the declared title once as the large title, over the layout title', async () => {
+    await go('/accounts');
+    expect(largeTitle()?.textContent?.trim()).toBe('Accounts');
+    expect(host().querySelectorAll('h1').length).toBe(1);
+    expect(inlineTitle()?.textContent?.trim()).toBe('Accounts');
+    expect(host().textContent).not.toContain('Shell title');
+  });
+
+  it('should show no back on a tab root', async () => {
+    await go('/accounts');
+    await go('/dashboard');
+    expect(backButton()).toBeNull();
+  });
+
+  it('should go back to an absolute parent, even on a deep link', async () => {
+    await go('/settings/profile');
+    backButton()?.click();
+    await fixture.whenStable();
+    expect(router.url).toBe('/settings');
+  });
+
+  it('should resolve a relative parent from the page route', async () => {
+    await go('/accounts/42');
+    backButton()?.click();
+    await fixture.whenStable();
+    expect(router.url).toBe('/accounts');
+  });
+
+  it('should go back through history for a child page without a parent', async () => {
+    const back = vi.spyOn(TestBed.inject(Location), 'back').mockImplementation(() => undefined);
+    await go('/dashboard');
+    await go('/notes');
+    backButton()?.click();
+    expect(back).toHaveBeenCalledTimes(1);
+  });
+
+  it('should show no back on a deep link with no parent and no history', async () => {
+    await go('/notes');
+    expect(backButton()).toBeNull();
+  });
+
+  it('should deliver an action press to the page, the output and its route', async () => {
+    const pressed: string[] = [];
+    const emitted: string[] = [];
+    TestBed.inject(CmnPageActionsService)
+      .on('new')
+      .subscribe(() => pressed.push('new'));
+    fixture.componentInstance.pageAction.subscribe(id => emitted.push(id));
+    await go('/notes');
+    host().querySelector<HTMLButtonElement>('cmn-top-bar button[aria-label="New note"]')?.click();
+    await fixture.whenStable();
+    expect(pressed).toEqual(['new']);
+    expect(emitted).toEqual(['new']);
+    expect(router.url).toBe('/notes/new');
+  });
+
+  it('should render only the current page actions', async () => {
+    await go('/accounts');
+    expect(host().querySelector('button[aria-label="Add account"]')).toBeTruthy();
+    await go('/accounts/42');
+    expect(host().querySelector('button[aria-label="Add account"]')).toBeNull();
+  });
+
+  it('should shrink the large title into the bar once it scrolls away', async () => {
+    await go('/accounts');
+    const main = host().querySelector('main') as HTMLElement;
+    main.style.display = 'block';
+    main.style.height = `${MAIN_HEIGHT_PX}px`;
+    main.style.overflowY = 'auto';
+    const tall = document.createElement('div');
+    tall.style.height = `${TALL_CONTENT_PX}px`;
+    main.append(tall);
+    const settle = async (): Promise<void> => {
+      await new Promise(resolve =>
+        requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(resolve)))
+      );
+      fixture.detectChanges();
+    };
+
+    await settle();
+    expect(inlineTitle()?.classList).toContain('opacity-0');
+
+    main.scrollTop = SCROLL_PAST_TITLE_PX;
+    await settle();
+    expect(inlineTitle()?.classList).not.toContain('opacity-0');
+
+    main.scrollTop = 0;
+    await settle();
+    expect(inlineTitle()?.classList).toContain('opacity-0');
   });
 });

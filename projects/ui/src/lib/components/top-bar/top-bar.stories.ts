@@ -34,3 +34,29 @@ export const TwoLetterInitialsDark: Story = {
   args: {title: 'Dashboard', isDark: true, avatarLabel: 'DT'},
   globals: {viewport: {value: 'mobile2', isRotated: false}},
 };
+
+/** Page chrome: a back chevron (no text) and trailing page actions, sized for touch below md. */
+export const BackAndActions: Story = {
+  args: {
+    title: 'Checking',
+    avatarLabel: 'DT',
+    showBack: true,
+    actions: [
+      {id: 'edit', label: 'Edit', icon: 'Pencil'},
+      {id: 'share', label: 'Share', icon: 'Share'},
+    ],
+  },
+  globals: {viewport: {value: 'mobile2', isRotated: false}},
+};
+
+/** `largeTitle: 'visible'`: the page's large title is in view, so the bar's copy stays hidden. */
+export const LargeTitleVisible: Story = {
+  args: {title: 'Accounts', avatarLabel: 'DT', largeTitle: 'visible'},
+  globals: {viewport: {value: 'mobile2', isRotated: false}},
+};
+
+/** `largeTitle: 'collapsed'`: the large title scrolled under the bar, which now shows the title. */
+export const LargeTitleCollapsed: Story = {
+  args: {title: 'Accounts', avatarLabel: 'DT', largeTitle: 'collapsed', showBack: true},
+  globals: {viewport: {value: 'mobile2', isRotated: false}},
+};

@@ -18,7 +18,6 @@ const NAV_ITEMS: NavItem[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="flex flex-col gap-cmn-3 p-cmn-4">
-      <h1 class="font-headline text-cmn-lg text-text-primary">List</h1>
       <a routerLink="/detail" class="text-cmn-sm text-accent-default">Open detail</a>
       @for (row of rows; track row) {
         <div class="rounded-cmn-lg border border-border-default bg-surface-card p-cmn-4">
@@ -37,7 +36,6 @@ class RoutedListPageComponent {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="p-cmn-4">
-      <h1 class="font-headline text-cmn-lg text-text-primary">Detail</h1>
       <p class="text-cmn-sm text-text-secondary">A short page: go back to the list.</p>
     </div>
   `,
@@ -49,7 +47,7 @@ class RoutedDetailPageComponent {}
   imports: [AppLayoutComponent, RouterOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <cmn-app-layout [navItems]="navItems" [phoneOverlay]="true" title="List">
+    <cmn-app-layout [navItems]="navItems" [phoneOverlay]="true">
       <router-outlet />
     </cmn-app-layout>
   `,
@@ -60,7 +58,8 @@ class RoutedShellComponent {
 
 /**
  * Fixture for the phone conformance suite: the app layout with a real router and two routes, so
- * browser back between pages can be exercised against the shell's scrolling main region.
+ * browser back between pages can be exercised against the shell's scrolling main region. Each
+ * route declares its title (and the detail its parent) in route data; the shell renders them.
  */
 const meta: Meta<RoutedShellComponent> = {
   title: 'Conformance/Routed App Layout',
@@ -72,8 +71,12 @@ const meta: Meta<RoutedShellComponent> = {
         provideRouter(
           [
             {path: '', redirectTo: 'list', pathMatch: 'full'},
-            {path: 'list', component: RoutedListPageComponent},
-            {path: 'detail', component: RoutedDetailPageComponent},
+            {path: 'list', component: RoutedListPageComponent, data: {title: 'List'}},
+            {
+              path: 'detail',
+              component: RoutedDetailPageComponent,
+              data: {title: 'Detail', parent: '/list'},
+            },
           ],
           withHashLocation()
         ),

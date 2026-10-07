@@ -3,6 +3,7 @@ import {type ComponentFixture, TestBed} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
 import {afterEach, beforeEach, describe, expect, it} from 'vitest';
 
+import {type PageAction} from '../app-layout/page-chrome';
 import {type MenuItem} from '../menu/menu.component';
 import {TopBarComponent} from './top-bar.component';
 
@@ -121,5 +122,85 @@ describe('TopBarComponent', () => {
     expect(header.className).toContain('max-md:bg-[color-mix(');
     // Desktop keeps the solid surface.
     expect(header.classList).toContain('bg-surface-card');
+  });
+
+  describe('page chrome', () => {
+    const ACTIONS: PageAction[] = [
+      {id: 'add', label: 'Add account', icon: 'Plus'},
+      {id: 'share', label: 'Share', icon: 'Share'},
+    ];
+
+    const query = (selector: string): HTMLElement | null =>
+      (fixture.nativeElement as HTMLElement).querySelector(selector);
+
+    it('should render no back chevron by default', () => {
+      expect(query('button[aria-label="Back"]')).toBeNull();
+    });
+
+    it('should render a text-less back chevron first and emit backClick', () => {
+      fixture.componentRef.setInput('title', 'Account');
+      fixture.componentRef.setInput('showBack', true);
+      fixture.detectChanges();
+      let backs = 0;
+      fixture.componentInstance.backClick.subscribe(() => backs++);
+      const back = query('button[aria-label="Back"]');
+      expect(query('header')?.firstElementChild).toBe(back);
+      expect(back?.textContent?.trim()).toBe('');
+      back?.click();
+      expect(backs).toBe(1);
+    });
+
+    it('should give back and actions a 44px target below md', () => {
+      fixture.componentRef.setInput('showBack', true);
+      fixture.componentRef.setInput('actions', ACTIONS);
+      fixture.detectChanges();
+      for (const button of [
+        query('button[aria-label="Back"]'),
+        query('button[aria-label="Share"]'),
+      ]) {
+        expect(button?.classList).toContain('h-11');
+        expect(button?.classList).toContain('w-11');
+      }
+    });
+
+    it('should render each action as a labelled icon button and emit the pressed one', () => {
+      fixture.componentRef.setInput('actions', ACTIONS);
+      fixture.detectChanges();
+      const pressed: PageAction[] = [];
+      fixture.componentInstance.actionClick.subscribe(action => pressed.push(action));
+      const share = query('button[aria-label="Share"]');
+      expect(share?.getAttribute('title')).toBe('Share');
+      share?.click();
+      expect(pressed).toEqual([ACTIONS[1]]);
+    });
+
+    it('should place actions before the search trigger', () => {
+      fixture.componentRef.setInput('actions', ACTIONS);
+      fixture.detectChanges();
+      const labels = fixture.debugElement
+        .queryAll(By.css('header > button'))
+        .map(button => button.nativeElement.getAttribute('aria-label'));
+      expect(labels.slice(0, 3)).toEqual(['Add account', 'Share', 'Search']);
+    });
+
+    it('should hide the inline title, as a non-heading, while the large title is in view', () => {
+      fixture.componentRef.setInput('title', 'Accounts');
+      fixture.componentRef.setInput('largeTitle', 'visible');
+      fixture.detectChanges();
+      const inline = query('[data-inline-title]');
+      expect(query('h1')).toBeNull();
+      expect(inline?.textContent?.trim()).toBe('Accounts');
+      expect(inline?.getAttribute('aria-hidden')).toBe('true');
+      expect(inline?.classList).toContain('opacity-0');
+      expect(inline?.classList).toContain('motion-reduce:transition-none');
+    });
+
+    it('should fade the inline title in once the large title has collapsed', () => {
+      fixture.componentRef.setInput('title', 'Accounts');
+      fixture.componentRef.setInput('largeTitle', 'collapsed');
+      fixture.detectChanges();
+      expect(query('h1')).toBeNull();
+      expect(query('[data-inline-title]')?.classList).not.toContain('opacity-0');
+    });
   });
 });

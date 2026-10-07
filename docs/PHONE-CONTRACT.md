@@ -43,6 +43,15 @@ A page gets all of this without writing any code for it.
 
 Pages declare these in route data and templates. No per-page header, back or sheet code.
 
+```ts
+// Typed as PageChromeData from @lifekit-hq/ui. A page reacts to its actions through
+// CmnPageActionsService: inject(CmnPageActionsService).on('add').
+{path: 'accounts', component: AccountsPage, data: {title: 'Accounts', actions: [{id: 'add', label: 'Add account', icon: 'Plus'}]}},
+{path: 'accounts/:id', component: AccountPage, data: {title: 'Account', parent: '/accounts'}},
+```
+
+A route that declares none of these keeps the layout's `title` input and gets no back chevron.
+
 | Declaration | Rule                                                                                                                                                    |
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `title`     | Under 15 characters. Shown once: in the top bar and as the large title, never repeated in the content.                                                  |
@@ -100,7 +109,7 @@ guarantee above is only gating once its check exists.
 | Guarantee                                        | Status                                                                               |
 | ------------------------------------------------ | ------------------------------------------------------------------------------------ |
 | Tab bar, sheets, safe areas                      | Partial: tab bar and `cmn-drawer` exist, with two sheet implementations and no stops |
-| Top bar title, back, actions                     | Target                                                                               |
+| Top bar title, back, actions                     | Built: route data `title`, `parent`, `actions`; no suite check yet                   |
 | Shell-owned scroll and tab state                 | Target                                                                               |
 | One state pattern                                | Target (policy rules 1, 2 enforced by `cmn-async-state`)                             |
 | Touch size, overlays, layout by size, appearance | Target                                                                               |
