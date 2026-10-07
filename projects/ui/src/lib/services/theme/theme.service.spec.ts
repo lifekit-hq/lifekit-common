@@ -1,8 +1,14 @@
 import {TestBed} from '@angular/core/testing';
-import chroma from 'chroma-js';
+import {
+  contrastRatio,
+  DEFAULT_INTENSITY,
+  derive,
+  SEED_STORAGE_KEY,
+  seedTokenNames,
+} from '@lifekit-hq/tokens/engine';
 import {afterEach, beforeEach, describe, expect, it} from 'vitest';
 
-import {LOCAL_STORAGE, PREFERS_DARK, ThemeService} from './theme.service';
+import {LOCAL_STORAGE, PREFERS_DARK, PREFERS_MORE_CONTRAST, ThemeService} from './theme.service';
 
 class MemoryStorage implements Storage {
   private readonly map = new Map<string, string>();
@@ -32,14 +38,19 @@ class MemoryStorage implements Storage {
   }
 }
 
-const ACCENT_STOPS = 11;
-const MIN_CONTRAST = 4.5;
-const MAX_MID_DELTA_E = 15;
-const LIGHT_SURFACE = '#f8f9fa';
-const DARK_SURFACE = '#111827';
+const INDIGO = '#4f46e5';
+const MIN_TEXT_CONTRAST = 4.5;
 
-function stopValue(stop: number): string {
-  return document.documentElement.style.getPropertyValue(`--cmn-accent-${stop * 100}`);
+function inline(name: string): string {
+  return document.documentElement.style.getPropertyValue(`--color-${name}`);
+}
+
+function derived(
+  name: string,
+  mode: 'light' | 'dark',
+  contrast: 'standard' | 'more' = 'standard'
+): string {
+  return derive({seed: INDIGO, mode, contrast}).tokens[name];
 }
 
 class FakeMediaQuery extends EventTarget {
@@ -57,12 +68,14 @@ class FakeMediaQuery extends EventTarget {
 }
 
 function build(
-  seed?: Record<string, string>,
-  osDark = false
-): {service: ThemeService; storage: Storage; os: FakeMediaQuery} {
+  stored?: Record<string, string>,
+  osDark = false,
+  osMoreContrast = false
+): {service: ThemeService; storage: Storage; os: FakeMediaQuery; contrast: FakeMediaQuery} {
   const storage = new MemoryStorage();
   const os = new FakeMediaQuery(osDark);
-  for (const [k, v] of Object.entries(seed ?? {})) {
+  const contrast = new FakeMediaQuery(osMoreContrast);
+  for (const [k, v] of Object.entries(stored ?? {})) {
     storage.setItem(k, v);
   }
   TestBed.resetTestingModule();
@@ -70,16 +83,17 @@ function build(
     providers: [
       {provide: LOCAL_STORAGE, useValue: storage},
       {provide: PREFERS_DARK, useValue: os},
+      {provide: PREFERS_MORE_CONTRAST, useValue: contrast},
     ],
   });
-  return {service: TestBed.inject(ThemeService), storage, os};
+  return {service: TestBed.inject(ThemeService), storage, os, contrast};
 }
 
 describe('ThemeService', () => {
   beforeEach(() => {
     document.documentElement.removeAttribute('data-theme');
-    for (let stop = 1; stop <= ACCENT_STOPS; stop++) {
-      document.documentElement.style.removeProperty(`--cmn-accent-${stop * 100}`);
+    for (const name of seedTokenNames()) {
+      document.documentElement.style.removeProperty(name);
     }
   });
 
@@ -189,9 +203,13 @@ describe('ThemeService', () => {
         providers: [
           {provide: LOCAL_STORAGE, useValue: storage},
           {provide: PREFERS_DARK, useValue: null},
+          {provide: PREFERS_MORE_CONTRAST, useValue: null},
         ],
       });
-      expect(TestBed.inject(ThemeService).getTheme()).toBe('light');
+      const service = TestBed.inject(ThemeService);
+      expect(service.getTheme()).toBe('light');
+      service.setSeed(INDIGO);
+      expect(inline('accent-default')).toBe(derived('accent-default', 'light'));
     });
 
     it('survives blocked storage', () => {
@@ -207,15 +225,18 @@ describe('ThemeService', () => {
         providers: [
           {provide: LOCAL_STORAGE, useValue: blocked},
           {provide: PREFERS_DARK, useValue: new FakeMediaQuery(true)},
+          {provide: PREFERS_MORE_CONTRAST, useValue: new FakeMediaQuery(false)},
         ],
       });
       const service = TestBed.inject(ThemeService);
       expect(service.getTheme()).toBe('dark');
       service.setTheme('light');
       service.setPreference('system');
-      service.setAccent('#4f46e5');
-      service.resetAccent();
-      expect(service.getStoredAccent()).toBeNull();
+      service.setSeed(INDIGO);
+      expect(inline('accent-default')).toBe(derived('accent-default', 'dark'));
+      service.resetSeed();
+      expect(service.getSeed()).toBeNull();
+      expect(inline('accent-default')).toBe('');
     });
   });
 
@@ -269,149 +290,166 @@ describe('ThemeService', () => {
       build();
       expect(metas.map(m => m.content)).toEqual(['#000000', '#000000']);
     });
-  });
 
-  it('writes a full accent ramp as inline custom properties', () => {
-    const {service, storage} = build();
-    service.setAccent('#4f46e5');
-
-    for (let stop = 1; stop <= ACCENT_STOPS; stop++) {
-      const value = document.documentElement.style.getPropertyValue(`--cmn-accent-${stop * 100}`);
-      expect(value).toMatch(/^#[0-9a-f]{6}$/i);
-    }
-    expect(storage.getItem('cmn-accent')).toBe('#4f46e5');
-    expect(service.getStoredAccent()).toBe('#4f46e5');
-  });
-
-  it('runs the accent ramp between the scale-end tokens when they resolve', () => {
-    const root = document.documentElement;
-    const {service} = build();
-    service.setAccent('#4f46e5');
-    const shipped = root.style.getPropertyValue('--cmn-accent-100');
-
-    root.style.setProperty('--color-accent-scale-light', '#000000');
-    root.style.setProperty('--color-accent-scale-dark', '#000000');
-    service.setAccent('#4f46e5');
-    const overridden = root.style.getPropertyValue('--cmn-accent-100');
-    root.style.removeProperty('--color-accent-scale-light');
-    root.style.removeProperty('--color-accent-scale-dark');
-
-    expect(overridden).not.toBe(shipped);
-  });
-
-  it('publishes the active accent', () => {
-    const {service} = build();
-    const seen: (string | null)[] = [];
-    service.activeAccent$.subscribe(a => seen.push(a));
-
-    service.setAccent('#0ea5e9');
-    expect(seen).toEqual([null, '#0ea5e9']);
-  });
-
-  it('re-applies a persisted accent on construction', () => {
-    build({'cmn-accent': '#e11d48'});
-    expect(document.documentElement.style.getPropertyValue('--cmn-accent-500')).not.toBe('');
-  });
-
-  it('clears every stop and the stored hex on reset', () => {
-    const {service, storage} = build();
-    service.setAccent('#4f46e5');
-    service.resetAccent();
-
-    for (let stop = 1; stop <= ACCENT_STOPS; stop++) {
-      expect(document.documentElement.style.getPropertyValue(`--cmn-accent-${stop * 100}`)).toBe(
-        ''
-      );
-    }
-    expect(storage.getItem('cmn-accent')).toBeNull();
-    expect(service.getStoredAccent()).toBeNull();
-  });
-
-  it('reports no stored accent on a fresh install', () => {
-    const {service} = build();
-    expect(service.getStoredAccent()).toBeNull();
-  });
-
-  describe('contrast auto-correction', () => {
-    let surfaces: HTMLStyleElement;
-
-    beforeEach(() => {
-      surfaces = document.createElement('style');
-      surfaces.textContent = `
-        :root { --color-surface-bg: ${LIGHT_SURFACE}; }
-        :root[data-theme='dark'] { --color-surface-bg: ${DARK_SURFACE}; }
-      `;
-      document.head.appendChild(surfaces);
-    });
-
-    afterEach(() => {
-      surfaces.remove();
-    });
-
-    it('darkens failing light stops on a light surface until they pass', () => {
+    it('follows a seed, whose surface replaces the app palette', () => {
       const {service} = build();
-      service.setAccent('#4f46e5');
+      service.setSeed(INDIGO);
+      const surface = derived('surface-bg', 'light');
+      expect(metas.map(m => m.content)).toEqual([surface, surface]);
 
-      for (let stop = 1; stop <= ACCENT_STOPS; stop++) {
-        expect(chroma.contrast(stopValue(stop), LIGHT_SURFACE)).toBeGreaterThanOrEqual(
-          MIN_CONTRAST
-        );
+      service.resetSeed();
+      expect(metas.map(m => m.content)).toEqual(['#f7f8fa', '#f7f8fa']);
+    });
+  });
+
+  describe('seed colour', () => {
+    it('leaves the app palette untouched when no seed is set', () => {
+      const {service} = build();
+      expect(service.getSeed()).toBeNull();
+      for (const name of seedTokenNames()) {
+        expect(document.documentElement.style.getPropertyValue(name)).toBe('');
       }
-      // First stop starts near-white (#f8f8f8): corrected darker, never saturating at white.
-      const first = chroma(stopValue(1));
-      expect(first.get('oklch.l')).toBeLessThan(chroma('#f8f8f8').get('oklch.l'));
-      expect(first.hex()).not.toBe('#ffffff');
     });
 
-    it('lightens failing dark stops on a dark surface until they pass', () => {
-      const {service} = build({'cmn-theme': 'dark'});
-      service.setAccent('#4f46e5');
-
-      for (let stop = 1; stop <= ACCENT_STOPS; stop++) {
-        expect(chroma.contrast(stopValue(stop), DARK_SURFACE)).toBeGreaterThanOrEqual(MIN_CONTRAST);
+    it('applies the whole derived palette inline at the quiet default intensity', () => {
+      const {service} = build();
+      service.setSeed(INDIGO);
+      const {tokens} = derive({seed: INDIGO, intensity: DEFAULT_INTENSITY, mode: 'light'});
+      for (const [name, value] of Object.entries(tokens)) {
+        expect(inline(name), name).toBe(value);
       }
-      // Last stop starts near-black (#0a0a0a): corrected lighter, never saturating at black.
-      const last = chroma(stopValue(ACCENT_STOPS));
-      expect(last.get('oklch.l')).toBeGreaterThan(chroma('#0a0a0a').get('oklch.l'));
-      expect(last.hex()).not.toBe('#000000');
+      expect(service.getSeed()).toEqual({seed: INDIGO, intensity: DEFAULT_INTENSITY});
     });
 
-    it('keeps the mid stop recognisably the requested accent', () => {
-      const {service} = build();
-      service.setAccent('#4f46e5');
-
-      expect(chroma.deltaE(stopValue(6), '#4f46e5')).toBeLessThan(MAX_MID_DELTA_E);
+    it('persists the choice with every variant cached for the pre-paint script', () => {
+      const {service, storage} = build();
+      service.setSeed('#4F46E5', 0.45);
+      const cached = JSON.parse(storage.getItem(SEED_STORAGE_KEY) ?? 'null');
+      expect(cached.seed).toBe(INDIGO);
+      expect(cached.intensity).toBe(0.45);
+      expect(Object.keys(cached.css)).toEqual(['light', 'dark', 'light-more', 'dark-more']);
     });
 
-    it('recomputes the ramp against the new surface when the theme changes', () => {
+    it('re-derives for the theme when it changes', () => {
       const {service} = build();
-      service.setAccent('#4f46e5');
-      const lightLast = stopValue(ACCENT_STOPS);
-      expect(chroma.contrast(lightLast, LIGHT_SURFACE)).toBeGreaterThanOrEqual(MIN_CONTRAST);
-
+      service.setSeed(INDIGO);
       service.setTheme('dark');
-      const darkLast = stopValue(ACCENT_STOPS);
-      expect(darkLast).not.toBe(lightLast);
-      expect(chroma(darkLast).get('oklch.l')).toBeGreaterThan(chroma(lightLast).get('oklch.l'));
-      expect(chroma.contrast(darkLast, DARK_SURFACE)).toBeGreaterThanOrEqual(MIN_CONTRAST);
-
+      expect(inline('accent-default')).toBe(derived('accent-default', 'dark'));
+      expect(inline('surface-bg')).toBe(derived('surface-bg', 'dark'));
       service.setTheme('light');
-      expect(stopValue(ACCENT_STOPS)).toBe(lightLast);
+      expect(inline('accent-default')).toBe(derived('accent-default', 'light'));
     });
 
-    it('meets AA on every stop for extreme accents on each surface', () => {
-      for (const [theme, surface] of [
-        ['light', LIGHT_SURFACE],
-        ['dark', DARK_SURFACE],
-      ] as const) {
-        for (const accent of ['#ffffff', '#000000', '#808080']) {
+    it('follows the OS contrast preference live', () => {
+      const {service, contrast} = build({}, false, true);
+      service.setSeed(INDIGO);
+      expect(inline('text-secondary')).toBe(derived('text-secondary', 'light', 'more'));
+      contrast.setMatches(false);
+      expect(inline('text-secondary')).toBe(derived('text-secondary', 'light'));
+    });
+
+    it('keeps text and accent fills readable for any colour, solved per role', () => {
+      for (const seed of ['#ffffff', '#000000', '#ffff00', '#808080']) {
+        for (const theme of ['light', 'dark'] as const) {
           const {service} = build({'cmn-theme': theme});
-          service.setAccent(accent);
-          for (let stop = 1; stop <= ACCENT_STOPS; stop++) {
-            expect(chroma.contrast(stopValue(stop), surface)).toBeGreaterThanOrEqual(MIN_CONTRAST);
+          service.setSeed(seed);
+          const pairs: [string, string][] = [
+            ['text-primary', 'surface-card'],
+            ['accent-default', 'surface-card'],
+            ['text-inverse', 'accent-default'],
+          ];
+          for (const [fg, bg] of pairs) {
+            expect(
+              contrastRatio(inline(fg), inline(bg)),
+              `${seed} ${theme} ${fg}/${bg}`
+            ).toBeGreaterThanOrEqual(MIN_TEXT_CONTRAST);
           }
         }
       }
+    });
+
+    it('restores a stored seed on construction', () => {
+      const first = build();
+      first.service.setSeed(INDIGO, 0.85);
+      const {service} = build({
+        [SEED_STORAGE_KEY]: first.storage.getItem(SEED_STORAGE_KEY) ?? '',
+        'cmn-theme': 'dark',
+      });
+      expect(service.getSeed()).toEqual({seed: INDIGO, intensity: 0.85});
+      expect(inline('surface-bg')).toBe(
+        derive({seed: INDIGO, intensity: 0.85, mode: 'dark'}).tokens['surface-bg']
+      );
+    });
+
+    it('publishes the active seed', () => {
+      const {service} = build();
+      const seen: unknown[] = [];
+      service.activeSeed$.subscribe(seed => seen.push(seed));
+      service.setSeed(INDIGO);
+      service.resetSeed();
+      expect(seen).toEqual([null, {seed: INDIGO, intensity: DEFAULT_INTENSITY}, null]);
+    });
+
+    it('clears every derived property and the stored choice on reset', () => {
+      const {service, storage} = build();
+      service.setSeed(INDIGO);
+      service.resetSeed();
+      for (const name of seedTokenNames()) {
+        expect(document.documentElement.style.getPropertyValue(name)).toBe('');
+      }
+      expect(storage.getItem(SEED_STORAGE_KEY)).toBeNull();
+    });
+
+    it('rejects a seed that is not a hex colour', () => {
+      const {service} = build();
+      expect(() => service.setSeed('indigo')).toThrow(TypeError);
+      expect(service.getSeed()).toBeNull();
+    });
+  });
+
+  describe('accent (pre-engine API)', () => {
+    it('sets the seed, keeping the current intensity', () => {
+      const {service} = build();
+      service.setSeed('#8e3b8a', 0.45);
+      service.setAccent(INDIGO);
+      expect(service.getSeed()).toEqual({seed: INDIGO, intensity: 0.45});
+      expect(service.getStoredAccent()).toBe(INDIGO);
+    });
+
+    it('feeds the --cmn-accent-* ramp through the derived accent stops', () => {
+      const {service} = build();
+      service.setAccent(INDIGO);
+      expect(inline('accent-500')).toBe(derived('accent-500', 'light'));
+    });
+
+    it('publishes the active accent hex', () => {
+      const {service} = build();
+      const seen: (string | null)[] = [];
+      service.activeAccent$.subscribe(a => seen.push(a));
+      service.setAccent('#0ea5e9');
+      service.resetAccent();
+      expect(seen).toEqual([null, '#0ea5e9', null]);
+    });
+
+    it('migrates an accent stored before the engine into a seed', () => {
+      const {service, storage} = build({'cmn-accent': '#e11d48'});
+      expect(service.getSeed()).toEqual({seed: '#e11d48', intensity: DEFAULT_INTENSITY});
+      expect(storage.getItem('cmn-accent')).toBeNull();
+      expect(storage.getItem(SEED_STORAGE_KEY)).not.toBeNull();
+      expect(inline('accent-default')).toBe(
+        derive({seed: '#e11d48', mode: 'light'}).tokens['accent-default']
+      );
+    });
+
+    it('drops an unusable stored accent', () => {
+      const {service, storage} = build({'cmn-accent': 'not-a-colour'});
+      expect(service.getSeed()).toBeNull();
+      expect(storage.getItem('cmn-accent')).toBeNull();
+    });
+
+    it('reports no stored accent on a fresh install', () => {
+      const {service} = build();
+      expect(service.getStoredAccent()).toBeNull();
     });
   });
 });

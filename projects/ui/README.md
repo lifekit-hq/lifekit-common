@@ -4,7 +4,7 @@ This project was generated using [Angular CLI](https://github.com/angular/angula
 
 ## Peer dependencies
 
-Consumers must install these alongside `@lifekit-hq/ui`: `@angular/cdk`, `chart.js`, `chroma-js`, `deep-chat`, `lucide-angular`, `rxjs`.
+Consumers must install these alongside `@lifekit-hq/ui`: `@angular/cdk`, `chart.js`, `deep-chat`, `lucide-angular`, `rxjs`.
 
 ## Code scaffolding
 

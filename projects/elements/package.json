@@ -15,7 +15,8 @@
     "registry": "https://npm.pkg.github.com"
   },
   "dependencies": {
-    "@lifekit-hq/charts-core": "2.3.0"
+    "@lifekit-hq/charts-core": "2.3.0",
+    "@lifekit-hq/tokens": "2.3.0"
   },
   "peerDependencies": {
     "chart.js": "^4.5.1",

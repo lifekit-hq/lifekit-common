@@ -121,7 +121,7 @@ describe('color', () => {
     clean('a.css', 'a { color: var(--color-accent-default, #5aa9bb); }');
     clean('a.css', 'a { border: 1px solid var( --color-border-default , #d9e0e3 ); }');
     clean('a.ts', 'const s = css`a { color: var(--color-accent-default, #175a6d); }`;');
-    clean('a.ts', "const c = cssVar('--color-chart-series-2', '#f59e0b');");
+    clean('a.ts', "const c = cssVar('--color-chart-series-2', '#cc6184');");
     clean('a.ts', 'const c = this.readToken(\n  "--color-surface-bg",\n  "#f3f5f6"\n);');
     clean(
       'a.css',

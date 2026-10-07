@@ -15,12 +15,12 @@ import {
 import {scrubPlugin} from './scrub';
 import {type AreaSeries, type ChartScrubHandlers} from './types';
 import {
+  CATEGORICAL_STEPS,
   CHART_FONT_SIZE,
   chartFontFamily,
   cssVar,
   fontFamily,
   money,
-  SERIES,
   seriesColor,
   xTickLimitPlugin,
 } from './utils';
@@ -36,7 +36,7 @@ Chart.register(
   Filler
 );
 
-const DEFAULT_SERIES_STEPS = [SERIES.green, SERIES.accent, SERIES.amber, SERIES.slate, SERIES.pink];
+const DEFAULT_SERIES_STEPS = CATEGORICAL_STEPS;
 const FILL_ALPHA = 'cc';
 
 const X_TICK_LIMIT = 8;

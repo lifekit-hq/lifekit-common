@@ -244,3 +244,28 @@ lifekit-stack runbook for the gate itself.
 **Sign-out URL, OIDC client apps (finance-sentry).** Use the app's own sign-out route, which ends
 its session and then redirects to Logto's `/oidc/session/end` with its own `client_id` and a
 registered `post_logout_redirect_uri`.
+
+### `<lk-theme-picker>`
+
+The colour section of Settings > Appearance: the app's own colour, the preset colours, a custom
+colour, and an intensity slider (Quiet / Tinted / Immersive). The whole palette is derived from the
+one colour by the `@lifekit-hq/tokens` engine, so every choice keeps text and controls readable; a
+colour close to a status colour gets a note saying the accent may be read as that status. What the
+colour is allowed to touch: [`docs/design/patterns.md`](../../docs/design/patterns.md#colour).
+
+| Property    | Attribute   | Type     | Default | Description                                    |
+| ----------- | ----------- | -------- | ------- | ---------------------------------------------- |
+| `appSeed`   | `app-seed`  | `string` | `''`    | The app's own colour, offered as "App default" |
+| `seed`      | `seed`      | `string` | `''`    | The user's colour; empty for the app's own     |
+| `intensity` | `intensity` | `number` | `0.12`  | How far the colour tints the surfaces, 0-1     |
+
+The element is controlled. Events:
+
+- `lk-theme-picker-change`, `detail: {seed: string | null, intensity: number}` (`seed: null` is
+  the app's own colour). In an Angular app, pass it to `ThemeService.setSeed(seed, intensity)`,
+  or `resetSeed()` for `null`; the service persists it per device and the pre-paint script
+  applies it on the next load.
+
+```html
+<lk-theme-picker app-seed="#175a6d"></lk-theme-picker>
+```

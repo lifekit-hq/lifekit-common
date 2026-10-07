@@ -2,14 +2,14 @@
 
 Shared design system & Angular component library for the lifekit-hq ecosystem. Six lockstep-versioned packages published to GitHub Packages:
 
-| Package                   | What                                                                                                                                                                        | Consumers                               |
-| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
-| `@lifekit-hq/tokens`      | Design tokens — `theme.css` (light/dark) + Tailwind preset, self-hosted IBM Plex Sans, brand mark + browser-chrome standard (`docs/BROWSER-CHROME.md`). Framework-agnostic. | All lifekit frontends (Angular + React) |
-| `@lifekit-hq/charts-core` | Framework-free Chart.js config builders (zero `@angular/*`)                                                                                                                 | `ui`, `elements`                        |
-| `@lifekit-hq/elements`    | Framework-free Lit custom elements (`lk-*`) — incl. PWA install/update/offline pieces                                                                                       | finance-sentry                          |
-| `@lifekit-hq/ui`          | Angular component library (`cmn-*` selectors), Storybook-first                                                                                                              | finance-sentry                          |
-| `@lifekit-hq/core`        | Angular signal-store features & helpers                                                                                                                                     | finance-sentry                          |
-| `@lifekit-hq/config`      | ESLint / Prettier / Stylelint / tsconfig presets                                                                                                                            | lifekit repos (build-time)              |
+| Package                   | What                                                                                                                                                                        | Consumers                       |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| `@lifekit-hq/tokens`      | Design tokens — `theme.css` (light/dark) + Tailwind preset, self-hosted IBM Plex Sans, brand mark + browser-chrome standard (`docs/BROWSER-CHROME.md`). Framework-agnostic. | All lifekit frontends (Angular) |
+| `@lifekit-hq/charts-core` | Framework-free Chart.js config builders (zero `@angular/*`)                                                                                                                 | `ui`, `elements`                |
+| `@lifekit-hq/elements`    | Framework-free Lit custom elements (`lk-*`) — incl. PWA install/update/offline pieces                                                                                       | finance-sentry                  |
+| `@lifekit-hq/ui`          | Angular component library (`cmn-*` selectors), Storybook-first                                                                                                              | finance-sentry                  |
+| `@lifekit-hq/core`        | Angular signal-store features & helpers                                                                                                                                     | finance-sentry                  |
+| `@lifekit-hq/config`      | ESLint / Prettier / Stylelint / tsconfig presets                                                                                                                            | lifekit repos (build-time)      |
 
 Extracted from finance-sentry (`dsdevq-common`) 2026-08-25. Sole developer: Denys.
 
@@ -89,7 +89,7 @@ New components and component changes are developed and reviewed **in Storybook**
 - `sideEffects` in `projects/elements/package.json` must name the _built_ bundle (`./fesm2022/lifekit-hq-elements.mjs`), not `src/` paths — ng-packagr copies the field verbatim, and `sideEffects: false` (or non-matching paths) silently drops `customElements.define` calls in Rollup/Vite production builds.
 - VRT baselines are `*-win32.png`; Denys runs VRT on Windows. Container-pinned Linux baselines are a follow-up (not in the current verify gate).
 - Every exported component ships a `*.stories.ts` covering its real states and a `*.spec.ts` for what a story cannot assert. Infrastructure components that only exist behind a service (dialog/drawer containers, the command palette) get one launcher story per service rather than a story each.
-- Two of the three consumers are React, so `@lifekit-hq/ui` is reachable only by finance-sentry today; `tokens` (plain custom properties) and `elements` (Lit) are the framework-free seams. See `docs/CONSUMER-GAP-AUDIT.md` before adding surface area.
+- All three consumers (finance-sentry, lifekit-dashboard, devclaw) are Angular apps, so `@lifekit-hq/ui` is reachable by each; `tokens` (plain custom properties) and `elements` (Lit) are the framework-free seams. `docs/CONSUMER-GAP-AUDIT.md` predates the dashboard and devclaw moving to Angular; check what each consumer uses before adding surface area.
 - Vitest browser mode writes failure screenshots to `__screenshots__/` next to the failing spec; the directory is gitignored.
 
 ## Further reading

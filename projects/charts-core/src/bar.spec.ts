@@ -10,6 +10,7 @@ import {
   updateBarChart,
 } from './bar';
 import {type BarSeries} from './types';
+import {CATEGORICAL_STEPS} from './utils';
 
 const TOKENS: BarChartTokens = {textSecondary: '#464555', borderDefault: '#c7c4d8'};
 
@@ -78,14 +79,15 @@ describe('buildBarDatasets', () => {
   });
 
   it('assigns distinct default colors and cycles them past the palette length', () => {
-    const many: BarSeries[] = Array.from({length: 7}, (_, i) => ({
+    const steps = CATEGORICAL_STEPS.length;
+    const many: BarSeries[] = Array.from({length: steps + 2}, (_, i) => ({
       label: `S${i}`,
       points: [{label: 'Jan', value: i}],
     }));
     const colors = buildBarDatasets(many).map(d => d.backgroundColor);
-    expect(colors[0]).not.toBe(colors[1]);
-    expect(colors[5]).toBe(colors[0]);
-    expect(colors[6]).toBe(colors[1]);
+    expect(new Set(colors.slice(0, steps)).size).toBe(steps);
+    expect(colors[steps]).toBe(colors[0]);
+    expect(colors[steps + 1]).toBe(colors[1]);
   });
 
   it('lets a series override its color', () => {

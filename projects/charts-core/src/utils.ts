@@ -10,20 +10,26 @@ export function cssVar(name: string, fallback: string): string {
 /** Canvas text size (px): the 12px floor, the smallest step of the type ramp. */
 export const CHART_FONT_SIZE = 12;
 
-/** `--color-chart-series-N` with its shipped value as the fallback, read when the token is unavailable. */
+/** `--color-chart-series-N` with its light-theme value as the fallback, read when the token is unavailable. */
 const SERIES_COLORS: readonly (() => string)[] = [
   () => cssVar('--color-chart-series-1', '#175a6d'),
-  () => cssVar('--color-chart-series-2', '#f59e0b'),
-  () => cssVar('--color-chart-series-3', '#a855f7'),
-  () => cssVar('--color-chart-series-4', '#84cc16'),
-  () => cssVar('--color-chart-series-5', '#ec4899'),
-  () => cssVar('--color-chart-series-6', '#3b82f6'),
-  () => cssVar('--color-chart-series-7', '#10b981'),
-  () => cssVar('--color-chart-series-8', '#ef4444'),
-  () => cssVar('--color-chart-series-9', '#64748b'),
+  () => cssVar('--color-chart-series-2', '#cc6184'),
+  () => cssVar('--color-chart-series-3', '#745fbc'),
+  () => cssVar('--color-chart-series-4', '#8d9000'),
+  () => cssVar('--color-chart-series-5', '#3471c1'),
+  () => cssVar('--color-chart-series-6', '#b67c00'),
+  () => cssVar('--color-chart-series-7', '#9a509c'),
+  () => cssVar('--color-chart-series-8', '#009e93'),
+  () => cssVar('--color-chart-series-9', '#636a6d'),
 ];
 
-/** Named steps of the series palette, so a chart's default order reads as colours, not numbers. */
+/**
+ * Named steps of the series palette as it shipped before the seed engine.
+ *
+ * @deprecated The series now come from the seed's categorical ramp, so a step's colour follows the
+ * seed and no longer matches its name. Use the step number (1 is the accent, 9 the neutral), or
+ * `CATEGORICAL_STEPS` for the default order.
+ */
 export const SERIES = {
   accent: 1,
   amber: 2,
@@ -35,6 +41,28 @@ export const SERIES = {
   red: 8,
   slate: 9,
 } as const;
+
+/** The neutral step, for "other" or a muted comparison series. */
+export const NEUTRAL_STEP = SERIES_COLORS.length;
+
+const ACCENT_STEP = 1;
+/** The ramp step the engine walks to last, which lands just short of the accent on the wheel. */
+const NEAR_ACCENT_STEP = NEUTRAL_STEP - 1;
+const STEPS_BEFORE_NEAR_ACCENT = Array.from(
+  {length: NEAR_ACCENT_STEP - ACCENT_STEP},
+  (_, i) => i + ACCENT_STEP
+);
+
+/**
+ * The categorical steps in drawing order: the accent, then the engine's ramp, whose neighbours it
+ * already keeps apart on the wheel. The step that lands beside the accent is swapped with the one
+ * before it, so a ring's wrap-around (its last slice next to its first) stays apart too.
+ */
+export const CATEGORICAL_STEPS: readonly number[] = [
+  ...STEPS_BEFORE_NEAR_ACCENT.slice(0, -1),
+  NEAR_ACCENT_STEP,
+  ...STEPS_BEFORE_NEAR_ACCENT.slice(-1),
+];
 
 /** Default colour of series step `step` (1-based): its `--color-chart-series-N` token. */
 export function seriesColor(step: number): string {

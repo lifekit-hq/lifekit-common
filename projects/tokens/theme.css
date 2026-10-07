@@ -56,7 +56,7 @@
   --color-accent-active: #0f3846;
   --color-accent-subtle: #e3f1f4;
 
-  /* Dynamic accent (runtime override via ThemeService / chroma-js) */
+  /* Pre-engine accent names: aliases of the ramp, which a seed (ThemeService.setSeed) re-derives */
   --cmn-accent-100: var(--color-accent-100);
   --cmn-accent-200: var(--color-accent-200);
   --cmn-accent-300: var(--color-accent-300);
@@ -75,21 +75,49 @@
   --color-status-warning: #955400;
   --color-status-error: #bb2530;
 
+  /* Status tints and deltas: derived from the status colours, so they follow every theme and seed.
+     Green and red mean gain and loss only; nothing else in the UI wears them. */
+  --color-status-info-subtle: color-mix(
+    in srgb,
+    var(--color-status-info) 15%,
+    var(--color-surface-card)
+  );
+  --color-status-success-subtle: color-mix(
+    in srgb,
+    var(--color-status-success) 15%,
+    var(--color-surface-card)
+  );
+  --color-status-warning-subtle: color-mix(
+    in srgb,
+    var(--color-status-warning) 15%,
+    var(--color-surface-card)
+  );
+  --color-status-error-subtle: color-mix(
+    in srgb,
+    var(--color-status-error) 15%,
+    var(--color-surface-card)
+  );
+  --color-delta-up: var(--color-status-success);
+  --color-delta-down: var(--color-status-error);
+
   /* Scrim — the veil behind a dialog or drawer; the same in both themes */
   --color-scrim-dialog: rgb(0 0 0 / 0.55);
   --color-scrim-drawer: rgb(0 0 0 / 0.35);
 
-  /* Chart series — default colours for series that name none, as they shipped; the same in both
-     themes. A retune to the Instrument direction is a separate design call. */
+  /* Chart series: the seed engine's categorical ramp for the petrol seed (engine/derive.mjs).
+     Series 1 is the accent; 2-8 walk the wheel clear of the red and green the deltas own, each
+     at 3:1 on a card; 9 is the neutral. A seed (seeds/<app>.css, ThemeService.setSeed)
+     re-derives them. */
   --color-chart-series-1: #175a6d;
-  --color-chart-series-2: #f59e0b;
-  --color-chart-series-3: #a855f7;
-  --color-chart-series-4: #84cc16;
-  --color-chart-series-5: #ec4899;
-  --color-chart-series-6: #3b82f6;
-  --color-chart-series-7: #10b981;
-  --color-chart-series-8: #ef4444;
-  --color-chart-series-9: #64748b;
+  --color-chart-series-2: #cc6184;
+  --color-chart-series-3: #745fbc;
+  --color-chart-series-4: #8d9000;
+  --color-chart-series-5: #3471c1;
+  --color-chart-series-6: #b67c00;
+  --color-chart-series-7: #9a509c;
+  --color-chart-series-8: #009e93;
+  --color-chart-series-9: #636a6d;
+  --color-chart-grid: var(--color-border-default);
 
   /* Accent scale ends — the near-white and near-black a generated accent ramp runs between */
   --color-accent-scale-light: #f8f8f8;
@@ -100,7 +128,7 @@
   --color-border-strong: #7d8c93;
   --color-border-focus: #1d6f85;
 
-  /* Shadow — dual-layer per Finance Sentry design tokens */
+  /* Shadow — dual-layer, a soft ambient spread over a tight contact shadow */
   --shadow-sm: 0 1px 4px rgba(25, 28, 29, 0.05), 0 2px 8px rgba(25, 28, 29, 0.04);
   --shadow-md: 0 8px 32px rgba(25, 28, 29, 0.08), 0 2px 8px rgba(25, 28, 29, 0.04);
   --shadow-lg: 0 24px 64px rgba(25, 28, 29, 0.1);
@@ -142,6 +170,16 @@
   --color-status-warning: #e8a33c;
   --color-status-error: #f27b83;
 
+  --color-chart-series-1: #5aa9bb;
+  --color-chart-series-2: #de809d;
+  --color-chart-series-3: #bbadff;
+  --color-chart-series-4: #a4a848;
+  --color-chart-series-5: #8dbdff;
+  --color-chart-series-6: #cc9641;
+  --color-chart-series-7: #e39fe4;
+  --color-chart-series-8: #1cb9ad;
+  --color-chart-series-9: #98a0a3;
+
   --color-border-default: #27333a;
   --color-border-strong: #62727a;
   --color-border-focus: #5aa9bb;
@@ -171,7 +209,7 @@ html {
   }
 }
 
-/* ─── Animations (Finance Sentry design tokens) ──────────────────────────── */
+/* ─── Animations ─────────────────────────────────────────────────────────── */
 @keyframes cmn-spin {
   to {
     transform: rotate(360deg);

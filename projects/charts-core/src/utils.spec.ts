@@ -1,12 +1,14 @@
 import {afterEach, describe, expect, it, vi} from 'vitest';
 
 import {
+  CATEGORICAL_STEPS,
   chartFontFamily,
   cssVar,
   fontFamily,
   isSeriesEmpty,
   money,
   NARROW_CHART_WIDTH,
+  NEUTRAL_STEP,
   percent,
   plainNumber,
   seriesColor,
@@ -149,7 +151,12 @@ describe('seriesColor', () => {
   });
 
   it('falls back to the shipped colour when the token is unavailable', () => {
-    expect(seriesColor(2)).toBe('#f59e0b');
+    expect(seriesColor(2)).toBe('#cc6184');
+  });
+
+  it('draws categories from the accent through the ramp, leaving the neutral for "other"', () => {
+    expect(CATEGORICAL_STEPS).toEqual([1, 2, 3, 4, 5, 6, 8, 7]);
+    expect(CATEGORICAL_STEPS).not.toContain(NEUTRAL_STEP);
   });
 
   it('reads the series token when it resolves', () => {
