@@ -297,15 +297,15 @@ grow into (see the status table below).
 7. **One page frame.** Pages sit in `cmn-page-container` (1200px max width,
    `p-cmn-4 md:p-cmn-8`) so width and padding match across products.
 
-| Rule                                 | Status   | Where                                                                         |
-| ------------------------------------ | -------- | ----------------------------------------------------------------------------- |
-| 1. Skeletons, not spinners           | Enforced | `cmn-async-state` renders `cmn-skeleton` or its `[skeleton]` slot             |
-| 2. Loading is not empty              | Enforced | `cmn-async-state` never shows empty while `idle` or `loading`                 |
-| 3. Keep cached data while refreshing | Target   | `loading` always replaces content with a skeleton                             |
-| 4. No micro-flashes                  | Target   | no indicator delay or minimum display time                                    |
-| 5. No layout shift                   | Partial  | stable page width via `cmn-page-container`; skeleton shape is caller-supplied |
-| 6. Errors keep context               | Partial  | `errorPlacement="above"` keeps content; `[error-action]` holds Retry          |
-| 7. One page frame                    | Enforced | `cmn-page-container` defaults                                                 |
+| Rule                                 | Status   | Where                                                                             |
+| ------------------------------------ | -------- | --------------------------------------------------------------------------------- |
+| 1. Skeletons, not spinners           | Enforced | `cmn-async-state` renders `cmn-skeleton` or its `[skeleton]` slot                 |
+| 2. Loading is not empty              | Enforced | `cmn-async-state` never shows empty while `idle` or `loading`                     |
+| 3. Keep cached data while refreshing | Target   | `loading` always replaces content with a skeleton                                 |
+| 4. No micro-flashes                  | Target   | no indicator delay or minimum display time                                        |
+| 5. No layout shift                   | Partial  | stable page width via `cmn-page-container`; skeleton shape is caller-supplied     |
+| 6. Errors keep context               | Partial  | `errorPlacement="above"` keeps content; `retryable` / `[error-action]` hold Retry |
+| 7. One page frame                    | Enforced | `cmn-page-container` defaults                                                     |
 
 Apps use `cmn-async-state` and `cmn-skeleton` rather than local loading markup; rules marked
 Target are not yet guaranteed by the primitives and must be handled in the app until they are.
