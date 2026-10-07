@@ -135,10 +135,11 @@ html {
 }
 
 /* ─── Reduced motion ─────────────────────────────────────────────────────── */
+/* Spinners keep turning (they signal work in progress); pulses and everything else settle. */
 @media (prefers-reduced-motion: reduce) {
-  *:not(.animate-spin, .animate-pulse, .animate-cmn-spin, .animate-cmn-pulse),
-  *:not(.animate-spin, .animate-pulse, .animate-cmn-spin, .animate-cmn-pulse)::before,
-  *:not(.animate-spin, .animate-pulse, .animate-cmn-spin, .animate-cmn-pulse)::after {
+  *:not(.animate-spin, .animate-cmn-spin),
+  *:not(.animate-spin, .animate-cmn-spin)::before,
+  *:not(.animate-spin, .animate-cmn-spin)::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -215,7 +216,6 @@ html {
 
 .cmn-dialog-backdrop {
   background-color: rgb(0 0 0 / 0.55);
-  backdrop-filter: blur(2px);
 }
 
 /* ─── Drawer (cmn-drawer) ───────────────────────────────────────────────────── */

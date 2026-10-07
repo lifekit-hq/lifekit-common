@@ -42,6 +42,16 @@ describe('SidebarNavComponent', () => {
     expect(text).not.toContain('Lifekit');
   });
 
+  it('should switch width on collapse without tweening it', () => {
+    const aside = (fixture.nativeElement as HTMLElement).querySelector('aside');
+    expect(aside?.classList).toContain('w-60');
+    expect(aside?.className).not.toContain('transition-[width]');
+    fixture.componentInstance.toggleCollapsed();
+    fixture.detectChanges();
+    expect(aside?.classList).toContain('w-16');
+    expect(aside?.className).not.toContain('transition-[width]');
+  });
+
   it('should collapse when toggle is clicked', () => {
     const btn: HTMLButtonElement = fixture.nativeElement.querySelector(
       'button[title="Collapse sidebar"]'

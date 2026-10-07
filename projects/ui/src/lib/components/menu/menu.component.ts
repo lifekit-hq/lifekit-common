@@ -29,8 +29,7 @@ const TRIGGER_BASE_CLASSES =
   'focus:ring-2 focus:ring-border-focus focus:ring-offset-1';
 
 const PANEL_BASE_CLASSES =
-  'min-w-48 overflow-hidden rounded-cmn-lg border border-border-default bg-surface-card ' +
-  'py-cmn-2 shadow-cmn-lg';
+  'min-w-48 overflow-hidden rounded-cmn-lg bg-surface-card py-cmn-2 shadow-cmn-lg';
 
 const ITEM_BASE_CLASSES =
   'flex w-full items-center gap-cmn-3 px-cmn-4 py-cmn-2 text-left text-cmn-sm transition-colors ' +

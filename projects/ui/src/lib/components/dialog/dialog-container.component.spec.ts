@@ -42,6 +42,11 @@ describe('CmnDialogContainerComponent', () => {
     expect(shell().getAttribute('aria-modal')).toBe('true');
   });
 
+  it('is held by its shadow alone, with no border', () => {
+    expect(shell().classList).toContain('shadow-cmn-lg');
+    expect(shell().classList).not.toContain('border');
+  });
+
   it('omits aria-label when none is configured', () => {
     expect(shell().getAttribute('aria-label')).toBeNull();
   });

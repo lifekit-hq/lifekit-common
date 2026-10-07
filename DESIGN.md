@@ -152,7 +152,7 @@ A 4px spacing base (`cmn-1` to `cmn-16`). App chrome comes from `cmn-app-layout`
 
 ## Elevation & Depth
 
-Flat by default: hairline border on `surface-card`. Shadows are for overlays only (menu, popover, dialog, bottom sheet). Dialogs do not stack border, shadow and blur.
+Flat by default: hairline border on `surface-card`. Shadows are for overlays only (menu, popover, dialog, bottom sheet). A surface is held by its border or its shadow, never both: overlays (menu, multi-select, dialog, command palette) carry a shadow and no border, and no backdrop blur.
 
 ## Shapes
 

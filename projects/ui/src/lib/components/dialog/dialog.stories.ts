@@ -35,9 +35,7 @@ class StoryDialogContentComponent {
   selector: 'cmn-story-bare-dialog-content',
   imports: [ButtonComponent],
   template: `
-    <div
-      class="w-[22rem] rounded-2xl border border-accent-default bg-surface-card p-cmn-6 shadow-cmn-md"
-    >
+    <div class="w-[22rem] rounded-2xl bg-surface-card p-cmn-6 shadow-cmn-md">
       <p class="mb-cmn-4 font-headline text-cmn-lg text-text-primary">Custom chrome</p>
       <p class="mb-cmn-4 text-cmn-sm text-text-secondary">
         The bare container draws no shell, so this dialog owns its own frame.

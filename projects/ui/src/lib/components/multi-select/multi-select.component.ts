@@ -84,7 +84,7 @@ const POSITIONS: ConnectedPosition[] = [
       cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
     >
       <div
-        class="max-h-64 overflow-y-auto rounded-cmn-lg border border-border-default bg-surface-card py-cmn-2 shadow-cmn-lg"
+        class="max-h-64 overflow-y-auto rounded-cmn-lg bg-surface-card py-cmn-2 shadow-cmn-lg"
         role="listbox"
         aria-multiselectable="true"
       >
