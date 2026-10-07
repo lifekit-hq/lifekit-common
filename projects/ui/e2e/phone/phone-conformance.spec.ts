@@ -26,7 +26,10 @@ const THEME_COLOR_METAS = [
 
 type Theme = 'light' | 'dark';
 
-async function open(page: Page, story: string, theme: Theme = 'light') {
+const layoutStory = (story: string) => `components-app-layout--${story}`;
+const ROUTED_STORY = 'conformance-routed-app-layout--routed';
+
+async function open(page: Page, storyId: string, theme: Theme = 'light') {
   // The head carries the browser chrome metas, as an app's index.html does.
   await page.addInitScript(metas => {
     document.addEventListener('DOMContentLoaded', () => {
@@ -39,9 +42,7 @@ async function open(page: Page, story: string, theme: Theme = 'light') {
       }
     });
   }, THEME_COLOR_METAS);
-  await page.goto(
-    `/iframe.html?id=components-app-layout--${story}&viewMode=story&globals=theme:${theme}`
-  );
+  await page.goto(`/iframe.html?id=${storyId}&viewMode=story&globals=theme:${theme}`);
   await page.waitForSelector('cmn-app-layout > div', {state: 'visible'});
 }
 
@@ -67,7 +68,7 @@ for (const vp of VIEWPORTS) {
       const id = `${vp.name} | ${story}`;
 
       test(`${id} | targets >= 44`, async ({page}) => {
-        await open(page, story);
+        await open(page, layoutStory(story));
         const small = await page.evaluate(min => {
           const found: string[] = [];
           const selector = 'button, a[href], [role=button], [role=tab], input, select';
@@ -86,7 +87,7 @@ for (const vp of VIEWPORTS) {
       });
 
       test(`${id} | text >= 12px`, async ({page}) => {
-        await open(page, story);
+        await open(page, layoutStory(story));
         const small = await page.evaluate(min => {
           const found = new Map<string, number>();
           for (const el of document.querySelectorAll('body *')) {
@@ -107,7 +108,7 @@ for (const vp of VIEWPORTS) {
       });
 
       test(`${id} | nothing covers the chrome`, async ({page}) => {
-        await open(page, story);
+        await open(page, layoutStory(story));
         const covered = await page.evaluate(() => {
           const found: string[] = [];
           const bars: [string, string][] = [
@@ -140,7 +141,7 @@ for (const vp of VIEWPORTS) {
       });
 
       test(`${id} | tab bar by device`, async ({page}) => {
-        await open(page, story);
+        await open(page, layoutStory(story));
         const tabs = page.locator('cmn-bottom-tab-bar nav');
         const visible = (await tabs.count()) > 0 && (await tabs.first().isVisible());
         const problems: string[] = [];
@@ -152,28 +153,30 @@ for (const vp of VIEWPORTS) {
         }
         report(problems);
       });
-
-      // `phone` has no scrollable body; only the overlay story gives main something to scroll.
-      if (story === 'phone-overlay') {
-        test(`${id} | back restores scroll`, async ({page}) => {
-          await open(page, story);
-          const main = page.locator('cmn-app-layout main');
-          await main.evaluate((el, y) => el.scrollTo(0, y), SCROLL_PROBE);
-          await page.evaluate(() => history.pushState({}, '', '#detail'));
-          await page.goBack();
-          await page.waitForTimeout(200);
-          const top = await main.evaluate(el => el.scrollTop);
-          report(
-            top === SCROLL_PROBE ? [] : [`scrollTop ${top} after back, expected ${SCROLL_PROBE}`]
-          );
-        });
-      }
     }
+
+    test(`${vp.name} | back restores scroll`, async ({page}) => {
+      await open(page, ROUTED_STORY);
+      const main = page.locator('cmn-app-layout main');
+      await expect(main.getByRole('heading', {name: 'List'})).toBeVisible();
+      await main.evaluate((el, y) => el.scrollTo(0, y), SCROLL_PROBE);
+      const before = await main.evaluate(el => el.scrollTop);
+      expect(before).toBeGreaterThan(0);
+      await page.getByRole('link', {name: 'Open detail'}).evaluate(el => el.click());
+      await expect(main.getByRole('heading', {name: 'Detail'})).toBeVisible();
+      await page.goBack();
+      await expect(main.getByRole('heading', {name: 'List'})).toBeVisible();
+      await page.evaluate(
+        () => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+      );
+      const after = await main.evaluate(el => el.scrollTop);
+      report(after === before ? [] : [`scrollTop ${after} after back, expected ${before}`]);
+    });
 
     for (const theme of ['light', 'dark'] as const) {
       test(`${vp.name} | ${theme} | theme-color matches the surface`, async ({page}) => {
         await page.emulateMedia({colorScheme: theme});
-        await open(page, 'phone', theme);
+        await open(page, layoutStory('phone'), theme);
         const state = await page.evaluate(() => {
           const metas = [...document.querySelectorAll('meta[name="theme-color"]')];
           const surface = getComputedStyle(document.documentElement)
