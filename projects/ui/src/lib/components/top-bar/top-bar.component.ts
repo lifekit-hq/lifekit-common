@@ -37,6 +37,8 @@ const HEADER_OVERLAY_CLASSES =
   selector: 'cmn-top-bar',
   imports: [IconComponent, MenuComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  // Chrome is for pressing: a long press on a label selects nothing
+  host: {class: 'select-none'},
   template: `
     <header [class]="headerClass()">
       <!-- Back: a chevron only, no "Back" text -->

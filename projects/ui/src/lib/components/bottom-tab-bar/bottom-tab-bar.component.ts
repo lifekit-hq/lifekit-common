@@ -42,6 +42,8 @@ const SHEET_ITEM_INACTIVE_CLASSES = 'text-text-primary hover:bg-surface-raised';
   selector: 'cmn-bottom-tab-bar',
   imports: [CdkTrapFocus, BadgeComponent, IconComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  // Chrome is for pressing: a long press on a label selects nothing
+  host: {class: 'select-none'},
   template: `
     @if (tabs().length || moreItems().length) {
       <nav [class]="navClass()" aria-label="Primary">
