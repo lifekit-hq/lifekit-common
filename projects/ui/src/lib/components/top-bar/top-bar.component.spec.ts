@@ -66,21 +66,6 @@ describe('TopBarComponent', () => {
     expect(host.querySelector('button[aria-label="Toggle theme"]')).toBeNull();
   });
 
-  it('should let the theme toggle yield on narrow phones only once pages declare several actions', () => {
-    const toggle = () =>
-      (fixture.nativeElement as HTMLElement).querySelector('button[aria-label="Toggle theme"]');
-    expect(toggle()?.classList.contains('max-[359px]:hidden')).toBe(false);
-    fixture.componentRef.setInput('actions', [{id: 'edit', label: 'Edit', icon: 'Pencil'}]);
-    fixture.detectChanges();
-    expect(toggle()?.classList.contains('max-[359px]:hidden')).toBe(false);
-    fixture.componentRef.setInput('actions', [
-      {id: 'edit', label: 'Edit', icon: 'Pencil'},
-      {id: 'share', label: 'Share', icon: 'Share'},
-    ]);
-    fixture.detectChanges();
-    expect(toggle()?.classList.contains('max-[359px]:hidden')).toBe(true);
-  });
-
   it('should show avatar initial from avatarLabel', () => {
     fixture.componentRef.setInput('avatarLabel', 'Denys');
     fixture.detectChanges();

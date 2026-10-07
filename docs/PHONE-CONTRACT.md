@@ -39,6 +39,9 @@ A page gets all of this without writing any code for it.
 | Appearance     | Follows the system light or dark setting by default. The override lives in Settings. `theme-color` matches the surface, per the browser chrome standard.                                                    |
 | Motion         | Brief and purposeful. Everything fades or stops under Reduce Motion.                                                                                                                                        |
 
+Below 360px, a page with two or more actions loses the top bar's theme toggle so the title stays
+readable. The app must offer the theme override in Settings.
+
 ### Scroll and tab state
 
 The shell does this itself, in `cmn-app-layout`, with no page code and no router feature to enable

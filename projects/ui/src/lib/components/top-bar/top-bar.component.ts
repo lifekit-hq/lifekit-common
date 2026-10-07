@@ -23,9 +23,9 @@ const CHROME_BUTTON_CLASSES =
   'text-text-secondary transition-colors hover:bg-surface-raised hover:text-text-primary ' +
   'md:h-8 md:w-8';
 /**
- * On a 320px phone the fullest bar (back, two actions, search, avatar) leaves the title ~23px, so
- * the theme toggle yields below 360px once a page declares more than one action. It stays in the
- * DOM, hidden, so no control ever shrinks under its touch target to make room.
+ * On a 320px phone the fullest bar (back, two actions, search, theme toggle, avatar) leaves the
+ * title ~32px, so the theme toggle yields below 360px once a page declares more than one action
+ * (title ~76px). It stays in the DOM, hidden, so no control ever shrinks under its touch target.
  */
 const NARROW_HIDDEN_CLASSES = 'max-[359px]:hidden';
 /** The avatar's disc stays 32px inside its touch-sized, invisible button. */
