@@ -313,6 +313,9 @@ Target are not yet guaranteed by the primitives and must be handled in the app u
 The phone chapter of this policy (what the shell guarantees and what a page declares on a phone)
 is [PHONE-CONTRACT.md](PHONE-CONTRACT.md). Where the two overlap, the rules above win.
 
+The reference registry, the named gaps and the per-pattern compare-against links are in
+[design/patterns.md](design/patterns.md).
+
 ---
 
 ## Sequencing note — what unblocks issue #3
