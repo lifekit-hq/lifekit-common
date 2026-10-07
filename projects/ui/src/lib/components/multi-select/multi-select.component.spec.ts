@@ -76,6 +76,14 @@ describe('MultiSelectComponent', () => {
     expect(trigger().getAttribute('aria-expanded')).toBe('true');
   });
 
+  it('floats its panel on its shadow alone, with no border', () => {
+    open();
+
+    const listbox = panel().querySelector('[role="listbox"]');
+    expect(listbox?.classList).toContain('shadow-cmn-lg');
+    expect(listbox?.classList).not.toContain('border');
+  });
+
   it('adds and removes values as options are toggled', () => {
     open();
 
