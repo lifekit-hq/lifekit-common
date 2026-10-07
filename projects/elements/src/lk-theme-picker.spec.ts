@@ -179,91 +179,10 @@ describe('LkThemePicker', () => {
     expect(handler).toHaveBeenCalledOnce();
   });
 
-  it('touches neither storage nor <html> unless persisting', async () => {
+  it('touches neither storage nor <html>', async () => {
     el = await mount({'app-seed': APP});
     pick(radios(el)[1]);
     expect(localStorage.getItem(SEED_STORAGE_KEY)).toBeNull();
     expect(document.documentElement.style.getPropertyValue('--color-accent-default')).toBe('');
-  });
-
-  describe('appearance', () => {
-    const appearanceRadios = (picker: LkThemePicker): HTMLInputElement[] => [
-      ...(picker.shadowRoot?.querySelectorAll<HTMLInputElement>('.appearance input') ?? []),
-    ];
-
-    it('is hidden unless the host asks for it', async () => {
-      el = await mount({'app-seed': APP});
-      expect(el.shadowRoot?.querySelector('.appearance')).toBeNull();
-    });
-
-    it('emits the appearance picked', async () => {
-      el = await mount({'app-seed': APP, appearance: 'system'});
-      expect(appearanceRadios(el).map(r => r.checked)).toEqual([false, false, true]);
-      const seen: unknown[] = [];
-      el.addEventListener('lk-theme-picker-appearance', e => seen.push((e as CustomEvent).detail));
-      pick(appearanceRadios(el)[1]);
-      expect(seen).toEqual([{appearance: 'dark'}]);
-      expect(localStorage.getItem('cmn-theme')).toBeNull();
-    });
-
-    it('with persist, stores the choice and sets data-theme', async () => {
-      localStorage.setItem('cmn-theme', 'dark');
-      el = await mount({'app-seed': APP, appearance: 'system', persist: ''});
-      expect(el.appearance).toBe('dark');
-      pick(appearanceRadios(el)[0]);
-      expect(localStorage.getItem('cmn-theme')).toBe('light');
-      expect(document.documentElement.getAttribute('data-theme')).toBe('light');
-      pick(appearanceRadios(el)[2]);
-      expect(localStorage.getItem('cmn-theme')).toBeNull();
-    });
-  });
-
-  describe('persist', () => {
-    const accent = (): string =>
-      document.documentElement.style.getPropertyValue('--color-accent-default');
-
-    it('keeps the choice on this device and applies it for the active theme', async () => {
-      document.documentElement.setAttribute('data-theme', 'light');
-      el = await mount({'app-seed': APP, persist: ''});
-      pick(radios(el).find(r => r.value === PRESETS[1].seed) as HTMLInputElement);
-      expect(JSON.parse(localStorage.getItem(SEED_STORAGE_KEY) ?? 'null').seed).toBe(
-        PRESETS[1].seed
-      );
-      expect(accent()).toBe(
-        derive({seed: PRESETS[1].seed, mode: 'light'}).tokens['accent-default']
-      );
-    });
-
-    it('restores the stored choice and follows a theme switch', async () => {
-      document.documentElement.setAttribute('data-theme', 'light');
-      el = await mount({'app-seed': APP, persist: ''});
-      pick(radios(el).find(r => r.value === PRESETS[2].seed) as HTMLInputElement);
-      el.remove();
-      clearDocument();
-      localStorage.setItem(
-        SEED_STORAGE_KEY,
-        JSON.stringify({v: 1, seed: PRESETS[2].seed, intensity: 0.45, css: {}})
-      );
-
-      document.documentElement.setAttribute('data-theme', 'light');
-      el = await mount({'app-seed': APP, persist: ''});
-      expect(el.seed).toBe(PRESETS[2].seed);
-      expect(el.intensity).toBe(0.45);
-      document.documentElement.setAttribute('data-theme', 'dark');
-      await vi.waitFor(() =>
-        expect(accent()).toBe(
-          derive({seed: PRESETS[2].seed, intensity: 0.45, mode: 'dark'}).tokens['accent-default']
-        )
-      );
-    });
-
-    it('clears storage and the inline palette on reset', async () => {
-      el = await mount({'app-seed': APP, persist: ''});
-      pick(radios(el)[1]);
-      await el.updateComplete;
-      el.shadowRoot?.querySelector<HTMLButtonElement>('button.reset')?.click();
-      expect(localStorage.getItem(SEED_STORAGE_KEY)).toBeNull();
-      expect(accent()).toBe('');
-    });
   });
 });

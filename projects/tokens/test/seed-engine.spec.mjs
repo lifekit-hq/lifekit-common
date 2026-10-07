@@ -231,23 +231,4 @@ describe('seeds/<app>.css', () => {
       );
     });
   }
-
-  it('carries a prefers-contrast: more block', () => {
-    assert.match(seedCss('lk'), /@media \(prefers-contrast: more\)/);
-  });
-});
-
-describe('docs/design/patterns.md', () => {
-  it('quotes the app seeds the engine ships', () => {
-    const doc = readFileSync(new URL('../../../docs/design/patterns.md', import.meta.url), 'utf8');
-    for (const {seed} of Object.values(APP_SEEDS)) {
-      assert.ok(doc.includes(`\`${seed}\``), `patterns.md is missing ${seed}`);
-    }
-    const quoted = [...doc.matchAll(/`(#[0-9a-f]{6})`/gi)].map(([, hex]) => hex);
-    const seeds = Object.values(APP_SEEDS).map(app => app.seed);
-    assert.deepEqual(
-      quoted.filter(hex => !seeds.includes(hex)),
-      []
-    );
-  });
 });

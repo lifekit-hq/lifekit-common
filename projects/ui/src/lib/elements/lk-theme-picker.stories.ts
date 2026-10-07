@@ -123,19 +123,3 @@ export const NearStatusColour: Story = {
 export const NoAppColour: Story = {
   args: {appSeed: '', seed: PRESETS[3].seed, intensity: DEFAULT_INTENSITY},
 };
-
-/** With `appearance` set the picker also offers Light / Dark / System, as Settings > Appearance. */
-export const WithAppearance: Story = {
-  args: {appSeed: APP_SEEDS.lk.seed, seed: '', intensity: DEFAULT_INTENSITY},
-  render: args => ({
-    props: args,
-    template: `
-      <lk-theme-picker
-        appearance="system"
-        [attr.app-seed]="appSeed"
-        [seed]="seed"
-        [intensity]="intensity"
-      ></lk-theme-picker>
-    `,
-  }),
-};

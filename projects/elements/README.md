@@ -253,13 +253,11 @@ one colour by the `@lifekit-hq/tokens` engine, so every choice keeps text and co
 colour close to a status colour gets a note saying the accent may be read as that status. What the
 colour is allowed to touch: [`docs/design/patterns.md`](../../docs/design/patterns.md#colour).
 
-| Property     | Attribute    | Type                                  | Default | Description                                                          |
-| ------------ | ------------ | ------------------------------------- | ------- | -------------------------------------------------------------------- |
-| `appSeed`    | `app-seed`   | `string`                              | `''`    | The app's own colour, offered as "App default"                       |
-| `seed`       | `seed`       | `string`                              | `''`    | The user's colour; empty for the app's own                           |
-| `intensity`  | `intensity`  | `number`                              | `0.12`  | How far the colour tints the surfaces, 0-1                           |
-| `appearance` | `appearance` | `'light' \| 'dark' \| 'system' \| ''` | `''`    | Shows a Light / Dark / System row when set                           |
-| `persist`    | `persist`    | `boolean`                             | `false` | Store and apply the choice itself, for hosts without a theme service |
+| Property    | Attribute   | Type     | Default | Description                                    |
+| ----------- | ----------- | -------- | ------- | ---------------------------------------------- |
+| `appSeed`   | `app-seed`  | `string` | `''`    | The app's own colour, offered as "App default" |
+| `seed`      | `seed`      | `string` | `''`    | The user's colour; empty for the app's own     |
+| `intensity` | `intensity` | `number` | `0.12`  | How far the colour tints the surfaces, 0-1     |
 
 The element is controlled. Events:
 
@@ -267,13 +265,7 @@ The element is controlled. Events:
   the app's own colour). In an Angular app, pass it to `ThemeService.setSeed(seed, intensity)`,
   or `resetSeed()` for `null`; the service persists it per device and the pre-paint script
   applies it on the next load.
-- `lk-theme-picker-appearance`, `detail: {appearance}`. Pass it to
-  `ThemeService.setPreference()`.
-
-With `persist` the element writes the choice to `localStorage` itself (`cmn-theme-seed`,
-`cmn-theme`) and applies it to `<html>`, following `data-theme` changes. Use it only where no
-theme service owns the palette, or the two will fight.
 
 ```html
-<lk-theme-picker appearance="system" app-seed="#175a6d"></lk-theme-picker>
+<lk-theme-picker app-seed="#175a6d"></lk-theme-picker>
 ```

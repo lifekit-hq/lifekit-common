@@ -1,16 +1,9 @@
 import {
-  applySeedDeclarations,
-  clearSeedDeclarations,
-  clearStoredSeed,
   DEFAULT_INTENSITY,
   derive,
   INTENSITY_STOPS,
   normalizeHex,
   PRESETS,
-  readStoredSeed,
-  seedVariant,
-  seedVariants,
-  storeSeed,
 } from '@lifekit-hq/tokens/engine';
 import {css, html, LitElement, nothing, type PropertyDeclarations, type TemplateResult} from 'lit';
 
@@ -20,19 +13,8 @@ export interface LkThemeChoice {
   intensity: number;
 }
 
-/** Light, dark, or follow the OS. */
-export type LkAppearance = 'light' | 'dark' | 'system';
-
 /** A named stop on the intensity slider. */
 export type LkIntensityStop = 'quiet' | 'tinted' | 'immersive';
-
-const APPEARANCE_LABELS: Readonly<Record<LkAppearance, string>> = {
-  light: 'Light',
-  dark: 'Dark',
-  system: 'System',
-};
-/** The key the pre-paint script and ThemeService keep an explicit light or dark choice under. */
-const THEME_STORAGE_KEY = 'cmn-theme';
 
 const STOP_LABELS: Readonly<Record<LkIntensityStop, string>> = {
   quiet: 'Quiet',
@@ -41,8 +23,6 @@ const STOP_LABELS: Readonly<Record<LkIntensityStop, string>> = {
 };
 const CUSTOM = 'custom';
 const APP_DEFAULT = '';
-const DARK_SCHEME_QUERY = '(prefers-color-scheme: dark)';
-const MORE_CONTRAST_QUERY = '(prefers-contrast: more)';
 
 /** The named stop nearest to `intensity`. */
 export function nearestIntensityStop(intensity: number): LkIntensityStop {
@@ -56,34 +36,6 @@ function clampIntensity(intensity: number): number {
   return Number.isFinite(intensity) ? Math.min(1, Math.max(0, intensity)) : DEFAULT_INTENSITY;
 }
 
-function deviceStorage(): Storage | null {
-  try {
-    return localStorage;
-  } catch {
-    return null;
-  }
-}
-
-function readTheme(storage: Storage): string | null {
-  try {
-    return storage.getItem(THEME_STORAGE_KEY);
-  } catch {
-    return null;
-  }
-}
-
-function writeTheme(storage: Storage, appearance: LkAppearance): void {
-  try {
-    if (appearance === 'system') {
-      storage.removeItem(THEME_STORAGE_KEY);
-    } else {
-      storage.setItem(THEME_STORAGE_KEY, appearance);
-    }
-  } catch {
-    // storage blocked: the choice applies for this page only
-  }
-}
-
 let nextId = 0;
 
 /**
@@ -94,13 +46,7 @@ let nextId = 0;
  *
  * The element is controlled: it shows `seed` and `intensity` and emits `lk-theme-picker-change` with
  * `{seed, intensity}` (`seed: null` for the app's own colour). In an Angular app, hand that to
- * `ThemeService.setSeed` / `resetSeed`. With `persist`, the element instead keeps the choice on
- * this device itself (the `cmn-theme-seed` key the pre-paint script reads) and applies it to
- * `<html>`; use that only where no theme service owns the palette.
- *
- * Set `appearance` to also show a Light / Dark / System row; a pick emits `lk-theme-picker-appearance`
- * with `{appearance}` (for `ThemeService.setPreference`), or with `persist` is stored under
- * `cmn-theme` and applied as `data-theme` directly.
+ * `ThemeService.setSeed` / `resetSeed`, which keep it per device and re-apply it.
  *
  * @example
  * <lk-theme-picker app-seed="#175a6d" seed="#4f46e5" intensity="0.12"></lk-theme-picker>
@@ -108,7 +54,6 @@ let nextId = 0;
 export class LkThemePicker extends LitElement {
   private readonly groupName = `lk-theme-picker-${nextId++}`;
   private readonly ticksId = `${this.groupName}-ticks`;
-  private themeObserver: MutationObserver | null = null;
 
   declare private customSeed: string;
   declare private nearStatusNote: string;
@@ -176,14 +121,6 @@ export class LkThemePicker extends LitElement {
       position: absolute;
       opacity: 0;
       pointer-events: none;
-    }
-
-    .swatch.segment {
-      padding: var(--space-1, 0.25rem) var(--space-3, 0.75rem);
-    }
-
-    .appearance {
-      margin-bottom: var(--space-4, 1rem);
     }
 
     .chip {
@@ -264,8 +201,6 @@ export class LkThemePicker extends LitElement {
     appSeed: {type: String, attribute: 'app-seed', reflect: true},
     seed: {type: String, reflect: true},
     intensity: {type: Number, reflect: true},
-    persist: {type: Boolean, reflect: true},
-    appearance: {type: String, reflect: true},
     customSeed: {state: true},
     nearStatusNote: {state: true},
   };
@@ -276,46 +211,13 @@ export class LkThemePicker extends LitElement {
   declare public seed: string;
   /** How far the colour tints the surfaces, 0-1. */
   declare public intensity: number;
-  /** Keep the choice on this device and apply it to `<html>` (hosts without a theme service). */
-  declare public persist: boolean;
-  /** Light, dark or system; empty hides the appearance row. */
-  declare public appearance: LkAppearance | '';
-
   constructor() {
     super();
     this.appSeed = '';
     this.seed = '';
     this.intensity = DEFAULT_INTENSITY;
-    this.persist = false;
-    this.appearance = '';
     this.customSeed = '';
     this.nearStatusNote = '';
-  }
-
-  public override connectedCallback(): void {
-    super.connectedCallback();
-    if (!this.persist) {
-      return;
-    }
-    const storage = deviceStorage();
-    if (this.appearance && storage) {
-      const theme = readTheme(storage);
-      this.appearance = theme === 'light' || theme === 'dark' ? theme : 'system';
-    }
-    const stored = storage ? readStoredSeed(storage) : null;
-    if (stored) {
-      this.seed = stored.seed;
-      this.intensity = stored.intensity;
-      this.applyToDocument();
-    }
-    this.themeObserver = new MutationObserver(() => this.applyToDocument());
-    this.themeObserver.observe(document.documentElement, {attributeFilter: ['data-theme']});
-  }
-
-  public override disconnectedCallback(): void {
-    super.disconnectedCallback();
-    this.themeObserver?.disconnect();
-    this.themeObserver = null;
   }
 
   protected override willUpdate(changed: Map<PropertyKey, unknown>): void {
@@ -367,27 +269,6 @@ export class LkThemePicker extends LitElement {
     this.setIntensity(INTENSITY_STOPS[stop]);
   };
 
-  private readonly onAppearance = (event: Event): void => {
-    const appearance = (event.target as HTMLInputElement).value as LkAppearance;
-    this.appearance = appearance;
-    if (this.persist) {
-      const storage = deviceStorage();
-      if (storage) {
-        writeTheme(storage, appearance);
-      }
-      const dark =
-        appearance === 'dark' || (appearance === 'system' && matchMedia(DARK_SCHEME_QUERY).matches);
-      document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
-    }
-    this.dispatchEvent(
-      new CustomEvent<{appearance: LkAppearance}>('lk-theme-picker-appearance', {
-        detail: {appearance},
-        bubbles: true,
-        composed: true,
-      })
-    );
-  };
-
   private readonly onReset = (): void => {
     this.intensity = DEFAULT_INTENSITY;
     this.choose(null);
@@ -406,9 +287,6 @@ export class LkThemePicker extends LitElement {
     };
     this.seed = choice.seed ?? '';
     this.intensity = choice.intensity;
-    if (this.persist) {
-      this.persistChoice(choice);
-    }
     this.dispatchEvent(
       new CustomEvent<LkThemeChoice>('lk-theme-picker-change', {
         detail: choice,
@@ -416,37 +294,6 @@ export class LkThemePicker extends LitElement {
         composed: true,
       })
     );
-  }
-
-  private persistChoice(choice: LkThemeChoice): void {
-    const storage = deviceStorage();
-    if (!choice.seed) {
-      if (storage) {
-        clearStoredSeed(storage);
-      }
-      clearSeedDeclarations(document.documentElement);
-      return;
-    }
-    if (storage) {
-      storeSeed(storage, {seed: choice.seed, intensity: choice.intensity});
-    }
-    this.applyToDocument();
-  }
-
-  private applyToDocument(): void {
-    const seed = normalizeHex(this.seed);
-    if (!seed) {
-      return;
-    }
-    const root = document.documentElement;
-    const theme =
-      root.getAttribute('data-theme') === 'dark' ||
-      (!root.hasAttribute('data-theme') && matchMedia(DARK_SCHEME_QUERY).matches)
-        ? 'dark'
-        : 'light';
-    const contrast = matchMedia(MORE_CONTRAST_QUERY).matches ? 'more' : 'standard';
-    const variants = seedVariants({seed, intensity: this.intensity});
-    applySeedDeclarations(root, variants[seedVariant(theme, contrast)]);
   }
 
   private renderSwatch(value: string, label: string, colour: string): TemplateResult {
@@ -465,39 +312,11 @@ export class LkThemePicker extends LitElement {
     `;
   }
 
-  private renderAppearance(): TemplateResult | typeof nothing {
-    if (!this.appearance) {
-      return nothing;
-    }
-    return html`
-      <fieldset class="appearance">
-        <legend>Appearance</legend>
-        <div class="swatches">
-          ${(Object.keys(APPEARANCE_LABELS) as LkAppearance[]).map(
-            value => html`
-              <label class="swatch segment">
-                <input
-                  type="radio"
-                  name=${`${this.groupName}-appearance`}
-                  .value=${value}
-                  .checked=${this.appearance === value}
-                  @change=${this.onAppearance}
-                />
-                <span>${APPEARANCE_LABELS[value]}</span>
-              </label>
-            `
-          )}
-        </div>
-      </fieldset>
-    `;
-  }
-
   protected override render(): TemplateResult {
     const appSeed = normalizeHex(this.appSeed);
     const canTint = Boolean(normalizeHex(this.seed) ?? appSeed);
     const stop = nearestIntensityStop(this.intensity);
     return html`
-      ${this.renderAppearance()}
       <fieldset>
         <legend>Colour</legend>
         <div class="swatches">

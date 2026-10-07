@@ -40,10 +40,8 @@ const SERIES = [1, 2, 3, 4, 5, 6, 7, 8];
       <cmn-card>
         <lk-theme-picker
           [attr.app-seed]="appSeed"
-          [appearance]="preference()"
           [seed]="seed()?.seed ?? ''"
           [intensity]="seed()?.intensity ?? defaultIntensity"
-          (lk-theme-picker-appearance)="onAppearance($event)"
           (lk-theme-picker-change)="onSeed($event)"
         />
         <p class="mt-cmn-3 text-cmn-sm text-text-secondary">
@@ -113,12 +111,6 @@ class StoryThemePanelComponent {
 
   protected toggle(): void {
     this.themeService.toggle();
-  }
-
-  protected onAppearance(event: Event): void {
-    this.themeService.setPreference(
-      (event as CustomEvent<{appearance: ThemePreference}>).detail.appearance
-    );
   }
 
   /** Settings > Appearance wiring: the picker reports, the service applies and persists. */
