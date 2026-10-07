@@ -23,6 +23,10 @@ const VIEWPORTS = [
 // The narrowest phone still sold (iPhone SE): the tab bar must hold its labels at this width.
 const NARROW_PHONE = {width: 320, height: 568};
 
+// Room for roughly "Che…" beside the glyphs; a title narrower than this has collapsed.
+const MIN_TOP_BAR_TITLE = 64;
+const TOP_BAR_STORY = 'components-topbar--back-and-actions';
+
 const STORIES = ['phone', 'phone-overlay'] as const;
 // Layout stories that differ in their tab labels (up to four tabs and More).
 const TAB_STORIES = ['phone', 'phone-overlay', 'phone-default-tabs', 'phone-active-in-more'];
@@ -310,6 +314,25 @@ test.describe(`phone ${NARROW_PHONE.width}x${NARROW_PHONE.height}`, () => {
       report(cut, true);
     });
   }
+
+  // Back, two page actions, search, theme and avatar: the fullest bar a page declares. The title
+  // gives way (ellipsis) but never to nothing, and no control gives up its touch target for it.
+  test('top bar | title stays readable, targets stay >= 44', async ({page}) => {
+    await open(page, TOP_BAR_STORY, 'light', 'cmn-top-bar header');
+    const bar = await page.evaluate(() => {
+      const title = document.querySelector('cmn-top-bar h1');
+      const box = title?.getBoundingClientRect();
+      return {
+        titleWidth: box ? Math.round(box.width) : 0,
+        ellipsis: !!title && getComputedStyle(title).textOverflow === 'ellipsis',
+        overflowsBar: document.documentElement.scrollWidth > window.innerWidth,
+      };
+    });
+    expect(bar.titleWidth).toBeGreaterThanOrEqual(MIN_TOP_BAR_TITLE);
+    expect(bar.ellipsis).toBe(true);
+    expect(bar.overflowsBar).toBe(false);
+    expect(await undersizedTargets(page, MIN_TARGET)).toEqual([]);
+  });
 });
 
 test.describe('desktop pointer', () => {

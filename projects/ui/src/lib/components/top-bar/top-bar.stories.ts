@@ -35,8 +35,12 @@ export const TwoLetterInitialsDark: Story = {
   globals: {viewport: {value: 'mobile2', isRotated: false}},
 };
 
-/** Page chrome: a back chevron (no text) and trailing page actions, sized for touch below md. */
+/**
+ * Page chrome: a back chevron (no text) and trailing page actions, sized for touch below md.
+ * Fullscreen, so a 320px phone gives the bar its full width: the title truncates, never collapses.
+ */
 export const BackAndActions: Story = {
+  parameters: {layout: 'fullscreen'},
   args: {
     title: 'Checking',
     avatarLabel: 'DT',
