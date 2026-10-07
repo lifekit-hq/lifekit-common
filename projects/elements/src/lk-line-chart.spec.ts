@@ -54,6 +54,44 @@ describe('LkLineChart', () => {
     expect(el.valueFormat).toBe('number');
   });
 
+  it('defaults compact to off', () => {
+    expect(el.compact).toBe(false);
+  });
+
+  it('reads and reflects the compact attribute', async () => {
+    el.setAttribute('compact', '');
+    await el.updateComplete;
+    expect(el.compact).toBe(true);
+    el.compact = false;
+    await el.updateComplete;
+    expect(el.hasAttribute('compact')).toBe(false);
+  });
+
+  it('drops the label when compact but keeps the canvas', async () => {
+    el.label = 'Portfolio Value';
+    el.compact = true;
+    await el.updateComplete;
+    expect(el.shadowRoot?.querySelector('.label')).toBeNull();
+    expect(el.shadowRoot?.querySelector('canvas')).toBeTruthy();
+  });
+
+  it('builds a compact chart: no axes, no animation', async () => {
+    el.compact = true;
+    await el.updateComplete;
+    const chart = (
+      el as unknown as {
+        chart: {options: {animation: unknown; scales: Record<string, {display: boolean}>}} | null;
+      }
+    ).chart;
+    if (!chart) {
+      expect(chart).toBeNull();
+      return;
+    }
+    expect(chart.options.animation).toBe(false);
+    expect(chart.options.scales['x'].display).toBe(false);
+    expect(chart.options.scales['y'].display).toBe(false);
+  });
+
   it('defaults points to empty array', () => {
     expect(el.points).toEqual([]);
   });

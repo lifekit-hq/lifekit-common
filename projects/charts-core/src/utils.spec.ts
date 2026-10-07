@@ -9,6 +9,7 @@ import {
   NARROW_CHART_WIDTH,
   percent,
   plainNumber,
+  prefersReducedMotion,
   seriesColor,
   valueFormatter,
   xTickLimit,
@@ -72,6 +73,24 @@ describe('chart font and emptiness helpers', () => {
     expect(isSeriesEmpty([])).toBe(true);
     expect(isSeriesEmpty([{points: []}])).toBe(true);
     expect(isSeriesEmpty([{points: [1]}])).toBe(false);
+  });
+});
+
+describe('prefersReducedMotion', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('reflects the prefers-reduced-motion media query', () => {
+    vi.stubGlobal('matchMedia', (query: string) => ({matches: query.includes('reduce')}));
+    expect(prefersReducedMotion()).toBe(true);
+    vi.stubGlobal('matchMedia', () => ({matches: false}));
+    expect(prefersReducedMotion()).toBe(false);
+  });
+
+  it('is false where matchMedia is unavailable', () => {
+    vi.stubGlobal('matchMedia', undefined);
+    expect(prefersReducedMotion()).toBe(false);
   });
 });
 

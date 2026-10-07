@@ -110,9 +110,12 @@ in this pilot.
 | `label`       | `string`                                                            | `''`         | Card title rendered above the chart                                                                                                                                                   |
 | `currency`    | `string`                                                            | `'USD'`      | ISO 4217 code, used when `valueFormat` is `'currency'`                                                                                                                                |
 | `valueFormat` | `'currency' \| 'number' \| 'percent' \| (value, compact) => string` | `'currency'` | How ticks and tooltips render values. `'number'` and `'percent'` carry no currency symbol; a function (property only) gets `compact: true` for axis ticks. Attribute: `value-format`. |
+| `compact`     | `boolean`                                                           | `false`      | Sparkline: just the line and fill - no title, frame, axes, gridlines or tooltip, no animation. Height follows a `height` on the element (min `2rem`).                                 |
 
 ```html
 <lk-line-chart label="Net Worth" currency="USD"></lk-line-chart>
+<!-- sparkline sized by the host -->
+<lk-line-chart compact style="height: 2.5rem"></lk-line-chart>
 <!-- unit-less series, e.g. a score of 25 renders as "25", not "$25" -->
 <lk-line-chart label="Health score" value-format="number"></lk-line-chart>
 <script>

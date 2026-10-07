@@ -1,5 +1,5 @@
 import {type Chart} from 'chart.js';
-import {describe, expect, it, vi} from 'vitest';
+import {afterEach, describe, expect, it, vi} from 'vitest';
 
 import {buildLineChartConfig, updateLineChart} from './line';
 import {type ChartPoint} from './types';
@@ -101,6 +101,67 @@ describe('buildLineChartConfig value format', () => {
     );
     expect(tooltip(3)).toBe('3T');
     expect(tick(3)).toBe('3t');
+  });
+});
+
+function stubReducedMotion(reduce: boolean): void {
+  vi.stubGlobal('matchMedia', (query: string) => ({
+    matches: reduce && query === '(prefers-reduced-motion: reduce)',
+  }));
+}
+
+describe('buildLineChartConfig compact', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('hides both axes, and with them the ticks and gridlines', () => {
+    const scales = buildLineChartConfig(POINTS, TOKENS, 'USD', 'currency', true).options?.scales;
+    expect(scales?.['x']?.display).toBe(false);
+    expect(scales?.['y']?.display).toBe(false);
+  });
+
+  it('draws no legend, title or tooltip, and ignores pointer events', () => {
+    const options = buildLineChartConfig(POINTS, TOKENS, 'USD', 'currency', true).options;
+    expect(options?.plugins?.legend?.display).toBe(false);
+    expect(options?.plugins?.title).toBeUndefined();
+    expect(options?.plugins?.tooltip?.enabled).toBe(false);
+    expect(options?.events).toEqual([]);
+  });
+
+  it('disables animation', () => {
+    stubReducedMotion(false);
+    const config = buildLineChartConfig(POINTS, TOKENS, 'USD', 'currency', true);
+    expect(config.options?.animation).toBe(false);
+  });
+
+  it('insets the plot so the stroke is not clipped, and still fills the canvas', () => {
+    const options = buildLineChartConfig(POINTS, TOKENS, 'USD', 'currency', true).options;
+    expect(options?.layout?.padding).toBe(2);
+    expect(options?.responsive).toBe(true);
+    expect(options?.maintainAspectRatio).toBe(false);
+  });
+
+  it('keeps the line and area fill', () => {
+    const config = buildLineChartConfig(POINTS, TOKENS, 'USD', 'currency', true);
+    expect(config.data.datasets[0].data).toEqual([100, 200, 150]);
+    expect(config.data.datasets[0].fill).toBe(true);
+  });
+
+  it('leaves the default chart unchanged: axes, tooltip and events on', () => {
+    stubReducedMotion(false);
+    const options = buildLineChartConfig(POINTS, TOKENS, 'USD').options;
+    expect(options?.scales?.['x']?.display).toBe(true);
+    expect(options?.scales?.['y']?.display).toBe(true);
+    expect(options?.plugins?.tooltip?.enabled).toBe(true);
+    expect(options?.events).toBeUndefined();
+    expect(options?.layout).toBeUndefined();
+    expect(options?.animation).toBeUndefined();
+  });
+
+  it('disables animation in the default chart under prefers-reduced-motion', () => {
+    stubReducedMotion(true);
+    expect(buildLineChartConfig(POINTS, TOKENS, 'USD').options?.animation).toBe(false);
   });
 });
 
