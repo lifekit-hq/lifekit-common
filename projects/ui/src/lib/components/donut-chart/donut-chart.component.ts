@@ -22,7 +22,7 @@ import {
 } from '@lifekit-hq/charts-core';
 import {Chart} from 'chart.js';
 
-import {isOutputObserved} from '../chart-click/output-observed';
+import {isOutputObserved} from '../../chart-click/output-observed';
 
 export type {DonutSegment, DonutSegmentClick} from '@lifekit-hq/charts-core';
 

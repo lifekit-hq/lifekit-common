@@ -23,7 +23,7 @@ import {
 } from '@lifekit-hq/charts-core';
 import {Chart} from 'chart.js';
 
-import {isOutputObserved} from '../chart-click/output-observed';
+import {isOutputObserved} from '../../chart-click/output-observed';
 
 export type {BarSeries, BarValueFormat, ChartPointClick} from '@lifekit-hq/charts-core';
 
