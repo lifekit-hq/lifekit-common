@@ -9,8 +9,8 @@ const BASE_CLASSES =
   'shadow-sm';
 
 const SIZE_CLASSES = {
-  sm: 'h-6 w-6 text-[10px]',
-  md: 'h-7 w-7 text-[10px]',
+  sm: 'h-6 w-6 text-cmn-xs',
+  md: 'h-7 w-7 text-cmn-xs',
   lg: 'h-9 w-9 text-cmn-sm',
 } as const;
 

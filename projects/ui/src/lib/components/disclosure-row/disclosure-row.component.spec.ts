@@ -59,14 +59,14 @@ describe('DisclosureRowComponent', () => {
   });
 
   it('should not render the amount block by default', () => {
-    const amountEl: HTMLElement | null = fixture.nativeElement.querySelector('.font-mono');
+    const amountEl: HTMLElement | null = fixture.nativeElement.querySelector('.tabular-nums');
     expect(amountEl).toBeNull();
   });
 
   it('should render a formatted amount when amount is provided', () => {
     fixture.componentRef.setInput('amount', 1234.5);
     fixture.detectChanges();
-    const amountEl: HTMLElement | null = fixture.nativeElement.querySelector('.font-mono');
+    const amountEl: HTMLElement | null = fixture.nativeElement.querySelector('.tabular-nums');
     expect(amountEl).toBeTruthy();
     expect(amountEl?.textContent?.trim()).toContain('1,234.50');
   });
@@ -74,7 +74,8 @@ describe('DisclosureRowComponent', () => {
   it('should not render currency text when currency is null', () => {
     fixture.componentRef.setInput('amount', 1000);
     fixture.detectChanges();
-    const amountText = fixture.nativeElement.querySelector('.font-mono')?.textContent?.trim() ?? '';
+    const amountText =
+      fixture.nativeElement.querySelector('.tabular-nums')?.textContent?.trim() ?? '';
     expect(amountText).not.toContain('USD');
   });
 
@@ -82,7 +83,8 @@ describe('DisclosureRowComponent', () => {
     fixture.componentRef.setInput('amount', 5000);
     fixture.componentRef.setInput('currency', 'USD');
     fixture.detectChanges();
-    const amountText = fixture.nativeElement.querySelector('.font-mono')?.textContent?.trim() ?? '';
+    const amountText =
+      fixture.nativeElement.querySelector('.tabular-nums')?.textContent?.trim() ?? '';
     expect(amountText).toContain('USD');
     expect(amountText.indexOf('USD')).toBeLessThan(amountText.indexOf('5,000.00'));
   });

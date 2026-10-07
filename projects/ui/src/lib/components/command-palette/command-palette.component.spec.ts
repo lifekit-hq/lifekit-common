@@ -43,7 +43,7 @@ describe('CommandPaletteComponent', () => {
 
   function groupHeadings(): string[] {
     return Array.from(
-      (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>('.uppercase')
+      (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>('[data-group-heading]')
     ).map(el => el.textContent?.trim() ?? '');
   }
 

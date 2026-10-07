@@ -221,7 +221,7 @@ export const PhoneOverlay: Story = {
           <button
             type="button"
             aria-label="Ask Ledger"
-            class="fixed bottom-[calc(64px+16px+env(safe-area-inset-bottom)+8px)] left-cmn-4 z-20 flex size-12 items-center justify-center rounded-full bg-accent-default text-cmn-xs text-white shadow-cmn-md md:hidden"
+            class="fixed bottom-[calc(64px+16px+env(safe-area-inset-bottom)+8px)] left-cmn-4 z-20 flex size-12 items-center justify-center rounded-full bg-accent-default text-cmn-xs text-text-inverse shadow-cmn-md md:hidden"
           >Ask</button>
         }
       </cmn-app-layout>

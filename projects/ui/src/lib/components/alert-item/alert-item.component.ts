@@ -58,13 +58,13 @@ const SEVERITY_ICON: Record<AlertItemSeverity, LucideIconName> = {
             <cmn-tag [variant]="severity()">{{ badgeLabel() }}</cmn-tag>
           }
           @if (referenceLabel()) {
-            <span class="rounded bg-surface-raised px-1.5 py-0.5 text-[11px] text-text-disabled">{{
+            <span class="rounded bg-surface-raised px-1.5 py-0.5 text-cmn-xs text-text-disabled">{{
               referenceLabel()
             }}</span>
           }
         </div>
         @if (description()) {
-          <p class="mb-cmn-1 text-[11px] font-medium uppercase tracking-wide text-text-secondary">
+          <p class="mb-cmn-1 text-cmn-xs font-medium text-text-secondary">
             {{ description() }}
           </p>
         }
@@ -72,7 +72,7 @@ const SEVERITY_ICON: Record<AlertItemSeverity, LucideIconName> = {
           {{ message() }}
         </p>
         @if (relativeTime()) {
-          <span class="text-[11px] text-text-disabled">{{ relativeTime() }}</span>
+          <span class="text-cmn-xs text-text-disabled">{{ relativeTime() }}</span>
         }
       </div>
 

@@ -3,7 +3,7 @@ import {ChangeDetectionStrategy, Component, computed, input} from '@angular/core
 export type BadgeStatus = 'default' | 'success' | 'processing' | 'error' | 'warning';
 
 const STATUS_CLASSES: Record<BadgeStatus, string> = {
-  default: 'bg-neutral-500',
+  default: 'bg-text-secondary',
   success: 'bg-status-success',
   processing: 'bg-status-info animate-pulse',
   error: 'bg-status-error',
@@ -11,10 +11,10 @@ const STATUS_CLASSES: Record<BadgeStatus, string> = {
 };
 
 const DEFAULT_OVERFLOW_COUNT = 99;
-const COUNT_SIZE_CLASSES = 'min-w-[18px] h-[18px] px-1 text-[10px] font-semibold leading-none';
+const COUNT_SIZE_CLASSES = 'min-w-5 h-5 px-1 text-cmn-xs font-semibold leading-none';
 const DOT_SIZE_CLASSES = 'w-2 h-2';
 const BASE_INDICATOR_CLASSES =
-  'cmn-badge-indicator inline-flex items-center justify-center rounded-full text-white';
+  'cmn-badge-indicator inline-flex items-center justify-center rounded-full text-text-inverse';
 const ABSOLUTE_POSITION_CLASSES = 'absolute -right-1.5 -top-1.5';
 
 @Component({

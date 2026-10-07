@@ -42,7 +42,7 @@ The source of truth for lifekit's look: `@lifekit-hq/tokens` is the theming cont
 
 ## Evidence on Hand
 
-- The Storybook catalog has 278 stories on 2026-10-05 (`docs/design-baseline.json` records the count at each baseline).
+- The Storybook catalog is the reference surface; `docs/design-baseline.json` records the current story count.
 - finance-sentry's frontend is the only consumer with real usage data. Its e2e fixtures provide demo data, so screenshots never need real financial data.
 - None of the following exists: user research, analytics, or testimonials. Do not fabricate them.
 
