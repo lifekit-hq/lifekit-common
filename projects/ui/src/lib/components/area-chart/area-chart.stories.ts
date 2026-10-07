@@ -85,3 +85,9 @@ export const StackedDark: Story = {
 
 /** Long range: x labels thin out below ~480px so neighbours never touch (resize the viewport to compare). */
 export const LongRange: Story = {args: {series: LONG_RANGE_SERIES}};
+
+/**
+ * Opt into scrub-to-read with `scrubbable`: a crosshair follows a hovering mouse or a pressed
+ * finger and `(scrub)` reports every band at the point, with the stacked total as its `y`.
+ */
+export const Scrubbable: Story = {args: {scrubbable: true}};

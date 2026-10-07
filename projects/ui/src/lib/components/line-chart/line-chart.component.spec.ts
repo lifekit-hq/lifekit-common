@@ -130,13 +130,79 @@ describe('LineChartComponent', () => {
       await fixture.whenStable();
       expect(chart().options.scales['x'].type).toBe('linear');
       expect(chart().data.datasets[0].data).toEqual([
-        {x: 1_000, y: 1},
-        {x: 9_000, y: 2},
+        {x: 1_000, y: 1, label: 'a'},
+        {x: 9_000, y: 2, label: 'b'},
       ]);
       fixture.componentRef.setInput('data', [{label: 'c', value: 5, time: 4_000}]);
       fixture.detectChanges();
       await fixture.whenStable();
-      expect(chart().data.datasets[0].data).toEqual([{x: 4_000, y: 5}]);
+      expect(chart().data.datasets[0].data).toEqual([{x: 4_000, y: 5, label: 'c'}]);
+    });
+  });
+
+  describe('scrub-to-read', () => {
+    const POINTS = [
+      {label: 'May', value: 100},
+      {label: 'Jun', value: 300},
+      {label: 'Jul', value: 200},
+    ];
+
+    function hover(fraction: number): void {
+      const canvas = fixture.nativeElement.querySelector('canvas') as HTMLCanvasElement;
+      const rect = canvas.getBoundingClientRect();
+      canvas.dispatchEvent(
+        new PointerEvent('pointermove', {
+          clientX: rect.left + rect.width * fraction,
+          pointerType: 'mouse',
+          bubbles: true,
+        })
+      );
+    }
+
+    function leave(): void {
+      fixture.nativeElement
+        .querySelector('canvas')
+        .dispatchEvent(new PointerEvent('pointerleave', {pointerType: 'mouse'}));
+    }
+
+    it('is off by default and emits nothing', () => {
+      const scrubs: unknown[] = [];
+      fixture.componentInstance.scrub.subscribe(p => scrubs.push(p));
+      fixture.componentRef.setInput('data', POINTS);
+      fixture.detectChanges();
+      hover(0.5);
+      expect(fixture.componentInstance.scrubbable()).toBe(false);
+      expect(scrubs).toEqual([]);
+    });
+
+    it('emits the point under the pointer, then scrubEnd on release', () => {
+      const scrubs: {index: number; y: number}[] = [];
+      let ends = 0;
+      fixture.componentInstance.scrub.subscribe(p => scrubs.push(p));
+      fixture.componentInstance.scrubEnd.subscribe(() => ends++);
+      fixture.componentRef.setInput('data', POINTS);
+      fixture.componentRef.setInput('scrubbable', true);
+      fixture.detectChanges();
+      hover(0.5);
+      hover(1);
+      leave();
+      expect(scrubs.map(p => [p.index, p.y])).toEqual([
+        [1, 300],
+        [2, 200],
+      ]);
+      expect(ends).toBe(1);
+    });
+
+    it('rebuilds with scrubbing off again when it is switched off', () => {
+      const scrubs: unknown[] = [];
+      fixture.componentInstance.scrub.subscribe(p => scrubs.push(p));
+      fixture.componentRef.setInput('data', POINTS);
+      fixture.componentRef.setInput('scrubbable', true);
+      fixture.detectChanges();
+      fixture.componentRef.setInput('scrubbable', false);
+      fixture.detectChanges();
+      hover(0.5);
+      expect(scrubs).toEqual([]);
     });
   });
 });

@@ -2,6 +2,7 @@ import {
   buildLineChartConfig,
   type ChartDomain,
   type ChartPoint,
+  type ChartScrubPoint,
   type ChartValueFormat,
   type ChartXSpacing,
   resolveLineChartTokens,
@@ -13,6 +14,7 @@ import {css, html, LitElement, type PropertyDeclarations, type TemplateResult} f
 export type {
   ChartDomain,
   ChartPoint,
+  ChartScrubPoint,
   ChartValueFormat,
   ChartXSpacing,
 } from '@lifekit-hq/charts-core';
@@ -38,6 +40,11 @@ export type {
  * against a known scale. `xSpacing="time"` (`x-spacing` attribute) places each point by the
  * epoch-ms `time` on it instead of in an equal slot, so a burst of points reads as a burst;
  * points without a `time` are then left out.
+ *
+ * Set `scrubbable` (attribute) to opt into scrub-to-read: a crosshair follows a held pointer (a
+ * touch, or a hovering mouse) and `lk-line-chart-scrub` (`detail` is a `ChartScrubPoint`) reports
+ * the point under it, so the host's headline number can follow; `lk-line-chart-scrub-end` fires on
+ * release. The chart's own tooltip steps aside; a `compact` chart ignores it.
  *
  * @example
  * <lk-line-chart label="Net Worth" currency="USD"></lk-line-chart>
@@ -111,6 +118,7 @@ export class LkLineChart extends LitElement {
     compact: {type: Boolean, reflect: true},
     yDomain: {attribute: false},
     xSpacing: {attribute: 'x-spacing'},
+    scrubbable: {type: Boolean},
   };
 
   declare public points: ChartPoint[];
@@ -120,6 +128,7 @@ export class LkLineChart extends LitElement {
   declare public compact: boolean;
   declare public yDomain: ChartDomain | undefined;
   declare public xSpacing: ChartXSpacing;
+  declare public scrubbable: boolean;
 
   constructor() {
     super();
@@ -130,6 +139,7 @@ export class LkLineChart extends LitElement {
     this.compact = false;
     this.yDomain = undefined;
     this.xSpacing = 'even';
+    this.scrubbable = false;
   }
 
   protected override firstUpdated(): void {
@@ -146,18 +156,39 @@ export class LkLineChart extends LitElement {
         this.currency,
         this.valueFormat,
         this.compact,
-        {yDomain: this.yDomain, xSpacing: this.xSpacing}
+        {yDomain: this.yDomain, xSpacing: this.xSpacing},
+        this.scrubbable
+          ? {
+              onScrub: point => this.emitScrub(point),
+              onRelease: () => this.emitScrubEnd(),
+            }
+          : undefined
       )
     );
   }
 
+  private emitScrub(point: ChartScrubPoint): void {
+    this.dispatchEvent(
+      new CustomEvent<ChartScrubPoint>('lk-line-chart-scrub', {
+        detail: point,
+        bubbles: true,
+        composed: true,
+      })
+    );
+  }
+
+  private emitScrubEnd(): void {
+    this.dispatchEvent(new CustomEvent('lk-line-chart-scrub-end', {bubbles: true, composed: true}));
+  }
+
   public override updated(changed: Map<string, unknown>): void {
-    // `compact` and `xSpacing` shape the chart config, so a later change rebuilds it (the first
-    // update already built it).
+    // `compact`, `xSpacing` and `scrubbable` shape the chart config, so a later change rebuilds it
+    // (the first update already built it).
     if (
       this.chart &&
       ((changed.has('compact') && changed.get('compact') !== undefined) ||
-        (changed.has('xSpacing') && changed.get('xSpacing') !== undefined))
+        (changed.has('xSpacing') && changed.get('xSpacing') !== undefined) ||
+        (changed.has('scrubbable') && changed.get('scrubbable') !== undefined))
     ) {
       this.rebuildChart();
       return;
