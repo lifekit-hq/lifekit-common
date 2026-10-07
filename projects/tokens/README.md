@@ -10,7 +10,7 @@ Design tokens for the lifekit ecosystem, framework-agnostic.
   `--color-surface-hover`, each light and dark where themed. It sets `color-scheme` per theme, and
   the `html` background and text colour, so the canvas follows the active theme. A
   `prefers-reduced-motion` block suppresses transitions and decorative animation. Looping loading
-  indicators (`animate-spin`, `animate-pulse`, `animate-cmn-spin`, `animate-cmn-pulse`) are exempt.
+  spinners (`animate-spin`, `animate-cmn-spin`) are exempt; pulses settle.
 - `tailwind`: a Tailwind preset mapping the tokens onto the `cmn-*` scale. Its fonts, radii and
   shadows read the `theme.css` custom properties, so a value change lands in `theme.css` only.
 - `fonts.css`: self-hosted IBM Plex Sans (variable), the `--font-sans` font, and IBM Plex Mono for code (`--font-mono`). No font CDN.
