@@ -335,6 +335,60 @@ test.describe(`phone ${NARROW_PHONE.width}x${NARROW_PHONE.height}`, () => {
   });
 });
 
+const NOTICE_WIDTHS = [NARROW_PHONE, {width: 390, height: 844}] as const;
+
+// Overlays never cover the chrome: notices sit between the top bar and the tab bar, and the
+// floating action hides while a bottom sheet is open.
+for (const size of NOTICE_WIDTHS) {
+  test.describe(`overlays ${size.width}x${size.height}`, () => {
+    test.use({viewport: size, hasTouch: true, isMobile: true});
+
+    test('notices | sit below the top bar and above the tab bar', async ({page}) => {
+      await open(page, layoutStory('phone-overlay-notices'));
+      await page.waitForSelector('lk-offline-banner .banner, lk-update-prompt .prompt', {
+        state: 'visible',
+      });
+      for (const scroll of [0, SCROLL_PROBE]) {
+        await page.evaluate(top => document.querySelector('main')?.scrollTo(0, top), scroll);
+        // Locators pierce the elements' shadow roots, which querySelector cannot.
+        const box = async (selector: string) => {
+          const found = await page.locator(selector).boundingBox();
+          return found ? {top: found.y, bottom: found.y + found.height} : null;
+        };
+        const boxes = {
+          bar: await box('cmn-top-bar header'),
+          tabs: await box('cmn-bottom-tab-bar nav'),
+          banner: await box('lk-offline-banner .banner'),
+          prompt: await box('lk-update-prompt .prompt'),
+        };
+        // Flush under the bar: no strip of scrolling content between them, no row hidden behind.
+        expect(boxes.banner?.top).toBeLessThanOrEqual((boxes.bar?.bottom ?? 0) + SURFACE_TOLERANCE);
+        for (const notice of [boxes.banner, boxes.prompt]) {
+          expect(notice).not.toBeNull();
+          expect(notice?.top).toBeGreaterThanOrEqual((boxes.bar?.bottom ?? 0) - SURFACE_TOLERANCE);
+          expect(notice?.bottom).toBeLessThanOrEqual(
+            (boxes.tabs?.top ?? Infinity) + SURFACE_TOLERANCE
+          );
+        }
+      }
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)
+      ).toBe(false);
+    });
+
+    test('floating action | visible, then hidden while a sheet is open', async ({page}) => {
+      await open(page, layoutStory('phone-overlay-sheet-open'));
+      await page.waitForSelector('cmn-drawer-container', {state: 'visible'});
+      await expect(page.getByRole('button', {name: 'Ask Ledger'})).toBeHidden();
+    });
+
+    test('floating action | shown with no sheet open', async ({page}) => {
+      await open(page, layoutStory('phone-overlay-notices'));
+      await expect(page.getByRole('button', {name: 'Ask Ledger'})).toBeVisible();
+    });
+  });
+}
+
 test.describe('desktop pointer', () => {
   test.use({viewport: {width: 1280, height: 800}});
 

@@ -17,6 +17,7 @@ import {createUrlTreeFromSnapshot, NavigationEnd, Router} from '@angular/router'
 import {filter, map} from 'rxjs';
 
 import {CmnDialogService} from '../../services/dialog/dialog.service';
+import {CmnDrawerService} from '../../services/drawer/drawer.service';
 import {CmnPageActionsService} from '../../services/page-actions/page-actions.service';
 import {ThemeService} from '../../services/theme/theme.service';
 import {BottomTabBarComponent, MAX_BOTTOM_TABS} from '../bottom-tab-bar/bottom-tab-bar.component';
@@ -60,6 +61,12 @@ const LARGE_TITLE_BOX_CLASSES =
 /** Phone overlay: the bars sit over main below md instead of in flow. */
 const OVERLAY_TOP_BAR_CLASSES = 'max-md:absolute max-md:inset-x-0 max-md:top-0 max-md:z-30';
 const OVERLAY_TAB_BAR_CLASSES = 'max-md:absolute max-md:inset-x-0 max-md:bottom-0 max-md:z-30';
+/**
+ * Notices (install hint, offline banner, update prompt) pin to the top of main, in flow below
+ * the top bar. Sticky offsets are measured from main's content box, which main's overlay
+ * padding already shifts below the bar, so top-0 is flush under it on every size.
+ */
+const NOTICES_BASE_CLASSES = 'sticky top-0 z-20 flex flex-col empty:hidden';
 /** Overscroll stops at main: it never chains to the browser (pull-to-refresh, page bounce). */
 const MAIN_BASE_CLASSES = 'flex-1 overflow-y-auto overscroll-y-contain';
 /** Clears the top bar: its 3.5rem height plus the top safe-area inset. */
@@ -125,8 +132,13 @@ const MAIN_OVERLAY_BOTTOM_CLASSES =
               </h1>
             </div>
           }
+          <div [class]="noticesClasses"><ng-content select="[cmnAppLayoutNotice]" /></div>
           <ng-content />
         </main>
+        <!-- Hidden while a bottom sheet is open; the slot's own element keeps its fixed position -->
+        <div [class]="sheetOpen() ? 'hidden' : 'contents'">
+          <ng-content select="[cmnAppLayoutFab]" />
+        </div>
         <cmn-bottom-tab-bar
           [items]="phoneTabs()"
           [more]="phoneMore()"
@@ -239,7 +251,9 @@ export class AppLayoutComponent {
    * the tab bar, including its own gap to the bar. With `phoneOverlay`, main reserves this much
    * extra space at the bottom so the last row scrolls clear of the button instead of under it.
    * 0 (default) reserves nothing; it has no effect at md and up or without `phoneOverlay`,
-   * where the button is expected not to overlap content.
+   * where the button is expected not to overlap content. Project the button into the
+   * `[cmnAppLayoutFab]` slot and the layout hides it while a bottom sheet is open. Banners
+   * project into `[cmnAppLayoutNotice]`: they render in flow below the top bar, never over it.
    */
   public readonly floatingActionClearance = input<number>(0);
 
@@ -349,6 +363,10 @@ export class AppLayoutComponent {
     const clearance = this.floatingActionClearance();
     return this.phoneOverlay() && this.hasTabBar() && clearance > 0 ? clearance : null;
   });
+
+  protected readonly noticesClasses = NOTICES_BASE_CLASSES;
+
+  protected readonly sheetOpen = inject(CmnDrawerService).sheetOpen;
 
   protected readonly largeTitleBoxClasses = LARGE_TITLE_BOX_CLASSES;
   protected readonly overlayTopBarClasses = OVERLAY_TOP_BAR_CLASSES;

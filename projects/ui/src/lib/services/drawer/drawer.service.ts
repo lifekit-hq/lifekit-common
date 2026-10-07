@@ -1,7 +1,7 @@
 import {BreakpointObserver} from '@angular/cdk/layout';
 import {Overlay, type OverlayRef, type PositionStrategy} from '@angular/cdk/overlay';
 import {ComponentPortal, type ComponentType} from '@angular/cdk/portal';
-import {inject, Injectable, Injector} from '@angular/core';
+import {computed, inject, Injectable, Injector, signal} from '@angular/core';
 import {distinctUntilChanged, map, skip, startWith, takeUntil} from 'rxjs';
 
 import {CMN_DRAWER_DATA, type CmnDrawerOpenConfig} from '../../components/drawer/drawer-config';
@@ -23,6 +23,13 @@ export class CmnDrawerService {
   private readonly overlay = inject(Overlay);
   private readonly injector = inject(Injector);
   private readonly breakpoints = inject(BreakpointObserver);
+  private readonly openSheets = signal(0);
+
+  /**
+   * True while a drawer is open in its bottom-sheet layout. Floating chrome (the shell's FAB
+   * slot) hides on it, so nothing sits over a sheet's rows.
+   */
+  public readonly sheetOpen = computed<boolean>(() => this.openSheets() > 0);
 
   public open<R = unknown, D = unknown, C = unknown>(
     component: ComponentType<C>,
@@ -42,6 +49,18 @@ export class CmnDrawerService {
     });
 
     drawerRef.overlayRef = overlayRef;
+
+    let counted = sheet;
+    if (counted) {
+      this.openSheets.update(n => n + 1);
+    }
+    const setCounted = (next: boolean): void => {
+      if (next !== counted) {
+        counted = next;
+        this.openSheets.update(n => n + (next ? 1 : -1));
+      }
+    };
+    drawerRef.beforeClose$.subscribe({complete: () => setCounted(false)});
 
     overlayRef.backdropClick().subscribe(() => {
       if (!config.disableClose) {
@@ -87,6 +106,7 @@ export class CmnDrawerService {
         )
         .subscribe(isSheet => {
           this.applyLayout(overlayRef, config, isSheet);
+          setCounted(isSheet);
           containerRef.instance.sheet.set(isSheet);
           containerRef.changeDetectorRef.detectChanges();
         });

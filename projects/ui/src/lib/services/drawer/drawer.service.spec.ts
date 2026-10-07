@@ -187,4 +187,29 @@ describe('CmnDrawerService', () => {
     viewport.setWide(false);
     expect(isSheet()).toBe(false);
   });
+
+  describe('sheetOpen', () => {
+    it('is false with no drawer and true only while a bottom sheet is open', () => {
+      expect(service.sheetOpen()).toBe(false);
+      viewport.setWide(false);
+      const ref = service.open(ContentComponent);
+      expect(service.sheetOpen()).toBe(true);
+      ref.close();
+      expect(service.sheetOpen()).toBe(false);
+    });
+
+    it('stays false for a side drawer', () => {
+      service.open(ContentComponent, {mode: 'side'});
+      expect(service.sheetOpen()).toBe(false);
+    });
+
+    it('follows an open drawer across the md breakpoint', () => {
+      service.open(ContentComponent);
+      expect(service.sheetOpen()).toBe(false);
+      viewport.setWide(false);
+      expect(service.sheetOpen()).toBe(true);
+      viewport.setWide(true);
+      expect(service.sheetOpen()).toBe(false);
+    });
+  });
 });
