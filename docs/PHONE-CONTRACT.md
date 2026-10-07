@@ -94,7 +94,8 @@ keep cached data, errors keep context):
 ## Status
 
 The contract is the target. The shell reaches it step by step, and each step adds a check to the
-phone conformance suite, so a guarantee above is only gating once its check exists.
+phone conformance suite (`npm run test:phone`, report-only until `PHONE_CONFORMANCE=gate`), so a
+guarantee above is only gating once its check exists.
 
 | Guarantee                                        | Status                                                                               |
 | ------------------------------------------------ | ------------------------------------------------------------------------------------ |
