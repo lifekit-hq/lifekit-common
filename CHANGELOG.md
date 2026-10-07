@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.0](https://github.com/lifekit-hq/lifekit-common/compare/v2.1.0...v2.2.0) (2026-10-07)
+
+
+### Features
+
+* **ui:** add a fixed y domain and time-proportional x spacing to the line chart ([#127](https://github.com/lifekit-hq/lifekit-common/issues/127)) ([e68d498](https://github.com/lifekit-hq/lifekit-common/commit/e68d498fb90b951d5f361b18ce4e67cc149ee9de))
+
 ## [2.1.0](https://github.com/lifekit-hq/lifekit-common/compare/v2.0.0...v2.1.0) (2026-10-07)
 
 
