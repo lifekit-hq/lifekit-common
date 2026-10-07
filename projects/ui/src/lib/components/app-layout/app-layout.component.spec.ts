@@ -129,10 +129,9 @@ describe('AppLayoutComponent', () => {
         '/transactions',
         '/budgets',
       ]);
-      expect(routes(layout.phoneMoreItems())).toEqual(['/alerts', '/settings']);
     });
 
-    it('should take tabs from tabRoutes in the given order and put the rest under More', () => {
+    it('should take tabs from tabRoutes in the given order', () => {
       fixture.componentRef.setInput('navItems', FULL_NAV);
       fixture.componentRef.setInput('tabRoutes', [
         '/dashboard',
@@ -148,7 +147,6 @@ describe('AppLayoutComponent', () => {
         '/transactions',
         '/alerts',
       ]);
-      expect(routes(layout.phoneMoreItems())).toEqual(['/budgets', '/settings']);
     });
 
     it('should skip tabRoutes that are not in navItems and cap tabs at four', () => {
@@ -164,7 +162,6 @@ describe('AppLayoutComponent', () => {
       fixture.detectChanges();
       const layout = fixture.componentInstance;
       expect(routes(layout.phoneTabs())).toEqual(['/settings', '/alerts', '/budgets', '/accounts']);
-      expect(routes(layout.phoneMoreItems())).toEqual(['/dashboard', '/transactions']);
     });
 
     it('should emit navClick when a bottom tab is pressed', () => {
@@ -173,6 +170,106 @@ describe('AppLayoutComponent', () => {
       const tabs = fixture.debugElement.queryAll(By.css('cmn-bottom-tab-bar nav > button'));
       tabs[1]?.triggerEventHandler('click', null);
       expect(emitted).toEqual([NAV_ITEMS[1]]);
+    });
+  });
+
+  describe('More page', () => {
+    const MORE_ROUTE = '/more';
+    const UNREAD = 4;
+
+    const tabLabels = (): string[] =>
+      Array.from(
+        (fixture.nativeElement as HTMLElement).querySelectorAll('cmn-bottom-tab-bar nav > button')
+      ).map(button => button.textContent?.trim() ?? '');
+
+    const moreTab = (): HTMLButtonElement =>
+      (fixture.nativeElement as HTMLElement).querySelector(
+        'cmn-bottom-tab-bar nav > button:last-child'
+      ) as HTMLButtonElement;
+
+    const current = (): (string | null)[] =>
+      Array.from(
+        (fixture.nativeElement as HTMLElement).querySelectorAll('cmn-bottom-tab-bar nav > button')
+      ).map(button => button.getAttribute('aria-current'));
+
+    beforeEach(() => {
+      localStorage.clear();
+      fixture.componentRef.setInput('navItems', [
+        ...FULL_NAV.slice(0, 4),
+        {label: 'Alerts', icon: 'Bell', route: '/alerts', badge: () => UNREAD},
+        FULL_NAV[5],
+      ]);
+      fixture.componentRef.setInput('tabRoutes', [
+        '/dashboard',
+        '/accounts',
+        '/transactions',
+        '/budgets',
+      ]);
+    });
+
+    it('should not render a More tab until the app declares a More page', () => {
+      fixture.detectChanges();
+      expect(tabLabels()).toEqual(['Dashboard', 'Accounts', 'Transactions', 'Budgets']);
+    });
+
+    it('should end the tab bar with a More tab once moreRoute is set', () => {
+      fixture.componentRef.setInput('moreRoute', MORE_ROUTE);
+      fixture.detectChanges();
+      expect(tabLabels()).toEqual(['Dashboard', 'Accounts', 'Transactions', 'Budgets', 'More']);
+    });
+
+    it('should open the More page like any tab and report it through navClick', async () => {
+      fixture.componentRef.setInput('moreRoute', MORE_ROUTE);
+      fixture.detectChanges();
+      const emitted: NavItem[] = [];
+      fixture.componentInstance.navClick.subscribe(item => emitted.push(item));
+
+      moreTab().click();
+      await fixture.whenStable();
+
+      expect(TestBed.inject(Router).url).toBe(MORE_ROUTE);
+      expect(emitted.map(item => item.route)).toEqual([MORE_ROUTE]);
+      expect((fixture.nativeElement as HTMLElement).querySelector('[role="dialog"]')).toBeNull();
+    });
+
+    it('should highlight More on the More page and on a nav item that is not a tab', () => {
+      fixture.componentRef.setInput('moreRoute', MORE_ROUTE);
+      fixture.componentRef.setInput('activeRoute', MORE_ROUTE);
+      fixture.detectChanges();
+      expect(current()).toEqual([null, null, null, null, 'page']);
+
+      fixture.componentRef.setInput('activeRoute', '/settings');
+      fixture.detectChanges();
+      expect(current()).toEqual([null, null, null, null, 'page']);
+
+      fixture.componentRef.setInput('activeRoute', '/accounts');
+      fixture.detectChanges();
+      expect(current()).toEqual([null, 'page', null, null, null]);
+    });
+
+    it('should follow the router onto the More page', async () => {
+      fixture.componentRef.setInput('moreRoute', MORE_ROUTE);
+      fixture.componentRef.setInput('activeRoute', undefined);
+      await TestBed.inject(Router).navigateByUrl('/more/profile');
+      fixture.detectChanges();
+      expect(current()).toEqual([null, null, null, null, 'page']);
+    });
+
+    it('should dot the More tab while a nav item behind it has a badge', () => {
+      fixture.componentRef.setInput('moreRoute', MORE_ROUTE);
+      fixture.detectChanges();
+      expect(moreTab().querySelector('.cmn-badge-indicator')).toBeTruthy();
+
+      fixture.componentRef.setInput('navItems', FULL_NAV);
+      fixture.detectChanges();
+      expect(moreTab().querySelector('.cmn-badge-indicator')).toBeNull();
+    });
+
+    it('should leave the sidebar without a More entry', () => {
+      fixture.componentRef.setInput('moreRoute', MORE_ROUTE);
+      fixture.detectChanges();
+      const sidebar = (fixture.nativeElement as HTMLElement).querySelector('cmn-sidebar-nav');
+      expect(sidebar?.textContent).not.toContain('More');
     });
   });
 
@@ -460,6 +557,7 @@ describe('AppLayoutComponent page chrome', () => {
     {path: 'notes', children: [], data: {title: 'Notes', actions: [NEW]}},
     {path: 'notes/new', children: []},
     {path: 'plain', children: []},
+    {path: 'more', children: [], data: {title: 'More'}},
   ];
 
   let fixture: ComponentFixture<AppLayoutComponent>;
@@ -510,6 +608,20 @@ describe('AppLayoutComponent page chrome', () => {
     await go('/accounts');
     await go('/dashboard');
     expect(backButton()).toBeNull();
+  });
+
+  it('should treat the More page as a tab root with no back', async () => {
+    fixture.componentRef.setInput('moreRoute', '/more');
+    await go('/dashboard');
+    await go('/more');
+    expect(largeTitle()?.textContent?.trim()).toBe('More');
+    expect(backButton()).toBeNull();
+  });
+
+  it('should show a back on the More page when the app declares no moreRoute', async () => {
+    await go('/dashboard');
+    await go('/more');
+    expect(backButton()).not.toBeNull();
   });
 
   it('should go back to an absolute parent, even on a deep link', async () => {

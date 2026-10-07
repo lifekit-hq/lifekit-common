@@ -13,10 +13,12 @@ const TABS: NavItem[] = [
   {label: 'Alerts', icon: 'Bell', route: '/alerts', badge: () => UNREAD_ALERTS},
 ];
 
-const MORE: NavItem[] = [
+const OVERFLOW: NavItem[] = [
   {label: 'Budgets', icon: 'Zap', route: '/budgets'},
   {label: 'Settings', icon: 'Settings', route: '/settings'},
 ];
+
+const MORE: NavItem = {label: 'More', icon: 'Ellipsis', route: '/more'};
 
 describe('BottomTabBarComponent', () => {
   let fixture: ComponentFixture<BottomTabBarComponent>;
@@ -29,7 +31,7 @@ describe('BottomTabBarComponent', () => {
     fixture = TestBed.createComponent(BottomTabBarComponent);
     host = fixture.nativeElement as HTMLElement;
     fixture.componentRef.setInput('items', TABS);
-    fixture.componentRef.setInput('moreItems', MORE);
+    fixture.componentRef.setInput('more', MORE);
     fixture.componentRef.setInput('activeRoute', '/dashboard');
     fixture.detectChanges();
   });
@@ -46,10 +48,6 @@ describe('BottomTabBarComponent', () => {
     return button;
   }
 
-  function sheet(): HTMLElement | null {
-    return host.querySelector('[role="dialog"]');
-  }
-
   function labels(): (string | undefined)[] {
     return tabButtons().map(b => b.querySelector('span.truncate')?.textContent?.trim());
   }
@@ -59,23 +57,29 @@ describe('BottomTabBarComponent', () => {
   });
 
   it('caps the primary tabs at four', () => {
-    fixture.componentRef.setInput('items', [...TABS, ...MORE]);
-    fixture.componentRef.setInput('moreItems', []);
+    fixture.componentRef.setInput('items', [...TABS, ...OVERFLOW]);
+    fixture.componentRef.setInput('more', undefined);
     fixture.detectChanges();
     expect(labels()).toEqual(['Home', 'Accounts', 'Transactions', 'Alerts']);
   });
 
-  it('omits the More tab when there is nothing to put in it', () => {
-    fixture.componentRef.setInput('moreItems', []);
+  it('omits the More tab when the app declares no More page', () => {
+    fixture.componentRef.setInput('more', undefined);
     fixture.detectChanges();
     expect(labels()).not.toContain('More');
   });
 
   it('renders nothing when there are no destinations at all', () => {
     fixture.componentRef.setInput('items', []);
-    fixture.componentRef.setInput('moreItems', []);
+    fixture.componentRef.setInput('more', undefined);
     fixture.detectChanges();
     expect(host.querySelector('nav')).toBeNull();
+  });
+
+  it('renders the More tab alone when it is the only destination', () => {
+    fixture.componentRef.setInput('items', []);
+    fixture.detectChanges();
+    expect(labels()).toEqual(['More']);
   });
 
   it('marks the active tab with aria-current', () => {
@@ -98,80 +102,31 @@ describe('BottomTabBarComponent', () => {
     expect(emitted).toEqual([TABS[1]]);
   });
 
-  it('opens the More sheet with the remaining destinations', () => {
-    expect(sheet()).toBeNull();
-    moreButton().click();
-    fixture.detectChanges();
-
-    expect(moreButton().getAttribute('aria-expanded')).toBe('true');
-    const items = Array.from(sheet()?.querySelectorAll('button') ?? []).map(b =>
-      b.textContent?.trim()
-    );
-    expect(items).toEqual(['Budgets', 'Settings']);
-  });
-
-  it('moves focus into the sheet on open and back to the More tab on close', async () => {
-    moreButton().focus();
-    moreButton().click();
-    fixture.detectChanges();
-    await fixture.whenStable();
-    await new Promise(resolve => setTimeout(resolve));
-    expect(document.activeElement?.tagName).toBe('H2');
-
-    fixture.componentInstance.closeMore();
-    fixture.detectChanges();
-    expect(document.activeElement).toBe(moreButton());
-  });
-
-  it('emits navClick and closes the sheet when a More item is picked', () => {
+  it('emits navClick with the More destination, like any tab, and opens no sheet', () => {
     const emitted: NavItem[] = [];
     fixture.componentInstance.navClick.subscribe(item => emitted.push(item));
     moreButton().click();
     fixture.detectChanges();
 
-    sheet()?.querySelectorAll('button')[1]?.click();
-    fixture.detectChanges();
-
-    expect(emitted).toEqual([MORE[1]]);
-    expect(sheet()).toBeNull();
+    expect(emitted).toEqual([MORE]);
+    expect(host.querySelector('[role="dialog"]')).toBeNull();
+    expect(moreButton().getAttribute('aria-haspopup')).toBeNull();
   });
 
-  it('closes the sheet on a backdrop click', () => {
-    moreButton().click();
-    fixture.detectChanges();
-    host.querySelector<HTMLElement>('.cmn-drawer-backdrop')?.click();
-    fixture.detectChanges();
-    expect(sheet()).toBeNull();
-  });
-
-  it('closes the sheet on Escape', () => {
-    moreButton().click();
-    fixture.detectChanges();
-    sheet()?.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}));
-    fixture.detectChanges();
-    expect(sheet()).toBeNull();
-  });
-
-  it('closes the sheet when the More tab is pressed again', () => {
-    moreButton().click();
-    fixture.detectChanges();
-    fixture.componentInstance.toggleMore();
-    fixture.detectChanges();
-    expect(sheet()).toBeNull();
-  });
-
-  it('highlights More when the active route lives in the sheet', () => {
-    fixture.componentRef.setInput('activeRoute', '/settings');
+  it('highlights More when the More page is the active route', () => {
+    fixture.componentRef.setInput('activeRoute', '/more');
     fixture.detectChanges();
     expect(moreButton().getAttribute('aria-current')).toBe('page');
     expect(tabButtons()[0].getAttribute('aria-current')).toBeNull();
   });
 
-  it('marks the More tab with a dot when a sheet item has a badge', () => {
+  it('marks the More tab with a dot when something behind it has a badge', () => {
     expect(moreButton().querySelector('.cmn-badge-indicator')).toBeNull();
-    fixture.componentRef.setInput('moreItems', [{...MORE[0], badge: () => 1}, MORE[1]]);
+    fixture.componentRef.setInput('more', {...MORE, badge: () => 2});
     fixture.detectChanges();
-    expect(moreButton().querySelector('.cmn-badge-indicator')).toBeTruthy();
+    const dot = moreButton().querySelector('.cmn-badge-indicator');
+    expect(dot).toBeTruthy();
+    expect(dot?.textContent?.trim()).toBe('');
   });
 
   describe('floating', () => {

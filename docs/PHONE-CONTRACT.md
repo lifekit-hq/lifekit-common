@@ -24,20 +24,20 @@ browser-level chrome (tab title, icons, `theme-color`, manifest) is the
 
 A page gets all of this without writing any code for it.
 
-| Area           | Guarantee                                                                                                                                                                                   |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Tab bar        | Navigation only, 3-5 destinations, one-word labels that never truncate, always visible except under a sheet. No "More" overflow: that destination is a page. Badges for critical info only. |
-| Tab state      | Each tab remembers its last screen. Launch restores the last tab. Re-tapping the active tab scrolls to top, then pops to the tab root.                                                      |
-| Top bar        | Owns the title, the back chevron (no "Back" text) and a trailing actions slot. The page's large title shrinks into the bar on scroll. No page renders its own back button or title.         |
-| Back           | Back goes to the route's `parent`, or to history when there is none. A deep link to a detail still has a way up. The system swipe back works and is never overridden.                       |
-| Scroll         | The shell owns the scroller. Back restores the scroll position. Overscroll does not chain to the browser (`overscroll-behavior-y: contain`).                                                |
-| Sheets         | One sheet implementation, `cmn-drawer`: half and full stops, a grabber, drag to dismiss, at most one open at a time, opens at most half height.                                             |
-| Overlays       | Install hint, offline banner and update prompt sit in the content area, below the top bar. They never cover the top bar or the tab bar. The floating action hides while a sheet is open.    |
-| Touch          | 44pt hit areas for every chrome control. Chrome text is not selectable. Keyboard hints are hidden on touch (`(hover: none)`).                                                               |
-| Safe areas     | Top bar, tab bar and sheets pad `env(safe-area-inset-*)`.                                                                                                                                   |
-| Layout by size | Under 600px: tab bar. 600-839px: collapsed sidebar as a rail. 840px and up: sidebar. A landscape phone (short, coarse pointer) keeps the tab bar.                                           |
-| Appearance     | Follows the system light or dark setting by default. The override lives in Settings. `theme-color` matches the surface, per the browser chrome standard.                                    |
-| Motion         | Brief and purposeful. Everything fades or stops under Reduce Motion.                                                                                                                        |
+| Area           | Guarantee                                                                                                                                                                                                   |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tab bar        | Navigation only, 3-5 destinations, one-word labels that never truncate, always visible except under a sheet. The last tab, More, opens a page the app builds, never a sheet. Badges for critical info only. |
+| Tab state      | Each tab remembers its last screen. Launch restores the last tab. Re-tapping the active tab scrolls to top, then pops to the tab root.                                                                      |
+| Top bar        | Owns the title, the back chevron (no "Back" text) and a trailing actions slot. The page's large title shrinks into the bar on scroll. No page renders its own back button or title.                         |
+| Back           | Back goes to the route's `parent`, or to history when there is none. A deep link to a detail still has a way up. The system swipe back works and is never overridden.                                       |
+| Scroll         | The shell owns the scroller. Back restores the scroll position. Overscroll does not chain to the browser (`overscroll-behavior-y: contain`).                                                                |
+| Sheets         | One sheet implementation, `cmn-drawer`: half and full stops, a grabber (tap cycles the stops), drag to dismiss, opens at most half height. Do not open two at once.                                         |
+| Overlays       | Install hint, offline banner and update prompt sit in the content area, below the top bar. They never cover the top bar or the tab bar. The floating action hides while a sheet is open.                    |
+| Touch          | 44pt hit areas for every chrome control. Chrome text is not selectable. Keyboard hints are hidden on touch (`(hover: none)`).                                                                               |
+| Safe areas     | Top bar, tab bar and sheets pad `env(safe-area-inset-*)`.                                                                                                                                                   |
+| Layout by size | Under 600px: tab bar. 600-839px: collapsed sidebar as a rail. 840px and up: sidebar. A landscape phone (short, coarse pointer) keeps the tab bar.                                                           |
+| Appearance     | Follows the system light or dark setting by default. The override lives in Settings. `theme-color` matches the surface, per the browser chrome standard.                                                    |
+| Motion         | Brief and purposeful. Everything fades or stops under Reduce Motion.                                                                                                                                        |
 
 ### Scroll and tab state
 
@@ -59,6 +59,31 @@ The shell does this itself, in `cmn-app-layout`, with no page code and no router
 On the phone tab bar `navClick` is a notification: the shell does the navigating. An app that also
 navigates on that event fights the shell (a re-tap would pop to the root before it can scroll to the
 top), so it should drop that handler. The sidebar still leaves navigating to the app.
+
+### The More tab
+
+Below 600px the tab bar shows up to four destinations and, when the app sets `moreRoute`, a last
+**More** tab. More is an ordinary page that the app declares as a route and fills itself; the shell
+supplies no content for it.
+
+```html
+<cmn-app-layout [navItems]="navItems" [tabRoutes]="tabRoutes" moreRoute="/more">
+  <router-outlet />
+</cmn-app-layout>
+```
+
+```ts
+{path: 'more', component: MorePage, data: {title: 'More'}}
+```
+
+- The More page is a tab root: it shows its `title` and no back chevron, remembers its scroll, and a
+  re-tap scrolls to top, then pops to the root, like any other tab.
+- The More tab is highlighted on the More page and on any nav item that is not a tab. It shows a dot
+  while any of those items has a badge.
+- Nav items left off `tabRoutes` stay in the sidebar (600px and up). On a phone they are reached
+  from the More page, which links to them. Pages reached from More set `parent: '/more'`.
+- Without `moreRoute` there is no More tab, and a nav item beyond the fourth is not reachable from
+  the tab bar.
 
 ## What a page declares
 
@@ -127,10 +152,10 @@ The contract is the target. The shell reaches it step by step, and each step add
 phone conformance suite (`npm run test:phone`, report-only until `PHONE_CONFORMANCE=gate`), so a
 guarantee above is only gating once its check exists.
 
-| Guarantee                                        | Status                                                                               |
-| ------------------------------------------------ | ------------------------------------------------------------------------------------ |
-| Tab bar, sheets, safe areas                      | Partial: tab bar and `cmn-drawer` exist, with two sheet implementations and no stops |
-| Top bar title, back, actions                     | Built: route data `title`, `parent`, `actions`; no suite check yet                   |
-| Shell-owned scroll and tab state                 | Built: checked by the suite's "back restores scroll"; see "Scroll and tab state"     |
-| One state pattern                                | Target (policy rules 1, 2 enforced by `cmn-async-state`)                             |
-| Touch size, overlays, layout by size, appearance | Target                                                                               |
+| Guarantee                                        | Status                                                                                       |
+| ------------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| Tab bar, sheets, safe areas                      | Built: one sheet (`cmn-drawer`) with half and full stops, More is a page; no suite check yet |
+| Top bar title, back, actions                     | Built: route data `title`, `parent`, `actions`; no suite check yet                           |
+| Shell-owned scroll and tab state                 | Built: checked by the suite's "back restores scroll"; see "Scroll and tab state"             |
+| One state pattern                                | Target (policy rules 1, 2 enforced by `cmn-async-state`)                                     |
+| Touch size, overlays, layout by size, appearance | Target                                                                                       |

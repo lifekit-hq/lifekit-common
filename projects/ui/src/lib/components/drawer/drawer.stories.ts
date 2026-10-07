@@ -83,6 +83,8 @@ class StoryDrawerLauncherComponent {
 
   /** Opens a drawer in this mode as soon as the story renders (visual stories). */
   public readonly autoOpen = input<CmnDrawerMode | null>(null);
+  /** The auto-opened drawer holds a long scrolling body instead of a short one. */
+  public readonly autoLong = input<boolean>(false);
 
   protected readonly result = signal('—');
 
@@ -119,11 +121,14 @@ class StoryDrawerLauncherComponent {
 
   protected openIn(mode: CmnDrawerMode): void {
     this.drawer
-      .open<string, TransactionData>(StoryDrawerContentComponent, {
-        title: 'Transaction detail',
-        data: {description: 'Whole Foods', amount: '-$87.43'},
-        mode,
-      })
+      .open<string, TransactionData>(
+        this.autoLong() ? StoryLongDrawerContentComponent : StoryDrawerContentComponent,
+        {
+          title: 'Transaction detail',
+          data: {description: 'Whole Foods', amount: '-$87.43'},
+          mode,
+        }
+      )
       .afterClosed()
       .subscribe(r => this.result.set(String(r)));
   }
@@ -157,9 +162,10 @@ type Story = StoryObj<StoryDrawerLauncherComponent>;
 export const Playground: Story = {};
 
 /**
- * The phone presentation: a bottom sheet with a drag handle, a 90dvh max height
- * and safe-area bottom padding. Drag the handle or header down to dismiss.
- * The default `responsive` mode uses it below `md`; `mode: 'sheet'` pins it.
+ * The phone presentation: a bottom sheet with a grabber, safe-area bottom padding and two
+ * stops. It opens at the half stop (content-sized, never past half the viewport); tap the
+ * grabber to go to the full stop (90dvh) and again to come back. Drag the grabber or header
+ * down to dismiss. The default `responsive` mode uses it below `md`; `mode: 'sheet'` pins it.
  */
 export const BottomSheet: Story = {
   args: {autoOpen: 'sheet'},
@@ -180,5 +186,31 @@ export const ResponsivePhone: Story = {
 /** The side panel from `md` up, unchanged, in the dark theme. */
 export const SidePanelDark: Story = {
   args: {autoOpen: 'side'},
+  globals: {theme: 'dark'},
+};
+
+/** A long body at the half stop: the sheet stops at half the viewport and the body scrolls. */
+export const BottomSheetHalfScrolling: Story = {
+  args: {autoOpen: 'sheet', autoLong: true},
+};
+
+/** Taps the grabber once the sheet has opened: the full stop, 90dvh. */
+export const BottomSheetFull: Story = {
+  args: {autoOpen: 'sheet', autoLong: true},
+  play: async () => {
+    const frames = 60;
+    for (let frame = 0; frame < frames; frame++) {
+      const grabber = document.querySelector<HTMLButtonElement>('.cmn-drawer-grabber');
+      if (grabber) {
+        grabber.click();
+        return;
+      }
+      await new Promise(resolve => requestAnimationFrame(resolve));
+    }
+  },
+};
+
+export const BottomSheetFullDark: Story = {
+  ...BottomSheetFull,
   globals: {theme: 'dark'},
 };
