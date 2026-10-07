@@ -12,7 +12,7 @@
     "test:tokens": "npm run build:brand && node --test \"projects/tokens/test/*.spec.mjs\"",
     "lint": "ng lint",
     "format": "prettier --write \"projects/**/*.{ts,html,scss,css}\"",
-    "format:check": "prettier --check \"projects/**/*.{ts,html,scss,css}\"",
+    "format:check": "prettier --check \"projects/**/*.{ts,html,scss,css}\" \"docs/**/*.md\"",
     "storybook": "ng run \"@lifekit-hq/ui:storybook\"",
     "build-storybook": "ng run \"@lifekit-hq/ui:build-storybook\"",
     "check-strategy": "node scripts/check-strategy-coverage.mjs && node --test \"scripts/test/*.spec.mjs\"",
