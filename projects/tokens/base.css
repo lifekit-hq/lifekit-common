@@ -59,3 +59,22 @@ h5,
 h6 {
   margin: 0;
 }
+
+/* Touch hit area for a small inline control (a link in a card): the pressable area grows to
+   --size-touch around the control without moving or resizing what is drawn. The control must not
+   clip overflow, and neighbours closer than the target overlap it, so keep them apart. */
+.cmn-hit-slop {
+  position: relative;
+}
+
+.cmn-hit-slop::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  min-width: 100%;
+  min-height: 100%;
+  width: var(--size-touch);
+  height: var(--size-touch);
+  transform: translate(-50%, -50%);
+}

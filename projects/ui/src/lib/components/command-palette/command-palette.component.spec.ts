@@ -41,6 +41,10 @@ describe('CommandPaletteComponent', () => {
     );
   }
 
+  function hints(): HTMLElement[] {
+    return Array.from((fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>('kbd'));
+  }
+
   function groupHeadings(): string[] {
     return Array.from(
       (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>('[data-group-heading]')
@@ -156,5 +160,13 @@ describe('CommandPaletteComponent', () => {
     type('zzzz');
     press('Enter');
     expect(close).not.toHaveBeenCalled();
+  });
+
+  it('hides every keyboard hint where hover is unavailable', () => {
+    // ESC beside the field, the Enter glyph on the selected row, and the three footer hints
+    expect(hints().map(el => el.textContent?.trim())).toEqual(['ESC', '↵', '↑↓', '↵', 'ESC']);
+    for (const hint of hints()) {
+      expect(hint.classList).toContain('[@media(hover:none)]:hidden');
+    }
   });
 });

@@ -7,9 +7,14 @@ import {type NavItem} from '../sidebar-nav/sidebar-nav.component';
 /** Primary tabs a phone bar can hold, besides the "More" tab. */
 export const MAX_BOTTOM_TABS = 4;
 
+/**
+ * Tabs share the bar equally, but never below their label (`min-w-fit`): a long label widens its
+ * tab and the others give way, so no label is ever cut. `min-h` keeps the touch target.
+ */
 const TAB_BASE_CLASSES =
-  'flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-0.5 pb-cmn-1 pt-cmn-2 ' +
-  'transition-colors focus:outline-none focus-visible:bg-surface-raised';
+  'flex min-h-cmn-touch min-w-fit flex-1 flex-col items-center justify-center gap-0.5 px-0.5 ' +
+  'pb-cmn-1 pt-cmn-2 transition-colors focus:outline-none focus-visible:bg-surface-raised';
+const TAB_LABEL_CLASSES = 'whitespace-nowrap font-label text-cmn-xs font-medium leading-tight';
 const TAB_FLOATING_CLASSES = 'my-0.5 rounded-cmn-full';
 const TAB_ACTIVE_CLASSES = 'text-accent-default';
 const TAB_FLOATING_ACTIVE_CLASSES = 'bg-accent-subtle';
@@ -52,9 +57,7 @@ const NAV_FLOATING_CLASSES =
             <cmn-badge [count]="item.badge ? item.badge() : 0" status="error">
               <cmn-icon [name]="item.icon" size="md" aria-hidden="true" />
             </cmn-badge>
-            <span
-              class="max-w-full shrink-0 truncate font-label text-cmn-xs font-medium leading-tight"
-            >
+            <span [class]="labelClasses">
               {{ item.label }}
             </span>
           </button>
@@ -69,9 +72,7 @@ const NAV_FLOATING_CLASSES =
             <cmn-badge [dot]="moreHasBadge()" status="error">
               <cmn-icon [name]="moreItem.icon" size="md" aria-hidden="true" />
             </cmn-badge>
-            <span
-              class="max-w-full shrink-0 truncate font-label text-cmn-xs font-medium leading-tight"
-            >
+            <span [class]="labelClasses">
               {{ moreItem.label }}
             </span>
           </button>
@@ -100,6 +101,8 @@ export class BottomTabBarComponent {
   public readonly navClass = computed<string>(() =>
     this.floating() ? NAV_FLOATING_CLASSES : NAV_DOCKED_CLASSES
   );
+
+  protected readonly labelClasses = TAB_LABEL_CLASSES;
 
   public isActive(item: NavItem): boolean {
     return this.activeRoute() === item.route;

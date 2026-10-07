@@ -110,6 +110,7 @@ module.exports = {
         'cmn-7': '28px',
         'cmn-8': '32px',
         'cmn-10': '40px',
+        'cmn-touch': 'var(--size-touch)',
         'cmn-12': '48px',
         'cmn-16': '64px',
       },

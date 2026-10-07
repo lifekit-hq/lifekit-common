@@ -158,9 +158,33 @@ describe('TopBarComponent', () => {
         query('button[aria-label="Back"]'),
         query('button[aria-label="Share"]'),
       ]) {
-        expect(button?.classList).toContain('h-11');
-        expect(button?.classList).toContain('w-11');
+        expect(button?.classList).toContain('h-cmn-touch');
+        expect(button?.classList).toContain('w-cmn-touch');
       }
+    });
+
+    it('should give search, theme and the avatar the same target while the avatar disc stays 32px', () => {
+      const trigger = query('button[aria-label="Account menu"]');
+      for (const button of [
+        query('button[aria-label="Search"]'),
+        query('button[aria-label="Toggle theme"]'),
+        trigger,
+      ]) {
+        expect(button?.classList).toContain('h-cmn-touch');
+        expect(button?.classList).toContain('w-cmn-touch');
+      }
+      expect(trigger?.classList).toContain('md:h-8');
+      expect(trigger?.classList).toContain('md:w-8');
+      const disc = trigger?.querySelector('span');
+      expect(disc?.classList).toContain('h-8');
+      expect(disc?.classList).toContain('w-8');
+      expect(disc?.classList).toContain('bg-accent-default');
+    });
+
+    it('should hide the search shortcut hint where hover is unavailable', () => {
+      const hint = query('kbd');
+      expect(hint?.textContent?.trim()).toBe('⌘K');
+      expect(hint?.classList).toContain('[@media(hover:none)]:hidden');
     });
 
     it('should render each action as a labelled icon button and emit the pressed one', () => {

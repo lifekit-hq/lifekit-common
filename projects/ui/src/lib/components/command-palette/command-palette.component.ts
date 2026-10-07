@@ -73,10 +73,7 @@ interface PaletteGroup {
             placeholder="Search pages, actions…"
             class="flex-1 border-none bg-transparent text-cmn-md text-text-primary outline-none placeholder:text-text-placeholder"
           />
-          <kbd
-            class="shrink-0 rounded border border-border-default px-1.5 py-0.5 font-mono text-cmn-xs text-text-disabled"
-            >ESC</kbd
-          >
+          <kbd [class]="KEY_CLASSES + ' shrink-0 px-1.5'">ESC</kbd>
         </div>
 
         <!-- Results -->
@@ -123,10 +120,7 @@ interface PaletteGroup {
                     >
                     @if (entry.idx === selectedIndex()) {
                       <div class="ml-auto">
-                        <kbd
-                          class="rounded border border-border-default px-1.5 py-0.5 font-mono text-cmn-xs text-text-disabled"
-                          >↵</kbd
-                        >
+                        <kbd [class]="KEY_CLASSES + ' px-1.5'">↵</kbd>
                       </div>
                     }
                   </div>
@@ -137,13 +131,12 @@ interface PaletteGroup {
         </div>
 
         <!-- Footer hints -->
-        <div class="flex gap-3.5 border-t border-border-default px-cmn-4 py-2">
+        <div
+          class="flex gap-3.5 border-t border-border-default px-cmn-4 py-2 [@media(hover:none)]:hidden"
+        >
           @for (hint of KEY_HINTS; track hint[0]) {
             <div class="flex items-center gap-1">
-              <kbd
-                class="rounded border border-border-default px-1 py-0.5 font-mono text-cmn-xs text-text-disabled"
-                >{{ hint[0] }}</kbd
-              >
+              <kbd [class]="KEY_CLASSES + ' px-1'">{{ hint[0] }}</kbd>
               <span class="text-cmn-xs text-text-disabled">{{ hint[1] }}</span>
             </div>
           }
@@ -161,6 +154,11 @@ export class CommandPaletteComponent {
   private readonly dialogRef = inject<DialogRef<PaletteResult>>(DialogRef);
   private readonly items = inject<CommandPaletteItem[]>(CMN_DIALOG_DATA);
   private readonly searchInput = viewChild<ElementRef<HTMLInputElement>>('searchInput');
+
+  /** Keyboard hints mean nothing without a keyboard: hidden wherever hover is unavailable. */
+  protected readonly KEY_CLASSES =
+    'rounded border border-border-default py-0.5 font-mono text-cmn-xs text-text-disabled ' +
+    '[@media(hover:none)]:hidden';
 
   protected readonly KEY_HINTS: [string, string][] = [
     ['↑↓', 'Navigate'],

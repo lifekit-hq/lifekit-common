@@ -152,10 +152,11 @@ The contract is the target. The shell reaches it step by step, and each step add
 phone conformance suite (`npm run test:phone`, report-only until `PHONE_CONFORMANCE=gate`), so a
 guarantee above is only gating once its check exists.
 
-| Guarantee                                        | Status                                                                                       |
-| ------------------------------------------------ | -------------------------------------------------------------------------------------------- |
-| Tab bar, sheets, safe areas                      | Built: one sheet (`cmn-drawer`) with half and full stops, More is a page; no suite check yet |
-| Top bar title, back, actions                     | Built: route data `title`, `parent`, `actions`; no suite check yet                           |
-| Shell-owned scroll and tab state                 | Built: checked by the suite's "back restores scroll"; see "Scroll and tab state"             |
-| One state pattern                                | Target (policy rules 1, 2 enforced by `cmn-async-state`)                                     |
-| Touch size, overlays, layout by size, appearance | Target                                                                                       |
+| Guarantee                               | Status                                                                                            |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Tab bar, sheets, safe areas             | Built: one sheet (`cmn-drawer`) with half and full stops, More is a page; no suite check yet      |
+| Top bar title, back, actions            | Built: route data `title`, `parent`, `actions`; no suite check yet                                |
+| Shell-owned scroll and tab state        | Built: checked by the suite's "back restores scroll"; see "Scroll and tab state"                  |
+| One state pattern                       | Target (policy rules 1, 2 enforced by `cmn-async-state`)                                          |
+| Touch size (44pt chrome, labels, hints) | Built: `--size-touch`, `.cmn-hit-slop`; the suite enforces 44x44 at 390x844, labels at 320, hints |
+| Overlays, layout by size, appearance    | Target                                                                                            |
