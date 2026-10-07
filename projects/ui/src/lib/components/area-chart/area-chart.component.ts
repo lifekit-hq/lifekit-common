@@ -7,18 +7,20 @@ import {
   ElementRef,
   input,
   OnDestroy,
+  output,
   viewChild,
 } from '@angular/core';
 import {
   type AreaSeries,
   buildAreaChartConfig,
+  type ChartScrubPoint,
   isSeriesEmpty,
   resolveAreaChartTokens,
   updateAreaChart,
 } from '@lifekit-hq/charts-core';
 import {Chart} from 'chart.js';
 
-export type {AreaSeries} from '@lifekit-hq/charts-core';
+export type {AreaSeries, ChartScrubPoint} from '@lifekit-hq/charts-core';
 
 @Component({
   selector: 'cmn-area-chart',
@@ -47,6 +49,7 @@ export type {AreaSeries} from '@lifekit-hq/charts-core';
 export class AreaChartComponent implements AfterViewInit, OnDestroy {
   private readonly canvasRef = viewChild.required<ElementRef<HTMLCanvasElement>>('chartCanvas');
   private chart: Chart | null = null;
+  private builtScrubbable = false;
 
   public readonly series = input<AreaSeries[]>([]);
   public readonly label = input<string>('');
@@ -55,14 +58,32 @@ export class AreaChartComponent implements AfterViewInit, OnDestroy {
   public readonly emptyMessage = input<string>('No data yet');
   /** `true` stacks the bands into a cumulative total from a zero baseline; `false` draws independent, unfilled lines. */
   public readonly stacked = input<boolean>(true);
+  /**
+   * Opts into scrub-to-read: a crosshair follows a held pointer (a touch, or a hovering mouse) and
+   * `scrub` reports the point under it (its `y` is the stacked total), so the host's headline
+   * number can follow; `scrubEnd` fires on release. The chart's own tooltip steps aside.
+   */
+  public readonly scrubbable = input<boolean>(false);
+  /** The point under a held pointer; only while `scrubbable`. */
+  public readonly scrub = output<ChartScrubPoint>();
+  /** The pointer lifted or left the chart: snap the headline back. */
+  public readonly scrubEnd = output<void>();
   protected readonly isEmpty = computed(() => isSeriesEmpty(this.series()));
 
   constructor() {
     effect(() => {
       const series = this.series();
       const stacked = this.stacked();
-      if (this.chart) {
+      const scrubbable = this.scrubbable();
+      if (!this.chart) {
+        return;
+      }
+      if (scrubbable === this.builtScrubbable) {
         updateAreaChart(this.chart, series, stacked);
+      } else {
+        // The scrub plugin is part of the chart config, so toggling it rebuilds the chart.
+        this.chart.destroy();
+        this.buildChart();
       }
     });
   }
@@ -81,9 +102,21 @@ export class AreaChartComponent implements AfterViewInit, OnDestroy {
     if (!ctx) {
       return;
     }
+    this.builtScrubbable = this.scrubbable();
     this.chart = new Chart(
       ctx,
-      buildAreaChartConfig(this.series(), resolveAreaChartTokens(), this.currency(), this.stacked())
+      buildAreaChartConfig(
+        this.series(),
+        resolveAreaChartTokens(),
+        this.currency(),
+        this.stacked(),
+        this.scrubbable()
+          ? {
+              onScrub: point => this.scrub.emit(point),
+              onRelease: () => this.scrubEnd.emit(),
+            }
+          : undefined
+      )
     );
   }
 }

@@ -11,9 +11,11 @@ import {
   Tooltip,
 } from 'chart.js';
 
+import {scrubPlugin} from './scrub';
 import {
   type ChartDomain,
   type ChartPoint,
+  type ChartScrubHandlers,
   type ChartValueFormat,
   type ChartXSpacing,
 } from './types';
@@ -84,7 +86,7 @@ function timeTick(val: string | number, index: number, ticks: {value: number}[])
 
 function lineData(points: ChartPoint[], xSpacing: ChartXSpacing): ChartDataset<'line'>['data'] {
   return xSpacing === 'time'
-    ? points.map(p => ({x: p.time as number, y: p.value}))
+    ? points.map(p => ({x: p.time as number, y: p.value, label: p.label}))
     : points.map(p => p.value);
 }
 
@@ -113,6 +115,10 @@ function buildLineDataset(
 /**
  * `compact` renders a sparkline: no axes, ticks, gridlines or tooltip, no animation, and it
  * fills whatever box its canvas is given.
+ *
+ * `scrub` opts into scrub-to-read: a crosshair follows the pointer and the handlers report the
+ * point under it, so the host's headline can follow. The chart's own tooltip steps aside for it,
+ * and a compact chart (a still glyph) ignores it.
  */
 export function buildLineChartConfig(
   points: ChartPoint[],
@@ -120,14 +126,17 @@ export function buildLineChartConfig(
   currency: string,
   valueFormat: ChartValueFormat = 'currency',
   compact = false,
-  scale: LineChartScale = {}
+  scale: LineChartScale = {},
+  scrub?: ChartScrubHandlers
 ): ChartConfiguration<'line'> {
+  const scrubbing = scrub !== undefined && !compact;
   const format = valueFormatter(valueFormat, currency);
   const xSpacing = scale.xSpacing ?? 'even';
   const timed = xSpacing === 'time';
   const drawn = drawnPoints(points, xSpacing);
   return {
     type: 'line',
+    ...(scrubbing ? {plugins: [scrubPlugin(scrub, tokens.textSecondary)]} : {}),
     data: {
       // A time-spaced chart reads x from the data, so it has no category labels.
       ...(timed ? {} : {labels: drawn.map(p => p.label)}),
@@ -144,7 +153,7 @@ export function buildLineChartConfig(
       plugins: {
         legend: {display: false},
         tooltip: {
-          enabled: !compact,
+          enabled: !compact && !scrubbing,
           mode: 'index',
           intersect: false,
           callbacks: {

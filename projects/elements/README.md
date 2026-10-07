@@ -113,6 +113,15 @@ in this pilot.
 | `compact`     | `boolean`                                                           | `false`      | Sparkline: just the line and fill - no title, frame, axes, gridlines or tooltip, no animation. Height follows a `height` on the element (min `2rem`).                                 |
 | `yDomain`     | `{min?: number, max?: number}`                                      | `undefined`  | Fixes the y range instead of auto-scaling it to the data; an omitted bound stays auto. Property only. Works in compact mode.                                                          |
 | `xSpacing`    | `'even' \| 'time'`                                                  | `'even'`     | `'time'` places each point by the epoch-ms `time` on it instead of in an equal slot (points without one are left out). Attribute: `x-spacing`. Works in compact mode.                 |
+| `scrubbable`  | `boolean`                                                           | `false`      | Opts into scrub-to-read (below). The chart's own tooltip steps aside; ignored in compact mode.                                                                                        |
+
+**Scrub-to-read.** With `scrubbable`, a crosshair and a dot follow a held pointer - a hovering mouse
+or pen, or a finger pressed on the chart (a horizontal drag reads the chart, a vertical one still
+scrolls the page). `lk-line-chart-scrub` fires when the point under the pointer changes, or when
+the data under a held pointer does, with a `ChartScrubPoint` as `detail` (`index`, `label`, `x`,
+`y`, `total`, `values`), and `lk-line-chart-scrub-end` fires on release. The host swaps its
+headline number and delta while scrubbing and restores them on the end event;
+`chartDelta(from, to)` from `@lifekit-hq/charts-core` gives the change and percent. Colour the delta text only - the chart never repaints.
 
 ```html
 <lk-line-chart label="Net Worth" currency="USD"></lk-line-chart>
@@ -127,6 +136,40 @@ in this pilot.
   ];
 </script>
 ```
+
+### `<lk-segmented>`
+
+One-row segmented control for picking one value out of a short list, such as a chart period. A
+`role="radiogroup"` of `role="radio"` cells, not a tablist: choosing a cell changes a value the host
+reads, it does not swap a panel. Cells share the row equally, never wrap and are at least 44px
+square (seven fit the 326px a card leaves on a 390px phone).
+
+| Property   | Attribute  | Type                                                   | Default | Description                                                    |
+| ---------- | ---------- | ------------------------------------------------------ | ------- | -------------------------------------------------------------- |
+| `options`  | -          | `{value: string, label: string, disabled?: boolean}[]` | `[]`    | The cells, in order. Property only. A disabled cell is skipped |
+| `value`    | `value`    | `string`                                               | `''`    | The chosen option's `value`                                    |
+| `label`    | `label`    | `string`                                               | `''`    | Accessible name of the group                                   |
+| `disabled` | `disabled` | `boolean`                                              | `false` | Disables every cell                                            |
+
+Event: `lk-segmented-change` - the reader chose a cell; `detail` is `{value}`. Like a native `change`,
+it fires for the reader's choice only, never for a `value` the host sets.
+
+Keyboard: Tab lands on the chosen cell (or the first enabled one); the arrow keys move and choose,
+wrapping at the ends; Home and End jump to the first and last enabled cell.
+
+```html
+<lk-segmented label="History range" value="1M"></lk-segmented>
+<script>
+  const el = document.querySelector('lk-segmented');
+  el.options = ['1W', '1M', '1Y'].map(p => ({value: p, label: p}));
+  el.addEventListener('lk-segmented-change', e => load(e.detail.value));
+</script>
+```
+
+Why `lk-segmented` and not a `cmn-*` Angular component: it has no
+framework behaviour (no CDK, router, overlay or form integration - the host binds `value` and the
+event), so the layered substrate rule in `docs/STRATEGY.md` makes it a framework-free leaf, and the
+`lk-` tag prefix is that layer's convention.
 
 ### `<lk-update-prompt>`
 

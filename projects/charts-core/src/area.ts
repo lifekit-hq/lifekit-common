@@ -12,7 +12,8 @@ import {
   Tooltip,
 } from 'chart.js';
 
-import {type AreaSeries} from './types';
+import {scrubPlugin} from './scrub';
+import {type AreaSeries, type ChartScrubHandlers} from './types';
 import {
   CHART_FONT_SIZE,
   chartFontFamily,
@@ -72,11 +73,17 @@ export function buildAreaDatasets(series: AreaSeries[], stacked = true): ChartDa
   });
 }
 
+/**
+ * `scrub` opts into scrub-to-read: a crosshair follows the pointer and the handlers report the
+ * point under it (the stacked total as its headline value), so the host's headline can follow.
+ * The chart's own tooltip steps aside for it.
+ */
 export function buildAreaChartConfig(
   series: AreaSeries[],
   tokens: AreaChartTokens,
   currency: string,
-  stacked = true
+  stacked = true,
+  scrub?: ChartScrubHandlers
 ): ChartConfiguration<'line'> {
   return {
     type: 'line',
@@ -84,7 +91,10 @@ export function buildAreaChartConfig(
       labels: series[0]?.points.map(p => p.label) ?? [],
       datasets: buildAreaDatasets(series, stacked),
     },
-    plugins: [xTickLimitPlugin(X_TICK_LIMIT)],
+    plugins: [
+      xTickLimitPlugin(X_TICK_LIMIT),
+      ...(scrub ? [scrubPlugin(scrub, tokens.textSecondary)] : []),
+    ],
     options: {
       responsive: true,
       maintainAspectRatio: false,
@@ -103,6 +113,7 @@ export function buildAreaChartConfig(
           },
         },
         tooltip: {
+          enabled: !scrub,
           mode: 'index',
           intersect: false,
           callbacks: {

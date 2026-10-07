@@ -1,6 +1,6 @@
 import {type Plugin} from 'chart.js';
 
-import {type ChartValueFormat, type ChartValueFormatter} from './types';
+import {type ChartDelta, type ChartValueFormat, type ChartValueFormatter} from './types';
 
 export function cssVar(name: string, fallback: string): string {
   const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -128,4 +128,12 @@ export function valueFormatter(format: ChartValueFormat, currency: string): Char
     default:
       return (value, compact) => money(value, currency, compact);
   }
+}
+
+const PERCENT_SCALE = 100;
+
+/** How far `to` moved from `from`: the absolute change and the change as a percent of `|from|`. */
+export function chartDelta(from: number, to: number): ChartDelta {
+  const change = to - from;
+  return {change, percent: from === 0 ? null : (change / Math.abs(from)) * PERCENT_SCALE};
 }

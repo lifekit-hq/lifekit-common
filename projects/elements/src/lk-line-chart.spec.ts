@@ -129,12 +129,12 @@ describe('LkLineChart', () => {
     await el.updateComplete;
     expect(builtChart()?.options.scales['x'].type).toBe('linear');
     expect(builtChart()?.data.datasets[0].data).toEqual([
-      {x: 1_000, y: 1},
-      {x: 9_000, y: 2},
+      {x: 1_000, y: 1, label: 'a'},
+      {x: 9_000, y: 2, label: 'b'},
     ]);
     el.points = [{label: 'c', value: 5, time: 4_000}];
     await el.updateComplete;
-    expect(builtChart()?.data.datasets[0].data).toEqual([{x: 4_000, y: 5}]);
+    expect(builtChart()?.data.datasets[0].data).toEqual([{x: 4_000, y: 5, label: 'c'}]);
   });
 
   it('defaults points to empty array', () => {
@@ -162,5 +162,65 @@ describe('LkLineChart', () => {
     const spy = vi.spyOn(chart, 'destroy');
     el.remove();
     expect(spy).toHaveBeenCalledOnce();
+  });
+
+  describe('scrub-to-read', () => {
+    const POINTS = [
+      {label: 'Jan', value: 100},
+      {label: 'Feb', value: 200},
+      {label: 'Mar', value: 150},
+    ];
+    const canvas = (): HTMLCanvasElement =>
+      el.shadowRoot?.querySelector('canvas') as HTMLCanvasElement;
+    const hover = (fraction: number): void => {
+      const rect = canvas().getBoundingClientRect();
+      canvas().dispatchEvent(
+        new PointerEvent('pointermove', {
+          clientX: rect.left + rect.width * fraction,
+          pointerType: 'mouse',
+          bubbles: true,
+        })
+      );
+    };
+
+    it('is off by default and says nothing when hovered', async () => {
+      el.points = POINTS;
+      await el.updateComplete;
+      const seen = vi.fn();
+      el.addEventListener('lk-line-chart-scrub', seen);
+      hover(0.5);
+      expect(el.scrubbable).toBe(false);
+      expect(seen).not.toHaveBeenCalled();
+    });
+
+    it('emits the point under the pointer and an end event on leave', async () => {
+      el.points = POINTS;
+      el.scrubbable = true;
+      await el.updateComplete;
+      const scrubs: {index: number; y: number}[] = [];
+      let ends = 0;
+      el.addEventListener('lk-line-chart-scrub', e => scrubs.push((e as CustomEvent).detail));
+      el.addEventListener('lk-line-chart-scrub-end', () => ends++);
+      hover(1);
+      expect(scrubs).toMatchObject([{index: 2, y: 150}]);
+      canvas().dispatchEvent(new PointerEvent('pointerleave', {pointerType: 'mouse'}));
+      expect(ends).toBe(1);
+    });
+
+    it('reads the scrubbable attribute', async () => {
+      el.setAttribute('scrubbable', '');
+      await el.updateComplete;
+      expect(el.scrubbable).toBe(true);
+    });
+
+    it('rebuilds the chart when scrubbable is switched on later', async () => {
+      el.points = POINTS;
+      await el.updateComplete;
+      const before = builtChart();
+      el.scrubbable = true;
+      await el.updateComplete;
+      expect(builtChart()).not.toBe(before);
+      expect(builtChart()).not.toBeNull();
+    });
   });
 });

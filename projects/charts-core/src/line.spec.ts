@@ -203,9 +203,9 @@ describe('buildLineChartConfig xSpacing time', () => {
   it('positions each point by its timestamp on a linear x scale', () => {
     const config = build(TIMED);
     expect(config.data.datasets[0].data).toEqual([
-      {x: T0, y: 1},
-      {x: T0 + DAY, y: 2},
-      {x: T0 + 90 * DAY, y: 3},
+      {x: T0, y: 1, label: 'A'},
+      {x: T0 + DAY, y: 2, label: 'B'},
+      {x: T0 + 90 * DAY, y: 3, label: 'C'},
     ]);
     expect(config.data.labels).toBeUndefined();
     const x = config.options?.scales?.['x'] as {type: string; bounds: string};
@@ -297,8 +297,8 @@ describe('updateLineChart', () => {
     });
 
     expect(chart.data.datasets[0].data).toEqual([
-      {x: T0, y: 1},
-      {x: T0 + DAY, y: 2},
+      {x: T0, y: 1, label: 'A'},
+      {x: T0 + DAY, y: 2, label: 'B'},
     ]);
     expect(y['min']).toBe(1);
     expect(y['max']).toBe(3);

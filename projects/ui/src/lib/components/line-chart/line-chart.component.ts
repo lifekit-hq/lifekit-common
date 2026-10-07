@@ -7,12 +7,14 @@ import {
   ElementRef,
   input,
   OnDestroy,
+  output,
   viewChild,
 } from '@angular/core';
 import {
   buildLineChartConfig,
   type ChartDomain,
   type ChartPoint,
+  type ChartScrubPoint,
   type ChartValueFormat,
   type ChartXSpacing,
   resolveLineChartTokens,
@@ -23,6 +25,7 @@ import {Chart} from 'chart.js';
 export type {
   ChartDomain,
   ChartPoint,
+  ChartScrubPoint,
   ChartValueFormat,
   ChartXSpacing,
 } from '@lifekit-hq/charts-core';
@@ -68,6 +71,7 @@ export class LineChartComponent implements AfterViewInit, OnDestroy {
   private chart: Chart | null = null;
   private builtCompact = false;
   private builtXSpacing: ChartXSpacing = 'even';
+  private builtScrubbable = false;
 
   public readonly data = input<ChartPoint[]>([]);
   public readonly label = input<string>('');
@@ -91,6 +95,16 @@ export class LineChartComponent implements AfterViewInit, OnDestroy {
    * burst of points reads as a burst; points without a `time` are then left out. Default `'even'`.
    */
   public readonly xSpacing = input<ChartXSpacing>('even');
+  /**
+   * Opts into scrub-to-read: a crosshair follows a held pointer (a touch, or a hovering mouse) and
+   * `scrub` reports the point under it, so the host's headline number can follow; `scrubEnd`
+   * fires on release. The chart's own tooltip steps aside. Ignored when `compact`.
+   */
+  public readonly scrubbable = input<boolean>(false);
+  /** The point under a held pointer; only while `scrubbable`. */
+  public readonly scrub = output<ChartScrubPoint>();
+  /** The pointer lifted or left the chart: snap the headline back. */
+  public readonly scrubEnd = output<void>();
   protected readonly isEmpty = computed(() => this.data().length === 0);
 
   constructor() {
@@ -99,13 +113,18 @@ export class LineChartComponent implements AfterViewInit, OnDestroy {
       const format = {currency: this.currency(), valueFormat: this.valueFormat()};
       const compact = this.compact();
       const scale = {yDomain: this.yDomain(), xSpacing: this.xSpacing()};
+      const scrubbable = this.scrubbable();
       if (!this.chart) {
         return;
       }
-      if (compact === this.builtCompact && scale.xSpacing === this.builtXSpacing) {
+      if (
+        compact === this.builtCompact &&
+        scale.xSpacing === this.builtXSpacing &&
+        scrubbable === this.builtScrubbable
+      ) {
         updateLineChart(this.chart, points, format, scale);
       } else {
-        // `compact` and `xSpacing` shape the whole chart config, so changing one rebuilds the chart.
+        // `compact`, `xSpacing` and `scrubbable` shape the whole chart config, so changing one rebuilds the chart.
         this.chart.destroy();
         this.buildChart();
       }
@@ -128,6 +147,7 @@ export class LineChartComponent implements AfterViewInit, OnDestroy {
     }
     this.builtCompact = this.compact();
     this.builtXSpacing = this.xSpacing();
+    this.builtScrubbable = this.scrubbable();
     this.chart = new Chart(
       ctx,
       buildLineChartConfig(
@@ -136,7 +156,13 @@ export class LineChartComponent implements AfterViewInit, OnDestroy {
         this.currency(),
         this.valueFormat(),
         this.compact(),
-        {yDomain: this.yDomain(), xSpacing: this.xSpacing()}
+        {yDomain: this.yDomain(), xSpacing: this.xSpacing()},
+        this.scrubbable()
+          ? {
+              onScrub: point => this.scrub.emit(point),
+              onRelease: () => this.scrubEnd.emit(),
+            }
+          : undefined
       )
     );
   }

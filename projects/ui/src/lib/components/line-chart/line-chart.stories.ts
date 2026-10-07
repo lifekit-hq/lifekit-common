@@ -143,3 +143,12 @@ export const EmptyDark: Story = {
   args: Empty.args,
   globals: {theme: 'dark'},
 };
+
+/**
+ * Opt into scrub-to-read with `scrubbable`: a hovering mouse or a pressed finger gets a crosshair
+ * and `(scrub)` reports the point under it; `(scrubEnd)` fires on release. The chart's own tooltip
+ * steps aside. See "Patterns/Period hero" for the headline wired to it.
+ */
+export const Scrubbable: Story = {
+  args: {data: SAMPLE_DATA, label: 'Net Worth Performance', scrubbable: true},
+};

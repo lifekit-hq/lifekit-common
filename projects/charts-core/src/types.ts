@@ -47,3 +47,42 @@ export interface DonutSegment {
   value: number;
   color?: string;
 }
+
+/** One series' value at a scrubbed point. */
+export interface ChartScrubValue {
+  label: string;
+  value: number;
+}
+
+/** The data point under a held pointer. */
+export interface ChartScrubPoint {
+  /** Index of the point in the drawn data. */
+  index: number;
+  /** The point's label; empty when the data carries none. */
+  label: string;
+  /** The x value: the category label, or the epoch-ms `time` on a time-spaced chart. */
+  x: string | number;
+  /** The headline value: the stacked total for a stacked chart, otherwise the first series' value. */
+  y: number;
+  /** Sum of every visible series' value at the point. */
+  total: number;
+  /** Each visible series' value at the point, in dataset order. */
+  values: ChartScrubValue[];
+}
+
+/** What a chart tells its host while a pointer reads it. */
+export interface ChartScrubHandlers {
+  /**
+   * The held pointer moved onto a different point, or the data under it changed (fires once on
+   * touch-down, then on each change).
+   */
+  onScrub(point: ChartScrubPoint): void;
+  /** The pointer lifted or left the chart: the host snaps back to its resting value. */
+  onRelease(): void;
+}
+
+/** A value's change between two points; `percent` is null when the starting value is zero. */
+export interface ChartDelta {
+  change: number;
+  percent: number | null;
+}

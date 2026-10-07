@@ -136,4 +136,53 @@ describe('AreaChartComponent', () => {
       expect(liveChart().data.labels).toEqual(['Jan', 'Feb']);
     });
   });
+
+  describe('scrub-to-read', () => {
+    function pointer(type: string, fraction: number): void {
+      const canvas = fixture.nativeElement.querySelector('canvas') as HTMLCanvasElement;
+      const rect = canvas.getBoundingClientRect();
+      canvas.dispatchEvent(
+        new PointerEvent(type, {
+          clientX: rect.left + rect.width * fraction,
+          pointerType: 'mouse',
+          bubbles: true,
+        })
+      );
+    }
+
+    it('is off by default and emits nothing', () => {
+      const scrubs: unknown[] = [];
+      fixture.componentInstance.scrub.subscribe(p => scrubs.push(p));
+      fixture.componentRef.setInput('series', SAMPLE);
+      fixture.detectChanges();
+      pointer('pointermove', 1);
+      expect(scrubs).toEqual([]);
+    });
+
+    it('emits the stacked total and every band, then scrubEnd on release', () => {
+      const scrubs: {index: number; y: number; values: {label: string}[]}[] = [];
+      let ends = 0;
+      fixture.componentInstance.scrub.subscribe(p => scrubs.push(p));
+      fixture.componentInstance.scrubEnd.subscribe(() => ends++);
+      fixture.componentRef.setInput('series', SAMPLE);
+      fixture.componentRef.setInput('scrubbable', true);
+      fixture.detectChanges();
+      pointer('pointermove', 1);
+      pointer('pointerleave', 0);
+      expect(scrubs).toHaveLength(1);
+      expect(scrubs[0].index).toBe(1);
+      expect(scrubs[0].y).toBe(175);
+      expect(scrubs[0].values.map(v => v.label)).toEqual(['Banking', 'Crypto']);
+      expect(ends).toBe(1);
+    });
+
+    it('keeps updating data after scrubbing is switched on', () => {
+      fixture.componentRef.setInput('series', SAMPLE);
+      fixture.componentRef.setInput('scrubbable', true);
+      fixture.detectChanges();
+      fixture.componentRef.setInput('stacked', false);
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelector('canvas')).toBeTruthy();
+    });
+  });
 });
