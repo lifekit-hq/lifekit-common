@@ -42,13 +42,18 @@ describe('CardComponent', () => {
     }
   });
 
-  it('adds the shadow only when elevated', () => {
+  it('holds the card by its border by default, with no shadow', () => {
     fixture.detectChanges();
-    expect(inner()?.className).not.toContain('shadow-cmn-md');
+    expect(inner()?.classList).toContain('border-border-default');
+    expect(inner()?.classList).not.toContain('shadow-cmn-md');
+  });
 
+  it('swaps the border for the shadow when elevated', () => {
     fixture.componentRef.setInput('elevated', true);
     fixture.detectChanges();
-    expect(inner()?.className).toContain('shadow-cmn-md');
+    expect(inner()?.classList).toContain('shadow-cmn-md');
+    expect(inner()?.classList).toContain('border-transparent');
+    expect(inner()?.classList).not.toContain('border-border-default');
   });
 
   it('turns the host and the shell into a clipping flex column in fill mode', () => {

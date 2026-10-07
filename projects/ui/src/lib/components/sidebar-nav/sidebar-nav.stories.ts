@@ -31,3 +31,11 @@ export const CustomBrand: Story = {
 export const ActiveAccounts: Story = {
   args: {items: NAV_ITEMS, activeRoute: '/accounts'},
 };
+
+/** Collapsing snaps straight to the rail: the width does not tween. */
+export const Collapsed: Story = {
+  args: {items: NAV_ITEMS, activeRoute: '/dashboard'},
+  play: ({canvasElement}) => {
+    canvasElement.querySelector<HTMLButtonElement>('button[aria-expanded="true"]')?.click();
+  },
+};

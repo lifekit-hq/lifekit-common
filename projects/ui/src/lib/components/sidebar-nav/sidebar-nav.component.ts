@@ -18,7 +18,7 @@ export interface NavItem {
   template: `
     <aside
       [ngClass]="[
-        'flex flex-col h-full border-r border-border-default bg-surface-card transition-[width] duration-200',
+        'flex flex-col h-full border-r border-border-default bg-surface-card',
         collapsed() ? 'w-16' : 'w-60',
       ]"
     >

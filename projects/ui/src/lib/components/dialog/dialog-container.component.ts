@@ -6,7 +6,7 @@ import {type CmnDialogConfig, type CmnDialogSize} from './dialog-config';
 
 const SHELL_BASE =
   'cmn-dialog-shell relative flex flex-col bg-surface-card text-text-primary ' +
-  'rounded-cmn-lg border border-border-default shadow-cmn-lg overflow-hidden ' +
+  'rounded-cmn-lg shadow-cmn-lg overflow-hidden ' +
   'max-h-[90vh] w-full';
 
 // Min-widths are gated behind the first breakpoint where they fit inside the

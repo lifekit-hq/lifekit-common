@@ -25,6 +25,7 @@ const PADDING_CLASSES: Record<CardPadding, string> = {
 })
 export class CardComponent {
   public readonly padding = input<CardPadding>('md');
+  /** Swaps the border for a shadow (a card never carries both). */
   public readonly elevated = input<boolean>(false);
   /**
    * Fill mode: the card stretches to its flex parent and clips overflow, so a
@@ -35,11 +36,13 @@ export class CardComponent {
   public readonly fill = input<boolean>(false);
 
   public readonly classes = computed(() => {
+    // One container rule: a card is held by its border or by its shadow, never both. The
+    // elevated card keeps a transparent border so both variants occupy the same box.
     const parts: string[] = [
       'bg-surface-card',
       'rounded-cmn-md',
       'border',
-      'border-border-default',
+      this.elevated() ? 'border-transparent' : 'border-border-default',
     ];
     const paddingClass = PADDING_CLASSES[this.padding()];
     if (paddingClass) {

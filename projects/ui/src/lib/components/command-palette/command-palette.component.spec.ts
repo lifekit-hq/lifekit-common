@@ -63,6 +63,14 @@ describe('CommandPaletteComponent', () => {
     fixture.detectChanges();
   }
 
+  it('frames the panel with a shadow only and leaves the backdrop unblurred', () => {
+    const host = fixture.nativeElement as HTMLElement;
+    const panel = host.querySelector<HTMLElement>('.cmn-palette-panel');
+    expect(panel?.classList).toContain('shadow-cmn-md');
+    expect(panel?.classList).not.toContain('border');
+    expect(host.querySelector('.cmn-palette-backdrop')?.className).not.toContain('backdrop-blur');
+  });
+
   it('lists every item grouped by its group', () => {
     expect(rows()).toHaveLength(3);
     expect(groupHeadings()).toEqual(['Pages', 'Actions']);
