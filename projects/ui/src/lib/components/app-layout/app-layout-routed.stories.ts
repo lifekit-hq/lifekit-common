@@ -88,6 +88,11 @@ const meta: Meta<RoutedShellComponent> = {
   title: 'Conformance/Routed App Layout',
   component: RoutedShellComponent,
   parameters: {layout: 'fullscreen'},
+};
+
+export default meta;
+
+export const Routed: StoryObj<RoutedShellComponent> = {
   decorators: [
     applicationConfig({
       providers: [
@@ -107,10 +112,6 @@ const meta: Meta<RoutedShellComponent> = {
     }),
   ],
 };
-
-export default meta;
-
-export const Routed: StoryObj<RoutedShellComponent> = {};
 
 @Component({
   selector: 'cmn-routed-more-shell',
