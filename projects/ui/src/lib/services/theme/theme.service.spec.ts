@@ -283,6 +283,22 @@ describe('ThemeService', () => {
     expect(service.getStoredAccent()).toBe('#4f46e5');
   });
 
+  it('runs the accent ramp between the scale-end tokens when they resolve', () => {
+    const root = document.documentElement;
+    const {service} = build();
+    service.setAccent('#4f46e5');
+    const shipped = root.style.getPropertyValue('--cmn-accent-100');
+
+    root.style.setProperty('--color-accent-scale-light', '#000000');
+    root.style.setProperty('--color-accent-scale-dark', '#000000');
+    service.setAccent('#4f46e5');
+    const overridden = root.style.getPropertyValue('--cmn-accent-100');
+    root.style.removeProperty('--color-accent-scale-light');
+    root.style.removeProperty('--color-accent-scale-dark');
+
+    expect(overridden).not.toBe(shipped);
+  });
+
   it('publishes the active accent', () => {
     const {service} = build();
     const seen: (string | null)[] = [];

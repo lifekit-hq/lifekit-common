@@ -11,11 +11,19 @@ import {
 } from 'chart.js';
 
 import {type BarSeries, type BarValueFormat} from './types';
-import {chartFontFamily, cssVar, fontFamily, xTickLimitPlugin} from './utils';
+import {
+  CHART_FONT_SIZE,
+  chartFontFamily,
+  cssVar,
+  fontFamily,
+  SERIES,
+  seriesColor,
+  xTickLimitPlugin,
+} from './utils';
 
 Chart.register(CategoryScale, LinearScale, BarController, BarElement, Tooltip, Legend);
 
-const DEFAULT_SERIES_COLORS = ['#10b981', '#ef4444', '#175a6d', '#f59e0b', '#64748b'];
+const DEFAULT_SERIES_STEPS = [SERIES.green, SERIES.red, SERIES.accent, SERIES.amber, SERIES.slate];
 const BAR_RADIUS = 4;
 
 const X_TICK_LIMIT = 12;
@@ -57,7 +65,7 @@ export function buildBarDatasets(series: BarSeries[]): ChartDataset<'bar'>[] {
   return series.map((s, i) => ({
     label: s.label,
     data: s.points.map(p => p.value),
-    backgroundColor: s.color ?? DEFAULT_SERIES_COLORS[i % DEFAULT_SERIES_COLORS.length],
+    backgroundColor: s.color ?? seriesColor(DEFAULT_SERIES_STEPS[i % DEFAULT_SERIES_STEPS.length]),
     borderRadius: BAR_RADIUS,
     borderSkipped: false,
     maxBarThickness: 40,
@@ -93,7 +101,7 @@ export function buildBarChartConfig(
             boxWidth: 10,
             boxHeight: 10,
             usePointStyle: true,
-            font: {family: fontFamily(tokens), size: 11},
+            font: {family: fontFamily(tokens), size: CHART_FONT_SIZE},
           },
         },
         tooltip: {
@@ -110,7 +118,7 @@ export function buildBarChartConfig(
           border: {display: false},
           ticks: {
             color: tokens.textSecondary,
-            font: {family: fontFamily(tokens), size: 11},
+            font: {family: fontFamily(tokens), size: CHART_FONT_SIZE},
             maxRotation: 0,
             autoSkip: true,
             maxTicksLimit: X_TICK_LIMIT,
@@ -122,7 +130,7 @@ export function buildBarChartConfig(
           border: {display: false},
           ticks: {
             color: tokens.textSecondary,
-            font: {family: fontFamily(tokens), size: 11},
+            font: {family: fontFamily(tokens), size: CHART_FONT_SIZE},
             callback: val => barFormat(val as number, valueFormat, currency, true),
           },
         },

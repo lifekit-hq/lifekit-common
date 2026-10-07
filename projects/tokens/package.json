@@ -31,7 +31,10 @@
     "base.css",
     "tailwind/",
     "brand/",
-    "bin/"
+    "drift/",
+    "bin/",
+    "LICENSES/",
+    "NOTICE.md"
   ],
   "scripts": {
     "prepack": "node scripts/build-brand.mjs"

@@ -20,7 +20,8 @@
     "smoke:tokens": "node -e \"const p=require('./projects/tokens/tailwind/preset.cjs'); if(!p.theme) throw new Error('preset has no theme'); require('fs').accessSync('./projects/tokens/theme.css'); console.log('tokens ok')\"",
     "consumer-type-check": "bash fixtures/consumer-type-check/run.sh",
     "prepare": "husky",
-    "design:scan": "node scripts/design-scan.mjs"
+    "design:scan": "node scripts/design-scan.mjs",
+    "check:drift": "node projects/tokens/bin/lifekit-chrome-check.mjs drift projects"
   },
   "workspaces": [
     "projects/*"

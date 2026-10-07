@@ -58,7 +58,7 @@ export class LkAccountMenu extends LitElement {
       width: 2.25rem;
       height: 2.25rem;
       padding: 0;
-      border: 1px solid var(--color-border-default, #e4e7ec);
+      border: 1px solid var(--color-border-default, #d9e0e3);
       border-radius: 50%;
       background: var(--color-accent-subtle, #e3f1f4);
       color: var(--color-accent-default, #175a6d);
@@ -76,7 +76,7 @@ export class LkAccountMenu extends LitElement {
 
     button:focus-visible,
     a:focus-visible {
-      outline: 2px solid var(--color-border-focus, #175a6d);
+      outline: 2px solid var(--color-border-focus, #1d6f85);
       outline-offset: 2px;
     }
 
@@ -88,7 +88,7 @@ export class LkAccountMenu extends LitElement {
       min-width: 14rem;
       max-width: 20rem;
       padding: var(--space-3, 0.75rem);
-      border: 1px solid var(--color-border-default, #e4e7ec);
+      border: 1px solid var(--color-border-default, #d9e0e3);
       border-radius: var(--radius-lg);
       background: var(--color-surface-card, #ffffff);
       color: var(--color-text-primary, #0f1a1f);
@@ -111,7 +111,7 @@ export class LkAccountMenu extends LitElement {
       display: block;
       margin-top: var(--space-3, 0.75rem);
       padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
-      border: 1px solid var(--color-border-default, #e4e7ec);
+      border: 1px solid var(--color-border-default, #d9e0e3);
       border-radius: var(--radius-md);
       color: inherit;
       text-align: center;
@@ -119,7 +119,7 @@ export class LkAccountMenu extends LitElement {
     }
 
     a.sign-out:hover {
-      background: var(--color-surface-raised, #eef0f4);
+      background: var(--color-surface-raised, #e8edef);
     }
   `;
 

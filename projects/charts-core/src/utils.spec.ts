@@ -1,4 +1,4 @@
-import {describe, expect, it, vi} from 'vitest';
+import {afterEach, describe, expect, it, vi} from 'vitest';
 
 import {
   chartFontFamily,
@@ -9,6 +9,7 @@ import {
   NARROW_CHART_WIDTH,
   percent,
   plainNumber,
+  seriesColor,
   valueFormatter,
   xTickLimit,
 } from './utils';
@@ -139,5 +140,20 @@ describe('valueFormatter', () => {
   it('returns a consumer formatter untouched', () => {
     const custom = (v: number): string => `#${v}`;
     expect(valueFormatter(custom, 'USD')).toBe(custom);
+  });
+});
+
+describe('seriesColor', () => {
+  afterEach(() => {
+    document.documentElement.style.removeProperty('--color-chart-series-2');
+  });
+
+  it('falls back to the shipped colour when the token is unavailable', () => {
+    expect(seriesColor(2)).toBe('#f59e0b');
+  });
+
+  it('reads the series token when it resolves', () => {
+    document.documentElement.style.setProperty('--color-chart-series-2', '#112233');
+    expect(seriesColor(2)).toBe('#112233');
   });
 });

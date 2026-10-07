@@ -20,6 +20,8 @@ jobs:
         run: npm run check-strategy
       - run: npm run smoke:tokens
       - run: npm run lint
+      - name: Design drift (zero tolerance)
+        run: npm run check:drift
       - run: npm run format:check
       - run: npm run test
       - run: npm run build

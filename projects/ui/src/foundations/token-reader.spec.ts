@@ -6,7 +6,7 @@ describe('token-reader', () => {
   beforeEach(() => {
     style = document.createElement('style');
     style.textContent = `
-      :root { --color-test-a: #102030; --color-test-b: var(--color-test-a); --not-a-color: 1px; }
+      :root, [data-theme='light'] { --color-test-a: #102030; --color-test-b: var(--color-test-a); --not-a-color: 1px; }
       [data-theme='dark'] { --color-test-a: #f0e0d0; }
       @media (min-width: 1px) { :root { --color-test-media: #ffffff; } }
     `;

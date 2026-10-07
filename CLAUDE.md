@@ -22,6 +22,7 @@ npm run test             # Vitest via @angular/build:unit-test (ci config = cove
 npm run lint             # ESLint (angular-eslint) across all projects
 npm run build            # brand asset build (tokens), then ng-packagr: charts-core, elements, ui, core
 npm run build-storybook  # static catalog (deployed to Pages on merge)
+npm run check:drift      # static design-drift scan of source (font/colour/size/radius/root-size/transition literals outside tokens); CI fails on any finding, no baseline — rules in docs/BROWSER-CHROME.md
 npm run design:scan      # impeccable detector over source (+ `-- --storybook <url>` for a built catalog); report-only, compares to docs/design-baseline.json
 ```
 

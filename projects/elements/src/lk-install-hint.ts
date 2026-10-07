@@ -112,8 +112,8 @@ export class LkInstallHint extends LitElement {
 
     button.install {
       border-color: transparent;
-      background: var(--color-primary, #175a6d);
-      color: var(--color-on-primary, #ffffff);
+      background: var(--color-accent-default, #175a6d);
+      color: var(--color-text-inverse, #ffffff);
       font-weight: 600;
     }
   `;

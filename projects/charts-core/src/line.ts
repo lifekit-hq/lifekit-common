@@ -12,7 +12,7 @@ import {
 } from 'chart.js';
 
 import {type ChartPoint, type ChartValueFormat} from './types';
-import {chartFontFamily, cssVar, fontFamily, valueFormatter} from './utils';
+import {CHART_FONT_SIZE, chartFontFamily, cssVar, fontFamily, valueFormatter} from './utils';
 
 Chart.register(
   CategoryScale,
@@ -84,13 +84,16 @@ export function buildLineChartConfig(
       scales: {
         x: {
           grid: {color: tokens.borderDefault},
-          ticks: {color: tokens.textSecondary, font: {family: fontFamily(tokens), size: 11}},
+          ticks: {
+            color: tokens.textSecondary,
+            font: {family: fontFamily(tokens), size: CHART_FONT_SIZE},
+          },
         },
         y: {
           grid: {color: tokens.borderDefault},
           ticks: {
             color: tokens.textSecondary,
-            font: {family: fontFamily(tokens), size: 11},
+            font: {family: fontFamily(tokens), size: CHART_FONT_SIZE},
             callback: val => format(val as number, true),
           },
         },
