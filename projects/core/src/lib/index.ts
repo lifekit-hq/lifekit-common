@@ -12,7 +12,4 @@ export * from './services/api-base-url.token';
 
 // Store features
 export * from './store/with-async-status.feature';
-export * from './store/with-filters.feature';
-export * from './store/with-pagination.feature';
-export * from './store/with-sorting.feature';
 export * from './store/with-url-sync.feature';

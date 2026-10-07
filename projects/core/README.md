@@ -1,7 +1,7 @@
 # @lifekit-hq/core
 
-Angular signal-store features and helpers for the lifekit apps (`withAsyncStatus`, `withFilters`,
-`withPagination`, `withSorting`, `withUrlSync`, `ApiService`, …), plus the framework-free
+Angular signal-store features and helpers for the lifekit apps (`withAsyncStatus`,
+`withUrlSync`, `ApiService`, …), plus the framework-free
 `@lifekit-hq/core/format` and the `@lifekit-hq/core/pwa` entry points.
 
 ## `withUrlSync`
