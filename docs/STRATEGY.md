@@ -116,7 +116,6 @@ Counts are a point-in-time measurement; re-measure before relying on them for a 
 | disclosure-row        | fs 2 · dash 0                                                                   | templated   | keep-own        | Named `ng-content` slots (status/actions) over native `<details>`; institution+amount is a finance-domain pattern; reasonable Lit target later once slot API is stable                                        |
 | donut-chart           | fs 3 · dash 0                                                                   | simple-leaf | element-rewrite | charts-core Lit path; chrome/legend variants map to attributes and slots                                                                                                                                      |
 | drawer                | fs 0 · dash 0                                                                   | templated   | keep-own        | CDK portal + entering/open/closing state machine + `beforeClose$` subscription; a11y focus management via CDK; see §"Expensive components"                                                                    |
-| editable-field        | fs 0 · dash 0                                                                   | interactive | keep-own        | `model()` two-way binding; inline form with Enter/Escape keyboard UX; Angular forms integration required                                                                                                      |
 | empty-state           | fs 20 · dash 3                                                                  | simple-leaf | element-rewrite | Icon + text + CTA slot; purely presentational                                                                                                                                                                 |
 | form-field            | fs 26 · dash 0                                                                  | templated   | keep-own        | `ControlValueAccessor` integration with `ReactiveFormsModule`; `contentChild(InputComponent)`; no Lit forms pattern decided                                                                                   |
 | google-sign-in-button | fs 2 · dash 0                                                                   | simple-leaf | keep-own        | Wraps Google Accounts library via `NgZone.runOutsideAngular`; framework-glue concerns outweigh conversion cost                                                                                                |
@@ -146,7 +145,7 @@ Counts are a point-in-time measurement; re-measure before relying on them for a 
 | top-bar               | fs 0 · dash 0 (composed by `app-layout`)                                        | interactive | keep-own        | Uses `MenuComponent`; event orchestration (back/page actions/search/theme/avatar); app-shell concern                                                                                                          |
 | usage-chip            | new (added for usage meter chip, #37); fs 0 · dash 0                            | simple-leaf | element-rewrite | `role="meter"` pill with token-coloured fill and readout; pure token CSS, no framework logic                                                                                                                  |
 
-**Summary:** 28 keep-own · 20 element-rewrite · 1 wrap-base · 0 delete
+**Summary:** 27 keep-own · 20 element-rewrite · 1 wrap-base · 0 delete
 
 ---
 
@@ -355,8 +354,8 @@ Every data-entry flow depends on these. Polish them before touching any page tha
 ### Tier 6 — domain-specific
 
 `disclosure-row` · `list-item-row` · `stat-card` · `google-sign-in-button` ·
-`editable-field` · `selectable-card` · `institution-avatar` · `month-stepper` · `chat`
+`selectable-card` · `institution-avatar` · `month-stepper` · `chat`
 
 Within each tier, order is the author's call. `selectable-card` has an
-`element-rewrite` decision and `editable-field` is `keep-own`, but both carry `interactive`
-complexity — they are included in Tier 6 as coordination reminders, not as look-and-feel targets.
+`element-rewrite` decision but carries `interactive` complexity — it is included in Tier 6 as a
+coordination reminder, not as a look-and-feel target.

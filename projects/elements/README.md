@@ -231,51 +231,6 @@ load, so late-mounting hints still work). Dismissal is remembered in `localStora
 
 Event: `lk-install-hint-dismiss` — the user dismissed the hint.
 
-### `<lk-account-menu>`
-
-Small "who is signed in" menu shared by every lifekit app: an avatar (initials when there is no
-picture) that opens a panel with the name, the email and one **Sign out** link. The element does
-not fetch claims or talk to the identity provider; the host passes the claims in and decides the
-sign-out URL. Only absolute `http(s)` and root-relative URLs are followed.
-
-| Property     | Attribute      | Type     | Default | Description                                                                    |
-| ------------ | -------------- | -------- | ------- | ------------------------------------------------------------------------------ |
-| `name`       | `name`         | `string` | `''`    | Display name from the `name` claim                                             |
-| `email`      | `email`        | `string` | `''`    | Email from the `email` claim                                                   |
-| `picture`    | `picture`      | `string` | `''`    | Optional avatar URL (`picture` claim); initials when empty or it fails to load |
-| `signOutUrl` | `sign-out-url` | `string` | `''`    | Where Sign out navigates; no Sign out link is shown when empty                 |
-
-Keyboard: Enter/Space on the avatar opens the panel and moves focus to Sign out; Escape closes it
-and returns focus to the avatar; tabbing out or clicking elsewhere closes it. Colours come from
-the `@lifekit-hq/tokens` light and dark custom properties.
-
-```html
-<lk-account-menu
-  name="Ada Lovelace"
-  email="ada@example.com"
-  sign-out-url="/oauth2/sign_out?rd=..."
-></lk-account-menu>
-```
-
-**Sign-out URL, apps behind the oauth2-proxy gate.** Sign out has to end two sessions: the gate's
-oauth2-proxy cookie and the Logto session. Point `sign-out-url` at the gate's sign-out endpoint
-and pass Logto's end-session URL, URL-encoded, as `rd`:
-
-```
-/oauth2/sign_out?rd=<encoded: {issuer}/oidc/session/end?client_id={gate client id}&post_logout_redirect_uri={encoded app root}>
-```
-
-For the tailnet gate the issuer is `https://lifekit-vps.tail1cb676.ts.net:3001/oidc` (so the end-session URL is
-`https://lifekit-vps.tail1cb676.ts.net:3001/oidc/session/end`) and the post-logout landing is the
-app's own root (for example `https://lifekit-vps.tail1cb676.ts.net:18790/`), which the gate answers
-with the sign-in page. The `client_id` is the gate's Logto application, and the `post_logout_redirect_uri` must be
-one of that application's registered post-logout URIs. See "Tailnet sign-in gate" in the
-lifekit-stack runbook for the gate itself.
-
-**Sign-out URL, OIDC client apps (finance-sentry).** Use the app's own sign-out route, which ends
-its session and then redirects to Logto's `/oidc/session/end` with its own `client_id` and a
-registered `post_logout_redirect_uri`.
-
 ### `<lk-theme-picker>`
 
 The colour section of Settings > Appearance: the app's own colour, the preset colours, a custom
