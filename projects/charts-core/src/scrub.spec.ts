@@ -243,6 +243,37 @@ describe('scrub on a line chart', () => {
     expect(h.releases).toBe(1);
   });
 
+  it('reports the held point again when new data changes its reading', () => {
+    const h = line();
+    h.fire('pointermove', h.xOf(1));
+    h.chart.data.datasets[0].data = [10, 20, 30, 40, 50];
+    h.chart.data.labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May'];
+    h.chart.update('none');
+    expect(h.scrubs.map(p => [p.index, p.y])).toEqual([
+      [1, 200],
+      [1, 20],
+    ]);
+    expect(h.releases).toBe(0);
+  });
+
+  it('releases when new data leaves no value at the held point', () => {
+    const h = line();
+    h.fire('pointermove', h.xOf(1));
+    h.chart.data.datasets[0].data = [100, null, 150, 180];
+    h.chart.update('none');
+    expect(h.releases).toBe(1);
+  });
+
+  it('releases a held point when destroyed, and nothing otherwise', () => {
+    const idle = line();
+    idle.chart.destroy();
+    expect(idle.releases).toBe(0);
+    const h = line();
+    h.fire('pointermove', h.xOf(1));
+    h.chart.destroy();
+    expect(h.releases).toBe(1);
+  });
+
   it('lets go of the canvas when destroyed', () => {
     const h = line();
     h.chart.destroy();

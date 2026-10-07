@@ -176,8 +176,16 @@ export function scrubPlugin(handlers: ChartScrubHandlers, crosshairColor: string
       detach = attach(chart);
     },
     afterUpdate(chart) {
-      // New data can leave the scrubbed index past the end: snap back rather than read a ghost.
-      if (active !== null && active >= chart.getDatasetMeta(0).data.length) {
+      // New data changes what the held point reads: report it again, or snap back rather than
+      // read a ghost when the index is now past the end.
+      if (active === null) {
+        return;
+      }
+      const point =
+        active < chart.getDatasetMeta(0).data.length ? scrubPointAt(chart, active) : null;
+      if (point) {
+        handlers.onScrub(point);
+      } else {
         release(chart);
       }
     },
@@ -213,7 +221,10 @@ export function scrubPlugin(handlers: ChartScrubHandlers, crosshairColor: string
       detach?.();
       detach = null;
       touchId = null;
-      active = null;
+      if (active !== null) {
+        active = null;
+        handlers.onRelease();
+      }
     },
   };
 }
