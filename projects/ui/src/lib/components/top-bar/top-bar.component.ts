@@ -1,3 +1,4 @@
+import {CdkMenu, CdkMenuItem, CdkMenuTrigger} from '@angular/cdk/menu';
 import {ChangeDetectionStrategy, Component, computed, input, output} from '@angular/core';
 
 import {type PageAction} from '../app-layout/page-chrome';
@@ -21,13 +22,31 @@ const HEADER_BASE_CLASSES =
 const CHROME_BUTTON_CLASSES =
   'flex h-cmn-touch w-cmn-touch shrink-0 items-center justify-center rounded-cmn-md ' +
   'text-text-secondary transition-colors hover:bg-surface-raised hover:text-text-primary ' +
-  'md:h-8 md:w-8';
+  'disabled:opacity-50 md:h-8 md:w-8';
 /**
  * On a 320px phone the fullest bar (back, two actions, search, theme toggle, avatar) leaves the
  * title ~32px, so the theme toggle yields below 360px once a page declares more than one action
  * (title ~76px). It stays in the DOM, hidden, so no control ever shrinks under its touch target.
  */
 const NARROW_HIDDEN_CLASSES = 'max-[359px]:hidden';
+/**
+ * Below 360px a page with more than two actions keeps only its first one inline and moves the rest
+ * into an overflow menu, so back, action, overflow, search and avatar (five targets) leave the same
+ * ~76px title as two actions do. From 360px nothing moves: every action stays inline.
+ */
+const OVERFLOW_HIDDEN_CLASSES = 'max-[359px]:hidden';
+const OVERFLOW_ONLY_CLASSES = 'min-[360px]:hidden';
+const OVERFLOW_THRESHOLD = 2;
+const OVERFLOW_INLINE_COUNT = 1;
+/** The panel clears the side safe areas (landscape notch) and never outgrows a 320px screen. */
+const OVERFLOW_PANEL_CLASSES =
+  'min-w-48 max-w-[calc(100vw-2rem-env(safe-area-inset-left)-env(safe-area-inset-right))] ' +
+  'overflow-hidden rounded-cmn-lg bg-surface-card py-cmn-2 shadow-cmn-lg ' +
+  'mr-[env(safe-area-inset-right)]';
+const OVERFLOW_ITEM_CLASSES =
+  'flex w-full items-center gap-cmn-3 px-cmn-4 py-cmn-2 text-left text-cmn-sm text-text-primary ' +
+  'transition-colors hover:bg-surface-raised focus:bg-surface-raised focus:outline-none ' +
+  'min-h-cmn-touch disabled:opacity-50 aria-disabled:opacity-50';
 /** The avatar's disc stays 32px inside its touch-sized, invisible button. */
 const AVATAR_TRIGGER_CLASSES =
   'group h-cmn-touch w-cmn-touch shrink-0 rounded-cmn-full md:h-8 md:w-8';
@@ -55,7 +74,7 @@ const HEADER_OVERLAY_CLASSES =
 
 @Component({
   selector: 'cmn-top-bar',
-  imports: [IconComponent, MenuComponent],
+  imports: [CdkMenu, CdkMenuItem, CdkMenuTrigger, IconComponent, MenuComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   // Chrome is for pressing: a long press on a label selects nothing
   host: {class: 'select-none'},
@@ -94,16 +113,47 @@ const HEADER_OVERLAY_CLASSES =
       <div class="flex-1"></div>
 
       <!-- Page actions, declared by the page in route data -->
-      @for (action of actions(); track action.id) {
+      @for (action of actions(); track action.id; let i = $index) {
         <button
-          [class]="chromeButtonClasses"
+          [class]="inlineActionClasses(i)"
           [attr.aria-label]="action.label"
           [title]="action.label"
+          [disabled]="action.disabled"
           (click)="actionClick.emit(action)"
           type="button"
         >
           <cmn-icon [name]="action.icon" size="sm" />
         </button>
+      }
+
+      <!-- Overflow: the actions that no longer fit inline below 360px -->
+      @if (overflowActions().length) {
+        <button
+          [class]="overflowTriggerClasses"
+          [cdkMenuTriggerFor]="overflowMenu"
+          type="button"
+          aria-label="More actions"
+          title="More actions"
+          data-overflow-trigger
+        >
+          <cmn-icon name="Ellipsis" size="sm" />
+        </button>
+        <ng-template #overflowMenu>
+          <div [class]="overflowPanelClasses" cdkMenu aria-label="More actions" data-overflow-menu>
+            @for (action of overflowActions(); track action.id) {
+              <button
+                [class]="overflowItemClasses"
+                [cdkMenuItemDisabled]="!!action.disabled"
+                (cdkMenuItemTriggered)="actionClick.emit(action)"
+                cdkMenuItem
+                type="button"
+              >
+                <cmn-icon [name]="action.icon" size="sm" aria-hidden="true" />
+                <span>{{ action.label }}</span>
+              </button>
+            }
+          </div>
+        </ng-template>
       }
 
       <!-- Search trigger: icon-only below md -->
@@ -181,6 +231,13 @@ export class TopBarComponent {
       ? `${CHROME_BUTTON_CLASSES} ${NARROW_HIDDEN_CLASSES}`
       : CHROME_BUTTON_CLASSES
   );
+  /** The actions behind the overflow button: all but the first once a page declares over two. */
+  protected readonly overflowActions = computed<PageAction[]>(() =>
+    this.actions().length > OVERFLOW_THRESHOLD ? this.actions().slice(OVERFLOW_INLINE_COUNT) : []
+  );
+  protected readonly overflowTriggerClasses = `${CHROME_BUTTON_CLASSES} ${OVERFLOW_ONLY_CLASSES}`;
+  protected readonly overflowPanelClasses = OVERFLOW_PANEL_CLASSES;
+  protected readonly overflowItemClasses = OVERFLOW_ITEM_CLASSES;
   protected readonly backButtonClasses = BACK_BUTTON_CLASSES;
   protected readonly chromeButtonClasses = CHROME_BUTTON_CLASSES;
   protected readonly avatarTriggerClasses = AVATAR_TRIGGER_CLASSES;
@@ -188,6 +245,12 @@ export class TopBarComponent {
   protected readonly keyHintClasses = KEY_HINT_CLASSES;
   protected readonly inlineTitleClasses = INLINE_TITLE_CLASSES;
   protected readonly inlineLabelClasses = INLINE_LABEL_CLASSES;
+
+  protected inlineActionClasses(index: number): string {
+    return this.overflowActions().length > 0 && index >= OVERFLOW_INLINE_COUNT
+      ? `${CHROME_BUTTON_CLASSES} ${OVERFLOW_HIDDEN_CLASSES}`
+      : CHROME_BUTTON_CLASSES;
+  }
 
   public avatarInitial(): string {
     const label = this.avatarLabel().trim();

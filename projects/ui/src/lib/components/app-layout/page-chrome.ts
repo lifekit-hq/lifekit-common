@@ -11,6 +11,8 @@ export interface PageAction {
   icon: IconName;
   /** Navigates here when pressed, resolved like `parent` (absolute, or relative to the page). */
   route?: string;
+  /** Greys the control out and ignores presses, inline and in the narrow-phone overflow menu. */
+  disabled?: boolean;
 }
 
 /**
