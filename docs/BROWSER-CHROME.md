@@ -16,6 +16,9 @@ Everything comes from `@lifekit-hq/tokens`:
 | Vite plugin                | `@lifekit-hq/tokens/brand/vite`                                                        |
 | IBM Plex Sans / Mono       | `@lifekit-hq/tokens/fonts.css`                                                         |
 
+This page covers what the browser shows around the app. How the app itself behaves on a phone
+(top bar, back, tabs, sheets, states) is the [phone app contract](PHONE-CONTRACT.md).
+
 Apps never commit copies of icon files or colours. They import the package and add the head lines
 below. A mark or colour change then ships as a lifekit-common release and reaches every app on its
 next build.
