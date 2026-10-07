@@ -1,6 +1,6 @@
 /**
  * @lifekit-hq/tokens/engine: one seed colour in, the whole `--color-*` palette out. Pure and
- * zero-dependency, for Node tooling and the browser alike. See README.md, "Seed engine".
+ * zero-dependency, for Node tooling and the browser alike. See README.md, the `engine` entry.
  */
 export {
   contrastRatio,

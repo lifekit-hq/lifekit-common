@@ -23,8 +23,8 @@ Design tokens for the lifekit ecosystem, framework-agnostic.
 - `engine`: the seed engine, plain zero-dependency ES modules with types
   (`@lifekit-hq/tokens/engine`). `derive({seed, intensity, mode, contrast})` turns one colour into
   the whole `--color-*` palette, every pair solved to its WCAG floor. It also exports the app
-  seeds, the picker presets and the per-device storage helpers that `ThemeService.setSeed()`,
-  `<lk-theme-picker>` and the pre-paint script share. What each role is for and where the accent
+  seeds, the picker presets (used by `<lk-theme-picker>`) and the per-device storage helpers that
+  `ThemeService.setSeed()` and the pre-paint script share. What each role is for and where the accent
   may appear: [`docs/design/patterns.md`](../../docs/design/patterns.md#colour).
 - `seeds/<app>.css`: each app's palette (`fs`, `lk`, `dc`) for light, dark and
   `prefers-contrast: more`, generated from the engine by `scripts/build-seeds.mjs`
