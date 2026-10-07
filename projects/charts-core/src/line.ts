@@ -12,14 +12,7 @@ import {
 } from 'chart.js';
 
 import {type ChartPoint, type ChartValueFormat} from './types';
-import {
-  CHART_FONT_SIZE,
-  chartFontFamily,
-  cssVar,
-  fontFamily,
-  prefersReducedMotion,
-  valueFormatter,
-} from './utils';
+import {CHART_FONT_SIZE, chartFontFamily, cssVar, fontFamily, valueFormatter} from './utils';
 
 /** Inset (px) that keeps a compact chart's 2px stroke from being clipped at the canvas edge. */
 const COMPACT_PADDING = 2;
@@ -66,8 +59,7 @@ function buildLineDataset(points: ChartPoint[], accent: string): ChartDataset<'l
 
 /**
  * `compact` renders a sparkline: no axes, ticks, gridlines or tooltip, no animation, and it
- * fills whatever box its canvas is given. Every chart (compact or not) skips animation under
- * `prefers-reduced-motion: reduce`.
+ * fills whatever box its canvas is given.
  */
 export function buildLineChartConfig(
   points: ChartPoint[],
@@ -86,10 +78,10 @@ export function buildLineChartConfig(
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      // Compact charts never animate; every chart skips it under prefers-reduced-motion.
-      ...(compact || prefersReducedMotion() ? {animation: false as const} : {}),
-      // A compact chart is a still glyph: no hover, no tooltip.
-      ...(compact ? {events: [], layout: {padding: COMPACT_PADDING}} : {}),
+      // A compact chart is a still glyph: no animation, no hover, no tooltip.
+      ...(compact
+        ? {animation: false as const, events: [], layout: {padding: COMPACT_PADDING}}
+        : {}),
       interaction: {mode: 'index', intersect: false},
       plugins: {
         legend: {display: false},

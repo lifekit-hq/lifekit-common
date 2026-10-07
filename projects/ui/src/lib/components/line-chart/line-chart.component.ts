@@ -38,7 +38,12 @@ export type {ChartPoint, ChartValueFormat} from '@lifekit-hq/charts-core';
         </span>
       }
       <div [class]="compact() ? 'relative h-full min-h-8' : 'relative h-48'">
-        <canvas #chartCanvas [class.invisible]="isEmpty()"></canvas>
+        <canvas
+          #chartCanvas
+          [class.invisible]="isEmpty()"
+          [class.absolute]="compact()"
+          [class.inset-0]="compact()"
+        ></canvas>
         @if (isEmpty() && !compact()) {
           <p
             class="absolute inset-0 flex items-center justify-center text-center text-cmn-sm text-text-secondary"

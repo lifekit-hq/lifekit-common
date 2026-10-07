@@ -83,13 +83,10 @@ describe('LkLineChart', () => {
         chart: {options: {animation: unknown; scales: Record<string, {display: boolean}>}} | null;
       }
     ).chart;
-    if (!chart) {
-      expect(chart).toBeNull();
-      return;
-    }
-    expect(chart.options.animation).toBe(false);
-    expect(chart.options.scales['x'].display).toBe(false);
-    expect(chart.options.scales['y'].display).toBe(false);
+    expect(chart).toBeTruthy();
+    expect(chart?.options.animation).toBe(false);
+    expect(chart?.options.scales['x'].display).toBe(false);
+    expect(chart?.options.scales['y'].display).toBe(false);
   });
 
   it('defaults points to empty array', () => {

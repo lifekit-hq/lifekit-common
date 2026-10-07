@@ -53,14 +53,6 @@ export function fontFamily(tokens: {fontFamily?: string}): string {
   return tokens.fontFamily ?? FALLBACK_FONT_FAMILY;
 }
 
-/** True when the user asked the OS/browser to cut non-essential motion (`prefers-reduced-motion: reduce`). */
-export function prefersReducedMotion(): boolean {
-  return (
-    typeof window !== 'undefined' &&
-    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true
-  );
-}
-
 /** True when the series holds nothing to draw (no points at all). */
 export function isSeriesEmpty(series: readonly {points: readonly unknown[]}[]): boolean {
   return series.every(s => s.points.length === 0);

@@ -1,5 +1,5 @@
 import {type Chart} from 'chart.js';
-import {afterEach, describe, expect, it, vi} from 'vitest';
+import {describe, expect, it, vi} from 'vitest';
 
 import {buildLineChartConfig, updateLineChart} from './line';
 import {type ChartPoint} from './types';
@@ -104,17 +104,7 @@ describe('buildLineChartConfig value format', () => {
   });
 });
 
-function stubReducedMotion(reduce: boolean): void {
-  vi.stubGlobal('matchMedia', (query: string) => ({
-    matches: reduce && query === '(prefers-reduced-motion: reduce)',
-  }));
-}
-
 describe('buildLineChartConfig compact', () => {
-  afterEach(() => {
-    vi.unstubAllGlobals();
-  });
-
   it('hides both axes, and with them the ticks and gridlines', () => {
     const scales = buildLineChartConfig(POINTS, TOKENS, 'USD', 'currency', true).options?.scales;
     expect(scales?.['x']?.display).toBe(false);
@@ -130,7 +120,6 @@ describe('buildLineChartConfig compact', () => {
   });
 
   it('disables animation', () => {
-    stubReducedMotion(false);
     const config = buildLineChartConfig(POINTS, TOKENS, 'USD', 'currency', true);
     expect(config.options?.animation).toBe(false);
   });
@@ -149,7 +138,6 @@ describe('buildLineChartConfig compact', () => {
   });
 
   it('leaves the default chart unchanged: axes, tooltip and events on', () => {
-    stubReducedMotion(false);
     const options = buildLineChartConfig(POINTS, TOKENS, 'USD').options;
     expect(options?.scales?.['x']?.display).toBe(true);
     expect(options?.scales?.['y']?.display).toBe(true);
@@ -157,11 +145,6 @@ describe('buildLineChartConfig compact', () => {
     expect(options?.events).toBeUndefined();
     expect(options?.layout).toBeUndefined();
     expect(options?.animation).toBeUndefined();
-  });
-
-  it('disables animation in the default chart under prefers-reduced-motion', () => {
-    stubReducedMotion(true);
-    expect(buildLineChartConfig(POINTS, TOKENS, 'USD').options?.animation).toBe(false);
   });
 });
 
