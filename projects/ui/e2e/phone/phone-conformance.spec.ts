@@ -444,6 +444,44 @@ for (const size of NOTICE_WIDTHS) {
   });
 }
 
+// One state pattern: the offline cold start and an error are announced, never read as empty, and
+// the Retry beside them is a touch-sized target that fits the narrowest phone.
+const STATE_STORIES = [
+  {name: 'offline cold start', story: 'components-async-state--offline-cold-start', role: 'status'},
+  {
+    name: 'error with retry',
+    story: 'components-async-state--error-with-built-in-retry',
+    role: 'alert',
+  },
+] as const;
+
+for (const size of NOTICE_WIDTHS) {
+  test.describe(`state pattern ${size.width}x${size.height}`, () => {
+    test.use({viewport: size, hasTouch: true, isMobile: true});
+
+    for (const state of STATE_STORIES) {
+      test(`${state.name} | announced, not empty, Retry >= 44, no sideways scroll`, async ({
+        page,
+      }) => {
+        await open(page, state.story, 'light', 'cmn-async-state');
+        const region = page.locator(`cmn-async-state [role="${state.role}"]`);
+        await expect(region).toBeVisible();
+        await expect(page.locator('cmn-async-state')).not.toContainText('No data available');
+        await expect(page.getByRole('button', {name: 'Retry'})).toBeVisible();
+        expect(await undersizedTargets(page, MIN_TARGET)).toEqual([]);
+        expect(
+          await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)
+        ).toBe(false);
+      });
+    }
+
+    test('offline cold start | says when it last synced', async ({page}) => {
+      await open(page, STATE_STORIES[0].story, 'light', 'cmn-async-state');
+      await expect(page.locator('cmn-async-state')).toContainText(/Last synced .*2026/);
+    });
+  });
+}
+
 test.describe('desktop pointer', () => {
   test.use({viewport: {width: 1280, height: 800}});
 

@@ -123,15 +123,31 @@ at most three buttons. A destination in the tab bar is a page, never a sheet.
 
 ### State pattern
 
-One component covers every state, built on the policy's rules (skeletons, loading is not empty,
-keep cached data, errors keep context):
+`cmn-async-state` covers every state, built on the policy's rules (skeletons, loading is not
+empty, keep cached data, errors keep context). A page binds `status`, `isEmpty`, `offline` and
+`lastSynced`, sets `retryable` and handles `(retry)`:
 
-| State   | Shows                                                                                                                          |
-| ------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| Loading | A skeleton shaped like the content, the old content while refreshing.                                                          |
-| Empty   | Only after a successful load with no results. Explains the section and offers action.                                          |
-| Error   | In place of the skeleton on a first load, a banner over the last good data otherwise. Always with Retry. Never shown as empty. |
-| Offline | What still works, plus the time of the last sync. Never blocks content, never covers the chrome.                               |
+```html
+<cmn-async-state
+  [status]="status()"
+  [isEmpty]="rows().length === 0"
+  [offline]="offline()"
+  [lastSynced]="lastSynced()"
+  retryable
+  (retry)="reload()"
+>
+  <!-- the content -->
+</cmn-async-state>
+```
+
+Offline beats error, and error beats empty, so a failed or offline load never reads as "no data".
+
+| State   | Shows                                                                                                                                                  |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Loading | A skeleton shaped like the content, the old content while refreshing.                                                                                  |
+| Empty   | Only after a successful load with no results. Explains the section and offers action.                                                                  |
+| Error   | In place of the skeleton on a first load, a banner over the last good data otherwise. Always with Retry. Never shown as empty.                         |
+| Offline | What still works, plus the time of the last sync. Never blocks content, never covers the chrome. A banner over content, or a panel when there is none. |
 
 ## Forms and notifications
 
@@ -160,7 +176,7 @@ guarantee above is only gating once its check exists.
 | Tab bar, sheets, safe areas             | Built: one sheet (`cmn-drawer`) with half and full stops, More is a page; no suite check yet      |
 | Top bar title, back, actions            | Built: route data `title`, `parent`, `actions`; the suite checks the title at 320                 |
 | Shell-owned scroll and tab state        | Built: checked by the suite's "back restores scroll"; see "Scroll and tab state"                  |
-| One state pattern                       | Target (policy rules 1, 2 enforced by `cmn-async-state`)                                          |
+| One state pattern                       | Built: `cmn-async-state`; the suite checks the offline and error states at 320 and 390            |
 | Touch size (44pt chrome, labels, hints) | Built: `--size-touch`, `.cmn-hit-slop`; the suite enforces 44x44 at 390x844, labels at 320, hints |
 | Layout by size                          | Built: `CmnShellService` picks tab bar, rail or sidebar; the suite checks each width and device   |
 | Overlays, appearance                    | Target                                                                                            |

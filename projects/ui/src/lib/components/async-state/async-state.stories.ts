@@ -21,6 +21,9 @@ const meta: Meta<AsyncStateComponent> = {
 export default meta;
 type Story = StoryObj<AsyncStateComponent>;
 
+// A fixed local time keeps the "last synced" line stable across snapshots.
+const LAST_SYNCED = '2026-10-05T09:41:00';
+
 const CONTENT = `
   <div class="rounded-cmn-md border border-border-default bg-surface-card p-cmn-4">
     <p class="text-cmn-sm text-text-primary">Loaded content.</p>
@@ -242,4 +245,111 @@ export const EmptyWithCallToAction: Story = {
     `,
   }),
   args: {status: 'success', isEmpty: true},
+};
+
+/** The built-in Retry button: `retryable` renders it and `retry` fires when it is pressed (here it switches to loading). */
+export const ErrorWithBuiltInRetry: Story = {
+  render: args => ({
+    props: args,
+    template: `
+      <cmn-async-state [status]="status" [errorMessage]="errorMessage" [retryable]="retryable" (retry)="status = 'loading'">
+        ${CONTENT}
+      </cmn-async-state>
+    `,
+  }),
+  args: {
+    status: 'error',
+    errorMessage: 'Could not load your accounts.',
+    retryable: true,
+  },
+};
+
+/**
+ * A failed load never reads as empty. Even when the region has no data, a failed refresh shows
+ * the error alone, not "no data" under it.
+ */
+export const ErrorNeverEmpty: Story = {
+  render: args => ({
+    props: args,
+    template: `
+      <cmn-async-state [status]="status" [isEmpty]="isEmpty" [errorMessage]="errorMessage" errorPlacement="above" [retryable]="true">
+        ${CONTENT}
+      </cmn-async-state>
+    `,
+  }),
+  args: {status: 'error', isEmpty: true, errorMessage: 'Sync failed.'},
+};
+
+/** The default empty state, with the optional icon and sub-message. */
+export const EmptyWithSubMessage: Story = {
+  render: args => ({
+    props: args,
+    template: `
+      <cmn-async-state [status]="status" [isEmpty]="isEmpty" [emptyMessage]="emptyMessage" [emptySubMessage]="emptySubMessage" emptyIcon="Inbox">
+        ${CONTENT}
+      </cmn-async-state>
+    `,
+  }),
+  args: {
+    status: 'success',
+    isEmpty: true,
+    emptyMessage: 'No transactions this month.',
+    emptySubMessage: 'New activity appears here after the next sync.',
+  },
+};
+
+/**
+ * A cold start with no network and nothing to show: an offline panel with the time of the last
+ * sync, never "no data". Offline beats both an error and an empty result.
+ */
+export const OfflineColdStart: Story = {
+  render: args => ({
+    props: args,
+    template: `
+      <cmn-async-state [status]="status" [offline]="offline" [lastSynced]="lastSynced" [isEmpty]="isEmpty" [retryable]="true">
+        ${CONTENT}
+      </cmn-async-state>
+    `,
+  }),
+  args: {status: 'error', offline: true, lastSynced: LAST_SYNCED, isEmpty: true},
+  globals: {viewport: {value: 'mobile2', isRotated: false}},
+};
+
+/** The same offline state when an empty result came back from a device with no network. */
+export const OfflineInsteadOfEmpty: Story = {
+  render: args => ({
+    props: args,
+    template: `
+      <cmn-async-state [status]="status" [offline]="offline" [lastSynced]="lastSynced" [isEmpty]="isEmpty">
+        ${CONTENT}
+      </cmn-async-state>
+    `,
+  }),
+  args: {status: 'success', offline: true, lastSynced: LAST_SYNCED, isEmpty: true},
+};
+
+/** Never synced: the panel says so instead of showing a time. */
+export const OfflineNeverSynced: Story = {
+  render: args => ({
+    props: args,
+    template: `
+      <cmn-async-state [status]="status" [offline]="offline" [lastSynced]="lastSynced">
+        ${CONTENT}
+      </cmn-async-state>
+    `,
+  }),
+  args: {status: 'error', offline: true, lastSynced: null},
+};
+
+/** Offline with content on screen: a banner above it, content never blocked. */
+export const OfflineWithContent: Story = {
+  render: args => ({
+    props: args,
+    template: `
+      <cmn-async-state [status]="status" [offline]="offline" [lastSynced]="lastSynced" [retryable]="true">
+        ${ROWS}
+      </cmn-async-state>
+    `,
+  }),
+  args: {status: 'success', offline: true, lastSynced: LAST_SYNCED},
 };
