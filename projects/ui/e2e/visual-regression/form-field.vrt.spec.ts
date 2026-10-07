@@ -13,13 +13,13 @@ const STORIES = [
 
 for (const story of STORIES) {
   test(`form-field/${story} — light`, async ({page}) => {
-    await openStory(page, `components-form-field--${story}`, 'light');
+    await openStory(page, `components-formfield--${story}`, 'light');
     await page.waitForSelector('cmn-form-field, label', {timeout: 10000}).catch(() => null);
     await expect(page).toHaveScreenshot(`form-field-${story}-light.png`);
   });
 
   test(`form-field/${story} — dark`, async ({page}) => {
-    await openStory(page, `components-form-field--${story}`, 'dark');
+    await openStory(page, `components-formfield--${story}`, 'dark');
     await page.waitForSelector('cmn-form-field, label', {timeout: 10000}).catch(() => null);
     await expect(page).toHaveScreenshot(`form-field-${story}-dark.png`);
   });
