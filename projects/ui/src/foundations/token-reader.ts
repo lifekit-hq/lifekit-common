@@ -49,10 +49,22 @@ export function listColorTokens(sheets: StyleSheetList = document.styleSheets): 
 export function resolveColor(value: string, theme: ThemeName): Rgb {
   const probe = document.createElement('div');
   probe.setAttribute('data-theme', theme);
-  probe.style.color = value.startsWith('--') ? `var(${value})` : value;
+  const isToken = value.startsWith('--');
+  probe.style.color = isToken ? `var(${value})` : value;
+  if (!probe.style.color) {
+    throw new Error(`Unsupported CSS colour: ${value}`);
+  }
   document.body.appendChild(probe);
   try {
-    return parseColor(getComputedStyle(probe).color) ?? {r: 0, g: 0, b: 0};
+    const computed = getComputedStyle(probe);
+    if (isToken && !computed.getPropertyValue(value).trim()) {
+      throw new Error(`Colour token ${value} is not defined under theme "${theme}"`);
+    }
+    const rgb = parseColor(computed.color);
+    if (!rgb) {
+      throw new Error(`Cannot parse computed colour "${computed.color}" for ${value}`);
+    }
+    return rgb;
   } finally {
     probe.remove();
   }

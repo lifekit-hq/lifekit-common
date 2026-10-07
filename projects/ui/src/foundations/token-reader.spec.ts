@@ -44,6 +44,16 @@ describe('token-reader', () => {
     expect(document.body.children.length).toBe(before);
   });
 
+  it('throws for a token no stylesheet defines instead of resolving the inherited colour', () => {
+    expect(() => resolveColor('--color-test-missing', 'light')).toThrow(/--color-test-missing/);
+  });
+
+  it('throws for a value that is not a CSS colour, leaving no probe behind', () => {
+    const before = document.body.children.length;
+    expect(() => resolveColor('not-a-colour', 'light')).toThrow(/not-a-colour/);
+    expect(document.body.children.length).toBe(before);
+  });
+
   it('reads computed type metrics', () => {
     const el = document.createElement('p');
     el.style.cssText = 'font-size: 20px; line-height: 25px; font-family: serif';
