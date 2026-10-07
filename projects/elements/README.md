@@ -137,6 +137,36 @@ headline number and delta while scrubbing and restores them on the end event;
 </script>
 ```
 
+### `<lk-dismissible-chip>`
+
+Removable chip for an applied filter or a picked value: the label plus a remove button. It is the
+chip with its own remove affordance, so a host never nests an icon in a selectable chip to fake one.
+The remove button is a native `<button>` (Tab reaches it, Enter and Space press it), at least 44px
+square (`--size-touch`) while the pill around the label stays chip-sized, with a `--color-border-focus`
+ring on keyboard focus.
+
+| Property      | Attribute      | Type      | Default | Description                                                                                           |
+| ------------- | -------------- | --------- | ------- | ----------------------------------------------------------------------------------------------------- |
+| `label`       | `label`        | `string`  | `''`    | The chip text; a long one truncates with an ellipsis                                                  |
+| `removeLabel` | `remove-label` | `string`  | `''`    | Accessible name of the remove button; empty means "Remove {label}", e.g. "Remove Category: Groceries" |
+| `disabled`    | `disabled`     | `boolean` | `false` | Disables the remove button                                                                            |
+
+Event: `lk-dismissible-chip-remove` - the reader pressed remove; `detail` is `{label}`. The element
+does not remove itself: the host drops the chip from its own state, and should then move focus
+somewhere sensible, since the focused button is gone.
+
+```html
+<lk-dismissible-chip label="Category: Groceries"></lk-dismissible-chip>
+<script>
+  const chip = document.querySelector('lk-dismissible-chip');
+  chip.addEventListener('lk-dismissible-chip-remove', () => chip.remove());
+</script>
+```
+
+Why `lk-dismissible-chip` and not a variant of `cmn-chip`: it is a presentational leaf with no
+framework behaviour, so the layered substrate rule in `docs/STRATEGY.md` makes it a Lit element;
+`cmn-chip` and `cmn-tag` are unchanged.
+
 ### `<lk-segmented>`
 
 One-row segmented control for picking one value out of a short list, such as a chart period. A
