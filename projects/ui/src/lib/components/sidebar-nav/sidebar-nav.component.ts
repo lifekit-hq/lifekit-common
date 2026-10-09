@@ -69,7 +69,7 @@ export interface NavItem {
         @if (clickable()) {
           <button
             [title]="isCollapsed() ? versionLabel() : ''"
-            [attr.aria-label]="isCollapsed() ? versionLabel() : null"
+            [attr.aria-label]="isCollapsed() ? collapsedVersionName() : null"
             (click)="versionClick.emit()"
             type="button"
             class="flex w-full items-center gap-cmn-2 border-t border-border-default px-cmn-4 py-cmn-2 text-left text-cmn-xs text-text-secondary hover:bg-surface-raised hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-border-focus transition-colors"
@@ -84,9 +84,6 @@ export interface NavItem {
               <cmn-badge [dot]="versionDot()" status="error">
                 <cmn-icon name="Info" size="sm" />
               </cmn-badge>
-              @if (versionDot()) {
-                <span class="sr-only">(new)</span>
-              }
             }
           </button>
         } @else {
@@ -133,6 +130,10 @@ export class SidebarNavComponent {
   public readonly collapsed = signal<boolean>(false);
 
   protected readonly isCollapsed = computed<boolean>(() => this.rail() || this.collapsed());
+
+  protected readonly collapsedVersionName = computed<string>(() =>
+    this.versionDot() ? `${this.versionLabel()} (new)` : this.versionLabel()
+  );
 
   protected clickable(): boolean {
     return this.versionClickable() ?? isOutputObserved(this.versionClick);

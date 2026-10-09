@@ -193,10 +193,14 @@ describe('SidebarNavComponent', () => {
       host.detectChanges();
       const el = host.nativeElement as HTMLElement;
       const button = footerButton(el);
-      expect(button?.getAttribute('aria-label')).toBe('v1.15.0 · Release notes');
+      expect(button?.getAttribute('aria-label')).toBe('v1.15.0 · Release notes (new)');
       expect(button?.getAttribute('title')).toBe('v1.15.0 · Release notes');
       expect(button?.textContent).not.toContain('v1.15.0');
       expect(button?.querySelector('.cmn-badge-indicator')).not.toBeNull();
+
+      host.componentInstance.dot.set(false);
+      host.detectChanges();
+      expect(footerButton(el)?.getAttribute('aria-label')).toBe('v1.15.0 · Release notes');
     });
 
     it('should take versionClickable over listener detection', () => {
