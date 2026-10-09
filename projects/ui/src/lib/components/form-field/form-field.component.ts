@@ -14,6 +14,7 @@ import {of, switchMap} from 'rxjs';
 
 import {VALIDATION_MESSAGES} from '../../tokens/validation-messages.token';
 import {InputComponent} from '../input/input.component';
+import {TextareaComponent} from '../textarea/textarea.component';
 
 let fieldCounter = 0;
 
@@ -55,6 +56,8 @@ let fieldCounter = 0;
 })
 export class FormFieldComponent implements ControlValueAccessor, AfterContentInit {
   private readonly validationMessages = inject(VALIDATION_MESSAGES);
+  private readonly singleLineChild = contentChild(InputComponent);
+  private readonly multiLineChild = contentChild(TextareaComponent);
   private pendingValue: unknown = undefined;
   private pendingDisabled: boolean | undefined = undefined;
   private onChangeFn: ((v: unknown) => void) | undefined;
@@ -68,7 +71,10 @@ export class FormFieldComponent implements ControlValueAccessor, AfterContentIni
 
   public readonly fieldId: string;
 
-  protected readonly inputChild = contentChild(InputComponent);
+  /** The projected `cmn-input` or `cmn-textarea`, which share one value-accessor surface. */
+  protected readonly inputChild = computed<InputComponent | TextareaComponent | undefined>(
+    () => this.singleLineChild() ?? this.multiLineChild()
+  );
   protected readonly controlChanges = toSignal(
     toObservable(this.control).pipe(switchMap(ctrl => (ctrl ? ctrl.events : of(null))))
   );

@@ -4,6 +4,7 @@ import type {Meta, StoryObj} from '@storybook/angular';
 
 import {ButtonComponent} from '../button/button.component';
 import {InputComponent} from '../input/input.component';
+import {TextareaComponent} from '../textarea/textarea.component';
 import {FormFieldComponent} from './form-field.component';
 
 const MIN_PASSWORD_LENGTH = 8;
@@ -57,6 +58,29 @@ export const Required: Story = {
     template: `
       <cmn-form-field label="Password" [required]="true" hint="At least 8 characters.">
         <cmn-input type="password" placeholder="••••••••" />
+      </cmn-form-field>
+    `,
+  }),
+};
+
+/** A multi-line field takes the label, hint and error exactly as a single-line one does. */
+export const WithTextarea: Story = {
+  render: () => ({
+    moduleMetadata: {imports: [FormFieldComponent, TextareaComponent]},
+    template: `
+      <cmn-form-field label="What went wrong?" hint="Don't include account numbers, amounts or passwords.">
+        <cmn-textarea [maxlength]="1000" placeholder="Tell us what happened" />
+      </cmn-form-field>
+    `,
+  }),
+};
+
+export const TextareaWithError: Story = {
+  render: () => ({
+    moduleMetadata: {imports: [FormFieldComponent, TextareaComponent]},
+    template: `
+      <cmn-form-field label="What went wrong?" errorMessage="Tell us a little more.">
+        <cmn-textarea [hasError]="true" [maxlength]="1000" />
       </cmn-form-field>
     `,
   }),

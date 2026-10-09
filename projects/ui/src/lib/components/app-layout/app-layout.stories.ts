@@ -159,6 +159,29 @@ export const NoThemeToggle: Story = {
   args: {showThemeToggle: false},
 };
 
+/**
+ * Binding `versionClick` makes the sidebar's version footer a button, with `versionDot` marking
+ * it while there is something new. Left unbound the footer stays static text.
+ */
+export const VersionFooterButton: Story = {
+  render: args => ({
+    props: args,
+    template: `
+      <cmn-app-layout
+        [navItems]="navItems"
+        [activeRoute]="activeRoute"
+        [title]="title"
+        [avatarLabel]="avatarLabel"
+        [avatarMenuItems]="avatarMenuItems"
+        [versionLabel]="versionLabel"
+        [versionDot]="true"
+        (versionClick)="versionLabel = 'v0.3.2'"
+      >${BODY}</cmn-app-layout>
+    `,
+  }),
+  args: {versionLabel: "v0.3.2 · What's new"},
+};
+
 /** Nothing configured — no nav, no title, no avatar, no version. */
 export const Bare: Story = {
   args: {

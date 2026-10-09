@@ -28,6 +28,51 @@ export const CustomBrand: Story = {
   args: {items: NAV_ITEMS, activeRoute: '/dashboard', brand: 'Lifekit Dashboard'},
 };
 
+/** Nothing listens to `versionClick`, so the version footer is static text, as it always was. */
+export const VersionFooter: Story = {
+  args: {items: NAV_ITEMS, activeRoute: '/dashboard', versionLabel: 'v1.15.0'},
+};
+
+/** Binding `versionClick` turns the footer into a button; `versionDot` marks it while there is news. */
+export const VersionFooterButton: Story = {
+  render: args => ({
+    props: args,
+    template: `
+      <cmn-sidebar-nav
+        [items]="items"
+        [activeRoute]="activeRoute"
+        [versionLabel]="versionLabel"
+        [versionDot]="versionDot"
+        (versionClick)="versionDot = false"
+      />
+    `,
+  }),
+  args: {
+    items: NAV_ITEMS,
+    activeRoute: '/dashboard',
+    versionLabel: "v1.15.0 · What's new",
+    versionDot: true,
+  },
+};
+
+/** The rail keeps the button: an info icon with the dot, named by the version label. */
+export const VersionFooterButtonRail: Story = {
+  ...VersionFooterButton,
+  render: args => ({
+    props: args,
+    template: `
+      <cmn-sidebar-nav
+        [items]="items"
+        [activeRoute]="activeRoute"
+        [versionLabel]="versionLabel"
+        [versionDot]="versionDot"
+        [rail]="true"
+        (versionClick)="versionDot = false"
+      />
+    `,
+  }),
+};
+
 export const ActiveAccounts: Story = {
   args: {items: NAV_ITEMS, activeRoute: '/accounts'},
 };
