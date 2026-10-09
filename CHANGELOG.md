@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.2.0](https://github.com/lifekit-hq/lifekit-common/compare/v3.1.0...v3.2.0) (2026-10-09)
+
+
+### Features
+
+* **ui:** multi-line text field, and a clickable version footer with a dot ([#144](https://github.com/lifekit-hq/lifekit-common/issues/144)) ([13deedb](https://github.com/lifekit-hq/lifekit-common/commit/13deedbc114ac88578d7fa155ed26d453331ca18))
+
 ## [3.1.0](https://github.com/lifekit-hq/lifekit-common/compare/v3.0.0...v3.1.0) (2026-10-07)
 
 
