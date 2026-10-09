@@ -16,6 +16,7 @@ import {toSignal} from '@angular/core/rxjs-interop';
 import {createUrlTreeFromSnapshot, NavigationEnd, Router} from '@angular/router';
 import {filter, map} from 'rxjs';
 
+import {isOutputObserved} from '../../chart-click/output-observed';
 import {CmnDialogService} from '../../services/dialog/dialog.service';
 import {CmnDrawerService} from '../../services/drawer/drawer.service';
 import {CmnPageActionsService} from '../../services/page-actions/page-actions.service';
@@ -101,11 +102,14 @@ const MAIN_OVERLAY_BOTTOM_CLASSES =
         [items]="navItems()"
         [activeRoute]="effectiveActiveRoute()"
         [versionLabel]="versionLabel()"
+        [versionDot]="versionDot()"
+        [versionClickable]="versionClickable()"
         [brand]="brand()"
         [rail]="shellMode() === 'rail'"
         [class]="sidebarClasses()"
         (navClick)="navClick.emit($event)"
         (collapsedChange)="collapsedChange.emit($event)"
+        (versionClick)="versionClick.emit()"
       />
       <div class="relative flex min-w-0 flex-1 flex-col overflow-hidden">
         <cmn-top-bar
@@ -228,6 +232,8 @@ export class AppLayoutComponent {
    */
   public readonly paletteItems = input<CommandPaletteItem[]>([]);
   public readonly versionLabel = input<string>('');
+  /** Marks the sidebar's version footer with a dot, e.g. while there is something new to read. */
+  public readonly versionDot = input<boolean>(false);
   /** Product name shown in the sidebar header; defaults to "Lifekit". */
   public readonly brand = input<string>('Lifekit');
   /**
@@ -270,6 +276,8 @@ export class AppLayoutComponent {
    */
   public readonly navClick = output<NavItem>();
   public readonly collapsedChange = output<boolean>();
+  /** The sidebar's version footer was pressed. Binding it makes the footer a button; unbound it stays static text. */
+  public readonly versionClick = output<void>();
   public readonly searchClick = output<void>();
   public readonly themeToggle = output<void>();
   public readonly avatarMenuSelect = output<MenuItem>();
@@ -434,6 +442,11 @@ export class AppLayoutComponent {
         observer?.disconnect();
       });
     });
+  }
+
+  /** The footer is a button only when the app listens; this layout forwards the output either way. */
+  protected versionClickable(): boolean {
+    return isOutputObserved(this.versionClick);
   }
 
   protected onWindowKeydown(event: KeyboardEvent): void {

@@ -61,6 +61,7 @@ export * from './components/stepper-dialog/stepper-dialog.component';
 export * from './components/stepper-dialog/stepper-step.directive';
 export * from './components/tab-group/tab-group.component';
 export * from './components/tag/tag.component';
+export * from './components/textarea/textarea.component';
 export * from './components/toast/toast.component';
 export * from './components/toast/toast.service';
 export * from './components/toggle/toggle.component';

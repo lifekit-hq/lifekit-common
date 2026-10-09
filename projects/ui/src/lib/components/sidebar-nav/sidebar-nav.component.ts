@@ -1,6 +1,7 @@
 import {NgClass} from '@angular/common';
 import {ChangeDetectionStrategy, Component, computed, input, output, signal} from '@angular/core';
 
+import {isOutputObserved} from '../../chart-click/output-observed';
 import {BadgeComponent} from '../badge/badge.component';
 import {IconComponent, LucideIconName} from '../icon/icon.component';
 
@@ -63,18 +64,43 @@ export interface NavItem {
         }
       </nav>
 
-      <!-- Version footer -->
+      <!-- Version footer: a button while the app listens for versionClick, static text otherwise -->
       @if (versionLabel()) {
-        <div
-          [title]="isCollapsed() ? versionLabel() : ''"
-          class="border-t border-border-default px-cmn-4 py-cmn-2 text-cmn-xs text-text-secondary"
-        >
-          @if (!isCollapsed()) {
-            {{ versionLabel() }}
-          } @else {
-            <cmn-icon name="Info" size="sm" />
-          }
-        </div>
+        @if (clickable()) {
+          <button
+            [title]="isCollapsed() ? versionLabel() : ''"
+            [attr.aria-label]="isCollapsed() ? versionLabel() : null"
+            (click)="versionClick.emit()"
+            type="button"
+            class="flex w-full items-center gap-cmn-2 border-t border-border-default px-cmn-4 py-cmn-2 text-left text-cmn-xs text-text-secondary hover:bg-surface-raised hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-border-focus transition-colors"
+          >
+            @if (!isCollapsed()) {
+              <span class="truncate">{{ versionLabel() }}</span>
+              @if (versionDot()) {
+                <cmn-badge [dot]="true" [standalone]="true" status="error" />
+                <span class="sr-only">(new)</span>
+              }
+            } @else {
+              <cmn-badge [dot]="versionDot()" status="error">
+                <cmn-icon name="Info" size="sm" />
+              </cmn-badge>
+              @if (versionDot()) {
+                <span class="sr-only">(new)</span>
+              }
+            }
+          </button>
+        } @else {
+          <div
+            [title]="isCollapsed() ? versionLabel() : ''"
+            class="border-t border-border-default px-cmn-4 py-cmn-2 text-cmn-xs text-text-secondary"
+          >
+            @if (!isCollapsed()) {
+              {{ versionLabel() }}
+            } @else {
+              <cmn-icon name="Info" size="sm" />
+            }
+          </div>
+        }
       }
     </aside>
   `,
@@ -83,11 +109,20 @@ export class SidebarNavComponent {
   public readonly items = input<NavItem[]>([]);
   public readonly activeRoute = input<string>('');
   public readonly versionLabel = input<string>('');
+  /** Marks the version footer with a dot, e.g. while there is something new to read. Only shown while the footer is a button. */
+  public readonly versionDot = input<boolean>(false);
+  /**
+   * Whether the version footer is a button. Left unset, it is one exactly when the host template
+   * listens to `versionClick`; a wrapper that always forwards the output passes its own answer.
+   */
+  public readonly versionClickable = input<boolean | undefined>(undefined);
   /** Product name shown in the sidebar header while expanded. */
   public readonly brand = input<string>('Lifekit');
 
   public readonly navClick = output<NavItem>();
   public readonly collapsedChange = output<boolean>();
+  /** The version footer was pressed. Binding it turns the static footer into a button. */
+  public readonly versionClick = output<void>();
 
   /**
    * Shows the sidebar as a navigation rail: collapsed to icons, with no toggle to widen it. The
@@ -98,6 +133,10 @@ export class SidebarNavComponent {
   public readonly collapsed = signal<boolean>(false);
 
   protected readonly isCollapsed = computed<boolean>(() => this.rail() || this.collapsed());
+
+  protected clickable(): boolean {
+    return this.versionClickable() ?? isOutputObserved(this.versionClick);
+  }
 
   public toggleCollapsed(): void {
     const next = !this.collapsed();

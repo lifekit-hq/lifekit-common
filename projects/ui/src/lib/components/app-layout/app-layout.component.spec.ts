@@ -40,6 +40,66 @@ const AVATAR_MENU_ITEMS: MenuItem[] = [
 })
 class SheetContentComponent {}
 
+@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [AppLayoutComponent],
+  template: `
+    <cmn-app-layout
+      [navItems]="navItems"
+      [versionDot]="true"
+      (versionClick)="clicks = clicks + 1"
+      versionLabel="v1.15.0 · Release notes"
+    />
+  `,
+})
+class VersionListeningHostComponent {
+  public readonly navItems = NAV_ITEMS;
+  public clicks = 0;
+}
+
+@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [AppLayoutComponent],
+  template: '<cmn-app-layout [navItems]="navItems" [versionDot]="true" versionLabel="v1.15.0" />',
+})
+class VersionSilentHostComponent {
+  public readonly navItems = NAV_ITEMS;
+}
+
+describe('AppLayoutComponent version footer', () => {
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [VersionListeningHostComponent, VersionSilentHostComponent],
+      providers: [
+        provideRouter([{path: '**', children: []}]),
+        {provide: BreakpointObserver, useValue: new PinnedBreakpointObserver('sidebar')},
+      ],
+    }).compileComponents();
+  });
+
+  it('should keep the footer static text, with no dot, when the app does not bind versionClick', () => {
+    const fixture = TestBed.createComponent(VersionSilentHostComponent);
+    fixture.detectChanges();
+    const sidebar = (fixture.nativeElement as HTMLElement).querySelector('cmn-sidebar-nav');
+    expect(sidebar?.querySelector('aside > button')).toBeNull();
+    expect(sidebar?.querySelector('.cmn-badge-indicator')).toBeNull();
+    expect(sidebar?.textContent).toContain('v1.15.0');
+  });
+
+  it('should make the footer a button with a dot, and report presses, when the app binds versionClick', () => {
+    const fixture = TestBed.createComponent(VersionListeningHostComponent);
+    fixture.detectChanges();
+    const button = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>(
+      'cmn-sidebar-nav aside > button'
+    );
+    expect(button?.textContent).toContain('v1.15.0 · Release notes');
+    expect(button?.querySelector('.cmn-badge-indicator')).not.toBeNull();
+
+    button?.click();
+    expect(fixture.componentInstance.clicks).toBe(1);
+  });
+});
+
 describe('AppLayoutComponent', () => {
   let fixture: ComponentFixture<AppLayoutComponent>;
   let viewport: PinnedBreakpointObserver;
