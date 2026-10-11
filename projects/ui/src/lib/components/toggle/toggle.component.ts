@@ -30,7 +30,7 @@ export class ToggleComponent {
       'relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full ' +
       'border-2 border-transparent transition-colors duration-200 ' +
       'focus:outline-none focus:ring-2 focus:ring-border-focus focus:ring-offset-1';
-    const color = this.checked() ? 'bg-accent-default' : 'bg-border-default';
+    const color = this.checked() ? 'bg-accent-default' : 'bg-border-strong';
     const disabled = this.disabled() ? 'opacity-50 pointer-events-none' : '';
     return [base, color, disabled].filter(Boolean).join(' ');
   });

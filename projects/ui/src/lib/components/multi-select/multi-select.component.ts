@@ -151,7 +151,7 @@ export class MultiSelectComponent implements ControlValueAccessor {
     [
       TRIGGER_BASE,
       SIZE_CLASSES[this.size()],
-      this.hasError() ? 'border-status-error' : 'border-border-default',
+      this.hasError() ? 'border-status-error' : 'border-border-strong',
     ].join(' ')
   );
 

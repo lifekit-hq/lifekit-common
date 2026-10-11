@@ -13,7 +13,8 @@ export const MAX_BOTTOM_TABS = 4;
  */
 const TAB_BASE_CLASSES =
   'flex min-h-cmn-touch min-w-fit flex-1 flex-col items-center justify-center gap-0.5 px-0.5 ' +
-  'pb-cmn-1 pt-cmn-2 transition-colors focus:outline-none focus-visible:bg-surface-raised';
+  'pb-cmn-1 pt-cmn-2 transition-colors focus:outline-none focus-visible:bg-surface-raised ' +
+  'focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-border-focus';
 const TAB_LABEL_CLASSES = 'whitespace-nowrap font-label text-cmn-xs font-medium leading-tight';
 const TAB_FLOATING_CLASSES = 'my-0.5 rounded-cmn-full';
 const TAB_ACTIVE_CLASSES = 'text-accent-default';

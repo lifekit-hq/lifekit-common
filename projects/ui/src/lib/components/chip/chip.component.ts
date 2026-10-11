@@ -10,7 +10,7 @@ const BUTTON_CLASSES =
 
 const PILL_BASE_CLASSES =
   'inline-flex items-center rounded-cmn-full px-cmn-3 py-cmn-1 text-cmn-sm font-medium ' +
-  'transition-colors group-focus:ring-2 group-focus:ring-border-focus group-focus:ring-offset-1';
+  'transition-colors group-focus-visible:ring-2 group-focus-visible:ring-border-focus group-focus-visible:ring-offset-1';
 
 const SELECTED_CLASSES = 'bg-accent-default text-text-inverse';
 const UNSELECTED_CLASSES = 'bg-surface-raised text-text-secondary group-hover:bg-surface-hover';

@@ -54,6 +54,17 @@ describe('MenuComponent', () => {
     expect(menu?.classList).not.toContain('border');
   });
 
+  it('should ring the focused item, not just tint it', () => {
+    fixture.debugElement
+      .query(By.css('button'))
+      .triggerEventHandler('click', new MouseEvent('click'));
+    fixture.detectChanges();
+
+    const item = overlayContainer.getContainerElement().querySelector('[role="menuitem"]');
+    expect(item?.classList).toContain('focus-visible:ring-2');
+    expect(item?.classList).toContain('focus-visible:ring-inset');
+  });
+
   it('should emit the selected item and close the menu', () => {
     const selected: MenuItem[] = [];
     fixture.componentInstance.itemSelect.subscribe(item => selected.push(item));

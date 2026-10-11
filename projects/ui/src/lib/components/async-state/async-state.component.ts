@@ -119,7 +119,7 @@ const DATE_AND_TIME: Intl.DateTimeFormatOptions = {dateStyle: 'medium', timeStyl
       @if (retryable()) {
         <button
           (click)="retry.emit()"
-          class="min-h-cmn-touch min-w-cmn-touch cursor-pointer rounded-cmn-md border border-border-default px-cmn-3 text-cmn-sm font-medium text-text-primary hover:bg-surface-raised focus:outline-none focus:ring-2 focus:ring-border-focus focus:ring-offset-1"
+          class="min-h-cmn-touch min-w-cmn-touch cursor-pointer rounded-cmn-md border border-border-strong px-cmn-3 text-cmn-sm font-medium text-text-primary hover:bg-surface-raised focus:outline-none focus:ring-2 focus:ring-border-focus focus:ring-offset-1"
           type="button"
         >
           Retry

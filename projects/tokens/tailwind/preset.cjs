@@ -55,6 +55,10 @@ module.exports = {
         'border-focus': 'var(--color-border-focus)',
       },
 
+      ringOffsetColor: {
+        DEFAULT: 'var(--color-surface-card)',
+      },
+
       fontFamily: {
         sans: ['var(--font-sans)'],
         base: ['var(--font-sans)'],

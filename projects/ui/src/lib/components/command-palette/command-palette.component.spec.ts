@@ -139,6 +139,12 @@ describe('CommandPaletteComponent', () => {
     expect(close).toHaveBeenCalledWith({type: 'navigate', id: '/accounts'});
   });
 
+  it('marks the selected row with an accent bar, not a background alone', () => {
+    expect(rows()[0].classList).toContain('border-accent-default');
+    expect(rows()[1].classList).not.toContain('border-accent-default');
+    expect(rows()[1].classList).toContain('border-transparent');
+  });
+
   it('closes with no result on Escape', () => {
     press('Escape');
     expect(close).toHaveBeenCalledWith();

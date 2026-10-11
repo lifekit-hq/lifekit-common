@@ -48,7 +48,7 @@ export class CheckboxComponent {
     const filled = this.checked() || this.indeterminate();
     const color = filled
       ? 'bg-accent-default border-accent-default text-text-inverse'
-      : 'bg-surface-card border-border-default';
+      : 'bg-surface-card border-border-strong';
     const disabled = this.disabled() ? 'opacity-50 pointer-events-none' : '';
     return [BOX_BASE, color, disabled].filter(Boolean).join(' ');
   });

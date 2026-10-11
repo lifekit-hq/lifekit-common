@@ -66,6 +66,13 @@ describe('BottomTabBarComponent', () => {
     }
   });
 
+  it('rings a keyboard-focused tab inside its own bounds', () => {
+    for (const button of tabButtons()) {
+      expect(button.classList).toContain('focus-visible:ring-2');
+      expect(button.classList).toContain('focus-visible:ring-inset');
+    }
+  });
+
   it('caps the primary tabs at four', () => {
     fixture.componentRef.setInput('items', [...TABS, ...OVERFLOW]);
     fixture.componentRef.setInput('more', undefined);

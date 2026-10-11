@@ -25,7 +25,7 @@ describe('ButtonComponent', () => {
 
   it.each<[ButtonVariant, string]>([
     ['primary', 'bg-accent-default'],
-    ['secondary', 'border-border-default'],
+    ['secondary', 'border-border-strong'],
     ['destructive', 'bg-status-error'],
   ])('applies the "%s" variant classes', (variant, expected) => {
     fixture.componentRef.setInput('variant', variant);

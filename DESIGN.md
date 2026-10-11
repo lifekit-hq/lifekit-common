@@ -170,7 +170,7 @@ Animate transform and opacity only, never layout properties (no `transition` on 
 - **Buttons:** accent fill with `text-inverse` label; secondary bordered; destructive uses the error colour; ghost text-only. Focus is a 2px ring in `border-focus`.
 - **Chips:** pill, `surface-raised` fill; selected fills with the accent.
 - **Cards:** hairline border, `surface-card`, 12/16/24px padding. Never nested.
-- **Inputs:** hairline border, accent focus ring, red border plus helper text for errors.
+- **Inputs:** `border-strong` border (3:1), accent focus ring, red border plus helper text for errors.
 - **Data table / list rows:** sentence-case headers, hairline dividers, right-aligned tabular amounts.
 - **Stat card:** the balance is the content. Value in the text face with tabular figures; no uppercase label, no decorative accent. The hero-metric layout is deliberately kept for this product.
 - **Navigation:** sidebar rows with accent-subtle active fill; bottom tab bar on phones.
