@@ -41,7 +41,7 @@ const NON_TEXT_FLOOR = 3;
 const SOLVER_STEP = 0.0025;
 const SOLVER_LIMIT = 400;
 
-/** Chart categories avoid this arc around the error and success hues (deltas own red and green). */
+/** Chart categories avoid this arc around the error and success hues (gain and loss own red and green). */
 const DELTA_HUE_GUARD = 20;
 const CHART_WALK_DEGREES = 360 - 4 * DELTA_HUE_GUARD;
 /** Series 2-8 take these eighths of the walk, ordered so neighbours differ most. */
@@ -222,10 +222,6 @@ export function derive({
     T[`status-${status}`] = colour;
     T[`status-${status}-subtle`] = mix(colour, T['surface-card'], STATUS_TINT_ALPHA);
   }
-  // Colour on money is for the change only (up or down), never a whole screen.
-  T['delta-up'] = T['status-success'];
-  T['delta-down'] = T['status-error'];
-
   // Chart series: 1 is the accent; 2-8 walk the wheel from the seed, clear of red and green.
   T['chart-series-1'] = T['accent-default'];
   CHART_ORDER.forEach((eighth, i) => {

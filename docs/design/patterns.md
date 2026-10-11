@@ -296,7 +296,7 @@ counter-example (see [Chart period and scrub](#chart-period-and-scrub)). **Owner
 | Accent       | `accent-default`, `accent-hover`, `accent-active`, `accent-subtle`, `accent-100`…`accent-1000` | The seed. Accent text is 4.5:1 on the surfaces and on `accent-subtle`.                                                             |
 | Borders      | `border-default`, `border-strong`, `border-focus`                                              | `border-default` is a decorative hairline. A boundary that must be seen (an input) uses `border-strong`, 3:1. Focus is 3:1.        |
 | Status       | `status-{info,success,warning,error}`, `status-…-subtle`                                       | Fixed hues whatever the seed, so red always means a problem. Status text is 4.5:1 on the surfaces and on its own `-subtle` tint.   |
-| Delta        | `delta-up`, `delta-down`                                                                       | A value's change. Aliases of success and error.                                                                                    |
+| Delta        | `delta-up`, `delta-down`                                                                       | Deprecated. Aliases of `gain` and `loss`; use those.                                                                               |
 | Fixed        | `asset-equity`, `asset-crypto`, `asset-cash`, `gain`, `loss`, `flow-in`, `flow-out`            | A colour that carries a meaning, so no seed changes it. See [Fixed-meaning colour](#fixed-meaning-colour).                         |
 | Chart        | `chart-series-1`…`chart-series-8`, `chart-series-9`, `chart-grid`                              | Series 1 is the accent, 2-8 are categories, 9 is the neutral (an "other" or a baseline). Every mark is 3:1 on the card and page.   |
 
@@ -318,14 +318,14 @@ component never paints a surface with an accent token to get the same effect.
 
 ### Delta-only colour
 
-Green and red mean "went up" and "went down" (`delta-up`, `delta-down`), and the matching status.
+Green and red mean "went up" and "went down" (`gain`, `loss`), and the matching status.
 They are never a category:
 
 - A chart's categories use the series tokens. The engine walks series 2-8 around the colour wheel
   from the seed and skips the red and green arcs, so a category never reads as a gain or a loss.
   `@lifekit-hq/charts-core` defaults to that order (`CATEGORICAL_STEPS`).
-- A chart that shows one gain or loss, such as a sparkline coloured by its trend, uses the delta
-  tokens.
+- A chart that shows one gain or loss, such as a sparkline coloured by its trend, uses the gain
+  and loss tokens.
 - Colour is never the only signal: a change also carries its sign or an arrow.
 
 ### Fixed-meaning colour
@@ -341,7 +341,8 @@ finance-sentry), crypto (`asset-crypto`, amber), cash (`asset-cash`, green), a c
 - Use them for the thing they name and nothing else. A category that is not an asset class still
   takes a chart series. `asset-cash` is a green, so it is told apart from `gain` by its label, as
   colour is never the only signal.
-- `delta-up` and `delta-down` stay the status-derived pair that follows the seed's surfaces.
+- `delta-up` and `delta-down` are deprecated aliases of `gain` and `loss`, so a change of value is
+  one green and one red whichever name a consumer uses. They go in the next major.
 
 ### Seeds and intensity
 

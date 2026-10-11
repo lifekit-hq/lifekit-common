@@ -83,8 +83,8 @@ const meta: Meta<StoryArgs> = {
             Primary
           </button>
           <a href="#" style="color: var(--color-accent-default)">A link</a>
-          <span style="color: var(--color-delta-up)">+4.2%</span>
-          <span style="color: var(--color-delta-down)">-1.8%</span>
+          <span style="color: var(--color-gain)">+4.2%</span>
+          <span style="color: var(--color-loss)">-1.8%</span>
         </div>
       </div>
     `,

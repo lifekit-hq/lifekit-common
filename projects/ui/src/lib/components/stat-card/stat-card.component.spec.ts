@@ -39,8 +39,7 @@ describe('StatCardComponent', () => {
     fixture.componentRef.setInput('delta', 4.2);
     fixture.componentRef.setInput('deltaLabel', '+4.2%');
     fixture.detectChanges();
-    const deltaSpan: HTMLElement | null =
-      fixture.nativeElement.querySelector('.text-status-success');
+    const deltaSpan: HTMLElement | null = fixture.nativeElement.querySelector('.text-gain');
     expect(deltaSpan).toBeTruthy();
   });
 
@@ -48,7 +47,7 @@ describe('StatCardComponent', () => {
     fixture.componentRef.setInput('delta', -2.1);
     fixture.componentRef.setInput('deltaLabel', '-2.1%');
     fixture.detectChanges();
-    const deltaSpan: HTMLElement | null = fixture.nativeElement.querySelector('.text-status-error');
+    const deltaSpan: HTMLElement | null = fixture.nativeElement.querySelector('.text-loss');
     expect(deltaSpan).toBeTruthy();
   });
 
@@ -57,7 +56,7 @@ describe('StatCardComponent', () => {
     fixture.componentRef.setInput('deltaLabel', '0.0%');
     fixture.detectChanges();
     const neutral: HTMLElement | null = fixture.nativeElement.querySelector('.text-text-secondary');
-    const success: HTMLElement | null = fixture.nativeElement.querySelector('.text-status-success');
+    const success: HTMLElement | null = fixture.nativeElement.querySelector('.text-gain');
     expect(neutral).toBeTruthy();
     expect(success).toBeFalsy();
   });
@@ -84,12 +83,12 @@ describe('StatCardComponent', () => {
 
     fixture.componentRef.setInput('delta', 4.2);
     fixture.detectChanges();
-    deltaRow = fixture.nativeElement.querySelector('.text-status-success');
+    deltaRow = fixture.nativeElement.querySelector('.text-gain');
     expect(deltaRow).toBeTruthy();
 
     fixture.componentRef.setInput('delta', -4.2);
     fixture.detectChanges();
-    deltaRow = fixture.nativeElement.querySelector('.text-status-error');
+    deltaRow = fixture.nativeElement.querySelector('.text-loss');
     expect(deltaRow).toBeTruthy();
   });
 

@@ -3,8 +3,8 @@ import {ChangeDetectionStrategy, Component, computed, input} from '@angular/core
 import {IconComponent, LucideIconName} from '../icon/icon.component';
 import {SkeletonComponent} from '../skeleton/skeleton.component';
 
-const POSITIVE_DELTA_CLASSES = 'text-status-success';
-const NEGATIVE_DELTA_CLASSES = 'text-status-error';
+const POSITIVE_DELTA_CLASSES = 'text-gain';
+const NEGATIVE_DELTA_CLASSES = 'text-loss';
 const NEUTRAL_DELTA_CLASSES = 'text-text-secondary';
 
 @Component({

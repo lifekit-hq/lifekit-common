@@ -75,7 +75,7 @@
   --color-status-warning: #955400;
   --color-status-error: #bb2530;
 
-  /* Status tints and deltas: derived from the status colours, so they follow every theme and seed.
+  /* Status tints: derived from the status colours, so they follow every theme and seed.
      Green and red mean gain and loss only; nothing else in the UI wears them. */
   --color-status-info-subtle: color-mix(
     in srgb,
@@ -97,15 +97,13 @@
     var(--color-status-error) 15%,
     var(--color-surface-card)
   );
-  --color-delta-up: var(--color-status-success);
-  --color-delta-down: var(--color-status-error);
 
   /* Scrim — the veil behind a dialog or drawer; the same in both themes */
   --color-scrim-dialog: rgb(0 0 0 / 0.55);
   --color-scrim-drawer: rgb(0 0 0 / 0.35);
 
   /* Chart series: the seed engine's categorical ramp for the petrol seed (engine/derive.mjs).
-     Series 1 is the accent; 2-8 walk the wheel clear of the red and green the deltas own, each
+     Series 1 is the accent; 2-8 walk the wheel clear of the red and green that gain and loss own, each
      at 3:1 on a card; 9 is the neutral. A seed (seeds/<app>.css, ThemeService.setSeed)
      re-derives them. */
   --color-chart-series-1: #175a6d;
@@ -132,6 +130,11 @@
   --color-loss: #af1426;
   --color-flow-in: var(--color-gain);
   --color-flow-out: var(--color-loss);
+
+  /* Deprecated: the old delta pair, now aliases of gain and loss so a change of value is one green
+     and one red everywhere. Use gain and loss; the aliases go in the next major. */
+  --color-delta-up: var(--color-gain);
+  --color-delta-down: var(--color-loss);
 
   /* Accent scale ends — the near-white and near-black a generated accent ramp runs between */
   --color-accent-scale-light: #f8f8f8;
