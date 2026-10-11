@@ -4,6 +4,37 @@ Angular signal-store features and helpers for the lifekit apps (`withAsyncStatus
 `withUrlSync`, `ApiService`, …), plus the framework-free
 `@lifekit-hq/core/format` and the `@lifekit-hq/core/pwa` entry points.
 
+## `withAsyncStatus`
+
+Request status for a store: `status` (`'idle' | 'loading' | 'success' | 'error'`) and `errorCode`,
+with the `isLoading`, `hasError` and `errorMessage` computeds and `setLoading()`, `setSuccess()`,
+`setError(code)` and `setIdle()`. `errorMessage` resolves the code through `ErrorMessageService` and
+falls back to `defaultErrorMessage` (default: "Something went wrong. Please try again.").
+
+```ts
+signalStore(withAsyncStatus({defaultErrorMessage: 'Could not load accounts.'}));
+```
+
+### Several requests in one store: `withNamedAsyncStatus`
+
+`withNamedAsyncStatus(name, config?)` is the same feature with every member prefixed by `name`, so one
+store can track independent requests, each with its own status, error code and message. Call it once
+per request with a distinct name; the features compose like any other `signalStoreFeature`.
+
+```ts
+signalStore(
+  withNamedAsyncStatus('profile'),
+  withNamedAsyncStatus('events', {defaultErrorMessage: 'Could not load events.'})
+);
+// profileStatus, profileErrorCode, isProfileLoading, hasProfileError, profileErrorMessage,
+// setProfileLoading, setProfileSuccess, setProfileError(code), setProfileIdle
+// eventsStatus, eventsErrorCode, isEventsLoading, hasEventsError, eventsErrorMessage, …
+```
+
+The name is the state field prefix (`profileStatus`) and, capitalised, the infix in computeds and
+methods (`isProfileLoading`, `setProfileLoading`). It must be a string literal so the members are
+typed, and two features in one store need different names (or they overwrite each other).
+
 ## `withUrlSync`
 
 Two-way sync between store state and the query string. Each schema entry maps one state field to one
