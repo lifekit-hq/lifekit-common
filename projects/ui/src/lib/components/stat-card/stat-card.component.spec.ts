@@ -39,8 +39,7 @@ describe('StatCardComponent', () => {
     fixture.componentRef.setInput('delta', 4.2);
     fixture.componentRef.setInput('deltaLabel', '+4.2%');
     fixture.detectChanges();
-    const deltaSpan: HTMLElement | null =
-      fixture.nativeElement.querySelector('.text-gain');
+    const deltaSpan: HTMLElement | null = fixture.nativeElement.querySelector('.text-gain');
     expect(deltaSpan).toBeTruthy();
   });
 

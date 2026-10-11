@@ -109,11 +109,7 @@ const meta: Meta<HeroArgs> = {
         },
         release: () => rest(hero),
         deltaClass: (h: Hero) =>
-          h.change === 0
-            ? 'text-text-secondary'
-            : h.change > 0
-              ? 'text-gain'
-              : 'text-loss',
+          h.change === 0 ? 'text-text-secondary' : h.change > 0 ? 'text-gain' : 'text-loss',
       },
       template: `
         <section class="mx-auto flex w-full max-w-md flex-col gap-cmn-3 rounded-cmn-lg border border-border-default bg-surface-card p-cmn-4">
