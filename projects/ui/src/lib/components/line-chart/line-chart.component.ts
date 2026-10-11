@@ -22,6 +22,8 @@ import {
 } from '@lifekit-hq/charts-core';
 import {Chart} from 'chart.js';
 
+import {injectChartThemeKey} from '../../chart-theme/chart-theme';
+
 export type {
   ChartDomain,
   ChartPoint,
@@ -72,6 +74,8 @@ export class LineChartComponent implements AfterViewInit, OnDestroy {
   private builtCompact = false;
   private builtXSpacing: ChartXSpacing = 'even';
   private builtScrubbable = false;
+  private builtThemeKey = '';
+  private readonly themeKey = injectChartThemeKey();
 
   public readonly data = input<ChartPoint[]>([]);
   public readonly label = input<string>('');
@@ -114,17 +118,19 @@ export class LineChartComponent implements AfterViewInit, OnDestroy {
       const compact = this.compact();
       const scale = {yDomain: this.yDomain(), xSpacing: this.xSpacing()};
       const scrubbable = this.scrubbable();
+      const themeKey = this.themeKey();
       if (!this.chart) {
         return;
       }
       if (
         compact === this.builtCompact &&
         scale.xSpacing === this.builtXSpacing &&
-        scrubbable === this.builtScrubbable
+        scrubbable === this.builtScrubbable &&
+        themeKey === this.builtThemeKey
       ) {
         updateLineChart(this.chart, points, format, scale);
       } else {
-        // `compact`, `xSpacing` and `scrubbable` shape the whole chart config, so changing one rebuilds the chart.
+        // `compact`, `xSpacing` and `scrubbable` shape the whole chart config, as do the token colours a theme change rewrites, so changing one rebuilds the chart.
         this.chart.destroy();
         this.buildChart();
       }
@@ -148,6 +154,7 @@ export class LineChartComponent implements AfterViewInit, OnDestroy {
     this.builtCompact = this.compact();
     this.builtXSpacing = this.xSpacing();
     this.builtScrubbable = this.scrubbable();
+    this.builtThemeKey = this.themeKey();
     this.chart = new Chart(
       ctx,
       buildLineChartConfig(
