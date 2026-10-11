@@ -53,6 +53,18 @@ describe('LkSegmented', () => {
     );
   });
 
+  it('marks the chosen cell with the accent tint and a strong edge, not the card surface', async () => {
+    const el = await mount();
+    el.style.setProperty('--color-accent-subtle', 'rgb(1, 2, 3)');
+    el.style.setProperty('--color-accent-default', 'rgb(4, 5, 6)');
+    el.style.setProperty('--color-border-strong', 'rgb(7, 8, 9)');
+    const chosen = getComputedStyle(cells(el)[2]);
+    expect(chosen.backgroundColor).toBe('rgb(1, 2, 3)');
+    expect(chosen.color).toBe('rgb(4, 5, 6)');
+    expect(chosen.boxShadow).toContain('rgb(7, 8, 9)');
+    expect(chosen.boxShadow).toContain('inset');
+  });
+
   it('leaves the group unnamed when there is no label', async () => {
     const el = await mount({label: ''});
     expect(el.shadowRoot?.querySelector('.group')?.hasAttribute('aria-label')).toBe(false);

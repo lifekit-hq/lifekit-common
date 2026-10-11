@@ -61,7 +61,7 @@ interface PaletteGroup {
 
       <div
         (click)="$event.stopPropagation()"
-        class="cmn-palette-panel relative z-10 w-full max-w-[560px] overflow-hidden rounded-2xl bg-surface-card shadow-cmn-md"
+        class="cmn-palette-panel relative z-10 w-full max-w-[560px] overflow-hidden rounded-2xl border border-border-default bg-surface-card shadow-cmn-md"
       >
         <!-- Search row -->
         <div class="flex items-center gap-cmn-3 border-b border-border-default px-cmn-4 py-3.5">

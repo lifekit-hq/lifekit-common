@@ -121,7 +121,7 @@ lifekit's interface is a precision instrument for reading money: flat, quiet sur
 - One family: IBM Plex Sans (variable 100-700, self-hosted, Cyrillic) for every role; Plex Mono for code only. Money is set in the text face.
 - Tabular figures everywhere, so amount columns align even where a component forgets `tabular-nums`.
 - Petrol accent (`#175a6d`, dark `#5aa9bb`) on cool graphite; status colours at text grade: blue `#2557b0`, green `#0e7446`, amber `#955400`, red `#bb2530`. Info has its own hue and never reads as a second accent.
-- Flat surfaces: a hairline border or a shadow, never both. Shadow is reserved for overlays (menu, dialog, sheet).
+- Flat surfaces: a hairline border or a shadow, never both. Shadow is reserved for overlays (menu, dialog, sheet); the menu, dialog and command palette also carry a hairline border so they keep an edge on dark surfaces.
 - Tight radii: 3 / 6 / 8px.
 
 ## Colors
@@ -155,7 +155,7 @@ A 4px spacing base (`cmn-1` to `cmn-16`). App chrome comes from `cmn-app-layout`
 
 ## Elevation & Depth
 
-Flat by default: hairline border on `surface-card`. Shadows are for overlays only (menu, popover, dialog, bottom sheet). A surface is held by its border or its shadow, never both: overlays (menu, multi-select, dialog, command palette) carry a shadow and no border, and no backdrop blur.
+Flat by default: hairline border on `surface-card`. Shadows are for overlays only (menu, popover, dialog, bottom sheet). A surface is held by its border or its shadow, never both, with one exception: the menu, dialog and command palette carry a shadow and a hairline `border-default`, because a shadow alone is invisible on near-black dark surfaces. Multi-select floats on its shadow alone. No backdrop blur.
 
 ## Shapes
 
@@ -187,5 +187,5 @@ Animate transform and opacity only, never layout properties (no `transition` on 
 
 - **Don't** change the root font size in a consumer.
 - **Don't** put white text on status or dark-accent fills.
-- **Don't** use a border and a shadow on the same container, or nest cards.
+- **Don't** use a border and a shadow on the same container (menu, dialog and command palette excepted), or nest cards.
 - **Don't** use monospace for money, or uppercase tracked labels.

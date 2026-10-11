@@ -45,25 +45,44 @@ describe('ListItemRowComponent', () => {
     expect(divs[1].textContent?.trim()).toBe('Video streaming');
   });
 
-  it('should not apply opacity-55 by default', () => {
-    const row: HTMLElement = fixture.nativeElement.querySelector('div');
-    expect(row.classList).not.toContain('opacity-55');
+  function rowEl(): HTMLElement {
+    return fixture.nativeElement.querySelector('div');
+  }
+
+  function labelEl(): HTMLElement {
+    return fixture.nativeElement.querySelector('.flex-1 > div');
+  }
+
+  it('should not fade the row or its avatar by default', () => {
+    expect(rowEl().className).not.toContain('opacity-55');
+    expect(labelEl().classList).toContain('text-text-primary');
   });
 
-  it('should apply opacity-55 when dimmed is true', () => {
+  it('should recolour the label and sublabel instead of fading the row when dimmed', () => {
+    fixture.componentRef.setInput('sublabel', 'Video streaming');
     fixture.componentRef.setInput('dimmed', true);
     fixture.detectChanges();
-    const row: HTMLElement = fixture.nativeElement.querySelector('div');
-    expect(row.classList).toContain('opacity-55');
+    expect(rowEl().classList).not.toContain('opacity-55');
+    expect(labelEl().classList).toContain('text-text-secondary');
+    expect(labelEl().classList).not.toContain('text-text-primary');
+    const sublabel: HTMLElement = fixture.nativeElement.querySelectorAll('.flex-1 > div')[1];
+    expect(sublabel.classList).toContain('text-text-disabled');
+    expect(sublabel.classList).not.toContain('text-text-secondary');
   });
 
-  it('should remove opacity-55 when dimmed changes back to false', () => {
+  it('should fade only the avatar slot when dimmed', () => {
+    fixture.componentRef.setInput('dimmed', true);
+    fixture.detectChanges();
+    expect(rowEl().className).toContain('[&>[avatar]]:opacity-55');
+  });
+
+  it('should restore the full-strength colours when dimmed changes back to false', () => {
     fixture.componentRef.setInput('dimmed', true);
     fixture.detectChanges();
     fixture.componentRef.setInput('dimmed', false);
     fixture.detectChanges();
-    const row: HTMLElement = fixture.nativeElement.querySelector('div');
-    expect(row.classList).not.toContain('opacity-55');
+    expect(rowEl().className).not.toContain('[&>[avatar]]');
+    expect(labelEl().classList).toContain('text-text-primary');
   });
 
   it('should have the border and flex layout classes on the row div', () => {

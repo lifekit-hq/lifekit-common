@@ -43,7 +43,7 @@ describe('MenuComponent', () => {
     expect(overlayContainer.getContainerElement().textContent).toContain('Log out');
   });
 
-  it('should float on its shadow alone, with no border', () => {
+  it('should lift off the page with a shadow and a hairline border', () => {
     fixture.debugElement
       .query(By.css('button'))
       .triggerEventHandler('click', new MouseEvent('click'));
@@ -51,7 +51,8 @@ describe('MenuComponent', () => {
 
     const menu = overlayContainer.getContainerElement().querySelector('[role="menu"]');
     expect(menu?.classList).toContain('shadow-cmn-lg');
-    expect(menu?.classList).not.toContain('border');
+    expect(menu?.classList).toContain('border');
+    expect(menu?.classList).toContain('border-border-default');
   });
 
   it('should emit the selected item and close the menu', () => {
