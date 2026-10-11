@@ -42,6 +42,13 @@ describe('ChipComponent', () => {
     expect(pill?.classList).toContain('bg-accent-default');
   });
 
+  it('rings the pill on keyboard focus only, never after a mouse click', () => {
+    fixture.detectChanges();
+    const pill = (fixture.nativeElement as HTMLElement).querySelector('button > span');
+    expect(pill?.classList).toContain('group-focus-visible:ring-2');
+    expect(pill?.classList).not.toContain('group-focus:ring-2');
+  });
+
   it('projects its label into the pill', () => {
     const host = TestBed.createComponent(ChipHostComponent);
     host.detectChanges();

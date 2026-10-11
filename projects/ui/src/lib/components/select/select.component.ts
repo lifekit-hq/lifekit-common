@@ -100,8 +100,9 @@ export class SelectComponent implements ControlValueAccessor {
     [
       'block w-full appearance-none rounded border bg-surface-bg pl-cmn-2 pr-8',
       'text-text-primary outline-none transition-colors',
-      'focus:border-accent-default disabled:cursor-not-allowed disabled:opacity-60',
-      this.hasError() ? 'border-error-default' : 'border-surface-raised',
+      'focus:border-accent-default focus-visible:ring-2 focus-visible:ring-border-focus',
+      'disabled:cursor-not-allowed disabled:opacity-60',
+      this.hasError() ? 'border-status-error' : 'border-border-strong',
       SIZE_CLASSES[this.size()],
       this.mode() === 'multiple' ? 'pr-cmn-2' : '',
     ].join(' ')

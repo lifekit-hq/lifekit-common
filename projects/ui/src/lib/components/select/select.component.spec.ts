@@ -46,6 +46,22 @@ describe('SelectComponent', () => {
     expect(nativeSelect()?.className).toContain('text-cmn-base');
   });
 
+  it('bounds the field with the 3:1 border and a focus ring', () => {
+    fixture.detectChanges();
+
+    expect(nativeSelect()?.classList).toContain('border-border-strong');
+    expect(nativeSelect()?.classList).toContain('focus-visible:ring-2');
+    expect(nativeSelect()?.classList).toContain('focus-visible:ring-border-focus');
+  });
+
+  it('swaps to the error border when hasError is set', () => {
+    fixture.componentRef.setInput('hasError', true);
+    fixture.detectChanges();
+
+    expect(nativeSelect()?.classList).toContain('border-status-error');
+    expect(nativeSelect()?.classList).not.toContain('border-border-strong');
+  });
+
   it('writes external form values', () => {
     fixture.componentInstance.writeValue('eur');
     fixture.detectChanges();

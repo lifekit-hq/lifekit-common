@@ -16,7 +16,7 @@ const BASE_CLASSES =
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   primary: 'bg-accent-default text-text-inverse hover:bg-accent-hover active:bg-accent-active',
   secondary:
-    'bg-transparent border border-border-default text-text-primary hover:bg-surface-raised active:bg-surface-raised',
+    'bg-transparent border border-border-strong text-text-primary hover:bg-surface-raised active:bg-surface-raised',
   destructive: 'bg-status-error text-text-inverse hover:opacity-90 active:opacity-80',
 };
 

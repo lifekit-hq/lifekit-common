@@ -33,7 +33,8 @@ const PANEL_BASE_CLASSES =
 
 const ITEM_BASE_CLASSES =
   'flex w-full items-center gap-cmn-3 px-cmn-4 py-cmn-2 text-left text-cmn-sm transition-colors ' +
-  'focus:outline-none focus:bg-surface-raised';
+  'focus:outline-none focus:bg-surface-raised ' +
+  'focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-border-focus';
 
 const ITEM_DEFAULT_CLASSES = 'text-text-primary hover:bg-surface-raised';
 const ITEM_DESTRUCTIVE_CLASSES = 'text-status-error hover:bg-status-error/10';

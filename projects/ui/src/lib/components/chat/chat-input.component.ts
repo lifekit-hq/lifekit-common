@@ -4,7 +4,7 @@ import {ButtonComponent} from '../button/button.component';
 import {type LucideIconName} from '../icon/icon.component';
 
 const TEXTAREA_CLASSES =
-  'flex-1 resize-none rounded-cmn-md border border-border-default bg-surface-card ' +
+  'flex-1 resize-none rounded-cmn-md border border-border-strong bg-surface-card ' +
   'px-cmn-3 py-cmn-2 text-cmn-md text-text-primary placeholder:text-text-placeholder ' +
   'focus:outline-none focus:ring-2 focus:ring-border-focus focus:border-border-focus ' +
   'disabled:opacity-50 disabled:cursor-not-allowed transition-colors max-h-40';

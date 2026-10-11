@@ -24,7 +24,7 @@ const SIZE_CLASSES: Record<InputSize, string> = {
   lg: 'px-cmn-4 py-cmn-3 text-cmn-lg',
 };
 
-const DEFAULT_BORDER = 'border-border-default';
+const DEFAULT_BORDER = 'border-border-strong';
 const ERROR_BORDER = 'border-status-error';
 
 const DEFAULT_ROWS = 3;

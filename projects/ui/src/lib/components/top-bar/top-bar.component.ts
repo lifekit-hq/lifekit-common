@@ -46,6 +46,7 @@ const OVERFLOW_PANEL_CLASSES =
 const OVERFLOW_ITEM_CLASSES =
   'flex w-full items-center gap-cmn-3 px-cmn-4 py-cmn-2 text-left text-cmn-sm text-text-primary ' +
   'transition-colors hover:bg-surface-raised focus:bg-surface-raised focus:outline-none ' +
+  'focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-border-focus ' +
   'min-h-cmn-touch disabled:opacity-50 aria-disabled:opacity-50';
 /** The avatar's disc stays 32px inside its touch-sized, invisible button. */
 const AVATAR_TRIGGER_CLASSES =

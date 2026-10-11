@@ -79,7 +79,7 @@ export class DateRangeComponent implements ControlValueAccessor {
     return from !== null && to !== null && from > to;
   });
   public readonly fieldClasses = computed(
-    () => `${FIELD_CLASSES} ${this.invalid() ? 'border-status-error' : 'border-border-default'}`
+    () => `${FIELD_CLASSES} ${this.invalid() ? 'border-status-error' : 'border-border-strong'}`
   );
 
   protected readonly value = signal<DateRange>(EMPTY_RANGE);

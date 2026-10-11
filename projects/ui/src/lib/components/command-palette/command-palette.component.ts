@@ -94,9 +94,10 @@ interface PaletteGroup {
                 @for (entry of group.items; track entry.item.id) {
                   <div
                     [class.bg-accent-subtle]="entry.idx === selectedIndex()"
+                    [class.border-accent-default]="entry.idx === selectedIndex()"
                     (click)="activate(entry.item)"
                     (mouseenter)="selectedIndex.set(entry.idx)"
-                    class="flex cursor-pointer items-center gap-cmn-3 px-cmn-4 py-2.5 transition-colors duration-75"
+                    class="flex cursor-pointer items-center gap-cmn-3 border-l-2 border-transparent px-cmn-4 py-2.5 transition-colors duration-75"
                   >
                     <div
                       [class.bg-accent-default]="entry.idx === selectedIndex()"

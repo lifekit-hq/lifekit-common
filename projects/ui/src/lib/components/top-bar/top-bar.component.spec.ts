@@ -266,6 +266,16 @@ describe('TopBarComponent', () => {
       expect(items.map(item => item.textContent?.trim())).toEqual(['Share', 'Archive']);
     });
 
+    it('should ring the focused overflow item, not just tint it', () => {
+      fixture.componentRef.setInput('actions', ACTIONS);
+      fixture.detectChanges();
+      trigger()?.click();
+      fixture.detectChanges();
+      const item = overlayContainer.getContainerElement().querySelector('[role="menuitem"]');
+      expect(item?.classList).toContain('focus-visible:ring-2');
+      expect(item?.classList).toContain('focus-visible:ring-inset');
+    });
+
     it('should emit the original action when an item is chosen and return focus', async () => {
       fixture.componentRef.setInput('actions', ACTIONS);
       fixture.detectChanges();

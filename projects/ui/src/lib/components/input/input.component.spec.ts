@@ -95,7 +95,7 @@ describe('InputComponent', () => {
   it('marks the field invalid and swaps the border when hasError is set', () => {
     fixture.detectChanges();
     expect(input().getAttribute('aria-invalid')).toBeNull();
-    expect(input().className).toContain('border-border-default');
+    expect(input().className).toContain('border-border-strong');
 
     fixture.componentRef.setInput('hasError', true);
     fixture.detectChanges();
