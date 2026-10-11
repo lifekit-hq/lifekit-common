@@ -10,8 +10,10 @@ import {type LkThemeChoice, LkThemePicker} from '@lifekit-hq/elements';
 import {APP_SEEDS, DEFAULT_INTENSITY} from '@lifekit-hq/tokens/engine';
 import type {Meta, StoryObj} from '@storybook/angular';
 
+import {AreaChartComponent} from '../../components/area-chart/area-chart.component';
 import {ButtonComponent} from '../../components/button/button.component';
 import {CardComponent} from '../../components/card/card.component';
+import {DonutChartComponent} from '../../components/donut-chart/donut-chart.component';
 import {type Theme, type ThemePreference, type ThemeSeed, ThemeService} from './theme.service';
 
 if (!customElements.get('lk-theme-picker')) {
@@ -20,10 +22,25 @@ if (!customElements.get('lk-theme-picker')) {
 
 const SERIES = [1, 2, 3, 4, 5, 6, 7, 8];
 
+const CHART_SERIES = [
+  ['Banking', [420, 428, 431, 445]],
+  ['Brokerage', [610, 625, 601, 640]],
+  ['Crypto', [180, 205, 172, 198]],
+].map(([label, values]) => ({
+  label: label as string,
+  points: (values as number[]).map((value, i) => ({label: ['Jun', 'Jul', 'Aug', 'Sep'][i], value})),
+}));
+
+const CHART_SEGMENTS = [
+  {label: 'Banking', value: 445},
+  {label: 'Brokerage', value: 640},
+  {label: 'Crypto', value: 198},
+];
+
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'cmn-story-theme-panel',
-  imports: [ButtonComponent, CardComponent],
+  imports: [AreaChartComponent, ButtonComponent, CardComponent, DonutChartComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: `
     <div class="flex max-w-xl flex-col gap-cmn-4">
@@ -82,6 +99,13 @@ const SERIES = [1, 2, 3, 4, 5, 6, 7, 8];
           }
         </div>
       </cmn-card>
+
+      <p class="text-cmn-sm text-text-secondary">
+        Charts draw on a canvas, so they rebuild on a theme or colour change: flip the theme or pick
+        a colour above and the legend, grid and series follow without a reload.
+      </p>
+      <cmn-area-chart [series]="areaSeries" label="Net worth" />
+      <cmn-donut-chart [segments]="segments" label="Allocation" />
     </div>
   `,
 })
@@ -94,6 +118,8 @@ class StoryThemePanelComponent {
   protected readonly appSeed = APP_SEEDS.fs.seed;
   protected readonly defaultIntensity = DEFAULT_INTENSITY;
   protected readonly series = SERIES;
+  protected readonly areaSeries = CHART_SERIES;
+  protected readonly segments = CHART_SEGMENTS;
 
   constructor() {
     this.themeService.activeTheme$.pipe(takeUntilDestroyed()).subscribe(t => this.theme.set(t));

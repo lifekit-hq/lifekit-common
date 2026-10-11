@@ -24,6 +24,7 @@ import {
 import {Chart} from 'chart.js';
 
 import {isOutputObserved} from '../../chart-click/output-observed';
+import {injectChartThemeKey} from '../../chart-theme/chart-theme';
 
 export type {BarSeries, BarValueFormat, ChartPointClick} from '@lifekit-hq/charts-core';
 
@@ -54,6 +55,8 @@ export type {BarSeries, BarValueFormat, ChartPointClick} from '@lifekit-hq/chart
 export class BarChartComponent implements AfterViewInit, OnDestroy {
   private readonly canvasRef = viewChild.required<ElementRef<HTMLCanvasElement>>('chartCanvas');
   private chart: Chart | null = null;
+  private builtThemeKey = '';
+  private readonly themeKey = injectChartThemeKey();
 
   public readonly series = input<BarSeries[]>([]);
   public readonly label = input<string>('');
@@ -73,8 +76,16 @@ export class BarChartComponent implements AfterViewInit, OnDestroy {
   constructor() {
     effect(() => {
       const series = this.series();
-      if (this.chart) {
+      const themeKey = this.themeKey();
+      if (!this.chart) {
+        return;
+      }
+      if (themeKey === this.builtThemeKey) {
         updateBarChart(this.chart, series);
+      } else {
+        // The token colours are part of the chart config, so a theme change rebuilds the chart.
+        this.chart.destroy();
+        this.buildChart();
       }
     });
   }
@@ -93,6 +104,7 @@ export class BarChartComponent implements AfterViewInit, OnDestroy {
     if (!ctx) {
       return;
     }
+    this.builtThemeKey = this.themeKey();
     const config = buildBarChartConfig(
       this.series(),
       resolveBarChartTokens(),

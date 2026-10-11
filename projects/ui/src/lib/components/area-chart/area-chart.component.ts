@@ -24,6 +24,7 @@ import {
 import {Chart} from 'chart.js';
 
 import {isOutputObserved} from '../../chart-click/output-observed';
+import {injectChartThemeKey} from '../../chart-theme/chart-theme';
 
 export type {AreaSeries, ChartPointClick, ChartScrubPoint} from '@lifekit-hq/charts-core';
 
@@ -55,6 +56,8 @@ export class AreaChartComponent implements AfterViewInit, OnDestroy {
   private readonly canvasRef = viewChild.required<ElementRef<HTMLCanvasElement>>('chartCanvas');
   private chart: Chart | null = null;
   private builtScrubbable = false;
+  private builtThemeKey = '';
+  private readonly themeKey = injectChartThemeKey();
 
   public readonly series = input<AreaSeries[]>([]);
   public readonly label = input<string>('');
@@ -86,13 +89,15 @@ export class AreaChartComponent implements AfterViewInit, OnDestroy {
       const series = this.series();
       const stacked = this.stacked();
       const scrubbable = this.scrubbable();
+      const themeKey = this.themeKey();
       if (!this.chart) {
         return;
       }
-      if (scrubbable === this.builtScrubbable) {
+      if (scrubbable === this.builtScrubbable && themeKey === this.builtThemeKey) {
         updateAreaChart(this.chart, series, stacked);
       } else {
-        // The scrub plugin is part of the chart config, so toggling it rebuilds the chart.
+        // The scrub plugin and the token colours are part of the chart config, so toggling the
+        // plugin or switching theme rebuilds the chart.
         this.chart.destroy();
         this.buildChart();
       }
@@ -114,6 +119,7 @@ export class AreaChartComponent implements AfterViewInit, OnDestroy {
       return;
     }
     this.builtScrubbable = this.scrubbable();
+    this.builtThemeKey = this.themeKey();
     const config = buildAreaChartConfig(
       this.series(),
       resolveAreaChartTokens(),
