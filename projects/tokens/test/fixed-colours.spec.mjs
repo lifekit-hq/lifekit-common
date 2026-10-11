@@ -38,6 +38,8 @@ const MODES = ['light', 'dark'];
 const ASSETS = ['asset-equity', 'asset-crypto', 'asset-cash'];
 const CHANGES = ['gain', 'loss'];
 const FLOWS = {'flow-in': 'gain', 'flow-out': 'loss'};
+// Deprecated names that now only alias gain and loss, so the old and the fixed pair never differ.
+const DELTAS = {'delta-up': 'gain', 'delta-down': 'loss'};
 
 /** The declarations of the blocks whose selector list names one of `selectors`. */
 function declared(selectors) {
@@ -113,6 +115,14 @@ describe('fixed colours: declared', () => {
     }
   });
 
+  it('keeps the deprecated deltas on gain and loss, in light and dark', () => {
+    for (const [delta, change] of Object.entries(DELTAS)) {
+      assert.equal(THEME.light.get(`--color-${delta}`), `var(--color-${change})`);
+      assert.equal(THEME.dark.get(`--color-${delta}`), `var(--color-${change})`);
+      for (const mode of MODES) assert.equal(themed(mode, delta), themed(mode, change));
+    }
+  });
+
   it('keeps the pre-#971 finance-sentry colours where they already clear contrast', () => {
     assert.equal(themed('light', 'asset-equity'), '#175a6d');
     assert.equal(themed('dark', 'asset-crypto'), '#f59e0b');
@@ -133,6 +143,10 @@ describe('fixed colours: independent of the seed', () => {
         }
       }
     }
+    const deltas = seedTokenNames().filter(name =>
+      Object.keys(DELTAS).some(d => name === `--color-${d}`)
+    );
+    assert.deepEqual(deltas, [], 'a seed that rewrote a delta would split it from gain and loss');
     const rewritten = seedTokenNames().filter(name =>
       FIXED_COLOUR_NAMES.some(f => name === `--color-${f}`)
     );
@@ -144,7 +158,7 @@ describe('fixed colours: independent of the seed', () => {
     assert.ok(sheets.length >= 2, 'at least two seed stylesheets');
     for (const file of sheets) {
       const css = readFileSync(new URL(file, `file://${SEEDS_DIR}`), 'utf8');
-      for (const name of FIXED_COLOUR_NAMES) {
+      for (const name of [...FIXED_COLOUR_NAMES, ...Object.keys(DELTAS)]) {
         assert.ok(!css.includes(`--color-${name}:`), `${file} sets --color-${name}`);
       }
     }

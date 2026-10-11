@@ -107,10 +107,9 @@ describe('derive', () => {
     assert.equal(new Set(accents).size, accents.length);
   });
 
-  it('aliases the deltas to success and error and series 1 to the accent', () => {
+  it('aliases series 1 to the accent and leaves the deprecated deltas to theme.css', () => {
     const {tokens} = derive({seed: '#8e3b8a', mode: 'dark'});
-    assert.equal(tokens['delta-up'], tokens['status-success']);
-    assert.equal(tokens['delta-down'], tokens['status-error']);
+    assert.ok(!('delta-up' in tokens) && !('delta-down' in tokens));
     assert.equal(tokens['chart-series-1'], tokens['accent-default']);
   });
 

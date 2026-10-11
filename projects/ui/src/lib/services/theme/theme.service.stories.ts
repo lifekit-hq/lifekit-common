@@ -70,8 +70,8 @@ const SERIES = [1, 2, 3, 4, 5, 6, 7, 8];
           <span class="px-cmn-3 py-cmn-2 text-text-secondary">Another nav item</span>
         </div>
         <div class="mb-cmn-4 flex gap-cmn-3 text-cmn-sm">
-          <span class="text-delta-up">+4.2%</span>
-          <span class="text-delta-down">-1.8%</span>
+          <span class="text-gain">+4.2%</span>
+          <span class="text-loss">-1.8%</span>
         </div>
         <div class="flex gap-cmn-1" aria-label="Chart series 1 to 8">
           @for (n of series; track n) {

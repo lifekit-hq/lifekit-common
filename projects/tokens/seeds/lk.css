@@ -39,8 +39,6 @@
   --color-status-warning-subtle: #ede6d9;
   --color-status-error: #b02a2d;
   --color-status-error-subtle: #f3dfe0;
-  --color-delta-up: #007835;
-  --color-delta-down: #b02a2d;
   --color-chart-series-1: #5051cf;
   --color-chart-series-2: #a08800;
   --color-chart-series-3: #a94a81;
@@ -90,8 +88,6 @@
   --color-status-warning-subtle: #382e25;
   --color-status-error: #ff958d;
   --color-status-error-subtle: #3b2c2e;
-  --color-delta-up: #76cf8a;
-  --color-delta-down: #ff958d;
   --color-chart-series-1: #8e9aff;
   --color-chart-series-2: #b7a13e;
   --color-chart-series-3: #f39ac9;
@@ -143,8 +139,6 @@
     --color-status-warning-subtle: #e8e2d9;
     --color-status-error: #920014;
     --color-status-error-subtle: #efd9dc;
-    --color-delta-up: #005523;
-    --color-delta-down: #920014;
     --color-chart-series-1: #3e39b6;
     --color-chart-series-2: #a08800;
     --color-chart-series-3: #a94a81;
@@ -193,8 +187,6 @@
     --color-status-warning-subtle: #393026;
     --color-status-error: #ffa8a0;
     --color-status-error-subtle: #3b2e31;
-    --color-delta-up: #7ad38e;
-    --color-delta-down: #ffa8a0;
     --color-chart-series-1: #aab5ff;
     --color-chart-series-2: #b7a13e;
     --color-chart-series-3: #f39ac9;
