@@ -160,7 +160,7 @@ const HEADER_OVERLAY_CLASSES =
       <!-- Search trigger: icon-only below md -->
       <button
         (click)="searchClick.emit()"
-        class="flex h-cmn-touch w-cmn-touch shrink-0 items-center justify-center gap-cmn-2 rounded-cmn-md text-cmn-sm text-text-secondary transition-colors hover:bg-surface-raised hover:text-text-primary md:h-auto md:w-auto md:border md:border-border-default md:bg-surface-bg md:px-cmn-3 md:py-1.5 md:hover:border-border-strong md:hover:bg-surface-bg"
+        class="flex h-cmn-touch w-cmn-touch shrink-0 items-center justify-center gap-cmn-2 rounded-cmn-md text-cmn-sm text-text-secondary transition-colors hover:bg-surface-raised hover:text-text-primary md:h-auto md:w-auto md:border md:border-border-strong md:bg-surface-bg md:px-cmn-3 md:py-1.5 md:hover:bg-surface-bg"
         type="button"
         aria-label="Search"
       >
