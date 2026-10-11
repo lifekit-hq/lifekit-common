@@ -112,8 +112,8 @@ const meta: Meta<HeroArgs> = {
           h.change === 0
             ? 'text-text-secondary'
             : h.change > 0
-              ? 'text-status-success'
-              : 'text-status-error',
+              ? 'text-gain'
+              : 'text-loss',
       },
       template: `
         <section class="mx-auto flex w-full max-w-md flex-col gap-cmn-3 rounded-cmn-lg border border-border-default bg-surface-card p-cmn-4">
