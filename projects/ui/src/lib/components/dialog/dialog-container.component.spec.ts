@@ -42,9 +42,15 @@ describe('CmnDialogContainerComponent', () => {
     expect(shell().getAttribute('aria-modal')).toBe('true');
   });
 
-  it('is held by its shadow alone, with no border', () => {
+  it('is held by a shadow and a hairline border', () => {
     expect(shell().classList).toContain('shadow-cmn-lg');
-    expect(shell().classList).not.toContain('border');
+    expect(shell().classList).toContain('border');
+    expect(shell().classList).toContain('border-border-default');
+  });
+
+  it('sizes the body to its content, leaving no empty band under the actions', () => {
+    const body = (fixture.nativeElement as HTMLElement).querySelector('.cmn-dialog-shell__body');
+    expect(body?.className).not.toMatch(/min-h-/);
   });
 
   it('omits aria-label when none is configured', () => {

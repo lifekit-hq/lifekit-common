@@ -100,10 +100,10 @@ export class LkSegmented extends LitElement {
     }
 
     .cell[aria-checked='true'] {
-      background: var(--color-surface-card, #ffffff);
-      color: var(--color-text-primary, #0f1a1f);
+      background: var(--color-accent-subtle, #e3f1f4);
+      color: var(--color-accent-default, #175a6d);
       font-weight: 600;
-      box-shadow: var(--shadow-sm);
+      box-shadow: inset 0 0 0 1px var(--color-border-strong, #7d8c93);
     }
 
     .cell:disabled {

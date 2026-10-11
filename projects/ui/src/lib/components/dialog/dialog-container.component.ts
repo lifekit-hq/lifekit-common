@@ -6,7 +6,7 @@ import {type CmnDialogConfig, type CmnDialogSize} from './dialog-config';
 
 const SHELL_BASE =
   'cmn-dialog-shell relative flex flex-col bg-surface-card text-text-primary ' +
-  'rounded-cmn-lg shadow-cmn-lg overflow-hidden ' +
+  'rounded-cmn-lg border border-border-default shadow-cmn-lg overflow-hidden ' +
   'max-h-[90vh] w-full';
 
 // Min-widths are gated behind the first breakpoint where they fit inside the
@@ -47,7 +47,7 @@ const SIZE_CLASSES: Record<CmnDialogSize, string> = {
           </button>
         </header>
       }
-      <div class="cmn-dialog-shell__body overflow-y-auto p-cmn-6 flex-1 min-h-[20rem]">
+      <div class="cmn-dialog-shell__body overflow-y-auto p-cmn-6 flex-1">
         <ng-template cdkPortalOutlet />
       </div>
     </section>
