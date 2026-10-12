@@ -1,5 +1,21 @@
 # Changelog
 
+## [3.2.0](https://github.com/lifekit-hq/lifekit-common/compare/v3.1.0...v3.2.0) (2026-10-11)
+
+
+### Features
+
+* **core:** add withNamedAsyncStatus for stores that track several requests ([#150](https://github.com/lifekit-hq/lifekit-common/issues/150)) ([6819569](https://github.com/lifekit-hq/lifekit-common/commit/68195699464da2cf1de1bfb30ce250e749157823))
+* **ui:** multi-line text field, and a clickable version footer with a dot ([#144](https://github.com/lifekit-hq/lifekit-common/issues/144)) ([13deedb](https://github.com/lifekit-hq/lifekit-common/commit/13deedbc114ac88578d7fa155ed26d453331ca18))
+
+
+### Bug Fixes
+
+* **tokens:** alias delta-up/down to gain/loss so deltas share one green and red ([#148](https://github.com/lifekit-hq/lifekit-common/issues/148)) ([a0de190](https://github.com/lifekit-hq/lifekit-common/commit/a0de190aac2f5b26f19b99edc98460472dc19620))
+* **ui:** dim rows by recolouring text, selected segment tint, hairline border on overlays ([#147](https://github.com/lifekit-hq/lifekit-common/issues/147)) ([6ba2baa](https://github.com/lifekit-hq/lifekit-common/commit/6ba2baac0411e9624c93e49c8360365d5ca5fc94))
+* **ui:** give form controls 3:1 borders and visible keyboard focus ([#146](https://github.com/lifekit-hq/lifekit-common/issues/146)) ([59e4aaf](https://github.com/lifekit-hq/lifekit-common/commit/59e4aafb3b679c3803e3762838d6a28b5a6a0226))
+* **ui:** rebuild charts when the theme or seed colour changes ([#149](https://github.com/lifekit-hq/lifekit-common/issues/149)) ([1251a3b](https://github.com/lifekit-hq/lifekit-common/commit/1251a3b60f061f12854e7223097b6928f34ec5f1))
+
 ## [3.1.0](https://github.com/lifekit-hq/lifekit-common/compare/v3.0.0...v3.1.0) (2026-10-07)
 
 
