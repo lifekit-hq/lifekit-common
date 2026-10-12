@@ -28,6 +28,9 @@ export type {
  * attribute). Theming is passive: import `@lifekit-hq/tokens/theme.css` in the host page and the
  * element resolves the correct values automatically.
  *
+ * The chart follows a live theme change: it watches `data-theme` and the inline style on the
+ * document element and redraws with the new token colours when they move.
+ *
  * Values render as currency by default; set `valueFormat` (`value-format` attribute) to `number`
  * or `percent` for unit-less series, or assign a `(value, compact) => string` function property.
  *
@@ -54,6 +57,9 @@ export type {
  */
 export class LkLineChart extends LitElement {
   private chart: Chart | null = null;
+  /** The token values the live chart was built with; a theme change that moves them rebuilds it. */
+  private tokenKey = '';
+  private themeObserver: MutationObserver | null = null;
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   public static override styles = css`
@@ -148,11 +154,13 @@ export class LkLineChart extends LitElement {
     if (!ctx) {
       return;
     }
+    const tokens = resolveLineChartTokens();
+    this.tokenKey = JSON.stringify(tokens);
     this.chart = new Chart(
       ctx,
       buildLineChartConfig(
         this.points,
-        resolveLineChartTokens(),
+        tokens,
         this.currency,
         this.valueFormat,
         this.compact,
@@ -215,8 +223,27 @@ export class LkLineChart extends LitElement {
     this.firstUpdated();
   }
 
+  public override connectedCallback(): void {
+    super.connectedCallback();
+    // A theme switch or seed colour rewrites `data-theme` and the inline custom properties on the
+    // root; the canvas keeps the colours it was built with, so redraw when the tokens moved.
+    this.themeObserver = new MutationObserver(() => this.rethemeChart());
+    this.themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme', 'style'],
+    });
+  }
+
+  private rethemeChart(): void {
+    if (this.chart && JSON.stringify(resolveLineChartTokens()) !== this.tokenKey) {
+      this.rebuildChart();
+    }
+  }
+
   public override disconnectedCallback(): void {
     super.disconnectedCallback();
+    this.themeObserver?.disconnect();
+    this.themeObserver = null;
     this.chart?.destroy();
     this.chart = null;
   }
