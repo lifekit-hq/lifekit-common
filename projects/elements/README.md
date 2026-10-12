@@ -101,8 +101,9 @@ Peer dependencies: `lit ^3.0.0`, `chart.js ^4.5.1`. Runtime dependency: `@lifeki
 ### `<lk-line-chart>`
 
 Renders a Chart.js line chart inside shadow DOM. Themed via `@lifekit/tokens` CSS custom
-properties. Data flows in via the `points` property; no user-interaction events are emitted
-in this pilot.
+properties, and redrawn with the new colours when `data-theme` or the inline style on the document
+element changes (theme switch, seed colour). Data flows in via the `points` property; no
+user-interaction events are emitted in this pilot.
 
 | Property      | Type                                                                | Default      | Description                                                                                                                                                                           |
 | ------------- | ------------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

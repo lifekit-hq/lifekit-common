@@ -164,6 +164,55 @@ describe('LkLineChart', () => {
     expect(spy).toHaveBeenCalledOnce();
   });
 
+  describe('live theme change', () => {
+    const root = document.documentElement;
+    const ACCENT = '--color-accent-default';
+    // The observer callback is a microtask; yield a macrotask so it has run.
+    const settle = (): Promise<void> => new Promise(resolve => setTimeout(resolve));
+
+    afterEach(() => {
+      root.style.removeProperty(ACCENT);
+      root.removeAttribute('data-theme');
+    });
+
+    it('rebuilds with the new token colours when data-theme flips', async () => {
+      root.style.setProperty(ACCENT, 'rgb(1, 2, 3)');
+      root.setAttribute('data-theme', 'light');
+      await settle();
+      const before = builtChart();
+      expect(before).not.toBeNull();
+
+      root.style.setProperty(ACCENT, 'rgb(4, 5, 6)');
+      root.setAttribute('data-theme', 'dark');
+      await settle();
+
+      const after = builtChart();
+      expect(after).not.toBeNull();
+      expect(after).not.toBe(before);
+      expect(
+        (after as unknown as {data: {datasets: {borderColor: string}[]}}).data.datasets[0]
+          .borderColor
+      ).toBe('rgb(4, 5, 6)');
+    });
+
+    it('keeps the chart when the document changes but the tokens do not', async () => {
+      const before = builtChart();
+      root.setAttribute('data-theme', 'dark');
+      await settle();
+      expect(builtChart()).toBe(before);
+    });
+
+    it('stops observing once the element is removed', async () => {
+      const disconnect = vi.spyOn(MutationObserver.prototype, 'disconnect');
+      el.remove();
+      expect(disconnect).toHaveBeenCalled();
+      disconnect.mockRestore();
+      root.style.setProperty(ACCENT, 'rgb(7, 8, 9)');
+      await settle();
+      expect(builtChart()).toBeNull();
+    });
+  });
+
   describe('scrub-to-read', () => {
     const POINTS = [
       {label: 'Jan', value: 100},
