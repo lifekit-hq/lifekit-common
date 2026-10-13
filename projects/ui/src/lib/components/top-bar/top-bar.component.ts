@@ -6,6 +6,7 @@ import {
   type AccountIdentity,
   avatarInitials,
 } from '../account-avatar/account-avatar.component';
+import {accountHeader} from '../account-avatar/account-header';
 import {type PageAction} from '../app-layout/page-chrome';
 import {IconComponent} from '../icon/icon.component';
 import {MenuComponent, type MenuHeader, type MenuItem} from '../menu/menu.component';
@@ -257,21 +258,9 @@ export class TopBarComponent {
   });
 
   /** The menu's identity header, or undefined when the identity has neither a name nor an email. */
-  protected readonly menuHeader = computed<MenuHeader | undefined>(() => {
-    const identity = this.avatarIdentity();
-    const name = identity?.name?.trim() ?? '';
-    const email = identity?.email?.trim() ?? '';
-    const title = name || email;
-    if (!title) {
-      return undefined;
-    }
-    return {
-      title,
-      subtitle: name && email ? email : undefined,
-      pictureUrl: identity?.pictureUrl,
-      avatarLabel: this.avatarText(),
-    };
-  });
+  protected readonly menuHeader = computed<MenuHeader | undefined>(() =>
+    accountHeader(this.avatarIdentity(), this.avatarLabel())
+  );
 
   protected readonly themeToggleClasses = computed<string>(() =>
     this.actions().length > 1

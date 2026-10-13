@@ -47,7 +47,6 @@ import {matchTab, ShellNavigationService} from './shell-navigation.service';
 export {type NavItem} from '../sidebar-nav/sidebar-nav.component';
 export * from './account-menu';
 export * from './page-chrome';
-export * from './phone-tabs';
 export {LAST_TAB_STORAGE_KEY} from './shell-navigation.service';
 
 /** Palette action id the layout handles itself: toggles the theme. */

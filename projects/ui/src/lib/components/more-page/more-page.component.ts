@@ -2,6 +2,7 @@ import {ChangeDetectionStrategy, Component, computed, input, output} from '@angu
 import {RouterLink} from '@angular/router';
 
 import {AccountAvatarComponent} from '../account-avatar/account-avatar.component';
+import {accountHeader} from '../account-avatar/account-header';
 import {type AppLayoutAccount} from '../app-layout/app-layout.component';
 import {overflowNavItems} from '../app-layout/phone-tabs';
 import {BadgeComponent} from '../badge/badge.component';
@@ -69,7 +70,10 @@ const ROW_CLASSES =
                   class="flex items-center gap-cmn-3 border-b border-border-default px-cmn-4 py-cmn-3"
                   data-more-identity
                 >
-                  <cmn-account-avatar [label]="who.avatarLabel" [pictureUrl]="who.pictureUrl" />
+                  <cmn-account-avatar
+                    [label]="who.avatarLabel ?? who.title"
+                    [pictureUrl]="who.pictureUrl"
+                  />
                   <div class="min-w-0">
                     <p class="truncate text-cmn-sm font-medium text-text-primary">
                       {{ who.title }}
@@ -157,21 +161,9 @@ export class MorePageComponent {
     return groups.length > 0 || !this.identity() ? groups : [[]];
   });
 
-  protected readonly identity = computed(() => {
-    const account = this.account();
-    const name = account?.name?.trim() ?? '';
-    const email = account?.email?.trim() ?? '';
-    const title = name || email;
-    if (!account || !title) {
-      return undefined;
-    }
-    return {
-      title,
-      subtitle: name && email ? email : undefined,
-      pictureUrl: account.pictureUrl,
-      avatarLabel: account.label.trim() || title,
-    };
-  });
+  protected readonly identity = computed(() =>
+    accountHeader(this.account(), this.account()?.label)
+  );
 
   protected isRoute(item: MenuItem): boolean {
     return isRouteMenuItem(item);
