@@ -241,9 +241,8 @@ export const Standard: Story = {
   render: () => ({template: '<cmn-story-settings-page />'}),
 };
 
-/** The same page at phone width: each section stacks its heading above its content. */
+/** The same page in the phone viewport: each section stacks its heading above its content. */
 export const Phone: Story = {
-  render: () => ({
-    template: '<div class="mx-auto w-[375px]"><cmn-story-settings-page /></div>',
-  }),
+  globals: {viewport: {value: 'mobile2', isRotated: false}},
+  render: () => ({template: '<cmn-story-settings-page />'}),
 };
