@@ -57,8 +57,13 @@ export function toCss(selector: string, tokens: Record<string, string>, indent?:
 
 export const DEFAULT_INTENSITY: number;
 export const INTENSITY_STOPS: Readonly<{quiet: number; tinted: number; immersive: number}>;
-/** Colours with a fixed meaning (asset classes, gain/loss, in/out): no seed rewrites them. */
+/** Colours with a fixed meaning (asset classes, gain/loss, in/out, categories): no seed rewrites them. */
 export const FIXED_COLOUR_NAMES: readonly string[];
+/**
+ * The fixed categorical palette, in index order: `category-1` … `category-14`, then the neutral
+ * `category-other`. Names are token names without the `--color-` prefix.
+ */
+export const CATEGORY_COLOUR_NAMES: readonly string[];
 
 export const APP_SEEDS: Readonly<
   Record<'fs' | 'lk' | 'dc' | 'bs', Readonly<{name: string; seed: string; intensity: number}>>

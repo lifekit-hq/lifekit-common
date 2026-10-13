@@ -27,8 +27,12 @@ Design tokens for the lifekit ecosystem, framework-agnostic.
   `ThemeService.setSeed()` and the pre-paint script share. What each role is for and where the accent
   may appear: [`docs/design/patterns.md`](../../docs/design/patterns.md#colour).
 - Fixed-meaning colours (`--color-asset-equity|crypto|cash`, `--color-gain|loss`,
-  `--color-flow-in|out`, also Tailwind colours of the same name): set in `theme.css` for light and
-  dark, never derived by the engine or set by a seed. `FIXED_COLOUR_NAMES` from `engine` lists them.
+  `--color-flow-in|out`, `--color-flow-in-fill|flow-out-fill`, `--color-category-1`…`category-14` and
+  `--color-category-other`, also Tailwind colours of the same name): set in `theme.css` for light
+  and dark, never derived by the engine or set by a seed. `FIXED_COLOUR_NAMES` from `engine` lists
+  them and `CATEGORY_COLOUR_NAMES` the categorical palette in index order. `flow-in|out` are the text
+  grade (gain and loss); the `-fill` pair is for bars and dots, a lightness gap apart. Categories are
+  a fixed palette a host maps its category keys onto, not a seed-derived series.
 - `seeds/<app>.css`: each app's palette (`fs`, `lk`, `dc`, `bs`) for light, dark and
   `prefers-contrast: more`, generated from the engine by `scripts/build-seeds.mjs`
   (`npm run build:seeds`). Import it after `theme.css`; with none, the app gets the default

@@ -25,4 +25,18 @@ describe('tailwind preset', () => {
     assert.match(css, /--tw-ring-offset-color:\s*var\(--color-surface-card\)/);
     assert.doesNotMatch(css, /--tw-ring-offset-color:\s*#fff/);
   });
+
+  it('exposes the categorical palette and the cash-flow fills as colour utilities', async () => {
+    const css = await generate([
+      'bg-category-1',
+      'bg-category-14',
+      'text-category-other',
+      'bg-flow-in-fill',
+      'bg-flow-out-fill',
+    ]);
+    for (const name of ['category-1', 'category-14', 'flow-in-fill', 'flow-out-fill']) {
+      assert.match(css, new RegExp(`\\.bg-${name}\\s*\\{[^}]*var\\(--color-${name}\\)`));
+    }
+    assert.match(css, /\.text-category-other\s*\{[^}]*var\(--color-category-other\)/);
+  });
 });

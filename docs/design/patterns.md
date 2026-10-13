@@ -297,6 +297,8 @@ counter-example (see [Chart period and scrub](#chart-period-and-scrub)). **Owner
 | Status       | `status-{info,success,warning,error}`, `status-…-subtle`                                       | Fixed hues whatever the seed, so red always means a problem. Status text is 4.5:1 on the surfaces and on its own `-subtle` tint.   |
 | Delta        | `delta-up`, `delta-down`                                                                       | Deprecated. Aliases of `gain` and `loss`; use those.                                                                               |
 | Fixed        | `asset-equity`, `asset-crypto`, `asset-cash`, `gain`, `loss`, `flow-in`, `flow-out`            | A colour that carries a meaning, so no seed changes it. See [Fixed-meaning colour](#fixed-meaning-colour).                         |
+| Fixed fills  | `flow-in-fill`, `flow-out-fill`                                                                | Cash flow as a mark (a bar, a legend dot), a lightness gap apart. `flow-in` and `flow-out` stay the text grade.                    |
+| Categories   | `category-1`…`category-14`, `category-other`                                                   | One fixed colour per category, the same in every theme, range and screen. See [Fixed-meaning colour](#fixed-meaning-colour).       |
 | Chart        | `chart-series-1`…`chart-series-8`, `chart-series-9`, `chart-grid`                              | Series 1 is the accent, 2-8 are categories, 9 is the neutral (an "other" or a baseline). Every mark is 3:1 on the card and page.   |
 
 ### Where the accent may appear
@@ -322,7 +324,9 @@ They are never a category:
 
 - A chart's categories use the series tokens. The engine walks series 2-8 around the colour wheel
   from the seed and skips the red and green arcs, so a category never reads as a gain or a loss.
-  `@lifekit-hq/charts-core` defaults to that order (`CATEGORICAL_STEPS`).
+  `@lifekit-hq/charts-core` defaults to that order (`CATEGORICAL_STEPS`). Categories that must
+  keep one colour across screens and ranges (spending categories) take the fixed `category-N`
+  palette instead, below.
 - A chart that shows one gain or loss, such as a sparkline coloured by its trend, uses the gain
   and loss tokens.
 - Colour is never the only signal: a change also carries its sign or an arrow.
@@ -332,14 +336,28 @@ They are never a category:
 A few colours mean one thing in every app and under every seed, so the engine does not derive
 them and no seed stylesheet sets them: equity (`asset-equity`, the petrol of the original
 finance-sentry), crypto (`asset-crypto`, amber), cash (`asset-cash`, green), a change of value
-(`gain`, `loss`) and cash flow (`flow-in`, `flow-out`, the same colours as gain and loss).
+(`gain`, `loss`) and cash flow (`flow-in`, `flow-out`, the same colours as gain and loss, with
+`flow-in-fill` and `flow-out-fill` for the marks). A categorical palette (`category-1`…`category-14`,
+`category-other`) completes the set.
 
 - Light and dark share the hue; only lightness moves, and only as far as contrast needs: 3:1 for
   a mark (a donut slice, a legend dot), 4.5:1 for `gain` and `loss` as text, on every surface the
   engine can produce. `test/fixed-colours.spec.mjs` holds this.
-- Use them for the thing they name and nothing else. A category that is not an asset class still
-  takes a chart series. `asset-cash` is a green, so it is told apart from `gain` by its label, as
-  colour is never the only signal.
+- Use them for the thing they name and nothing else. `asset-cash` is a green, so it is told apart
+  from `gain` by its label, as colour is never the only signal.
+- **Cash flow has two grades.** `flow-in` and `flow-out` are text (the colours of `gain` and `loss`,
+  4.5:1 on a surface). They are the same lightness, so as bars they blur for red-green colour
+  blindness. A bar, a legend dot or a slice takes `flow-in-fill` and `flow-out-fill`: the same hues,
+  at least 1.4:1 apart in lightness in light and dark (the inflow the lighter), each 3:1 on a card.
+  Never set text in a fill token; never fill a bar with the text pair.
+- **Categories are fixed, not ranked.** A host that colours spending categories maps each category
+  key onto a `category-N` token once and keeps the mapping, so a category wears one colour in every
+  theme, range and screen; it never takes the colour of whatever ranks where, and it never takes a
+  seed-derived chart series (those shift with the accent). `category-other` is the neutral for a
+  folded "other" or an uncategorised slice. The hues skip the loss, gain and asset arcs, each
+  colour is 3:1 on a card and no two are closer than 0.08 in OKLab. Indices are append-only. With 14
+  colours the later ones are mostly told apart by lightness inside a family, so a chart with that
+  many slices also labels them. A chart of a few categories uses the first few.
 - `delta-up` and `delta-down` are deprecated aliases of `gain` and `loss`, so a change of value is
   one green and one red whichever name a consumer uses. They go in the next major.
 
@@ -365,6 +383,14 @@ surfaces, colour only where you act), Tinted 0.45, Immersive 0.85.
   account too. `ThemeService` sets the derived palette inline on `<html>` and caches it under
   `cmn-theme-seed`, which the pre-paint script applies before first paint. That script's CSP hash changed with seed support; see
   [`BROWSER-CHROME.md`](../BROWSER-CHROME.md).
+- The picker offers Petrol, Indigo, Plum, Ocean and Violet beside the app's own colour and a custom
+  one. A preset is a clearly chromatic hue clear of the error and success arcs, so an accent never
+  reads as a loss or a gain and never blends into body text; Rose and Graphite were dropped for
+  that (`test/fixed-colours.spec.mjs`).
+- The selected cell of a segmented control (`cmn-segmented`, `lk-segmented`) is `accent-subtle`
+  with `accent-default` text, like the tab bar, and a `border-strong` ring. The fill alone sits
+  next to the `surface-raised` track, so the ring is what is 3:1 against it (4.5:1 with more
+  contrast), under every preset and app seed.
 - Any seed is safe. The engine solves each role's lightness to its WCAG floor rather than
   trusting the colour, and `npm run test:tokens` checks every pair over a sweep of seeds
   (`SEED_AA_FULL=1` runs the full design-time sweep). A seed close to a status hue still works,

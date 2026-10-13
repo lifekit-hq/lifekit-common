@@ -49,6 +49,13 @@ module.exports = {
         loss: 'var(--color-loss)',
         'flow-in': 'var(--color-flow-in)',
         'flow-out': 'var(--color-flow-out)',
+        'flow-in-fill': 'var(--color-flow-in-fill)',
+        'flow-out-fill': 'var(--color-flow-out-fill)',
+        ...Object.fromEntries(
+          [...Array.from({length: 14}, (_, i) => `category-${i + 1}`), 'category-other'].map(
+            name => [name, `var(--color-${name})`]
+          )
+        ),
 
         'border-default': 'var(--color-border-default)',
         'border-strong': 'var(--color-border-strong)',
