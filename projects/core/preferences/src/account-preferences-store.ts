@@ -49,7 +49,10 @@ export interface AccountPreferencesStoreApi<P extends AccountPreferences> {
    * from `DEFAULT_APPEARANCE`.
    */
   patchAppearance(change: Partial<AppearancePreference>): Promise<boolean>;
-  /** Forgets the loaded copy, e.g. on sign-out, so the next user starts clean. */
+  /**
+   * Forgets the loaded copy, e.g. on sign-out, so the next user starts clean. Requests still in
+   * flight are ignored when they answer, and saves not yet sent are dropped (they resolve `false`).
+   */
   clear(): void;
 }
 
@@ -104,44 +107,61 @@ export function accountPreferencesStore<P extends AccountPreferences = AccountPr
       const http = inject(HttpClient);
       const onSaveError = inject(PREFERENCE_SAVE_ERROR_HANDLER);
       let nextId = 0;
+      let generation = 0;
       let inFlightLoad: Promise<void> | null = null;
       let saveQueue: Promise<unknown> = Promise.resolve();
 
       const fetchPreferences = async (): Promise<void> => {
+        const started = generation;
         store.setLoading();
         try {
-          store.confirmed.set(await firstValueFrom(http.get<P>(endpoint)));
-          store.setSuccess();
+          const loaded = await firstValueFrom(http.get<P>(endpoint));
+          if (started === generation) {
+            store.confirmed.set(loaded);
+            store.setSuccess();
+          }
         } catch (error) {
-          store.setError(extractErrorCode(error));
+          if (started === generation) {
+            store.setError(extractErrorCode(error));
+          }
         }
       };
 
-      const send = async (pending: PendingPatch<P>): Promise<boolean> => {
+      const send = async (pending: PendingPatch<P>, started: number): Promise<boolean> => {
+        if (started !== generation) {
+          return false;
+        }
         const settle = (confirmed?: P): void => {
+          if (started !== generation) {
+            return;
+          }
           if (confirmed !== undefined) {
             store.confirmed.set(confirmed);
           }
           store.pending.update(list => list.filter(({id}) => id !== pending.id));
         };
         try {
-          settle(await firstValueFrom(http.patch<P>(endpoint, pending.patch)));
-          return true;
+          const response = await firstValueFrom(http.patch<P>(endpoint, pending.patch));
+          settle(response);
+          return started === generation;
         } catch (error) {
           settle();
-          onSaveError({
-            error,
-            errorCode: extractErrorCode(error),
-            fields: Object.keys(pending.patch),
-          });
+          if (started === generation) {
+            onSaveError({
+              error,
+              errorCode: extractErrorCode(error),
+              fields: Object.keys(pending.patch),
+            });
+          }
           return false;
         }
       };
 
       const patch = (partial: Partial<P>): Promise<boolean> => {
         const pending: PendingPatch<P> = {id: nextId++, patch: partial};
+        const started = generation;
         store.pending.update(list => [...list, pending]);
-        const result = saveQueue.then(() => send(pending));
+        const result = saveQueue.then(() => send(pending, started));
         saveQueue = result;
         return result;
       };
@@ -151,9 +171,14 @@ export function accountPreferencesStore<P extends AccountPreferences = AccountPr
           if (store.confirmed() !== null) {
             return Promise.resolve();
           }
-          inFlightLoad ??= fetchPreferences().finally(() => {
-            inFlightLoad = null;
-          });
+          if (inFlightLoad === null) {
+            const load: Promise<void> = fetchPreferences().finally(() => {
+              if (inFlightLoad === load) {
+                inFlightLoad = null;
+              }
+            });
+            inFlightLoad = load;
+          }
           return inFlightLoad;
         },
         reload(): Promise<void> {
@@ -168,6 +193,9 @@ export function accountPreferencesStore<P extends AccountPreferences = AccountPr
           return patch({appearance} as Partial<P>);
         },
         clear(): void {
+          generation++;
+          inFlightLoad = null;
+          saveQueue = Promise.resolve();
           store.confirmed.set(null);
           store.pending.set([]);
           store.setIdle();

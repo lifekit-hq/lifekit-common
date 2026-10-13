@@ -266,5 +266,73 @@ describe('accountPreferencesStore', () => {
       await done;
       expect(store.preferences()?.baseCurrency).toBe('GBP');
     });
+
+    it('ignores a load that answers after clear', async () => {
+      const store = TestBed.inject(Store);
+      const stale = store.load();
+      store.clear();
+      const fresh = store.load();
+
+      const [staleRequest, freshRequest] = http.match(r => r.url === URL && r.method === 'GET');
+      staleRequest.flush({appearance: {theme: 'dark'}, baseCurrency: 'EUR'});
+      await stale;
+      expect(store.isLoaded()).toBe(false);
+      expect(store.status()).toBe('loading');
+
+      freshRequest.flush(STORED);
+      await fresh;
+      expect(store.preferences()).toEqual(STORED);
+      expect(store.status()).toBe('success');
+    });
+
+    it('ignores a failed load that answers after clear', async () => {
+      const store = TestBed.inject(Store);
+      const stale = store.load();
+      const staleRequest = await nextRequest('GET');
+      store.clear();
+      staleRequest.flush({errorCode: 'down'}, {status: 500, statusText: 'Error'});
+      await stale;
+      expect(store.status()).toBe('idle');
+      expect(store.hasError()).toBe(false);
+    });
+
+    it('ignores a save that answers after clear', async () => {
+      const store = await loaded();
+      const saved = store.patch({baseCurrency: 'EUR'});
+      const request = await nextRequest('PATCH');
+      store.clear();
+      request.flush({...STORED, baseCurrency: 'EUR'});
+
+      await expect(saved).resolves.toBe(false);
+      expect(store.isLoaded()).toBe(false);
+      expect(store.isSaving()).toBe(false);
+    });
+
+    it('does not report a failed save that answers after clear', async () => {
+      const store = await loaded();
+      const saved = store.patch({baseCurrency: 'EUR'});
+      const request = await nextRequest('PATCH');
+      store.clear();
+      request.flush({}, {status: 500, statusText: 'Error'});
+
+      await expect(saved).resolves.toBe(false);
+      expect(failures).toHaveLength(0);
+    });
+
+    it('drops saves still queued when clear is called', async () => {
+      const store = await loaded();
+      const first = store.patch({baseCurrency: 'EUR'});
+      const second = store.patch({baseCurrency: 'GBP'});
+      const request = await nextRequest('PATCH');
+      store.clear();
+      request.flush({...STORED, baseCurrency: 'EUR'});
+
+      await expect(Promise.all([first, second])).resolves.toEqual([false, false]);
+      http.expectNone(r => r.method === 'PATCH');
+
+      const next = store.patch({baseCurrency: 'JPY'});
+      (await nextRequest('PATCH')).flush({...STORED, baseCurrency: 'JPY'});
+      await expect(next).resolves.toBe(true);
+    });
   });
 });
