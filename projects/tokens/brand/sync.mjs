@@ -18,8 +18,7 @@ import {THEME_SCRIPT, themeScriptCspHash} from './theme-script.mjs';
 const START_PREFIX = '<!-- theme-init:start';
 
 /** The start marker as an app writes it, with the sentence that tells editors to leave it alone. */
-export const THEME_INIT_MARKER =
-  `${START_PREFIX} - generated from @lifekit-hq/tokens by lifekit-theme-sync; do not edit. -->`;
+export const THEME_INIT_MARKER = `${START_PREFIX} - generated from @lifekit-hq/tokens by lifekit-theme-sync; do not edit. -->`;
 
 /** The end marker an app's `index.html` carries after the inlined script. */
 export const THEME_INIT_END = '<!-- theme-init:end -->';

@@ -39,12 +39,6 @@ Design tokens for the lifekit ecosystem, framework-agnostic.
   [`docs/BROWSER-CHROME.md`](../../docs/BROWSER-CHROME.md). Rule logic adapted from impeccable
   (Apache-2.0), see [`NOTICE.md`](NOTICE.md).
 
-- `lifekit-theme-sync`: keeps an app's inlined copy of the pre-paint theme script (and, with
-  `--csp`, the hash its CSP pins) identical to this package's. Run it from the app's frontend
-  directory; `--check` changes nothing and exits 1 when anything is stale, for lint and CI. It
-  replaces the `sync-theme-script.mjs` each app used to copy. Usage and the markers it needs:
-  [`docs/BROWSER-CHROME.md`](../../docs/BROWSER-CHROME.md#keeping-the-script-in-step).
-
 ```js
 // tailwind.config.js
 module.exports = {

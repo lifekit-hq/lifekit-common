@@ -170,8 +170,8 @@ copy it by hand: `@lifekit-hq/tokens` ships it, along with the hash your CSP nee
 - **Pin its hash in the CSP.** `brand/theme-init.csp-hash.txt` (or `themeScriptCspHash()`) is the
   `script-src` source expression, e.g. `'sha256-…'`. The hash covers the exact bytes between the
   tags, which are the bytes of `theme-init.js`, so inline the file unedited. The hash only
-  changes in a release that edits the script, and the release notes say so. Compare the pinned
-  value against the package in CI and bump both together.
+  changes in a release that edits the script, and the release notes say so. `lifekit-theme-sync`
+  keeps the page and the pinned value in step with the package (next section).
 - **What it does.** It reads the `cmn-theme` key `ThemeService` writes (`light` | `dark`), falls
   back to the OS `prefers-color-scheme`, and sets `data-theme` on `<html>`. No stored choice means
   the `system` preference, which `ThemeService` then follows live. When the user picked their own
