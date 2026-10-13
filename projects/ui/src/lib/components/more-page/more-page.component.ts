@@ -49,7 +49,7 @@ const ROW_CLASSES =
     <cmn-page-container spacing="none">
       <div class="space-y-cmn-4">
         @if (overflow().length > 0) {
-          <cmn-card padding="none" data-more-section="nav">
+          <cmn-card class="block" padding="none" data-more-section="nav">
             @for (item of overflow(); track item.route) {
               <a [routerLink]="item.route" [class]="rowClasses">
                 <cmn-list-item-row [label]="item.label">
@@ -65,7 +65,7 @@ const ROW_CLASSES =
 
         @if (account(); as signedIn) {
           @for (group of groups(); track $index; let first = $first) {
-            <cmn-card padding="none" data-more-section="account">
+            <cmn-card class="block" padding="none" data-more-section="account">
               @if (first && identity(); as who) {
                 <div
                   class="flex items-center gap-cmn-3 border-b border-border-default px-cmn-4 py-cmn-3"

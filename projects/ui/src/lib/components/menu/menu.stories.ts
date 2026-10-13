@@ -41,7 +41,7 @@ export const Default: Story = {
 
 /**
  * An identity header (the signed-in account) sits above the items as text, not as an item: it is
- * skipped by the arrow keys and cannot be selected. `separatorBefore` sets Sign out apart from
+ * not focusable and cannot be selected. `separatorBefore` sets Sign out apart from
  * the group above it. `accountMenu()` builds this list for an app.
  */
 export const AccountWithIdentity: Story = {

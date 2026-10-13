@@ -119,6 +119,15 @@ describe('MorePageComponent', () => {
     ).toEqual(['Report a problem']);
   });
 
+  it('should render every card as a block so the stack spacing applies', () => {
+    // cmn-card's host is inline; margins from the wrapper's space-y only apply to block boxes.
+    const cards = Array.from(host().querySelectorAll('cmn-card'));
+    expect(cards).toHaveLength(3);
+    for (const card of cards) {
+      expect(card.classList).toContain('block');
+    }
+  });
+
   it('should put Sign out in a card of its own, last, with a tinted icon', () => {
     const cards = Array.from(host().querySelectorAll('[data-more-section="account"]'));
     expect(cards).toHaveLength(2);
