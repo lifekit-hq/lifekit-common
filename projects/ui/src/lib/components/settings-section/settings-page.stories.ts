@@ -3,6 +3,7 @@ import {FormsModule} from '@angular/forms';
 import type {Meta, StoryObj} from '@storybook/angular';
 import {moduleMetadata} from '@storybook/angular';
 
+import {APPEARANCE_STORE, type AppearanceStore} from '../../services/appearance/appearance.service';
 import {AppearanceSettingsComponent} from '../appearance-settings/appearance-settings.component';
 import {ButtonComponent} from '../button/button.component';
 import {DangerZoneComponent} from '../danger-zone/danger-zone.component';
@@ -15,6 +16,18 @@ import {ToggleComponent} from '../toggle/toggle.component';
 import {SettingsSectionComponent} from './settings-section.component';
 
 const SAVE_DELAY_MS = 600;
+
+/** Stands in for an app's `accountPreferencesStore`: it keeps the saved appearance in memory. */
+function fakeAccountStore(): AppearanceStore {
+  const appearance = signal<{theme: 'system' | 'light' | 'dark'} | null>(null);
+  return {
+    appearance: appearance as AppearanceStore['appearance'],
+    patch: partial => {
+      appearance.set(partial.appearance as never);
+      return Promise.resolve(true);
+    },
+  };
+}
 
 const CURRENCIES: SelectOption[] = [
   {label: 'US dollar', value: 'USD'},
@@ -222,7 +235,12 @@ const meta: Meta<StorySettingsPageComponent> = {
   title: 'Patterns/Settings page',
   component: StorySettingsPageComponent,
   parameters: {layout: 'fullscreen'},
-  decorators: [moduleMetadata({imports: [StorySettingsPageComponent]})],
+  decorators: [
+    moduleMetadata({
+      imports: [StorySettingsPageComponent],
+      providers: [{provide: APPEARANCE_STORE, useFactory: fakeAccountStore}],
+    }),
+  ],
 };
 
 export default meta;

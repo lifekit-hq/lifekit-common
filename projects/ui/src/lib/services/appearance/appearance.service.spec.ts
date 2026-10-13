@@ -10,7 +10,7 @@ import {
   PREFERS_MORE_CONTRAST,
   ThemeService,
 } from '../theme/theme.service';
-import {AppearanceService, provideAppearanceSync} from './appearance.service';
+import {AppearanceService, provideAppearanceSync, SEED_SAVE_DELAY_MS} from './appearance.service';
 
 const TEAL = '#175a6d';
 const INDIGO = '#4f46e5';
@@ -138,11 +138,16 @@ describe('AppearanceService with a preferences store', () => {
   let store: FakeStore;
 
   beforeEach(() => {
+    vi.useFakeTimers();
     configure([provideAppearanceSync(FakeStore)]);
     store = TestBed.inject(FakeStore);
     theme = TestBed.inject(ThemeService);
     service = TestBed.inject(AppearanceService);
     TestBed.tick();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('reports itself as synced', () => {
@@ -205,15 +210,114 @@ describe('AppearanceService with a preferences store', () => {
     service.resetSeed();
 
     expect(store.patched.at(-1)).toEqual({appearance: {theme: 'system'}});
+    vi.advanceTimersByTime(SEED_SAVE_DELAY_MS);
+    expect(store.patched).toHaveLength(1);
   });
 
   it('builds the write from the cache, not a merge over a store that has not loaded', () => {
     theme.setPreference('dark');
 
     service.setSeed(TEAL);
+    vi.advanceTimersByTime(SEED_SAVE_DELAY_MS);
 
     expect(store.patched[0]).toEqual({
       appearance: {theme: 'dark', seed: TEAL, intensity: DEFAULT_INTENSITY},
+    });
+  });
+
+  describe('a colour drag', () => {
+    const DRAG = ['#112233', '#223344', '#334455', TEAL];
+
+    it('changes the page at once and writes the account once, with the last colour', () => {
+      for (const colour of DRAG) {
+        service.setSeed(colour);
+      }
+
+      expect(theme.getSeed()?.seed).toBe(TEAL);
+      expect(store.patched).toEqual([]);
+
+      vi.advanceTimersByTime(SEED_SAVE_DELAY_MS);
+
+      expect(store.patched).toEqual([
+        {appearance: {theme: 'system', seed: TEAL, intensity: DEFAULT_INTENSITY}},
+      ]);
+    });
+
+    it('waits for the colour to sit still', () => {
+      service.setSeed(INDIGO);
+      vi.advanceTimersByTime(SEED_SAVE_DELAY_MS - 1);
+      service.setSeed(TEAL);
+      vi.advanceTimersByTime(SEED_SAVE_DELAY_MS - 1);
+      expect(store.patched).toEqual([]);
+
+      vi.advanceTimersByTime(1);
+
+      expect(store.patched).toHaveLength(1);
+      expect(store.patched[0].appearance?.seed).toBe(TEAL);
+    });
+
+    it('writes an intensity change at once, with the colour it has now', () => {
+      service.setSeed(INDIGO);
+      service.setSeed(TEAL);
+      service.setSeed(TEAL, INTENSITY);
+
+      expect(store.patched).toEqual([
+        {appearance: {theme: 'system', seed: TEAL, intensity: INTENSITY}},
+      ]);
+      vi.advanceTimersByTime(SEED_SAVE_DELAY_MS);
+      expect(store.patched).toHaveLength(1);
+    });
+
+    it('goes out with a mode change instead of after it', () => {
+      service.setSeed(TEAL);
+      service.setMode('dark');
+
+      expect(store.patched).toEqual([
+        {appearance: {theme: 'dark', seed: TEAL, intensity: DEFAULT_INTENSITY}},
+      ]);
+      vi.advanceTimersByTime(SEED_SAVE_DELAY_MS);
+      expect(store.patched).toHaveLength(1);
+    });
+
+    it('is written when the page is hidden for navigation', () => {
+      service.setSeed(TEAL);
+
+      window.dispatchEvent(new Event('pagehide'));
+
+      expect(store.patched).toHaveLength(1);
+      expect(store.patched[0].appearance?.seed).toBe(TEAL);
+      vi.advanceTimersByTime(SEED_SAVE_DELAY_MS);
+      expect(store.patched).toHaveLength(1);
+    });
+
+    it('is written when the tab becomes hidden, and not when it becomes visible', () => {
+      const state = vi.spyOn(document, 'visibilityState', 'get');
+      service.setSeed(TEAL);
+
+      state.mockReturnValue('visible');
+      document.dispatchEvent(new Event('visibilitychange'));
+      expect(store.patched).toEqual([]);
+
+      state.mockReturnValue('hidden');
+      document.dispatchEvent(new Event('visibilitychange'));
+      expect(store.patched).toHaveLength(1);
+      expect(store.patched[0].appearance?.seed).toBe(TEAL);
+    });
+
+    it('is written when the service is destroyed', () => {
+      service.setSeed(TEAL);
+
+      TestBed.resetTestingModule();
+
+      expect(store.patched).toHaveLength(1);
+      expect(store.patched[0].appearance?.seed).toBe(TEAL);
+    });
+
+    it('sends nothing when nothing was pending as the page is left', () => {
+      window.dispatchEvent(new Event('pagehide'));
+      TestBed.resetTestingModule();
+
+      expect(store.patched).toEqual([]);
     });
   });
 

@@ -1,4 +1,6 @@
+import {DOCUMENT} from '@angular/common';
 import {
+  DestroyRef,
   effect,
   type EnvironmentProviders,
   inject,
@@ -22,6 +24,9 @@ import {type ThemeSeed, ThemeService} from '../theme/theme.service';
 
 /** The theme modes a user can choose, in the order a control lists them. */
 export const THEME_MODES: readonly ThemeMode[] = ['system', 'light', 'dark'];
+
+/** How long a colour change must sit still before it is written to the account. */
+export const SEED_SAVE_DELAY_MS = 400;
 
 /**
  * What `AppearanceService` needs from an account preferences store: the appearance it holds and a
@@ -63,6 +68,9 @@ function isThemeMode(value: unknown): value is ThemeMode {
 export class AppearanceService {
   private readonly themeService = inject(ThemeService);
   private readonly store = inject(APPEARANCE_STORE);
+  private readonly document = inject(DOCUMENT);
+  private readonly destroyRef = inject(DestroyRef);
+  private pendingSave: ReturnType<typeof setTimeout> | null = null;
 
   /** The chosen mode, `system` while the OS decides. */
   public readonly mode: Signal<ThemeMode> = toSignal(this.themeService.preference$, {
@@ -84,6 +92,7 @@ export class AppearanceService {
           untracked(() => this.applyFromAccount(appearance));
         }
       });
+      this.flushOnLeave();
     }
   }
 
@@ -99,13 +108,21 @@ export class AppearanceService {
   }
 
   /**
-   * Sets the user's colour and saves it.
+   * Sets the user's colour and saves it. The page and the local cache change at once. A change of
+   * colour alone (a drag in the colour dialog fires one per step) is written to the account once it
+   * has been still for `SEED_SAVE_DELAY_MS`, or when the page is left; a change of intensity is
+   * written at once.
    *
    * @throws TypeError when `seed` is not a hex colour; nothing is changed or saved then.
    */
   public setSeed(seed: string, intensity: number = DEFAULT_INTENSITY): void {
+    const held = this.themeService.getSeed()?.intensity ?? DEFAULT_INTENSITY;
     this.themeService.setSeed(seed, intensity);
-    this.save();
+    if (intensity === held) {
+      this.saveSoon();
+    } else {
+      this.save();
+    }
   }
 
   /** Goes back to the app's own colour and saves that. */
@@ -120,6 +137,7 @@ export class AppearanceService {
    * over a server theme that has not arrived yet.
    */
   private save(): void {
+    this.cancelPendingSave();
     const store = this.store;
     if (!store) {
       return;
@@ -130,6 +148,45 @@ export class AppearanceService {
       ...(seed ? {seed: seed.seed, intensity: seed.intensity} : {}),
     };
     void store.patch({appearance});
+  }
+
+  private saveSoon(): void {
+    if (!this.store) {
+      return;
+    }
+    this.cancelPendingSave();
+    this.pendingSave = setTimeout(() => this.save(), SEED_SAVE_DELAY_MS);
+  }
+
+  private cancelPendingSave(): void {
+    if (this.pendingSave !== null) {
+      clearTimeout(this.pendingSave);
+      this.pendingSave = null;
+    }
+  }
+
+  private flushPendingSave(): void {
+    if (this.pendingSave !== null) {
+      this.save();
+    }
+  }
+
+  /** A write that is still waiting goes out when the page is hidden or left, and when this is destroyed. */
+  private flushOnLeave(): void {
+    const view = this.document.defaultView;
+    const onPageHide = (): void => this.flushPendingSave();
+    const onVisibilityChange = (): void => {
+      if (this.document.visibilityState === 'hidden') {
+        this.flushPendingSave();
+      }
+    };
+    view?.addEventListener('pagehide', onPageHide);
+    this.document.addEventListener('visibilitychange', onVisibilityChange);
+    this.destroyRef.onDestroy(() => {
+      this.flushPendingSave();
+      view?.removeEventListener('pagehide', onPageHide);
+      this.document.removeEventListener('visibilitychange', onVisibilityChange);
+    });
   }
 
   /** The server value wins: bring the cache and the page to it, touching only what differs. */
