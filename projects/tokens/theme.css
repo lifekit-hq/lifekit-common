@@ -142,9 +142,9 @@
      in every theme, range and screen, so a category never takes the colour of whatever ranks where.
      A host maps its own category keys onto these indices and never reorders them; category-other is
      the neutral for a folded "other" or an uncategorised slice. Hues stay clear of gain and loss
-     (40 degrees of loss, 28 of gain and cash) and of the asset hues, 3:1 on the page, card and raised surfaces, and no two
-     are closer than 0.08 in OKLab in either theme. With this many, a slice is told apart by its
-     label as well as its colour; colour is never the only signal. */
+     (40 degrees of loss, 28 of gain and cash) and of the asset hues; each is 3:1 on the page, card
+     and raised surfaces, and no two are closer than 0.08 in OKLab in either theme. With this many,
+     a slice is told apart by its label as well as its colour; colour is never the only signal. */
   --color-category-1: #0d50aa;
   --color-category-2: #738c27;
   --color-category-3: #b13c94;
