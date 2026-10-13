@@ -10,15 +10,16 @@ document is the contract for the account and settings surface inside it.
 
 ## Status
 
-| Part                                                                  | Where                                    | Status                                |
-| --------------------------------------------------------------------- | ---------------------------------------- | ------------------------------------- |
-| Preference tiers, `devicePreference`, `accountPreferencesStore`       | `@lifekit-hq/core/preferences`           | Built                                 |
-| Save-failure toast wiring                                             | `provideToastPreferenceErrors()` in `ui` | Built                                 |
-| `cmn-segmented`, `cmn-appearance-settings`, palette System/Light/Dark | `ui`                                     | Target (reads the Account tier below) |
-| `showThemeToggle` default `false`                                     | `cmn-app-layout`                         | Target                                |
-| `cmn-settings-section`, `cmn-setting-row`, `cmn-danger-zone`          | `ui`                                     | Target                                |
-| Identity header, `accountMenu()`, `accountOnPhone`, `cmn-more-page`   | `ui`                                     | Built                                 |
-| `lifekit-theme-sync`, `APP_SEEDS.bs`                                  | `tokens`                                 | Target                                |
+| Part                                                                  | Where                                    | Status |
+| --------------------------------------------------------------------- | ---------------------------------------- | ------ |
+| Preference tiers, `devicePreference`, `accountPreferencesStore`       | `@lifekit-hq/core/preferences`           | Built  |
+| Save-failure toast wiring                                             | `provideToastPreferenceErrors()` in `ui` | Built  |
+| `cmn-segmented`, `cmn-appearance-settings`, palette System/Light/Dark | `ui`                                     | Built  |
+| `AppearanceService`, `provideAppearanceSync(Store)`                   | `ui`                                     | Built  |
+| `showThemeToggle` default `false`                                     | `cmn-app-layout`                         | Built  |
+| `cmn-settings-section`, `cmn-setting-row`, `cmn-danger-zone`          | `ui`                                     | Target |
+| Identity header, `accountMenu()`, `accountOnPhone`, `cmn-more-page`   | `ui`                                     | Built  |
+| `lifekit-theme-sync`, `APP_SEEDS.bs`                                  | `tokens`                                 | Target |
 
 Every app migrates to the standard in its own PR after the library parts land. Until an app has, the
 rules below describe where it is going, not where it is.
@@ -73,6 +74,18 @@ Load order, so the page never flashes the wrong theme and the server still has t
 
 The appearance control's caption is "Synced to your account". A signed-out surface (a login page)
 only has the cache, so it follows the last theme used on this device.
+
+In `@lifekit-hq/ui` the whole path is `AppearanceService`: `setMode`, `setSeed`, `resetSeed` and
+`toggle` write the cache and the account together, and the store's `appearance()` is mirrored into
+`ThemeService` so the server value wins once `load()` has answered. An app wires it once with
+`provideAppearanceSync(AppPreferencesStore)`. An app with no preferences endpoint omits that and
+keeps working on the cache alone; `cmn-appearance-settings` then captions the control "On this
+device" instead of "Synced to your account".
+
+The page and the cache change at once on every input. A colour drag fires an input per step, so a
+change of colour alone is written to the account once it has been still for `SEED_SAVE_DELAY_MS`,
+or when the page is hidden or left, and the account mirror does not overwrite the cache while that
+write is waiting. Mode and intensity changes are written at once.
 
 ## 3. The shared code
 
@@ -140,8 +153,10 @@ Behaviour worth knowing:
 - `patchAppearance` before the first load starts from `DEFAULT_APPEARANCE` (`{theme: 'system'}`).
 - The store is `providedIn: 'root'`. Provide `HttpClient` as usual.
 
-L1 (`cmn-appearance-settings`) needs exactly two things from it: read `appearance()`, and call
-`patchAppearance({theme})` or `patchAppearance({seed, intensity})`.
+`AppearanceService` (L1) needs exactly two things from it: read `appearance()`, and call
+`patch({appearance})` with the whole local appearance. It sends the whole object rather than using
+`patchAppearance`, because before the first load the store's copy is the default and a merge over it
+would send `system` over a server theme that has not arrived yet.
 
 ### The server contract
 
@@ -218,8 +233,9 @@ The label is **"Sign out"** everywhere. Not "Log out".
 - **No theme toggle in the top bar.** The library default for `showThemeToggle` is `false`; Settings
   is the home of the override. The toggle could only flip between light and dark and pin the result,
   so it could never go back to System.
-- The command palette offers three entries, **Appearance: System**, **Light** and **Dark**, each
-  calling `setPreference`, so System stays reachable.
+- The command palette offers three entries, **Appearance: System**, **Light** and **Dark**
+  (`APPEARANCE_PALETTE_ITEMS`), each setting the mode through `AppearanceService.setMode`, so System
+  stays reachable.
 - A palette or Settings change goes through the paths in section 2: cache and server together.
 
 ## What this standard does not cover

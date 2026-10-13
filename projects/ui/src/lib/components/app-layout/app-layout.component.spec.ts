@@ -17,10 +17,12 @@ import {type MenuItem} from '../menu/menu.component';
 import {
   ACCOUNT_SIGN_OUT_ID,
   accountMenu,
+  APPEARANCE_PALETTE_ITEMS,
   type AppLayoutAccount,
   AppLayoutComponent,
   type NavItem,
   type PageAction,
+  PALETTE_APPEARANCE_ACTIONS,
 } from './app-layout.component';
 
 const NAV_ITEMS: NavItem[] = [
@@ -184,10 +186,13 @@ describe('AppLayoutComponent', () => {
   });
 
   it('should emit themeToggle from top bar', () => {
+    fixture.componentRef.setInput('showThemeToggle', true);
+    fixture.detectChanges();
     const emitted: void[] = [];
     fixture.componentInstance.themeToggle.subscribe(() => emitted.push(undefined));
-    const topBarButtons = fixture.debugElement.queryAll(By.css('cmn-top-bar button'));
-    const themeBtn = topBarButtons[1];
+    const themeBtn = fixture.debugElement.query(
+      By.css('cmn-top-bar button[aria-label="Toggle theme"]')
+    );
     themeBtn?.triggerEventHandler('click', null);
     expect(emitted.length).toBe(1);
   });
@@ -515,15 +520,15 @@ describe('AppLayoutComponent', () => {
     });
   });
 
-  it('should show the theme toggle by default', () => {
-    expect(fixture.nativeElement.querySelector('button[aria-label="Toggle theme"]')).toBeTruthy();
-  });
-
-  it('should not render the theme toggle when showThemeToggle is false', () => {
-    fixture.componentRef.setInput('showThemeToggle', false);
-    fixture.detectChanges();
+  it('should not render the theme toggle by default', () => {
     expect(fixture.nativeElement.querySelector('button[aria-label="Toggle theme"]')).toBeNull();
     expect(fixture.nativeElement.querySelector('button[aria-label="Search"]')).toBeTruthy();
+  });
+
+  it('should render the theme toggle when showThemeToggle is true', () => {
+    fixture.componentRef.setInput('showThemeToggle', true);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('button[aria-label="Toggle theme"]')).toBeTruthy();
   });
 
   describe('phone overlay', () => {
@@ -682,6 +687,7 @@ describe('AppLayoutComponent', () => {
     const PALETTE_ITEMS: CommandPaletteItem[] = [
       {id: '/accounts', label: 'Accounts', icon: 'Building2', group: 'Pages'},
       {id: '_theme', label: 'Toggle theme', icon: 'Sun', group: 'Actions'},
+      ...APPEARANCE_PALETTE_ITEMS,
       {id: '_logout', label: 'Log out', icon: 'LogOut', group: 'Actions'},
     ];
 
@@ -830,6 +836,36 @@ describe('AppLayoutComponent', () => {
       fixture.detectChanges();
       keydown({key: 'k', metaKey: true});
       expect(theme.getTheme()).toBe('dark');
+    });
+
+    it('should offer System, Light and Dark as the standard appearance entries', () => {
+      expect(APPEARANCE_PALETTE_ITEMS.map(item => item.label)).toEqual([
+        'Appearance: System',
+        'Appearance: Light',
+        'Appearance: Dark',
+      ]);
+      expect(APPEARANCE_PALETTE_ITEMS.map(item => item.id)).toEqual([
+        PALETTE_APPEARANCE_ACTIONS.system,
+        PALETTE_APPEARANCE_ACTIONS.light,
+        PALETTE_APPEARANCE_ACTIONS.dark,
+      ]);
+    });
+
+    it.each([
+      [PALETTE_APPEARANCE_ACTIONS.dark, 'dark'],
+      [PALETTE_APPEARANCE_ACTIONS.light, 'light'],
+      [PALETTE_APPEARANCE_ACTIONS.system, 'system'],
+    ] as const)('should set the appearance for %s', (id, expected) => {
+      stubPalette({type: 'action', id});
+      const theme = TestBed.inject(ThemeService);
+      theme.setPreference(expected === 'dark' ? 'light' : 'dark');
+      const emitted: string[] = [];
+      fixture.componentInstance.paletteAction.subscribe(actionId => emitted.push(actionId));
+      fixture.componentRef.setInput('paletteItems', PALETTE_ITEMS);
+      fixture.detectChanges();
+      keydown({key: 'k', metaKey: true});
+      expect(theme.getPreference()).toBe(expected);
+      expect(emitted).toEqual([]);
     });
 
     it('should emit other palette actions and nothing when the palette is dismissed', () => {

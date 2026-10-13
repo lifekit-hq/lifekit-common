@@ -1,8 +1,10 @@
 import {ChangeDetectionStrategy, Component, computed, signal} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import type {Meta, StoryObj} from '@storybook/angular';
-import {moduleMetadata} from '@storybook/angular';
+import {applicationConfig, moduleMetadata} from '@storybook/angular';
 
+import {APPEARANCE_STORE, type AppearanceStore} from '../../services/appearance/appearance.service';
+import {AppearanceSettingsComponent} from '../appearance-settings/appearance-settings.component';
 import {ButtonComponent} from '../button/button.component';
 import {DangerZoneComponent} from '../danger-zone/danger-zone.component';
 import {FormFieldComponent} from '../form-field/form-field.component';
@@ -14,6 +16,18 @@ import {ToggleComponent} from '../toggle/toggle.component';
 import {SettingsSectionComponent} from './settings-section.component';
 
 const SAVE_DELAY_MS = 600;
+
+/** Stands in for an app's `accountPreferencesStore`: it keeps the saved appearance in memory. */
+function fakeAccountStore(): AppearanceStore {
+  const appearance = signal<{theme: 'system' | 'light' | 'dark'} | null>(null);
+  return {
+    appearance: appearance as AppearanceStore['appearance'],
+    patch: partial => {
+      appearance.set(partial.appearance as never);
+      return Promise.resolve(true);
+    },
+  };
+}
 
 const CURRENCIES: SelectOption[] = [
   {label: 'US dollar', value: 'USD'},
@@ -31,6 +45,7 @@ const CURRENCIES: SelectOption[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'cmn-story-settings-page',
   imports: [
+    AppearanceSettingsComponent,
     ButtonComponent,
     DangerZoneComponent,
     FormFieldComponent,
@@ -91,19 +106,12 @@ const CURRENCIES: SelectOption[] = [
         </div>
       </cmn-settings-section>
 
-      <!-- 2. Appearance: the shared cmn-appearance-settings lands here (a later kit piece). -->
+      <!-- 2. Appearance: the shared body; it renders its own "Synced to your account" caption. -->
       <cmn-settings-section
         heading="Appearance"
         description="Light or dark, and the colour the app takes."
-        caption="Synced to your account"
       >
-        <div
-          class="rounded-cmn-lg border border-dashed border-border-strong p-cmn-5 text-cmn-sm text-text-secondary"
-          role="note"
-        >
-          Placeholder: the shared appearance section (System / Light / Dark and the seed colour)
-          drops in here.
-        </div>
+        <cmn-appearance-settings appSeed="#175a6d" />
       </cmn-settings-section>
 
       <!-- 3. Notifications: toggles apply immediately, so no Save. -->
@@ -227,7 +235,11 @@ const meta: Meta<StorySettingsPageComponent> = {
   title: 'Patterns/Settings page',
   component: StorySettingsPageComponent,
   parameters: {layout: 'fullscreen'},
-  decorators: [moduleMetadata({imports: [StorySettingsPageComponent]})],
+  decorators: [
+    // `AppearanceService` is root-provided, so the store has to be in the application config.
+    applicationConfig({providers: [{provide: APPEARANCE_STORE, useFactory: fakeAccountStore}]}),
+    moduleMetadata({imports: [StorySettingsPageComponent]}),
+  ],
 };
 
 export default meta;

@@ -14,9 +14,11 @@ import {
 } from '@angular/core';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {createUrlTreeFromSnapshot, NavigationEnd, Router} from '@angular/router';
+import {type ThemeMode} from '@lifekit-hq/core/preferences';
 import {filter, map} from 'rxjs';
 
 import {isOutputObserved} from '../../chart-click/output-observed';
+import {AppearanceService} from '../../services/appearance/appearance.service';
 import {CmnDialogService} from '../../services/dialog/dialog.service';
 import {CmnDrawerService} from '../../services/drawer/drawer.service';
 import {CmnPageActionsService} from '../../services/page-actions/page-actions.service';
@@ -50,8 +52,42 @@ export * from './account-menu';
 export * from './page-chrome';
 export {LAST_TAB_STORAGE_KEY} from './shell-navigation.service';
 
-/** Palette action id the layout handles itself: toggles the theme. */
+/**
+ * Palette action id the layout handles itself: flips light and dark and pins the result.
+ *
+ * @deprecated A toggle can never go back to System. Offer `APPEARANCE_PALETTE_ITEMS` instead; this id
+ * is still handled so existing palettes keep working.
+ */
 export const PALETTE_THEME_ACTION = '_theme';
+
+/** Palette action ids the layout handles itself: set the appearance mode, System included. */
+export const PALETTE_APPEARANCE_ACTIONS = {
+  system: '_theme:system',
+  light: '_theme:light',
+  dark: '_theme:dark',
+} as const;
+
+/**
+ * The standard palette entries for appearance: "Appearance: System", "Light" and "Dark". Spread them
+ * into `paletteItems`; the layout applies the choice through `AppearanceService`, so the cache and
+ * the account are written together (see `docs/APP-SHELL-STANDARD.md`).
+ */
+export const APPEARANCE_PALETTE_ITEMS: readonly CommandPaletteItem[] = [
+  {
+    id: PALETTE_APPEARANCE_ACTIONS.system,
+    label: 'Appearance: System',
+    icon: 'Monitor',
+    group: 'Actions',
+  },
+  {id: PALETTE_APPEARANCE_ACTIONS.light, label: 'Appearance: Light', icon: 'Sun', group: 'Actions'},
+  {id: PALETTE_APPEARANCE_ACTIONS.dark, label: 'Appearance: Dark', icon: 'Moon', group: 'Actions'},
+];
+
+const APPEARANCE_MODE_BY_ACTION: Readonly<Record<string, ThemeMode>> = {
+  [PALETTE_APPEARANCE_ACTIONS.system]: 'system',
+  [PALETTE_APPEARANCE_ACTIONS.light]: 'light',
+  [PALETTE_APPEARANCE_ACTIONS.dark]: 'dark',
+};
 
 /** Where the account lives on a phone: the More page, or the top bar's avatar menu. */
 export type AccountOnPhone = 'more' | 'avatar';
@@ -178,6 +214,7 @@ export class AppLayoutComponent {
   private readonly router = inject(Router);
   private readonly dialog = inject(CmnDialogService);
   private readonly themeService = inject(ThemeService);
+  private readonly appearance = inject(AppearanceService);
   private readonly location = inject(Location);
   private readonly pageActionsService = inject(CmnPageActionsService);
   private readonly destroyRef = inject(DestroyRef);
@@ -230,8 +267,13 @@ export class AppLayoutComponent {
   public readonly activeRoute = input<string | undefined>(undefined);
   /** Top-bar title for pages that declare none in route data (`data.title` takes precedence). */
   public readonly title = input<string>('');
-  /** Renders the top bar's theme toggle (both desktop and phone); false removes it. */
-  public readonly showThemeToggle = input<boolean>(true);
+  /**
+   * Renders the top bar's light/dark toggle (both desktop and phone). Off by default: the toggle can
+   * only flip between light and dark and pin the result, so it can never go back to System. The
+   * override lives in Settings (`cmn-appearance-settings`) and in the palette
+   * (`APPEARANCE_PALETTE_ITEMS`).
+   */
+  public readonly showThemeToggle = input<boolean>(false);
   /**
    * The signed-in account; takes precedence over `avatarLabel` and `avatarMenuItems`. A menu item
    * whose id is an absolute path (the Settings item `accountMenu()` builds) is navigated by the
@@ -254,8 +296,8 @@ export class AppLayoutComponent {
   public readonly avatarMenuItems = input<MenuItem[]>([]);
   /**
    * Entries for the command palette, which the layout owns: the search button and Cmd/Ctrl-K
-   * open it, choosing a page entry navigates there, and the built-in theme action toggles the
-   * theme.
+   * open it, choosing a page entry navigates there, and the built-in appearance actions
+   * (`APPEARANCE_PALETTE_ITEMS`) set System, Light or Dark.
    */
   public readonly paletteItems = input<CommandPaletteItem[]>([]);
   public readonly versionLabel = input<string>('');
@@ -529,7 +571,7 @@ export class AppLayoutComponent {
 
   protected onThemeToggle(): void {
     this.themeToggle.emit();
-    this.themeService.toggle();
+    this.appearance.toggle();
   }
 
   private openPalette(): void {
@@ -566,7 +608,9 @@ export class AppLayoutComponent {
     if (result.type === 'navigate') {
       void this.router.navigateByUrl(result.id);
     } else if (result.id === PALETTE_THEME_ACTION) {
-      this.themeService.toggle();
+      this.appearance.toggle();
+    } else if (Object.hasOwn(APPEARANCE_MODE_BY_ACTION, result.id)) {
+      this.appearance.setMode(APPEARANCE_MODE_BY_ACTION[result.id]);
     } else {
       this.paletteAction.emit(result.id);
     }

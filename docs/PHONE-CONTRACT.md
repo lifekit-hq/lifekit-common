@@ -39,14 +39,16 @@ A page gets all of this without writing any code for it.
 | Appearance     | Follows the system light or dark setting by default. The override lives in Settings. `theme-color` matches the surface, per the browser chrome standard.                                                    |
 | Motion         | Brief and purposeful. Everything fades or stops under Reduce Motion.                                                                                                                                        |
 
-Below 360px, a page with two or more actions loses the top bar's theme toggle so the title stays
-readable. The app must offer the theme override in Settings.
+The top bar's theme toggle is off by default (`showThemeToggle`), because it can only flip between
+light and dark and never back to System. The override lives in Settings (`cmn-appearance-settings`)
+and in the command palette ("Appearance: System / Light / Dark"). Where an app turns the toggle on,
+below 360px a page with two or more actions loses it so the title stays readable.
 
 Below 360px, a page with more than two actions keeps only its first action inline and moves the
 rest into a "More actions" menu (Angular CDK menu: arrow keys, Escape, focus returns to the
 trigger). Each item keeps its action id, `route` and `disabled`. With back, search and avatar the
 title keeps at least 64px at 320px and 359px. From 360px every action stays inline and the theme
-toggle stays visible; with three actions the title there is about 28px.
+toggle, where an app has turned it on, stays visible; with three actions the title there is about 28px.
 
 ### Scroll and tab state
 
@@ -220,4 +222,5 @@ guarantee above is only gating once its check exists.
 | One state pattern                       | Built: `cmn-async-state`; the suite checks the offline and error states at 320 and 390            |
 | Touch size (44pt chrome, labels, hints) | Built: `--size-touch`, `.cmn-hit-slop`; the suite enforces 44x44 at 390x844, labels at 320, hints |
 | Layout by size                          | Built: `CmnShellService` picks tab bar, rail or sidebar; the suite checks each width and device   |
-| Overlays, appearance                    | Target                                                                                            |
+| Appearance                              | Built: `cmn-appearance-settings` in Settings, palette entries, synced through `AppearanceService` |
+| Overlays                                | Target                                                                                            |

@@ -2,7 +2,7 @@
 # Consumer type-check against the ACTUAL npm-packed artifact (issue #13).
 #
 # `npm pack` the built libraries, extract the tarballs into local
-# node_modules/@lifekit-hq/{ui,charts-core,core}, and compile consumer.ts with
+# node_modules/@lifekit-hq/{ui,charts-core,core,elements}, and compile consumer.ts with
 # skipLibCheck:false resolving through those packages — so the check exercises
 # real package resolution (package.json `exports`, `files` filtering, what
 # actually ships in the tarball), not a tsconfig path alias into dist/.
@@ -11,7 +11,8 @@
 # re-exports charts-core types (BarSeries, ChartPoint, etc.) as part of its
 # public API — consumers need both installed to compile. @lifekit-hq/core is packed for the same
 # reason: ui's rollup imports from `@lifekit-hq/core/format` (e.g. RelativeTimePipe's `TimeInput`).
-# ui declares both as `dependencies`; this fixture extracts tarballs by hand, so it installs them itself.
+# `@lifekit-hq/elements` is packed because `cmn-appearance-settings` renders `lk-theme-picker`.
+# ui declares all three as `dependencies`; this fixture extracts tarballs by hand, so it installs them itself.
 set -euo pipefail
 cd "$(dirname "$0")"
 root="$(cd ../.. && pwd)"
@@ -21,7 +22,7 @@ if [[ ! -d "$root/dist/lifekit-hq/ui" ]]; then
   exit 1
 fi
 
-for lib in charts-core core; do
+for lib in charts-core core elements; do
   if [[ ! -d "$root/dist/lifekit-hq/$lib" ]]; then
     echo "consumer-type-check: dist/lifekit-hq/$lib missing — run 'npm run build' first" >&2
     exit 1
@@ -39,6 +40,10 @@ mv .tmp/package node_modules/@lifekit-hq/charts-core
 (cd "$root" && npm pack ./dist/lifekit-hq/core --pack-destination "$dest" >/dev/null)
 tar -xzf .tmp/lifekit-hq-core-*.tgz -C .tmp
 mv .tmp/package node_modules/@lifekit-hq/core
+
+(cd "$root" && npm pack ./dist/lifekit-hq/elements --pack-destination "$dest" >/dev/null)
+tar -xzf .tmp/lifekit-hq-elements-*.tgz -C .tmp
+mv .tmp/package node_modules/@lifekit-hq/elements
 
 (cd "$root" && npm pack ./dist/lifekit-hq/ui --pack-destination "$dest" >/dev/null)
 tar -xzf .tmp/lifekit-hq-ui-*.tgz -C .tmp

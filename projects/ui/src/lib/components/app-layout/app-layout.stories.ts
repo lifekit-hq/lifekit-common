@@ -9,7 +9,12 @@ import {PinnedBreakpointObserver} from '../../services/shell/pinned-breakpoints'
 import type {CommandPaletteItem} from '../command-palette/command-palette-item.model';
 import type {MenuItem} from '../menu/menu.component';
 import type {NavItem} from '../sidebar-nav/sidebar-nav.component';
-import {accountMenu, type AppLayoutAccount, AppLayoutComponent} from './app-layout.component';
+import {
+  accountMenu,
+  APPEARANCE_PALETTE_ITEMS,
+  type AppLayoutAccount,
+  AppLayoutComponent,
+} from './app-layout.component';
 
 // Imported by name so a bundler cannot tree-shake the customElements.define() calls.
 for (const [tag, element] of [
@@ -128,7 +133,7 @@ const meta: Meta<AppLayoutComponent> = {
     navItems: NAV_ITEMS,
     activeRoute: '/dashboard',
     title: 'Dashboard',
-    showThemeToggle: true,
+    showThemeToggle: false,
     avatarLabel: 'D',
     avatarMenuItems: AVATAR_MENU,
     versionLabel: 'v0.3.2',
@@ -155,9 +160,13 @@ export const CustomBrand: Story = {
   args: {brand: 'Lifekit Dashboard'},
 };
 
-/** `showThemeToggle: false` removes the top bar's theme toggle (desktop and phone). */
-export const NoThemeToggle: Story = {
-  args: {showThemeToggle: false},
+/**
+ * The top bar's light/dark toggle is off by default: it can only flip between light and dark, so it
+ * can never go back to System. Appearance lives in Settings (`cmn-appearance-settings`) and in the
+ * palette. An app that still wants the toggle sets `showThemeToggle` (desktop and phone).
+ */
+export const WithThemeToggle: Story = {
+  args: {showThemeToggle: true},
 };
 
 /**
@@ -463,14 +472,14 @@ export const PhoneOverlaySheetOpen: Story = {
 const PALETTE_ITEMS: CommandPaletteItem[] = [
   {id: '/dashboard', label: 'Dashboard', icon: 'LayoutDashboard', group: 'Pages'},
   {id: '/budgets', label: 'Budgets', icon: 'Zap', group: 'Pages'},
-  {id: '_theme', label: 'Toggle theme', icon: 'Sun', group: 'Actions'},
+  ...APPEARANCE_PALETTE_ITEMS,
 ];
 
 /**
- * The shell owns its own glue: with no `activeRoute` it follows the router, the theme toggle drives
- * the theme service, and with `paletteItems` it opens the command palette from the search button
- * and Cmd/Ctrl-K. The app passes only nav items, a brand and an `account` (label and menu). Try
- * the theme toggle and Cmd-K; choosing "Toggle theme" in the palette flips the theme.
+ * The shell owns its own glue: with no `activeRoute` it follows the router, and with `paletteItems`
+ * it opens the command palette from the search button and Cmd/Ctrl-K. The app passes only nav
+ * items, a brand and an `account` (label and menu), and spreads `APPEARANCE_PALETTE_ITEMS` into the
+ * palette. Try Cmd-K and choose "Appearance: Dark", then "Appearance: System".
  */
 export const LibraryManaged: Story = {
   render: args => ({
