@@ -4,6 +4,7 @@
   "allowedNonPeerDependencies": [
     "@lifekit-hq/charts-core",
     "@lifekit-hq/core",
+    "@lifekit-hq/elements",
     "@lifekit-hq/tokens"
   ],
   "lib": {

@@ -10,12 +10,14 @@
     "@angular/router": "^21.2.0 || ^22.0.0",
     "chart.js": "^4.5.1",
     "deep-chat": "^2.5.0",
+    "lit": "^3.0.0",
     "lucide-angular": "^1.0.0",
     "rxjs": "^7.8.0"
   },
   "dependencies": {
     "@lifekit-hq/charts-core": "3.2.0",
     "@lifekit-hq/core": "3.2.0",
+    "@lifekit-hq/elements": "3.2.0",
     "@lifekit-hq/tokens": "3.2.0",
     "tslib": "^2.3.0"
   },

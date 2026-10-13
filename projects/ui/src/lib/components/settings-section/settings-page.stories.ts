@@ -3,6 +3,7 @@ import {FormsModule} from '@angular/forms';
 import type {Meta, StoryObj} from '@storybook/angular';
 import {moduleMetadata} from '@storybook/angular';
 
+import {AppearanceSettingsComponent} from '../appearance-settings/appearance-settings.component';
 import {ButtonComponent} from '../button/button.component';
 import {DangerZoneComponent} from '../danger-zone/danger-zone.component';
 import {FormFieldComponent} from '../form-field/form-field.component';
@@ -31,6 +32,7 @@ const CURRENCIES: SelectOption[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'cmn-story-settings-page',
   imports: [
+    AppearanceSettingsComponent,
     ButtonComponent,
     DangerZoneComponent,
     FormFieldComponent,
@@ -91,19 +93,12 @@ const CURRENCIES: SelectOption[] = [
         </div>
       </cmn-settings-section>
 
-      <!-- 2. Appearance: the shared cmn-appearance-settings lands here (a later kit piece). -->
+      <!-- 2. Appearance: the shared body; it renders its own "Synced to your account" caption. -->
       <cmn-settings-section
         heading="Appearance"
         description="Light or dark, and the colour the app takes."
-        caption="Synced to your account"
       >
-        <div
-          class="rounded-cmn-lg border border-dashed border-border-strong p-cmn-5 text-cmn-sm text-text-secondary"
-          role="note"
-        >
-          Placeholder: the shared appearance section (System / Light / Dark and the seed colour)
-          drops in here.
-        </div>
+        <cmn-appearance-settings appSeed="#175a6d" />
       </cmn-settings-section>
 
       <!-- 3. Notifications: toggles apply immediately, so no Save. -->

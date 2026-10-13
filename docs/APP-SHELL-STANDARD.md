@@ -10,15 +10,16 @@ document is the contract for the account and settings surface inside it.
 
 ## Status
 
-| Part                                                                  | Where                                    | Status                                |
-| --------------------------------------------------------------------- | ---------------------------------------- | ------------------------------------- |
-| Preference tiers, `devicePreference`, `accountPreferencesStore`       | `@lifekit-hq/core/preferences`           | Built                                 |
-| Save-failure toast wiring                                             | `provideToastPreferenceErrors()` in `ui` | Built                                 |
-| `cmn-segmented`, `cmn-appearance-settings`, palette System/Light/Dark | `ui`                                     | Target (reads the Account tier below) |
-| `showThemeToggle` default `false`                                     | `cmn-app-layout`                         | Target                                |
-| `cmn-settings-section`, `cmn-setting-row`, `cmn-danger-zone`          | `ui`                                     | Target                                |
-| Identity header, `accountMenu()`, `accountOnPhone`, `cmn-more-page`   | `ui`                                     | Built                                 |
-| `lifekit-theme-sync`, `APP_SEEDS.bs`                                  | `tokens`                                 | Target                                |
+| Part                                                                  | Where                                    | Status |
+| --------------------------------------------------------------------- | ---------------------------------------- | ------ |
+| Preference tiers, `devicePreference`, `accountPreferencesStore`       | `@lifekit-hq/core/preferences`           | Built  |
+| Save-failure toast wiring                                             | `provideToastPreferenceErrors()` in `ui` | Built  |
+| `cmn-segmented`, `cmn-appearance-settings`, palette System/Light/Dark | `ui`                                     | Built  |
+| `AppearanceService`, `provideAppearanceSync(Store)`                   | `ui`                                     | Built  |
+| `showThemeToggle` default `false`                                     | `cmn-app-layout`                         | Built  |
+| `cmn-settings-section`, `cmn-setting-row`, `cmn-danger-zone`          | `ui`                                     | Target |
+| Identity header, `accountMenu()`, `accountOnPhone`, `cmn-more-page`   | `ui`                                     | Built  |
+| `lifekit-theme-sync`, `APP_SEEDS.bs`                                  | `tokens`                                 | Target |
 
 Every app migrates to the standard in its own PR after the library parts land. Until an app has, the
 rules below describe where it is going, not where it is.
@@ -73,6 +74,13 @@ Load order, so the page never flashes the wrong theme and the server still has t
 
 The appearance control's caption is "Synced to your account". A signed-out surface (a login page)
 only has the cache, so it follows the last theme used on this device.
+
+In `@lifekit-hq/ui` the whole path is `AppearanceService`: `setMode`, `setSeed`, `resetSeed` and
+`toggle` write the cache and the account together, and the store's `appearance()` is mirrored into
+`ThemeService` so the server value wins once `load()` has answered. An app wires it once with
+`provideAppearanceSync(AppPreferencesStore)`. An app with no preferences endpoint omits that and
+keeps working on the cache alone; `cmn-appearance-settings` then captions the control "On this
+device" instead of "Synced to your account".
 
 ## 3. The shared code
 

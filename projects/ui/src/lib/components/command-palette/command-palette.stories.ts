@@ -14,7 +14,9 @@ const ITEMS: CommandPaletteItem[] = [
   {id: '/budgets', label: 'Budgets', icon: 'Zap', group: 'Pages'},
   {id: '/settings', label: 'Settings', icon: 'Settings2', group: 'Pages'},
   {id: '_connect', label: 'Connect Account', icon: 'Link', group: 'Actions'},
-  {id: '_theme', label: 'Toggle Dark Mode', icon: 'Moon', group: 'Actions'},
+  {id: '_theme:system', label: 'Appearance: System', icon: 'Monitor', group: 'Actions'},
+  {id: '_theme:light', label: 'Appearance: Light', icon: 'Sun', group: 'Actions'},
+  {id: '_theme:dark', label: 'Appearance: Dark', icon: 'Moon', group: 'Actions'},
 ];
 
 const ONE_GROUP: CommandPaletteItem[] = ITEMS.filter(i => i.group === 'Pages');

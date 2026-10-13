@@ -89,7 +89,8 @@ Where an option is stored, by tier. The tiers and the server contract are in
 /api/me/preferences`: it loads once, applies each `patch` at once, saves in order and rolls a
   failed change back, reporting through `PREFERENCE_SAVE_ERROR_HANDLER` (`provideToastPreferenceErrors()`
   in `@lifekit-hq/ui` turns that into a toast). `patchAppearance` is the helper the appearance
-  settings use.
+  settings use. In an Angular app prefer `AppearanceService` from `@lifekit-hq/ui`, which writes the
+  theme cache and this store together (`provideAppearanceSync(Store)`).
 - `AccountPreferences` and `AppearancePreference` (`{theme: 'system' | 'light' | 'dark', seed?,
 intensity?}`, choices only, never derived CSS) are the shared types; an app extends
   `AccountPreferences` with its own fields.

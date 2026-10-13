@@ -11,6 +11,7 @@
         {"type": "json", "path": "projects/ui/package.json", "jsonpath": "$.version"},
         {"type": "json", "path": "projects/ui/package.json", "jsonpath": "$.dependencies['@lifekit-hq/charts-core']"},
         {"type": "json", "path": "projects/ui/package.json", "jsonpath": "$.dependencies['@lifekit-hq/core']"},
+        {"type": "json", "path": "projects/ui/package.json", "jsonpath": "$.dependencies['@lifekit-hq/elements']"},
         {"type": "json", "path": "projects/ui/package.json", "jsonpath": "$.dependencies['@lifekit-hq/tokens']"},
         {"type": "json", "path": "projects/core/package.json", "jsonpath": "$.version"},
         {"type": "json", "path": "projects/elements/package.json", "jsonpath": "$.version"},

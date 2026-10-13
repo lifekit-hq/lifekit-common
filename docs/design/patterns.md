@@ -49,14 +49,14 @@ The captain's picks (2026-10-07, reference round 1) and what each means for this
 
 | #   | Pick          | Pattern it chose                                                                                                            | Owner in lifekit-common                                  | Consumer                               |
 | --- | ------------- | --------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- | -------------------------------------- |
-| 1   | 1-charts-a    | [Chart period and scrub](#chart-period-and-scrub): one-row period control, scrub-to-read, delta-only colour                 | `cmn-segmented` (gap), charts-core scrub (gap)           | dashboard, events, dossier             |
+| 1   | 1-charts-a    | [Chart period and scrub](#chart-period-and-scrub): one-row period control, scrub-to-read, delta-only colour                 | `cmn-segmented`, charts-core scrub (gap)                 | dashboard, events, dossier             |
 | 2   | 2-dashboard-a | [Hero card](#hero-card): number and delta, then chart, then the period control under it                                     | `cmn-card`, `cmn-stat-card`, chart pieces (gap)          | finance-sentry dashboard               |
 | 3   | 3-holdings-a  | [Positions row](#positions-row): day change per row, 1M sparkline later                                                     | sparkline mode (gap)                                     | finance-sentry holdings                |
 | 4   | 4-dossier-a   | [Entity page order](#entity-page-order): Robinhood/Taras order                                                              | `cmn-card`, `cmn-key-value-grid` (gap), stat strip (gap) | finance-sentry asset dossier (#824)    |
 | 5   | 5-verdict-a   | [Verdict idea card](#verdict-idea-card): STRONG BUY / BUY / WAIT / AVOID word, four raw axis facts, what would change it    | verdict badge and axis strip (gap)                       | dossier header, ranked universe (#726) |
 | 6   | 6-notify-a    | [Scoped notifications](#scoped-notifications): held names on by default, watchlist opt-in, consensus and timing on earnings | `cmn-alert-item`, `cmn-chip`                             | finance-sentry alerts (#466)           |
 | 7   | 7-nav-a       | [Search lands on the entity](#search-lands-on-the-entity): held names, watchlist and accounts as palette items              | `cmn-command-palette`                                    | finance-sentry shell                   |
-| 8   | 8-tx-b        | [Transaction period chips](#transaction-period-chips): monobank-style period chip row beside the restored filters           | `cmn-chip`, `cmn-segmented` (gap)                        | finance-sentry transactions            |
+| 8   | 8-tx-b        | [Transaction period chips](#transaction-period-chips): monobank-style period chip row beside the restored filters           | `cmn-chip`, `cmn-segmented`                              | finance-sentry transactions            |
 | 9   | 9-digest-a    | [Terse digest](#terse-digest): bullets, one headline number each, every bullet linked to its entity                         | none, a content rule                                     | finance-sentry Ledger digests          |
 | 10  | 10-playbook-a | This page                                                                                                                   | `docs/design/patterns.md`                                | all lifekit apps                       |
 
@@ -68,17 +68,16 @@ control he uses without his word) is met for this change only. The rest of the r
 
 What the library does not have yet, named so a PR can say which row it closes.
 
-| Missing piece                                               | Pattern source                    | First consumer                                     | When                               |
-| ----------------------------------------------------------- | --------------------------------- | -------------------------------------------------- | ---------------------------------- |
-| `cmn-segmented` (radiogroup, one row, 44px cells or wider)  | Robinhood / IBKR span selector    | dashboard range, events 7/30/90, dossier chart     | with the first picked chart change |
-| charts-core crosshair / scrub plus hover and select outputs | Robinhood scrub                   | dashboard hero, dossier chart; pairs with #466 L-1 | same                               |
-| charts-core multi-series line (benchmark overlay)           | Webull, Taras                     | dossier chart (C2a)                                | November                           |
-| sparkline mode (`lk-line-chart` minimal or `cmn-sparkline`) | Robinhood positions row           | holdings rows                                      | November                           |
-| verdict badge plus axis strip                               | Trading Central card, #726 FR-009 | dossier header, ranked universe                    | November (#726)                    |
-| key/value definition grid                                   | Yahoo Statistics, Taras           | dossier key stats                                  | with #824                          |
-| compact stat strip                                          | Taras perf strip                  | dossier                                            | with #824                          |
-| bull/bear split list                                        | Seeking Alpha                     | dossier thesis                                     | later (C5a)                        |
-| treemap                                                     | Finviz                            | book heatmap                                       | not now (C4a)                      |
+| Missing piece                                               | Pattern source                    | First consumer                                     | When            |
+| ----------------------------------------------------------- | --------------------------------- | -------------------------------------------------- | --------------- |
+| charts-core crosshair / scrub plus hover and select outputs | Robinhood scrub                   | dashboard hero, dossier chart; pairs with #466 L-1 | same            |
+| charts-core multi-series line (benchmark overlay)           | Webull, Taras                     | dossier chart (C2a)                                | November        |
+| sparkline mode (`lk-line-chart` minimal or `cmn-sparkline`) | Robinhood positions row           | holdings rows                                      | November        |
+| verdict badge plus axis strip                               | Trading Central card, #726 FR-009 | dossier header, ranked universe                    | November (#726) |
+| key/value definition grid                                   | Yahoo Statistics, Taras           | dossier key stats                                  | with #824       |
+| compact stat strip                                          | Taras perf strip                  | dossier                                            | with #824       |
+| bull/bear split list                                        | Seeking Alpha                     | dossier thesis                                     | later (C5a)     |
+| treemap                                                     | Finviz                            | book heatmap                                       | not now (C4a)   |
 
 Already covered by existing components (no new work): `cmn-chip`, `cmn-command-palette`,
 `cmn-alert-item`, `cmn-card`, `cmn-stat-card`, `cmn-tag`, `cmn-disclosure-row`, `cmn-date-range`,
@@ -106,7 +105,7 @@ reads a past point.
   [IBKR Campus, Customizing Charts
   (iPhone)](https://www.interactivebrokers.com/campus/trading-lessons/customizing-charts-iphone/)
   (menu along the bottom of the chart).
-- **Owner:** `cmn-segmented` (gap), charts-core crosshair / scrub plugin and hover/select outputs (gap).
+- **Owner:** `cmn-segmented`, charts-core crosshair / scrub plugin and hover/select outputs (gap).
 - **Consumer:** finance-sentry dashboard range, events 7/30/90 chips, dossier chart. Pairs with
   finance-sentry #466 L-1 (chart click outputs), which touches the same plugin layer.
 - **Not copied:** Robinhood's whole-screen red/green repaint. A 0.02% dip gets the same red as a
@@ -232,10 +231,10 @@ A fast period chip row (This month / Last month / 3M) beside the transaction fil
 
 - **What it is:** the monobank list filters (period, category, search), met by the restored
   filter bar, with a period chip row added by the captain's pick (8-tx-b), reusing the dashboard
-  presets. `cmn-segmented` is the candidate control once it exists.
+  presets. `cmn-segmented` is the candidate control.
 - **Compare against:** monobank statement and transaction filters ([monobank knowledge
   base](https://monobank.ua/en/knowledge-base/acquiring/online/website/platforms/statement)).
-- **Owner:** `cmn-chip`, `cmn-date-range`; `cmn-segmented` (gap).
+- **Owner:** `cmn-chip`, `cmn-date-range`, `cmn-segmented`.
 - **Consumer:** finance-sentry transactions.
 - **Not copied:** statement export (monobank already exports statements), bank-only surfaces,
   gamification.

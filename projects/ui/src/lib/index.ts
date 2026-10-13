@@ -6,6 +6,7 @@ export * from './components/account-avatar/account-avatar.component';
 export * from './components/alert/alert.component';
 export * from './components/alert-item/alert-item.component';
 export * from './components/app-layout/app-layout.component';
+export * from './components/appearance-settings/appearance-settings.component';
 export * from './components/area-chart/area-chart.component';
 export * from './components/async-state/async-state.component';
 export * from './components/badge/badge.component';
@@ -54,6 +55,7 @@ export * from './components/page-container/page-container.component';
 export * from './components/page-header/page-header.component';
 export * from './components/password-strength/password-strength.component';
 export * from './components/search-input/search-input.component';
+export * from './components/segmented/segmented.component';
 export * from './components/select/select.component';
 export * from './components/selectable-card/selectable-card.component';
 export * from './components/setting-row/setting-row.component';
@@ -82,6 +84,7 @@ export * from './directives/typography/typography.directive';
 export * from './pipes/relative-time/relative-time.pipe';
 
 // Services
+export * from './services/appearance/appearance.service';
 export * from './services/dialog/dialog.service';
 export * from './services/drawer/drawer.service';
 export * from './services/icon-registry/icon-registry.service';
