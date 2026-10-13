@@ -61,7 +61,7 @@ export const INTENSITY_STOPS: Readonly<{quiet: number; tinted: number; immersive
 export const FIXED_COLOUR_NAMES: readonly string[];
 
 export const APP_SEEDS: Readonly<
-  Record<'fs' | 'lk' | 'dc', Readonly<{name: string; seed: string; intensity: number}>>
+  Record<'fs' | 'lk' | 'dc' | 'bs', Readonly<{name: string; seed: string; intensity: number}>>
 >;
 export const PRESETS: readonly Readonly<{id: string; name: string; seed: string}>[];
 

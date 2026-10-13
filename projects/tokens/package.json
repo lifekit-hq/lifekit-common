@@ -28,7 +28,8 @@
     "./package.json": "./package.json"
   },
   "bin": {
-    "lifekit-chrome-check": "./bin/lifekit-chrome-check.mjs"
+    "lifekit-chrome-check": "./bin/lifekit-chrome-check.mjs",
+    "lifekit-theme-sync": "./bin/lifekit-theme-sync.mjs"
   },
   "files": [
     "theme.css",

@@ -18,7 +18,7 @@ Design tokens for the lifekit ecosystem, framework-agnostic.
 - `brand`: the lifekit mark and the browser-chrome standard. That covers per-app icon sets under
   `brand/<app>/`, `brand/head.html`, `brand/manifest.fragment.json`, the pre-paint theme script
   (`brand/theme-init.js`) with its CSP hash, Node helpers, a Vite plugin
-  (`brand/vite`) and the `lifekit-chrome-check` drift check. See
+  (`brand/vite`), the `lifekit-chrome-check` drift check and the `lifekit-theme-sync` bin. See
   [`docs/BROWSER-CHROME.md`](../../docs/BROWSER-CHROME.md).
 - `engine`: the seed engine, plain zero-dependency ES modules with types
   (`@lifekit-hq/tokens/engine`). `derive({seed, intensity, mode, contrast})` turns one colour into
@@ -29,7 +29,7 @@ Design tokens for the lifekit ecosystem, framework-agnostic.
 - Fixed-meaning colours (`--color-asset-equity|crypto|cash`, `--color-gain|loss`,
   `--color-flow-in|out`, also Tailwind colours of the same name): set in `theme.css` for light and
   dark, never derived by the engine or set by a seed. `FIXED_COLOUR_NAMES` from `engine` lists them.
-- `seeds/<app>.css`: each app's palette (`fs`, `lk`, `dc`) for light, dark and
+- `seeds/<app>.css`: each app's palette (`fs`, `lk`, `dc`, `bs`) for light, dark and
   `prefers-contrast: more`, generated from the engine by `scripts/build-seeds.mjs`
   (`npm run build:seeds`). Import it after `theme.css`; with none, the app gets the default
   (finance-sentry's petrol) palette.
@@ -38,6 +38,12 @@ Design tokens for the lifekit ecosystem, framework-agnostic.
   it in CI; it exits 1 on any finding. Rules and options: the last section of
   [`docs/BROWSER-CHROME.md`](../../docs/BROWSER-CHROME.md). Rule logic adapted from impeccable
   (Apache-2.0), see [`NOTICE.md`](NOTICE.md).
+
+- `lifekit-theme-sync`: keeps an app's inlined copy of the pre-paint theme script (and, with
+  `--csp`, the hash its CSP pins) identical to this package's. Run it from the app's frontend
+  directory; `--check` changes nothing and exits 1 when anything is stale, for lint and CI. It
+  replaces the `sync-theme-script.mjs` each app used to copy. Usage and the markers it needs:
+  [`docs/BROWSER-CHROME.md`](../../docs/BROWSER-CHROME.md#keeping-the-script-in-step).
 
 ```js
 // tailwind.config.js
