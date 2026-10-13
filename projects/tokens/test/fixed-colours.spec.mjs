@@ -2,7 +2,8 @@
  * The fixed-meaning colours (asset classes, gain/loss, in/out, the categorical palette) never follow
  * the seed: the engine does not derive them, no seed stylesheet sets them, and whatever a seed does
  * to the page they resolve to the same value. Each also keeps one hue across light and dark, and
- * clears its contrast floor on every surface the engine can produce.
+ * clears its contrast floor on the page, card and raised surfaces (surface-hover is a transient
+ * state and is not guaranteed).
  */
 import assert from 'node:assert/strict';
 import {readdirSync, readFileSync} from 'node:fs';
@@ -107,7 +108,7 @@ const SEEDS = [
 ];
 const INTENSITIES = [0, ...Object.values(INTENSITY_STOPS), 1];
 
-/** Every surface the engine places under the fixed colours, by theme. */
+/** The surfaces the fixed colours are guaranteed on (bg, card, raised), by theme. */
 const SURFACES = {light: [], dark: []};
 for (const seed of SEEDS) {
   for (const intensity of INTENSITIES) {
@@ -244,21 +245,21 @@ describe('fixed colours: contrast', () => {
   // Gain and loss are also read as text on a surface and on their own 15% tint: WCAG 1.4.3, 4.5:1.
   for (const mode of MODES) {
     for (const name of ASSETS) {
-      it(`${name} is a ${MARK_MIN}:1 mark on every ${mode} surface`, () => {
+      it(`${name} is a ${MARK_MIN}:1 mark on every ${mode} page, card and raised surface`, () => {
         const hex = themed(mode, name);
         const worst = Math.min(...SURFACES[mode].map(surface => contrastRatio(hex, surface)));
         assert.ok(worst >= MARK_MIN, `${name} ${hex} is ${worst.toFixed(2)}`);
       });
     }
     for (const name of [...Object.keys(FLOW_FILLS), ...CATEGORIES]) {
-      it(`${name} is a ${MARK_MIN}:1 mark on every ${mode} surface`, () => {
+      it(`${name} is a ${MARK_MIN}:1 mark on every ${mode} page, card and raised surface`, () => {
         const hex = themed(mode, name);
         const worst = Math.min(...SURFACES[mode].map(surface => contrastRatio(hex, surface)));
         assert.ok(worst >= MARK_MIN, `${name} ${hex} is ${worst.toFixed(2)}`);
       });
     }
     for (const name of CHANGES) {
-      it(`${name} is ${TEXT_MIN}:1 text on every ${mode} surface and its own tint`, () => {
+      it(`${name} is ${TEXT_MIN}:1 text on every ${mode} page, card and raised surface and its own tint`, () => {
         const hex = themed(mode, name);
         const worst = Math.min(
           ...SURFACES[mode].flatMap(surface => [

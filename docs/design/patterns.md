@@ -341,8 +341,9 @@ finance-sentry), crypto (`asset-crypto`, amber), cash (`asset-cash`, green), a c
 `category-other`) completes the set.
 
 - Light and dark share the hue; only lightness moves, and only as far as contrast needs: 3:1 for
-  a mark (a donut slice, a legend dot), 4.5:1 for `gain` and `loss` as text, on every surface the
-  engine can produce. `test/fixed-colours.spec.mjs` holds this.
+  a mark (a donut slice, a legend dot), 4.5:1 for `gain` and `loss` as text, on the page, card and
+  raised surfaces (`surface-bg`, `surface-card`, `surface-raised`; `surface-hover` is a transient
+  state and is not guaranteed). `test/fixed-colours.spec.mjs` holds this.
 - Use them for the thing they name and nothing else. `asset-cash` is a green, so it is told apart
   from `gain` by its label, as colour is never the only signal.
 - **Cash flow has two grades.** `flow-in` and `flow-out` are text (the colours of `gain` and `loss`,
