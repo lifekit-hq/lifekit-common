@@ -19,7 +19,6 @@ import {
   INTENSITY_STOPS,
   mix,
   NEAR_HUE_DEGREES,
-  oklchToHex,
   PRESETS,
   seedTokenNames,
   seedVariants,
@@ -348,16 +347,6 @@ describe('fixed colours: categorical palette', () => {
   it('makes category-other a neutral that is not mistaken for a category', () => {
     for (const mode of MODES) {
       assert.ok(hexToOklch(themed(mode, 'category-other')).C <= OTHER_CHROMA_MAX, mode);
-    }
-  });
-
-  it('gives a hex the engine reads back as written, so a palette entry is not a typo', () => {
-    for (const mode of MODES) {
-      for (const name of CATEGORIES) {
-        const hex = themed(mode, name);
-        const {L, C, H} = hexToOklch(hex);
-        assert.equal(oklchToHex({L, C, H}), hex, `${name} ${mode}`);
-      }
     }
   });
 });

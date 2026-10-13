@@ -25,7 +25,8 @@ export const APP_SEEDS = Object.freeze({
 /**
  * The colours the picker offers next to the app default and a custom colour. None sits within
  * `NEAR_HUE_DEGREES` of the error or success hue, so an accent never reads as a loss or a gain, and
- * none is a grey, so a link and a selected state never read as body text (test/seed-engine.spec.mjs).
+ * none is a grey, so a link and a selected state never read as body text
+ * (test/fixed-colours.spec.mjs).
  */
 export const PRESETS = Object.freeze(
   [

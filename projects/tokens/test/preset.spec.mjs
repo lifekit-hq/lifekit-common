@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
 import {describe, it} from 'node:test';
 
+import {FIXED_COLOUR_NAMES} from '../engine/index.mjs';
+
 const require = createRequire(import.meta.url);
 const postcss = require('postcss');
 const tailwindcss = require('tailwindcss');
@@ -26,17 +28,10 @@ describe('tailwind preset', () => {
     assert.doesNotMatch(css, /--tw-ring-offset-color:\s*#fff/);
   });
 
-  it('exposes the categorical palette and the cash-flow fills as colour utilities', async () => {
-    const css = await generate([
-      'bg-category-1',
-      'bg-category-14',
-      'text-category-other',
-      'bg-flow-in-fill',
-      'bg-flow-out-fill',
-    ]);
-    for (const name of ['category-1', 'category-14', 'flow-in-fill', 'flow-out-fill']) {
-      assert.match(css, new RegExp(`\\.bg-${name}\\s*\\{[^}]*var\\(--color-${name}\\)`));
+  it('exposes every fixed colour as a colour utility resolving to its custom property', async () => {
+    const css = await generate(FIXED_COLOUR_NAMES.map(name => `bg-${name}`));
+    for (const name of FIXED_COLOUR_NAMES) {
+      assert.match(css, new RegExp(`\\.bg-${name}\\s*\\{[^}]*var\\(--color-${name}\\)`), name);
     }
-    assert.match(css, /\.text-category-other\s*\{[^}]*var\(--color-category-other\)/);
   });
 });
