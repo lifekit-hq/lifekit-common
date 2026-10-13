@@ -1,10 +1,11 @@
 import {BreakpointObserver} from '@angular/cdk/layout';
+import {OverlayContainer} from '@angular/cdk/overlay';
 import {Location} from '@angular/common';
 import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {type ComponentFixture, TestBed} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
 import {provideRouter, Router, type Routes} from '@angular/router';
-import {beforeEach, describe, expect, it, vi} from 'vitest';
+import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
 import {CmnDialogService} from '../../services/dialog/dialog.service';
 import {CmnDrawerService} from '../../services/drawer/drawer.service';
@@ -13,7 +14,14 @@ import {PinnedBreakpointObserver} from '../../services/shell/pinned-breakpoints'
 import {ThemeService} from '../../services/theme/theme.service';
 import {type CommandPaletteItem} from '../command-palette/command-palette-item.model';
 import {type MenuItem} from '../menu/menu.component';
-import {AppLayoutComponent, type NavItem, type PageAction} from './app-layout.component';
+import {
+  ACCOUNT_SIGN_OUT_ID,
+  accountMenu,
+  type AppLayoutAccount,
+  AppLayoutComponent,
+  type NavItem,
+  type PageAction,
+} from './app-layout.component';
 
 const NAV_ITEMS: NavItem[] = [
   {label: 'Dashboard', icon: 'LayoutDashboard', route: '/dashboard'},
@@ -380,6 +388,119 @@ describe('AppLayoutComponent', () => {
       fixture.detectChanges();
       const sidebar = (fixture.nativeElement as HTMLElement).querySelector('cmn-sidebar-nav');
       expect(sidebar?.textContent).not.toContain('More');
+    });
+  });
+
+  describe('account', () => {
+    const ACCOUNT: AppLayoutAccount = {
+      label: 'Ada Lovelace',
+      name: 'Ada Lovelace',
+      email: 'ada@example.com',
+      menuItems: accountMenu({settingsRoute: '/settings'}),
+    };
+
+    const host = (): HTMLElement => fixture.nativeElement as HTMLElement;
+    const avatarTrigger = (): HTMLButtonElement | null =>
+      host().querySelector('button[aria-label="Account menu"]');
+
+    function openAvatarMenu(): HTMLElement {
+      avatarTrigger()?.click();
+      fixture.detectChanges();
+      return TestBed.inject(OverlayContainer).getContainerElement();
+    }
+
+    afterEach(() => {
+      TestBed.inject(OverlayContainer).ngOnDestroy();
+    });
+
+    it('should open the menu with an identity header above the items', () => {
+      fixture.componentRef.setInput('account', ACCOUNT);
+      fixture.detectChanges();
+
+      const menu = openAvatarMenu().querySelector('[role="menu"]');
+      const header = menu?.querySelector('[data-menu-header]');
+      expect(header?.textContent).toContain('Ada Lovelace');
+      expect(header?.textContent).toContain('ada@example.com');
+      expect(menu?.querySelectorAll('[role="menuitem"]').length).toBe(2);
+      expect(menu?.querySelector('[role="separator"]')).toBeTruthy();
+    });
+
+    it('should show no header for an account that is only a label and items', () => {
+      fixture.componentRef.setInput('account', {
+        label: 'Ada Lovelace',
+        menuItems: AVATAR_MENU_ITEMS,
+      });
+      fixture.detectChanges();
+
+      expect(openAvatarMenu().querySelector('[data-menu-header]')).toBeNull();
+    });
+
+    it('should navigate to the Settings item itself and still report it', () => {
+      const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+      const selected: MenuItem[] = [];
+      fixture.componentInstance.avatarMenuSelect.subscribe(item => selected.push(item));
+      fixture.componentRef.setInput('account', ACCOUNT);
+      fixture.detectChanges();
+
+      const items = openAvatarMenu().querySelectorAll<HTMLElement>('[role="menuitem"]');
+      items[0]?.click();
+      fixture.detectChanges();
+
+      expect(navigate).toHaveBeenCalledWith('/settings');
+      expect(selected.map(item => item.id)).toEqual(['/settings']);
+    });
+
+    it('should leave Sign out and extras to the app', () => {
+      const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+      const selected: MenuItem[] = [];
+      fixture.componentInstance.avatarMenuSelect.subscribe(item => selected.push(item));
+      fixture.componentRef.setInput('account', ACCOUNT);
+      fixture.detectChanges();
+
+      const items = openAvatarMenu().querySelectorAll<HTMLElement>('[role="menuitem"]');
+      items[1]?.click();
+      fixture.detectChanges();
+
+      expect(navigate).not.toHaveBeenCalled();
+      expect(selected.map(item => item.id)).toEqual([ACCOUNT_SIGN_OUT_ID]);
+    });
+
+    describe('on a phone', () => {
+      beforeEach(() => {
+        viewport.pin('phone');
+        fixture.componentRef.setInput('account', ACCOUNT);
+      });
+
+      it('should keep the avatar when the app declares no More page', () => {
+        fixture.detectChanges();
+        expect(avatarTrigger()).toBeTruthy();
+      });
+
+      it('should move the account to the More page, dropping the avatar, once there is one', () => {
+        fixture.componentRef.setInput('moreRoute', '/more');
+        fixture.detectChanges();
+        expect(avatarTrigger()).toBeNull();
+      });
+
+      it('should keep the avatar when the app asks for it', () => {
+        fixture.componentRef.setInput('moreRoute', '/more');
+        fixture.componentRef.setInput('accountOnPhone', 'avatar');
+        fixture.detectChanges();
+        expect(avatarTrigger()).toBeTruthy();
+      });
+
+      it('should keep the avatar for more without a More page, so the account stays reachable', () => {
+        fixture.componentRef.setInput('accountOnPhone', 'more');
+        fixture.detectChanges();
+        expect(avatarTrigger()).toBeTruthy();
+      });
+
+      it('should keep the avatar on a wide window whatever the setting', () => {
+        viewport.pin('sidebar');
+        fixture.componentRef.setInput('moreRoute', '/more');
+        fixture.detectChanges();
+        expect(avatarTrigger()).toBeTruthy();
+      });
     });
   });
 

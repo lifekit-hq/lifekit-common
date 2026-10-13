@@ -94,6 +94,38 @@ supplies no content for it.
 - Without `moreRoute` there is no More tab, and a nav item beyond the fourth is not reachable from
   the tab bar.
 
+#### The account on a phone
+
+On a phone the account surface is the More page, not an avatar in the top bar. `cmn-app-layout`
+takes `accountOnPhone`: `more` (the default whenever `moreRoute` is set) drops the top bar's avatar
+in the phone shell, and `avatar` keeps it. `more` with no `moreRoute` keeps the avatar too, so the
+account never becomes unreachable. Wider windows always show the avatar and its menu.
+
+```html
+<cmn-app-layout [navItems]="navItems" [tabRoutes]="tabRoutes" moreRoute="/more" [account]="account">
+  <router-outlet />
+</cmn-app-layout>
+```
+
+```ts
+protected readonly account: AppLayoutAccount = {
+  label: user.name, name: user.name, email: user.email, pictureUrl: user.picture,
+  menuItems: accountMenu({settingsRoute: '/settings', extras: [{id: 'whatsNew', label: "What's new", icon: 'Sparkles'}]}),
+};
+```
+
+- **One menu everywhere.** `accountMenu()` returns Settings, then the app's extras, then Sign out
+  (label "Sign out", separated by a divider), with the same ids, icons and order in every app. The
+  Settings item's id is its route, so the layout and `cmn-more-page` navigate there themselves;
+  the app handles `avatarMenuSelect` (or `cmn-more-page`'s `itemSelect`) for `ACCOUNT_SIGN_OUT_ID`
+  and its extras only.
+- **Identity.** `AppLayoutAccount` takes `name`, `email` and `pictureUrl`; a name or an email puts
+  an identity header, as text and not an item, at the top of the menu and on the More page. An
+  account that passes only `label` and `menuItems` keeps the menu it had.
+- **`cmn-more-page`** is the page to declare for `moreRoute`: the overflow nav (`items`, with
+  `tabRoutes`), an account card with the identity, Settings and the extras, Sign out in a card of
+  its own, and `versionLabel`. It owns no sign-in.
+
 ## What a page declares
 
 Pages declare these in route data and templates. No per-page header, back or sheet code.
@@ -180,6 +212,7 @@ guarantee above is only gating once its check exists.
 | Guarantee                               | Status                                                                                            |
 | --------------------------------------- | ------------------------------------------------------------------------------------------------- |
 | Tab bar, sheets, safe areas             | Built: one sheet (`cmn-drawer`) with half and full stops, More is a page; no suite check yet      |
+| Account on a phone                      | Built: `accountOnPhone`, `accountMenu()`, `cmn-more-page`; no suite check yet                     |
 | Top bar title, back, actions            | Built: route data `title`, `parent`, `actions`; the suite checks the title at 320                 |
 | Shell-owned scroll and tab state        | Built: checked by the suite's "back restores scroll"; see "Scroll and tab state"                  |
 | One state pattern                       | Built: `cmn-async-state`; the suite checks the offline and error states at 320 and 390            |

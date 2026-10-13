@@ -22,14 +22,15 @@ import {CmnDrawerService} from '../../services/drawer/drawer.service';
 import {CmnPageActionsService} from '../../services/page-actions/page-actions.service';
 import {CmnShellService} from '../../services/shell/shell.service';
 import {ThemeService} from '../../services/theme/theme.service';
-import {BottomTabBarComponent, MAX_BOTTOM_TABS} from '../bottom-tab-bar/bottom-tab-bar.component';
+import {type AccountIdentity} from '../account-avatar/account-avatar.component';
+import {BottomTabBarComponent} from '../bottom-tab-bar/bottom-tab-bar.component';
 import {CommandPaletteComponent} from '../command-palette/command-palette.component';
 import {
   type CommandPaletteItem,
   type PaletteResult,
 } from '../command-palette/command-palette-item.model';
 import {CmnDialogBareContainerComponent} from '../dialog/dialog-bare-container.component';
-import {type MenuItem} from '../menu/menu.component';
+import {isRouteMenuItem, type MenuItem} from '../menu/menu.component';
 import {type NavItem, SidebarNavComponent} from '../sidebar-nav/sidebar-nav.component';
 import {TopBarComponent, type TopBarLargeTitle} from '../top-bar/top-bar.component';
 import {
@@ -40,17 +41,28 @@ import {
   readPageChrome,
   resolveBack,
 } from './page-chrome';
+import {overflowNavItems, phoneTabItems} from './phone-tabs';
 import {matchTab, ShellNavigationService} from './shell-navigation.service';
 
 export {type NavItem} from '../sidebar-nav/sidebar-nav.component';
+export * from './account-menu';
 export * from './page-chrome';
+export * from './phone-tabs';
 export {LAST_TAB_STORAGE_KEY} from './shell-navigation.service';
 
 /** Palette action id the layout handles itself: toggles the theme. */
 export const PALETTE_THEME_ACTION = '_theme';
 
-/** The signed-in account shown as the top bar avatar and its menu. */
-export interface AppLayoutAccount {
+/** Where the account lives on a phone: the More page, or the top bar's avatar menu. */
+export type AccountOnPhone = 'more' | 'avatar';
+
+/**
+ * The signed-in account shown as the top bar avatar and its menu. `name`, `email` and
+ * `pictureUrl` put an identity header at the top of the menu (and on the More page); an app that
+ * passes only `label` and `menuItems` keeps the menu as it was. Build `menuItems` with
+ * `accountMenu()`.
+ */
+export interface AppLayoutAccount extends AccountIdentity {
   /** Avatar text: initials, a name, or an email; the top bar reduces it to initials. */
   label: string;
   menuItems: MenuItem[];
@@ -123,9 +135,11 @@ const MAIN_OVERLAY_BOTTOM_CLASSES =
           [showThemeToggle]="showThemeToggle()"
           [avatarLabel]="effectiveAvatarLabel()"
           [avatarMenuItems]="effectiveAvatarMenuItems()"
+          [avatarIdentity]="account()"
+          [showAvatar]="showAvatar()"
           (searchClick)="onSearchClick()"
           (themeToggle)="onThemeToggle()"
-          (avatarMenuSelect)="avatarMenuSelect.emit($event)"
+          (avatarMenuSelect)="onAvatarMenuSelect($event)"
           (backClick)="onBack()"
           (actionClick)="onPageAction($event)"
         />
@@ -193,10 +207,9 @@ export class AppLayoutComponent {
   );
   private readonly theme = toSignal(this.themeService.activeTheme$, {initialValue: 'light'});
   /** Nav items that are not phone tabs: they live behind the More page. */
-  private readonly overflowItems = computed<NavItem[]>(() => {
-    const tabs = this.phoneTabs();
-    return this.navItems().filter(item => !tabs.includes(item));
-  });
+  private readonly overflowItems = computed<NavItem[]>(() =>
+    overflowNavItems(this.navItems(), this.tabRoutes())
+  );
 
   private readonly hasTabBar = computed<boolean>(
     () => this.navItems().length > 0 || this.moreRoute() !== ''
@@ -219,8 +232,21 @@ export class AppLayoutComponent {
   public readonly title = input<string>('');
   /** Renders the top bar's theme toggle (both desktop and phone); false removes it. */
   public readonly showThemeToggle = input<boolean>(true);
-  /** The signed-in account; takes precedence over `avatarLabel` and `avatarMenuItems`. */
+  /**
+   * The signed-in account; takes precedence over `avatarLabel` and `avatarMenuItems`. A menu item
+   * whose id is an absolute path (the Settings item `accountMenu()` builds) is navigated by the
+   * layout itself; `avatarMenuSelect` still reports every selection, so an app handles only
+   * Sign out (`ACCOUNT_SIGN_OUT_ID`) and its own extras.
+   */
   public readonly account = input<AppLayoutAccount | undefined>(undefined);
+  /**
+   * Where the account lives in the phone shell. `more`: on the More page (`cmn-more-page`), and
+   * the top bar drops its avatar; `avatar`: the avatar and its menu stay in the top bar. Left
+   * unset it is `more` when `moreRoute` is set, and `avatar` otherwise: with no More page there is
+   * nowhere else to reach the account, so `more` without a `moreRoute` also keeps the avatar.
+   * Outside the phone shell the avatar always shows.
+   */
+  public readonly accountOnPhone = input<AccountOnPhone | undefined>(undefined);
   /** @deprecated Goes once both apps pass `account`; `account` takes precedence. */
   public readonly avatarLabel = input<string>('');
   /** @deprecated Goes once both apps pass `account`; `account` takes precedence. */
@@ -289,14 +315,9 @@ export class AppLayoutComponent {
    */
   public readonly pageAction = output<string>();
 
-  public readonly phoneTabs = computed<NavItem[]>(() => {
-    const items = this.navItems();
-    const routes = this.tabRoutes();
-    const tabs = routes.length
-      ? routes.flatMap(route => items.filter(item => item.route === route))
-      : items;
-    return tabs.slice(0, MAX_BOTTOM_TABS);
-  });
+  public readonly phoneTabs = computed<NavItem[]>(() =>
+    phoneTabItems(this.navItems(), this.tabRoutes())
+  );
 
   /** The More tab, or undefined when the app declares no More page. */
   public readonly phoneMore = computed<NavItem | undefined>(() => {
@@ -380,6 +401,12 @@ export class AppLayoutComponent {
   protected readonly effectiveAvatarMenuItems = computed<MenuItem[]>(
     () => this.account()?.menuItems ?? this.avatarMenuItems()
   );
+
+  /** The phone shell shows the account on the More page, so the top bar leaves its avatar out. */
+  protected readonly showAvatar = computed<boolean>(() => {
+    const onMore = (this.accountOnPhone() ?? 'more') === 'more' && this.moreRoute() !== '';
+    return !(onMore && this.shellService.isPhone());
+  });
 
   protected readonly fabClearance = computed<number | null>(() => {
     const clearance = this.floatingActionClearance();
@@ -487,6 +514,13 @@ export class AppLayoutComponent {
     }
     this.pageActionsService.press(action.id);
     this.pageAction.emit(action.id);
+  }
+
+  protected onAvatarMenuSelect(item: MenuItem): void {
+    if (isRouteMenuItem(item)) {
+      void this.router.navigateByUrl(item.id);
+    }
+    this.avatarMenuSelect.emit(item);
   }
 
   protected onThemeToggle(): void {
