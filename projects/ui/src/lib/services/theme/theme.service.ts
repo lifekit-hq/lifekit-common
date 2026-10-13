@@ -1,4 +1,5 @@
 import {DestroyRef, inject, Injectable, InjectionToken} from '@angular/core';
+import {LOCAL_STORAGE} from '@lifekit-hq/core/preferences';
 import {
   applySeedDeclarations,
   clearSeedDeclarations,
@@ -36,10 +37,8 @@ export const DOCUMENT = new InjectionToken<Document>('DOCUMENT', {
   factory: () => document,
 });
 
-export const LOCAL_STORAGE = new InjectionToken<Storage>('LOCAL_STORAGE', {
-  providedIn: 'root',
-  factory: () => localStorage,
-});
+/** One token for every device-tier read and write; it lives in `@lifekit-hq/core/preferences`. */
+export {LOCAL_STORAGE};
 
 /** The OS colour-scheme query, or `null` where `matchMedia` is unavailable. */
 export const PREFERS_DARK = new InjectionToken<MediaQueryList | null>('PREFERS_DARK', {

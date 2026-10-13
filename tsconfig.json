@@ -8,6 +8,7 @@
       "@lifekit-hq/elements": ["./projects/elements/src/index.ts"],
       "@lifekit-hq/core": ["./projects/core/src/public-api.ts"],
       "@lifekit-hq/core/format": ["./projects/core/format/src/index.ts"],
+      "@lifekit-hq/core/preferences": ["./projects/core/preferences/src/index.ts"],
       "@lifekit-hq/core/pwa": ["./projects/core/pwa/src/index.ts"],
       "@lifekit-hq/ui": ["./projects/ui/src/public-api.ts"]
     }

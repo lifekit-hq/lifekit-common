@@ -2,7 +2,8 @@
 
 Angular signal-store features and helpers for the lifekit apps (`withAsyncStatus`,
 `withUrlSync`, `ApiService`, …), plus the framework-free
-`@lifekit-hq/core/format` and the `@lifekit-hq/core/pwa` entry points.
+`@lifekit-hq/core/format` and the `@lifekit-hq/core/pwa` entry points, and
+`@lifekit-hq/core/preferences` (device and account preference storage).
 
 ## `withAsyncStatus`
 
@@ -75,3 +76,28 @@ navigating on the same, reused route (`/transactions?type=debit` → `/transacti
 updates the state. After init, a param absent from the URL resets its field to the schema `default`;
 at init it leaves the initial state untouched. The feature's own URL writes (`replaceUrl: true`) are
 not read back.
+
+## `@lifekit-hq/core/preferences`
+
+Where an option is stored, by tier. The tiers and the server contract are in
+[`docs/APP-SHELL-STANDARD.md`](../../docs/APP-SHELL-STANDARD.md).
+
+- `devicePreference<T>(key, default, options?)` is a signal backed by `LOCAL_STORAGE` for options that
+  belong to this browser. Keys are `cmn-*` or `lk.<app>.*`. Storage that throws or holds a bad value
+  falls back to the default; the signal keeps working in memory.
+- `accountPreferencesStore<P>(endpoint?)` is a signal store over `GET` and `PATCH
+/api/me/preferences`: it loads once, applies each `patch` at once, saves in order and rolls a
+  failed change back, reporting through `PREFERENCE_SAVE_ERROR_HANDLER` (`provideToastPreferenceErrors()`
+  in `@lifekit-hq/ui` turns that into a toast). `patchAppearance` is the helper the appearance
+  settings use.
+- `AccountPreferences` and `AppearancePreference` (`{theme: 'system' | 'light' | 'dark', seed?,
+intensity?}`, choices only, never derived CSS) are the shared types; an app extends
+  `AccountPreferences` with its own fields.
+
+```ts
+export const AppPreferencesStore = accountPreferencesStore<AppPreferences>();
+
+const prefs = inject(AppPreferencesStore);
+await prefs.load();
+await prefs.patchAppearance({theme: 'dark'}); // resolves false after a rollback, never rejects
+```
