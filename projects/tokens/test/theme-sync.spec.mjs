@@ -70,6 +70,12 @@ describe('inlineThemeScript', () => {
     assert.equal(inlineThemeScript(html), inlined());
   });
 
+  it('accepts a CRLF page and keeps its line endings', () => {
+    const crlf = text => text.replace(/\n/g, '\r\n');
+    assert.equal(inlineThemeScript(crlf(page())), crlf(inlined()));
+    assert.equal(inlineThemeScript(crlf(inlined())), crlf(inlined()));
+  });
+
   it('refuses a page without the markers rather than passing vacuously', () => {
     assert.throws(
       () => inlineThemeScript('<head><script>old</script></head>'),
@@ -99,6 +105,13 @@ describe('pinCspHash', () => {
 
   it('is idempotent', () => {
     assert.equal(pinCspHash(csp(HASH)), csp(HASH));
+  });
+
+  it('pins script-src without being confused by script-src-attr or script-src-elem', () => {
+    const policy = hash =>
+      `script-src 'self' ${hash}; script-src-elem 'self'; script-src-attr 'none'; style-src 'self'`;
+    assert.equal(pinCspHash(policy(STALE_HASH)), policy(HASH));
+    assert.throws(() => pinCspHash("script-src-attr 'none'"), /no script-src/);
   });
 
   it('refuses a CSP with no script-src, or with no or several hashes to choose from', () => {
@@ -197,6 +210,15 @@ describe('syncTheme and lifekit-theme-sync', () => {
     const bare = run('--html', 'bare.html');
     assert.equal(bare.status, 2);
     assert.match(bare.stderr, /bare\.html: no theme-init block/);
+  });
+
+  it('writes nothing when a later --csp file cannot be pinned', () => {
+    write('index.html', page());
+    write('nginx.conf', "script-src 'self'");
+    const result = run('--html', 'index.html', '--csp', 'nginx.conf');
+    assert.equal(result.status, 2);
+    assert.match(result.stderr, /nginx\.conf: script-src must carry exactly one/);
+    assert.equal(read('index.html'), page());
   });
 
   it('exits 2 for an unknown option and prints the usage for --help', () => {

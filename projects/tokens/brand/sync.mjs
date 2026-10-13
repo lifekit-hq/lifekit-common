@@ -24,8 +24,8 @@ export const THEME_INIT_MARKER =
   '<!-- theme-init:start - generated from @lifekit-hq/tokens by lifekit-theme-sync; do not edit. -->';
 
 const BLOCK =
-  /^([ \t]*)(<!-- theme-init:start[^>]*-->\n(?:[ \t]*<!-- prettier-ignore -->\n)?)[\s\S]*?(\n[ \t]*<!-- theme-init:end -->)/m;
-const SCRIPT_SRC = /script-src\b[^;"\n]*/g;
+  /^([ \t]*)(<!-- theme-init:start[^>]*-->\r?\n(?:[ \t]*<!-- prettier-ignore -->\r?\n)?)[\s\S]*?(\r?\n[ \t]*<!-- theme-init:end -->)/m;
+const SCRIPT_SRC = /\bscript-src(?![-\w])[^;"\n]*/g;
 const SHA256_SOURCE = /'sha256-[A-Za-z0-9+/=]+'/g;
 
 /** `html` with the script between its theme-init markers replaced by `script`. */
@@ -35,10 +35,10 @@ export function inlineThemeScript(html, script = THEME_SCRIPT) {
       `no theme-init block: put ${THEME_INIT_MARKER} and ${THEME_INIT_END} in <head> around the script`
     );
   }
-  return html.replace(
-    BLOCK,
-    (_match, indent, open, close) => `${indent}${open}${indent}<script>${script}</script>${close}`
-  );
+  return html.replace(BLOCK, (_match, indent, open, close) => {
+    const eol = open.includes('\r\n') ? '\r\n' : '\n';
+    return `${indent}${open}${indent}<script>${script.replace(/\n/g, eol)}</script>${close}`;
+  });
 }
 
 /** `text` (a CSP file) with the `sha256` source in every `script-src` replaced by `hash`. */
@@ -68,23 +68,20 @@ export function syncTheme({html, csp = [], check = false}) {
     {file: html, next: source => inlineThemeScript(source, script)},
     ...csp.map(file => ({file, next: source => pinCspHash(source, hash)})),
   ];
-  const stale = [];
-  for (const {file, next} of targets) {
+  const pending = targets.map(({file, next}) => {
     let source;
     try {
       source = readFileSync(file, 'utf8');
     } catch (error) {
       throw new Error(`${file}: ${error.code === 'ENOENT' ? 'no such file' : error.message}`);
     }
-    let updated;
     try {
-      updated = next(source);
+      return {file, source, updated: next(source)};
     } catch (error) {
       throw new Error(`${file}: ${error.message}`);
     }
-    if (updated === source) continue;
-    stale.push(file);
-    if (!check) writeFileSync(file, updated);
-  }
-  return stale;
+  });
+  const stale = pending.filter(({source, updated}) => updated !== source);
+  if (!check) stale.forEach(({file, updated}) => writeFileSync(file, updated));
+  return stale.map(({file}) => file);
 }
