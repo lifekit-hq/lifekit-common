@@ -1,5 +1,21 @@
 # Changelog
 
+## [3.3.0](https://github.com/lifekit-hq/lifekit-common/compare/v3.2.0...v3.3.0) (2026-10-13)
+
+
+### Features
+
+* **core:** add preferences entry point and the app-shell standard ([#155](https://github.com/lifekit-hq/lifekit-common/issues/155)) ([8b1f0e2](https://github.com/lifekit-hq/lifekit-common/commit/8b1f0e28945f0dc0d45f31713813dd656c5fedff))
+* **tokens:** add lifekit-theme-sync bin and the backstage seed ([#153](https://github.com/lifekit-hq/lifekit-common/issues/153)) ([32ea6e2](https://github.com/lifekit-hq/lifekit-common/commit/32ea6e2b107fbdab78f91d60460013ae126c0237))
+* **ui:** account standard - identity header, accountMenu() and cmn-more-page ([#156](https://github.com/lifekit-hq/lifekit-common/issues/156)) ([cb1c6e8](https://github.com/lifekit-hq/lifekit-common/commit/cb1c6e8451eebc2ae2c09d4337a0c1255035fb1d))
+* **ui:** add cmn-segmented and cmn-appearance-settings with account-synced appearance ([#157](https://github.com/lifekit-hq/lifekit-common/issues/157)) ([977fea3](https://github.com/lifekit-hq/lifekit-common/commit/977fea359e040f578927e12783f2289fdc70ca2d))
+* **ui:** add settings kit (settings-section, setting-row, danger-zone) ([#154](https://github.com/lifekit-hq/lifekit-common/issues/154)) ([80a7f2c](https://github.com/lifekit-hq/lifekit-common/commit/80a7f2c99514926ab9b434411f26d5fc86a034ae))
+
+
+### Bug Fixes
+
+* **elements:** redraw lk-line-chart when the theme or seed colour changes ([#151](https://github.com/lifekit-hq/lifekit-common/issues/151)) ([00f9bd6](https://github.com/lifekit-hq/lifekit-common/commit/00f9bd6e68841212a751b74b3e1f3901c139eb23))
+
 ## [3.2.0](https://github.com/lifekit-hq/lifekit-common/compare/v3.1.0...v3.2.0) (2026-10-11)
 
 
