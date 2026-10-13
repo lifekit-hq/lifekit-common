@@ -345,6 +345,18 @@ describe('fixed colours: categorical palette', () => {
     });
   }
 
+  for (const mode of MODES) {
+    it(`keeps category-other at least ${DISTINCT_MIN} from gain, loss, the assets and the fills in ${mode}`, () => {
+      for (const other of FIXED_APART) {
+        const apart = distance(themed(mode, 'category-other'), themed(mode, other));
+        assert.ok(
+          apart >= DISTINCT_MIN,
+          `category-other ${mode} collides with ${other}: ${apart.toFixed(3)}`
+        );
+      }
+    });
+  }
+
   it('makes category-other a neutral that is not mistaken for a category', () => {
     for (const mode of MODES) {
       assert.ok(hexToOklch(themed(mode, 'category-other')).C <= OTHER_CHROMA_MAX, mode);
