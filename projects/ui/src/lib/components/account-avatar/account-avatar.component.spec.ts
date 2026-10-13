@@ -58,6 +58,14 @@ describe('AccountAvatarComponent', () => {
     expect(picture()?.getAttribute('alt')).toBe('');
   });
 
+  it('should show a data: picture without throwing', () => {
+    const dataUrl = 'data:image/png;base64,iVBORw0KGgo=';
+    fixture.componentRef.setInput('pictureUrl', dataUrl);
+    fixture.detectChanges();
+
+    expect(picture()?.getAttribute('src')).toBe(dataUrl);
+  });
+
   it('should fall back to the initials when the picture fails to load', () => {
     fixture.componentRef.setInput('pictureUrl', 'https://example.com/ada.png');
     fixture.detectChanges();

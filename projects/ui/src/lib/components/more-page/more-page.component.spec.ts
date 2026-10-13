@@ -99,6 +99,18 @@ describe('MorePageComponent', () => {
     expect(host().querySelector('[data-more-identity]')).toBeNull();
   });
 
+  it('should render no account card for a label-only account without items', () => {
+    fixture.componentRef.setInput('account', {label: 'AL', menuItems: []});
+    fixture.detectChanges();
+    expect(section('account')).toBeNull();
+  });
+
+  it('should still render the identity card for an account without items', () => {
+    fixture.componentRef.setInput('account', {...ACCOUNT, menuItems: []});
+    fixture.detectChanges();
+    expect(host().querySelector('[data-more-identity]')).not.toBeNull();
+  });
+
   it('should link Settings and leave the app its other items as buttons', () => {
     const account = section('account');
     expect(account?.querySelector('a')?.getAttribute('href')).toBe('/settings');

@@ -154,7 +154,7 @@ export class MorePageComponent {
         groups.push([item]);
       }
     }
-    return groups.length > 0 ? groups : [[]];
+    return groups.length > 0 || !this.identity() ? groups : [[]];
   });
 
   protected readonly identity = computed(() => {

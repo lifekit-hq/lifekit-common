@@ -1,4 +1,3 @@
-import {NgOptimizedImage} from '@angular/common';
 import {ChangeDetectionStrategy, Component, computed, input, signal} from '@angular/core';
 
 const MAX_INITIALS = 2;
@@ -51,14 +50,13 @@ export function avatarInitials(label: string): string {
  */
 @Component({
   selector: 'cmn-account-avatar',
-  imports: [NgOptimizedImage],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {class: 'inline-flex shrink-0'},
   template: `
     <span [class]="classes()" aria-hidden="true">
       @if (picture(); as src) {
         <img
-          [ngSrc]="src"
+          [src]="src"
           [width]="pixels()"
           [height]="pixels()"
           (error)="onPictureError(src)"
