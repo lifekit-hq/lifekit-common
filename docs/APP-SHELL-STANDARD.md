@@ -127,7 +127,7 @@ export const FinancePreferencesStore = accountPreferencesStore<FinancePreference
 | `reload()`                    | Fetches again and keeps the current view while it loads                                                      |
 | `patch(partial)`              | Optimistic change of top-level fields; resolves `true` when confirmed, `false` after rollback; never rejects |
 | `patchAppearance(change)`     | `patch` for appearance: merged over the current one, the whole appearance is sent. `seed: undefined` resets  |
-| `clear()`                     | Forgets the loaded copy (sign-out)                                                                           |
+| `clear()`                     | Forgets the loaded copy (sign-out); answers still in flight are ignored and unsent saves are dropped         |
 
 Behaviour worth knowing:
 
