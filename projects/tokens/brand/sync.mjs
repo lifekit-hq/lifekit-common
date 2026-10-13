@@ -15,16 +15,21 @@ import {readFileSync, writeFileSync} from 'node:fs';
 
 import {THEME_SCRIPT, themeScriptCspHash} from './theme-script.mjs';
 
-/** The marker comments an app's `index.html` carries around the inlined script. */
-export const THEME_INIT_START = '<!-- theme-init:start';
-export const THEME_INIT_END = '<!-- theme-init:end -->';
+const START_PREFIX = '<!-- theme-init:start';
 
 /** The start marker as an app writes it, with the sentence that tells editors to leave it alone. */
 export const THEME_INIT_MARKER =
-  '<!-- theme-init:start - generated from @lifekit-hq/tokens by lifekit-theme-sync; do not edit. -->';
+  `${START_PREFIX} - generated from @lifekit-hq/tokens by lifekit-theme-sync; do not edit. -->`;
 
-const BLOCK =
-  /^([ \t]*)(<!-- theme-init:start[^>]*-->\r?\n(?:[ \t]*<!-- prettier-ignore -->\r?\n)?)[\s\S]*?(\r?\n[ \t]*<!-- theme-init:end -->)/m;
+/** The end marker an app's `index.html` carries after the inlined script. */
+export const THEME_INIT_END = '<!-- theme-init:end -->';
+
+const escapeRegExp = text => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const BLOCK = new RegExp(
+  `^([ \\t]*)(${escapeRegExp(START_PREFIX)}[^>]*-->\\r?\\n(?:[ \\t]*<!-- prettier-ignore -->\\r?\\n)?)` +
+    `[\\s\\S]*?(\\r?\\n[ \\t]*${escapeRegExp(THEME_INIT_END)})`,
+  'm'
+);
 const SCRIPT_SRC = /\bscript-src(?![-\w])[^;"\n]*/g;
 const SHA256_SOURCE = /'sha256-[A-Za-z0-9+/=]+'/g;
 
