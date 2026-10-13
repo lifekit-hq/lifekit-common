@@ -55,6 +55,8 @@ export function avatarInitials(label: string): string {
   template: `
     <span [class]="classes()" aria-hidden="true">
       @if (picture(); as src) {
+        <!-- A plain src: NgOptimizedImage throws on the data: URIs an IdP can supply -->
+        <!-- eslint-disable @angular-eslint/template/prefer-ngsrc -->
         <img
           [src]="src"
           [width]="pixels()"
@@ -64,6 +66,7 @@ export function avatarInitials(label: string): string {
           alt=""
           referrerpolicy="no-referrer"
         />
+        <!-- eslint-enable @angular-eslint/template/prefer-ngsrc -->
       } @else {
         {{ initials() }}
       }
