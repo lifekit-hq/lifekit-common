@@ -98,8 +98,10 @@ supplies no content for it.
 
 On a phone the account surface is the More page, not an avatar in the top bar. `cmn-app-layout`
 takes `accountOnPhone`: `more` (the default whenever `moreRoute` is set) drops the top bar's avatar
-in the phone shell, and `avatar` keeps it. `more` with no `moreRoute` keeps the avatar too, so the
-account never becomes unreachable. Wider windows always show the avatar and its menu.
+in the phone shell, and `avatar` keeps it. `more` with no `moreRoute`, or with no `account` (an app
+still on the deprecated `avatarLabel` / `avatarMenuItems`, which `cmn-more-page` does not read),
+keeps the avatar too, so the account never becomes unreachable. Wider windows always show the avatar
+and its menu.
 
 ```html
 <cmn-app-layout [navItems]="navItems" [tabRoutes]="tabRoutes" moreRoute="/more" [account]="account">

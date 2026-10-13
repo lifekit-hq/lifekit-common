@@ -495,6 +495,17 @@ describe('AppLayoutComponent', () => {
         expect(avatarTrigger()).toBeTruthy();
       });
 
+      it('should keep the avatar and its legacy items when the app passes no account', () => {
+        fixture.componentRef.setInput('account', undefined);
+        fixture.componentRef.setInput('moreRoute', '/more');
+        fixture.componentRef.setInput('avatarLabel', 'Ada Lovelace');
+        fixture.componentRef.setInput('avatarMenuItems', AVATAR_MENU_ITEMS);
+        fixture.detectChanges();
+
+        const items = openAvatarMenu().querySelectorAll('[role="menuitem"]');
+        expect(items.length).toBe(AVATAR_MENU_ITEMS.length);
+      });
+
       it('should keep the avatar on a wide window whatever the setting', () => {
         viewport.pin('sidebar');
         fixture.componentRef.setInput('moreRoute', '/more');

@@ -242,8 +242,9 @@ export class AppLayoutComponent {
   /**
    * Where the account lives in the phone shell. `more`: on the More page (`cmn-more-page`), and
    * the top bar drops its avatar; `avatar`: the avatar and its menu stay in the top bar. Left
-   * unset it is `more` when `moreRoute` is set, and `avatar` otherwise: with no More page there is
-   * nowhere else to reach the account, so `more` without a `moreRoute` also keeps the avatar.
+   * unset it is `more` when `moreRoute` is set, and `avatar` otherwise: with no More page, or no
+   * `account` for it to show (the deprecated `avatarLabel` / `avatarMenuItems` only reach the
+   * avatar menu), there is nowhere else to reach the account, so `more` also keeps the avatar.
    * Outside the phone shell the avatar always shows.
    */
   public readonly accountOnPhone = input<AccountOnPhone | undefined>(undefined);
@@ -404,7 +405,10 @@ export class AppLayoutComponent {
 
   /** The phone shell shows the account on the More page, so the top bar leaves its avatar out. */
   protected readonly showAvatar = computed<boolean>(() => {
-    const onMore = (this.accountOnPhone() ?? 'more') === 'more' && this.moreRoute() !== '';
+    const onMore =
+      (this.accountOnPhone() ?? 'more') === 'more' &&
+      this.moreRoute() !== '' &&
+      this.account() !== undefined;
     return !(onMore && this.shellService.isPhone());
   });
 
