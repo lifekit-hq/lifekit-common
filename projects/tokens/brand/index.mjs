@@ -19,6 +19,13 @@ export {
   TITLE_SEPARATOR,
   VIEWPORT,
 } from './standard.mjs';
+export {
+  inlineThemeScript,
+  pinCspHash,
+  syncTheme,
+  THEME_INIT_END,
+  THEME_INIT_MARKER,
+} from './sync.mjs';
 export {brandColors} from './tokens.mjs';
 export {
   THEME_SCRIPT,

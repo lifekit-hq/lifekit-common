@@ -18,6 +18,8 @@ export const APP_SEEDS = Object.freeze({
   fs: Object.freeze({name: 'Finance Sentry', seed: '#175a6d', intensity: DEFAULT_INTENSITY}),
   lk: Object.freeze({name: 'Lifekit', seed: '#4f46e5', intensity: DEFAULT_INTENSITY}),
   dc: Object.freeze({name: 'devclaw', seed: '#8e3b8a', intensity: DEFAULT_INTENSITY}),
+  // Velvet-curtain wine, the backstage of a theatre; the hue sits clear of the status colours.
+  bs: Object.freeze({name: 'Backstage', seed: '#8a2a5c', intensity: DEFAULT_INTENSITY}),
 });
 
 /** The colours the picker offers next to the app default and a custom colour. */

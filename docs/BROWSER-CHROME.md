@@ -170,14 +170,44 @@ copy it by hand: `@lifekit-hq/tokens` ships it, along with the hash your CSP nee
 - **Pin its hash in the CSP.** `brand/theme-init.csp-hash.txt` (or `themeScriptCspHash()`) is the
   `script-src` source expression, e.g. `'sha256-…'`. The hash covers the exact bytes between the
   tags, which are the bytes of `theme-init.js`, so inline the file unedited. The hash only
-  changes in a release that edits the script, and the release notes say so. Compare the pinned
-  value against the package in CI and bump both together.
+  changes in a release that edits the script, and the release notes say so. `lifekit-theme-sync`
+  keeps the page and the pinned value in step with the package (next section).
 - **What it does.** It reads the `cmn-theme` key `ThemeService` writes (`light` | `dark`), falls
   back to the OS `prefers-color-scheme`, and sets `data-theme` on `<html>`. No stored choice means
   the `system` preference, which `ThemeService` then follows live. When the user picked their own
   colour on this device (`cmn-theme-seed`), it also sets that palette inline on `<html>`, the
   variant for the active theme and `prefers-contrast`, so a custom colour never flashes the app's
   default first. The palette is set through the CSSOM, so `style-src` needs nothing new.
+
+### Keeping the script in step
+
+Angular's `index.html` has no include mechanism, so the script is written into the page between
+two markers, and the `lifekit-theme-sync` bin (run from the app's frontend directory) does it
+from the installed package. Put the markers in `<head>`; the second line is optional and keeps
+Prettier from reflowing the script:
+
+```text
+    <!-- theme-init:start - generated from @lifekit-hq/tokens by lifekit-theme-sync; do not edit. -->
+    <!-- prettier-ignore -->
+    <script>…</script>
+    <!-- theme-init:end -->
+```
+
+```bash
+lifekit-theme-sync                                    # rewrite src/index.html
+lifekit-theme-sync --check                            # exit 1 when it is out of sync (lint, CI)
+lifekit-theme-sync --html src/index.html --csp ../docker/nginx.security-headers.conf
+```
+
+- `--csp <file>` (repeatable) also re-pins the hash: the one `'sha256-…'` source in each
+  `script-src` of that file is rewritten, so a package bump never leaves the CSP behind. A
+  `script-src` with zero or several hashes is refused, because the bin cannot tell which is the
+  theme script's. An app without a CSP passes no `--csp`.
+- Exit codes: `0` in sync (or rewritten), `1` out of sync under `--check`, `2` for a usage error,
+  a missing file, or a page without the markers (a check never passes vacuously).
+- Wire `lifekit-theme-sync --check` into the app's lint, next to `lifekit-chrome-check`.
+- The script itself is unchanged: it still reads the `cmn-theme` and `cmn-theme-seed`
+  localStorage cache `ThemeService` writes, so appearance paints before the network answers.
 
 ## Fonts and tokens
 
