@@ -107,7 +107,8 @@
             "include": [
               "**/*.spec.ts",
               "../pwa/**/*.spec.ts",
-              "../format/**/*.spec.ts"
+              "../format/**/*.spec.ts",
+              "../preferences/**/*.spec.ts"
             ],
             "coverage": true,
             "browsers": [
@@ -135,7 +136,8 @@
             "lintFilePatterns": [
               "projects/core/src/**/*.ts",
               "projects/core/pwa/**/*.ts",
-              "projects/core/format/**/*.ts"
+              "projects/core/format/**/*.ts",
+              "projects/core/preferences/**/*.ts"
             ]
           }
         }
