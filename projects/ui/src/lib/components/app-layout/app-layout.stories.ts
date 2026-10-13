@@ -9,7 +9,7 @@ import {PinnedBreakpointObserver} from '../../services/shell/pinned-breakpoints'
 import type {CommandPaletteItem} from '../command-palette/command-palette-item.model';
 import type {MenuItem} from '../menu/menu.component';
 import type {NavItem} from '../sidebar-nav/sidebar-nav.component';
-import {AppLayoutComponent} from './app-layout.component';
+import {accountMenu, type AppLayoutAccount, AppLayoutComponent} from './app-layout.component';
 
 // Imported by name so a bundler cannot tree-shake the customElements.define() calls.
 for (const [tag, element] of [
@@ -118,6 +118,7 @@ const meta: Meta<AppLayoutComponent> = {
         [brand]="brand"
         [tabRoutes]="tabRoutes"
         [moreRoute]="moreRoute"
+        [accountOnPhone]="accountOnPhone"
         [phoneOverlay]="phoneOverlay"
         [floatingActionClearance]="floatingActionClearance"
       >${BODY}</cmn-app-layout>
@@ -490,4 +491,68 @@ export const LibraryManaged: Story = {
     account: {label: 'Ada Lovelace', menuItems: AVATAR_MENU},
     paletteItems: PALETTE_ITEMS,
   },
+};
+
+/** The account every lifekit app shows: identity, then `accountMenu()`'s fixed order. */
+const STANDARD_ACCOUNT: AppLayoutAccount = {
+  label: 'Ada Lovelace',
+  name: 'Ada Lovelace',
+  email: 'ada@example.com',
+  menuItems: accountMenu({
+    settingsRoute: '/settings',
+    extras: [{id: 'whatsNew', label: "What's new", icon: 'Sparkles'}],
+  }),
+};
+
+const ACCOUNT_STANDARD_TEMPLATE = `
+  <cmn-app-layout
+    [navItems]="navItems"
+    [title]="title"
+    [brand]="brand"
+    [tabRoutes]="tabRoutes"
+    [moreRoute]="moreRoute"
+    [accountOnPhone]="accountOnPhone"
+    [account]="account"
+    [showThemeToggle]="showThemeToggle"
+  >${BODY}</cmn-app-layout>
+`;
+
+/**
+ * The account standard on a wide window: the avatar opens a menu with the identity header,
+ * Settings, the app's extras and, set apart by a divider, Sign out. `accountMenu()` gives every
+ * app the same ids, icons and order, and the layout navigates to Settings itself; the app handles
+ * `avatarMenuSelect` for Sign out and its extras only. The menu holds no appearance controls.
+ */
+export const AccountStandard: Story = {
+  render: args => ({props: args, template: ACCOUNT_STANDARD_TEMPLATE}),
+  args: {
+    title: 'Dashboard',
+    brand: 'Lifekit',
+    account: STANDARD_ACCOUNT,
+    showThemeToggle: false,
+  },
+};
+
+/**
+ * On a phone with a More page the account lives there: `accountOnPhone` defaults to `more` when
+ * `moreRoute` is set, so the top bar drops its avatar and the app's More page renders
+ * `cmn-more-page`. Open the More tab's page in your app; the shell only gives it the tab.
+ */
+export const AccountStandardPhone: Story = {
+  render: args => ({props: args, template: ACCOUNT_STANDARD_TEMPLATE}),
+  args: {
+    ...AccountStandard.args,
+    navItems: PHONE_NAV_ITEMS,
+    tabRoutes: PHONE_TAB_ROUTES,
+    moreRoute: MORE_ROUTE,
+    title: 'Home',
+  },
+  globals: PHONE,
+};
+
+/** `accountOnPhone="avatar"` keeps the avatar and its menu in the phone's top bar. */
+export const AccountOnPhoneAvatar: Story = {
+  render: args => ({props: args, template: ACCOUNT_STANDARD_TEMPLATE}),
+  args: {...AccountStandardPhone.args, accountOnPhone: 'avatar'},
+  globals: PHONE,
 };

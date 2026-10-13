@@ -25,6 +25,22 @@ export const Overlay: Story = {
   globals: {viewport: {value: 'mobile2', isRotated: false}},
 };
 
+/**
+ * `avatarIdentity` puts the signed-in name and email (and a picture, when there is one) at the
+ * top of the avatar menu. `cmn-app-layout` passes it from its `account`.
+ */
+export const WithIdentity: Story = {
+  args: {
+    title: 'Dashboard',
+    isDark: false,
+    avatarIdentity: {name: 'Ada Lovelace', email: 'ada@example.com'},
+    avatarMenuItems: [
+      {id: '/settings', label: 'Settings', icon: 'Settings2'},
+      {id: '_signOut', label: 'Sign out', icon: 'LogOut', destructive: true, separatorBefore: true},
+    ],
+  },
+};
+
 /** Two-letter initials from the consumer (e.g. `authStore.avatarInitials`) fit the avatar circle. */
 export const TwoLetterInitials: Story = {
   args: {title: 'Dashboard', isDark: false, avatarLabel: 'DT'},

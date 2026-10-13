@@ -2,6 +2,7 @@
 export type * from './types';
 
 // Components
+export * from './components/account-avatar/account-avatar.component';
 export * from './components/alert/alert.component';
 export * from './components/alert-item/alert-item.component';
 export * from './components/app-layout/app-layout.component';
@@ -47,6 +48,7 @@ export * from './components/line-chart/line-chart.component';
 export * from './components/list-item-row/list-item-row.component';
 export * from './components/menu/menu.component';
 export * from './components/month-stepper/month-stepper.component';
+export * from './components/more-page/more-page.component';
 export * from './components/multi-select/multi-select.component';
 export * from './components/page-container/page-container.component';
 export * from './components/page-header/page-header.component';

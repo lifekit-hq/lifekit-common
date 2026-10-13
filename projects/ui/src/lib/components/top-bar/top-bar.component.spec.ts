@@ -106,6 +106,63 @@ describe('TopBarComponent', () => {
     expect(overlayContainer.getContainerElement().textContent).toContain('Log out');
   });
 
+  describe('account identity', () => {
+    const IDENTITY = {name: 'Ada Lovelace', email: 'ada@example.com'};
+
+    function openMenu(): HTMLElement {
+      fixture.nativeElement.querySelector('button[aria-label="Account menu"]')?.click();
+      fixture.detectChanges();
+      return overlayContainer.getContainerElement();
+    }
+
+    it('should open the menu with the name and email above the items', () => {
+      fixture.componentRef.setInput('avatarIdentity', IDENTITY);
+      fixture.detectChanges();
+
+      const header = openMenu().querySelector('[data-menu-header]');
+      expect(header?.textContent).toContain('Ada Lovelace');
+      expect(header?.textContent).toContain('ada@example.com');
+    });
+
+    it('should title the header with the email alone when there is no name', () => {
+      fixture.componentRef.setInput('avatarIdentity', {email: 'ada@example.com'});
+      fixture.detectChanges();
+
+      const header = openMenu().querySelector('[data-menu-header]');
+      expect(header?.querySelectorAll('p').length).toBe(1);
+      expect(header?.textContent).toContain('ada@example.com');
+    });
+
+    it('should show no header when the identity has neither a name nor an email', () => {
+      fixture.componentRef.setInput('avatarIdentity', {pictureUrl: 'https://example.com/a.png'});
+      fixture.detectChanges();
+
+      expect(openMenu().querySelector('[data-menu-header]')).toBeNull();
+    });
+
+    it('should take the initials from the name when there is no label', () => {
+      fixture.componentRef.setInput('avatarIdentity', IDENTITY);
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.avatarInitial()).toBe('AL');
+    });
+
+    it('should prefer the label for the initials', () => {
+      fixture.componentRef.setInput('avatarLabel', 'D');
+      fixture.componentRef.setInput('avatarIdentity', IDENTITY);
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.avatarInitial()).toBe('D');
+    });
+
+    it('should drop the avatar and its menu when showAvatar is false', () => {
+      fixture.componentRef.setInput('showAvatar', false);
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('button[aria-label="Account menu"]')).toBeNull();
+    });
+  });
+
   it('should render a solid header with no safe-area padding by default', () => {
     const header = fixture.nativeElement.querySelector('header') as HTMLElement;
     expect(header.classList).toContain('bg-surface-card');

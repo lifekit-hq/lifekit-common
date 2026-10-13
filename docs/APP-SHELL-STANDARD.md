@@ -17,7 +17,7 @@ document is the contract for the account and settings surface inside it.
 | `cmn-segmented`, `cmn-appearance-settings`, palette System/Light/Dark | `ui`                                     | Target (reads the Account tier below) |
 | `showThemeToggle` default `false`                                     | `cmn-app-layout`                         | Target                                |
 | `cmn-settings-section`, `cmn-setting-row`, `cmn-danger-zone`          | `ui`                                     | Target                                |
-| Identity header, `accountMenu()`, `accountOnPhone`, `cmn-more-page`   | `ui`                                     | Target                                |
+| Identity header, `accountMenu()`, `accountOnPhone`, `cmn-more-page`   | `ui`                                     | Built                                 |
 | `lifekit-theme-sync`, `APP_SEEDS.bs`                                  | `tokens`                                 | Target                                |
 
 Every app migrates to the standard in its own PR after the library parts land. Until an app has, the

@@ -1,9 +1,15 @@
 import {CdkMenu, CdkMenuItem, CdkMenuTrigger} from '@angular/cdk/menu';
 import {ChangeDetectionStrategy, Component, computed, input, output} from '@angular/core';
 
+import {
+  AccountAvatarComponent,
+  type AccountIdentity,
+} from '../account-avatar/account-avatar.component';
+import {accountHeader} from '../account-avatar/account-header';
+import {avatarInitials} from '../account-avatar/avatar-initials';
 import {type PageAction} from '../app-layout/page-chrome';
 import {IconComponent} from '../icon/icon.component';
-import {MenuComponent, type MenuItem} from '../menu/menu.component';
+import {MenuComponent, type MenuHeader, type MenuItem} from '../menu/menu.component';
 
 /**
  * How the bar shows its title. `none`: the bar's title is the page heading (h1). With a large
@@ -12,7 +18,6 @@ import {MenuComponent, type MenuItem} from '../menu/menu.component';
  */
 export type TopBarLargeTitle = 'none' | 'visible' | 'collapsed';
 
-const MAX_INITIALS = 2;
 const HEADER_BASE_CLASSES =
   'flex h-14 items-center border-b border-border-default px-cmn-4 md:gap-cmn-4 md:px-cmn-6';
 /**
@@ -51,9 +56,6 @@ const OVERFLOW_ITEM_CLASSES =
 /** The avatar's disc stays 32px inside its touch-sized, invisible button. */
 const AVATAR_TRIGGER_CLASSES =
   'group h-cmn-touch w-cmn-touch shrink-0 rounded-cmn-full md:h-8 md:w-8';
-const AVATAR_DISC_CLASSES =
-  'flex h-8 w-8 items-center justify-center rounded-cmn-full bg-accent-default text-cmn-xs ' +
-  'font-semibold text-text-inverse transition-opacity group-hover:opacity-90';
 /** Keyboard hints mean nothing without a keyboard: hidden wherever hover is unavailable. */
 const KEY_HINT_CLASSES =
   'ml-cmn-2 hidden rounded border border-border-default px-1 py-0.5 font-mono text-cmn-xs ' +
@@ -75,7 +77,14 @@ const HEADER_OVERLAY_CLASSES =
 
 @Component({
   selector: 'cmn-top-bar',
-  imports: [CdkMenu, CdkMenuItem, CdkMenuTrigger, IconComponent, MenuComponent],
+  imports: [
+    AccountAvatarComponent,
+    CdkMenu,
+    CdkMenuItem,
+    CdkMenuTrigger,
+    IconComponent,
+    MenuComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   // Chrome is for pressing: a long press on a label selects nothing
   host: {class: 'select-none'},
@@ -182,15 +191,22 @@ const HEADER_OVERLAY_CLASSES =
         </button>
       }
 
-      <!-- Avatar -->
-      <cmn-menu
-        [items]="avatarMenuItems()"
-        [triggerClass]="avatarTriggerClasses"
-        (itemSelect)="avatarMenuSelect.emit($event)"
-        ariaLabel="Account menu"
-      >
-        <span [class]="avatarDiscClasses">{{ avatarInitial() }}</span>
-      </cmn-menu>
+      <!-- Avatar: left out where the account lives elsewhere (the phone's More page) -->
+      @if (showAvatar()) {
+        <cmn-menu
+          [items]="avatarMenuItems()"
+          [header]="menuHeader()"
+          [triggerClass]="avatarTriggerClasses"
+          (itemSelect)="avatarMenuSelect.emit($event)"
+          ariaLabel="Account menu"
+        >
+          <cmn-account-avatar
+            [label]="avatarText()"
+            [pictureUrl]="avatarIdentity()?.pictureUrl"
+            size="sm"
+          />
+        </cmn-menu>
+      }
     </header>
   `,
 })
@@ -202,10 +218,18 @@ export class TopBarComponent {
    * Text shown in the avatar. A label of up to two characters without spaces is treated as
    * initials and shown as given, uppercased ('dt' → 'DT', 'Al' → 'AL'); a longer single word shows
    * its first letter ('Denys' → 'D'); several words show the first letters of the first two
-   * ('Denys Taran' → 'DT'); an empty label shows '?'.
+   * ('Denys Taran' → 'DT'); an empty label shows '?' (see `avatarInitials`).
    */
   public readonly avatarLabel = input<string>('');
   public readonly avatarMenuItems = input<MenuItem[]>([]);
+  /**
+   * Who the avatar is. A name or an email puts an identity header (picture, name, email) at the
+   * top of the menu; without either the menu is just its items. A picture also replaces the
+   * initials in the avatar itself.
+   */
+  public readonly avatarIdentity = input<AccountIdentity | undefined>(undefined);
+  /** Renders the avatar and its menu; false drops it from the bar. */
+  public readonly showAvatar = input<boolean>(true);
   /**
    * Phone overlay styling: translucent, blurred, and padded by the top safe-area inset. The
    * bar applies it whenever set; `cmn-app-layout` sets it only in the phone shell.
@@ -227,6 +251,17 @@ export class TopBarComponent {
     () => `${HEADER_BASE_CLASSES} ${this.overlay() ? HEADER_OVERLAY_CLASSES : HEADER_SOLID_CLASSES}`
   );
 
+  /** What the avatar's initials come from: the label, else the identity's name or email. */
+  protected readonly avatarText = computed<string>(() => {
+    const identity = this.avatarIdentity();
+    return this.avatarLabel().trim() || identity?.name?.trim() || identity?.email?.trim() || '';
+  });
+
+  /** The menu's identity header, or undefined when the identity has neither a name nor an email. */
+  protected readonly menuHeader = computed<MenuHeader | undefined>(() =>
+    accountHeader(this.avatarIdentity(), this.avatarLabel())
+  );
+
   protected readonly themeToggleClasses = computed<string>(() =>
     this.actions().length > 1
       ? `${CHROME_BUTTON_CLASSES} ${NARROW_HIDDEN_CLASSES}`
@@ -242,7 +277,6 @@ export class TopBarComponent {
   protected readonly backButtonClasses = BACK_BUTTON_CLASSES;
   protected readonly chromeButtonClasses = CHROME_BUTTON_CLASSES;
   protected readonly avatarTriggerClasses = AVATAR_TRIGGER_CLASSES;
-  protected readonly avatarDiscClasses = AVATAR_DISC_CLASSES;
   protected readonly keyHintClasses = KEY_HINT_CLASSES;
   protected readonly inlineTitleClasses = INLINE_TITLE_CLASSES;
   protected readonly inlineLabelClasses = INLINE_LABEL_CLASSES;
@@ -254,16 +288,6 @@ export class TopBarComponent {
   }
 
   public avatarInitial(): string {
-    const label = this.avatarLabel().trim();
-    const words = label.split(/\s+/).filter(Boolean);
-    if (words.length > 1) {
-      return words
-        .slice(0, MAX_INITIALS)
-        .map(word => word.charAt(0))
-        .join('')
-        .toUpperCase();
-    }
-    const single = label.length <= MAX_INITIALS ? label : label.charAt(0);
-    return single.toUpperCase() || '?';
+    return avatarInitials(this.avatarText());
   }
 }

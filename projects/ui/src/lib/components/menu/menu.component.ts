@@ -14,14 +14,31 @@ import {
   signal,
 } from '@angular/core';
 
+import {AccountAvatarComponent} from '../account-avatar/account-avatar.component';
 import {IconComponent, type LucideIconName} from '../icon/icon.component';
 
 export interface MenuItem {
+  /**
+   * What the app tells the item apart by. An id that is an absolute path (`/settings`) is a
+   * route: `cmn-app-layout` and `cmn-more-page` navigate there themselves.
+   */
   id: string;
   label: string;
   icon?: LucideIconName;
   destructive?: boolean;
   disabled?: boolean;
+  /** Draws a divider above the item, to set it apart from the group before it. */
+  separatorBefore?: boolean;
+}
+
+/** A non-interactive header above a menu's items, e.g. the signed-in identity. */
+export interface MenuHeader {
+  title: string;
+  subtitle?: string;
+  /** Profile picture shown beside the text; the avatar's initials show without it. */
+  pictureUrl?: string;
+  /** What the avatar's initials are taken from; defaults to `title`. */
+  avatarLabel?: string;
 }
 
 const TRIGGER_BASE_CLASSES =
@@ -29,7 +46,12 @@ const TRIGGER_BASE_CLASSES =
   'focus:ring-2 focus:ring-border-focus focus:ring-offset-1';
 
 const PANEL_BASE_CLASSES =
-  'min-w-48 overflow-hidden rounded-cmn-lg border border-border-default bg-surface-card py-cmn-2 shadow-cmn-lg';
+  'min-w-48 max-w-[calc(100vw-2rem)] overflow-hidden rounded-cmn-lg border border-border-default ' +
+  'bg-surface-card py-cmn-2 shadow-cmn-lg';
+
+const HEADER_CLASSES =
+  'mb-cmn-2 flex items-center gap-cmn-3 border-b border-border-default px-cmn-4 pb-cmn-3 pt-cmn-2';
+const SEPARATOR_CLASSES = 'my-cmn-2 border-t border-border-default';
 
 const ITEM_BASE_CLASSES =
   'flex w-full items-center gap-cmn-3 px-cmn-4 py-cmn-2 text-left text-cmn-sm transition-colors ' +
@@ -58,7 +80,7 @@ const MENU_POSITIONS: ConnectedPosition[] = [
 
 @Component({
   selector: 'cmn-menu',
-  imports: [CdkConnectedOverlay, CdkOverlayOrigin, IconComponent],
+  imports: [AccountAvatarComponent, CdkConnectedOverlay, CdkOverlayOrigin, IconComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <button
@@ -85,8 +107,28 @@ const MENU_POSITIONS: ConnectedPosition[] = [
       cdkConnectedOverlay
       cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
     >
-      <div [class]="panelClasses()" role="menu">
-        @for (item of items(); track item.id) {
+      <div [class]="panelClasses()" [attr.aria-label]="panelLabel()" role="menu">
+        @if (header(); as menuHeader) {
+          <div [class]="headerClasses" role="presentation" data-menu-header>
+            <cmn-account-avatar
+              [label]="menuHeader.avatarLabel ?? menuHeader.title"
+              [pictureUrl]="menuHeader.pictureUrl"
+              size="md"
+            />
+            <div class="min-w-0">
+              <p class="truncate text-cmn-sm font-medium text-text-primary">
+                {{ menuHeader.title }}
+              </p>
+              @if (menuHeader.subtitle) {
+                <p class="truncate text-cmn-xs text-text-secondary">{{ menuHeader.subtitle }}</p>
+              }
+            </div>
+          </div>
+        }
+        @for (item of items(); track item.id; let first = $first) {
+          @if (item.separatorBefore && !first) {
+            <div [class]="separatorClasses" role="separator"></div>
+          }
           <button
             [disabled]="item.disabled"
             [attr.aria-disabled]="item.disabled || null"
@@ -109,6 +151,8 @@ export class MenuComponent {
   private readonly overlay = inject(Overlay);
 
   public readonly items = input<MenuItem[]>([]);
+  /** Identity or context shown above the items; not a menu item, so it can't be selected. */
+  public readonly header = input<MenuHeader | undefined>(undefined);
   public readonly ariaLabel = input<string>('Open menu');
   public readonly triggerClass = input<string>('');
   public readonly panelClass = input<string>('');
@@ -124,6 +168,13 @@ export class MenuComponent {
     this.joinClasses(PANEL_BASE_CLASSES, this.panelClass())
   );
   public readonly scrollStrategy = this.overlay.scrollStrategies.reposition();
+  /** The header's text names the menu, since a menu reads out its items and not the header. */
+  public readonly panelLabel = computed<string | null>(() => {
+    const header = this.header();
+    return header ? [header.title, header.subtitle].filter(Boolean).join(', ') : null;
+  });
+  public readonly headerClasses = HEADER_CLASSES;
+  public readonly separatorClasses = SEPARATOR_CLASSES;
 
   public toggle(): void {
     this.isOpen.update(open => !open);
