@@ -82,6 +82,11 @@ In `@lifekit-hq/ui` the whole path is `AppearanceService`: `setMode`, `setSeed`,
 keeps working on the cache alone; `cmn-appearance-settings` then captions the control "On this
 device" instead of "Synced to your account".
 
+The page and the cache change at once on every input. A colour drag fires an input per step, so a
+change of colour alone is written to the account once it has been still for `SEED_SAVE_DELAY_MS`,
+or when the page is hidden or left, and the account mirror does not overwrite the cache while that
+write is waiting. Mode and intensity changes are written at once.
+
 ## 3. The shared code
 
 ### `devicePreference<T>(key, default, options?)`
@@ -148,8 +153,10 @@ Behaviour worth knowing:
 - `patchAppearance` before the first load starts from `DEFAULT_APPEARANCE` (`{theme: 'system'}`).
 - The store is `providedIn: 'root'`. Provide `HttpClient` as usual.
 
-L1 (`cmn-appearance-settings`) needs exactly two things from it: read `appearance()`, and call
-`patchAppearance({theme})` or `patchAppearance({seed, intensity})`.
+`AppearanceService` (L1) needs exactly two things from it: read `appearance()`, and call
+`patch({appearance})` with the whole local appearance. It sends the whole object rather than using
+`patchAppearance`, because before the first load the store's copy is the default and a merge over it
+would send `system` over a server theme that has not arrived yet.
 
 ### The server contract
 
@@ -226,8 +233,9 @@ The label is **"Sign out"** everywhere. Not "Log out".
 - **No theme toggle in the top bar.** The library default for `showThemeToggle` is `false`; Settings
   is the home of the override. The toggle could only flip between light and dark and pin the result,
   so it could never go back to System.
-- The command palette offers three entries, **Appearance: System**, **Light** and **Dark**, each
-  calling `setPreference`, so System stays reachable.
+- The command palette offers three entries, **Appearance: System**, **Light** and **Dark**
+  (`APPEARANCE_PALETTE_ITEMS`), each setting the mode through `AppearanceService.setMode`, so System
+  stays reachable.
 - A palette or Settings change goes through the paths in section 2: cache and server together.
 
 ## What this standard does not cover

@@ -358,11 +358,12 @@ surfaces, colour only where you act), Tinted 0.45, Immersive 0.85.
 - `theme.css` ships finance-sentry's palette as the default. Each app imports its own generated
   stylesheet after it: `@import '@lifekit-hq/tokens/seeds/<app>.css';` (`fs`, `lk`, `dc`, `bs`). With
   no seed stylesheet an app renders as finance-sentry does.
-- A user can pick another colour and intensity on their device, in Settings > Appearance with
-  `<lk-theme-picker>`. In an Angular app the picker's `lk-theme-picker-change` goes to
-  `ThemeService.setSeed()` (or `resetSeed()` for the app's own colour). The service sets the
-  derived palette inline on `<html>` and caches it under `cmn-theme-seed`, which the pre-paint
-  script applies before first paint. That script's CSP hash changed with seed support; see
+- A user can pick another colour and intensity, in Settings > Appearance with
+  `<lk-theme-picker>`. In an Angular app `cmn-appearance-settings` sends the picker's
+  `lk-theme-picker-change` to `AppearanceService.setSeed()` (or `resetSeed()` for the app's own
+  colour), which calls `ThemeService.setSeed()` and, where the app syncs appearance, writes the
+  account too. `ThemeService` sets the derived palette inline on `<html>` and caches it under
+  `cmn-theme-seed`, which the pre-paint script applies before first paint. That script's CSP hash changed with seed support; see
   [`BROWSER-CHROME.md`](../BROWSER-CHROME.md).
 - Any seed is safe. The engine solves each role's lightness to its WCAG floor rather than
   trusting the colour, and `npm run test:tokens` checks every pair over a sweep of seeds

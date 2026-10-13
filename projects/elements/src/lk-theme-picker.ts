@@ -45,8 +45,8 @@ let nextId = 0;
  * controls readable; a colour close to a status colour gets a note saying so.
  *
  * The element is controlled: it shows `seed` and `intensity` and emits `lk-theme-picker-change` with
- * `{seed, intensity}` (`seed: null` for the app's own colour). In an Angular app, hand that to
- * `ThemeService.setSeed` / `resetSeed`, which keep it per device and re-apply it.
+ * `{seed, intensity}` (`seed: null` for the app's own colour). In an Angular app, use
+ * `cmn-appearance-settings`, which hands that to `AppearanceService.setSeed` / `resetSeed`.
  *
  * @example
  * <lk-theme-picker app-seed="#175a6d" seed="#4f46e5" intensity="0.12"></lk-theme-picker>

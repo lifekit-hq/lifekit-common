@@ -249,9 +249,9 @@ colour is allowed to touch: [`docs/design/patterns.md`](../../docs/design/patter
 The element is controlled. Events:
 
 - `lk-theme-picker-change`, `detail: {seed: string | null, intensity: number}` (`seed: null` is
-  the app's own colour). In an Angular app, pass it to `ThemeService.setSeed(seed, intensity)`,
-  or `resetSeed()` for `null`; the service persists it per device and the pre-paint script
-  applies it on the next load.
+  the app's own colour). In an Angular app, use `cmn-appearance-settings` from `@lifekit-hq/ui`,
+  which passes it to `AppearanceService.setSeed(seed, intensity)` (or `resetSeed()` for `null`):
+  it caches the choice for the pre-paint script and writes the account where the app syncs.
 
 ```html
 <lk-theme-picker app-seed="#175a6d"></lk-theme-picker>
