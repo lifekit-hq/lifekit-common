@@ -5,7 +5,9 @@ import {
   CUSTOM_ELEMENTS_SCHEMA,
   inject,
   input,
+  type Signal,
 } from '@angular/core';
+import {type ThemeMode} from '@lifekit-hq/core/preferences';
 import {type LkThemeChoice, LkThemePicker} from '@lifekit-hq/elements';
 import {DEFAULT_INTENSITY} from '@lifekit-hq/tokens/engine';
 
@@ -84,7 +86,7 @@ export class AppearanceSettingsComponent {
   protected readonly modeOptions = MODE_OPTIONS;
   protected readonly defaultIntensity = DEFAULT_INTENSITY;
 
-  protected readonly mode = this.appearance.mode;
+  protected readonly mode: Signal<ThemeMode> = this.appearance.mode;
   protected readonly seed = this.appearance.seed;
   protected readonly modeHelp = computed(() => MODE_HELP[this.mode()]);
   protected readonly caption = computed(() =>

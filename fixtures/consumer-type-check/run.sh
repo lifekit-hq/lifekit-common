@@ -49,5 +49,9 @@ mv .tmp/package node_modules/@lifekit-hq/elements
 tar -xzf .tmp/lifekit-hq-ui-*.tgz -C .tmp
 mv .tmp/package node_modules/@lifekit-hq/ui
 
+# The fixture sits inside the repo, so a build-machine-relative import("../../dist/...") can resolve
+# by accident here; scan the declarations directly so it cannot slip through.
+node "$root/scripts/check-dts-portable.mjs" "$root/dist/lifekit-hq"
+
 "$root/node_modules/.bin/tsc" --project tsconfig.json
 echo "consumer-type-check: OK (compiled against the npm-packed artifact)"
