@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, computed, signal} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import type {Meta, StoryObj} from '@storybook/angular';
-import {moduleMetadata} from '@storybook/angular';
+import {applicationConfig, moduleMetadata} from '@storybook/angular';
 
 import {APPEARANCE_STORE, type AppearanceStore} from '../../services/appearance/appearance.service';
 import {AppearanceSettingsComponent} from '../appearance-settings/appearance-settings.component';
@@ -236,10 +236,9 @@ const meta: Meta<StorySettingsPageComponent> = {
   component: StorySettingsPageComponent,
   parameters: {layout: 'fullscreen'},
   decorators: [
-    moduleMetadata({
-      imports: [StorySettingsPageComponent],
-      providers: [{provide: APPEARANCE_STORE, useFactory: fakeAccountStore}],
-    }),
+    // `AppearanceService` is root-provided, so the store has to be in the application config.
+    applicationConfig({providers: [{provide: APPEARANCE_STORE, useFactory: fakeAccountStore}]}),
+    moduleMetadata({imports: [StorySettingsPageComponent]}),
   ],
 };
 

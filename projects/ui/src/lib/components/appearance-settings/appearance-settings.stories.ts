@@ -1,6 +1,6 @@
 import {signal} from '@angular/core';
 import {APP_SEEDS} from '@lifekit-hq/tokens/engine';
-import {type Meta, moduleMetadata, type StoryObj} from '@storybook/angular';
+import {applicationConfig, type Meta, moduleMetadata, type StoryObj} from '@storybook/angular';
 
 import {APPEARANCE_STORE, type AppearanceStore} from '../../services/appearance/appearance.service';
 import {SettingsSectionComponent} from '../settings-section/settings-section.component';
@@ -32,7 +32,8 @@ type Story = StoryObj<AppearanceSettingsComponent>;
 /** The app has an account preferences store: the caption says the choice is synced. */
 export const SyncedToAccount: Story = {
   decorators: [
-    moduleMetadata({providers: [{provide: APPEARANCE_STORE, useFactory: fakeAccountStore}]}),
+    // `AppearanceService` is root-provided, so the store has to be in the application config.
+    applicationConfig({providers: [{provide: APPEARANCE_STORE, useFactory: fakeAccountStore}]}),
   ],
 };
 
@@ -42,10 +43,8 @@ export const DeviceOnly: Story = {};
 /** The way an app places it: the body of the standard Appearance section. */
 export const InASettingsSection: Story = {
   decorators: [
-    moduleMetadata({
-      imports: [SettingsSectionComponent],
-      providers: [{provide: APPEARANCE_STORE, useFactory: fakeAccountStore}],
-    }),
+    applicationConfig({providers: [{provide: APPEARANCE_STORE, useFactory: fakeAccountStore}]}),
+    moduleMetadata({imports: [SettingsSectionComponent]}),
   ],
   render: args => ({
     props: args,
