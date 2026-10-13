@@ -30,7 +30,8 @@ import {
   type PaletteResult,
 } from '../command-palette/command-palette-item.model';
 import {CmnDialogBareContainerComponent} from '../dialog/dialog-bare-container.component';
-import {isRouteMenuItem, type MenuItem} from '../menu/menu.component';
+import {type MenuItem} from '../menu/menu.component';
+import {isRouteMenuItem} from '../menu/route-menu-item';
 import {type NavItem, SidebarNavComponent} from '../sidebar-nav/sidebar-nav.component';
 import {TopBarComponent, type TopBarLargeTitle} from '../top-bar/top-bar.component';
 import {

@@ -1,23 +1,7 @@
 import {type ComponentFixture, TestBed} from '@angular/core/testing';
 import {beforeEach, describe, expect, it} from 'vitest';
 
-import {AccountAvatarComponent, avatarInitials} from './account-avatar.component';
-
-describe('avatarInitials', () => {
-  it.each([
-    ['DT', 'DT'],
-    ['dt', 'DT'],
-    ['D', 'D'],
-    ['Denys', 'D'],
-    ['Denys Taran', 'DT'],
-    ['Denys Ivanovych Taran', 'DI'],
-    ['  Denys   Taran  ', 'DT'],
-    ['', '?'],
-    ['   ', '?'],
-  ])('should reduce "%s" to "%s"', (label, expected) => {
-    expect(avatarInitials(label)).toBe(expected);
-  });
-});
+import {AccountAvatarComponent} from './account-avatar.component';
 
 describe('AccountAvatarComponent', () => {
   let fixture: ComponentFixture<AccountAvatarComponent>;

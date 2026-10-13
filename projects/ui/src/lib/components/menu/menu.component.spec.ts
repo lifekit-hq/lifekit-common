@@ -3,7 +3,7 @@ import {type ComponentFixture, TestBed} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
 import {afterEach, beforeEach, describe, expect, it} from 'vitest';
 
-import {isRouteMenuItem, MenuComponent, type MenuHeader, type MenuItem} from './menu.component';
+import {MenuComponent, type MenuHeader, type MenuItem} from './menu.component';
 
 const MENU_ITEMS: MenuItem[] = [
   {id: 'settings', label: 'Settings', icon: 'Settings2'},
@@ -167,16 +167,5 @@ describe('MenuComponent', () => {
 
       expect(open().querySelector('[role="separator"]')).toBeNull();
     });
-  });
-});
-
-describe('isRouteMenuItem', () => {
-  it('should treat an absolute path id as a route', () => {
-    expect(isRouteMenuItem({id: '/settings', label: 'Settings'})).toBe(true);
-  });
-
-  it('should treat any other id as an action', () => {
-    expect(isRouteMenuItem({id: '_signOut', label: 'Sign out'})).toBe(false);
-    expect(isRouteMenuItem({id: 'settings', label: 'Settings'})).toBe(false);
   });
 });

@@ -4,9 +4,9 @@ import {ChangeDetectionStrategy, Component, computed, input, output} from '@angu
 import {
   AccountAvatarComponent,
   type AccountIdentity,
-  avatarInitials,
 } from '../account-avatar/account-avatar.component';
 import {accountHeader} from '../account-avatar/account-header';
+import {avatarInitials} from '../account-avatar/avatar-initials';
 import {type PageAction} from '../app-layout/page-chrome';
 import {IconComponent} from '../icon/icon.component';
 import {MenuComponent, type MenuHeader, type MenuItem} from '../menu/menu.component';

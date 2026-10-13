@@ -9,7 +9,8 @@ import {BadgeComponent} from '../badge/badge.component';
 import {CardComponent} from '../card/card.component';
 import {IconComponent} from '../icon/icon.component';
 import {ListItemRowComponent} from '../list-item-row/list-item-row.component';
-import {isRouteMenuItem, type MenuItem} from '../menu/menu.component';
+import {type MenuItem} from '../menu/menu.component';
+import {isRouteMenuItem} from '../menu/route-menu-item';
 import {PageContainerComponent} from '../page-container/page-container.component';
 import {type NavItem} from '../sidebar-nav/sidebar-nav.component';
 
