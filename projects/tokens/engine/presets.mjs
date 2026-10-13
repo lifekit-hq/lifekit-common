@@ -22,7 +22,12 @@ export const APP_SEEDS = Object.freeze({
   bs: Object.freeze({name: 'Backstage', seed: '#8a2a5c', intensity: DEFAULT_INTENSITY}),
 });
 
-/** The colours the picker offers next to the app default and a custom colour. */
+/**
+ * The colours the picker offers next to the app default and a custom colour. None sits within
+ * `NEAR_HUE_DEGREES` of the error or success hue, so an accent never reads as a loss or a gain, and
+ * none is a grey, so a link and a selected state never read as body text
+ * (test/fixed-colours.spec.mjs).
+ */
 export const PRESETS = Object.freeze(
   [
     {id: 'petrol', name: 'Petrol', seed: '#175a6d'},
@@ -30,7 +35,5 @@ export const PRESETS = Object.freeze(
     {id: 'plum', name: 'Plum', seed: '#8e3b8a'},
     {id: 'ocean', name: 'Ocean', seed: '#1f5fbf'},
     {id: 'violet', name: 'Violet', seed: '#7c3aed'},
-    {id: 'rose', name: 'Rose', seed: '#be185d'},
-    {id: 'graphite', name: 'Graphite', seed: '#4b5563'},
   ].map(preset => Object.freeze(preset))
 );

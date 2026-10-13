@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
 import {describe, it} from 'node:test';
 
+import {FIXED_COLOUR_NAMES} from '../engine/index.mjs';
+
 const require = createRequire(import.meta.url);
 const postcss = require('postcss');
 const tailwindcss = require('tailwindcss');
@@ -24,5 +26,12 @@ describe('tailwind preset', () => {
     const css = await generate(['ring-offset-1'], '@tailwind base; @tailwind utilities;');
     assert.match(css, /--tw-ring-offset-color:\s*var\(--color-surface-card\)/);
     assert.doesNotMatch(css, /--tw-ring-offset-color:\s*#fff/);
+  });
+
+  it('exposes every fixed colour as a colour utility resolving to its custom property', async () => {
+    const css = await generate(FIXED_COLOUR_NAMES.map(name => `bg-${name}`));
+    for (const name of FIXED_COLOUR_NAMES) {
+      assert.match(css, new RegExp(`\\.bg-${name}\\s*\\{[^}]*var\\(--color-${name}\\)`), name);
+    }
   });
 });
