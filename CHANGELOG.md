@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.3.1](https://github.com/lifekit-hq/lifekit-common/compare/v3.3.0...v3.3.1) (2026-10-13)
+
+
+### Bug Fixes
+
+* **ui:** emit portable ThemeMode type in cmn-appearance-settings declarations ([#158](https://github.com/lifekit-hq/lifekit-common/issues/158)) ([f2df44d](https://github.com/lifekit-hq/lifekit-common/commit/f2df44d205f78eccc42bebec9ce85d706d7a1e1e))
+
 ## [3.3.0](https://github.com/lifekit-hq/lifekit-common/compare/v3.2.0...v3.3.0) (2026-10-13)
 
 

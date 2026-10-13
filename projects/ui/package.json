@@ -1,6 +1,6 @@
 {
   "name": "@lifekit-hq/ui",
-  "version": "3.3.0",
+  "version": "3.3.1",
   "peerDependencies": {
     "@angular/cdk": "^21.2.0 || ^22.0.0",
     "@angular/common": "^21.2.0 || ^22.0.0",
@@ -15,10 +15,10 @@
     "rxjs": "^7.8.0"
   },
   "dependencies": {
-    "@lifekit-hq/charts-core": "3.3.0",
-    "@lifekit-hq/core": "3.3.0",
-    "@lifekit-hq/elements": "3.3.0",
-    "@lifekit-hq/tokens": "3.3.0",
+    "@lifekit-hq/charts-core": "3.3.1",
+    "@lifekit-hq/core": "3.3.1",
+    "@lifekit-hq/elements": "3.3.1",
+    "@lifekit-hq/tokens": "3.3.1",
     "tslib": "^2.3.0"
   },
   "sideEffects": false,
