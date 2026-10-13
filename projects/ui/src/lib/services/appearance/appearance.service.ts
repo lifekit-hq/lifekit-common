@@ -88,7 +88,7 @@ export class AppearanceService {
     if (store) {
       effect(() => {
         const appearance = store.appearance();
-        if (appearance) {
+        if (appearance && this.pendingSave === null) {
           untracked(() => this.applyFromAccount(appearance));
         }
       });

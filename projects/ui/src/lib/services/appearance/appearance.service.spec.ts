@@ -313,6 +313,25 @@ describe('AppearanceService with a preferences store', () => {
       expect(store.patched[0].appearance?.seed).toBe(TEAL);
     });
 
+    it('keeps the drag colour when the store reports an older value while the write waits', () => {
+      store.appearance.set({theme: 'system', seed: INDIGO, intensity: DEFAULT_INTENSITY});
+      TestBed.tick();
+
+      service.setSeed(TEAL);
+      store.appearance.set({theme: 'system', seed: INDIGO, intensity: DEFAULT_INTENSITY});
+      TestBed.tick();
+
+      expect(theme.getSeed()?.seed).toBe(TEAL);
+
+      vi.advanceTimersByTime(SEED_SAVE_DELAY_MS);
+      TestBed.tick();
+
+      expect(store.patched).toEqual([
+        {appearance: {theme: 'system', seed: TEAL, intensity: DEFAULT_INTENSITY}},
+      ]);
+      expect(theme.getSeed()?.seed).toBe(TEAL);
+    });
+
     it('sends nothing when nothing was pending as the page is left', () => {
       window.dispatchEvent(new Event('pagehide'));
       TestBed.resetTestingModule();
