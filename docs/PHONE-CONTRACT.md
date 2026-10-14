@@ -24,20 +24,21 @@ browser-level chrome (tab title, icons, `theme-color`, manifest) is the
 
 A page gets all of this without writing any code for it.
 
-| Area           | Guarantee                                                                                                                                                                                                   |
-| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Tab bar        | Navigation only, 3-5 destinations, one-word labels that never truncate, always visible except under a sheet. The last tab, More, opens a page the app builds, never a sheet. Badges for critical info only. |
-| Tab state      | Each tab remembers its last screen. Launch restores the last tab. Re-tapping the active tab scrolls to top, then pops to the tab root.                                                                      |
-| Top bar        | Owns the title, the back chevron (no "Back" text) and a trailing actions slot. The page's large title shrinks into the bar on scroll. No page renders its own back button or title.                         |
-| Back           | Back goes to the route's `parent`, or to history when there is none. A deep link to a detail still has a way up. The system swipe back works and is never overridden.                                       |
-| Scroll         | The shell owns the scroller. Back restores the scroll position. Overscroll does not chain to the browser (`overscroll-behavior-y: contain`).                                                                |
-| Sheets         | One sheet implementation, `cmn-drawer`: half and full stops, a grabber (tap cycles the stops), drag to dismiss, opens at most half height. Do not open two at once.                                         |
-| Overlays       | Install hint, offline banner and update prompt sit in the content area, below the top bar. They never cover the top bar or the tab bar. The floating action hides while a sheet is open.                    |
-| Touch          | 44pt hit areas for every chrome control. Chrome text is not selectable. Keyboard hints are hidden on touch (`(hover: none)`).                                                                               |
-| Safe areas     | Top bar, tab bar and sheets pad `env(safe-area-inset-*)`.                                                                                                                                                   |
-| Layout by size | Under 600px: tab bar. 600-839px: collapsed sidebar as a rail. 840px and up: sidebar. A landscape phone (short, coarse pointer) keeps the tab bar.                                                           |
-| Appearance     | Follows the system light or dark setting by default. The override lives in Settings. `theme-color` matches the surface, per the browser chrome standard.                                                    |
-| Motion         | Brief and purposeful. Everything fades or stops under Reduce Motion.                                                                                                                                        |
+| Area           | Guarantee                                                                                                                                                                                                                   |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tab bar        | Navigation only, 3-5 destinations, one-word labels that never truncate, always visible except under a sheet. The last tab, More, opens a page the app builds, never a sheet. Badges for critical info only.                 |
+| Tab state      | Each tab remembers its last screen. Launch restores the last tab. Re-tapping the active tab scrolls to top, then pops to the tab root.                                                                                      |
+| Top bar        | Owns the title, the back chevron (no "Back" text) and a trailing actions slot. The page's large title shrinks into the bar on scroll. No page renders its own back button or title.                                         |
+| Back           | Back goes to the route's `parent`, or to history when there is none. A deep link to a detail still has a way up. The system swipe back works and is never overridden.                                                       |
+| Scroll         | The shell owns the scroller. Back restores the scroll position. Overscroll does not chain to the browser (`overscroll-behavior-y: contain`).                                                                                |
+| Sheets         | One sheet implementation, `cmn-drawer`: half and full stops, a grabber (tap cycles the stops), drag to dismiss, opens at most half height. Do not open two at once.                                                         |
+| Content insets | The shell measures its pinned chrome and publishes it as insets, so content never sits under the top bar, and the last row of a page scrolls clear of the tab bar and the floating action. See "Content clears the chrome". |
+| Overlays       | Install hint, offline banner and update prompt sit in the content area, below the top bar. They never cover the top bar or the tab bar. The floating action hides while a sheet is open.                                    |
+| Touch          | 44pt hit areas for every chrome control, and on a phone for every `cmn-*` and `lk-*` control in the content too. Chrome text is not selectable. Keyboard hints are hidden on touch (`(hover: none)`).                       |
+| Safe areas     | Top bar, tab bar and sheets pad `env(safe-area-inset-*)`.                                                                                                                                                                   |
+| Layout by size | Under 600px: tab bar. 600-839px: collapsed sidebar as a rail. 840px and up: sidebar. A landscape phone (short, coarse pointer) keeps the tab bar.                                                                           |
+| Appearance     | Follows the system light or dark setting by default. The override lives in Settings. `theme-color` matches the surface, per the browser chrome standard.                                                                    |
+| Motion         | Brief and purposeful. Everything fades or stops under Reduce Motion.                                                                                                                                                        |
 
 The top bar's theme toggle is off by default (`showThemeToggle`), because it can only flip between
 light and dark and never back to System. The override lives in Settings (`cmn-appearance-settings`)
@@ -130,6 +131,37 @@ protected readonly account: AppLayoutAccount = {
   `tabRoutes`), an account card with the identity, Settings and the extras, Sign out in a card of
   its own, and `versionLabel`. It owns no sign-in.
 
+### Content clears the chrome
+
+In the phone shell the top bar and the tab bar float over `<main>`, the scroller, so content can
+scroll under their translucent surfaces. The shell measures what is pinned over each end with a
+ResizeObserver and publishes it on `<main>` (`CMN_CONTENT_INSET_PROPERTIES`), so nothing depends
+on a fixed bar height, safe-area insets included:
+
+| Custom property              | Value                                                                                                                                                                                                         |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--cmn-content-inset-top`    | The top bar's height, safe area included. `<main>`'s top padding.                                                                                                                                             |
+| `--cmn-content-inset-bottom` | What covers main's bottom: the tab bar plus any declared `floatingActionClearance`, or up to the floating action's top when that sits higher, plus 8px of breathing room. Where the page's end padding stops. |
+| `--cmn-sticky-top`           | The height of the notices pinned under the top bar (offline, install, update), 0px when there are none. Where a sticky header sticks.                                                                         |
+
+Outside the phone shell all three are unset, and everything that reads them falls back to 0px.
+
+- **Top.** `<main>` pads its top by `--cmn-content-inset-top`, and its `scroll-padding-top` adds
+  the notices, so focusing or scrolling to an element never leaves it under the chrome.
+- **Bottom.** The outermost `cmn-page-container` ends with `--cmn-content-inset-bottom` added to
+  its own padding, so the last row scrolls clear of the tab bar; a page container nested in another
+  does not add it again. A page with no page container gets the inset as `<main>`'s bottom padding
+  instead. `scroll-padding-bottom` reads the same inset.
+- **Page height.** A page is never capped at the screen's height on a phone. `fill` makes the page
+  container at least the screen tall (`min-h-full`); the cap (`h-full`) applies from `md` only, where
+  a fill page scrolls a child internally. A page host that is itself `h-full` still works: in fill
+  mode the end clearance is a spacer after the content, so it follows content that overflows the
+  host.
+- **Sticky headers.** A sticky offset inside `<main>` counts from its padding edge, which is
+  already below the top bar. So a sticky header uses `top: var(--cmn-sticky-top, 0px)`, never
+  `--cmn-content-inset-top`: that would count the top bar twice and leave a gap of its height.
+  `cmn-list-section` does this for you.
+
 ## What a page declares
 
 Pages declare these in route data and templates. No per-page header, back or sheet code.
@@ -151,6 +183,47 @@ A route that declares none of these keeps the layout's `title` input and gets no
 | Detail kind | A quick look opens a **sheet**. A full record **pushes a page** with back. Do not mix the two for the same kind of record.                              |
 | States      | Wrap async content in the state pattern below. A page never builds its own loading, empty or error markup.                                              |
 | Fields      | Forms use `cmn-form-field`. Money fields set `inputmode="decimal"`, every field sets `enterkeyhint`, and `autocomplete` is set where the kind is known. |
+| Long lists  | A filtered or grouped list is built from the shared parts below, not hand-rolled rows and headers.                                                      |
+
+### Long lists
+
+The parts of a long list page (transactions, alerts, events) are shared, so every app filters,
+groups and scrolls a list the same way.
+
+```html
+<cmn-page-container fill>
+  <cmn-filter-bar
+    [(query)]="query"
+    [activeCount]="activeFilters()"
+    [applied]="appliedChips()"
+    (remove)="dropFilter($event)"
+    (clear)="clearFilters()"
+    placeholder="Search transactions"
+    sheetTitle="Transaction filters"
+  >
+    <lk-chip-row label="Period" cmnFilterBarQuick></lk-chip-row>
+    <ng-template let-close="close" cmnFilterBarSheet>
+      <!-- the filter form; a Done button calls close() -->
+    </ng-template>
+  </cmn-filter-bar>
+
+  @for (day of days(); track day.date) {
+  <cmn-list-section [heading]="day.label">
+    <span cmnListSectionAside>{{ day.total }}</span>
+    @for (row of day.rows; track row.id) {
+    <cmn-list-item-row ... />
+    }
+  </cmn-list-section>
+  }
+</cmn-page-container>
+```
+
+| Part                             | What it does                                                                                                                                                                                                                                                                                                                                                                              |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `cmn-filter-bar`                 | The filter flow: a search field (`[(query)]`), a Filters button badged with `activeCount`, a `cmnFilterBarQuick` slot for a quick-filter row, and the `applied` filters as removable chips with Clear (`remove`, `clear`). A `cmnFilterBarSheet` template opens from the Filters button as a bottom sheet on a phone and a side drawer from `md`. The bar keeps no filter state.          |
+| `lk-chip-row`                    | Quick filters on one line: a period, a status, an account. Scrolls sideways with an edge fade and snap, never truncates a label, keeps the selected chip in view, shows counts as badges, single or multi select, 44px chips.                                                                                                                                                             |
+| `cmn-segmented` / `lk-segmented` | A short parameter choice (a view mode, a chart period): five segments or fewer, short noun labels. Cells are equal and as wide as the widest label, and never narrower than their own: the row overflows rather than truncate. `lk-segmented` warns in development when it overflows. More choices, or long labels, use `lk-chip-row`; a rarely changed setting such as sort uses a menu. |
+| `cmn-list-section`               | One group of rows under a heading: a day of transactions, a severity of alerts. The heading is an `h2` that names the section, with a `cmnListSectionAside` slot for a total or count; the rows sit in an unpadded `cmn-card` (`card` false leaves them bare). On a phone the heading sticks flush under the top bar while its rows scroll past, and the next heading pushes it out.      |
 
 ### Sheet or page
 
@@ -207,20 +280,84 @@ Offline beats error, and error beats empty, so a failed or offline load never re
   CLS at most 0.1.
 - Haptics are not possible in an iOS PWA and are not part of the contract.
 
+## The phone standard
+
+The rules every lifekit app keeps on a phone, with the sources behind them and the suite check
+that holds each one. A rule marked "follow-up" is the target; its parts and check come later.
+
+1. **Content clears fixed controls.** The shell measures its pinned chrome and publishes the
+   insets (above). `cmn-page-container` ends with the bottom inset, `scroll-padding` reads the
+   same values, and a page host is never capped at the screen's height on a phone. Sources: WCAG
+   2.2 SC 2.4.11 and technique C43, failure F110; MDN `scroll-padding` and `env()`; WebKit
+   "Designing Websites for iPhone X"; HIG Layout (safe areas). Check: the last content of a list
+   page clears the tab bar and the floating action at 375, 390 and 402.
+2. **Overlays sit in flow.** Install, offline and update notices render in the notice slot below
+   the top bar; a toast sits above the bottom inset. Nothing covers the chrome. Check: notices sit
+   below the top bar and above the tab bar.
+3. **Touch targets.** Every interactive element on a phone has a hit area of at least 44x44 CSS
+   px. A smaller visual (a 32px chip, a `sm` button) keeps its look and gets a 44px hit area
+   (`PHONE_HIT_AREA_CLASSES`, `.cmn-hit-slop`). Inline text links follow WCAG 2.5.8. Sources: HIG
+   Buttons and Accessibility (44pt, 28pt minimum); WCAG 2.5.8 and 2.5.5; M3 48dp. Check: targets
+   are at least 44 in the phone chrome and on the list page.
+4. **Overflow rows.** A control row never overlaps or clips a label. Segmented controls keep to
+   five segments or fewer with equal cells at least as wide as the widest label. A filter with
+   counts, more than five options or two dimensions uses `lk-chip-row`; a rarely changed setting
+   (sort) uses a menu. Sources: HIG Segmented controls; M3 Segmented buttons and Filter chips; WCAG
+   1.4.10, 1.4.12, 1.4.4. Check: no segmented cell or chip label overflows at 375, 390 and 402.
+5. **Skeletons and states** (follow-up). Every async region uses `cmn-async-state` with a skeleton
+   shaped like the rendered content, on containers only, with no indicator for loads under about
+   200ms and a minimum display time once shown. The sweep stops under Reduce Motion. Sources: NN/g
+   "Skeleton Screens 101"; M3 Progress indicators; Atlassian and Carbon loading; web.dev CLS.
+   Check today: the state pattern; to come: CLS at most 0.1 per route.
+6. **Continuity** (follow-up). Data on screen stays while it refreshes; a tab return paints at
+   once and revalidates; scroll restore waits for the data; tab destinations preload on idle except
+   under Save-Data. Sources: RFC 5861; angular.dev service worker `dataGroups`, route preloading,
+   `@defer`; HIG Loading. Check today: back restores scroll.
+7. **Motion** (follow-up). Durations and easings come from tokens (M3 values: 150, 250 and 400ms;
+   standard and emphasized curves); only transform and opacity animate; under Reduce Motion,
+   movement becomes a fade or nothing. Sources: HIG Motion; M3 easing and duration tokens; WCAG
+   2.3.3.
+8. **Lists and pagination.** Phone lists load continuously with a sentinel (or a full-width 44px
+   Load More), showing skeleton rows while appending, an end marker and an inline retry. No page
+   size selectors or Prev/Next pagers on a phone (the sentinel is a follow-up). Sources: NN/g
+   "Infinite Scrolling Is Not for Every Website" and "Infinite Scrolling: When to Use It".
+   - **8a. Sticky section headers.** A grouped long list (transactions by day, alerts by day or
+     severity, events) pins the current group's header under the top bar while its rows scroll,
+     and the next header pushes it out, as an iOS plain list does. Use `cmn-list-section`. The
+     header sticks at `--cmn-sticky-top` with an opaque surface fill, flush under the top bar and
+     any pinned notices. Source: UIKit `UITableView.Style.plain`. Check: the header pins flush
+     under the top bar, never overlapping it, at 375, 390 and 402.
+9. **Text input.** Inputs, selects and textareas are 16px below `md` (iOS zooms into a focused
+   field set smaller) and at least 44px tall, and carry `inputmode`, `enterkeyhint` and
+   `autocomplete`. Sheets size with `dvh` and keep the focused field in the visual viewport
+   (follow-up). Sources: WebKit `WKWebViewIOS.mm`; MDN `inputmode`, `enterkeyhint`.
+10. **Navigation.** The tab bar stays visible with five destinations or fewer and one-word labels,
+    badges only for critical information; root pages have a large title that collapses on scroll.
+    Sources: HIG Tab bars and Toolbars; M3 Navigation bar. Check: tab labels, shell by device.
+
+Touch-sized controls in the landscape phone's and the tablet's chrome (the top bar's account menu
+and search, the rail's buttons) are not promised yet: those layouts keep desktop density. The suite
+reports them without failing (advisory) until a follow-up decides them.
+
 ## Status
 
 The contract is the target. The shell reaches it step by step, and each step adds a check to the
-phone conformance suite (`npm run test:phone`, report-only until `PHONE_CONFORMANCE=gate`), so a
-guarantee above is only gating once its check exists.
+phone conformance suite (`npm run test:phone`). CI runs it with `PHONE_CONFORMANCE=gate`, so every
+check fails the build except the advisory ones; a guarantee above is only gating once its check
+exists.
 
-| Guarantee                               | Status                                                                                            |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| Tab bar, sheets, safe areas             | Built: one sheet (`cmn-drawer`) with half and full stops, More is a page; no suite check yet      |
-| Account on a phone                      | Built: `accountOnPhone`, `accountMenu()`, `cmn-more-page`; no suite check yet                     |
-| Top bar title, back, actions            | Built: route data `title`, `parent`, `actions`; the suite checks the title at 320                 |
-| Shell-owned scroll and tab state        | Built: checked by the suite's "back restores scroll"; see "Scroll and tab state"                  |
-| One state pattern                       | Built: `cmn-async-state`; the suite checks the offline and error states at 320 and 390            |
-| Touch size (44pt chrome, labels, hints) | Built: `--size-touch`, `.cmn-hit-slop`; the suite enforces 44x44 at 390x844, labels at 320, hints |
-| Layout by size                          | Built: `CmnShellService` picks tab bar, rail or sidebar; the suite checks each width and device   |
-| Appearance                              | Built: `cmn-appearance-settings` in Settings, palette entries, synced through `AppearanceService` |
-| Overlays                                | Target                                                                                            |
+| Guarantee                               | Status                                                                                                                                                                              |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tab bar, sheets, safe areas             | Built: one sheet (`cmn-drawer`) with half and full stops, More is a page; no suite check yet                                                                                        |
+| Account on a phone                      | Built: `accountOnPhone`, `accountMenu()`, `cmn-more-page`; no suite check yet                                                                                                       |
+| Top bar title, back, actions            | Built: route data `title`, `parent`, `actions`; the suite checks the title at 320                                                                                                   |
+| Shell-owned scroll and tab state        | Built: checked by the suite's "back restores scroll"; see "Scroll and tab state"                                                                                                    |
+| One state pattern                       | Built: `cmn-async-state`; the suite checks the offline and error states at 320 and 390                                                                                              |
+| Touch size (44pt chrome, labels, hints) | Built: `--size-touch`, `.cmn-hit-slop`, `PHONE_HIT_AREA_CLASSES`; the suite enforces 44x44 at 390x844 and on the list page, labels at 320, hints; landscape and tablet are advisory |
+| Layout by size                          | Built: `CmnShellService` picks tab bar, rail or sidebar; the suite checks each width and device                                                                                     |
+| Appearance                              | Built: `cmn-appearance-settings` in Settings, palette entries, synced through `AppearanceService`                                                                                   |
+| Overlays                                | Built: the notice slot; the suite checks notices sit between the top bar and the tab bar                                                                                            |
+| Content insets                          | Built: measured `--cmn-content-inset-*`; the suite checks the last content clears the tab bar                                                                                       |
+| Long lists (filter, chips, sections)    | Built: `cmn-filter-bar`, `lk-chip-row`, `cmn-list-section`; the suite checks labels and headers                                                                                     |
+| Text input (16px, 44px)                 | Built: every `cmn-*` field below md; `dvh` sheets and visual viewport are a follow-up                                                                                               |
+| Skeletons, continuity, motion, paging   | Target: rules 5-8 of the standard                                                                                                                                                   |

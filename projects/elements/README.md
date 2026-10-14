@@ -173,8 +173,11 @@ framework behaviour, so the layered substrate rule in `docs/STRATEGY.md` makes i
 
 One-row segmented control for picking one value out of a short list, such as a chart period. A
 `role="radiogroup"` of `role="radio"` cells, not a tablist: choosing a cell changes a value the host
-reads, it does not swap a panel. Cells share the row equally, never wrap and are at least 44px
-square (seven fit the 326px a card leaves on a 390px phone).
+reads, it does not swap a panel. Cells are equal width, as wide as the widest label and at least
+44px square, and never wrap. A cell is never narrower than its own label: when the labels need more
+room than the row has, the row overflows rather than truncate one, and in development logs a
+console warning. Keep it to five segments or fewer with short noun labels; more choices, or longer
+labels, belong in an `lk-chip-row` or a menu.
 
 | Property   | Attribute  | Type                                                   | Default | Description                                                    |
 | ---------- | ---------- | ------------------------------------------------------ | ------- | -------------------------------------------------------------- |
@@ -202,6 +205,40 @@ Why `lk-segmented` and not a `cmn-*` Angular component: it has no
 framework behaviour (no CDK, router, overlay or form integration - the host binds `value` and the
 event), so the layered substrate rule in `docs/STRATEGY.md` makes it a framework-free leaf, and the
 `lk-` tag prefix is that layer's convention.
+
+### `<lk-chip-row>`
+
+A single-line row of filter chips that scrolls sideways instead of wrapping or truncating: the
+quick filters above a list (a period, a status, an account). Use it for a filter with counts, more
+than five options, or labels too long for `lk-segmented`. Every label shows whole; the row fades at
+an edge while there is more to scroll that way, snaps chip by chip, and scrolls (only itself) to
+keep the first chip that is on in view when the selection changes. Each chip is a toggle button
+(`aria-pressed`) in a `role="group"` named by `label`, and presses as a 44px (`--size-touch`)
+target around a 32px pill.
+
+| Property   | Attribute | Type                                                                   | Default    | Description                                                                  |
+| ---------- | --------- | ---------------------------------------------------------------------- | ---------- | ---------------------------------------------------------------------------- |
+| `options`  | -         | `{value: string, label: string, count?: number, disabled?: boolean}[]` | `[]`       | The chips, in order. Property only. `count` shows as a badge after the label |
+| `selected` | -         | `string[]`                                                             | `[]`       | The values that are on. Property only                                        |
+| `mode`     | `mode`    | `'single' \| 'multi'`                                                  | `'single'` | `single` keeps exactly one chip on; `multi` toggles each chip independently  |
+| `label`    | `label`   | `string`                                                               | `''`       | Accessible name of the group                                                 |
+
+Event: `lk-chip-row-change` - the reader pressed a chip; `detail` is `{selected, value}`, with
+`selected` in option order. In `single` mode, pressing the chip that is already on does nothing.
+Like a native `change`, it never fires for a `selected` the host sets.
+
+```html
+<lk-chip-row label="Period"></lk-chip-row>
+<script>
+  const row = document.querySelector('lk-chip-row');
+  row.options = [
+    {value: 'week', label: 'This week'},
+    {value: 'month', label: 'This month', count: 12},
+  ];
+  row.selected = ['month'];
+  row.addEventListener('lk-chip-row-change', e => apply(e.detail.selected));
+</script>
+```
 
 ### `<lk-update-prompt>`
 
