@@ -1,3 +1,4 @@
+import {booleanAttribute, ChangeDetectionStrategy, Component, input, signal} from '@angular/core';
 import type {Meta, StoryObj} from '@storybook/angular';
 import {moduleMetadata} from '@storybook/angular';
 
@@ -5,7 +6,62 @@ import {ButtonComponent} from '../button/button.component';
 import {CardComponent} from '../card/card.component';
 import {EmptyStateComponent} from '../empty-state/empty-state.component';
 import {SkeletonComponent} from '../skeleton/skeleton.component';
-import {AsyncStateComponent} from './async-state.component';
+import {
+  ASYNC_STATE_MIN_DISPLAY_MS,
+  ASYNC_STATE_SHOW_DELAY_MS,
+  AsyncStateComponent,
+  type AsyncStateStatus,
+} from './async-state.component';
+
+const REFRESH_MS = 1500;
+const QUICK_REFRESH_MS = 120;
+
+/** A region with a Refresh button, so the calm-loading options can be felt rather than described. */
+@Component({
+  selector: 'cmn-story-refresh',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [AsyncStateComponent, ButtonComponent],
+  template: `
+    <div class="flex max-w-md flex-col gap-cmn-4">
+      <div class="flex gap-cmn-2">
+        <cmn-button (click)="refresh(slow)">Refresh (1.5s)</cmn-button>
+        <cmn-button (click)="refresh(quick)" variant="secondary">Refresh (120ms)</cmn-button>
+      </div>
+      <cmn-async-state
+        [keepContent]="keepContent()"
+        [minDisplay]="calm() ? minDisplayMs : 0"
+        [showDelay]="calm() ? showDelayMs : 0"
+        [skeletonRows]="3"
+        [status]="status()"
+        [crossfade]="calm()"
+        skeletonShape="row"
+      >
+        <div class="rounded-cmn-md border border-border-default bg-surface-card p-cmn-4">
+          <p class="text-cmn-sm text-text-primary">Loaded content, {{ loads() }} load(s) so far.</p>
+        </div>
+      </cmn-async-state>
+    </div>
+  `,
+})
+class StoryRefreshComponent {
+  public readonly keepContent = input(false, {transform: booleanAttribute});
+  public readonly calm = input(false, {transform: booleanAttribute});
+
+  protected readonly slow = REFRESH_MS;
+  protected readonly quick = QUICK_REFRESH_MS;
+  protected readonly showDelayMs = ASYNC_STATE_SHOW_DELAY_MS;
+  protected readonly minDisplayMs = ASYNC_STATE_MIN_DISPLAY_MS;
+  protected readonly status = signal<AsyncStateStatus>('success');
+  protected readonly loads = signal(1);
+
+  protected refresh(ms: number): void {
+    this.status.set('loading');
+    setTimeout(() => {
+      this.loads.update(n => n + 1);
+      this.status.set('success');
+    }, ms);
+  }
+}
 
 const meta: Meta<AsyncStateComponent> = {
   title: 'Components/Async State',
@@ -13,7 +69,13 @@ const meta: Meta<AsyncStateComponent> = {
   tags: ['autodocs'],
   decorators: [
     moduleMetadata({
-      imports: [ButtonComponent, CardComponent, EmptyStateComponent, SkeletonComponent],
+      imports: [
+        ButtonComponent,
+        CardComponent,
+        EmptyStateComponent,
+        SkeletonComponent,
+        StoryRefreshComponent,
+      ],
     }),
   ],
 };
@@ -352,4 +414,46 @@ export const OfflineWithContent: Story = {
     `,
   }),
   args: {status: 'success', offline: true, lastSynced: LAST_SYNCED},
+};
+
+/**
+ * A skeleton preset with no `[skeleton]` markup to write: `skeletonShape="section"` draws a
+ * list-section heading over `skeletonRows` two-line rows, with the geometry of the real thing.
+ */
+export const PresetSkeleton: Story = {
+  render: args => ({
+    props: args,
+    template: `
+      <cmn-async-state [status]="status" skeletonShape="section" [skeletonRows]="skeletonRows">
+        ${CONTENT}
+      </cmn-async-state>
+    `,
+  }),
+  args: {status: 'loading', skeletonRows: 3},
+};
+
+/**
+ * Every option off: a refresh swaps the content for the skeleton at once, however short the load.
+ * This is how the component has always behaved.
+ */
+export const RefreshDefault: Story = {
+  render: () => ({template: '<cmn-story-refresh />'}),
+};
+
+/** `keepContent`: the loaded content stays on screen, dimmed, while the refresh loads. */
+export const RefreshKeepsContent: Story = {
+  render: () => ({template: '<cmn-story-refresh keepContent />'}),
+};
+
+/**
+ * `showDelay` and `minDisplay` (200 and 400ms) with `crossfade`: the 120ms refresh shows no
+ * indicator at all, a long one shows the skeleton for at least 400ms, and the content fades in.
+ */
+export const RefreshCalm: Story = {
+  render: () => ({template: '<cmn-story-refresh calm />'}),
+};
+
+/** All of it: content kept and dimmed after the delay, no flash for a quick refresh. */
+export const RefreshKeepsContentCalm: Story = {
+  render: () => ({template: '<cmn-story-refresh keepContent calm />'}),
 };

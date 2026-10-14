@@ -263,6 +263,33 @@ empty, keep cached data, errors keep context). A page binds `status`, `isEmpty`,
 
 Offline beats error, and error beats empty, so a failed or offline load never reads as "no data".
 
+Calm loading is opt-in: a region that sets none of the options below behaves as it always has.
+
+| Input           | Does                                                                                                                                                                                                     |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `keepContent`   | A refresh keeps the loaded content on screen, dimmed, instead of swapping it for the skeleton. A first load (nothing to keep) still shows the skeleton. The dim follows `showDelay`.                     |
+| `showDelay`     | Milliseconds a load must last before any loading indicator shows. Until then the content already on screen stays put, so a fast load shows no flash. `ASYNC_STATE_SHOW_DELAY_MS` is the standard's 200.  |
+| `minDisplay`    | Milliseconds an indicator that has shown stays up, so it never flashes away. `ASYNC_STATE_MIN_DISPLAY_MS` is the standard's 400. Not applied to a kept (dimmed) body: fresh content replaces it at once. |
+| `crossfade`     | The content fades in (`--cmn-duration-short`) when it replaces the skeleton; nothing under Reduce Motion.                                                                                                |
+| `skeletonShape` | Draws the placeholder as a `cmn-skeleton` preset (`skeletonRows` rows) instead of the default bars; a projected `[skeleton]` still wins.                                                                 |
+
+A skeleton goes on a container, never inside the text it stands for. `cmn-skeleton` draws a bar by
+default; `shape` draws a component's whole silhouette from that component's own geometry, so the
+page does not move when the content arrives:
+
+| `shape`   | Stands in for                                  | Notes                                                                                                                    |
+| --------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `row`     | `cmn-list-item-row` (avatar, two lines, value) | `count` rows (default 1), divided like the real rows. Put them in the same `cmn-card` the real rows use.                 |
+| `section` | `cmn-list-section`                             | The sticky-heading height, then a card of `count` rows (default 3).                                                      |
+| `stat`    | `cmn-stat-card`                                | Label, value and delta.                                                                                                  |
+| `chart`   | `cmn-line-chart` card                          | The plot keeps the chart's own height (`h-48`); `aspect` (`16 / 9`) reserves a ratio instead for a chart sized by ratio. |
+
+The sweep is one `--color-skeleton-sheen` band moving by `transform` over `--color-skeleton`, a
+token held apart from `surface-raised` so a skeleton reads as a placeholder in light and dark. It
+stops under Reduce Motion and leaves the still block. Presets are `aria-hidden`; the region's
+`role="status"` "Loading" carries the announcement. The suite holds each preset to within 8px of
+the loaded component at 375, 390 and 402 (`Conformance/Skeleton Geometry`).
+
 | State   | Shows                                                                                                                                                  |
 | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Loading | A skeleton shaped like the content, the old content while refreshing.                                                                                  |
@@ -310,19 +337,23 @@ that holds each one. A rule marked "follow-up" is the target; its parts and chec
    counts, more than five options or two dimensions uses `lk-chip-row`; a rarely changed setting
    (sort) uses a menu. Sources: HIG Segmented controls; M3 Segmented buttons and Filter chips; WCAG
    1.4.10, 1.4.12, 1.4.4. Check: no segmented cell or chip label overflows at 375, 390 and 402, and an over-long segmented row never scrolls the page sideways.
-5. **Skeletons and states** (follow-up). Every async region uses `cmn-async-state` with a skeleton
-   shaped like the rendered content, on containers only, with no indicator for loads under about
-   200ms and a minimum display time once shown. The sweep stops under Reduce Motion. Sources: NN/g
-   "Skeleton Screens 101"; M3 Progress indicators; Atlassian and Carbon loading; web.dev CLS.
-   Check today: the state pattern; to come: CLS at most 0.1 per route.
+5. **Skeletons and states.** Every async region uses `cmn-async-state` with a skeleton shaped like
+   the rendered content (the `cmn-skeleton` `shape` presets), on containers only, with no
+   indicator for loads under about 200ms (`showDelay`) and a minimum display time once shown
+   (`minDisplay`). The sweep stops under Reduce Motion. Sources: NN/g "Skeleton Screens 101"; M3
+   Progress indicators; Atlassian and Carbon loading; web.dev CLS. Check: each preset's box is
+   within 8px of the loaded component's; the state pattern. To come: CLS at most 0.1 per route.
 6. **Continuity** (follow-up). Data on screen stays while it refreshes; a tab return paints at
    once and revalidates; scroll restore waits for the data; tab destinations preload on idle except
    under Save-Data. Sources: RFC 5861; angular.dev service worker `dataGroups`, route preloading,
    `@defer`; HIG Loading. Check today: back restores scroll.
-7. **Motion** (follow-up). Durations and easings come from tokens (M3 values: 150, 250 and 400ms;
-   standard and emphasized curves); only transform and opacity animate; under Reduce Motion,
-   movement becomes a fade or nothing. Sources: HIG Motion; M3 easing and duration tokens; WCAG
-   2.3.3.
+7. **Motion.** Durations and easings come from tokens (`--cmn-duration-short|medium|long`: 150,
+   250 and 400ms; `--cmn-ease-standard|emphasized-decelerate|emphasized-accelerate`, the M3
+   curves, with Tailwind `duration-cmn-*` and `ease-cmn-*`); only transform and opacity animate;
+   under Reduce Motion, movement becomes a fade or nothing (the global block in `theme.css`; a
+   spinner is the one thing that keeps turning). Sources: HIG Motion; M3 easing and duration
+   tokens; WCAG 2.3.3. Check: no transform animation runs under Reduce Motion, on the skeleton
+   and on a sheet.
 8. **Lists and pagination.** Phone lists load continuously with a sentinel (or a full-width 44px
    Load More), showing skeleton rows while appending, an end marker and an inline retry. No page
    size selectors or Prev/Next pagers on a phone (the sentinel is a follow-up). Sources: NN/g
@@ -366,4 +397,5 @@ exists.
 | Content insets                          | Built: measured `--cmn-content-inset-*`; the suite checks the last content clears the tab bar, whatever the page composition                                                        |
 | Long lists (filter, chips, sections)    | Built: `cmn-filter-bar`, `lk-chip-row`, `cmn-list-section`; the suite checks labels and headers                                                                                     |
 | Text input (16px, 44px)                 | Built: every `cmn-*` field below md; `dvh` sheets and visual viewport are a follow-up                                                                                               |
-| Skeletons, continuity, motion, paging   | Target: rules 5-8 of the standard                                                                                                                                                   |
+| Skeletons and motion                    | Built: `cmn-skeleton` presets, `cmn-async-state` calm loading, motion tokens; the suite checks preset geometry and Reduce Motion                                                    |
+| Continuity and paging                   | Target: rules 6 and 8 of the standard                                                                                                                                               |

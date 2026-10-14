@@ -853,6 +853,116 @@ for (const size of LIST_WIDTHS) {
   });
 }
 
+// Skeleton presets copy the box of the component they stand in for, so the page does not shift
+// when the content arrives (rule 5). Each pair sits in `Conformance/Skeleton Geometry`.
+const SKELETON_STORY = 'conformance-skeleton-geometry--geometry';
+const SKELETON_READY = 'cmn-skeleton-geometry';
+const SKELETON_PAIRS = ['stat', 'chart', 'row', 'section'] as const;
+const GEOMETRY_TOLERANCE = 8;
+const SWEEP_PROBE_MS = 400;
+const TRANSFORM_PROPERTIES = ['transform', 'translate', 'scale', 'rotate'];
+
+for (const size of LIST_WIDTHS) {
+  test.describe(`skeleton geometry ${size.width}x${size.height}`, () => {
+    test.use({viewport: size, hasTouch: true, isMobile: true});
+
+    for (const pair of SKELETON_PAIRS) {
+      test(`${pair} | the skeleton is within ${GEOMETRY_TOLERANCE}px of the loaded component`, async ({
+        page,
+      }) => {
+        await open(page, SKELETON_STORY, 'light', SKELETON_READY);
+        await page.waitForSelector(`[data-pair="${pair}"] [data-loaded] > *`, {state: 'visible'});
+        await settleFrames(page);
+        const sizes = await page.evaluate(name => {
+          // A custom element is inline by default: measure the box it draws, not its line box.
+          const boxOf = (holder: Element | null) => {
+            const first = holder?.firstElementChild ?? null;
+            const el =
+              first && getComputedStyle(first).display === 'inline'
+                ? (first.firstElementChild ?? first)
+                : first;
+            const r = el?.getBoundingClientRect();
+            return r ? {width: r.width, height: r.height} : null;
+          };
+          const pairEl = document.querySelector(`[data-pair="${name}"]`);
+          return {
+            skeleton: boxOf(pairEl?.querySelector('[data-skeleton]') ?? null),
+            loaded: boxOf(pairEl?.querySelector('[data-loaded]') ?? null),
+          };
+        }, pair);
+        const problems: string[] = [];
+        if (!sizes.skeleton || !sizes.loaded) {
+          problems.push(`${pair}: the skeleton or the loaded component did not render`);
+        } else {
+          for (const axis of ['width', 'height'] as const) {
+            const gap = Math.abs(sizes.skeleton[axis] - sizes.loaded[axis]);
+            if (gap > GEOMETRY_TOLERANCE) {
+              problems.push(
+                `${pair} skeleton ${axis} ${Math.round(sizes.skeleton[axis])}px, loaded ${Math.round(sizes.loaded[axis])}px`
+              );
+            }
+          }
+        }
+        report(problems, 'enforce');
+      });
+    }
+  });
+}
+
+/** Running animations that move something by transform, spinners excepted (they show work). */
+async function runningTransformAnimations(page: Page): Promise<string[]> {
+  return page.evaluate(properties => {
+    const found: string[] = [];
+    for (const animation of document.getAnimations()) {
+      if (animation.playState !== 'running') {
+        continue;
+      }
+      const effect = animation.effect as KeyframeEffect | null;
+      const target = effect?.target ?? null;
+      if (target?.closest('.animate-spin, .animate-cmn-spin')) {
+        continue;
+      }
+      const props =
+        animation instanceof CSSTransition
+          ? [animation.transitionProperty]
+          : (effect?.getKeyframes().flatMap(frame => Object.keys(frame)) ?? []);
+      if (props.some(prop => properties.includes(prop))) {
+        found.push(
+          `${target?.tagName.toLowerCase()}.${String(target?.className).slice(0, 40)} ${props.join(',')}`
+        );
+      }
+    }
+    return found;
+  }, TRANSFORM_PROPERTIES);
+}
+
+test.describe('motion', () => {
+  test.use({viewport: {width: 390, height: 844}, hasTouch: true, isMobile: true});
+
+  // Guards the reduce check below against passing because nothing ever animates.
+  test('skeleton | the sheen sweeps when motion is allowed', async ({page}) => {
+    await page.emulateMedia({reducedMotion: 'no-preference'});
+    await open(page, SKELETON_STORY, 'light', SKELETON_READY);
+    await page.waitForTimeout(SWEEP_PROBE_MS);
+    expect((await runningTransformAnimations(page)).length).toBeGreaterThan(0);
+  });
+
+  test('skeleton | no transform animation under Reduce Motion', async ({page}) => {
+    await page.emulateMedia({reducedMotion: 'reduce'});
+    await open(page, SKELETON_STORY, 'light', SKELETON_READY);
+    await page.waitForTimeout(SWEEP_PROBE_MS);
+    report(await runningTransformAnimations(page), 'enforce');
+  });
+
+  test('sheet | no transform animation under Reduce Motion', async ({page}) => {
+    await page.emulateMedia({reducedMotion: 'reduce'});
+    await open(page, layoutStory('phone-overlay-sheet-open'));
+    await page.waitForSelector('cmn-drawer-container', {state: 'visible'});
+    await page.waitForTimeout(SWEEP_PROBE_MS);
+    report(await runningTransformAnimations(page), 'enforce');
+  });
+});
+
 test.describe('desktop pointer', () => {
   test.use({viewport: {width: 1280, height: 800}});
 

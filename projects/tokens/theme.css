@@ -23,6 +23,16 @@
      root font size cannot shrink it) */
   --size-touch: 44px;
 
+  /* Motion — durations and easings (M3). Short: small state changes (a toggle, a fade). Medium:
+     a surface entering or leaving (sheet, drawer, crossfade). Long: a large or full-screen move.
+     Decelerate what arrives, accelerate what leaves, standard for everything that stays on screen. */
+  --cmn-duration-short: 150ms;
+  --cmn-duration-medium: 250ms;
+  --cmn-duration-long: 400ms;
+  --cmn-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --cmn-ease-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --cmn-ease-emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
+
   color-scheme: light;
 
   /* Surface — cool graphite ground */
@@ -30,6 +40,16 @@
   --color-surface-card: #ffffff;
   --color-surface-raised: #e8edef;
   --color-surface-hover: #dce3e6;
+
+  /* Skeleton — a loading placeholder: visibly darker than card and ground, with a lighter sheen
+     that sweeps across it. Derived from the surface tokens so a per-app seed carries through, and
+     held apart from surface-raised so a skeleton never reads as a card. */
+  --color-skeleton: color-mix(in srgb, var(--color-surface-hover) 90%, var(--color-text-primary));
+  --color-skeleton-sheen: color-mix(
+    in srgb,
+    var(--color-surface-raised) 70%,
+    var(--color-surface-card)
+  );
 
   /* Text */
   --color-text-primary: #0f1a1f;
@@ -190,6 +210,13 @@
   --color-surface-raised: #1b2428;
   --color-surface-hover: #243036;
 
+  --color-skeleton: color-mix(in srgb, var(--color-surface-hover) 88%, var(--color-text-primary));
+  --color-skeleton-sheen: color-mix(
+    in srgb,
+    var(--color-surface-hover) 76%,
+    var(--color-text-primary)
+  );
+
   --color-text-primary: #e4ebed;
   --color-text-secondary: #a7b5bb;
   --color-text-disabled: #8a989e;
@@ -268,7 +295,8 @@ html {
 }
 
 /* ─── Reduced motion ─────────────────────────────────────────────────────── */
-/* Spinners keep turning (they signal work in progress); pulses and everything else settle. */
+/* Spinners keep turning (they signal work in progress); pulses and everything else settle.
+   Movement (slides, sweeps) becomes nothing; the opacity part of an entrance stays a fade. */
 @media (prefers-reduced-motion: reduce) {
   *:not(.animate-spin, .animate-cmn-spin),
   *:not(.animate-spin, .animate-cmn-spin)::before,
@@ -277,6 +305,11 @@ html {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  /* A sweep is pure movement with no state to carry, so it is removed, not shortened. */
+  .cmn-skeleton-sweep::after {
+    animation: none !important;
   }
 }
 
@@ -293,6 +326,14 @@ html {
   }
   50% {
     opacity: 0.45;
+  }
+}
+@keyframes cmn-skeleton-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
   }
 }
 @keyframes cmn-fade-in {
@@ -322,6 +363,25 @@ html {
     transform: translateX(0);
     opacity: 1;
   }
+}
+
+/* ─── Skeleton (cmn-skeleton) ───────────────────────────────────────────── */
+/* A placeholder block with a sheen that sweeps across it. Only the sheen moves, and only by
+   transform, so it stays on the compositor; Reduce Motion (above) leaves the still block. */
+.cmn-skeleton-sweep {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-skeleton);
+}
+
+.cmn-skeleton-sweep::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(90deg, transparent, var(--color-skeleton-sheen), transparent);
+  animation: cmn-skeleton-sweep calc(var(--cmn-duration-long) * 3.5) var(--cmn-ease-standard)
+    infinite;
 }
 
 /* ─── Dialog (cmn-dialog) ───────────────────────────────────────────────── */
@@ -365,7 +425,7 @@ cmn-drawer-container {
   flex-direction: column;
   height: 100%;
   transform: translateX(100%);
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform var(--cmn-duration-medium) var(--cmn-ease-emphasized-decelerate);
 }
 
 cmn-drawer-container.cmn-drawer--open {
@@ -375,7 +435,7 @@ cmn-drawer-container.cmn-drawer--open {
 
 cmn-drawer-container.cmn-drawer--closing {
   transform: translateX(100%);
-  transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform var(--cmn-duration-short) var(--cmn-ease-emphasized-accelerate);
 }
 
 /* Bottom sheet: the drawer's phone presentation (below md, or mode: 'sheet').

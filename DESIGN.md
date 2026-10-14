@@ -163,7 +163,9 @@ Radius 3 / 6 / 8px by role (`--radius-sm/md/lg`); full pills for chips, tags and
 
 ## Motion
 
-Animate transform and opacity only, never layout properties (no `transition` on width or height). Every animation has a `prefers-reduced-motion` path.
+Animate transform and opacity only, never layout properties (no `transition` on width or height). Every animation has a `prefers-reduced-motion` path: movement becomes a fade or nothing, and only a spinner keeps turning.
+
+Durations and easings are tokens (M3 values), never literals: `--cmn-duration-short` (150ms: a toggle, a fade, a small state change), `--cmn-duration-medium` (250ms: a surface entering or leaving, a crossfade) and `--cmn-duration-long` (400ms: a large or full-screen move); `--cmn-ease-standard` for anything that stays on screen, `--cmn-ease-emphasized-decelerate` for what arrives, `--cmn-ease-emphasized-accelerate` for what leaves. Tailwind reads them as `duration-cmn-*` and `ease-cmn-*`. A leaving surface is faster than an arriving one. A skeleton's sheen is the one decorative loop: it sweeps by transform, in `--color-skeleton-sheen` over `--color-skeleton`, and stops under Reduce Motion.
 
 ## Components
 

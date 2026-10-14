@@ -11,8 +11,13 @@ Design tokens for the lifekit ecosystem, framework-agnostic.
   `--color-surface-hover`, each light and dark where themed. It sets `color-scheme` per theme, and
   the `html` background and text colour, so the canvas follows the active theme. A
   `prefers-reduced-motion` block suppresses transitions and decorative animation. Looping loading
-  spinners (`animate-spin`, `animate-cmn-spin`) are exempt; pulses settle.
-- `tailwind`: a Tailwind preset mapping the tokens onto the `cmn-*` scale. Its fonts, radii,
+  spinners (`animate-spin`, `animate-cmn-spin`) are exempt; pulses settle. It also owns the motion
+  tokens (`--cmn-duration-short|medium|long`, 150/250/400ms; `--cmn-ease-standard`,
+  `--cmn-ease-emphasized-decelerate`, `--cmn-ease-emphasized-accelerate`) and the skeleton
+  colours (`--color-skeleton`, `--color-skeleton-sheen`, derived from the surface tokens so a seed
+  carries through) with the `.cmn-skeleton-sweep` block `cmn-skeleton` draws.
+- `tailwind`: a Tailwind preset mapping the tokens onto the `cmn-*` scale (`duration-cmn-short|medium|long`,
+  `ease-cmn-standard|decelerate|accelerate`, `bg-skeleton`). Its fonts, radii,
   shadows and `cmn-touch` size read the `theme.css` custom properties, so a value change lands in `theme.css` only.
 - `fonts.css`: self-hosted IBM Plex Sans (variable), the `--font-sans` font, and IBM Plex Mono for code (`--font-mono`). No font CDN.
 - `brand`: the lifekit mark and the browser-chrome standard. That covers per-app icon sets under

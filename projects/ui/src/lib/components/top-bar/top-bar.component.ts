@@ -65,7 +65,7 @@ const BACK_BUTTON_CLASSES = `${CHROME_BUTTON_CLASSES} -ml-cmn-2 md:ml-0`;
 const INLINE_TITLE_CLASSES =
   'min-w-0 truncate font-headline text-cmn-base font-semibold text-text-primary';
 /** The inline copy of a large title fades, never slides; Reduce Motion drops the fade. */
-const INLINE_LABEL_CLASSES = `${INLINE_TITLE_CLASSES} transition-opacity duration-150 motion-reduce:transition-none`;
+const INLINE_LABEL_CLASSES = `${INLINE_TITLE_CLASSES} transition-opacity duration-cmn-short ease-cmn-standard motion-reduce:transition-none`;
 const HEADER_SOLID_CLASSES = 'bg-surface-card';
 /**
  * In overlay mode the bar is translucent and blurred so content scrolling under it shows through,
