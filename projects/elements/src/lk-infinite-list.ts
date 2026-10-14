@@ -17,16 +17,23 @@ const DEFAULT_ROOT_MARGIN = '0px 0px 600px 0px';
 const SCROLLING_OVERFLOW = /auto|scroll|overlay/;
 
 /**
- * The nearest ancestor that scrolls vertically, crossing shadow roots, or null for the viewport.
- * `rootMargin` only reaches ahead of the root the observer uses, so inside a scrolling shell the
- * root has to be that scroller rather than the viewport.
+ * The nearest ancestor that really scrolls vertically (overflowing now, not merely
+ * `overflow: auto`), crossing shadow roots, or null for the viewport. `rootMargin` only reaches ahead of the root the
+ * observer uses, so inside a scrolling shell the root has to be that scroller rather than the
+ * viewport. The body and root element scroll the viewport, so they never count.
  */
 function findScrollRoot(start: Element): Element | null {
   let node: Node | null = start;
   while (node) {
     const parent: Node | null =
       node.parentNode instanceof ShadowRoot ? node.parentNode.host : node.parentNode;
-    if (parent instanceof Element && SCROLLING_OVERFLOW.test(getComputedStyle(parent).overflowY)) {
+    if (!(parent instanceof Element) || parent === document.body) {
+      return null;
+    }
+    if (
+      SCROLLING_OVERFLOW.test(getComputedStyle(parent).overflowY) &&
+      parent.scrollHeight > parent.clientHeight
+    ) {
       return parent;
     }
     node = parent;
@@ -76,6 +83,7 @@ function findScrollRoot(start: Element): Element | null {
  */
 export class LkInfiniteList extends LitElement {
   private observer: IntersectionObserver | undefined;
+  private observerRoot: Element | null = null;
   private hasRows = false;
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -314,13 +322,14 @@ export class LkInfiniteList extends LitElement {
       return;
     }
     this.observer?.disconnect();
+    this.observerRoot = findScrollRoot(this);
     this.observer = new IntersectionObserver(
       entries => {
         if (entries.some(entry => entry.isIntersecting) && this.ready) {
           this.emit('lk-infinite-list-load-more');
         }
       },
-      {root: findScrollRoot(this), rootMargin: this.rootMargin}
+      {root: this.observerRoot, rootMargin: this.rootMargin}
     );
     this.observer.observe(sentinel);
   }
@@ -343,20 +352,26 @@ export class LkInfiniteList extends LitElement {
   }
 
   protected override updated(changed: PropertyValues<this>): void {
+    if (changed.has('rootMargin') && this.hasUpdated && changed.get('rootMargin') !== undefined) {
+      this.observe();
+      return;
+    }
     // An observer reports only a change of state. Observing again reports the current one, so a
-    // sentinel that is still in reach once a page lands asks for the next page.
+    // sentinel that is still in reach once a page lands asks for the next page. Rows appended by
+    // that page may have made a scroller overflow, so the root is resolved again first.
     if (
       this.observer &&
       (changed.has('loading') || changed.has('failed') || changed.has('hasMore'))
     ) {
+      if (findScrollRoot(this) !== this.observerRoot) {
+        this.observe();
+        return;
+      }
       const sentinel = this.sentinel;
       if (sentinel) {
         this.observer.unobserve(sentinel);
         this.observer.observe(sentinel);
       }
-    }
-    if (changed.has('rootMargin') && this.hasUpdated && changed.get('rootMargin') !== undefined) {
-      this.observe();
     }
   }
 

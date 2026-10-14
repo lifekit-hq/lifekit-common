@@ -38,6 +38,30 @@ class FakeObserver {
 }
 
 const SKELETON_ROWS = 4;
+const ROWS = 3;
+const SCROLLER_HEIGHT = '20px';
+const SCROLLER_TALL_HEIGHT = '2000px';
+
+function scrollerOf(height: string): HTMLElement {
+  const scroller = document.createElement('main');
+  scroller.style.overflowY = 'auto';
+  scroller.style.height = height;
+  return scroller;
+}
+
+function rowsOf(count: number): HTMLElement[] {
+  return Array.from({length: count}, (_, i) =>
+    Object.assign(document.createElement('div'), {textContent: `Row ${i + 1}`})
+  );
+}
+
+function listWithRows(parent: Element | ShadowRoot, rows = ROWS): LkInfiniteList {
+  const el = document.createElement('lk-infinite-list') as LkInfiniteList;
+  el.hasMore = true;
+  el.append(...rowsOf(rows));
+  parent.append(el);
+  return el;
+}
 
 async function mount(
   props: Partial<
@@ -98,14 +122,11 @@ describe('LkInfiniteList', () => {
   });
 
   it('observes against the nearest scrolling ancestor', async () => {
-    const scroller = document.createElement('main');
-    scroller.style.overflowY = 'auto';
+    const scroller = scrollerOf(SCROLLER_HEIGHT);
     const wrapper = document.createElement('div');
     scroller.append(wrapper);
     document.body.append(scroller);
-    const el = document.createElement('lk-infinite-list') as LkInfiniteList;
-    el.hasMore = true;
-    wrapper.append(el);
+    const el = listWithRows(wrapper);
     await el.updateComplete;
     expect(observer().options?.root).toBe(scroller);
   });
@@ -116,16 +137,47 @@ describe('LkInfiniteList', () => {
   });
 
   it('crosses a shadow root to reach the scroller', async () => {
-    const scroller = document.createElement('main');
-    scroller.style.overflowY = 'scroll';
+    const scroller = scrollerOf(SCROLLER_HEIGHT);
     const host = document.createElement('div');
     scroller.append(host);
     document.body.append(scroller);
-    const shadow = host.attachShadow({mode: 'open'});
-    const el = document.createElement('lk-infinite-list') as LkInfiniteList;
-    el.hasMore = true;
-    shadow.append(el);
+    const el = listWithRows(host.attachShadow({mode: 'open'}));
     await el.updateComplete;
+    expect(observer().options?.root).toBe(scroller);
+  });
+
+  it('does not take a wrapper that only clips sideways for the scroller', async () => {
+    const scroller = scrollerOf(SCROLLER_HEIGHT);
+    const wrapper = document.createElement('div');
+    wrapper.style.overflowX = 'hidden';
+    scroller.append(wrapper);
+    document.body.append(scroller);
+    const el = listWithRows(wrapper);
+    await el.updateComplete;
+    expect(observer().options?.root).toBe(scroller);
+  });
+
+  it('uses the viewport while the scroller has nothing to scroll', async () => {
+    const scroller = scrollerOf(SCROLLER_TALL_HEIGHT);
+    document.body.append(scroller);
+    const el = listWithRows(scroller);
+    await el.updateComplete;
+    expect(observer().options?.root).toBeNull();
+  });
+
+  it('switches to the scroller once appended rows make it overflow', async () => {
+    const scroller = scrollerOf(SCROLLER_HEIGHT);
+    document.body.append(scroller);
+    const el = listWithRows(scroller, 0);
+    await el.updateComplete;
+    expect(observer().options?.root).toBeNull();
+    const first = observer();
+    el.loading = true;
+    await el.updateComplete;
+    el.append(...rowsOf(ROWS));
+    el.loading = false;
+    await el.updateComplete;
+    expect(observer()).not.toBe(first);
     expect(observer().options?.root).toBe(scroller);
   });
 
