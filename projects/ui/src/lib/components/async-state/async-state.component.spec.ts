@@ -620,6 +620,19 @@ describe('AsyncStateComponent calm loading', () => {
     expect(projected()).not.toBeNull();
   });
 
+  it('shows the error at once, without the skeleton, when a shown load fails', async () => {
+    host.showDelay.set(DELAY);
+    host.minDisplay.set(MINIMUM);
+    host.status.set('loading');
+    await settle(DELAY + 100);
+    expect(skeletons()).toBeGreaterThan(0);
+
+    host.status.set('error');
+    await settle();
+    expect(skeletons()).toBe(0);
+    expect(root().querySelector('cmn-alert')).not.toBeNull();
+  });
+
   it('leaves previous content in place until the delay passes on a refresh', async () => {
     host.showDelay.set(DELAY);
     host.status.set('success');

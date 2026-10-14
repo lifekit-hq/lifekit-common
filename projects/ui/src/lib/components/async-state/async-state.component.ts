@@ -178,7 +178,9 @@ export class AsyncStateComponent {
 
   /** The status says loading, or a shown indicator is still being held for its minimum time. */
   private readonly busy = computed(
-    () => this.status() === 'loading' || (this.gated() && this.gateOpen())
+    () =>
+      this.status() === 'loading' ||
+      (this.gated() && this.gateOpen() && this.status() !== 'error')
   );
 
   /** The loading indicator is allowed on screen: at once, or once the delay has passed. */
