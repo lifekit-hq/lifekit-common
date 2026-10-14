@@ -14,6 +14,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   CUSTOM_ELEMENTS_SCHEMA,
+  input,
   type OnDestroy,
   signal,
 } from '@angular/core';
@@ -63,7 +64,7 @@ export class StoryFeedComponent implements OnDestroy {
   private hasFailedOnce = false;
 
   public skeletonRows = 3;
-  public failFirst = false;
+  public readonly failFirst = input(false);
 
   protected readonly rows = signal<number[]>(range(0));
   protected readonly loading = signal(false);
@@ -75,7 +76,7 @@ export class StoryFeedComponent implements OnDestroy {
     this.loading.set(true);
     this.timer = setTimeout(() => {
       this.loading.set(false);
-      if (this.failFirst && this.page === 1 && !this.hasFailedOnce) {
+      if (this.failFirst() && this.page === 1 && !this.hasFailedOnce) {
         this.hasFailedOnce = true;
         this.failed.set(true);
         return;
