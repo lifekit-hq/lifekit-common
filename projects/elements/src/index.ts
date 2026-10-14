@@ -1,3 +1,4 @@
+export * from './lk-chip-row';
 export * from './lk-dismissible-chip';
 export * from './lk-install-hint';
 export * from './lk-line-chart';
