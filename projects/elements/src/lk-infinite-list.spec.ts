@@ -97,6 +97,38 @@ describe('LkInfiniteList', () => {
     expect(loadMore()).toBe(1);
   });
 
+  it('observes against the nearest scrolling ancestor', async () => {
+    const scroller = document.createElement('main');
+    scroller.style.overflowY = 'auto';
+    const wrapper = document.createElement('div');
+    scroller.append(wrapper);
+    document.body.append(scroller);
+    const el = document.createElement('lk-infinite-list') as LkInfiniteList;
+    el.hasMore = true;
+    wrapper.append(el);
+    await el.updateComplete;
+    expect(observer().options?.root).toBe(scroller);
+  });
+
+  it('observes against the viewport when no ancestor scrolls', async () => {
+    await mount({hasMore: true});
+    expect(observer().options?.root).toBeNull();
+  });
+
+  it('crosses a shadow root to reach the scroller', async () => {
+    const scroller = document.createElement('main');
+    scroller.style.overflowY = 'scroll';
+    const host = document.createElement('div');
+    scroller.append(host);
+    document.body.append(scroller);
+    const shadow = host.attachShadow({mode: 'open'});
+    const el = document.createElement('lk-infinite-list') as LkInfiniteList;
+    el.hasMore = true;
+    shadow.append(el);
+    await el.updateComplete;
+    expect(observer().options?.root).toBe(scroller);
+  });
+
   it('does not ask while the end is out of reach', async () => {
     const el = await mount({hasMore: true});
     const loadMore = asked(el, 'load-more');

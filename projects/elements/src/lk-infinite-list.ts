@@ -11,8 +11,28 @@ import {
 /** Placeholder rows drawn while a page is being appended, unless `skeleton-rows` says otherwise. */
 const DEFAULT_SKELETON_ROWS = 3;
 
-/** How far below the viewport the next page starts loading: about one phone screen ahead. */
+/** How far below the scrolling area the next page starts loading: about one phone screen ahead. */
 const DEFAULT_ROOT_MARGIN = '0px 0px 600px 0px';
+
+const SCROLLING_OVERFLOW = /auto|scroll|overlay/;
+
+/**
+ * The nearest ancestor that scrolls vertically, crossing shadow roots, or null for the viewport.
+ * `rootMargin` only reaches ahead of the root the observer uses, so inside a scrolling shell the
+ * root has to be that scroller rather than the viewport.
+ */
+function findScrollRoot(start: Element): Element | null {
+  let node: Node | null = start;
+  while (node) {
+    const parent: Node | null =
+      node.parentNode instanceof ShadowRoot ? node.parentNode.host : node.parentNode;
+    if (parent instanceof Element && SCROLLING_OVERFLOW.test(getComputedStyle(parent).overflowY)) {
+      return parent;
+    }
+    node = parent;
+  }
+  return null;
+}
 
 /**
  * A list that keeps loading as the reader nears its end, instead of ending in a Load More button
@@ -246,7 +266,10 @@ export class LkInfiniteList extends LitElement {
   declare public failed: boolean;
   /** How many skeleton rows to draw while `loading`. */
   declare public skeletonRows: number;
-  /** `IntersectionObserver` margin: how far past the viewport the end counts as within reach. */
+  /**
+   * `IntersectionObserver` margin: how far past the nearest scrolling ancestor (else the viewport)
+   * the end counts as within reach.
+   */
   declare public rootMargin: string;
   /** Shown at the end of a list that has rows and nothing more to load. */
   declare public endLabel: string;
@@ -297,7 +320,7 @@ export class LkInfiniteList extends LitElement {
           this.emit('lk-infinite-list-load-more');
         }
       },
-      {rootMargin: this.rootMargin}
+      {root: findScrollRoot(this), rootMargin: this.rootMargin}
     );
     this.observer.observe(sentinel);
   }

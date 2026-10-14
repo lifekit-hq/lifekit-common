@@ -246,9 +246,9 @@ Like a native `change`, it never fires for a `selected` the host sets.
 A list that keeps loading as the reader nears its end, instead of ending in a Load More button or a
 pager. The rows are the element's children; it draws what follows them: skeleton rows while a page
 is being appended, an inline retry when that fails, and an end marker once there is nothing more.
-An `IntersectionObserver` watches a sentinel after the rows, one screen ahead by default
-(`rootMargin`). Without `IntersectionObserver` it draws a 44px Load More button that fires the
-same event.
+An `IntersectionObserver` watches a sentinel after the rows, one screen ahead of the nearest
+scrolling ancestor by default (`rootMargin`), or of the viewport when nothing scrolls. Without
+`IntersectionObserver` it draws a 44px Load More button that fires the same event.
 
 It owns no data. The host (an app store) drives it with the **paging contract**:
 
@@ -258,7 +258,7 @@ It owns no data. The host (an app store) drives it with the **paging contract**:
 | `loading`       | `loading`         | `boolean` | `false`                    | A page is being fetched: skeleton rows show, no further page is asked for    |
 | `failed`        | `failed`          | `boolean` | `false`                    | The last fetch failed: an inline retry shows, no further page is asked for   |
 | `skeletonRows`  | `skeleton-rows`   | `number`  | `3`                        | Skeleton rows drawn while `loading`                                          |
-| `rootMargin`    | `root-margin`     | `string`  | `'0px 0px 600px 0px'`      | How far past the viewport the end counts as within reach                     |
+| `rootMargin`    | `root-margin`     | `string`  | `'0px 0px 600px 0px'`      | How far past the nearest scroller (else the viewport) the end is in reach    |
 | `endLabel`      | `end-label`       | `string`  | `"You've reached the end"` | Shown after the last row once `hasMore` is off (not for a list with no rows) |
 | `loadingLabel`  | `loading-label`   | `string`  | `'Loading more'`           | Read out, not shown, while a page loads                                      |
 | `errorLabel`    | `error-label`     | `string`  | `"Couldn't load more."`    | Shown beside the retry button                                                |
