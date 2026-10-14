@@ -1,12 +1,18 @@
 import {ChangeDetectionStrategy, Component, computed, input, output} from '@angular/core';
 import {formatRelativeTime} from '@lifekit-hq/core/format';
 
+import {PHONE_HIT_AREA_CLASSES} from '../../tokens/hit-area';
 import {type Nullable} from '../../types';
 import {IconComponent, type LucideIconName} from '../icon/icon.component';
 import {TagComponent} from '../tag/tag.component';
 
 export type AlertItemSeverity = 'error' | 'warning' | 'info';
 export type AlertItemDensity = 'card' | 'flat';
+
+/** 24px drawn, at least --size-touch pressed on a phone. */
+const DISMISS_CLASSES =
+  'flex shrink-0 rounded p-1 text-text-disabled transition-colors hover:bg-surface-raised ' +
+  `hover:text-text-primary ${PHONE_HIT_AREA_CLASSES}`;
 
 const SEVERITY_COLOR: Record<AlertItemSeverity, string> = {
   error: 'var(--color-status-error)',
@@ -90,10 +96,10 @@ const SEVERITY_ICON: Record<AlertItemSeverity, LucideIconName> = {
 
       @if (dismissible()) {
         <button
+          [class]="dismissClasses"
           (click)="onDismissClick($event)"
           type="button"
           aria-label="Dismiss"
-          class="flex shrink-0 rounded p-1 text-text-disabled transition-colors hover:bg-surface-raised hover:text-text-primary"
         >
           <cmn-icon name="X" size="sm" />
         </button>
@@ -124,6 +130,8 @@ export class AlertItemComponent {
   );
   public readonly relativeTime = computed(() => formatRelativeTime(this.timestamp()));
   public readonly flat = computed(() => this.density() === 'flat');
+
+  protected readonly dismissClasses = DISMISS_CLASSES;
 
   public onContainerClick(): void {
     if (!this.isRead()) {

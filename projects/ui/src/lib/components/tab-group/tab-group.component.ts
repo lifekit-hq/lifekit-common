@@ -10,7 +10,11 @@ export interface CmnTab {
   exact?: boolean;
 }
 
-const TAB_BASE = 'px-cmn-4 py-cmn-2 text-cmn-sm font-medium transition-colors border-b-2';
+// On a phone a tab is --size-touch tall and keeps its label on one line; the row scrolls sideways.
+const TAB_BASE =
+  'inline-flex shrink-0 items-center whitespace-nowrap max-md:min-h-cmn-touch px-cmn-4 py-cmn-2 ' +
+  'text-cmn-sm font-medium transition-colors border-b-2';
+const ROW_CLASSES = 'flex gap-cmn-2 overflow-x-auto border-b border-border-default';
 const TAB_ACTIVE = 'text-text-primary border-accent-default';
 const TAB_INACTIVE = 'text-text-secondary border-transparent hover:text-text-primary';
 
@@ -21,7 +25,7 @@ const TAB_INACTIVE = 'text-text-secondary border-transparent hover:text-text-pri
   host: {style: 'display: block'},
   template: `
     @if (routed()) {
-      <nav [attr.aria-label]="ariaLabel()" class="flex gap-cmn-2 border-b border-border-default">
+      <nav [attr.aria-label]="ariaLabel()" [class]="rowClasses">
         @for (tab of tabs(); track tab.id) {
           <a
             #rla="routerLinkActive"
@@ -36,11 +40,7 @@ const TAB_INACTIVE = 'text-text-secondary border-transparent hover:text-text-pri
         }
       </nav>
     } @else {
-      <div
-        [attr.aria-label]="ariaLabel()"
-        class="flex gap-cmn-2 border-b border-border-default"
-        role="tablist"
-      >
+      <div [attr.aria-label]="ariaLabel()" [class]="rowClasses" role="tablist">
         @for (tab of tabs(); track tab.id) {
           <button
             [attr.aria-selected]="tab.id === activeTab()"
@@ -62,6 +62,8 @@ export class TabGroupComponent {
   public readonly activeTab = model<string>('');
   /** Accessible name for the tab bar. */
   public readonly ariaLabel = input<string | null>(null);
+
+  protected readonly rowClasses = ROW_CLASSES;
 
   protected readonly routed = computed(() => this.tabs().some(tab => tab.link !== undefined));
 

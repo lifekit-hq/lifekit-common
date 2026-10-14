@@ -1,5 +1,6 @@
 import {ChangeDetectionStrategy, Component, computed, input, output} from '@angular/core';
 
+import {PHONE_HIT_AREA_CLASSES} from '../../tokens/hit-area';
 import {type Nullable} from '../../types';
 import {IconComponent, type LucideIconName} from '../icon/icon.component';
 
@@ -8,10 +9,11 @@ export type ButtonSize = 'sm' | 'md' | 'lg';
 export type ButtonType = 'button' | 'submit' | 'reset';
 export type ButtonIconPosition = 'prefix' | 'suffix';
 
+// Every size presses as at least --size-touch square on a phone and keeps its drawn size.
 const BASE_CLASSES =
   'inline-flex items-center justify-center gap-cmn-2 font-label font-medium rounded-cmn-md ' +
   'focus:outline-none focus:ring-2 focus:ring-border-focus focus:ring-offset-1 ' +
-  'transition-colors duration-150';
+  `transition-colors duration-150 ${PHONE_HIT_AREA_CLASSES}`;
 
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   primary: 'bg-accent-default text-text-inverse hover:bg-accent-hover active:bg-accent-active',

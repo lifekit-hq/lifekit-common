@@ -21,9 +21,11 @@ export interface SelectOption {
   disabled?: boolean;
 }
 
+// Below md every size keeps 16px text (iOS zooms the page into a focused field set smaller) and
+// presses as at least --size-touch tall.
 const SIZE_CLASSES: Record<SelectSize, string> = {
-  sm: 'py-1 text-cmn-xs',
-  md: 'py-1.5 text-cmn-sm',
+  sm: 'py-1 text-cmn-md md:text-cmn-xs',
+  md: 'py-1.5 text-cmn-md md:text-cmn-sm',
   lg: 'py-2 text-cmn-base',
 };
 
@@ -99,7 +101,7 @@ export class SelectComponent implements ControlValueAccessor {
   public readonly selectClasses = computed(() =>
     [
       'block w-full appearance-none rounded border bg-surface-bg pl-cmn-2 pr-8',
-      'text-text-primary outline-none transition-colors',
+      'text-text-primary outline-none transition-colors max-md:min-h-cmn-touch',
       'focus:border-accent-default focus-visible:ring-2 focus-visible:ring-border-focus',
       'disabled:cursor-not-allowed disabled:opacity-60',
       this.hasError() ? 'border-status-error' : 'border-border-strong',
