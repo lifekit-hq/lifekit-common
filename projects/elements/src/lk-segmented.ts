@@ -15,6 +15,18 @@ export interface SegmentedChangeDetail {
   value: string;
 }
 
+/**
+ * Development builds only: production Angular builds set `ngDevMode` to false, and other bundlers
+ * replace `process.env.NODE_ENV` with "production".
+ */
+function isDevMode(): boolean {
+  const scope = globalThis as {ngDevMode?: unknown; process?: {env?: Record<string, unknown>}};
+  return scope.ngDevMode !== false && scope.process?.env?.['NODE_ENV'] !== 'production';
+}
+
+/** Sub-pixel slack before a row counts as wider than its container. */
+const OVERFLOW_TOLERANCE_PX = 0.5;
+
 /** Where a key sends the choice: a step forward or back, or an end. Undefined for other keys. */
 function keyStep(key: string): 1 | -1 | 'first' | 'last' | undefined {
   switch (key) {
@@ -40,8 +52,12 @@ function keyStep(key: string): 1 | -1 | 'first' | 'last' | undefined {
  *
  * Semantics: `role="radiogroup"` of `role="radio"` cells with a roving tabindex - Tab lands on the
  * chosen cell (or the first enabled one), the arrow keys move and choose, Home/End jump to the
- * ends, and disabled cells are skipped. Cells share the row equally, never wrap, and are at least
- * 44px square so a phone thumb can hit them (seven fit a 390px phone).
+ * ends, and disabled cells are skipped. Cells share the row equally, never wrap, are at least
+ * 44px square so a phone thumb can hit them, and are never narrower than their label: the row fills
+ * its container, and grows past it rather than cut a label.
+ *
+ * Use it for five segments or fewer, with short labels. More choices, or longer labels, belong in a
+ * menu or an `lk-chip-row`. In development a row wider than its container logs a console warning.
  *
  * `value` follows the native `change` model: the element updates it when the reader chooses a
  * cell and fires `lk-segmented-change`; a host that sets `value` itself fires nothing.
@@ -55,6 +71,9 @@ function keyStep(key: string): 1 | -1 | 'first' | 'last' | undefined {
  * </script>
  */
 export class LkSegmented extends LitElement {
+  private overflowObserver: ResizeObserver | undefined;
+  private overflowWarned = false;
+
   // eslint-disable-next-line @typescript-eslint/naming-convention
   public static override styles = css`
     :host {
@@ -67,9 +86,15 @@ export class LkSegmented extends LitElement {
       display: none;
     }
 
+    /* Equal columns as wide as the widest label (at least 44px); fills the container when that is
+       wider, overflows it rather than squeeze a label. */
     .group {
-      display: flex;
-      flex-wrap: nowrap;
+      box-sizing: border-box;
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(2.75rem, 1fr);
+      width: max-content;
+      min-width: 100%;
       gap: 2px;
       padding: 2px;
       border-radius: var(--radius-lg);
@@ -77,8 +102,7 @@ export class LkSegmented extends LitElement {
     }
 
     .cell {
-      flex: 1 1 0;
-      min-width: 2.75rem;
+      min-width: max-content;
       min-height: 2.75rem;
       padding: 0 var(--space-1, 0.25rem);
       border: 0;
@@ -136,6 +160,36 @@ export class LkSegmented extends LitElement {
     this.value = '';
     this.label = '';
     this.disabled = false;
+  }
+
+  public override connectedCallback(): void {
+    super.connectedCallback();
+    if (isDevMode() && typeof ResizeObserver !== 'undefined') {
+      this.overflowObserver = new ResizeObserver(() => this.warnOnOverflow());
+      this.overflowObserver.observe(this);
+    }
+  }
+
+  public override disconnectedCallback(): void {
+    super.disconnectedCallback();
+    this.overflowObserver?.disconnect();
+    this.overflowObserver = undefined;
+  }
+
+  /** Once per element: the cells need more room than the container gives the row. */
+  private warnOnOverflow(): void {
+    const group = this.shadowRoot?.querySelector('.group');
+    if (this.overflowWarned || !group || this.clientWidth === 0) {
+      return;
+    }
+    if (group.getBoundingClientRect().width > this.clientWidth + OVERFLOW_TOLERANCE_PX) {
+      this.overflowWarned = true;
+      console.warn(
+        `lk-segmented: ${this.options.length} segments need more width than the ${this.clientWidth}px ` +
+          'container gives them; use five or fewer short labels, or a menu or lk-chip-row.',
+        this
+      );
+    }
   }
 
   private isEnabled(option: SegmentedOption): boolean {

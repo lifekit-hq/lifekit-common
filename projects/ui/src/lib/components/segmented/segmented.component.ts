@@ -18,12 +18,17 @@ export interface SegmentedOption {
   disabled?: boolean;
 }
 
+/**
+ * Equal columns as wide as the widest label (at least `--size-touch`): the row fills its container
+ * when that is wider, and overflows it rather than squeeze a label.
+ */
 const GROUP_CLASSES =
-  'flex flex-nowrap gap-0.5 rounded-cmn-lg bg-surface-raised p-0.5 aria-disabled:opacity-60';
+  'grid w-max min-w-full grid-flow-col auto-cols-[minmax(var(--size-touch),1fr)] gap-0.5 ' +
+  'rounded-cmn-lg bg-surface-raised p-0.5 aria-disabled:opacity-60';
 
-/** Equal-width cells, at least `--size-touch` square, never wrapping. */
+/** Cells at least `--size-touch` tall, never narrower than their label, never wrapping. */
 const CELL_BASE_CLASSES =
-  'min-h-cmn-touch min-w-cmn-touch flex-1 basis-0 cursor-pointer select-none whitespace-nowrap ' +
+  'min-h-cmn-touch min-w-max cursor-pointer select-none whitespace-nowrap ' +
   'rounded-cmn-md px-cmn-1 text-cmn-sm font-medium transition-colors touch-manipulation ' +
   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus ' +
   'focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:text-text-disabled';
@@ -67,8 +72,9 @@ function keyStep(key: string): 1 | -1 | 'first' | 'last' | undefined {
  *
  * Semantics: `role="radiogroup"` of `role="radio"` cells with a roving tabindex. Tab lands on the
  * chosen cell (or the first enabled one), the arrow keys move and choose, Home and End jump to the
- * ends, and disabled cells are skipped. Cells share the row equally, never wrap, and are at least
- * 44px square so a thumb can hit them.
+ * ends, and disabled cells are skipped. Cells share the row equally, never wrap, are at least
+ * 44px square so a thumb can hit them, and are never narrower than their label. Use it for five
+ * segments or fewer with short labels; more belong in a menu or a chip row.
  *
  * `value` is a two-way model: `[(value)]="mode"`, or `[value]` with `(valueChange)`. Name the
  * group with `label`; a control that has a visible label of its own can point `aria-labelledby`
