@@ -131,13 +131,11 @@ const MAIN_OVERLAY_TOP_CLASSES =
   'scroll-pt-[calc(var(--cmn-content-inset-top,0px)+var(--cmn-sticky-top,0px))]';
 /**
  * Clears the floating tab bar and floating action by their measured cover
- * (`--cmn-content-inset-bottom`). A `cmn-page-container` pads its own end by the inset instead, so
- * its content clears the bar even inside a page host that is capped at `h-full`; main then drops
- * its own bottom padding so the space is not reserved twice.
+ * (`--cmn-content-inset-bottom`). The padding follows the content frame and the spacer after it
+ * (see `publishContentInsets`), so the last row clears the bar whatever the page is made of.
  */
 const MAIN_OVERLAY_BOTTOM_CLASSES =
-  'pb-[var(--cmn-content-inset-bottom,0px)] [&:has(cmn-page-container)]:pb-0 ' +
-  'scroll-pb-[var(--cmn-content-inset-bottom,0px)]';
+  'pb-[var(--cmn-content-inset-bottom,0px)] scroll-pb-[var(--cmn-content-inset-bottom,0px)]';
 /** Breathing room between the last row and the bar or floating action it scrolls clear of. */
 const INSET_BREATHING_PX = 8;
 
@@ -212,7 +210,9 @@ export const CMN_CONTENT_INSET_PROPERTIES = {
             </div>
           }
           <div #notices [class]="noticesClasses"><ng-content select="[cmnAppLayoutNotice]" /></div>
-          <ng-content />
+          <!-- The frame page hosts size against; whatever overflows it gets a spacer in the overlay -->
+          <div #page class="h-full"><ng-content /></div>
+          <div #pageOverflow aria-hidden="true"></div>
         </main>
         <!-- Hidden while a bottom sheet is open; the slot's own element keeps its fixed position -->
         <div #fab [class]="sheetOpen() ? 'hidden' : 'contents'">
@@ -247,6 +247,8 @@ export class AppLayoutComponent {
   private readonly tabBarRef = viewChild.required(BottomTabBarComponent, {read: ElementRef});
   private readonly noticesRef = viewChild.required<ElementRef<HTMLElement>>('notices');
   private readonly fabRef = viewChild.required<ElementRef<HTMLElement>>('fab');
+  private readonly pageRef = viewChild.required<ElementRef<HTMLElement>>('page');
+  private readonly pageOverflowRef = viewChild.required<ElementRef<HTMLElement>>('pageOverflow');
   private readonly largeTitleRef = viewChild<ElementRef<HTMLElement>>('largeTitle');
   /** The large title has scrolled under the top bar; set by an IntersectionObserver only. */
   private readonly largeTitleScrolledAway = signal(false);
@@ -544,15 +546,24 @@ export class AppLayoutComponent {
    * `CMN_CONTENT_INSET_PROPERTIES`), so content clears the bars whatever their height: safe-area
    * insets, a taller tab bar, a floating action. Written straight to main's style from the
    * ResizeObserver, which runs before paint, so the first frame is already padded.
+   *
+   * The page content sits in a frame that is exactly main's content height, which is what an
+   * `h-full` page host resolves against. Content longer than the frame overflows it, past any
+   * padding on main, so a spacer after the frame is sized to that overflow: main's bottom padding
+   * then lands after the last row, whether the content is bare, several siblings, or inside a host
+   * that caps its own height.
    */
   private publishContentInsets(): void {
     effect(onCleanup => {
       const main = this.main().nativeElement;
+      const page = this.pageRef().nativeElement;
+      const pageOverflow = this.pageOverflowRef().nativeElement;
       const clearance = this.fabClearance() ?? 0;
       if (!this.overlay() || typeof ResizeObserver === 'undefined') {
         for (const property of Object.values(CMN_CONTENT_INSET_PROPERTIES)) {
           main.style.removeProperty(property);
         }
+        pageOverflow.style.removeProperty('height');
         return;
       }
       const topBar = this.topBarRef().nativeElement as HTMLElement;
@@ -580,23 +591,30 @@ export class AppLayoutComponent {
         for (const [key, property] of Object.entries(CMN_CONTENT_INSET_PROPERTIES)) {
           main.style.setProperty(property, `${Math.ceil(insets[key as keyof typeof insets])}px`);
         }
+        pageOverflow.style.height = `${Math.ceil(Math.max(0, page.scrollHeight - page.clientHeight))}px`;
       };
       const observer = new ResizeObserver(measure);
       const observeAll = (): void => {
         observer.disconnect();
-        for (const target of [main, topBar, tabBar, notices, ...Array.from(fab.children)]) {
+        const targets = [main, topBar, tabBar, notices, ...fab.children, ...page.children];
+        for (const target of targets) {
           observer.observe(target, {box: 'border-box'});
         }
       };
       observeAll();
-      const actions = new MutationObserver(() => {
-        observeAll();
+      // Children added or removed anywhere in the page change what overflows the frame, which no
+      // resize reports; only the slots' own children are (un)observed.
+      const changes = new MutationObserver(records => {
+        if (records.some(record => record.target === fab || record.target === page)) {
+          observeAll();
+        }
         measure();
       });
-      actions.observe(fab, {childList: true});
+      changes.observe(fab, {childList: true});
+      changes.observe(page, {childList: true, subtree: true});
       onCleanup(() => {
         observer.disconnect();
-        actions.disconnect();
+        changes.disconnect();
       });
     });
   }

@@ -1,4 +1,12 @@
-import {css, html, LitElement, nothing, type PropertyDeclarations, type TemplateResult} from 'lit';
+import {
+  css,
+  html,
+  LitElement,
+  nothing,
+  type PropertyDeclarations,
+  type PropertyValues,
+  type TemplateResult,
+} from 'lit';
 
 /** One cell of a segmented control. */
 export interface SegmentedOption {
@@ -26,6 +34,7 @@ function isDevMode(): boolean {
 
 /** Sub-pixel slack before a row counts as wider than its container. */
 const OVERFLOW_TOLERANCE_PX = 0.5;
+const CENTRE_DIVISOR = 2;
 
 /** Where a key sends the choice: a step forward or back, or an end. Undefined for other keys. */
 function keyStep(key: string): 1 | -1 | 'first' | 'last' | undefined {
@@ -54,10 +63,10 @@ function keyStep(key: string): 1 | -1 | 'first' | 'last' | undefined {
  * chosen cell (or the first enabled one), the arrow keys move and choose, Home/End jump to the
  * ends, and disabled cells are skipped. Cells share the row equally, never wrap, are at least
  * 44px square so a phone thumb can hit them, and are never narrower than their label: the row fills
- * its container, and grows past it rather than cut a label.
+ * its container, and scrolls sideways inside it rather than cut a label or widen the page.
  *
  * Use it for five segments or fewer, with short labels. More choices, or longer labels, belong in a
- * menu or an `lk-chip-row`. In development a row wider than its container logs a console warning.
+ * menu or an `lk-chip-row`. In development a row that has to scroll logs a console warning.
  *
  * `value` follows the native `change` model: the element updates it when the reader chooses a
  * cell and fires `lk-segmented-change`; a host that sets `value` itself fires nothing.
@@ -76,10 +85,19 @@ export class LkSegmented extends LitElement {
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   public static override styles = css`
+    /* The host is the clip: a row that needs more than the container scrolls inside it (scrollbar
+       hidden, the chosen cell kept in view) and never widens the page. */
     :host {
       display: block;
+      max-width: 100%;
+      overflow-x: auto;
+      scrollbar-width: none;
       font-family: var(--font-sans);
       font-size: 0.875rem;
+    }
+
+    :host::-webkit-scrollbar {
+      display: none;
     }
 
     :host([hidden]) {
@@ -87,7 +105,7 @@ export class LkSegmented extends LitElement {
     }
 
     /* Equal columns as wide as the widest label (at least 44px); fills the container when that is
-       wider, overflows it rather than squeeze a label. */
+       wider, and scrolls inside it rather than squeeze a label. */
     .group {
       box-sizing: border-box;
       display: grid;
@@ -137,7 +155,7 @@ export class LkSegmented extends LitElement {
 
     .cell:focus-visible {
       outline: 2px solid var(--color-border-focus, #1d6f85);
-      outline-offset: 2px;
+      outline-offset: -2px;
     }
   `;
 
@@ -174,6 +192,22 @@ export class LkSegmented extends LitElement {
     super.disconnectedCallback();
     this.overflowObserver?.disconnect();
     this.overflowObserver = undefined;
+  }
+
+  protected override updated(changed: PropertyValues): void {
+    if (changed.has('value') || changed.has('options')) {
+      this.revealChosen();
+    }
+  }
+
+  /** Scrolls a row that overflows its container so the chosen cell sits in the middle of it. */
+  private revealChosen(): void {
+    const chosen = this.shadowRoot?.querySelector<HTMLElement>('.cell[aria-checked="true"]');
+    if (!chosen || this.scrollWidth <= this.clientWidth) {
+      return;
+    }
+    const left = chosen.getBoundingClientRect().left - this.getBoundingClientRect().left;
+    this.scrollLeft += left - (this.clientWidth - chosen.offsetWidth) / CENTRE_DIVISOR;
   }
 
   /** Once per element: the cells need more room than the container gives the row. */

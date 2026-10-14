@@ -1,8 +1,10 @@
 import {
+  type AfterViewChecked,
   ChangeDetectionStrategy,
   Component,
   computed,
-  type ElementRef,
+  ElementRef,
+  inject,
   input,
   model,
   viewChildren,
@@ -19,8 +21,17 @@ export interface SegmentedOption {
 }
 
 /**
+ * The host is the clip: a row that needs more than its container scrolls inside it (scrollbar
+ * hidden, the chosen cell kept in view) and never widens the page.
+ */
+const CENTRE_DIVISOR = 2;
+
+const HOST_CLASSES =
+  'block max-w-full overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden';
+
+/**
  * Equal columns as wide as the widest label (at least `--size-touch`): the row fills its container
- * when that is wider, and overflows it rather than squeeze a label.
+ * when that is wider, and scrolls inside it rather than squeeze a label.
  */
 const GROUP_CLASSES =
   'grid w-max min-w-full grid-flow-col auto-cols-[minmax(var(--size-touch),1fr)] gap-0.5 ' +
@@ -30,8 +41,8 @@ const GROUP_CLASSES =
 const CELL_BASE_CLASSES =
   'min-h-cmn-touch min-w-max cursor-pointer select-none whitespace-nowrap ' +
   'rounded-cmn-md px-cmn-1 text-cmn-sm font-medium transition-colors touch-manipulation ' +
-  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus ' +
-  'focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:text-text-disabled';
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset ' +
+  'focus-visible:ring-border-focus disabled:cursor-not-allowed disabled:text-text-disabled';
 const CELL_CHECKED_CLASSES =
   'bg-accent-subtle font-semibold text-accent-default ring-1 ring-inset ring-border-strong';
 const CELL_UNCHECKED_CLASSES =
@@ -73,8 +84,9 @@ function keyStep(key: string): 1 | -1 | 'first' | 'last' | undefined {
  * Semantics: `role="radiogroup"` of `role="radio"` cells with a roving tabindex. Tab lands on the
  * chosen cell (or the first enabled one), the arrow keys move and choose, Home and End jump to the
  * ends, and disabled cells are skipped. Cells share the row equally, never wrap, are at least
- * 44px square so a thumb can hit them, and are never narrower than their label. Use it for five
- * segments or fewer with short labels; more belong in a menu or a chip row.
+ * 44px square so a thumb can hit them, and are never narrower than their label; a row that needs
+ * more than its container scrolls inside it. Use it for five segments or fewer with short labels;
+ * more belong in a menu or a chip row.
  *
  * `value` is a two-way model: `[(value)]="mode"`, or `[value]` with `(valueChange)`. Name the
  * group with `label`; a control that has a visible label of its own can point `aria-labelledby`
@@ -83,7 +95,7 @@ function keyStep(key: string): 1 | -1 | 'first' | 'last' | undefined {
 @Component({
   selector: 'cmn-segmented',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {style: 'display: block'},
+  host: {class: HOST_CLASSES},
   template: `
     <div
       [attr.aria-label]="label() || null"
@@ -109,7 +121,10 @@ function keyStep(key: string): 1 | -1 | 'first' | 'last' | undefined {
     </div>
   `,
 })
-export class SegmentedComponent {
+export class SegmentedComponent implements AfterViewChecked {
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private revealed: string | undefined;
+
   private readonly cellElements = viewChildren<ElementRef<HTMLButtonElement>>('cell');
 
   public readonly options = input<readonly SegmentedOption[]>([]);
@@ -135,6 +150,22 @@ export class SegmentedComponent {
       };
     });
   });
+
+  public ngAfterViewChecked(): void {
+    const value = this.value();
+    if (value === this.revealed) {
+      return;
+    }
+    this.revealed = value;
+    const host = this.host.nativeElement;
+    const chosen = this.cellElements()
+      .map(({nativeElement}) => nativeElement)
+      .find(cell => cell.getAttribute('aria-checked') === 'true');
+    if (chosen && host.scrollWidth > host.clientWidth) {
+      const left = chosen.getBoundingClientRect().left - host.getBoundingClientRect().left;
+      host.scrollLeft += left - (host.clientWidth - chosen.offsetWidth) / CENTRE_DIVISOR;
+    }
+  }
 
   protected choose(option: SegmentedOption): void {
     if (this.isEnabled(option) && option.value !== this.value()) {

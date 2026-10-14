@@ -148,15 +148,20 @@ Outside the phone shell all three are unset, and everything that reads them fall
 
 - **Top.** `<main>` pads its top by `--cmn-content-inset-top`, and its `scroll-padding-top` adds
   the notices, so focusing or scrolling to an element never leaves it under the chrome.
-- **Bottom.** The outermost `cmn-page-container` ends with `--cmn-content-inset-bottom` added to
-  its own padding, so the last row scrolls clear of the tab bar; a page container nested in another
-  does not add it again. A page with no page container gets the inset as `<main>`'s bottom padding
-  instead. `scroll-padding-bottom` reads the same inset.
+- **Bottom.** The shell owns the clearance, whatever the page is built from. `<main>` pads its end
+  by `--cmn-content-inset-bottom` (and `scroll-padding-bottom` reads the same inset), and projects
+  the page into a frame as tall as main's content box, followed by a spacer the shell sizes to the
+  frame's overflow. So the last row clears the tab bar after bare content following a page
+  container, after two sibling top-level page containers (no gap opens between them), and after an
+  `h-full` host whose content overflows it. A page container adds no end inset of its own.
 - **Page height.** A page is never capped at the screen's height on a phone. `fill` makes the page
   container at least the screen tall (`min-h-full`); the cap (`h-full`) applies from `md` only, where
-  a fill page scrolls a child internally. A page host that is itself `h-full` still works: in fill
-  mode the end clearance is a spacer after the content, so it follows content that overflows the
-  host.
+  a fill page scrolls a child internally. `h-full` resolves to main's content height, so a chat-style
+  host (`relative flex h-full` with an internal scroller) fills exactly the visible area and main
+  does not scroll. The spacer is re-measured when the page's children, their sizes or the chrome
+  change; content that only grows through images or CSS-only changes is not observed. A `sticky`
+  element that is a direct child of the page frame releases once the frame ends, so keep sticky
+  headers inside a page container or section.
 - **Sticky headers.** A sticky offset inside `<main>` counts from its padding edge, which is
   already below the top bar. So a sticky header uses `top: var(--cmn-sticky-top, 0px)`, never
   `--cmn-content-inset-top`: that would count the top bar twice and leave a gap of its height.
@@ -218,12 +223,12 @@ groups and scrolls a list the same way.
 </cmn-page-container>
 ```
 
-| Part                             | What it does                                                                                                                                                                                                                                                                                                                                                                              |
-| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `cmn-filter-bar`                 | The filter flow: a search field (`[(query)]`), a Filters button badged with `activeCount`, a `cmnFilterBarQuick` slot for a quick-filter row, and the `applied` filters as removable chips with Clear (`remove`, `clear`). A `cmnFilterBarSheet` template opens from the Filters button as a bottom sheet on a phone and a side drawer from `md`. The bar keeps no filter state.          |
-| `lk-chip-row`                    | Quick filters on one line: a period, a status, an account. Scrolls sideways with an edge fade and snap, never truncates a label, keeps the selected chip in view, shows counts as badges, single or multi select, 44px chips.                                                                                                                                                             |
-| `cmn-segmented` / `lk-segmented` | A short parameter choice (a view mode, a chart period): five segments or fewer, short noun labels. Cells are equal and as wide as the widest label, and never narrower than their own: the row overflows rather than truncate. `lk-segmented` warns in development when it overflows. More choices, or long labels, use `lk-chip-row`; a rarely changed setting such as sort uses a menu. |
-| `cmn-list-section`               | One group of rows under a heading: a day of transactions, a severity of alerts. The heading is an `h2` that names the section, with a `cmnListSectionAside` slot for a total or count; the rows sit in an unpadded `cmn-card` (`card` false leaves them bare). On a phone the heading sticks flush under the top bar while its rows scroll past, and the next heading pushes it out.      |
+| Part                             | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `cmn-filter-bar`                 | The filter flow: a search field (`[(query)]`), a Filters button badged with `activeCount`, a `cmnFilterBarQuick` slot for a quick-filter row, and the `applied` filters as removable chips with Clear (`remove`, `clear`). A `cmnFilterBarSheet` template opens from the Filters button as a bottom sheet on a phone and a side drawer from `md`. The bar keeps no filter state.                                                                                                     |
+| `lk-chip-row`                    | Quick filters on one line: a period, a status, an account. Scrolls sideways with an edge fade and snap, never truncates a label, keeps the selected chip in view, shows counts as badges, single or multi select, 44px chips.                                                                                                                                                                                                                                                        |
+| `cmn-segmented` / `lk-segmented` | A short parameter choice (a view mode, a chart period): five segments or fewer, short noun labels. Cells are equal and as wide as the widest label, and never narrower than their own: a row that needs more than its container scrolls inside itself (chosen cell kept in view, page never widens) rather than truncate. `lk-segmented` warns in development when it overflows. More choices, or long labels, use `lk-chip-row`; a rarely changed setting such as sort uses a menu. |
+| `cmn-list-section`               | One group of rows under a heading: a day of transactions, a severity of alerts. The heading is an `h2` that names the section, with a `cmnListSectionAside` slot for a total or count; the rows sit in an unpadded `cmn-card` (`card` false leaves them bare). On a phone the heading sticks flush under the top bar while its rows scroll past, and the next heading pushes it out.                                                                                                 |
 
 ### Sheet or page
 
@@ -303,7 +308,7 @@ that holds each one. A rule marked "follow-up" is the target; its parts and chec
    five segments or fewer with equal cells at least as wide as the widest label. A filter with
    counts, more than five options or two dimensions uses `lk-chip-row`; a rarely changed setting
    (sort) uses a menu. Sources: HIG Segmented controls; M3 Segmented buttons and Filter chips; WCAG
-   1.4.10, 1.4.12, 1.4.4. Check: no segmented cell or chip label overflows at 375, 390 and 402.
+   1.4.10, 1.4.12, 1.4.4. Check: no segmented cell or chip label overflows at 375, 390 and 402, and an over-long segmented row never scrolls the page sideways.
 5. **Skeletons and states** (follow-up). Every async region uses `cmn-async-state` with a skeleton
    shaped like the rendered content, on containers only, with no indicator for loads under about
    200ms and a minimum display time once shown. The sweep stops under Reduce Motion. Sources: NN/g
@@ -357,7 +362,7 @@ exists.
 | Layout by size                          | Built: `CmnShellService` picks tab bar, rail or sidebar; the suite checks each width and device                                                                                     |
 | Appearance                              | Built: `cmn-appearance-settings` in Settings, palette entries, synced through `AppearanceService`                                                                                   |
 | Overlays                                | Built: the notice slot; the suite checks notices sit between the top bar and the tab bar                                                                                            |
-| Content insets                          | Built: measured `--cmn-content-inset-*`; the suite checks the last content clears the tab bar                                                                                       |
+| Content insets                          | Built: measured `--cmn-content-inset-*`; the suite checks the last content clears the tab bar, whatever the page composition                                                        |
 | Long lists (filter, chips, sections)    | Built: `cmn-filter-bar`, `lk-chip-row`, `cmn-list-section`; the suite checks labels and headers                                                                                     |
 | Text input (16px, 44px)                 | Built: every `cmn-*` field below md; `dvh` sheets and visual viewport are a follow-up                                                                                               |
 | Skeletons, continuity, motion, paging   | Target: rules 5-8 of the standard                                                                                                                                                   |

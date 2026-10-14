@@ -175,8 +175,9 @@ One-row segmented control for picking one value out of a short list, such as a c
 `role="radiogroup"` of `role="radio"` cells, not a tablist: choosing a cell changes a value the host
 reads, it does not swap a panel. Cells are equal width, as wide as the widest label and at least
 44px square, and never wrap. A cell is never narrower than its own label: when the labels need more
-room than the row has, the row overflows rather than truncate one, and in development logs a
-console warning. Keep it to five segments or fewer with short noun labels; more choices, or longer
+room than the row has, the row scrolls sideways inside its own box (`max-width: 100%`, scrollbar
+hidden) with the chosen cell scrolled into view, so it never widens the page, and in development
+logs a console warning. Keep it to five segments or fewer with short noun labels; more choices, or longer
 labels, belong in an `lk-chip-row` or a menu.
 
 | Property   | Attribute  | Type                                                   | Default | Description                                                    |

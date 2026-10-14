@@ -593,7 +593,6 @@ describe('AppLayoutComponent', () => {
         'scroll-pt-[calc(var(--cmn-content-inset-top,0px)+var(--cmn-sticky-top,0px))]'
       );
       expect(main).toContain('pb-[var(--cmn-content-inset-bottom,0px)]');
-      expect(main).toContain('[&:has(cmn-page-container)]:pb-0');
       expect(main).toContain('scroll-pb-[var(--cmn-content-inset-bottom,0px)]');
     });
 

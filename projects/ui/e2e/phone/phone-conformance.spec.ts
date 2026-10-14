@@ -579,6 +579,35 @@ async function pinnedChromeBottom(page: Page): Promise<number> {
   });
 }
 
+/** Scrolls main to its end, then lists where `[data-last-content]` sits under the floating chrome. */
+async function lastContentClash(page: Page): Promise<string[]> {
+  await page.evaluate(() => {
+    const main = document.querySelector('cmn-app-layout main');
+    main?.scrollTo(0, main.scrollHeight);
+  });
+  await settleFrames(page);
+  return page.evaluate(() => {
+    const last = document.querySelector('[data-last-content]')?.getBoundingClientRect();
+    const covers = [
+      ['tab bar', document.querySelector('cmn-bottom-tab-bar nav')],
+      ['floating action', document.querySelector('[cmnAppLayoutFab]')],
+    ] as const;
+    const found: string[] = [];
+    if (!last) {
+      return ['no [data-last-content] in the story'];
+    }
+    for (const [name, el] of covers) {
+      const box = el?.getClientRects().length ? el.getBoundingClientRect() : null;
+      if (box && last.bottom > box.top) {
+        found.push(
+          `last content bottom ${Math.round(last.bottom)} under the ${name} at ${Math.round(box.top)}`
+        );
+      }
+    }
+    return found;
+  });
+}
+
 for (const size of LIST_WIDTHS) {
   test.describe(`list page ${size.width}x${size.height}`, () => {
     test.use({viewport: size, hasTouch: true, isMobile: true});
@@ -589,31 +618,7 @@ for (const size of LIST_WIDTHS) {
         if (notices) {
           await page.waitForSelector('lk-offline-banner .banner', {state: 'visible'});
         }
-        await page.evaluate(() => {
-          const main = document.querySelector('cmn-app-layout main');
-          main?.scrollTo(0, main.scrollHeight);
-        });
-        await settleFrames(page);
-        const clash = await page.evaluate(() => {
-          const last = document.querySelector('[data-last-content]')?.getBoundingClientRect();
-          const covers = [
-            ['tab bar', document.querySelector('cmn-bottom-tab-bar nav')],
-            ['floating action', document.querySelector('[cmnAppLayoutFab]')],
-          ] as const;
-          const found: string[] = [];
-          if (!last) {
-            return ['no [data-last-content] in the story'];
-          }
-          for (const [name, el] of covers) {
-            const box = el?.getClientRects().length ? el.getBoundingClientRect() : null;
-            if (box && last.bottom > box.top) {
-              found.push(
-                `last content bottom ${Math.round(last.bottom)} under the ${name} at ${Math.round(box.top)}`
-              );
-            }
-          }
-          return found;
-        });
+        const clash = await lastContentClash(page);
         report(clash, 'enforce');
       });
 
@@ -707,6 +712,121 @@ for (const size of LIST_WIDTHS) {
         );
       });
     }
+  });
+}
+
+// Page compositions the shell clears the chrome for, whatever the page is built from.
+const COMPOSITION_STORIES = [
+  'phone-overlay-content-after-container',
+  'phone-overlay-sibling-containers',
+  'phone-overlay-overflowing-host',
+  'phone-overlay-chat-host',
+] as const;
+const WIDE_SEGMENTED_STORY = 'phone-overlay-wide-segmented';
+const SIBLING_STORY = 'phone-overlay-sibling-containers';
+const CHAT_STORY = 'phone-overlay-chat-host';
+
+for (const size of LIST_WIDTHS) {
+  test.describe(`page composition ${size.width}x${size.height}`, () => {
+    test.use({viewport: size, hasTouch: true, isMobile: true});
+
+    for (const story of COMPOSITION_STORIES) {
+      test(`${story} | last content clears the tab bar`, async ({page}) => {
+        await open(page, layoutStory(story));
+        report(await lastContentClash(page), 'enforce');
+      });
+    }
+
+    test(`${SIBLING_STORY} | no gap opens between the containers`, async ({page}) => {
+      await open(page, layoutStory(SIBLING_STORY));
+      const gap = await page.evaluate(() => {
+        const [first, second] = document.querySelectorAll('cmn-page-container');
+        if (!first || !second) {
+          return Number.NaN;
+        }
+        return second.getBoundingClientRect().top - first.getBoundingClientRect().bottom;
+      });
+      report(
+        Math.abs(gap) <= SURFACE_TOLERANCE
+          ? []
+          : [`containers are ${gap}px apart, expected them flush`],
+        'enforce'
+      );
+    });
+
+    test(`${CHAT_STORY} | host fills the visible height, main does not scroll`, async ({page}) => {
+      await open(page, layoutStory(CHAT_STORY));
+      await settleFrames(page);
+      const problems = await page.evaluate(() => {
+        const main = document.querySelector('cmn-app-layout main');
+        const host = document.querySelector('[data-chat-host]');
+        const log = document.querySelector('[data-chat-log]');
+        if (!main || !host || !log) {
+          return ['chat story not rendered'];
+        }
+        const style = getComputedStyle(main);
+        const visible =
+          main.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
+        const found: string[] = [];
+        if (Math.abs(host.getBoundingClientRect().height - visible) > 1) {
+          found.push(
+            `host is ${host.getBoundingClientRect().height}px, main shows ${visible}px of content`
+          );
+        }
+        if (main.scrollHeight > main.clientHeight + 1) {
+          found.push(`main scrolls: ${main.scrollHeight}px of content in ${main.clientHeight}px`);
+        }
+        if (log.scrollHeight <= log.clientHeight) {
+          found.push('the chat log does not overflow, so the story proves nothing');
+        }
+        return found;
+      });
+      report(problems, 'enforce');
+    });
+
+    test(`${WIDE_SEGMENTED_STORY} | an over-long row scrolls inside itself`, async ({page}) => {
+      await open(page, layoutStory(WIDE_SEGMENTED_STORY));
+      await settleFrames(page);
+      const problems = await page.evaluate(() => {
+        const found: string[] = [];
+        const main = document.querySelector('cmn-app-layout main');
+        const root = document.scrollingElement;
+        if (main && main.scrollWidth > main.clientWidth) {
+          found.push(`main scrolls sideways: ${main.scrollWidth}px in ${main.clientWidth}px`);
+        }
+        if (root && root.scrollWidth > root.clientWidth) {
+          found.push(`the page scrolls sideways: ${root.scrollWidth}px in ${root.clientWidth}px`);
+        }
+        const rows: [string, Element, Element[]][] = [];
+        const cmn = document.querySelector('cmn-segmented');
+        if (cmn) {
+          rows.push(['cmn-segmented', cmn, [...cmn.querySelectorAll('[role=radio]')]]);
+        }
+        const lk = document.querySelector('lk-segmented');
+        if (lk) {
+          rows.push(['lk-segmented', lk, [...(lk.shadowRoot?.querySelectorAll('.cell') ?? [])]]);
+        }
+        if (rows.length !== 2) {
+          found.push('both segmented rows must render');
+        }
+        for (const [kind, host, cells] of rows) {
+          if (host.scrollWidth <= host.clientWidth) {
+            found.push(`${kind} fits, so the story proves nothing`);
+          }
+          const box = host.getBoundingClientRect();
+          if (box.right > window.innerWidth + 0.5) {
+            found.push(`${kind} runs off screen to ${Math.round(box.right)}px`);
+          }
+          for (const cell of cells) {
+            if (cell.scrollWidth > cell.clientWidth + 0.5) {
+              found.push(`${kind} cell "${cell.textContent?.trim()}" is clipped`);
+            }
+          }
+        }
+        return found;
+      });
+      report(problems, 'enforce');
+    });
   });
 }
 
