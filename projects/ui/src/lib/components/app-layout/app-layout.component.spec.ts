@@ -1,7 +1,7 @@
 import {BreakpointObserver} from '@angular/cdk/layout';
 import {OverlayContainer} from '@angular/cdk/overlay';
 import {Location} from '@angular/common';
-import {ChangeDetectionStrategy, Component} from '@angular/core';
+import {ChangeDetectionStrategy, Component, signal} from '@angular/core';
 import {type ComponentFixture, TestBed} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
 import {provideRouter, Router, type Routes} from '@angular/router';
@@ -687,6 +687,52 @@ describe('AppLayoutComponent', () => {
       TestBed.inject(CmnDrawerService).open(SheetContentComponent, {mode: 'sheet'});
       host.detectChanges();
       expect((q('.fab').parentElement as HTMLElement).classList).toContain('hidden');
+    });
+  });
+
+  describe('content inset with a floating action added later', () => {
+    @Component({
+      imports: [AppLayoutComponent],
+      changeDetection: ChangeDetectionStrategy.OnPush,
+      template: `
+        <cmn-app-layout [phoneOverlay]="true">
+          @if (showFab()) {
+            <button
+              cmnAppLayoutFab
+              class="fab"
+              type="button"
+              style="position: fixed; top: 0; right: 0; height: 120px"
+            >
+              Ask
+            </button>
+          }
+          <p>Body</p>
+        </cmn-app-layout>
+      `,
+    })
+    class LateFabHostComponent {
+      public readonly showFab = signal(false);
+    }
+
+    function inset(host: ComponentFixture<LateFabHostComponent>): number {
+      const main = (host.nativeElement as HTMLElement).querySelector('main') as HTMLElement;
+      return parseFloat(main.style.getPropertyValue('--cmn-content-inset-bottom')) || 0;
+    }
+
+    it('should clear a floating action that appears and disappears after first render', async () => {
+      viewport.pin('phone');
+      const host = TestBed.createComponent(LateFabHostComponent);
+      host.detectChanges();
+      await host.whenStable();
+      const before = inset(host);
+
+      host.componentInstance.showFab.set(true);
+      host.detectChanges();
+      await vi.waitFor(() => expect(inset(host)).toBeGreaterThan(before));
+
+      host.componentInstance.showFab.set(false);
+      host.detectChanges();
+      await vi.waitFor(() => expect(inset(host)).toBe(before));
     });
   });
 

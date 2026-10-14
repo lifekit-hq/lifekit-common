@@ -140,6 +140,25 @@ describe('LkChipRow', () => {
     expect(row(el).hasAttribute('data-fade-end')).toBe(false);
   });
 
+  it('refreshes the fades when the row is resized without a re-render', async () => {
+    const el = await mount();
+    el.style.width = NARROW_WIDTH;
+    await expect.poll(() => row(el).hasAttribute('data-fade-end')).toBe(true);
+    el.style.width = '';
+    await expect.poll(() => row(el).hasAttribute('data-fade-end')).toBe(false);
+  });
+
+  it('keeps watching the row after being moved in the document', async () => {
+    const el = await mount();
+    document.body.appendChild(el);
+    el.style.width = NARROW_WIDTH;
+    await expect.poll(() => row(el).hasAttribute('data-fade-end')).toBe(true);
+    document.body.removeChild(el);
+    document.body.appendChild(el);
+    el.style.width = '';
+    await expect.poll(() => row(el).hasAttribute('data-fade-end')).toBe(false);
+  });
+
   it('scrolls the row so a selected chip off the end comes into view', async () => {
     const el = await mount();
     el.style.width = NARROW_WIDTH;

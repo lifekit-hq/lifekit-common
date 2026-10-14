@@ -582,10 +582,22 @@ export class AppLayoutComponent {
         }
       };
       const observer = new ResizeObserver(measure);
-      for (const target of [main, topBar, tabBar, notices, ...Array.from(fab.children)]) {
-        observer.observe(target, {box: 'border-box'});
-      }
-      onCleanup(() => observer.disconnect());
+      const observeAll = (): void => {
+        observer.disconnect();
+        for (const target of [main, topBar, tabBar, notices, ...Array.from(fab.children)]) {
+          observer.observe(target, {box: 'border-box'});
+        }
+      };
+      observeAll();
+      const actions = new MutationObserver(() => {
+        observeAll();
+        measure();
+      });
+      actions.observe(fab, {childList: true});
+      onCleanup(() => {
+        observer.disconnect();
+        actions.disconnect();
+      });
     });
   }
 

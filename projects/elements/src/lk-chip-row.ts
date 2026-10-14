@@ -58,6 +58,8 @@ const SCROLL_TOLERANCE_PX = 1;
  * </script>
  */
 export class LkChipRow extends LitElement {
+  private resizeObserver: ResizeObserver | undefined;
+
   // eslint-disable-next-line @typescript-eslint/naming-convention
   public static override styles = css`
     :host {
@@ -263,6 +265,31 @@ export class LkChipRow extends LitElement {
       row.scrollLeft = start;
     } else if (end > row.scrollLeft + row.clientWidth) {
       row.scrollLeft = end - row.clientWidth;
+    }
+  }
+
+  public override connectedCallback(): void {
+    super.connectedCallback();
+    if (this.hasUpdated) {
+      this.observeRow();
+    }
+  }
+
+  public override disconnectedCallback(): void {
+    this.resizeObserver?.disconnect();
+    this.resizeObserver = undefined;
+    super.disconnectedCallback();
+  }
+
+  protected override firstUpdated(): void {
+    this.observeRow();
+  }
+
+  private observeRow(): void {
+    const row = this.row;
+    if (row && !this.resizeObserver && typeof ResizeObserver !== 'undefined') {
+      this.resizeObserver = new ResizeObserver(() => this.updateFades());
+      this.resizeObserver.observe(row);
     }
   }
 
