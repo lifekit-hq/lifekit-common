@@ -8,6 +8,8 @@ module.exports = {
         'surface-card': 'var(--color-surface-card)',
         'surface-raised': 'var(--color-surface-raised)',
         'surface-hover': 'var(--color-surface-hover)',
+        skeleton: 'var(--color-skeleton)',
+        'skeleton-sheen': 'var(--color-skeleton-sheen)',
 
         'text-primary': 'var(--color-text-primary)',
         'text-secondary': 'var(--color-text-secondary)',
@@ -121,9 +123,23 @@ module.exports = {
       animation: {
         'cmn-spin': 'cmn-spin 1s linear infinite',
         'cmn-pulse': 'cmn-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'cmn-fade-in': 'cmn-fade-in 200ms ease-out',
-        'cmn-slide-in': 'cmn-slide-in 240ms cubic-bezier(0.16, 1, 0.3, 1)',
-        'cmn-slide-in-right': 'cmn-slide-in-right 220ms cubic-bezier(0.16, 1, 0.3, 1)',
+        'cmn-fade-in': 'cmn-fade-in var(--cmn-duration-short) var(--cmn-ease-standard)',
+        'cmn-slide-in':
+          'cmn-slide-in var(--cmn-duration-medium) var(--cmn-ease-emphasized-decelerate)',
+        'cmn-slide-in-right':
+          'cmn-slide-in-right var(--cmn-duration-medium) var(--cmn-ease-emphasized-decelerate)',
+      },
+
+      transitionDuration: {
+        'cmn-short': 'var(--cmn-duration-short)',
+        'cmn-medium': 'var(--cmn-duration-medium)',
+        'cmn-long': 'var(--cmn-duration-long)',
+      },
+
+      transitionTimingFunction: {
+        'cmn-standard': 'var(--cmn-ease-standard)',
+        'cmn-decelerate': 'var(--cmn-ease-emphasized-decelerate)',
+        'cmn-accelerate': 'var(--cmn-ease-emphasized-accelerate)',
       },
 
       spacing: {
