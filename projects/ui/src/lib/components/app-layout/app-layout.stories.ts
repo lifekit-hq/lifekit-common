@@ -1,13 +1,24 @@
 import {BreakpointObserver} from '@angular/cdk/layout';
 import {ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA, inject} from '@angular/core';
-import {LkInstallHint, LkOfflineBanner, LkUpdatePrompt} from '@lifekit-hq/elements';
+import {
+  type ChipRowOption,
+  LkChipRow,
+  LkInstallHint,
+  LkOfflineBanner,
+  LkUpdatePrompt,
+} from '@lifekit-hq/elements';
 import type {Meta, StoryObj} from '@storybook/angular';
 import {moduleMetadata} from '@storybook/angular';
 
 import {CmnDrawerService} from '../../services/drawer/drawer.service';
 import {PinnedBreakpointObserver} from '../../services/shell/pinned-breakpoints';
 import type {CommandPaletteItem} from '../command-palette/command-palette-item.model';
+import {type FilterBarChip, FilterBarComponent} from '../filter-bar/filter-bar.component';
+import {ListItemRowComponent} from '../list-item-row/list-item-row.component';
+import {ListSectionComponent} from '../list-section/list-section.component';
 import type {MenuItem} from '../menu/menu.component';
+import {PageContainerComponent} from '../page-container/page-container.component';
+import {SegmentedComponent, type SegmentedOption} from '../segmented/segmented.component';
 import type {NavItem} from '../sidebar-nav/sidebar-nav.component';
 import {
   accountMenu,
@@ -18,6 +29,7 @@ import {
 
 // Imported by name so a bundler cannot tree-shake the customElements.define() calls.
 for (const [tag, element] of [
+  ['lk-chip-row', LkChipRow],
   ['lk-install-hint', LkInstallHint],
   ['lk-offline-banner', LkOfflineBanner],
   ['lk-update-prompt', LkUpdatePrompt],
@@ -465,6 +477,131 @@ export const PhoneOverlaySheetOpen: Story = {
         [phoneOverlay]="phoneOverlay"
         [floatingActionClearance]="floatingActionClearance"
       ><cmn-story-sheet-launcher />${NOTICES}${NOTICES_FAB}</cmn-app-layout>
+    `,
+  }),
+};
+
+const LIST_PERIODS: ChipRowOption[] = [
+  {value: 'week', label: 'This week'},
+  {value: 'month', label: 'This month'},
+  {value: 'last-month', label: 'Last month'},
+  {value: 'quarter', label: 'Last three months'},
+  {value: 'year', label: 'This year'},
+];
+
+const LIST_KINDS: SegmentedOption[] = [
+  {value: 'all', label: 'All'},
+  {value: 'out', label: 'Spending'},
+  {value: 'in', label: 'Income'},
+  {value: 'move', label: 'Transfers'},
+  {value: 'back', label: 'Refunds'},
+];
+
+const LIST_APPLIED: FilterBarChip[] = [
+  {id: 'category', label: 'Category: Groceries'},
+  {id: 'account', label: 'Account: Main current'},
+];
+
+const LIST_DAYS = ['Today', 'Yesterday', 'Mon 12 Oct', 'Sun 11 Oct', 'Sat 10 Oct'];
+const LIST_ROWS_PER_DAY = 5;
+
+/**
+ * A list page as consumers build one: the page component's host is a full-height flex column
+ * (`flex h-full flex-col`) holding `cmn-page-container fill`, a filter bar with a quick-filter
+ * chip row, a segmented control and day groups in `cmn-list-section`s.
+ */
+const LIST_PAGE_BODY = `
+  <div class="flex h-full flex-col">
+    <cmn-page-container spacing="md" fill>
+      <cmn-filter-bar [activeCount]="applied.length" [applied]="applied" placeholder="Search transactions">
+        <lk-chip-row [options]="periods" [selected]="['month']" cmnFilterBarQuick label="Period"></lk-chip-row>
+      </cmn-filter-bar>
+      <cmn-segmented [options]="kinds" value="all" label="Kind" />
+      @for (day of days; track day) {
+        <cmn-list-section [heading]="day">
+          <span cmnListSectionAside class="normal-case tabular-nums">-€61.20</span>
+          @for (row of rows; track row) {
+            <cmn-list-item-row [label]="day + ' payment ' + row" sublabel="Card payment">
+              <span amount class="text-cmn-sm tabular-nums text-text-primary">-€12.24</span>
+            </cmn-list-item-row>
+          }
+        </cmn-list-section>
+      }
+      <p class="text-center text-cmn-xs text-text-secondary" data-last-content>Last item clears the tab bar</p>
+    </cmn-page-container>
+  </div>
+`;
+
+const LIST_PAGE_PROPS = {
+  periods: LIST_PERIODS,
+  kinds: LIST_KINDS,
+  applied: LIST_APPLIED,
+  days: LIST_DAYS,
+  rows: Array.from({length: LIST_ROWS_PER_DAY}, (_, i) => i + 1),
+};
+
+/**
+ * A list page inside a full-height page host. main publishes how much the bars cover
+ * (`--cmn-content-inset-top` / `-bottom`); the page container pads its end by the bottom one, so
+ * the last line clears the floating tab bar even though the host caps its own height. Day headings
+ * stick flush under the top bar while their rows scroll past.
+ */
+export const PhoneOverlayListPage: Story = {
+  args: {...PhoneOverlay.args},
+  globals: PHONE,
+  decorators: [
+    moduleMetadata({
+      imports: [
+        FilterBarComponent,
+        ListItemRowComponent,
+        ListSectionComponent,
+        PageContainerComponent,
+        SegmentedComponent,
+      ],
+    }),
+  ],
+  render: args => ({
+    props: {...args, ...LIST_PAGE_PROPS},
+    template: `
+      <cmn-app-layout
+        [navItems]="navItems"
+        [activeRoute]="activeRoute"
+        [title]="title"
+        [avatarLabel]="avatarLabel"
+        [avatarMenuItems]="avatarMenuItems"
+        [tabRoutes]="tabRoutes"
+        [moreRoute]="moreRoute"
+        [phoneOverlay]="phoneOverlay"
+        [floatingActionClearance]="floatingActionClearance"
+      >${LIST_PAGE_BODY}</cmn-app-layout>
+    `,
+  }),
+};
+
+/**
+ * The list page with notices pinned under the top bar and a floating action: day headings stick
+ * under the notices (`--cmn-sticky-top`), and the last line clears the floating action too.
+ */
+export const PhoneOverlayListPageNotices: Story = {
+  ...PhoneOverlayListPage,
+  args: {...PhoneOverlay.args, floatingActionClearance: FAB_CLEARANCE},
+  play: () => {
+    window.dispatchEvent(new Event('offline'));
+  },
+  render: args => ({
+    props: {...args, ...LIST_PAGE_PROPS},
+    template: `
+      <cmn-app-layout
+        [navItems]="navItems"
+        [activeRoute]="activeRoute"
+        [title]="title"
+        [avatarLabel]="avatarLabel"
+        [avatarMenuItems]="avatarMenuItems"
+        [tabRoutes]="tabRoutes"
+        [moreRoute]="moreRoute"
+        [phoneOverlay]="phoneOverlay"
+        [floatingActionClearance]="floatingActionClearance"
+      >${LIST_PAGE_BODY}${NOTICES}${NOTICES_FAB}</cmn-app-layout>
     `,
   }),
 };

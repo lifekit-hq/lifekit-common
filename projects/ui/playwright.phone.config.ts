@@ -1,8 +1,9 @@
 import {defineConfig, devices} from '@playwright/test';
 
-// Phone conformance suite: checks docs/PHONE-CONTRACT.md against the built Storybook app-layout
-// stories. Run after `npm run build-storybook`. Report-only by default: violations are recorded
-// and summarised but the run stays green. Set PHONE_CONFORMANCE=gate to make them fail.
+// Phone conformance suite: checks docs/PHONE-CONTRACT.md against the built Storybook stories. Run
+// after `npm run build-storybook`. CI runs it with PHONE_CONFORMANCE=gate, where every violation
+// fails except the advisory checks. Without it, the gated checks only record and summarise their
+// violations; the enforced ones fail either way (see the head of e2e/phone/phone-conformance.spec.ts).
 const PORT = 6008;
 
 export default defineConfig({

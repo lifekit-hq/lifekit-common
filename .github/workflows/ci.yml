@@ -48,12 +48,11 @@ jobs:
         shell: bash
         run: npm run design:scan -- --storybook http://127.0.0.1:6007 | tee -a "$GITHUB_STEP_SUMMARY"
 
-  # Report-only: phone conformance (docs/PHONE-CONTRACT.md) against the built app-layout stories.
-  # Violations are summarised in the job summary and never fail the build; gating comes later
-  # (PHONE_CONFORMANCE=gate) once the violations are fixed.
+  # Gate: phone conformance (docs/PHONE-CONTRACT.md) against the built Storybook stories. Any
+  # violation fails the build, except the advisory checks (touch-sized controls in the tablet and
+  # landscape chrome), which are only summarised in the job summary.
   phone-conformance:
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -63,5 +62,7 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm run build-storybook
-      - name: Phone conformance (report only)
+      - name: Phone conformance
         run: npm run test:phone
+        env:
+          PHONE_CONFORMANCE: gate
