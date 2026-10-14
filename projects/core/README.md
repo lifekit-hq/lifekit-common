@@ -77,6 +77,28 @@ updates the state. After init, a param absent from the URL resets its field to t
 at init it leaves the initial state untouched. The feature's own URL writes (`replaceUrl: true`) are
 not read back.
 
+## `TabPreloadStrategy`
+
+A router preloading strategy for the tab-bar destinations, so the first visit to a tab does not wait
+for its lazy chunk. A route opts in with `data: {tabPreload: true}`; every other lazy route loads on
+demand, as it does without a strategy.
+
+```ts
+export const APP_ROUTES: Routes = [
+  {path: 'budgets', data: {tabPreload: true}, loadComponent: () => import('./budgets')},
+  {path: 'settings', loadComponent: () => import('./settings')}, // on demand
+];
+
+provideRouter(APP_ROUTES, withPreloading(TabPreloadStrategy), withViewTransitions());
+```
+
+A chunk loads on an idle moment after the first navigation has painted (two animation frames, then
+`requestIdleCallback` with a 4s timeout, a timer where that is missing), never during startup. It
+does not load at all when the reader asked to save data (`saveData`), the connection is metered
+(`type === 'cellular'`) or slow (`2g`), and it checks again at the idle moment in case that changed
+while it waited. The Network Information API does not exist in Safari, so on iOS (where these apps
+run installed) the tabs always preload: nothing can be known, and the chunks are small.
+
 ## `@lifekit-hq/core/preferences`
 
 Where an option is stored, by tier. The tiers and the server contract are in

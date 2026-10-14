@@ -1,5 +1,6 @@
 export * from './lk-chip-row';
 export * from './lk-dismissible-chip';
+export * from './lk-infinite-list';
 export * from './lk-install-hint';
 export * from './lk-line-chart';
 export * from './lk-offline-banner';

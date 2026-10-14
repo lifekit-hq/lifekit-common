@@ -1,8 +1,16 @@
 import {BreakpointObserver} from '@angular/cdk/layout';
-import {ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA, inject} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  CUSTOM_ELEMENTS_SCHEMA,
+  inject,
+  type OnDestroy,
+  signal,
+} from '@angular/core';
 import {
   type ChipRowOption,
   LkChipRow,
+  LkInfiniteList,
   LkInstallHint,
   LkOfflineBanner,
   LkSegmented,
@@ -31,6 +39,7 @@ import {
 // Imported by name so a bundler cannot tree-shake the customElements.define() calls.
 for (const [tag, element] of [
   ['lk-chip-row', LkChipRow],
+  ['lk-infinite-list', LkInfiniteList],
   ['lk-install-hint', LkInstallHint],
   ['lk-offline-banner', LkOfflineBanner],
   ['lk-segmented', LkSegmented],
@@ -38,6 +47,65 @@ for (const [tag, element] of [
 ] as const) {
   if (!customElements.get(tag)) {
     customElements.define(tag, element);
+  }
+}
+
+const FEED_PAGE_SIZE = 8;
+const FEED_PAGES = 4;
+const FEED_PAGE_DELAY_MS = 40;
+
+/**
+ * A store's paging in miniature, for the shell: pages of rows land after a short delay and the
+ * last page clears `hasMore`. The first page is shorter than the screen, so the list has to keep
+ * asking until it fills.
+ */
+@Component({
+  selector: 'cmn-story-infinite-feed',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  template: `
+    <lk-infinite-list
+      [hasMore]="hasMore()"
+      [loading]="loading()"
+      (lk-infinite-list-load-more)="load()"
+      data-last-content
+      data-infinite-list
+    >
+      <cmn-page-container spacing="md">
+        @for (row of rows(); track row) {
+          <cmn-list-item-row [label]="'Payment ' + row" sublabel="Card payment">
+            <span amount class="text-cmn-sm tabular-nums text-text-primary">-€12.24</span>
+          </cmn-list-item-row>
+        }
+      </cmn-page-container>
+    </lk-infinite-list>
+  `,
+  imports: [ListItemRowComponent, PageContainerComponent],
+})
+class StoryInfiniteFeedComponent implements OnDestroy {
+  private page = 0;
+  private timer: ReturnType<typeof setTimeout> | undefined;
+
+  protected readonly rows = signal<number[]>([]);
+  protected readonly loading = signal(false);
+  protected readonly hasMore = signal(true);
+
+  protected load(): void {
+    this.loading.set(true);
+    this.timer = setTimeout(() => {
+      this.page += 1;
+      const first = (this.page - 1) * FEED_PAGE_SIZE;
+      this.rows.update(rows => [
+        ...rows,
+        ...Array.from({length: FEED_PAGE_SIZE}, (_, i) => first + i + 1),
+      ]);
+      this.hasMore.set(this.page < FEED_PAGES);
+      this.loading.set(false);
+    }, FEED_PAGE_DELAY_MS);
+  }
+
+  public ngOnDestroy(): void {
+    clearTimeout(this.timer);
   }
 }
 
@@ -749,6 +817,18 @@ export const PhoneOverlayWideSegmented: Story = shellStory(
   WIDE_SEGMENTED_BODY,
   'Over-long `cmn-segmented` and `lk-segmented` rows scroll sideways inside their own box; the page never does.'
 );
+
+/**
+ * A list that pages itself: `lk-infinite-list` asks for the next page as the end nears, shows
+ * skeleton rows while it appends and closes with an end marker that clears the tab bar.
+ */
+export const PhoneOverlayInfiniteList: Story = {
+  ...shellStory(
+    '<cmn-story-infinite-feed />',
+    'Four pages of rows load as the reader scrolls; the last page ends in an end marker that clears the tab bar.'
+  ),
+  decorators: [moduleMetadata({imports: [StoryInfiniteFeedComponent]})],
+};
 
 const PALETTE_ITEMS: CommandPaletteItem[] = [
   {id: '/dashboard', label: 'Dashboard', icon: 'LayoutDashboard', group: 'Pages'},
