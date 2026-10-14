@@ -18,9 +18,10 @@ const SCROLLING_OVERFLOW = /auto|scroll|overlay/;
 
 /**
  * The nearest ancestor that really scrolls vertically (overflowing now, not merely
- * `overflow: auto`), crossing shadow roots, or null for the viewport. `rootMargin` only reaches ahead of the root the
- * observer uses, so inside a scrolling shell the root has to be that scroller rather than the
- * viewport. The body and root element scroll the viewport, so they never count.
+ * `overflow: auto`), crossing shadow roots, or null for the viewport. `rootMargin` only reaches
+ * ahead of the root the observer uses, so inside a scrolling shell the root has to be that
+ * scroller rather than the viewport. The body and root element scroll the viewport, so they never
+ * count.
  */
 function findScrollRoot(start: Element): Element | null {
   let node: Node | null = start;
@@ -53,7 +54,7 @@ function findScrollRoot(start: Element): Element | null {
  * - `hasMore`: the store has another page to fetch (it has a cursor, or the last page was full).
  * - `loading`: a page is being fetched (the store's append request is in flight).
  * - `failed`: the last append request failed. The list stops asking until the reader presses Retry.
- * - `lk-infinite-list-load-more`: the end is within reach of the viewport and the store may fetch
+ * - `lk-infinite-list-load-more`: the end is within reach of the reader and the store may fetch
  *   the next page. Fires only while `hasMore` is on and neither `loading` nor `failed` is.
  * - `lk-infinite-list-retry`: the reader pressed Retry. The host fetches again and clears `failed`.
  *

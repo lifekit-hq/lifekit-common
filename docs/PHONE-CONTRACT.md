@@ -376,7 +376,7 @@ that holds each one. A rule marked "follow-up" is the target; its parts and chec
    within 8px of the loaded component's; the state pattern. To come: CLS at most 0.1 per route.
 6. **Continuity.** Data on screen stays while it refreshes (`keepContent`); a tab return paints at
    once and revalidates; scroll restore waits for the data; tab destinations preload on idle, after
-   first paint, except under Save-Data or on a metered connection (`TabPreloadStrategy`, below),
+   first paint, except under Save-Data or on a metered connection (`TabPreloadStrategy`, `projects/core/README.md`),
    and a tab switch is a View Transition (`withViewTransitions()`, `DESIGN.md` Motion). Sources:
    RFC 5861; angular.dev service worker `dataGroups`, route preloading, `@defer`, View Transitions;
    HIG Loading. Check today: back restores scroll.
@@ -434,4 +434,4 @@ exists.
 | Long lists (filter, chips, sections)    | Built: `cmn-filter-bar`, `lk-chip-row`, `cmn-list-section`; the suite checks labels and headers                                                                                     |
 | Text input (16px, 44px)                 | Built: every `cmn-*` field below md; `dvh` sheets and visual viewport are a follow-up                                                                                               |
 | Skeletons and motion                    | Built: `cmn-skeleton` presets, `cmn-async-state` calm loading, motion tokens; the suite checks preset geometry and Reduce Motion                                                    |
-| Continuity and paging                   | Built: `lk-infinite-list`, `TabPreloadStrategy` (idle tab preload, skipped under Save-Data or metered), `keepContent`; the suite checks the end of a continuous list |
+| Continuity and paging                   | Built: `lk-infinite-list`, `TabPreloadStrategy` (idle tab preload, skipped under Save-Data or metered), `keepContent`; the suite checks the end of a continuous list                |
