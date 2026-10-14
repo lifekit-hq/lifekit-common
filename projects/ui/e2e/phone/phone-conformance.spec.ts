@@ -1,9 +1,11 @@
 import {expect, type Page, test} from '@playwright/test';
 
-// Checks docs/PHONE-CONTRACT.md against the built app-layout stories. Report-only by default:
-// a violation becomes a `violation` annotation (collected by summary-reporter.ts) and the test
-// stays green. PHONE_CONFORMANCE=gate turns every violation into a failure. Checks marked
-// `enforce` below always fail: the guarantee behind them is built, so they only ever raise the bar.
+// Checks docs/PHONE-CONTRACT.md against the built app-layout stories. Every violation becomes a
+// `violation` annotation (collected by summary-reporter.ts). How it counts depends on the check:
+// - `gate` (default): fails under PHONE_CONFORMANCE=gate, which CI runs; report-only without it.
+// - `enforce`: always fails. The guarantee behind it is built, so it only ever raises the bar.
+// - `advisory`: never fails, even under gate. Kept for what the contract does not yet promise
+//   (touch-sized controls in the tablet and landscape chrome, which keeps desktop density).
 
 const GATING = process.env['PHONE_CONFORMANCE'] === 'gate';
 
@@ -70,15 +72,20 @@ async function open(
   await page.waitForSelector(ready, {state: 'visible'});
 }
 
-/** Records violations; fails when gating, or when this check always enforces. */
-function report(violations: string[], enforce = false) {
+type CheckMode = 'gate' | 'enforce' | 'advisory';
+
+/** Records violations; fails by the check's mode (see the head of this file). */
+function report(violations: string[], mode: CheckMode = 'gate') {
   for (const detail of violations) {
     test.info().annotations.push({type: 'violation', description: detail});
   }
-  if (GATING || enforce) {
+  if (mode === 'enforce' || (mode === 'gate' && GATING)) {
     expect(violations).toEqual([]);
   }
 }
+
+/** Phone chrome enforces touch targets; the tablet and landscape chrome only advise them. */
+const targetMode = (touchChrome: boolean): CheckMode => (touchChrome ? 'enforce' : 'advisory');
 
 /** Interactive controls that measure under `min` px in either direction, hit-slop included. */
 async function undersizedTargets(page: Page, min: number): Promise<string[]> {
@@ -135,7 +142,7 @@ for (const vp of VIEWPORTS) {
         const small = await undersizedTargets(page, MIN_TARGET);
         report(
           small.map(s => `target under ${MIN_TARGET}: ${s}`),
-          vp.touchChrome
+          targetMode(vp.touchChrome)
         );
       });
 
@@ -204,7 +211,7 @@ for (const vp of VIEWPORTS) {
         if (!vp.tabs && visible) {
           problems.push(`tab bar shown at ${vp.width}x${vp.height}, expected the rail`);
         }
-        report(problems, true);
+        report(problems, 'enforce');
       });
     }
 
@@ -213,7 +220,7 @@ for (const vp of VIEWPORTS) {
       const small = await undersizedTargets(page, MIN_TARGET);
       report(
         small.map(s => `target under ${MIN_TARGET}: ${s}`),
-        vp.touchChrome
+        targetMode(vp.touchChrome)
       );
     });
 
@@ -224,7 +231,7 @@ for (const vp of VIEWPORTS) {
       hints.push(...(await visibleKeyHints(page)));
       report(
         hints.map(h => `keyboard hint shown on touch: ${h}`),
-        true
+        'enforce'
       );
     });
 
@@ -313,7 +320,7 @@ test.describe(`phone ${NARROW_PHONE.width}x${NARROW_PHONE.height}`, () => {
         }
         return found;
       });
-      report(cut, true);
+      report(cut, 'enforce');
     });
   }
 
@@ -535,6 +542,313 @@ for (const size of NOTICE_WIDTHS) {
     test('offline cold start | says when it last synced', async ({page}) => {
       await open(page, STATE_STORIES[0].story, 'light', 'cmn-async-state');
       await expect(page.locator('cmn-async-state')).toContainText(/Last synced .*2026/);
+    });
+  });
+}
+
+// A list page in a full-height page host (filter bar, chip row, segmented control, day groups), at
+// the phone widths in use: iPhone SE, iPhone 15 and iPhone 16 Pro.
+const LIST_WIDTHS = [
+  {width: 375, height: 667},
+  {width: 390, height: 844},
+  {width: 402, height: 874},
+] as const;
+const LIST_STORIES = [
+  {story: 'phone-overlay-list-page', notices: false},
+  {story: 'phone-overlay-list-page-notices', notices: true},
+] as const;
+// The section whose heading is checked once it has scrolled up to the top bar.
+const STICKY_SECTION = 2;
+// How far past the pin point the section is scrolled, so its heading is held by sticky.
+const STICKY_PROBE = 80;
+
+/** Waits two frames, so measured insets and sticky offsets have settled. */
+async function settleFrames(page: Page) {
+  await page.evaluate(
+    () => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+  );
+}
+
+/** The bottom edge of the pinned chrome: the top bar, or the notices stuck under it. */
+async function pinnedChromeBottom(page: Page): Promise<number> {
+  return page.evaluate(() => {
+    const bar = document.querySelector('cmn-top-bar header')?.getBoundingClientRect().bottom ?? 0;
+    const notices = document.querySelector('lk-offline-banner')?.parentElement;
+    const stuck = notices?.getClientRects().length ? notices.getBoundingClientRect().bottom : 0;
+    return Math.max(bar, stuck);
+  });
+}
+
+/** Scrolls main to its end, then lists where `[data-last-content]` sits under the floating chrome. */
+async function lastContentClash(page: Page): Promise<string[]> {
+  await page.evaluate(() => {
+    const main = document.querySelector('cmn-app-layout main');
+    main?.scrollTo(0, main.scrollHeight);
+  });
+  await settleFrames(page);
+  return page.evaluate(() => {
+    const last = document.querySelector('[data-last-content]')?.getBoundingClientRect();
+    const covers = [
+      ['tab bar', document.querySelector('cmn-bottom-tab-bar nav')],
+      ['floating action', document.querySelector('[cmnAppLayoutFab]')],
+    ] as const;
+    const found: string[] = [];
+    if (!last) {
+      return ['no [data-last-content] in the story'];
+    }
+    for (const [name, el] of covers) {
+      const box = el?.getClientRects().length ? el.getBoundingClientRect() : null;
+      if (box && last.bottom > box.top) {
+        found.push(
+          `last content bottom ${Math.round(last.bottom)} under the ${name} at ${Math.round(box.top)}`
+        );
+      }
+    }
+    return found;
+  });
+}
+
+for (const size of LIST_WIDTHS) {
+  test.describe(`list page ${size.width}x${size.height}`, () => {
+    test.use({viewport: size, hasTouch: true, isMobile: true});
+
+    for (const {story, notices} of LIST_STORIES) {
+      test(`${story} | last content clears the tab bar`, async ({page}) => {
+        await open(page, layoutStory(story));
+        if (notices) {
+          await page.waitForSelector('lk-offline-banner .banner', {state: 'visible'});
+        }
+        const clash = await lastContentClash(page);
+        report(clash, 'enforce');
+      });
+
+      test(`${story} | no segmented or chip label overflows`, async ({page}) => {
+        await open(page, layoutStory(story));
+        const cut = await page.evaluate(() => {
+          const found: string[] = [];
+          const check = (label: Element, cell: Element, kind: string) => {
+            const box = label.getBoundingClientRect();
+            const holder = cell.getBoundingClientRect();
+            const text = label.textContent?.trim() ?? '';
+            if (
+              label.scrollWidth > label.clientWidth + 0.5 ||
+              box.left < holder.left - 0.5 ||
+              box.right > holder.right + 0.5
+            ) {
+              found.push(`${kind} label "${text}" overflows (${Math.round(box.width)}px)`);
+            }
+          };
+          // A segmented control never scrolls: every cell must also sit inside the viewport. A chip
+          // row scrolls sideways by design, so only its labels are checked.
+          const onScreen = (cell: Element, kind: string) => {
+            const box = cell.getBoundingClientRect();
+            if (box.left < -0.5 || box.right > window.innerWidth + 0.5) {
+              found.push(`${kind} cell "${cell.textContent?.trim()}" runs off screen`);
+            }
+          };
+          for (const cell of document.querySelectorAll('cmn-segmented [role=radio]')) {
+            check(cell, cell, 'cmn-segmented');
+            onScreen(cell, 'cmn-segmented');
+          }
+          for (const host of document.querySelectorAll('lk-segmented')) {
+            for (const cell of host.shadowRoot?.querySelectorAll('.cell') ?? []) {
+              check(cell, cell, 'lk-segmented');
+              onScreen(cell, 'lk-segmented');
+            }
+          }
+          for (const host of document.querySelectorAll('lk-chip-row')) {
+            for (const chip of host.shadowRoot?.querySelectorAll('.chip') ?? []) {
+              check(chip.querySelector('.pill') ?? chip, chip, 'lk-chip-row');
+            }
+          }
+          if (document.documentElement.scrollWidth > window.innerWidth) {
+            found.push('the page scrolls sideways');
+          }
+          return found;
+        });
+        report(cut, 'enforce');
+      });
+
+      test(`${story} | sticky section header pins flush under the top bar`, async ({page}) => {
+        await open(page, layoutStory(story));
+        if (notices) {
+          await page.waitForSelector('lk-offline-banner .banner', {state: 'visible'});
+        }
+        const pin = await pinnedChromeBottom(page);
+        await page.evaluate(
+          ({index, pinAt, probe}) => {
+            const main = document.querySelector('cmn-app-layout main');
+            const section = document.querySelectorAll('cmn-list-section')[index];
+            const top = section?.getBoundingClientRect().top ?? 0;
+            main?.scrollBy(0, top - pinAt + probe);
+          },
+          {index: STICKY_SECTION, pinAt: pin, probe: STICKY_PROBE}
+        );
+        await settleFrames(page);
+        const state = await page.evaluate(index => {
+          const section = document.querySelectorAll('cmn-list-section')[index];
+          const heading = section?.querySelector('h2')?.getBoundingClientRect();
+          const box = section?.getBoundingClientRect();
+          return {heading: heading?.top ?? -1, section: box?.top ?? -1};
+        }, STICKY_SECTION);
+        const problems: string[] = [];
+        if (state.section >= pin) {
+          problems.push(`section ${STICKY_SECTION} did not scroll past the pin point (${pin})`);
+        }
+        if (Math.abs(state.heading - pin) > SURFACE_TOLERANCE) {
+          problems.push(
+            `section header pinned at ${Math.round(state.heading)}, expected flush under the chrome at ${Math.round(pin)}`
+          );
+        }
+        report(problems, 'enforce');
+      });
+
+      test(`${story} | targets >= 44`, async ({page}) => {
+        await open(page, layoutStory(story));
+        const small = await undersizedTargets(page, MIN_TARGET);
+        report(
+          small.map(s => `target under ${MIN_TARGET}: ${s}`),
+          'enforce'
+        );
+      });
+    }
+  });
+}
+
+// Page compositions the shell clears the chrome for, whatever the page is built from.
+const COMPOSITION_STORIES = [
+  'phone-overlay-content-after-container',
+  'phone-overlay-sibling-containers',
+  'phone-overlay-overflowing-host',
+  'phone-overlay-chat-host',
+] as const;
+const WIDE_SEGMENTED_STORY = 'phone-overlay-wide-segmented';
+const SHORT_PAGE_STORY = 'conformance-routed-app-layout--routed-short-page';
+const SIBLING_STORY = 'phone-overlay-sibling-containers';
+const CHAT_STORY = 'phone-overlay-chat-host';
+
+for (const size of LIST_WIDTHS) {
+  test.describe(`page composition ${size.width}x${size.height}`, () => {
+    test.use({viewport: size, hasTouch: true, isMobile: true});
+
+    for (const story of COMPOSITION_STORIES) {
+      test(`${story} | last content clears the tab bar`, async ({page}) => {
+        await open(page, layoutStory(story));
+        report(await lastContentClash(page), 'enforce');
+      });
+    }
+
+    test(`${SIBLING_STORY} | no gap opens between the containers`, async ({page}) => {
+      await open(page, layoutStory(SIBLING_STORY));
+      const gap = await page.evaluate(() => {
+        const [first, second] = document.querySelectorAll('cmn-page-container');
+        if (!first || !second) {
+          return Number.NaN;
+        }
+        return second.getBoundingClientRect().top - first.getBoundingClientRect().bottom;
+      });
+      report(
+        Math.abs(gap) <= SURFACE_TOLERANCE
+          ? []
+          : [`containers are ${gap}px apart, expected them flush`],
+        'enforce'
+      );
+    });
+
+    test(`${CHAT_STORY} | host fills the visible height, main does not scroll`, async ({page}) => {
+      await open(page, layoutStory(CHAT_STORY));
+      await settleFrames(page);
+      const problems = await page.evaluate(() => {
+        const main = document.querySelector('cmn-app-layout main');
+        const host = document.querySelector('[data-chat-host]');
+        const log = document.querySelector('[data-chat-log]');
+        if (!main || !host || !log) {
+          return ['chat story not rendered'];
+        }
+        const style = getComputedStyle(main);
+        const visible =
+          main.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
+        const found: string[] = [];
+        if (Math.abs(host.getBoundingClientRect().height - visible) > 1) {
+          found.push(
+            `host is ${host.getBoundingClientRect().height}px, main shows ${visible}px of content`
+          );
+        }
+        if (main.scrollHeight > main.clientHeight + 1) {
+          found.push(`main scrolls: ${main.scrollHeight}px of content in ${main.clientHeight}px`);
+        }
+        if (log.scrollHeight <= log.clientHeight) {
+          found.push('the chat log does not overflow, so the story proves nothing');
+        }
+        return found;
+      });
+      report(problems, 'enforce');
+    });
+
+    test('short page | a large title and a notice leave main nothing to scroll', async ({page}) => {
+      await open(page, SHORT_PAGE_STORY);
+      await page.waitForSelector('cmn-app-layout main h1', {state: 'visible'});
+      await settleFrames(page);
+      const state = await page.evaluate(() => {
+        const main = document.querySelector('cmn-app-layout main');
+        const notice = document.querySelector('cmn-app-layout [cmnAppLayoutNotice]');
+        return {
+          overflow: main ? main.scrollHeight - main.clientHeight : Number.NaN,
+          notice: Boolean(notice?.getClientRects().length),
+        };
+      });
+      const problems: string[] = [];
+      if (!state.notice) {
+        problems.push('the notice is not shown, so the story proves nothing');
+      }
+      if (!(state.overflow <= SURFACE_TOLERANCE)) {
+        problems.push(`main scrolls ${state.overflow}px on a short page`);
+      }
+      report(problems, 'enforce');
+    });
+
+    test(`${WIDE_SEGMENTED_STORY} | an over-long row scrolls inside itself`, async ({page}) => {
+      await open(page, layoutStory(WIDE_SEGMENTED_STORY));
+      await settleFrames(page);
+      const problems = await page.evaluate(() => {
+        const found: string[] = [];
+        const main = document.querySelector('cmn-app-layout main');
+        const root = document.scrollingElement;
+        if (main && main.scrollWidth > main.clientWidth) {
+          found.push(`main scrolls sideways: ${main.scrollWidth}px in ${main.clientWidth}px`);
+        }
+        if (root && root.scrollWidth > root.clientWidth) {
+          found.push(`the page scrolls sideways: ${root.scrollWidth}px in ${root.clientWidth}px`);
+        }
+        const rows: [string, Element, Element[]][] = [];
+        const cmn = document.querySelector('cmn-segmented');
+        if (cmn) {
+          rows.push(['cmn-segmented', cmn, [...cmn.querySelectorAll('[role=radio]')]]);
+        }
+        const lk = document.querySelector('lk-segmented');
+        if (lk) {
+          rows.push(['lk-segmented', lk, [...(lk.shadowRoot?.querySelectorAll('.cell') ?? [])]]);
+        }
+        if (rows.length !== 2) {
+          found.push('both segmented rows must render');
+        }
+        for (const [kind, host, cells] of rows) {
+          if (host.scrollWidth <= host.clientWidth) {
+            found.push(`${kind} fits, so the story proves nothing`);
+          }
+          const box = host.getBoundingClientRect();
+          if (box.right > window.innerWidth + 0.5) {
+            found.push(`${kind} runs off screen to ${Math.round(box.right)}px`);
+          }
+          for (const cell of cells) {
+            if (cell.scrollWidth > cell.clientWidth + 0.5) {
+              found.push(`${kind} cell "${cell.textContent?.trim()}" is clipped`);
+            }
+          }
+        }
+        return found;
+      });
+      report(problems, 'enforce');
     });
   });
 }

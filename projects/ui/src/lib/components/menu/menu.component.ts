@@ -14,6 +14,7 @@ import {
   signal,
 } from '@angular/core';
 
+import {PHONE_HIT_AREA_CLASSES} from '../../tokens/hit-area';
 import {AccountAvatarComponent} from '../account-avatar/account-avatar.component';
 import {IconComponent, type LucideIconName} from '../icon/icon.component';
 
@@ -41,9 +42,10 @@ export interface MenuHeader {
   avatarLabel?: string;
 }
 
+// The trigger presses as at least --size-touch square on a phone; the items are rows that tall.
 const TRIGGER_BASE_CLASSES =
   'inline-flex items-center justify-center rounded-cmn-md focus:outline-none ' +
-  'focus:ring-2 focus:ring-border-focus focus:ring-offset-1';
+  `focus:ring-2 focus:ring-border-focus focus:ring-offset-1 ${PHONE_HIT_AREA_CLASSES}`;
 
 const PANEL_BASE_CLASSES =
   'min-w-48 max-w-[calc(100vw-2rem)] overflow-hidden rounded-cmn-lg border border-border-default ' +
@@ -54,7 +56,8 @@ const HEADER_CLASSES =
 const SEPARATOR_CLASSES = 'my-cmn-2 border-t border-border-default';
 
 const ITEM_BASE_CLASSES =
-  'flex w-full items-center gap-cmn-3 px-cmn-4 py-cmn-2 text-left text-cmn-sm transition-colors ' +
+  'flex w-full max-md:min-h-cmn-touch items-center gap-cmn-3 px-cmn-4 py-cmn-2 text-left ' +
+  'text-cmn-sm transition-colors ' +
   'focus:outline-none focus:bg-surface-raised ' +
   'focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-border-focus';
 

@@ -47,7 +47,7 @@ export default class SummaryReporter implements Reporter {
       )
     );
     const lines = [
-      '### Phone conformance (report-only)',
+      `### Phone conformance (${process.env['PHONE_CONFORMANCE'] === 'gate' ? 'gate' : 'report-only'})`,
       '',
       `${this.violations.length} violation(s).`,
       '',

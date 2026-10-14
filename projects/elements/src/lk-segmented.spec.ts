@@ -1,4 +1,4 @@
-import {afterEach, describe, expect, it} from 'vitest';
+import {afterEach, describe, expect, it, vi} from 'vitest';
 
 // Value import - forces module evaluation so customElements.define('lk-segmented', ...) runs
 // (package.json has sideEffects pointing at the built bundle only).
@@ -87,6 +87,98 @@ describe('LkSegmented', () => {
     el.style.width = '326px';
     const last = cells(el)[6].getBoundingClientRect();
     expect(last.right).toBeLessThanOrEqual(el.getBoundingClientRect().right);
+  });
+
+  describe('a row wider than its container', () => {
+    const LONG: SegmentedOption[] = [
+      'Next charge date',
+      'Amount per month',
+      'Billing frequency',
+      'Account name',
+    ].map(label => ({value: label, label}));
+    const NARROW_PX = 200;
+
+    async function mountNarrow(
+      value: string,
+      options: SegmentedOption[] = LONG
+    ): Promise<LkSegmented> {
+      const frame = document.createElement('div');
+      frame.style.width = `${NARROW_PX}px`;
+      document.body.appendChild(frame);
+      const el = document.createElement('lk-segmented') as LkSegmented;
+      Object.assign(el, {options, value, label: 'Sort by'});
+      frame.appendChild(el);
+      await el.updateComplete;
+      return el;
+    }
+
+    it('scrolls inside the host and does not widen its container or the page', async () => {
+      const el = await mountNarrow(LONG[0].value);
+      expect(el.getBoundingClientRect().width).toBeLessThanOrEqual(NARROW_PX);
+      expect(el.scrollWidth).toBeGreaterThan(el.clientWidth);
+      expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth);
+    });
+
+    it('keeps every label whole', async () => {
+      const el = await mountNarrow(LONG[0].value);
+      for (const cell of cells(el)) {
+        expect(cell.scrollWidth).toBeLessThanOrEqual(cell.clientWidth);
+      }
+    });
+
+    it('scrolls the chosen cell into view when the value changes', async () => {
+      const el = await mountNarrow(LONG[0].value);
+      el.value = LONG[3].value;
+      await el.updateComplete;
+      const host = el.getBoundingClientRect();
+      const chosen = cells(el)[3].getBoundingClientRect();
+      expect(chosen.left).toBeGreaterThanOrEqual(host.left - 0.5);
+      expect(chosen.right).toBeLessThanOrEqual(host.right + 0.5);
+    });
+
+    it('warns when over-long options arrive after the first render', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+      const el = await mountNarrow('', []);
+      expect(warn).not.toHaveBeenCalled();
+      el.options = LONG;
+      await el.updateComplete;
+      expect(warn).toHaveBeenCalledTimes(1);
+      warn.mockRestore();
+    });
+
+    it('scrolls the chosen cell into view when the options arrive later', async () => {
+      const el = await mountNarrow(LONG[3].value, []);
+      el.options = LONG;
+      await el.updateComplete;
+      const host = el.getBoundingClientRect();
+      const chosen = cells(el)[3].getBoundingClientRect();
+      expect(chosen.left).toBeGreaterThanOrEqual(host.left - 0.5);
+      expect(chosen.right).toBeLessThanOrEqual(host.right + 0.5);
+    });
+
+    it('stays silent when the build is a production build', async () => {
+      const scope = globalThis as {ngDevMode?: unknown};
+      const original = scope.ngDevMode;
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+      scope.ngDevMode = false;
+      try {
+        const el = await mountNarrow(LONG[0].value);
+        el.options = LONG.map(option => ({...option}));
+        await el.updateComplete;
+        expect(warn).not.toHaveBeenCalled();
+        expect(el.scrollWidth).toBeGreaterThan(el.clientWidth);
+      } finally {
+        scope.ngDevMode = original;
+        warn.mockRestore();
+      }
+    });
+
+    it('warns once in development that the row has to scroll', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+      await mountNarrow(LONG[0].value);
+      await vi.waitFor(() => expect(warn).toHaveBeenCalledTimes(1));
+      warn.mockRestore();
+    });
   });
 
   it('puts only the chosen cell in the tab order', async () => {

@@ -18,10 +18,12 @@ const BASE_CLASSES =
   'text-text-primary placeholder:text-text-placeholder pl-cmn-8 pr-cmn-8 ' +
   'focus:outline-none focus:ring-2 focus:ring-border-focus focus:border-border-focus ' +
   'disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150 ' +
-  '[&::-webkit-search-cancel-button]:appearance-none';
+  '[&::-webkit-search-cancel-button]:appearance-none max-md:min-h-cmn-touch';
 
+// Below md every size keeps 16px text (iOS zooms the page into a focused field set smaller) and
+// presses as at least --size-touch tall.
 const SIZE_CLASSES: Record<SearchInputSize, string> = {
-  sm: 'py-cmn-1 text-cmn-sm',
+  sm: 'py-cmn-1 text-cmn-md md:text-cmn-sm',
   md: 'py-cmn-2 text-cmn-md',
   lg: 'py-cmn-3 text-cmn-lg',
 };

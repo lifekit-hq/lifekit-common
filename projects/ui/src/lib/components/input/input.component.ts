@@ -17,10 +17,12 @@ const BASE_CLASSES =
   'focus:outline-none focus:ring-2 focus:ring-border-focus focus:border-border-focus ' +
   'disabled:opacity-50 disabled:cursor-not-allowed ' +
   'read-only:bg-surface-raised read-only:cursor-default ' +
-  'transition-colors duration-150';
+  'transition-colors duration-150 max-md:min-h-cmn-touch';
 
+// Below md every size keeps 16px text (iOS zooms the page into a focused field set smaller) and
+// presses as at least --size-touch tall.
 const SIZE_CLASSES: Record<InputSize, string> = {
-  sm: 'px-cmn-2 py-cmn-1 text-cmn-sm',
+  sm: 'px-cmn-2 py-cmn-1 text-cmn-md md:text-cmn-sm',
   md: 'px-cmn-3 py-cmn-2 text-cmn-md',
   lg: 'px-cmn-4 py-cmn-3 text-cmn-lg',
 };

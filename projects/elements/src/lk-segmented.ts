@@ -1,4 +1,12 @@
-import {css, html, LitElement, nothing, type PropertyDeclarations, type TemplateResult} from 'lit';
+import {
+  css,
+  html,
+  LitElement,
+  nothing,
+  type PropertyDeclarations,
+  type PropertyValues,
+  type TemplateResult,
+} from 'lit';
 
 /** One cell of a segmented control. */
 export interface SegmentedOption {
@@ -14,6 +22,25 @@ export interface SegmentedOption {
 export interface SegmentedChangeDetail {
   value: string;
 }
+
+declare const ngDevMode: unknown;
+
+/**
+ * Development builds only. An Angular production build replaces the bare `ngDevMode` identifier
+ * with false (it never sets `globalThis.ngDevMode`); other bundlers replace
+ * `process.env.NODE_ENV` with "production". Unbundled, neither is defined and this is true.
+ */
+function isDevMode(): boolean {
+  const scope = globalThis as {process?: {env?: Record<string, unknown>}};
+  return (
+    (typeof ngDevMode === 'undefined' || !!ngDevMode) &&
+    scope.process?.env?.['NODE_ENV'] !== 'production'
+  );
+}
+
+/** Sub-pixel slack before a row counts as wider than its container. */
+const OVERFLOW_TOLERANCE_PX = 0.5;
+const CENTRE_DIVISOR = 2;
 
 /** Where a key sends the choice: a step forward or back, or an end. Undefined for other keys. */
 function keyStep(key: string): 1 | -1 | 'first' | 'last' | undefined {
@@ -40,8 +67,12 @@ function keyStep(key: string): 1 | -1 | 'first' | 'last' | undefined {
  *
  * Semantics: `role="radiogroup"` of `role="radio"` cells with a roving tabindex - Tab lands on the
  * chosen cell (or the first enabled one), the arrow keys move and choose, Home/End jump to the
- * ends, and disabled cells are skipped. Cells share the row equally, never wrap, and are at least
- * 44px square so a phone thumb can hit them (seven fit a 390px phone).
+ * ends, and disabled cells are skipped. Cells share the row equally, never wrap, are at least
+ * 44px square so a phone thumb can hit them, and are never narrower than their label: the row fills
+ * its container, and scrolls sideways inside it rather than cut a label or widen the page.
+ *
+ * Use it for five segments or fewer, with short labels. More choices, or longer labels, belong in a
+ * menu or an `lk-chip-row`. In development a row that has to scroll logs a console warning.
  *
  * `value` follows the native `change` model: the element updates it when the reader chooses a
  * cell and fires `lk-segmented-change`; a host that sets `value` itself fires nothing.
@@ -55,21 +86,39 @@ function keyStep(key: string): 1 | -1 | 'first' | 'last' | undefined {
  * </script>
  */
 export class LkSegmented extends LitElement {
+  private overflowObserver: ResizeObserver | undefined;
+  private overflowWarned = false;
+
   // eslint-disable-next-line @typescript-eslint/naming-convention
   public static override styles = css`
+    /* The host is the clip: a row that needs more than the container scrolls inside it (scrollbar
+       hidden, the chosen cell kept in view) and never widens the page. */
     :host {
       display: block;
+      max-width: 100%;
+      overflow-x: auto;
+      scrollbar-width: none;
       font-family: var(--font-sans);
       font-size: 0.875rem;
+    }
+
+    :host::-webkit-scrollbar {
+      display: none;
     }
 
     :host([hidden]) {
       display: none;
     }
 
+    /* Equal columns as wide as the widest label (at least 44px); fills the container when that is
+       wider, and scrolls inside it rather than squeeze a label. */
     .group {
-      display: flex;
-      flex-wrap: nowrap;
+      box-sizing: border-box;
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(2.75rem, 1fr);
+      width: max-content;
+      min-width: 100%;
       gap: 2px;
       padding: 2px;
       border-radius: var(--radius-lg);
@@ -77,8 +126,7 @@ export class LkSegmented extends LitElement {
     }
 
     .cell {
-      flex: 1 1 0;
-      min-width: 2.75rem;
+      min-width: max-content;
       min-height: 2.75rem;
       padding: 0 var(--space-1, 0.25rem);
       border: 0;
@@ -113,7 +161,7 @@ export class LkSegmented extends LitElement {
 
     .cell:focus-visible {
       outline: 2px solid var(--color-border-focus, #1d6f85);
-      outline-offset: 2px;
+      outline-offset: -2px;
     }
   `;
 
@@ -136,6 +184,55 @@ export class LkSegmented extends LitElement {
     this.value = '';
     this.label = '';
     this.disabled = false;
+  }
+
+  public override connectedCallback(): void {
+    super.connectedCallback();
+    if (isDevMode() && typeof ResizeObserver !== 'undefined') {
+      this.overflowObserver = new ResizeObserver(() => this.warnOnOverflow());
+      this.overflowObserver.observe(this);
+    }
+  }
+
+  public override disconnectedCallback(): void {
+    super.disconnectedCallback();
+    this.overflowObserver?.disconnect();
+    this.overflowObserver = undefined;
+  }
+
+  protected override updated(changed: PropertyValues): void {
+    if (changed.has('value') || changed.has('options')) {
+      this.revealChosen();
+    }
+    if (changed.has('options') && isDevMode()) {
+      this.warnOnOverflow();
+    }
+  }
+
+  /** Scrolls a row that overflows its container so the chosen cell sits in the middle of it. */
+  private revealChosen(): void {
+    const chosen = this.shadowRoot?.querySelector<HTMLElement>('.cell[aria-checked="true"]');
+    if (!chosen || this.scrollWidth <= this.clientWidth) {
+      return;
+    }
+    const left = chosen.getBoundingClientRect().left - this.getBoundingClientRect().left;
+    this.scrollLeft += left - (this.clientWidth - chosen.offsetWidth) / CENTRE_DIVISOR;
+  }
+
+  /** Once per element: the cells need more room than the container gives the row. */
+  private warnOnOverflow(): void {
+    const group = this.shadowRoot?.querySelector('.group');
+    if (this.overflowWarned || !group || this.clientWidth === 0) {
+      return;
+    }
+    if (group.getBoundingClientRect().width > this.clientWidth + OVERFLOW_TOLERANCE_PX) {
+      this.overflowWarned = true;
+      console.warn(
+        `lk-segmented: ${this.options.length} segments need more width than the ${this.clientWidth}px ` +
+          'container gives them; use five or fewer short labels, or a menu or lk-chip-row.',
+        this
+      );
+    }
   }
 
   private isEnabled(option: SegmentedOption): boolean {

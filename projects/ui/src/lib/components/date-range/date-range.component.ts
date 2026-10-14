@@ -16,10 +16,12 @@ export interface DateRange {
 
 const EMPTY_RANGE: DateRange = {from: null, to: null};
 
+// Below md the text stays 16px (iOS zooms the page into a focused field set smaller) and each
+// field presses as at least --size-touch tall.
 const FIELD_CLASSES =
-  'block w-full rounded-cmn-md border bg-surface-card px-cmn-2 py-cmn-1 text-cmn-sm ' +
+  'block w-full rounded-cmn-md border bg-surface-card px-cmn-2 py-cmn-1 text-cmn-md md:text-cmn-sm ' +
   'text-text-primary focus:outline-none focus:ring-2 focus:ring-border-focus ' +
-  'focus:border-border-focus disabled:opacity-50 disabled:cursor-not-allowed transition-colors';
+  'focus:border-border-focus disabled:opacity-50 disabled:cursor-not-allowed transition-colors max-md:min-h-cmn-touch';
 
 /**
  * Two native date inputs bound as one `{from, to}` value. An inverted range (`from > to`) is only

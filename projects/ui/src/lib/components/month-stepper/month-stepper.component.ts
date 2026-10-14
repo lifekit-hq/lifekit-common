@@ -1,9 +1,12 @@
 import {ChangeDetectionStrategy, Component, computed, input, model} from '@angular/core';
 
+import {PHONE_HIT_AREA_CLASSES} from '../../tokens/hit-area';
 import {type Nullable} from '../../types';
 import {IconComponent} from '../icon/icon.component';
 
+// 32px drawn, at least --size-touch pressed on a phone.
 const BUTTON_CLASSES =
+  `${PHONE_HIT_AREA_CLASSES} ` +
   'inline-flex h-8 w-8 items-center justify-center rounded-cmn-full text-text-secondary ' +
   'transition-colors hover:bg-surface-hover hover:text-text-primary focus:outline-none ' +
   'focus-visible:ring-2 focus-visible:ring-border-focus disabled:pointer-events-none ' +

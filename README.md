@@ -40,8 +40,8 @@ Browser-rendered proof above the unit layer lives in Playwright suites under `pr
 (`playwright.smoke.config.ts` against the built Storybook bundle, `playwright.config.ts` for
 visual regression, `playwright.phone.config.ts` for the phone conformance suite via
 `npm run test:phone`). Those run against the catalog, not the sources, and are not part of
-`npm run test`. The phone suite checks `docs/PHONE-CONTRACT.md`; it is report-only until
-`PHONE_CONFORMANCE=gate` is set.
+`npm run test`. The phone suite checks `docs/PHONE-CONTRACT.md`; CI runs it with
+`PHONE_CONFORMANCE=gate`, which makes every check except the advisory ones fail the build.
 
 ## PWA checklist
 

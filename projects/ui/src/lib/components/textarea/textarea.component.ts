@@ -18,8 +18,9 @@ const BASE_CLASSES =
   'read-only:bg-surface-raised read-only:cursor-default read-only:resize-none ' +
   'transition-colors duration-150';
 
+// Below md every size keeps 16px text: iOS zooms the page into a focused field set smaller.
 const SIZE_CLASSES: Record<InputSize, string> = {
-  sm: 'px-cmn-2 py-cmn-1 text-cmn-sm',
+  sm: 'px-cmn-2 py-cmn-1 text-cmn-md md:text-cmn-sm',
   md: 'px-cmn-3 py-cmn-2 text-cmn-md',
   lg: 'px-cmn-4 py-cmn-3 text-cmn-lg',
 };

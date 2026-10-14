@@ -1,13 +1,25 @@
 import {BreakpointObserver} from '@angular/cdk/layout';
 import {ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA, inject} from '@angular/core';
-import {LkInstallHint, LkOfflineBanner, LkUpdatePrompt} from '@lifekit-hq/elements';
+import {
+  type ChipRowOption,
+  LkChipRow,
+  LkInstallHint,
+  LkOfflineBanner,
+  LkSegmented,
+  LkUpdatePrompt,
+} from '@lifekit-hq/elements';
 import type {Meta, StoryObj} from '@storybook/angular';
 import {moduleMetadata} from '@storybook/angular';
 
 import {CmnDrawerService} from '../../services/drawer/drawer.service';
 import {PinnedBreakpointObserver} from '../../services/shell/pinned-breakpoints';
 import type {CommandPaletteItem} from '../command-palette/command-palette-item.model';
+import {type FilterBarChip, FilterBarComponent} from '../filter-bar/filter-bar.component';
+import {ListItemRowComponent} from '../list-item-row/list-item-row.component';
+import {ListSectionComponent} from '../list-section/list-section.component';
 import type {MenuItem} from '../menu/menu.component';
+import {PageContainerComponent} from '../page-container/page-container.component';
+import {SegmentedComponent, type SegmentedOption} from '../segmented/segmented.component';
 import type {NavItem} from '../sidebar-nav/sidebar-nav.component';
 import {
   accountMenu,
@@ -18,8 +30,10 @@ import {
 
 // Imported by name so a bundler cannot tree-shake the customElements.define() calls.
 for (const [tag, element] of [
+  ['lk-chip-row', LkChipRow],
   ['lk-install-hint', LkInstallHint],
   ['lk-offline-banner', LkOfflineBanner],
+  ['lk-segmented', LkSegmented],
   ['lk-update-prompt', LkUpdatePrompt],
 ] as const) {
   if (!customElements.get(tag)) {
@@ -468,6 +482,273 @@ export const PhoneOverlaySheetOpen: Story = {
     `,
   }),
 };
+
+const LIST_PERIODS: ChipRowOption[] = [
+  {value: 'week', label: 'This week'},
+  {value: 'month', label: 'This month'},
+  {value: 'last-month', label: 'Last month'},
+  {value: 'quarter', label: 'Last three months'},
+  {value: 'year', label: 'This year'},
+];
+
+const LIST_KINDS: SegmentedOption[] = [
+  {value: 'all', label: 'All'},
+  {value: 'out', label: 'Spending'},
+  {value: 'in', label: 'Income'},
+  {value: 'move', label: 'Transfers'},
+  {value: 'back', label: 'Refunds'},
+];
+
+const LIST_APPLIED: FilterBarChip[] = [
+  {id: 'category', label: 'Category: Groceries'},
+  {id: 'account', label: 'Account: Main current'},
+];
+
+const LIST_DAYS = ['Today', 'Yesterday', 'Mon 12 Oct', 'Sun 11 Oct', 'Sat 10 Oct'];
+const LIST_ROWS_PER_DAY = 5;
+
+/**
+ * A list page as consumers build one: the page component's host is a full-height flex column
+ * (`flex h-full flex-col`) holding `cmn-page-container fill`, a filter bar with a quick-filter
+ * chip row, a segmented control and day groups in `cmn-list-section`s.
+ */
+const LIST_PAGE_BODY = `
+  <div class="flex h-full flex-col">
+    <cmn-page-container spacing="md" fill>
+      <cmn-filter-bar [activeCount]="applied.length" [applied]="applied" placeholder="Search transactions">
+        <lk-chip-row [options]="periods" [selected]="['month']" cmnFilterBarQuick label="Period"></lk-chip-row>
+      </cmn-filter-bar>
+      <cmn-segmented [options]="kinds" value="all" label="Kind" />
+      @for (day of days; track day) {
+        <cmn-list-section [heading]="day">
+          <span cmnListSectionAside class="normal-case tabular-nums">-€61.20</span>
+          @for (row of rows; track row) {
+            <cmn-list-item-row [label]="day + ' payment ' + row" sublabel="Card payment">
+              <span amount class="text-cmn-sm tabular-nums text-text-primary">-€12.24</span>
+            </cmn-list-item-row>
+          }
+        </cmn-list-section>
+      }
+      <p class="text-center text-cmn-xs text-text-secondary" data-last-content>Last item clears the tab bar</p>
+    </cmn-page-container>
+  </div>
+`;
+
+const LIST_PAGE_PROPS = {
+  periods: LIST_PERIODS,
+  kinds: LIST_KINDS,
+  applied: LIST_APPLIED,
+  days: LIST_DAYS,
+  rows: Array.from({length: LIST_ROWS_PER_DAY}, (_, i) => i + 1),
+};
+
+/**
+ * A list page inside a full-height page host. main publishes how much the bars cover
+ * (`--cmn-content-inset-top` / `-bottom`) and reserves the bottom one after the page, so the last
+ * line clears the floating tab bar even though the host caps its own height. Day headings stick
+ * flush under the top bar while their rows scroll past.
+ */
+export const PhoneOverlayListPage: Story = {
+  args: {...PhoneOverlay.args},
+  globals: PHONE,
+  decorators: [
+    moduleMetadata({
+      imports: [
+        FilterBarComponent,
+        ListItemRowComponent,
+        ListSectionComponent,
+        PageContainerComponent,
+        SegmentedComponent,
+      ],
+    }),
+  ],
+  render: args => ({
+    props: {...args, ...LIST_PAGE_PROPS},
+    template: `
+      <cmn-app-layout
+        [navItems]="navItems"
+        [activeRoute]="activeRoute"
+        [title]="title"
+        [avatarLabel]="avatarLabel"
+        [avatarMenuItems]="avatarMenuItems"
+        [tabRoutes]="tabRoutes"
+        [moreRoute]="moreRoute"
+        [phoneOverlay]="phoneOverlay"
+        [floatingActionClearance]="floatingActionClearance"
+      >${LIST_PAGE_BODY}</cmn-app-layout>
+    `,
+  }),
+};
+
+/**
+ * The list page with notices pinned under the top bar and a floating action: day headings stick
+ * under the notices (`--cmn-sticky-top`), and the last line clears the floating action too.
+ */
+export const PhoneOverlayListPageNotices: Story = {
+  ...PhoneOverlayListPage,
+  args: {...PhoneOverlay.args, floatingActionClearance: FAB_CLEARANCE},
+  play: () => {
+    window.dispatchEvent(new Event('offline'));
+  },
+  render: args => ({
+    props: {...args, ...LIST_PAGE_PROPS},
+    template: `
+      <cmn-app-layout
+        [navItems]="navItems"
+        [activeRoute]="activeRoute"
+        [title]="title"
+        [avatarLabel]="avatarLabel"
+        [avatarMenuItems]="avatarMenuItems"
+        [tabRoutes]="tabRoutes"
+        [moreRoute]="moreRoute"
+        [phoneOverlay]="phoneOverlay"
+        [floatingActionClearance]="floatingActionClearance"
+      >${LIST_PAGE_BODY}${NOTICES}${NOTICES_FAB}</cmn-app-layout>
+    `,
+  }),
+};
+
+const WIDE_KINDS: SegmentedOption[] = [
+  {value: 'all', label: 'All transactions'},
+  {value: 'out', label: 'Spending and bills'},
+  {value: 'in', label: 'Income and refunds'},
+  {value: 'move', label: 'Transfers between accounts'},
+];
+
+const SHORT_ROWS = 8;
+
+const STORY_SHELL_PROPS = {
+  kinds: LIST_KINDS,
+  wideKinds: WIDE_KINDS,
+  rows: Array.from({length: SHORT_ROWS}, (_, i) => i + 1),
+  days: LIST_DAYS,
+};
+
+const STORY_ROW = `
+  <cmn-list-item-row [label]="'Payment ' + row" sublabel="Card payment">
+    <span amount class="text-cmn-sm tabular-nums text-text-primary">-€12.24</span>
+  </cmn-list-item-row>
+`;
+
+const AFTER_CONTAINER_BODY = `
+  <cmn-page-container spacing="md">
+    @for (row of rows; track row) {${STORY_ROW}}
+  </cmn-page-container>
+  <p class="px-cmn-4 py-cmn-2 text-center text-cmn-xs text-text-secondary" data-last-content>
+    Bare content after the page container clears the tab bar
+  </p>
+`;
+
+const SIBLING_CONTAINERS_BODY = `
+  <cmn-page-container spacing="md">
+    @for (row of rows; track row) {${STORY_ROW}}
+  </cmn-page-container>
+  <cmn-page-container spacing="md" data-second-container>
+    @for (row of rows; track row) {${STORY_ROW}}
+    <p class="text-center text-cmn-xs text-text-secondary" data-last-content>
+      The second page container clears the tab bar
+    </p>
+  </cmn-page-container>
+`;
+
+const OVERFLOWING_HOST_BODY = `
+  <div class="h-full">
+    <div class="flex flex-col gap-cmn-3 p-cmn-4">
+      @for (day of days; track day) {
+        @for (row of rows; track row) {
+          <div class="rounded-cmn-lg border border-border-default bg-surface-card p-cmn-4">
+            <p class="text-cmn-sm text-text-primary">{{ day }} item {{ row }}</p>
+          </div>
+        }
+      }
+      <p class="text-center text-cmn-xs text-text-secondary" data-last-content>
+        Overflow of a full-height host clears the tab bar
+      </p>
+    </div>
+  </div>
+`;
+
+const CHAT_HOST_BODY = `
+  <div class="relative flex h-full flex-col" data-chat-host>
+    <div class="flex min-h-0 flex-1 flex-col gap-cmn-2 overflow-y-auto p-cmn-4" data-chat-log>
+      @for (day of days; track day) {
+        @for (row of rows; track row) {
+          <p class="rounded-cmn-lg bg-surface-card p-cmn-3 text-cmn-sm text-text-primary">
+            {{ day }} message {{ row }}
+          </p>
+        }
+      }
+    </div>
+    <form class="shrink-0 border-t border-border-default p-cmn-3" data-last-content>
+      <input aria-label="Message" class="h-11 w-full rounded-cmn-lg border border-border-default bg-surface-card px-cmn-3 text-base" />
+    </form>
+  </div>
+`;
+
+const WIDE_SEGMENTED_BODY = `
+  <div class="flex flex-col gap-cmn-4 p-cmn-4">
+    <cmn-segmented [options]="wideKinds" value="out" label="Kind" />
+    <lk-segmented [options]="wideKinds" value="move" label="Kind"></lk-segmented>
+    <p class="text-center text-cmn-xs text-text-secondary" data-last-content>
+      Over-long segmented rows scroll inside themselves
+    </p>
+  </div>
+`;
+
+const shellStory = (body: string, summary: string): Story => ({
+  args: {...PhoneOverlay.args},
+  globals: PHONE,
+  parameters: {docs: {description: {story: summary}}},
+  decorators: [
+    moduleMetadata({imports: [ListItemRowComponent, PageContainerComponent, SegmentedComponent]}),
+  ],
+  render: args => ({
+    props: {...args, ...STORY_SHELL_PROPS},
+    template: `
+      <cmn-app-layout
+        [navItems]="navItems"
+        [activeRoute]="activeRoute"
+        [title]="title"
+        [avatarLabel]="avatarLabel"
+        [avatarMenuItems]="avatarMenuItems"
+        [tabRoutes]="tabRoutes"
+        [moreRoute]="moreRoute"
+        [phoneOverlay]="phoneOverlay"
+        [floatingActionClearance]="floatingActionClearance"
+      >${body}</cmn-app-layout>
+    `,
+  }),
+});
+
+/** Bare content after a page container: the shell, not the container, reserves the clearance. */
+export const PhoneOverlayContentAfterContainer: Story = shellStory(
+  AFTER_CONTAINER_BODY,
+  'A paragraph follows a `cmn-page-container`; the last line still rests clear of the tab bar.'
+);
+
+/** Two sibling page containers: clearance only after the last, no gap between them. */
+export const PhoneOverlaySiblingContainers: Story = shellStory(
+  SIBLING_CONTAINERS_BODY,
+  'Two top-level page containers: the tab bar clearance follows the second, never the first.'
+);
+
+/** A full-height host whose content is taller than main: its overflow still clears the tab bar. */
+export const PhoneOverlayOverflowingHost: Story = shellStory(
+  OVERFLOWING_HOST_BODY,
+  'An `h-full` host with taller content than main: the shell reserves clearance after the overflow.'
+);
+
+/** A chat-style host (`relative flex h-full`) fills main's visible height and scrolls inside. */
+export const PhoneOverlayChatHost: Story = shellStory(
+  CHAT_HOST_BODY,
+  'A `relative flex h-full` host with an internal scroller fills the visible height exactly; main does not scroll.'
+);
+
+/** Segmented rows whose labels need more than the phone is wide scroll inside themselves. */
+export const PhoneOverlayWideSegmented: Story = shellStory(
+  WIDE_SEGMENTED_BODY,
+  'Over-long `cmn-segmented` and `lk-segmented` rows scroll sideways inside their own box; the page never does.'
+);
 
 const PALETTE_ITEMS: CommandPaletteItem[] = [
   {id: '/dashboard', label: 'Dashboard', icon: 'LayoutDashboard', group: 'Pages'},

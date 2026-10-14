@@ -159,3 +159,46 @@ export const RoutedMore: StoryObj<RoutedMoreShellComponent> = {
   parameters: {viewport: {defaultViewport: 'mobile2'}},
   globals: {viewport: {value: 'mobile2', isRotated: false}},
 };
+
+@Component({
+  selector: 'cmn-routed-short-shell',
+  imports: [AppLayoutComponent, RouterOutlet],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <cmn-app-layout [navItems]="navItems" [phoneOverlay]="true">
+      <p cmnAppLayoutNotice class="bg-surface-card px-cmn-4 py-cmn-3 text-cmn-sm text-text-primary">
+        You are offline. Showing what was saved.
+      </p>
+      <router-outlet />
+    </cmn-app-layout>
+  `,
+})
+class RoutedShortShellComponent {
+  protected readonly navItems = NAV_ITEMS;
+}
+
+/**
+ * A short page under a large title and a pinned notice: the frame the page sits in fills what is
+ * left of main, so a few rows leave main with nothing to scroll.
+ */
+export const RoutedShortPage: StoryObj<RoutedShortShellComponent> = {
+  render: () => ({
+    template: '<cmn-routed-short-shell />',
+    moduleMetadata: {imports: [RoutedShortShellComponent]},
+  }),
+  decorators: [
+    applicationConfig({
+      providers: [
+        provideRouter(
+          [
+            {path: '', redirectTo: 'detail', pathMatch: 'full'},
+            {path: 'detail', component: RoutedDetailPageComponent, data: {title: 'Detail'}},
+          ],
+          withHashLocation()
+        ),
+      ],
+    }),
+  ],
+  parameters: {viewport: {defaultViewport: 'mobile2'}},
+  globals: {viewport: {value: 'mobile2', isRotated: false}},
+};
