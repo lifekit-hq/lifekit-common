@@ -143,7 +143,7 @@ Counts are a point-in-time measurement; re-measure before relying on them for a 
 | setting-row           | new (added for the app-shell Settings standard); fs 0 · dash 0                  | templated   | keep-own        | Label and description beside a projected control; labelled group for assistive technology; slot-based, app-shell concern                                                                                                    |
 | settings-section      | new (added for the app-shell Settings standard); fs 0 · dash 0                  | templated   | keep-own        | Titled Settings block with a heading column from md up and an optional per-section Save; slot-based, app-shell concern                                                                                                      |
 | sidebar-nav           | fs 0 · dash 0 (composed by `app-layout`)                                        | interactive | keep-own        | Collapsible nav with collapsed signal, badge support, responsive width transition; app-shell concern                                                                                                                        |
-| skeleton              | fs 17 · dash 0                                                                  | simple-leaf | element-rewrite | Animate-pulse div; trivially simple                                                                                                                                                                                         |
+| skeleton              | fs 17 · dash 0                                                                  | simple-leaf | element-rewrite | Bar plus shape presets (row, stat, chart, section) drawn with a token-coloured sheen; no state                                                                                                                              |
 | stat-card             | fs 4 · dash 1                                                                   | interactive | keep-own        | Depends on `SkeletonComponent`; delta formatting with trending icons; child-component dependency                                                                                                                            |
 | status-indicator      | fs 0 · dash 0                                                                   | simple-leaf | element-rewrite | Status badge + dot + optional timestamp; pure token CSS                                                                                                                                                                     |
 | stepper-dialog        | new (added for multi-step flows, #39); fs 0 · dash 0                            | interactive | keep-own        | `contentChildren` of `cmnStep` templates with `model()` step index, progress list and Back/Next/Finish actions; depends on `button` and `dialog-actions`; Angular template-outlet composition                               |
@@ -306,18 +306,18 @@ grow into (see the status table below).
 7. **One page frame.** Pages sit in `cmn-page-container` (1200px max width,
    `p-cmn-4 md:p-cmn-8`) so width and padding match across products.
 
-| Rule                                 | Status   | Where                                                                             |
-| ------------------------------------ | -------- | --------------------------------------------------------------------------------- |
-| 1. Skeletons, not spinners           | Enforced | `cmn-async-state` renders `cmn-skeleton` or its `[skeleton]` slot                 |
-| 2. Loading is not empty              | Enforced | `cmn-async-state` never shows empty while `idle` or `loading`                     |
-| 3. Keep cached data while refreshing | Target   | `loading` always replaces content with a skeleton                                 |
-| 4. No micro-flashes                  | Target   | no indicator delay or minimum display time                                        |
-| 5. No layout shift                   | Partial  | stable page width via `cmn-page-container`; skeleton shape is caller-supplied     |
-| 6. Errors keep context               | Partial  | `errorPlacement="above"` keeps content; `retryable` / `[error-action]` hold Retry |
-| 7. One page frame                    | Enforced | `cmn-page-container` defaults                                                     |
+| Rule                                 | Status   | Where                                                                                  |
+| ------------------------------------ | -------- | -------------------------------------------------------------------------------------- |
+| 1. Skeletons, not spinners           | Enforced | `cmn-async-state` renders `cmn-skeleton` or its `[skeleton]` slot                      |
+| 2. Loading is not empty              | Enforced | `cmn-async-state` never shows empty while `idle` or `loading`                          |
+| 3. Keep cached data while refreshing | Partial  | `keepContent` keeps and dims it on a refresh; off by default, so opt in per region     |
+| 4. No micro-flashes                  | Partial  | `showDelay` and `minDisplay` (off by default; standard values 200 / 400ms)             |
+| 5. No layout shift                   | Partial  | `cmn-page-container` width; `cmn-skeleton` `shape` presets copy the real component box |
+| 6. Errors keep context               | Partial  | `errorPlacement="above"` keeps content; `retryable` / `[error-action]` hold Retry      |
+| 7. One page frame                    | Enforced | `cmn-page-container` defaults                                                          |
 
 Apps use `cmn-async-state` and `cmn-skeleton` rather than local loading markup; rules marked
-Target are not yet guaranteed by the primitives and must be handled in the app until they are.
+Target or Partial are not yet guaranteed by the primitives and must be handled in the app until they are.
 
 The phone chapter of this policy (what the shell guarantees and what a page declares on a phone)
 is [PHONE-CONTRACT.md](PHONE-CONTRACT.md). Where the two overlap, the rules above win.
