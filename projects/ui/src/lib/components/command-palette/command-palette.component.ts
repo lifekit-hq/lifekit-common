@@ -44,10 +44,10 @@ interface PaletteGroup {
         }
       }
       .cmn-palette-backdrop {
-        animation: cmn-fade-in 0.12s ease both;
+        animation: cmn-fade-in var(--cmn-duration-short) var(--cmn-ease-standard) both;
       }
       .cmn-palette-panel {
-        animation: cmn-slide-in 0.16s ease both;
+        animation: cmn-slide-in var(--cmn-duration-short) var(--cmn-ease-emphasized-decelerate) both;
       }
     `,
   ],

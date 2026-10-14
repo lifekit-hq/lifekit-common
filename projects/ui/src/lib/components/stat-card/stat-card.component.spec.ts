@@ -31,7 +31,7 @@ describe('StatCardComponent', () => {
   it('should show loading skeleton when loading is true', () => {
     fixture.componentRef.setInput('loading', true);
     fixture.detectChanges();
-    const skeleton: HTMLElement | null = fixture.nativeElement.querySelector('.animate-pulse');
+    const skeleton: HTMLElement | null = fixture.nativeElement.querySelector('.cmn-skeleton-sweep');
     expect(skeleton).toBeTruthy();
   });
 

@@ -2,7 +2,7 @@ import {provideHttpClient, withXhr} from '@angular/common/http';
 import {provideHttpClientTesting} from '@angular/common/http/testing';
 import {ChangeDetectionStrategy, Component, signal} from '@angular/core';
 import {type ComponentFixture, TestBed} from '@angular/core/testing';
-import {beforeEach, describe, expect, it} from 'vitest';
+import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
 import {
   AsyncStateComponent,
@@ -515,5 +515,122 @@ describe('AsyncStateComponent state pattern', () => {
       render('success', {isEmpty: true});
       expect(query('cmn-empty-state')?.textContent).toContain('Add a transaction to get started.');
     });
+  });
+});
+
+@Component({
+  imports: [AsyncStateComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <cmn-async-state
+      [status]="status()"
+      [keepContent]="keepContent()"
+      [showDelay]="showDelay()"
+      [minDisplay]="minDisplay()"
+    >
+      <p class="projected">Loaded content</p>
+    </cmn-async-state>
+  `,
+})
+class CalmHostComponent {
+  public readonly status = signal<AsyncStateStatus>('idle');
+  public readonly keepContent = signal(false);
+  public readonly showDelay = signal(0);
+  public readonly minDisplay = signal(0);
+}
+
+describe('AsyncStateComponent calm loading', () => {
+  const DELAY = 200;
+  const MINIMUM = 400;
+  let fixture: ComponentFixture<CalmHostComponent>;
+  let host: CalmHostComponent;
+
+  const root = (): HTMLElement => fixture.nativeElement as HTMLElement;
+  const projected = (): HTMLElement | null => root().querySelector('.projected');
+  const skeletons = (): number => root().querySelectorAll('cmn-skeleton').length;
+  const busyWrapper = (): HTMLElement | null => root().querySelector('[aria-busy="true"]');
+
+  async function settle(ms = 0): Promise<void> {
+    fixture.detectChanges();
+    await vi.advanceTimersByTimeAsync(ms);
+    fixture.detectChanges();
+  }
+
+  beforeEach(async () => {
+    vi.useFakeTimers();
+    await TestBed.configureTestingModule({imports: [CalmHostComponent]}).compileComponents();
+    fixture = TestBed.createComponent(CalmHostComponent);
+    host = fixture.componentInstance;
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('keeps the loaded content on screen, dimmed, while a refresh loads', async () => {
+    host.keepContent.set(true);
+    host.status.set('success');
+    await settle();
+    host.status.set('loading');
+    await settle();
+
+    expect(projected()).not.toBeNull();
+    expect(skeletons()).toBe(0);
+    expect(busyWrapper()?.classList.contains('opacity-60')).toBe(true);
+
+    host.status.set('success');
+    await settle();
+    expect(busyWrapper()).toBeNull();
+  });
+
+  it('still shows the skeleton on a first load with keepContent', async () => {
+    host.keepContent.set(true);
+    host.status.set('loading');
+    await settle();
+    expect(projected()).toBeNull();
+    expect(skeletons()).toBeGreaterThan(0);
+  });
+
+  it('shows no skeleton for a load shorter than the delay', async () => {
+    host.showDelay.set(DELAY);
+    host.status.set('loading');
+    await settle(DELAY - 1);
+    expect(skeletons()).toBe(0);
+
+    host.status.set('success');
+    await settle(MINIMUM);
+    expect(skeletons()).toBe(0);
+    expect(projected()).not.toBeNull();
+  });
+
+  it('shows the skeleton once the delay passes, and holds it for the minimum time', async () => {
+    host.showDelay.set(DELAY);
+    host.minDisplay.set(MINIMUM);
+    host.status.set('loading');
+    await settle(DELAY);
+    expect(skeletons()).toBeGreaterThan(0);
+
+    host.status.set('success');
+    await settle(MINIMUM - 1);
+    expect(skeletons()).toBeGreaterThan(0);
+    expect(projected()).toBeNull();
+
+    await settle(1);
+    expect(skeletons()).toBe(0);
+    expect(projected()).not.toBeNull();
+  });
+
+  it('leaves previous content in place until the delay passes on a refresh', async () => {
+    host.showDelay.set(DELAY);
+    host.status.set('success');
+    await settle();
+    host.status.set('loading');
+    await settle(DELAY - 1);
+    expect(projected()).not.toBeNull();
+    expect(skeletons()).toBe(0);
+
+    await settle(1);
+    expect(projected()).toBeNull();
+    expect(skeletons()).toBeGreaterThan(0);
   });
 });

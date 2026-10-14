@@ -82,3 +82,44 @@ export const StructuralDirective: Story = {
     `,
   }),
 };
+
+/**
+ * `shape` draws a whole component's silhouette, copying its box so the page does not move when
+ * the content arrives. The sheen sweeps across each block; Reduce Motion leaves them still.
+ */
+export const Presets: Story = {
+  render: () => ({
+    template: `
+      <div class="flex max-w-md flex-col gap-cmn-6 bg-surface-bg p-cmn-4">
+        <section>
+          <p class="mb-cmn-2 text-cmn-xs text-text-secondary">stat</p>
+          <cmn-skeleton shape="stat" />
+        </section>
+        <section>
+          <p class="mb-cmn-2 text-cmn-xs text-text-secondary">chart</p>
+          <cmn-skeleton shape="chart" />
+        </section>
+        <section>
+          <p class="mb-cmn-2 text-cmn-xs text-text-secondary">chart, aspect 16 / 9</p>
+          <cmn-skeleton shape="chart" aspect="16 / 9" />
+        </section>
+        <section>
+          <p class="mb-cmn-2 text-cmn-xs text-text-secondary">section (heading and 3 rows)</p>
+          <cmn-skeleton shape="section" />
+        </section>
+        <section>
+          <p class="mb-cmn-2 text-cmn-xs text-text-secondary">row, 2</p>
+          <div class="rounded-cmn-md border border-border-default bg-surface-card">
+            <cmn-skeleton shape="row" [count]="2" />
+          </div>
+        </section>
+      </div>
+    `,
+  }),
+};
+
+/** The same presets on the dark ground, where the skeleton colour must still read. */
+export const PresetsDark: Story = {
+  ...Presets,
+  globals: {theme: 'dark'},
+};
