@@ -20,6 +20,7 @@ import {
   APPEARANCE_PALETTE_ITEMS,
   type AppLayoutAccount,
   AppLayoutComponent,
+  CMN_CONTENT_INSET_PROPERTIES,
   type NavItem,
   type PageAction,
   PALETTE_APPEARANCE_ACTIONS,
@@ -565,7 +566,7 @@ describe('AppLayoutComponent', () => {
       fixture.detectChanges();
       expect(el('cmn-top-bar').classList).toContain('absolute');
       expect(el('cmn-bottom-tab-bar').classList).toContain('absolute');
-      expect(el('main').className).toContain('pt-[calc(');
+      expect(el('main').classList).toContain('pt-[var(--cmn-content-inset-top,0px)]');
     });
 
     it.each(['rail', 'sidebar'] as const)(
@@ -583,18 +584,32 @@ describe('AppLayoutComponent', () => {
       }
     );
 
-    it('should pad and scroll-pad main by both bar heights plus safe-area insets', () => {
+    it('should pad and scroll-pad main by the measured content insets', () => {
       fixture.componentRef.setInput('phoneOverlay', true);
       fixture.detectChanges();
       const main = el('main').classList;
-      expect(main).toContain('pt-[calc(3.5rem+env(safe-area-inset-top))]');
-      expect(main).toContain('scroll-pt-[calc(3.5rem+env(safe-area-inset-top))]');
+      expect(main).toContain('pt-[var(--cmn-content-inset-top,0px)]');
       expect(main).toContain(
-        'pb-[calc(64px+16px+env(safe-area-inset-bottom)+var(--cmn-fab-clearance,0px))]'
+        'scroll-pt-[calc(var(--cmn-content-inset-top,0px)+var(--cmn-sticky-top,0px))]'
       );
-      expect(main).toContain(
-        'scroll-pb-[calc(64px+16px+env(safe-area-inset-bottom)+var(--cmn-fab-clearance,0px))]'
-      );
+      expect(main).toContain('pb-[var(--cmn-content-inset-bottom,0px)]');
+      expect(main).toContain('[&:has(cmn-page-container)]:pb-0');
+      expect(main).toContain('scroll-pb-[var(--cmn-content-inset-bottom,0px)]');
+    });
+
+    it('should publish the content insets on main in the overlay, and drop them outside it', async () => {
+      fixture.componentRef.setInput('phoneOverlay', true);
+      fixture.detectChanges();
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      const style = el('main').style;
+      for (const property of Object.values(CMN_CONTENT_INSET_PROPERTIES)) {
+        expect(style.getPropertyValue(property)).toMatch(/^\d+px$/);
+      }
+      fixture.componentRef.setInput('phoneOverlay', false);
+      fixture.detectChanges();
+      for (const property of Object.values(CMN_CONTENT_INSET_PROPERTIES)) {
+        expect(style.getPropertyValue(property)).toBe('');
+      }
     });
 
     it('should reserve no floating action clearance by default', () => {
@@ -618,14 +633,6 @@ describe('AppLayoutComponent', () => {
       fixture.componentRef.setInput('navItems', []);
       fixture.detectChanges();
       expect(el('main').style.getPropertyValue('--cmn-fab-clearance')).toBe('');
-    });
-
-    it('should skip the bottom padding when there is no tab bar to clear', () => {
-      fixture.componentRef.setInput('navItems', []);
-      fixture.componentRef.setInput('phoneOverlay', true);
-      fixture.detectChanges();
-      expect(el('main').className).toContain('pt-[calc(');
-      expect(el('main').className).not.toContain('pb-[calc(');
     });
   });
 

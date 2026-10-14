@@ -5,7 +5,7 @@ import {
   computed,
   DestroyRef,
   effect,
-  type ElementRef,
+  ElementRef,
   inject,
   input,
   output,
@@ -122,18 +122,37 @@ const OVERLAY_TAB_BAR_CLASSES = 'absolute inset-x-0 bottom-0 z-30';
 const NOTICES_BASE_CLASSES = 'sticky top-0 z-20 flex flex-col empty:hidden';
 /** Overscroll stops at main: it never chains to the browser (pull-to-refresh, page bounce). */
 const MAIN_BASE_CLASSES = 'flex-1 overflow-y-auto overscroll-y-contain';
-/** Clears the top bar: its 3.5rem height plus the top safe-area inset. */
-const MAIN_OVERLAY_TOP_CLASSES =
-  'pt-[calc(3.5rem+env(safe-area-inset-top))] scroll-pt-[calc(3.5rem+env(safe-area-inset-top))]';
 /**
- * Clears the floating tab bar: its 64px height, the 8px gap under it, the bottom safe-area
- * inset, and 8px of breathing room so the last item scrolls clear of the pill. Adds the
- * consumer's floating action clearance (--cmn-fab-clearance, set on main from
- * `floatingActionClearance`; 0px when none is declared).
+ * Clears the top bar by its measured cover (`--cmn-content-inset-top`). Scrolling an element into
+ * view also clears the pinned notices (`--cmn-sticky-top`).
+ */
+const MAIN_OVERLAY_TOP_CLASSES =
+  'pt-[var(--cmn-content-inset-top,0px)] ' +
+  'scroll-pt-[calc(var(--cmn-content-inset-top,0px)+var(--cmn-sticky-top,0px))]';
+/**
+ * Clears the floating tab bar and floating action by their measured cover
+ * (`--cmn-content-inset-bottom`). A `cmn-page-container` pads its own end by the inset instead, so
+ * its content clears the bar even inside a page host that is capped at `h-full`; main then drops
+ * its own bottom padding so the space is not reserved twice.
  */
 const MAIN_OVERLAY_BOTTOM_CLASSES =
-  'pb-[calc(64px+16px+env(safe-area-inset-bottom)+var(--cmn-fab-clearance,0px))] ' +
-  'scroll-pb-[calc(64px+16px+env(safe-area-inset-bottom)+var(--cmn-fab-clearance,0px))]';
+  'pb-[var(--cmn-content-inset-bottom,0px)] [&:has(cmn-page-container)]:pb-0 ' +
+  'scroll-pb-[var(--cmn-content-inset-bottom,0px)]';
+/** Breathing room between the last row and the bar or floating action it scrolls clear of. */
+const INSET_BREATHING_PX = 8;
+
+/**
+ * The CSS custom properties the shell publishes on main (its scroll container), in px. 0 outside
+ * the phone overlay, where nothing covers main. Pages read them through `var()` with a 0px fallback.
+ */
+export const CMN_CONTENT_INSET_PROPERTIES = {
+  /** How far the top bar covers main's top edge. */
+  top: '--cmn-content-inset-top',
+  /** How far the tab bar and the floating action (plus breathing room) cover main's bottom edge. */
+  bottom: '--cmn-content-inset-bottom',
+  /** Height of the pinned notices: where a content sticky header sticks, below main's top padding. */
+  sticky: '--cmn-sticky-top',
+} as const;
 
 @Component({
   selector: 'cmn-app-layout',
@@ -179,6 +198,7 @@ const MAIN_OVERLAY_BOTTOM_CLASSES =
           (backClick)="onBack()"
           (actionClick)="onPageAction($event)"
         />
+        <!-- In the phone overlay main carries the measured content insets as custom properties -->
         <main #main [class]="mainClass()" [style.--cmn-fab-clearance.px]="fabClearance()">
           <!-- The page's large title, declared in route data; shrinks into the top bar on scroll -->
           @if (largeTitle(); as text) {
@@ -191,11 +211,11 @@ const MAIN_OVERLAY_BOTTOM_CLASSES =
               </h1>
             </div>
           }
-          <div [class]="noticesClasses"><ng-content select="[cmnAppLayoutNotice]" /></div>
+          <div #notices [class]="noticesClasses"><ng-content select="[cmnAppLayoutNotice]" /></div>
           <ng-content />
         </main>
         <!-- Hidden while a bottom sheet is open; the slot's own element keeps its fixed position -->
-        <div [class]="sheetOpen() ? 'hidden' : 'contents'">
+        <div #fab [class]="sheetOpen() ? 'hidden' : 'contents'">
           <ng-content select="[cmnAppLayoutFab]" />
         </div>
         <cmn-bottom-tab-bar
@@ -223,6 +243,10 @@ export class AppLayoutComponent {
   private paletteOpen = false;
 
   private readonly main = viewChild.required<ElementRef<HTMLElement>>('main');
+  private readonly topBarRef = viewChild.required(TopBarComponent, {read: ElementRef});
+  private readonly tabBarRef = viewChild.required(BottomTabBarComponent, {read: ElementRef});
+  private readonly noticesRef = viewChild.required<ElementRef<HTMLElement>>('notices');
+  private readonly fabRef = viewChild.required<ElementRef<HTMLElement>>('fab');
   private readonly largeTitleRef = viewChild<ElementRef<HTMLElement>>('largeTitle');
   /** The large title has scrolled under the top bar; set by an IntersectionObserver only. */
   private readonly largeTitleScrolledAway = signal(false);
@@ -377,14 +401,11 @@ export class AppLayoutComponent {
     };
   });
 
-  public readonly mainClass = computed<string>(() => {
-    if (!this.overlay()) {
-      return MAIN_BASE_CLASSES;
-    }
-    // The tab bar renders nothing without destinations, so there is nothing to clear below.
-    const bottom = this.hasTabBar() ? ` ${MAIN_OVERLAY_BOTTOM_CLASSES}` : '';
-    return `${MAIN_BASE_CLASSES} ${MAIN_OVERLAY_TOP_CLASSES}${bottom}`;
-  });
+  public readonly mainClass = computed<string>(() =>
+    this.overlay()
+      ? `${MAIN_BASE_CLASSES} ${MAIN_OVERLAY_TOP_CLASSES} ${MAIN_OVERLAY_BOTTOM_CLASSES}`
+      : MAIN_BASE_CLASSES
+  );
 
   /** The shell this window and device call for: tab bar, rail or sidebar. */
   protected readonly shellMode = this.shellService.mode;
@@ -484,6 +505,7 @@ export class AppLayoutComponent {
       tabs: () => this.destinations(),
       activeTab: () => this.effectiveActiveRoute(),
     });
+    this.publishContentInsets();
     // A plain effect, not afterRenderEffect: the title element exists once its query resolves, the
     // observers report asynchronously, and afterRenderEffect costs every consumer ~1.8 kB of runtime.
     effect(onCleanup => {
@@ -514,6 +536,56 @@ export class AppLayoutComponent {
         resize.disconnect();
         observer?.disconnect();
       });
+    });
+  }
+
+  /**
+   * Measures what covers main in the phone overlay and publishes it on main (see
+   * `CMN_CONTENT_INSET_PROPERTIES`), so content clears the bars whatever their height: safe-area
+   * insets, a taller tab bar, a floating action. Written straight to main's style from the
+   * ResizeObserver, which runs before paint, so the first frame is already padded.
+   */
+  private publishContentInsets(): void {
+    effect(onCleanup => {
+      const main = this.main().nativeElement;
+      const clearance = this.fabClearance() ?? 0;
+      if (!this.overlay() || typeof ResizeObserver === 'undefined') {
+        for (const property of Object.values(CMN_CONTENT_INSET_PROPERTIES)) {
+          main.style.removeProperty(property);
+        }
+        return;
+      }
+      const topBar = this.topBarRef().nativeElement as HTMLElement;
+      const tabBar = this.tabBarRef().nativeElement as HTMLElement;
+      const notices = this.noticesRef().nativeElement;
+      const fab = this.fabRef().nativeElement;
+      const measure = (): void => {
+        const box = main.getBoundingClientRect();
+        const bar = topBar.getBoundingClientRect();
+        const nav = (tabBar.querySelector('nav') ?? tabBar).getBoundingClientRect();
+        const top = bar.height ? Math.max(0, bar.bottom - box.top) : 0;
+        // The declared clearance stacks on the tab bar; a measured floating action covers both.
+        let bottom = nav.height ? Math.max(0, box.bottom - nav.top) + clearance : 0;
+        for (const action of Array.from(fab.children)) {
+          const rect = action.getBoundingClientRect();
+          if (rect.height) {
+            bottom = Math.max(bottom, box.bottom - rect.top);
+          }
+        }
+        const insets = {
+          top,
+          bottom: bottom > 0 ? bottom + INSET_BREATHING_PX : 0,
+          sticky: notices.getBoundingClientRect().height,
+        };
+        for (const [key, property] of Object.entries(CMN_CONTENT_INSET_PROPERTIES)) {
+          main.style.setProperty(property, `${Math.ceil(insets[key as keyof typeof insets])}px`);
+        }
+      };
+      const observer = new ResizeObserver(measure);
+      for (const target of [main, topBar, tabBar, notices, ...Array.from(fab.children)]) {
+        observer.observe(target, {box: 'border-box'});
+      }
+      onCleanup(() => observer.disconnect());
     });
   }
 
