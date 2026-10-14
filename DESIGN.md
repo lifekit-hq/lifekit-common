@@ -155,7 +155,7 @@ A 4px spacing base (`cmn-1` to `cmn-16`). App chrome comes from `cmn-app-layout`
 
 ## Elevation & Depth
 
-Flat by default: hairline border on `surface-card`. Shadows are for overlays only (menu, popover, dialog, bottom sheet). A surface is held by its border or its shadow, never both, with one exception: the menu, dialog and command palette carry a shadow and a hairline `border-default`, because a shadow alone is invisible on near-black dark surfaces. Multi-select floats on its shadow alone. No backdrop blur.
+Flat by default: hairline border on `surface-card`. Shadows are for overlays only (menu, popover, dialog, bottom sheet). A surface is held by its border or its shadow, never both, with one exception: the menu, dialog and command palette carry a shadow and a hairline `border-default`, because a shadow alone is invisible on near-black dark surfaces. Multi-select floats on its shadow alone. Backdrop blur is allowed in exactly one place: the fixed bars that scroll content passes under (the bottom tab bar and the top bar), at `backdrop-blur-md` over an 80% `surface-card` mix. Nothing else blurs, and a card, sheet or menu stays an opaque surface.
 
 ## Shapes
 
@@ -166,6 +166,20 @@ Radius 3 / 6 / 8px by role (`--radius-sm/md/lg`); full pills for chips, tags and
 Animate transform and opacity only, never layout properties (no `transition` on width or height). Every animation has a `prefers-reduced-motion` path: movement becomes a fade or nothing, and only a spinner keeps turning.
 
 Durations and easings are tokens (M3 values), never literals: `--cmn-duration-short` (150ms: a toggle, a fade, a small state change), `--cmn-duration-medium` (250ms: a surface entering or leaving, a crossfade) and `--cmn-duration-long` (400ms: a large or full-screen move); `--cmn-ease-standard` for anything that stays on screen, `--cmn-ease-emphasized-decelerate` for what arrives, `--cmn-ease-emphasized-accelerate` for what leaves. Tailwind reads them as `duration-cmn-*` and `ease-cmn-*`. A leaving surface is faster than an arriving one. A skeleton's sheen is the one decorative loop: it sweeps by transform, in `--color-skeleton-sheen` over `--color-skeleton`, and stops under Reduce Motion.
+
+### View transitions
+
+A route change that moves between tab destinations or into a detail page is a View Transition, enabled once in the app config:
+
+```ts
+provideRouter(APP_ROUTES, withPreloading(TabPreloadStrategy), withViewTransitions());
+```
+
+The browser crossfades the old and new page by default, which already follows the rules above (opacity only, `prefers-reduced-motion` honoured by the global block in `theme.css`). Where a page shares an element with the next (a row and its detail header), name it with `view-transition-name` on both sides, never on a repeated element. Browsers without View Transitions (older Safari) navigate without one, so nothing may depend on it.
+
+### Blur
+
+The D16 decision: the tab bar and the top bar blur what scrolls under them (`backdrop-blur-md`), and this document used to say "no backdrop blur". The code stays and the rule changes. The fixed bars sit over scrolling content on every page, an opaque bar would hide that the page continues under the thumb, and the translucent tab bar is how iOS draws its own, which is what the installed app is meant to feel like. Blur is confined to those two surfaces so it stays cheap to paint: no blur on cards, sheets or lists, and no stacking of blurred layers. The bars should drop to an opaque `surface-card` under `prefers-reduced-transparency: reduce`; they do not yet, so add it with the next change to either bar.
 
 ## Components
 

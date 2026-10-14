@@ -715,6 +715,47 @@ for (const size of LIST_WIDTHS) {
   });
 }
 
+// A list that pages itself: scrolling to the end keeps loading until the end marker shows, and the
+// marker, the last thing on the page, rests clear of the tab bar.
+const INFINITE_STORY = 'phone-overlay-infinite-list';
+const INFINITE_ROWS = 32;
+const MAX_END_SCROLLS = 20;
+
+for (const size of LIST_WIDTHS) {
+  test.describe(`infinite list ${size.width}x${size.height}`, () => {
+    test.use({viewport: size, hasTouch: true, isMobile: true});
+
+    test(`${INFINITE_STORY} | scrolling reaches the end marker`, async ({page}) => {
+      await open(page, layoutStory(INFINITE_STORY));
+      const state = () =>
+        page.evaluate(() => {
+          const list = document.querySelector('lk-infinite-list');
+          return {
+            end: Boolean(list?.shadowRoot?.querySelector('[data-end]')),
+            rows: document.querySelectorAll('cmn-list-item-row').length,
+          };
+        });
+      let seen = await state();
+      for (let i = 0; i < MAX_END_SCROLLS && !seen.end; i += 1) {
+        await page.evaluate(() => {
+          const main = document.querySelector('cmn-app-layout main');
+          main?.scrollTo(0, main.scrollHeight);
+        });
+        await page.waitForTimeout(100);
+        seen = await state();
+      }
+      const problems: string[] = [];
+      if (!seen.end) {
+        problems.push(`no end marker after ${MAX_END_SCROLLS} scrolls (${seen.rows} rows loaded)`);
+      } else if (seen.rows !== INFINITE_ROWS) {
+        problems.push(`end marker shows with ${seen.rows} of ${INFINITE_ROWS} rows loaded`);
+      }
+      report(problems, 'enforce');
+      report(await lastContentClash(page), 'enforce');
+    });
+  });
+}
+
 // Page compositions the shell clears the chrome for, whatever the page is built from.
 const COMPOSITION_STORIES = [
   'phone-overlay-content-after-container',

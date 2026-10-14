@@ -231,6 +231,37 @@ groups and scrolls a list the same way.
 | `cmn-segmented` / `lk-segmented` | A short parameter choice (a view mode, a chart period): five segments or fewer, short noun labels. Cells are equal and as wide as the widest label, and never narrower than their own: a row that needs more than its container scrolls inside itself (chosen cell kept in view, page never widens) rather than truncate. `lk-segmented` warns in development when it overflows. More choices, or long labels, use `lk-chip-row`; a rarely changed setting such as sort uses a menu. |
 | `cmn-list-section`               | One group of rows under a heading: a day of transactions, a severity of alerts. The heading is an `h2` that names the section, with a `cmnListSectionAside` slot for a total or count; the rows sit in an unpadded `cmn-card` (`card` false leaves them bare). On a phone the heading sticks flush under the top bar while its rows scroll past, and the next heading pushes it out.                                                                                                 |
 
+#### Paging a long list
+
+A list longer than one page of rows ends in `lk-infinite-list`, not a Load More button or a pager.
+It wraps the rows, owns no data, and a store drives it through the paging contract:
+
+| Store signal        | List binding / event           | Meaning                                                                     |
+| ------------------- | ------------------------------ | --------------------------------------------------------------------------- |
+| has another page    | `[hasMore]`                    | There is a cursor, or the last page was full.                               |
+| append in flight    | `[loading]`                    | Skeleton rows show and no further page is asked for.                        |
+| append failed       | `[failed]`                     | An inline "Couldn't load more" with Try again shows; the list stops asking. |
+| fetch next page     | `(lk-infinite-list-load-more)` | The end is within reach and nothing is in flight, failed or finished.       |
+| fetch the same page | `(lk-infinite-list-retry)`     | The reader pressed Try again; the store clears `failed` and fetches.        |
+
+```html
+<lk-infinite-list
+  [hasMore]="store.hasMore()"
+  [loading]="store.isAppending()"
+  [failed]="store.appendFailed()"
+  (lk-infinite-list-load-more)="store.loadNextPage()"
+  (lk-infinite-list-retry)="store.loadNextPage()"
+>
+  @for (day of days(); track day.date) {
+  <cmn-list-section [heading]="day.label">...</cmn-list-section>
+  }
+</lk-infinite-list>
+```
+
+The first page is not the list's job: `cmn-async-state` draws the first load (a `list` skeleton) and
+the list appears once rows exist. Appending sets `loading` and keeps the rows on screen: the store appends the page, it does not replace the list. A short page that leaves the end in
+reach asks again until the screen is full.
+
 ### Sheet or page
 
 | Use a sheet when                                          | Use a page when                                         |
@@ -343,10 +374,12 @@ that holds each one. A rule marked "follow-up" is the target; its parts and chec
    (`minDisplay`). The sweep stops under Reduce Motion. Sources: NN/g "Skeleton Screens 101"; M3
    Progress indicators; Atlassian and Carbon loading; web.dev CLS. Check: each preset's box is
    within 8px of the loaded component's; the state pattern. To come: CLS at most 0.1 per route.
-6. **Continuity** (follow-up). Data on screen stays while it refreshes; a tab return paints at
-   once and revalidates; scroll restore waits for the data; tab destinations preload on idle except
-   under Save-Data. Sources: RFC 5861; angular.dev service worker `dataGroups`, route preloading,
-   `@defer`; HIG Loading. Check today: back restores scroll.
+6. **Continuity.** Data on screen stays while it refreshes (`keepContent`); a tab return paints at
+   once and revalidates; scroll restore waits for the data; tab destinations preload on idle, after
+   first paint, except under Save-Data or on a metered connection (`TabPreloadStrategy`, below),
+   and a tab switch is a View Transition (`withViewTransitions()`, `DESIGN.md` Motion). Sources:
+   RFC 5861; angular.dev service worker `dataGroups`, route preloading, `@defer`, View Transitions;
+   HIG Loading. Check today: back restores scroll.
 7. **Motion.** Durations and easings come from tokens (`--cmn-duration-short|medium|long`: 150,
    250 and 400ms; `--cmn-ease-standard|emphasized-decelerate|emphasized-accelerate`, the M3
    curves, with Tailwind `duration-cmn-*` and `ease-cmn-*`); only transform and opacity animate;
@@ -354,10 +387,13 @@ that holds each one. A rule marked "follow-up" is the target; its parts and chec
    spinner is the one thing that keeps turning). Sources: HIG Motion; M3 easing and duration
    tokens; WCAG 2.3.3. Check: no transform animation runs under Reduce Motion, on the skeleton
    and on a sheet.
-8. **Lists and pagination.** Phone lists load continuously with a sentinel (or a full-width 44px
-   Load More), showing skeleton rows while appending, an end marker and an inline retry. No page
-   size selectors or Prev/Next pagers on a phone (the sentinel is a follow-up). Sources: NN/g
-   "Infinite Scrolling Is Not for Every Website" and "Infinite Scrolling: When to Use It".
+8. **Lists and pagination.** Phone lists load continuously: an `lk-infinite-list` asks for the
+   next page when its end comes within about one screen, shows skeleton rows while the page
+   appends, an end marker once there is no more, and an inline retry when a page fails (a
+   full-width 44px Load More where `IntersectionObserver` is missing). No page size selectors or
+   Prev/Next pagers on a phone. Sources: NN/g "Infinite Scrolling Is Not for Every Website" and
+   "Infinite Scrolling: When to Use It". Check: scrolling an `lk-infinite-list` to its end reaches
+   the end marker with every page loaded and the last row clear of the tab bar, at 375, 390 and 402.
    - **8a. Sticky section headers.** A grouped long list (transactions by day, alerts by day or
      severity, events) pins the current group's header under the top bar while its rows scroll,
      and the next header pushes it out, as an iOS plain list does. Use `cmn-list-section`. The
@@ -398,4 +434,4 @@ exists.
 | Long lists (filter, chips, sections)    | Built: `cmn-filter-bar`, `lk-chip-row`, `cmn-list-section`; the suite checks labels and headers                                                                                     |
 | Text input (16px, 44px)                 | Built: every `cmn-*` field below md; `dvh` sheets and visual viewport are a follow-up                                                                                               |
 | Skeletons and motion                    | Built: `cmn-skeleton` presets, `cmn-async-state` calm loading, motion tokens; the suite checks preset geometry and Reduce Motion                                                    |
-| Continuity and paging                   | Target: rules 6 and 8 of the standard                                                                                                                                               |
+| Continuity and paging                   | Built: `lk-infinite-list`, `TabPreloadStrategy` (idle tab preload, skipped under Save-Data or metered), `keepContent`; the suite checks the end of a continuous list |
