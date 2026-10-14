@@ -156,6 +156,23 @@ describe('LkSegmented', () => {
       expect(chosen.right).toBeLessThanOrEqual(host.right + 0.5);
     });
 
+    it('stays silent when the build is a production build', async () => {
+      const scope = globalThis as {ngDevMode?: unknown};
+      const original = scope.ngDevMode;
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+      scope.ngDevMode = false;
+      try {
+        const el = await mountNarrow(LONG[0].value);
+        el.options = LONG.map(option => ({...option}));
+        await el.updateComplete;
+        expect(warn).not.toHaveBeenCalled();
+        expect(el.scrollWidth).toBeGreaterThan(el.clientWidth);
+      } finally {
+        scope.ngDevMode = original;
+        warn.mockRestore();
+      }
+    });
+
     it('warns once in development that the row has to scroll', async () => {
       const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
       await mountNarrow(LONG[0].value);

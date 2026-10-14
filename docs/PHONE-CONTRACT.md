@@ -292,8 +292,8 @@ The rules every lifekit app keeps on a phone, with the sources behind them and t
 that holds each one. A rule marked "follow-up" is the target; its parts and check come later.
 
 1. **Content clears fixed controls.** The shell measures its pinned chrome and publishes the
-   insets (above). `cmn-page-container` ends with the bottom inset, `scroll-padding` reads the
-   same values, and a page host is never capped at the screen's height on a phone. Sources: WCAG
+   insets (above). `<main>` pads its end by the bottom inset and the shell sizes a spacer after
+   the page frame, `scroll-padding` reads the same values, and a page host is never capped at the screen's height on a phone. Sources: WCAG
    2.2 SC 2.4.11 and technique C43, failure F110; MDN `scroll-padding` and `env()`; WebKit
    "Designing Websites for iPhone X"; HIG Layout (safe areas). Check: the last content of a list
    page clears the tab bar and the floating action at 375, 390 and 402.

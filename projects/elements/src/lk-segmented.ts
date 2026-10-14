@@ -23,13 +23,19 @@ export interface SegmentedChangeDetail {
   value: string;
 }
 
+declare const ngDevMode: unknown;
+
 /**
- * Development builds only: production Angular builds set `ngDevMode` to false, and other bundlers
- * replace `process.env.NODE_ENV` with "production".
+ * Development builds only. An Angular production build replaces the bare `ngDevMode` identifier
+ * with false (it never sets `globalThis.ngDevMode`); other bundlers replace
+ * `process.env.NODE_ENV` with "production". Unbundled, neither is defined and this is true.
  */
 function isDevMode(): boolean {
-  const scope = globalThis as {ngDevMode?: unknown; process?: {env?: Record<string, unknown>}};
-  return scope.ngDevMode !== false && scope.process?.env?.['NODE_ENV'] !== 'production';
+  const scope = globalThis as {process?: {env?: Record<string, unknown>}};
+  return (
+    (typeof ngDevMode === 'undefined' || !!ngDevMode) &&
+    scope.process?.env?.['NODE_ENV'] !== 'production'
+  );
 }
 
 /** Sub-pixel slack before a row counts as wider than its container. */
