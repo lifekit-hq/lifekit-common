@@ -184,4 +184,23 @@ describe('SegmentedComponent', () => {
     expect(chosen.left).toBeGreaterThanOrEqual(box.left - 0.5);
     expect(chosen.right).toBeLessThanOrEqual(box.right + 0.5);
   });
+
+  it('scrolls the chosen cell into view when the options change under an unchanged value', () => {
+    const host = fixture.nativeElement as HTMLElement;
+    host.style.cssText = 'display: block; width: 120px; overflow-x: auto';
+    group().style.cssText = 'display: flex; width: max-content';
+    cells().forEach(cell => (cell.style.cssText = 'white-space: nowrap; min-width: max-content'));
+    fixture.componentRef.setInput('value', 'dark');
+    fixture.detectChanges();
+    host.scrollLeft = 0;
+
+    fixture.componentRef.setInput('options', [...MODES]);
+    fixture.detectChanges();
+
+    const box = host.getBoundingClientRect();
+    const chosen = cells()[2].getBoundingClientRect();
+    expect(host.scrollWidth).toBeGreaterThan(host.clientWidth);
+    expect(chosen.left).toBeGreaterThanOrEqual(box.left - 0.5);
+    expect(chosen.right).toBeLessThanOrEqual(box.right + 0.5);
+  });
 });

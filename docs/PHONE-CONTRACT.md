@@ -150,13 +150,14 @@ Outside the phone shell all three are unset, and everything that reads them fall
   the notices, so focusing or scrolling to an element never leaves it under the chrome.
 - **Bottom.** The shell owns the clearance, whatever the page is built from. `<main>` pads its end
   by `--cmn-content-inset-bottom` (and `scroll-padding-bottom` reads the same inset), and projects
-  the page into a frame as tall as main's content box, followed by a spacer the shell sizes to the
-  frame's overflow. So the last row clears the tab bar after bare content following a page
+  the page into a frame that fills main's content box below the large title and the notices,
+  followed by a spacer the shell sizes to the frame's overflow. So the last row clears the tab bar after bare content following a page
   container, after two sibling top-level page containers (no gap opens between them), and after an
   `h-full` host whose content overflows it. A page container adds no end inset of its own.
 - **Page height.** A page is never capped at the screen's height on a phone. `fill` makes the page
   container at least the screen tall (`min-h-full`); the cap (`h-full`) applies from `md` only, where
-  a fill page scrolls a child internally. `h-full` resolves to main's content height, so a chat-style
+  a fill page scrolls a child internally. `h-full` resolves to that frame's height, so a short page under a large
+  title and notices leaves main nothing to scroll, and a chat-style
   host (`relative flex h-full` with an internal scroller) fills exactly the visible area and main
   does not scroll. The spacer is re-measured when the page's children, their sizes or the chrome
   change; content that only grows through images or CSS-only changes is not observed. A `sticky`

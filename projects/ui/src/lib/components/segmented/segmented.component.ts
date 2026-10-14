@@ -123,7 +123,7 @@ function keyStep(key: string): 1 | -1 | 'first' | 'last' | undefined {
 })
 export class SegmentedComponent implements AfterViewChecked {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
-  private revealed: string | undefined;
+  private revealed: readonly SegmentedCell[] | undefined;
 
   private readonly cellElements = viewChildren<ElementRef<HTMLButtonElement>>('cell');
 
@@ -152,11 +152,11 @@ export class SegmentedComponent implements AfterViewChecked {
   });
 
   public ngAfterViewChecked(): void {
-    const value = this.value();
-    if (value === this.revealed) {
+    const cells = this.cells();
+    if (cells === this.revealed) {
       return;
     }
-    this.revealed = value;
+    this.revealed = cells;
     const host = this.host.nativeElement;
     const chosen = this.cellElements()
       .map(({nativeElement}) => nativeElement)

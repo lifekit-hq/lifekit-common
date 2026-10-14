@@ -198,6 +198,9 @@ export class LkSegmented extends LitElement {
     if (changed.has('value') || changed.has('options')) {
       this.revealChosen();
     }
+    if (changed.has('options') && isDevMode()) {
+      this.warnOnOverflow();
+    }
   }
 
   /** Scrolls a row that overflows its container so the chosen cell sits in the middle of it. */

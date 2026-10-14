@@ -136,6 +136,12 @@ const MAIN_OVERLAY_TOP_CLASSES =
  */
 const MAIN_OVERLAY_BOTTOM_CLASSES =
   'pb-[var(--cmn-content-inset-bottom,0px)] scroll-pb-[var(--cmn-content-inset-bottom,0px)]';
+/** The phone overlay's page frame: it fills what is left of main below the title and notices. */
+const PAGE_FRAME_OVERLAY_CLASSES = 'flow-root h-[calc(100%-var(--cmn-page-above,0px))]';
+/** Outside the overlay the frame does not exist as a box: page hosts size against main itself. */
+const PAGE_FRAME_PLAIN_CLASSES = 'contents';
+/** What sits above the page frame in main (large title, notices): the frame is that much shorter. */
+const PAGE_ABOVE_PROPERTY = '--cmn-page-above';
 /** Breathing room between the last row and the bar or floating action it scrolls clear of. */
 const INSET_BREATHING_PX = 8;
 
@@ -211,7 +217,7 @@ export const CMN_CONTENT_INSET_PROPERTIES = {
           }
           <div #notices [class]="noticesClasses"><ng-content select="[cmnAppLayoutNotice]" /></div>
           <!-- The frame page hosts size against; whatever overflows it gets a spacer in the overlay -->
-          <div #page class="h-full"><ng-content /></div>
+          <div #page [class]="pageFrameClass()"><ng-content /></div>
           <div #pageOverflow aria-hidden="true"></div>
         </main>
         <!-- Hidden while a bottom sheet is open; the slot's own element keeps its fixed position -->
@@ -417,6 +423,10 @@ export class AppLayoutComponent {
     () => this.phoneOverlay() && this.shellService.isPhone()
   );
 
+  protected readonly pageFrameClass = computed<string>(() =>
+    this.overlay() ? PAGE_FRAME_OVERLAY_CLASSES : PAGE_FRAME_PLAIN_CLASSES
+  );
+
   /** What the current page declares in route data, or null when it declares nothing. */
   protected readonly chrome = computed<PageChromeData | null>(() =>
     readPageChrome(this.page().data)
@@ -547,8 +557,9 @@ export class AppLayoutComponent {
    * insets, a taller tab bar, a floating action. Written straight to main's style from the
    * ResizeObserver, which runs before paint, so the first frame is already padded.
    *
-   * The page content sits in a frame that is exactly main's content height, which is what an
-   * `h-full` page host resolves against. Content longer than the frame overflows it, past any
+   * The page content sits in a frame that fills main's content box below the large title and the
+   * notices, which is what an `h-full` page host resolves against, so a short page never makes
+   * main scroll. Content longer than the frame overflows it, past any
    * padding on main, so a spacer after the frame is sized to that overflow: main's bottom padding
    * then lands after the last row, whether the content is bare, several siblings, or inside a host
    * that caps its own height.
@@ -563,6 +574,7 @@ export class AppLayoutComponent {
         for (const property of Object.values(CMN_CONTENT_INSET_PROPERTIES)) {
           main.style.removeProperty(property);
         }
+        main.style.removeProperty(PAGE_ABOVE_PROPERTY);
         pageOverflow.style.removeProperty('height');
         return;
       }
@@ -570,6 +582,7 @@ export class AppLayoutComponent {
       const tabBar = this.tabBarRef().nativeElement as HTMLElement;
       const notices = this.noticesRef().nativeElement;
       const fab = this.fabRef().nativeElement;
+      const title = this.largeTitleRef()?.nativeElement;
       const measure = (): void => {
         const box = main.getBoundingClientRect();
         const bar = topBar.getBoundingClientRect();
@@ -591,12 +604,18 @@ export class AppLayoutComponent {
         for (const [key, property] of Object.entries(CMN_CONTENT_INSET_PROPERTIES)) {
           main.style.setProperty(property, `${Math.ceil(insets[key as keyof typeof insets])}px`);
         }
+        const padding = parseFloat(getComputedStyle(main).paddingTop);
+        const above = page.getBoundingClientRect().top - box.top + main.scrollTop - padding;
+        main.style.setProperty(PAGE_ABOVE_PROPERTY, `${Math.max(0, Math.ceil(above))}px`);
         pageOverflow.style.height = `${Math.ceil(Math.max(0, page.scrollHeight - page.clientHeight))}px`;
       };
       const observer = new ResizeObserver(measure);
       const observeAll = (): void => {
         observer.disconnect();
         const targets = [main, topBar, tabBar, notices, ...fab.children, ...page.children];
+        if (title) {
+          targets.push(title);
+        }
         for (const target of targets) {
           observer.observe(target, {box: 'border-box'});
         }

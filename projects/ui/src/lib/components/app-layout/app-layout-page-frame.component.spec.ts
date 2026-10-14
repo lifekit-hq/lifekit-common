@@ -29,6 +29,9 @@ describe('AppLayoutComponent page frame', () => {
     changeDetection: ChangeDetectionStrategy.OnPush,
     template: `
       <cmn-app-layout [phoneOverlay]="overlay()">
+        @if (notice()) {
+          <div cmnAppLayoutNotice class="notice" style="height: 40px"></div>
+        }
         <div class="host">
           @for (row of rows(); track row) {
             <div class="row" style="height: 100px"></div>
@@ -40,6 +43,7 @@ describe('AppLayoutComponent page frame', () => {
   class OverflowHostComponent {
     public readonly overlay = signal(true);
     public readonly rows = signal([1, 2, 3]);
+    public readonly notice = signal(false);
   }
 
   let frameStyle: HTMLStyleElement;
@@ -48,7 +52,7 @@ describe('AppLayoutComponent page frame', () => {
     frameStyle = document.createElement('style');
     frameStyle.textContent =
       `cmn-app-layout main { height: ${MAIN_PX}px; overflow-y: auto } ` +
-      `cmn-app-layout main > .h-full { height: ${FRAME_PX}px }`;
+      `cmn-app-layout main > .flow-root { height: ${FRAME_PX}px }`;
     document.head.appendChild(frameStyle);
   });
 
@@ -83,5 +87,22 @@ describe('AppLayoutComponent page frame', () => {
     host.componentInstance.overlay.set(false);
     host.detectChanges();
     await vi.waitFor(() => expect(spacerHeight(host)).toBe(''));
+  });
+
+  it('should size the frame below what sits above it in main, and drop that outside the overlay', async () => {
+    viewport.pin('phone');
+    const host = TestBed.createComponent(OverflowHostComponent);
+    host.componentInstance.notice.set(true);
+    host.detectChanges();
+    const main = (host.nativeElement as HTMLElement).querySelector('main') as HTMLElement;
+    await vi.waitFor(() => expect(main.style.getPropertyValue('--cmn-page-above')).toBe('40px'));
+
+    host.componentInstance.notice.set(false);
+    host.detectChanges();
+    await vi.waitFor(() => expect(main.style.getPropertyValue('--cmn-page-above')).toBe('0px'));
+
+    host.componentInstance.overlay.set(false);
+    host.detectChanges();
+    await vi.waitFor(() => expect(main.style.getPropertyValue('--cmn-page-above')).toBe(''));
   });
 });

@@ -98,12 +98,15 @@ describe('LkSegmented', () => {
     ].map(label => ({value: label, label}));
     const NARROW_PX = 200;
 
-    async function mountNarrow(value: string): Promise<LkSegmented> {
+    async function mountNarrow(
+      value: string,
+      options: SegmentedOption[] = LONG
+    ): Promise<LkSegmented> {
       const frame = document.createElement('div');
       frame.style.width = `${NARROW_PX}px`;
       document.body.appendChild(frame);
       const el = document.createElement('lk-segmented') as LkSegmented;
-      Object.assign(el, {options: LONG, value, label: 'Sort by'});
+      Object.assign(el, {options, value, label: 'Sort by'});
       frame.appendChild(el);
       await el.updateComplete;
       return el;
@@ -126,6 +129,26 @@ describe('LkSegmented', () => {
     it('scrolls the chosen cell into view when the value changes', async () => {
       const el = await mountNarrow(LONG[0].value);
       el.value = LONG[3].value;
+      await el.updateComplete;
+      const host = el.getBoundingClientRect();
+      const chosen = cells(el)[3].getBoundingClientRect();
+      expect(chosen.left).toBeGreaterThanOrEqual(host.left - 0.5);
+      expect(chosen.right).toBeLessThanOrEqual(host.right + 0.5);
+    });
+
+    it('warns when over-long options arrive after the first render', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+      const el = await mountNarrow('', []);
+      expect(warn).not.toHaveBeenCalled();
+      el.options = LONG;
+      await el.updateComplete;
+      expect(warn).toHaveBeenCalledTimes(1);
+      warn.mockRestore();
+    });
+
+    it('scrolls the chosen cell into view when the options arrive later', async () => {
+      const el = await mountNarrow(LONG[3].value, []);
+      el.options = LONG;
       await el.updateComplete;
       const host = el.getBoundingClientRect();
       const chosen = cells(el)[3].getBoundingClientRect();

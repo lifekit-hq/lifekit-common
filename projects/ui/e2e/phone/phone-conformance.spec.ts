@@ -723,6 +723,7 @@ const COMPOSITION_STORIES = [
   'phone-overlay-chat-host',
 ] as const;
 const WIDE_SEGMENTED_STORY = 'phone-overlay-wide-segmented';
+const SHORT_PAGE_STORY = 'conformance-routed-app-layout--routed-short-page';
 const SIBLING_STORY = 'phone-overlay-sibling-containers';
 const CHAT_STORY = 'phone-overlay-chat-host';
 
@@ -781,6 +782,28 @@ for (const size of LIST_WIDTHS) {
         }
         return found;
       });
+      report(problems, 'enforce');
+    });
+
+    test('short page | a large title and a notice leave main nothing to scroll', async ({page}) => {
+      await open(page, SHORT_PAGE_STORY);
+      await page.waitForSelector('cmn-app-layout main h1', {state: 'visible'});
+      await settleFrames(page);
+      const state = await page.evaluate(() => {
+        const main = document.querySelector('cmn-app-layout main');
+        const notice = document.querySelector('cmn-app-layout [cmnAppLayoutNotice]');
+        return {
+          overflow: main ? main.scrollHeight - main.clientHeight : Number.NaN,
+          notice: Boolean(notice?.getClientRects().length),
+        };
+      });
+      const problems: string[] = [];
+      if (!state.notice) {
+        problems.push('the notice is not shown, so the story proves nothing');
+      }
+      if (!(state.overflow <= SURFACE_TOLERANCE)) {
+        problems.push(`main scrolls ${state.overflow}px on a short page`);
+      }
       report(problems, 'enforce');
     });
 
