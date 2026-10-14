@@ -241,6 +241,67 @@ Like a native `change`, it never fires for a `selected` the host sets.
 </script>
 ```
 
+### `<lk-infinite-list>`
+
+A list that keeps loading as the reader nears its end, instead of ending in a Load More button or a
+pager. The rows are the element's children; it draws what follows them: skeleton rows while a page
+is being appended, an inline retry when that fails, and an end marker once there is nothing more.
+An `IntersectionObserver` watches a sentinel after the rows, one screen ahead by default
+(`rootMargin`). Without `IntersectionObserver` it draws a 44px Load More button that fires the
+same event.
+
+It owns no data. The host (an app store) drives it with the **paging contract**:
+
+| Property        | Attribute         | Type      | Default                    | Description                                                                  |
+| --------------- | ----------------- | --------- | -------------------------- | ---------------------------------------------------------------------------- |
+| `hasMore`       | `has-more`        | `boolean` | `false`                    | The store has another page (a cursor, or the last page was full)             |
+| `loading`       | `loading`         | `boolean` | `false`                    | A page is being fetched: skeleton rows show, no further page is asked for    |
+| `failed`        | `failed`          | `boolean` | `false`                    | The last fetch failed: an inline retry shows, no further page is asked for   |
+| `skeletonRows`  | `skeleton-rows`   | `number`  | `3`                        | Skeleton rows drawn while `loading`                                          |
+| `rootMargin`    | `root-margin`     | `string`  | `'0px 0px 600px 0px'`      | How far past the viewport the end counts as within reach                     |
+| `endLabel`      | `end-label`       | `string`  | `"You've reached the end"` | Shown after the last row once `hasMore` is off (not for a list with no rows) |
+| `loadingLabel`  | `loading-label`   | `string`  | `'Loading more'`           | Read out, not shown, while a page loads                                      |
+| `errorLabel`    | `error-label`     | `string`  | `"Couldn't load more."`    | Shown beside the retry button                                                |
+| `retryLabel`    | `retry-label`     | `string`  | `'Try again'`              | The retry button                                                             |
+| `loadMoreLabel` | `load-more-label` | `string`  | `'Load more'`              | The button drawn where `IntersectionObserver` is missing                     |
+
+Events (bubbling and composed, no `detail`):
+
+- `lk-infinite-list-load-more`: the end is within reach and the store may fetch the next page. It
+  fires only while `hasMore` is on and neither `loading` nor `failed` is.
+- `lk-infinite-list-retry`: the reader pressed the retry button. The host fetches again and clears
+  `failed`.
+
+The element never changes `hasMore`, `loading` or `failed` itself, so it cannot disagree with the
+store. When `loading` or `failed` turns off while the end is still within reach (a short page), it
+asks again, so the list fills the screen without a scroll. The first page is not its job: draw that
+with the host's own loading state (`cmn-async-state`) and put the list under it once rows exist.
+
+```html
+<lk-infinite-list has-more>
+  <div>Row 1</div>
+  <div>Row 2</div>
+</lk-infinite-list>
+<script>
+  const list = document.querySelector('lk-infinite-list');
+  const loadNext = async () => {
+    list.failed = false;
+    list.loading = true;
+    try {
+      const page = await fetchNextPage();
+      list.append(...page.rows);
+      list.hasMore = page.hasMore;
+    } catch {
+      list.failed = true;
+    } finally {
+      list.loading = false;
+    }
+  };
+  list.addEventListener('lk-infinite-list-load-more', loadNext);
+  list.addEventListener('lk-infinite-list-retry', loadNext);
+</script>
+```
+
 ### `<lk-update-prompt>`
 
 Presentational "new version available" prompt. Renders nothing until `ready` is true, then stays
