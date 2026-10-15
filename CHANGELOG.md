@@ -1,5 +1,15 @@
 # Changelog
 
+## [3.4.0](https://github.com/lifekit-hq/lifekit-common/compare/v3.3.1...v3.4.0) (2026-10-14)
+
+
+### Features
+
+* **elements:** add lk-infinite-list, TabPreloadStrategy and motion/blur guidance ([#164](https://github.com/lifekit-hq/lifekit-common/issues/164)) ([cd06af1](https://github.com/lifekit-hq/lifekit-common/commit/cd06af185471f05bbf1f29644e2973dbcb9b43d5))
+* **tokens:** add fixed category and flow-fill colours, drop Rose and Graphite presets ([#160](https://github.com/lifekit-hq/lifekit-common/issues/160)) ([0749387](https://github.com/lifekit-hq/lifekit-common/commit/07493879d261f1178bb63427c49304e4f8346f76))
+* **ui:** add skeleton presets, calm async-state loading and motion tokens ([#163](https://github.com/lifekit-hq/lifekit-common/issues/163)) ([bd37dae](https://github.com/lifekit-hq/lifekit-common/commit/bd37dae558574ec01b41094d4c16a8084e5dc28c))
+* **ui:** shell-measured content insets and overflow-proof phone primitives ([#162](https://github.com/lifekit-hq/lifekit-common/issues/162)) ([af4d646](https://github.com/lifekit-hq/lifekit-common/commit/af4d646e40dd303748cc747bb8f12273b56651c9))
+
 ## [3.3.1](https://github.com/lifekit-hq/lifekit-common/compare/v3.3.0...v3.3.1) (2026-10-13)
 
 
