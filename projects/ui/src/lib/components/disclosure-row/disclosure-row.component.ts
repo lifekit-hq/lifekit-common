@@ -1,7 +1,10 @@
 import {DecimalPipe} from '@angular/common';
 import {ChangeDetectionStrategy, Component, input} from '@angular/core';
 
-import {InstitutionAvatarComponent} from '../institution-avatar/institution-avatar.component';
+import {
+  InstitutionAvatarComponent,
+  type InstitutionAvatarStatus,
+} from '../institution-avatar/institution-avatar.component';
 
 @Component({
   selector: 'cmn-disclosure-row',
@@ -15,7 +18,12 @@ import {InstitutionAvatarComponent} from '../institution-avatar/institution-avat
       >
         <div class="flex items-center gap-cmn-3 flex-1 min-w-0">
           @if (avatarName()) {
-            <cmn-institution-avatar [name]="avatarName()!" [logoUrl]="avatarLogoUrl()" />
+            <cmn-institution-avatar
+              [name]="avatarName()!"
+              [logoUrl]="avatarLogoUrl()"
+              [status]="avatarStatus()"
+              [statusLabel]="avatarStatusLabel()"
+            />
           }
           <div class="min-w-0">
             <p class="font-medium text-text-primary">{{ label() }}</p>
@@ -61,5 +69,9 @@ export class DisclosureRowComponent {
   public readonly avatarName = input<string | null>(null);
   /** Optional remote logo for the avatar; falls back to initials if absent/broken. */
   public readonly avatarLogoUrl = input<string | null>(null);
+  /** Optional state dot on the avatar; null renders none. */
+  public readonly avatarStatus = input<InstitutionAvatarStatus | null>(null);
+  /** Accessible name for the avatar's state dot. */
+  public readonly avatarStatusLabel = input<string | null>(null);
   public readonly open = input<boolean>(true);
 }

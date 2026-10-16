@@ -55,3 +55,29 @@ export const InstitutionGallery: Story = {
     `,
   }),
 };
+
+export const StatusDots: Story = {
+  render: () => ({
+    template: `
+      <div class="flex items-center gap-4">
+        <cmn-institution-avatar name="Chase Bank" status="success" statusLabel="Synced 2h ago" />
+        <cmn-institution-avatar name="Wells Fargo" status="warning" statusLabel="Retrying 2h ago" />
+        <cmn-institution-avatar name="Monobank" status="error" statusLabel="Reconnect needed" />
+        <cmn-institution-avatar name="Inzhur" status="neutral" statusLabel="Not synced yet" />
+        <cmn-institution-avatar name="No Status" />
+      </div>
+    `,
+  }),
+};
+
+export const StatusDotAllSizes: Story = {
+  render: () => ({
+    template: `
+      <div class="flex items-center gap-4">
+        <cmn-institution-avatar name="Chase Bank" size="sm" status="success" statusLabel="Synced" />
+        <cmn-institution-avatar name="Wells Fargo" size="md" status="warning" statusLabel="Retrying" />
+        <cmn-institution-avatar name="Vanguard" size="lg" status="error" statusLabel="Reconnect needed" />
+      </div>
+    `,
+  }),
+};
