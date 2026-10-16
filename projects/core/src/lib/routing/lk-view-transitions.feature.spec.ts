@@ -142,6 +142,8 @@ describe('withLkViewTransitions', () => {
     const onViewTransitionCreated = vi.fn();
     const {harness} = await setup({onViewTransitionCreated});
     await harness.navigateByUrl('/budgets');
+    onViewTransitionCreated.mockClear();
+
     await harness.navigateByUrl('/budgets?period=3m');
     expect(onViewTransitionCreated).not.toHaveBeenCalled();
 
