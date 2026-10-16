@@ -384,6 +384,24 @@ html {
     infinite;
 }
 
+/* ─── Route crossfade (view transitions) ──────────────────────────────────── */
+/* The page crossfade a router view transition runs (withLkViewTransitions() in @lifekit-hq/core):
+   a surface change, so the medium duration on the standard curve. Reduce Motion drops it; the
+   router setup also skips the transition there, so the DOM updates at once. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--cmn-duration-medium);
+  animation-timing-function: var(--cmn-ease-standard);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
 /* ─── Dialog (cmn-dialog) ───────────────────────────────────────────────── */
 .cmn-dialog-panel {
   display: flex;

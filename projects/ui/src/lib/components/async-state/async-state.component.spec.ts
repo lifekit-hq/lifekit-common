@@ -527,6 +527,7 @@ describe('AsyncStateComponent state pattern', () => {
       [keepContent]="keepContent()"
       [showDelay]="showDelay()"
       [minDisplay]="minDisplay()"
+      [crossfade]="crossfade()"
     >
       <p class="projected">Loaded content</p>
     </cmn-async-state>
@@ -537,6 +538,7 @@ class CalmHostComponent {
   public readonly keepContent = signal(false);
   public readonly showDelay = signal(0);
   public readonly minDisplay = signal(0);
+  public readonly crossfade = signal(false);
 }
 
 describe('AsyncStateComponent calm loading', () => {
@@ -645,5 +647,65 @@ describe('AsyncStateComponent calm loading', () => {
     await settle(1);
     expect(projected()).toBeNull();
     expect(skeletons()).toBeGreaterThan(0);
+  });
+
+  describe('crossfade', () => {
+    const fading = (): boolean =>
+      projected()?.parentElement?.classList.contains('animate-cmn-fade-in') ?? false;
+
+    beforeEach(() => {
+      host.crossfade.set(true);
+    });
+
+    it('paints content that is there at the first render at full opacity', async () => {
+      host.status.set('success');
+      await settle();
+      expect(projected()).not.toBeNull();
+      expect(fading()).toBe(false);
+    });
+
+    it('fades the content in when it replaces the skeleton', async () => {
+      host.status.set('loading');
+      await settle();
+      expect(skeletons()).toBeGreaterThan(0);
+
+      host.status.set('success');
+      await settle();
+      expect(fading()).toBe(true);
+    });
+
+    it('fades the content in when it arrives after a quick load that showed nothing', async () => {
+      host.showDelay.set(DELAY);
+      host.status.set('loading');
+      await settle(DELAY - 1);
+      expect(projected()).toBeNull();
+
+      host.status.set('success');
+      await settle();
+      expect(fading()).toBe(true);
+    });
+
+    it('does not fade content kept on screen through a refresh', async () => {
+      host.keepContent.set(true);
+      host.status.set('success');
+      await settle();
+      host.status.set('loading');
+      await settle();
+      host.status.set('success');
+      await settle();
+      expect(fading()).toBe(false);
+    });
+
+    it('fades content that comes back after a refresh showed the skeleton', async () => {
+      host.status.set('success');
+      await settle();
+      host.status.set('loading');
+      await settle();
+      expect(projected()).toBeNull();
+
+      host.status.set('success');
+      await settle();
+      expect(fading()).toBe(true);
+    });
   });
 });

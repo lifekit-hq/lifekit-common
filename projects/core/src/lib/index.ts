@@ -7,6 +7,7 @@ export * from './errors/extract-error-code';
 export * from './rxjs/poll';
 
 // Routing
+export * from './routing/lk-view-transitions.feature';
 export * from './routing/tab-preload.strategy';
 
 // Services
