@@ -108,11 +108,11 @@ the `replaceUrl` writes a URL-synced store makes on each filter, search and rang
 fade the page is a frozen snapshot and taps and hovers go to the transition overlay.
 
 The transition is skipped (`skipTransition()`: the DOM updates at once) when the matched route configs
-are the same, so only params, query params or the fragment changed, when the reader prefers reduced
-motion. The other `withViewTransitions()` options, such as `skipInitialTransition`, pass through
-unchanged. An `onViewTransitionCreated` you pass runs only for a transition that goes ahead. The crossfade's timing
-(`--cmn-duration-medium`, `--cmn-ease-standard`) comes from the `::view-transition-old/new(root)` rule
-in `@lifekit-hq/tokens/theme.css`.
+are the same, so only params, query params or the fragment changed, or when the reader prefers
+reduced motion. The other `withViewTransitions()` options, such as `skipInitialTransition`, pass
+through unchanged. An `onViewTransitionCreated` you pass runs only for a transition that goes ahead.
+The crossfade's timing (`--cmn-duration-medium`, `--cmn-ease-standard`) comes from the
+`::view-transition-old/new(root)` rule in `@lifekit-hq/tokens/theme.css`.
 
 ## `@lifekit-hq/core/preferences`
 

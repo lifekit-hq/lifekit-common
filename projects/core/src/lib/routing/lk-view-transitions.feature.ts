@@ -16,10 +16,7 @@ const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
  * `replaceUrl` write). Compares the trees, not the URLs: `/detail/1` to `/detail/2` is the same
  * route, `/budgets` to `/settings` is not.
  */
-function isSameMatchedRoute(
-  from: ActivatedRouteSnapshot,
-  to: ActivatedRouteSnapshot
-): boolean {
+function isSameMatchedRoute(from: ActivatedRouteSnapshot, to: ActivatedRouteSnapshot): boolean {
   if (from.routeConfig !== to.routeConfig || from.outlet !== to.outlet) {
     return false;
   }
