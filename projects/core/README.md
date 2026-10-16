@@ -89,7 +89,7 @@ export const APP_ROUTES: Routes = [
   {path: 'settings', loadComponent: () => import('./settings')}, // on demand
 ];
 
-provideRouter(APP_ROUTES, withPreloading(TabPreloadStrategy), withViewTransitions());
+provideRouter(APP_ROUTES, withPreloading(TabPreloadStrategy), withLkViewTransitions());
 ```
 
 A chunk loads on an idle moment after the first navigation has painted (two animation frames, then
@@ -98,6 +98,21 @@ does not load at all when the reader asked to save data (`saveData`), the connec
 (`type === 'cellular'`) or slow (`2g`), and it checks again at the idle moment in case that changed
 while it waited. The Network Information API does not exist in Safari, so on iOS (where these apps
 run installed) the tabs always preload: nothing can be known, and the chunks are small.
+
+## `withLkViewTransitions()`
+
+The router's view-transition feature for lifekit apps. It is Angular's `withViewTransitions()`, with
+the page crossfade kept to navigations that change the matched route: a tab switch, opening a detail
+page. Use it in place of the bare `withViewTransitions()`, which crossfades every navigation, including
+the `replaceUrl` writes a URL-synced store makes on each filter, search and range change. During that
+fade the page is a frozen snapshot and taps and hovers go to the transition overlay.
+
+The transition is skipped (`skipTransition()`: the DOM updates at once) when the matched route configs
+are the same, so only params, query params or the fragment changed, when the reader prefers reduced
+motion, and on the first navigation unless `skipInitialTransition: false` is passed. An
+`onViewTransitionCreated` you pass runs only for a transition that goes ahead. The crossfade's timing
+(`--cmn-duration-medium`, `--cmn-ease-standard`) comes from the `::view-transition-old/new(root)` rule
+in `@lifekit-hq/tokens/theme.css`.
 
 ## `@lifekit-hq/core/preferences`
 

@@ -172,10 +172,10 @@ Durations and easings are tokens (M3 values), never literals: `--cmn-duration-sh
 A route change that moves between tab destinations or into a detail page is a View Transition, enabled once in the app config:
 
 ```ts
-provideRouter(APP_ROUTES, withPreloading(TabPreloadStrategy), withViewTransitions());
+provideRouter(APP_ROUTES, withPreloading(TabPreloadStrategy), withLkViewTransitions());
 ```
 
-The browser crossfades the old and new page by default, which already follows the rules above (opacity only, `prefers-reduced-motion` honoured by the global block in `theme.css`). Where a page shares an element with the next (a row and its detail header), name it with `view-transition-name` on both sides, never on a repeated element. Browsers without View Transitions (older Safari) navigate without one, so nothing may depend on it.
+`withLkViewTransitions()` (`@lifekit-hq/core`) crossfades only when the matched route changes: a navigation that changes only params, query params or the fragment (a filter chip, a search, a URL-synced store's `replaceUrl` write) skips the transition, so the page never fades as a frozen snapshot that swallows taps. It also skips under `prefers-reduced-motion`. The crossfade is opacity only, timed by `--cmn-duration-medium` and `--cmn-ease-standard` (`::view-transition-old/new(root)` in `theme.css`). Where a page shares an element with the next (a row and its detail header), name it with `view-transition-name` on both sides, never on a repeated element. Browsers without View Transitions (older Safari) navigate without one, so nothing may depend on it.
 
 ### Blur
 

@@ -74,7 +74,9 @@ const DATE_AND_TIME: Intl.DateTimeFormatOptions = {dateStyle: 'medium', timeStyl
  * - `showDelay` holds the loading indicator back so a quick load shows none; until it shows, the
  *   content already on screen stays put. `minDisplay` keeps an indicator that has shown up for at
  *   least that long, so it never flashes.
- * - `crossfade` fades the content in when it replaces the skeleton.
+ * - `crossfade` fades the content in when it replaces the skeleton (or nothing) during the
+ *   component's lifetime. Content already there at the first render (a revisit whose store kept
+ *   its data) paints at full opacity.
  *
  * Set `retryable` to render the built-in Retry button next to the error or offline message; it
  * emits `retry`. Leave it off when the page projects its own `[error-action]`.
@@ -170,6 +172,8 @@ export class AsyncStateComponent {
   private readonly gateOpen = signal(false);
   /** Whether the last settled view was real content, so a refresh has something to keep. */
   private readonly hadContent = signal(false);
+  /** The content was off screen at some point, so its next arrival fades in under `crossfade`. */
+  private readonly contentWasAbsent = signal(false);
   private showTimer: ReturnType<typeof setTimeout> | null = null;
   private hideTimer: ReturnType<typeof setTimeout> | null = null;
   private shownAt = 0;
@@ -195,6 +199,9 @@ export class AsyncStateComponent {
     () => !this.busy() && !this.showOfflinePanel() && !this.alertOnly()
   );
 
+  /** The projected content is on screen (inside the wrapper or not). */
+  private readonly contentShown = computed(() => this.showBody() && !this.showEmpty());
+
   public readonly status = input<AsyncStateStatus>('idle');
   public readonly errorMessage = input<string>('');
   public readonly errorPlacement = input<AsyncStateErrorPlacement>('replace');
@@ -217,7 +224,7 @@ export class AsyncStateComponent {
   public readonly showDelay = input<number>(0);
   /** Milliseconds a shown loading indicator stays up, so it never flashes. 0 hides it at once. */
   public readonly minDisplay = input<number>(0);
-  /** Fades the content in when it replaces the skeleton. */
+  /** Fades the content in when it replaces the skeleton; content there at first render does not fade. */
   public readonly crossfade = input(false, {transform: booleanAttribute});
   /** Draws the loading placeholder as a `cmn-skeleton` preset (`skeletonRows` rows) instead of bars. */
   public readonly skeletonShape = input<SkeletonShape | null>(null);
@@ -238,7 +245,7 @@ export class AsyncStateComponent {
   protected readonly bodyClasses = computed(() => {
     const motion =
       'transition-opacity duration-cmn-short ease-cmn-standard motion-reduce:transition-none';
-    const fade = this.crossfade() ? ' animate-cmn-fade-in' : '';
+    const fade = this.crossfade() && this.contentWasAbsent() ? ' animate-cmn-fade-in' : '';
     return `${motion}${fade}${this.dimmed() ? ' opacity-60' : ''}`;
   });
 
@@ -305,6 +312,16 @@ export class AsyncStateComponent {
       if (!this.busy()) {
         untracked(() => {
           this.hadContent.set(settled);
+        });
+      }
+    });
+
+    // Arm the crossfade once the content has been off screen (a skeleton, an empty state, an
+    // alert), so only content that replaces something fades; content at first render does not.
+    effect(() => {
+      if (!this.contentShown()) {
+        untracked(() => {
+          this.contentWasAbsent.set(true);
         });
       }
     });

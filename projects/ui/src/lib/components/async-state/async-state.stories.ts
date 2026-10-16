@@ -448,6 +448,8 @@ export const RefreshKeepsContent: Story = {
 /**
  * `showDelay` and `minDisplay` (200 and 400ms) with `crossfade`: the 120ms refresh shows no
  * indicator at all, a long one shows the skeleton for at least 400ms, and the content fades in.
+ * The content already loaded when the story opens (a revisit whose store kept its data) does not
+ * fade: only content that replaces the skeleton, or nothing, does.
  */
 export const RefreshCalm: Story = {
   render: () => ({template: '<cmn-story-refresh calm />'}),

@@ -301,7 +301,7 @@ Calm loading is opt-in: a region that sets none of the options below behaves as 
 | `keepContent`   | A refresh keeps the loaded content on screen, dimmed, instead of swapping it for the skeleton. A first load (nothing to keep) still shows the skeleton. The dim follows `showDelay`.                     |
 | `showDelay`     | Milliseconds a load must last before any loading indicator shows. Until then the content already on screen stays put, so a fast load shows no flash. `ASYNC_STATE_SHOW_DELAY_MS` is the standard's 200.  |
 | `minDisplay`    | Milliseconds an indicator that has shown stays up, so it never flashes away. `ASYNC_STATE_MIN_DISPLAY_MS` is the standard's 400. Not applied to a kept (dimmed) body: fresh content replaces it at once. |
-| `crossfade`     | The content fades in (`--cmn-duration-short`) when it replaces the skeleton; nothing under Reduce Motion.                                                                                                |
+| `crossfade`     | The content fades in (`--cmn-duration-short`) when it replaces the skeleton; content already there at first render paints at once; nothing under Reduce Motion.                                          |
 | `skeletonShape` | Draws the placeholder as a `cmn-skeleton` preset (`skeletonRows` rows) instead of the default bars; a projected `[skeleton]` still wins.                                                                 |
 
 A skeleton goes on a container, never inside the text it stands for. `cmn-skeleton` draws a bar by
@@ -377,7 +377,7 @@ that holds each one. A rule marked "follow-up" is the target; its parts and chec
 6. **Continuity.** Data on screen stays while it refreshes (`keepContent`); a tab return paints at
    once and revalidates; scroll restore waits for the data; tab destinations preload on idle, after
    first paint, except under Save-Data or on a metered connection (`TabPreloadStrategy`, `projects/core/README.md`),
-   and a tab switch is a View Transition (`withViewTransitions()`, `DESIGN.md` Motion). Sources:
+   and a tab switch is a View Transition (`withLkViewTransitions()`, `DESIGN.md` Motion). Sources:
    RFC 5861; angular.dev service worker `dataGroups`, route preloading, `@defer`, View Transitions;
    HIG Loading. Check today: back restores scroll.
 7. **Motion.** Durations and easings come from tokens (`--cmn-duration-short|medium|long`: 150,
