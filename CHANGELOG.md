@@ -1,5 +1,18 @@
 # Changelog
 
+## [3.5.0](https://github.com/lifekit-hq/lifekit-common/compare/v3.4.0...v3.5.0) (2026-10-16)
+
+
+### Features
+
+* **ui:** add status dot to cmn-institution-avatar and cmn-disclosure-row ([#167](https://github.com/lifekit-hq/lifekit-common/issues/167)) ([1259fbc](https://github.com/lifekit-hq/lifekit-common/commit/1259fbc7b29915055bfd5144e71143a084ace76a))
+
+
+### Bug Fixes
+
+* **core:** crossfade route changes only and stop async-state replaying fade-in on revisit ([#165](https://github.com/lifekit-hq/lifekit-common/issues/165)) ([719ce70](https://github.com/lifekit-hq/lifekit-common/commit/719ce70bd49cbce46d090e8ec23f3a31013d100b))
+* **ui:** cmn-async-state [crossfade] fades only content that replaces a ([719ce70](https://github.com/lifekit-hq/lifekit-common/commit/719ce70bd49cbce46d090e8ec23f3a31013d100b))
+
 ## [3.4.0](https://github.com/lifekit-hq/lifekit-common/compare/v3.3.1...v3.4.0) (2026-10-14)
 
 
