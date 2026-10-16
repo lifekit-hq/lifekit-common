@@ -16,7 +16,7 @@ const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
  * `replaceUrl` write). Compares the trees, not the URLs: `/detail/1` to `/detail/2` is the same
  * route, `/budgets` to `/settings` is not.
  */
-export function isSameMatchedRoute(
+function isSameMatchedRoute(
   from: ActivatedRouteSnapshot,
   to: ActivatedRouteSnapshot
 ): boolean {
@@ -44,8 +44,7 @@ function prefersReducedMotion(): boolean {
  * never held by the transition overlay) when:
  *
  * - the matched route configs are the same, so only params, query params or the fragment changed;
- * - the reader prefers reduced motion;
- * - it is the app's first navigation, unless `skipInitialTransition: false` is passed.
+ * - the reader prefers reduced motion.
  *
  * `onViewTransitionCreated` runs, in an injection context, only for a transition that goes ahead.
  * The crossfade's duration and easing come from the motion tokens in `@lifekit-hq/tokens`
@@ -57,9 +56,9 @@ function prefersReducedMotion(): boolean {
 export function withLkViewTransitions(
   options: ViewTransitionsFeatureOptions = {}
 ): ViewTransitionsFeature {
-  const {skipInitialTransition = true, onViewTransitionCreated} = options;
+  const {onViewTransitionCreated} = options;
   return withViewTransitions({
-    skipInitialTransition,
+    ...options,
     onViewTransitionCreated: (info: ViewTransitionInfo) => {
       if (isSameMatchedRoute(info.from, info.to) || prefersReducedMotion()) {
         info.transition.skipTransition();

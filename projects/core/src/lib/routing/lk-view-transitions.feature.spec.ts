@@ -92,19 +92,19 @@ describe('withLkViewTransitions', () => {
     expect(started.at(-1)?.skipTransition).not.toHaveBeenCalled();
   });
 
-  it('skips the first navigation by default', async () => {
+  it('crossfades the first navigation by default', async () => {
     const {harness} = await setup();
-    await harness.navigateByUrl('/budgets');
-
-    expect(started).toHaveLength(0);
-  });
-
-  it('crossfades the first navigation when skipInitialTransition is false', async () => {
-    const {harness} = await setup({skipInitialTransition: false});
     await harness.navigateByUrl('/budgets');
 
     expect(started).toHaveLength(1);
     expect(started[0].skipTransition).not.toHaveBeenCalled();
+  });
+
+  it('passes skipInitialTransition through to the router', async () => {
+    const {harness} = await setup({skipInitialTransition: true});
+    await harness.navigateByUrl('/budgets');
+
+    expect(started).toHaveLength(0);
   });
 
   it.each([

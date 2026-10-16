@@ -109,8 +109,8 @@ fade the page is a frozen snapshot and taps and hovers go to the transition over
 
 The transition is skipped (`skipTransition()`: the DOM updates at once) when the matched route configs
 are the same, so only params, query params or the fragment changed, when the reader prefers reduced
-motion, and on the first navigation unless `skipInitialTransition: false` is passed. An
-`onViewTransitionCreated` you pass runs only for a transition that goes ahead. The crossfade's timing
+motion. The other `withViewTransitions()` options, such as `skipInitialTransition`, pass through
+unchanged. An `onViewTransitionCreated` you pass runs only for a transition that goes ahead. The crossfade's timing
 (`--cmn-duration-medium`, `--cmn-ease-standard`) comes from the `::view-transition-old/new(root)` rule
 in `@lifekit-hq/tokens/theme.css`.
 
