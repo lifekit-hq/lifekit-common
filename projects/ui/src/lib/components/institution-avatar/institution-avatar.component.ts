@@ -53,10 +53,11 @@ export type InstitutionAvatarStatus = keyof typeof STATUS_CLASSES;
     @if (status(); as status) {
       <span
         [class]="statusClasses()"
-        [attr.aria-label]="statusLabel()"
-        [attr.title]="statusLabel()"
+        [attr.aria-label]="statusLabel() || null"
+        [attr.title]="statusLabel() || null"
+        [attr.role]="statusLabel() ? 'img' : null"
+        [attr.aria-hidden]="statusLabel() ? null : 'true'"
         data-testid="avatar-status"
-        role="img"
       ></span>
     }
   `,

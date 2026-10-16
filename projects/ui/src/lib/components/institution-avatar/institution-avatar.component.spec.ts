@@ -136,6 +136,19 @@ describe('InstitutionAvatarComponent', () => {
       expect(dot()?.getAttribute('title')).toBe('Synced 2h ago');
     });
 
+    it('exposes a labelled dot as an image', () => {
+      setupWithStatus('success', 'Synced 2h ago');
+      expect(dot()?.getAttribute('role')).toBe('img');
+      expect(dot()?.hasAttribute('aria-hidden')).toBe(false);
+    });
+
+    it.each([null, ''])('hides an unlabelled dot (label %j) from assistive tech', label => {
+      setupWithStatus('warning', label);
+      expect(dot()?.hasAttribute('role')).toBe(false);
+      expect(dot()?.hasAttribute('aria-label')).toBe(false);
+      expect(dot()?.getAttribute('aria-hidden')).toBe('true');
+    });
+
     it('keeps the avatar aria-label on the first span', () => {
       setupWithStatus('error', 'Reconnect needed');
       expect(fixture.nativeElement.querySelector('span').getAttribute('aria-label')).toBe(
