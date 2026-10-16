@@ -14,12 +14,27 @@ const SIZE_CLASSES = {
   lg: 'h-9 w-9 text-cmn-sm',
 } as const;
 
+const STATUS_BASE_CLASSES =
+  'absolute -right-0.5 -bottom-0.5 h-2 w-2 rounded-full ring-2 ring-surface-card';
+
+const STATUS_CLASSES = {
+  success: 'bg-status-success',
+  warning: 'bg-status-warning',
+  error: 'bg-status-error',
+  neutral: 'bg-text-disabled',
+} as const;
+
 export type InstitutionAvatarSize = keyof typeof SIZE_CLASSES;
+export type InstitutionAvatarStatus = keyof typeof STATUS_CLASSES;
 
 @Component({
   selector: 'cmn-institution-avatar',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgOptimizedImage],
+  host: {
+    '[class.relative]': '!!status()',
+    '[class.inline-flex]': '!!status()',
+  },
   template: `
     <span [class]="classes()" [attr.aria-label]="name()">
       @if (showLogo()) {
@@ -35,6 +50,16 @@ export type InstitutionAvatarSize = keyof typeof SIZE_CLASSES;
         {{ initials() }}
       }
     </span>
+    @if (status(); as status) {
+      <span
+        [class]="statusClasses()"
+        [attr.aria-label]="statusLabel() || null"
+        [attr.title]="statusLabel() || null"
+        [attr.role]="statusLabel() ? 'img' : null"
+        [attr.aria-hidden]="statusLabel() ? null : 'true'"
+        data-testid="avatar-status"
+      ></span>
+    }
   `,
 })
 export class InstitutionAvatarComponent {
@@ -45,11 +70,21 @@ export class InstitutionAvatarComponent {
   /** Optional remote logo. Falls back to initials if absent or it fails to load. */
   public readonly logoUrl = input<string | null>(null);
 
+  /** Optional state dot on the bottom-right corner. Null renders no dot. */
+  public readonly status = input<InstitutionAvatarStatus | null>(null);
+  /** Accessible name (and tooltip) for the dot, so state is never colour-only. */
+  public readonly statusLabel = input<string | null>(null);
+
   public readonly initials = computed(() => InstitutionAvatarComponent.deriveInitials(this.name()));
 
   public readonly showLogo = computed(() => !!this.logoUrl() && !this.logoFailed());
 
   public readonly classes = computed(() => `${BASE_CLASSES} ${SIZE_CLASSES[this.size()]}`);
+
+  public readonly statusClasses = computed(() => {
+    const status = this.status();
+    return status ? `${STATUS_BASE_CLASSES} ${STATUS_CLASSES[status]}` : '';
+  });
 
   private static deriveInitials(value: string): string {
     const trimmed = value?.trim() ?? '';

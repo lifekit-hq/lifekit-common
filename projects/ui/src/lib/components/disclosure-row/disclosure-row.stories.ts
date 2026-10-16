@@ -12,6 +12,8 @@ const meta: Meta<DisclosureRowComponent> = {
     amount: {control: 'number'},
     currency: {control: 'text'},
     avatarName: {control: 'text'},
+    avatarStatus: {control: 'select', options: [null, 'success', 'warning', 'error', 'neutral']},
+    avatarStatusLabel: {control: 'text'},
     open: {control: 'boolean'},
   },
 };
@@ -113,6 +115,19 @@ export const FullFeatures: Story = {
             <p class="text-sm text-text-primary">Checking ••••1234 — $12,450.00</p>
           </div>
         </cmn-disclosure-row>
+      </div>
+    `,
+  }),
+};
+
+export const AvatarStatusDots: Story = {
+  render: () => ({
+    template: `
+      <div class="border border-border-default rounded-cmn-md overflow-hidden">
+        <cmn-disclosure-row label="Chase Bank" sublabel="3 accounts" avatarName="Chase Bank" avatarStatus="success" avatarStatusLabel="Synced 2h ago" [amount]="8540.22" currency="USD" [open]="false"></cmn-disclosure-row>
+        <cmn-disclosure-row label="Wells Fargo" sublabel="1 account · Retrying 2h ago" avatarName="Wells Fargo" avatarStatus="warning" avatarStatusLabel="Retrying 2h ago" [amount]="12450" currency="USD" [open]="false"></cmn-disclosure-row>
+        <cmn-disclosure-row label="Monobank" sublabel="2 cards · Reconnect needed" avatarName="Monobank" avatarStatus="error" avatarStatusLabel="Reconnect needed" [amount]="-917.82" currency="USD" [open]="false"></cmn-disclosure-row>
+        <cmn-disclosure-row label="Inzhur" sublabel="5 assets · Not synced yet" avatarName="Inzhur" avatarStatus="neutral" avatarStatusLabel="Not synced yet" [amount]="3008" currency="USD" [open]="false"></cmn-disclosure-row>
       </div>
     `,
   }),

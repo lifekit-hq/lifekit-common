@@ -58,6 +58,24 @@ describe('DisclosureRowComponent', () => {
     expect(avatar.componentInstance.name()).toBe('Chase Bank');
   });
 
+  it('should render no status dot on the avatar by default', () => {
+    fixture.componentRef.setInput('avatarName', 'Chase Bank');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[data-testid="avatar-status"]')).toBeNull();
+  });
+
+  it('should pass avatarStatus and avatarStatusLabel through to the avatar', () => {
+    fixture.componentRef.setInput('avatarName', 'Chase Bank');
+    fixture.componentRef.setInput('avatarStatus', 'error');
+    fixture.componentRef.setInput('avatarStatusLabel', 'Reconnect needed');
+    fixture.detectChanges();
+    const dot: HTMLElement | null = fixture.nativeElement.querySelector(
+      '[data-testid="avatar-status"]'
+    );
+    expect(dot?.className).toContain('bg-status-error');
+    expect(dot?.getAttribute('aria-label')).toBe('Reconnect needed');
+  });
+
   it('should not render the amount block by default', () => {
     const amountEl: HTMLElement | null = fixture.nativeElement.querySelector('.tabular-nums');
     expect(amountEl).toBeNull();

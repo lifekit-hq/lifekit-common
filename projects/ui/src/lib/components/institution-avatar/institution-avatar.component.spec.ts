@@ -99,4 +99,61 @@ describe('InstitutionAvatarComponent', () => {
     expect(span.querySelector('img')).toBeNull();
     expect(span.textContent?.trim()).toBe('RE');
   });
+
+  describe('status dot', () => {
+    const dot = (): HTMLElement | null =>
+      fixture.nativeElement.querySelector('[data-testid="avatar-status"]');
+
+    const setupWithStatus = (status: string | null, label: string | null = null): void => {
+      fixture = TestBed.createComponent(InstitutionAvatarComponent);
+      fixture.componentRef.setInput('name', 'Revolut');
+      fixture.componentRef.setInput('status', status);
+      fixture.componentRef.setInput('statusLabel', label);
+      fixture.detectChanges();
+    };
+
+    it('renders no dot and leaves the host unchanged without a status', () => {
+      setupWithStatus(null);
+      expect(dot()).toBeNull();
+      expect(fixture.nativeElement.classList.contains('relative')).toBe(false);
+    });
+
+    it.each([
+      ['success', 'bg-status-success'],
+      ['warning', 'bg-status-warning'],
+      ['error', 'bg-status-error'],
+      ['neutral', 'bg-text-disabled'],
+    ])('renders the %s dot with %s and a surface ring', (status, colour) => {
+      setupWithStatus(status);
+      expect(dot()?.className).toContain(colour);
+      expect(dot()?.className).toContain('ring-surface-card');
+      expect(fixture.nativeElement.classList.contains('relative')).toBe(true);
+    });
+
+    it('exposes the status label as aria-label and tooltip', () => {
+      setupWithStatus('success', 'Synced 2h ago');
+      expect(dot()?.getAttribute('aria-label')).toBe('Synced 2h ago');
+      expect(dot()?.getAttribute('title')).toBe('Synced 2h ago');
+    });
+
+    it('exposes a labelled dot as an image', () => {
+      setupWithStatus('success', 'Synced 2h ago');
+      expect(dot()?.getAttribute('role')).toBe('img');
+      expect(dot()?.hasAttribute('aria-hidden')).toBe(false);
+    });
+
+    it.each([null, ''])('hides an unlabelled dot (label %j) from assistive tech', label => {
+      setupWithStatus('warning', label);
+      expect(dot()?.hasAttribute('role')).toBe(false);
+      expect(dot()?.hasAttribute('aria-label')).toBe(false);
+      expect(dot()?.getAttribute('aria-hidden')).toBe('true');
+    });
+
+    it('keeps the avatar aria-label on the first span', () => {
+      setupWithStatus('error', 'Reconnect needed');
+      expect(fixture.nativeElement.querySelector('span').getAttribute('aria-label')).toBe(
+        'Revolut'
+      );
+    });
+  });
 });
