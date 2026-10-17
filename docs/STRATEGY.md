@@ -221,6 +221,10 @@ token-based chrome: size variants (`sm`/`md`/`lg`/`full`) via `SIZE_CLASSES`, op
 bar with close button, `aria-modal` and `role="dialog"`, and `disableClose` guard. A companion
 `CmnConfirmDialogComponent` and `CmnDialogActionsComponent` handle the common confirm pattern.
 The bare variant (`dialog-bare-container.component.ts`) omits the chrome for custom layouts.
+Below `md` the container re-presents itself per the `phone` open option: `'sheet'` (default, grabber,
+swipe and backdrop dismiss, keyboard-safe), `'full-screen'` (default for `size: 'full'`) or
+`'action-sheet'` (`confirm()`, with `cancelLabel`). It shares the drawer's pull-down controller
+(`CmnSheetDrag`); see "Dialogs on a phone" in `PHONE-CONTRACT.md`.
 
 **Verdict: keep-own.** CDK Dialog provides focus trapping, WAI-ARIA compliance, keyboard
 dismiss, and scroll blocking for free. ng-zorro's `nz-modal` would duplicate this at larger

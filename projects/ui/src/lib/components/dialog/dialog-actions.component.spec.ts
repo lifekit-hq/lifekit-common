@@ -1,6 +1,8 @@
+import {signal} from '@angular/core';
 import {type ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {type DialogActionsAlign, DialogActionsComponent} from './dialog-actions.component';
+import {CMN_DIALOG_PRESENTATION, type CmnDialogPresentation} from './dialog-config';
 
 describe('DialogActionsComponent', () => {
   let fixture: ComponentFixture<DialogActionsComponent>;
@@ -38,5 +40,25 @@ describe('DialogActionsComponent', () => {
   it('applies top border separator', () => {
     const div: HTMLDivElement = fixture.nativeElement.querySelector('div');
     expect(div.className).toContain('border-t');
+  });
+
+  describe.each<[CmnDialogPresentation, string[], string[]]>([
+    ['dialog', ['border-t'], ['sticky', 'flex-col']],
+    ['sheet', ['sticky', '-bottom-cmn-6', 'bg-surface-card'], ['flex-col']],
+    ['full-screen', ['sticky', '-bottom-cmn-6'], ['flex-col']],
+    ['action-sheet', ['flex-col', 'items-stretch'], ['sticky']],
+  ])('in a "%s" presentation', (presentation, present, absent) => {
+    it('lays the actions out for it', () => {
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        imports: [DialogActionsComponent],
+        providers: [{provide: CMN_DIALOG_PRESENTATION, useValue: signal(presentation)}],
+      });
+      const f = TestBed.createComponent(DialogActionsComponent);
+      f.detectChanges();
+      const classes = (f.nativeElement.querySelector('div') as HTMLDivElement).classList;
+      present.forEach(c => expect(classes.contains(c)).toBe(true));
+      absent.forEach(c => expect(classes.contains(c)).toBe(false));
+    });
   });
 });

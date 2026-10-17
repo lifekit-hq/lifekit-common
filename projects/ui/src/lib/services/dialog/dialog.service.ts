@@ -1,6 +1,6 @@
 import {Dialog, type DialogConfig, type DialogRef} from '@angular/cdk/dialog';
 import {type ComponentType} from '@angular/cdk/portal';
-import {inject, Injectable} from '@angular/core';
+import {inject, Injectable, signal} from '@angular/core';
 import {map, type Observable} from 'rxjs';
 
 import {
@@ -9,6 +9,7 @@ import {
 } from '../../components/dialog/confirm-dialog.component';
 import {
   CMN_DIALOG_DATA,
+  CMN_DIALOG_PRESENTATION,
   CmnDialogConfig,
   type CmnDialogOpenConfig,
 } from '../../components/dialog/dialog-config';
@@ -30,6 +31,8 @@ export class CmnDialogService {
     cdkConfig.autoFocus = config.autoFocus ?? 'first-tabbable';
     cdkConfig.title = config.title;
     cdkConfig.size = config.size ?? 'md';
+    cdkConfig.phone = config.phone ?? (cdkConfig.size === 'full' ? 'full-screen' : 'sheet');
+    cdkConfig.cancelLabel = config.cancelLabel ?? 'Cancel';
     cdkConfig.hasBackdrop = config.hasBackdrop ?? true;
     cdkConfig.panelClass = config.panelClass ?? [
       'cmn-dialog-panel',
@@ -40,7 +43,16 @@ export class CmnDialogService {
     cdkConfig.viewContainerRef = config.viewContainerRef;
     cdkConfig.injector = config.injector;
     const dataValue = config.data ?? null;
-    cdkConfig.providers = () => [{provide: CMN_DIALOG_DATA, useValue: dataValue}];
+    cdkConfig.providers = (_ref, _config, container) => [
+      {provide: CMN_DIALOG_DATA, useValue: dataValue},
+      {
+        provide: CMN_DIALOG_PRESENTATION,
+        useValue:
+          container instanceof CmnDialogContainerComponent
+            ? container.presentation
+            : signal('dialog' as const),
+      },
+    ];
 
     const ref = this.cdkDialog.open<R, D, C>(
       component,
@@ -54,6 +66,8 @@ export class CmnDialogService {
       data,
       title: data.title,
       size: 'sm',
+      phone: 'action-sheet',
+      cancelLabel: data.cancelLabel,
     })
       .afterClosed()
       .pipe(map(result => result === true));
