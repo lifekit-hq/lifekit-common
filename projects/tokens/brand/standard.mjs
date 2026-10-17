@@ -36,8 +36,11 @@ export const TITLE_SEPARATOR = ' · ';
 /** Longest `short_name` that fits under a home-screen icon without truncation. */
 export const SHORT_NAME_MAX = 12;
 
-/** The viewport meta every app ships. */
-export const VIEWPORT = 'width=device-width, initial-scale=1, viewport-fit=cover';
+/**
+ * The viewport meta every app ships. `maximum-scale=1` stops iOS Safari zooming the page into a
+ * focused field; deliberate pinch zoom stays (iOS ignores the cap for it), so never `user-scalable=no`.
+ */
+export const VIEWPORT = 'width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover';
 
 export {BRAND_APPS};
 

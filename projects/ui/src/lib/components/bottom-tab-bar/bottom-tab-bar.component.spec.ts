@@ -158,13 +158,14 @@ describe('BottomTabBarComponent', () => {
       expect(tabButtons()[0]?.classList).not.toContain('bg-accent-subtle');
     });
 
-    it('floats as an inset translucent pill above the safe-area inset', () => {
+    it('sits on the bottom edge: 49px of items, then only the safe-area inset, no margin', () => {
       fixture.componentRef.setInput('floating', true);
       fixture.detectChanges();
-      expect(nav().classList).toContain('rounded-cmn-full');
+      expect(nav().classList).toContain('h-[calc(49px+env(safe-area-inset-bottom))]');
+      expect(nav().classList).toContain('pb-[env(safe-area-inset-bottom)]');
       expect(nav().classList).toContain('backdrop-blur-md');
-      expect(nav().classList).toContain('mb-[calc(env(safe-area-inset-bottom)+8px)]');
-      expect(nav().classList).not.toContain('border-t');
+      expect(nav().classList).toContain('border-t');
+      expect(nav().className).not.toMatch(/(^|\s)(m[bxy]?|rounded)-/);
     });
 
     it('highlights only the active tab with a pill when floating', () => {

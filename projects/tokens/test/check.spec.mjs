@@ -70,10 +70,11 @@ describe('checkHead', () => {
     ],
     ['missing color-scheme', h => h.replace(/<meta name="color-scheme"[^>]*>/, ''), 'color-scheme'],
     [
-      'zoom-locked viewport',
-      h => h.replace('viewport-fit=cover', 'viewport-fit=cover, maximum-scale=1'),
+      'zoom-disabled viewport',
+      h => h.replace('maximum-scale=1', 'maximum-scale=1, user-scalable=no'),
       'viewport',
     ],
+    ['viewport without maximum-scale', h => h.replace(' maximum-scale=1,', ''), 'viewport'],
     ['missing apple-touch-icon', h => h.replace(/<link rel="apple-touch-icon"[^>]*>/, ''), 'links'],
     ['ico without sizes', h => h.replace(' sizes="32x32"', ''), 'links'],
     ['blank data: favicon', h => `${h}\n<link rel="icon" href="data:," />`, 'links'],

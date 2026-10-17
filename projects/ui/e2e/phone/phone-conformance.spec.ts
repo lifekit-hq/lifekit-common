@@ -1,5 +1,18 @@
 import {expect, type Page, test} from '@playwright/test';
 
+import {
+  type CheckMode,
+  LAYOUT_READY,
+  layoutStory,
+  MIN_TARGET,
+  openStory,
+  report,
+  settleFrames,
+  TARGETS_READY,
+  type Theme,
+  undersizedTargets,
+} from './phone-helpers';
+
 // Checks docs/PHONE-CONTRACT.md against the built app-layout stories. Every violation becomes a
 // `violation` annotation (collected by summary-reporter.ts). How it counts depends on the check:
 // - `gate` (default): fails under PHONE_CONFORMANCE=gate, which CI runs; report-only without it.
@@ -7,9 +20,6 @@ import {expect, type Page, test} from '@playwright/test';
 // - `advisory`: never fails, even under gate. Kept for what the contract does not yet promise
 //   (touch-sized controls in the tablet and landscape chrome, which keeps desktop density).
 
-const GATING = process.env['PHONE_CONFORMANCE'] === 'gate';
-
-const MIN_TARGET = 44;
 const MIN_TEXT = 12;
 const SCROLL_PROBE = 300;
 const SURFACE_TOLERANCE = 1;
@@ -40,23 +50,13 @@ const THEME_COLOR_METAS = [
   {content: '#0c1113', media: '(prefers-color-scheme: dark)'},
 ];
 
-type Theme = 'light' | 'dark';
-
-const layoutStory = (story: string) => `components-app-layout--${story}`;
-const ROUTED_STORY = 'conformance-routed-app-layout--routed';
-// Chips and a link in a card: small controls the layout stories do not hold.
-const TARGETS_STORY = 'conformance-touch-targets--targets';
-const PALETTE_STORY = 'components-command-palette--playground';
-const LAYOUT_READY = 'cmn-app-layout > div';
-const TARGETS_READY = 'cmn-touch-targets';
-
+/** Opens a story with the head carrying the browser chrome metas, as an app's index.html does. */
 async function open(
   page: Page,
   storyId: string,
   theme: Theme = 'light',
   ready: string = LAYOUT_READY
-) {
-  // The head carries the browser chrome metas, as an app's index.html does.
+): Promise<void> {
   await page.addInitScript(metas => {
     document.addEventListener('DOMContentLoaded', () => {
       for (const {content, media} of metas) {
@@ -68,47 +68,15 @@ async function open(
       }
     });
   }, THEME_COLOR_METAS);
-  await page.goto(`/iframe.html?id=${storyId}&viewMode=story&globals=theme:${theme}`);
-  await page.waitForSelector(ready, {state: 'visible'});
+  await openStory(page, storyId, theme, ready);
 }
 
-type CheckMode = 'gate' | 'enforce' | 'advisory';
-
-/** Records violations; fails by the check's mode (see the head of this file). */
-function report(violations: string[], mode: CheckMode = 'gate') {
-  for (const detail of violations) {
-    test.info().annotations.push({type: 'violation', description: detail});
-  }
-  if (mode === 'enforce' || (mode === 'gate' && GATING)) {
-    expect(violations).toEqual([]);
-  }
-}
-
+const ROUTED_STORY = 'conformance-routed-app-layout--routed';
+// Chips and a link in a card: small controls the layout stories do not hold.
+const TARGETS_STORY = 'conformance-touch-targets--targets';
+const PALETTE_STORY = 'components-command-palette--playground';
 /** Phone chrome enforces touch targets; the tablet and landscape chrome only advise them. */
 const targetMode = (touchChrome: boolean): CheckMode => (touchChrome ? 'enforce' : 'advisory');
-
-/** Interactive controls that measure under `min` px in either direction, hit-slop included. */
-async function undersizedTargets(page: Page, min: number): Promise<string[]> {
-  return page.evaluate(limit => {
-    const found: string[] = [];
-    const selector = 'button, a[href], [role=button], [role=tab], input, select';
-    for (const el of document.querySelectorAll(selector)) {
-      const r = el.getBoundingClientRect();
-      // A control may press wider than it draws: `.cmn-hit-slop` paints its target in ::after
-      const slop = getComputedStyle(el, '::after');
-      const slopped = slop.content !== 'none' && slop.position === 'absolute';
-      const width = Math.max(r.width, slopped ? parseFloat(slop.width) : 0);
-      const height = Math.max(r.height, slopped ? parseFloat(slop.height) : 0);
-      if (r.width && r.height && (width < limit || height < limit)) {
-        const label = (el.getAttribute('aria-label') ?? el.textContent ?? '').trim();
-        found.push(
-          `${el.tagName.toLowerCase()}[${label.slice(0, 24)}] ${Math.round(width)}x${Math.round(height)}`
-        );
-      }
-    }
-    return found;
-  }, min);
-}
 
 /** Keyboard hints (`kbd`) that are on screen. */
 async function visibleKeyHints(page: Page): Promise<string[]> {
@@ -561,13 +529,6 @@ const LIST_STORIES = [
 const STICKY_SECTION = 2;
 // How far past the pin point the section is scrolled, so its heading is held by sticky.
 const STICKY_PROBE = 80;
-
-/** Waits two frames, so measured insets and sticky offsets have settled. */
-async function settleFrames(page: Page) {
-  await page.evaluate(
-    () => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
-  );
-}
 
 /** The bottom edge of the pinned chrome: the top bar, or the notices stuck under it. */
 async function pinnedChromeBottom(page: Page): Promise<number> {

@@ -13,10 +13,11 @@ export const MAX_BOTTOM_TABS = 4;
  */
 const TAB_BASE_CLASSES =
   'flex min-h-cmn-touch min-w-fit flex-1 flex-col items-center justify-center gap-0.5 px-0.5 ' +
-  'pb-cmn-1 pt-cmn-2 transition-colors focus:outline-none focus-visible:bg-surface-raised ' +
+  'transition-colors focus:outline-none focus-visible:bg-surface-raised ' +
   'focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-border-focus';
+const TAB_DOCKED_CLASSES = 'pb-cmn-1 pt-cmn-2';
 const TAB_LABEL_CLASSES = 'whitespace-nowrap font-label text-cmn-xs font-medium leading-tight';
-const TAB_FLOATING_CLASSES = 'my-0.5 rounded-cmn-full';
+const TAB_FLOATING_CLASSES = 'my-0.5 rounded-cmn-full py-1';
 const TAB_ACTIVE_CLASSES = 'text-accent-default';
 const TAB_FLOATING_ACTIVE_CLASSES = 'bg-accent-subtle';
 const TAB_INACTIVE_CLASSES = 'text-text-secondary hover:text-text-primary';
@@ -24,14 +25,15 @@ const TAB_INACTIVE_CLASSES = 'text-text-secondary hover:text-text-primary';
 const NAV_DOCKED_CLASSES =
   'flex border-t border-border-default bg-surface-card pb-[env(safe-area-inset-bottom)]';
 /**
- * Inset pill above the bottom safe-area inset: translucent and blurred so content scrolling
- * under it shows through. Keep its 64px height (px, so the host root font size cannot shrink
- * it) and 8px bottom gap in sync with MAIN_OVERLAY_BOTTOM_CLASSES in app-layout, which pads
- * main to clear it.
+ * The iOS tab bar: edge to edge on the bottom edge, 49pt of items and only the bottom safe-area
+ * inset below them, no margin. Translucent and blurred so content scrolling under it shows
+ * through; the active tab keeps its pill. Keep the 49px (px, so the host root font size cannot
+ * shrink it) in step with the shell's measured inset, which pads main to clear the bar.
  */
 const NAV_FLOATING_CLASSES =
-  'mx-cmn-3 mb-[calc(env(safe-area-inset-bottom)+8px)] flex h-[64px] rounded-cmn-full border border-border-default px-cmn-1 ' +
-  'bg-[color-mix(in_srgb,var(--color-surface-card)_80%,transparent)] shadow-cmn-md backdrop-blur-md';
+  'flex h-[calc(49px+env(safe-area-inset-bottom))] border-t border-border-default px-cmn-1 ' +
+  'pb-[env(safe-area-inset-bottom)] ' +
+  'bg-[color-mix(in_srgb,var(--color-surface-card)_80%,transparent)] backdrop-blur-md';
 
 /**
  * Phone navigation: up to four primary tabs, plus a "More" tab when the app declares a More
@@ -91,7 +93,7 @@ export class BottomTabBarComponent {
    */
   public readonly more = input<NavItem | undefined>(undefined);
   public readonly activeRoute = input<string>('');
-  /** Floats the bar as an inset, translucent pill instead of docking it edge to edge. */
+  /** Makes the bar translucent and blurred, over the content, instead of an opaque docked bar. */
   public readonly floating = input<boolean>(false);
 
   public readonly navClick = output<NavItem>();
@@ -112,7 +114,7 @@ export class BottomTabBarComponent {
   public tabClass(active: boolean): string {
     const state = active ? TAB_ACTIVE_CLASSES : TAB_INACTIVE_CLASSES;
     if (!this.floating()) {
-      return `${TAB_BASE_CLASSES} ${state}`;
+      return `${TAB_BASE_CLASSES} ${TAB_DOCKED_CLASSES} ${state}`;
     }
     const floatingState = active ? ` ${TAB_FLOATING_ACTIVE_CLASSES}` : '';
     return `${TAB_BASE_CLASSES} ${TAB_FLOATING_CLASSES} ${state}${floatingState}`;

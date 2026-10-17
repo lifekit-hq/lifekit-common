@@ -69,7 +69,7 @@ export const NoMore: Story = {
   args: {more: undefined},
 };
 
-/** `floating`: an inset, translucent pill with the active tab highlighted, as cmn-app-layout's phone overlay uses. */
+/** `floating`: the iOS bar, edge to edge, 49pt of items on the bottom edge, translucent, with the active tab in a pill, as cmn-app-layout's phone overlay uses. */
 export const Floating: Story = {
   args: {floating: true},
 };
