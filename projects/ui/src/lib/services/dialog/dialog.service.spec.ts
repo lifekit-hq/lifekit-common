@@ -1,6 +1,7 @@
 import {Dialog} from '@angular/cdk/dialog';
 import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {TestBed} from '@angular/core/testing';
+import {of} from 'rxjs';
 
 import {CmnDialogContainerComponent} from '../../components/dialog/dialog-container.component';
 import {CmnDialogService} from './dialog.service';
@@ -56,5 +57,47 @@ describe('CmnDialogService', () => {
     const cfg = openSpy.mock.calls[0][1];
     expect(cfg.disableClose).toBe(false);
     expect(cfg.autoFocus).toBe('first-tabbable');
+  });
+
+  it('presents a sheet on phones by default', () => {
+    service.open(HostComponent);
+    expect(openSpy.mock.calls[0][1].phone).toBe('sheet');
+  });
+
+  it('presents a full-size dialog full-screen on phones', () => {
+    service.open(HostComponent, {size: 'full'});
+    expect(openSpy.mock.calls[0][1].phone).toBe('full-screen');
+  });
+
+  it('lets the caller choose the phone presentation, even for a full-size dialog', () => {
+    service.open(HostComponent, {size: 'full', phone: 'sheet'});
+    expect(openSpy.mock.calls[0][1].phone).toBe('sheet');
+    service.open(HostComponent, {phone: 'action-sheet', cancelLabel: 'Keep it'});
+    expect(openSpy.mock.calls[1][1].phone).toBe('action-sheet');
+    expect(openSpy.mock.calls[1][1].cancelLabel).toBe('Keep it');
+  });
+
+  it('defaults the action sheet Cancel label', () => {
+    service.open(HostComponent);
+    expect(openSpy.mock.calls[0][1].cancelLabel).toBe('Cancel');
+  });
+
+  it('confirm() opens an action sheet carrying the cancel label', () => {
+    openSpy.mockReturnValue({closed: of(true)} as never);
+    service.confirm({message: 'Disconnect?', cancelLabel: 'Keep it'});
+    const cfg = openSpy.mock.calls[0][1];
+    expect(cfg.phone).toBe('action-sheet');
+    expect(cfg.cancelLabel).toBe('Keep it');
+  });
+
+  it('provides the container presentation to the content, "dialog" without a cmn container', () => {
+    service.open(HostComponent);
+    const providers = openSpy.mock.calls[0][1].providers as (
+      ref: unknown,
+      config: unknown,
+      container: unknown
+    ) => {provide: unknown; useValue: unknown}[];
+    const provided = providers({}, {}, {}).find(p => String(p.provide).includes('Presentation'));
+    expect((provided?.useValue as () => string)()).toBe('dialog');
   });
 });

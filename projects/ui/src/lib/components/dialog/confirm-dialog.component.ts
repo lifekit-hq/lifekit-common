@@ -1,9 +1,9 @@
 import {DialogRef} from '@angular/cdk/dialog';
-import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject} from '@angular/core';
 
 import {ButtonComponent, type ButtonVariant} from '../button/button.component';
 import {DialogActionsComponent} from './dialog-actions.component';
-import {CMN_DIALOG_DATA} from './dialog-config';
+import {CMN_DIALOG_DATA, CMN_DIALOG_PRESENTATION} from './dialog-config';
 
 export interface ConfirmDialogData {
   title?: string;
@@ -18,16 +18,21 @@ export interface ConfirmDialogData {
   imports: [ButtonComponent, DialogActionsComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    @if (data.title) {
+    <!-- On an action sheet the container draws the title and the Cancel button -->
+    @if (data.title && !actionSheet()) {
       <h2 class="font-headline text-base font-semibold text-text-primary mb-cmn-2">
         {{ data.title }}
       </h2>
     }
-    <p class="text-cmn-sm text-text-secondary">{{ data.message }}</p>
+    <p [class.text-center]="actionSheet()" class="text-cmn-sm text-text-secondary">
+      {{ data.message }}
+    </p>
     <cmn-dialog-actions>
-      <cmn-button (clicked)="cancel()" variant="secondary">
-        {{ data.cancelLabel ?? 'Cancel' }}
-      </cmn-button>
+      @if (!actionSheet()) {
+        <cmn-button (clicked)="cancel()" variant="secondary">
+          {{ data.cancelLabel ?? 'Cancel' }}
+        </cmn-button>
+      }
       <cmn-button [variant]="data.confirmVariant ?? 'primary'" (clicked)="confirm()">
         {{ data.confirmLabel ?? 'Confirm' }}
       </cmn-button>
@@ -36,7 +41,9 @@ export interface ConfirmDialogData {
 })
 export class ConfirmDialogComponent {
   private readonly ref = inject<DialogRef<boolean>>(DialogRef);
+  private readonly presentation = inject(CMN_DIALOG_PRESENTATION, {optional: true});
   protected readonly data = inject<ConfirmDialogData>(CMN_DIALOG_DATA);
+  protected readonly actionSheet = computed(() => this.presentation?.() === 'action-sheet');
 
   protected confirm(): void {
     this.ref.close(true);

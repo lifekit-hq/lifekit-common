@@ -429,6 +429,88 @@ html {
   background-color: var(--color-scrim-dialog);
 }
 
+/* Phone presentations (cmn-dialog below md). The container sets data-presentation on its host and
+   a panel class on the overlay pane: the pane sits on the bottom edge, the host slides in from it.
+   --cmn-keyboard-inset is the on-screen keyboard's height, published by the container. */
+.cmn-dialog-panel.cmn-dialog-panel--sheet,
+.cmn-dialog-panel.cmn-dialog-panel--action-sheet,
+.cmn-dialog-panel.cmn-dialog-panel--full-screen {
+  align-self: flex-end;
+  padding: 0;
+  max-width: 100%;
+}
+
+.cmn-dialog-panel.cmn-dialog-panel--full-screen {
+  align-self: stretch;
+  height: 100%;
+  max-height: 100%;
+}
+
+@keyframes cmn-dialog-sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+cmn-dialog-container:is(
+  [data-presentation='sheet'],
+  [data-presentation='action-sheet'],
+  [data-presentation='full-screen']
+) {
+  display: block;
+  width: 100%;
+  margin-bottom: var(--cmn-keyboard-inset, 0px);
+  animation: cmn-dialog-sheet-in var(--cmn-duration-medium) var(--cmn-ease-emphasized-decelerate);
+  transition: transform var(--cmn-duration-medium) var(--cmn-ease-emphasized-decelerate);
+}
+
+cmn-dialog-container.cmn-dialog--dragging {
+  transition: none;
+}
+
+cmn-dialog-container.cmn-dialog--closing {
+  transform: translateY(100%);
+  transition: transform var(--cmn-duration-short) var(--cmn-ease-emphasized-accelerate);
+}
+
+/* Sheet: rounded top, full width, never taller than the screen minus the status bar and a strip of
+   the page behind it (the HIG sheet); the keyboard shortens it instead of covering its fields. */
+cmn-dialog-container[data-presentation='sheet'] .cmn-dialog-shell {
+  border-top-left-radius: var(--radius-lg);
+  border-top-right-radius: var(--radius-lg);
+  max-height: calc(100vh - env(safe-area-inset-top, 0px) - var(--cmn-keyboard-inset, 0px) - 1.5rem);
+  max-height: calc(
+    100dvh - env(safe-area-inset-top, 0px) - var(--cmn-keyboard-inset, 0px) - 1.5rem
+  );
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* The keyboard covers the home indicator, so its safe-area padding would only be dead space. */
+cmn-dialog-container.cmn-dialog--keyboard .cmn-dialog-shell {
+  padding-bottom: 0;
+}
+
+/* Full screen: the whole viewport, padded clear of the status bar and the home indicator. */
+cmn-dialog-container[data-presentation='full-screen'] {
+  height: calc(100% - var(--cmn-keyboard-inset, 0px));
+  margin-bottom: 0;
+}
+
+cmn-dialog-container[data-presentation='full-screen'] .cmn-dialog-shell {
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Action sheet: floating cards inset from the screen edge, the Cancel card apart from the rest. */
+cmn-dialog-container[data-presentation='action-sheet'] {
+  box-sizing: border-box;
+  padding: 0 0.5rem max(0.5rem, env(safe-area-inset-bottom, 0px));
+}
+
+cmn-dialog-container[data-presentation='action-sheet'].cmn-dialog--keyboard {
+  padding-bottom: 0.5rem;
+}
+
 /* ─── Drawer (cmn-drawer) ───────────────────────────────────────────────────── */
 .cmn-drawer-backdrop {
   background-color: var(--color-scrim-drawer);

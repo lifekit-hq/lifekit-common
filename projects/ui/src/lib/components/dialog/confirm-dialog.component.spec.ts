@@ -1,17 +1,22 @@
 import {Dialog, DialogRef} from '@angular/cdk/dialog';
 import {provideHttpClient, withXhr} from '@angular/common/http';
 import {provideHttpClientTesting} from '@angular/common/http/testing';
+import {signal} from '@angular/core';
 import {type ComponentFixture, TestBed} from '@angular/core/testing';
 import {beforeEach, describe, expect, it, vi} from 'vitest';
 
 import {ConfirmDialogComponent, type ConfirmDialogData} from './confirm-dialog.component';
-import {CMN_DIALOG_DATA} from './dialog-config';
+import {
+  CMN_DIALOG_DATA,
+  CMN_DIALOG_PRESENTATION,
+  type CmnDialogPresentation,
+} from './dialog-config';
 
 describe('ConfirmDialogComponent', () => {
   let fixture: ComponentFixture<ConfirmDialogComponent>;
   let close: ReturnType<typeof vi.fn>;
 
-  function setup(data: ConfirmDialogData): void {
+  function setup(data: ConfirmDialogData, presentation?: CmnDialogPresentation): void {
     close = vi.fn();
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
@@ -22,6 +27,9 @@ describe('ConfirmDialogComponent', () => {
         {provide: DialogRef, useValue: {close}},
         {provide: CMN_DIALOG_DATA, useValue: data},
         {provide: Dialog, useValue: {open: vi.fn()}},
+        ...(presentation
+          ? [{provide: CMN_DIALOG_PRESENTATION, useValue: signal(presentation)}]
+          : []),
       ],
     });
     fixture = TestBed.createComponent(ConfirmDialogComponent);
@@ -77,5 +85,33 @@ describe('ConfirmDialogComponent', () => {
   it('honours a destructive confirm variant', () => {
     setup({message: 'Delete forever?', confirmVariant: 'destructive'});
     expect(buttons()[1].className).toContain('bg-status-error');
+  });
+
+  describe('as an action sheet', () => {
+    beforeEach(() => {
+      setup(
+        {title: 'Disconnect?', message: 'Sync stops.', confirmLabel: 'Disconnect'},
+        'action-sheet'
+      );
+    });
+
+    it('leaves the title and Cancel to the container', () => {
+      expect((fixture.nativeElement as HTMLElement).querySelector('h2')).toBeNull();
+      expect(buttons().map(b => b.textContent?.trim())).toEqual(['Disconnect']);
+    });
+
+    it('centres the message and still confirms', () => {
+      expect((fixture.nativeElement as HTMLElement).querySelector('p')?.className).toContain(
+        'text-center'
+      );
+      buttons()[0].click();
+      expect(close).toHaveBeenCalledWith(true);
+    });
+  });
+
+  it('keeps the title and Cancel in a centred dialog', () => {
+    setup({title: 'Disconnect?', message: 'Sync stops.'}, 'dialog');
+    expect(buttons()).toHaveLength(2);
+    expect((fixture.nativeElement as HTMLElement).querySelector('h2')).not.toBeNull();
   });
 });

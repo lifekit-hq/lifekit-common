@@ -4,7 +4,6 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  computed,
   DestroyRef,
   inject,
   signal,
@@ -13,18 +12,13 @@ import {
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
 import {IconComponent} from '../icon/icon.component';
+import {CmnSheetDrag} from '../sheet/sheet-drag';
 import {CmnDrawerRef} from './drawer-ref';
 
 type DrawerState = 'entering' | 'open' | 'closing';
 
 /** The heights a bottom sheet rests at: up to half the viewport, or nearly all of it. */
 export type CmnSheetStop = 'half' | 'full';
-
-/** A press that moves less than this (px) is a tap on the grabber, not a drag. */
-const GRABBER_TAP_SLOP_PX = 8;
-
-/** How far (px) a sheet must be dragged down before release dismisses it. */
-const SHEET_DISMISS_DISTANCE_PX = 96;
 
 @Component({
   selector: 'cmn-drawer-container',
@@ -88,9 +82,12 @@ export class CmnDrawerContainerComponent implements AfterViewInit {
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
   private state: DrawerState = 'entering';
-  private dragStartY: number | null = null;
-  private dragStartedOnGrabber = false;
-  private dragTravel = 0;
+  private readonly sheetDrag = new CmnSheetDrag({
+    enabled: () => this.sheet() && !this.isClosing,
+    dismissible: () => !this.disableClose(),
+    dismiss: () => this.drawerRef.close(),
+    tap: () => this.cycleStop(),
+  });
 
   public readonly title = signal('');
   /** Bottom-sheet presentation (phone width); set by `CmnDrawerService`. */
@@ -98,11 +95,9 @@ export class CmnDrawerContainerComponent implements AfterViewInit {
   /** Where the sheet rests: `half` (content up to half the viewport) or `full`. */
   public readonly stop = signal<CmnSheetStop>('half');
   public readonly disableClose = signal(false);
-  public readonly dragging = signal(false);
-  public readonly dragOffset = signal(0);
-  public readonly dragTransform = computed(() =>
-    this.dragOffset() > 0 ? `translateY(${this.dragOffset()}px)` : null
-  );
+  public readonly dragging = this.sheetDrag.dragging;
+  public readonly dragOffset = this.sheetDrag.offset;
+  public readonly dragTransform = this.sheetDrag.transform;
   public readonly drawerRef = inject(CmnDrawerRef);
   public readonly portalOutlet = viewChild.required(CdkPortalOutlet);
 
@@ -116,52 +111,22 @@ export class CmnDrawerContainerComponent implements AfterViewInit {
 
   public onDragStart(event: PointerEvent): void {
     const target = event.target as Element | null;
-    if (!this.sheet() || this.isClosing || target?.closest('button:not(.cmn-drawer-grabber)')) {
+    if (target?.closest('button:not(.cmn-drawer-grabber)')) {
       return;
     }
-    this.dragStartedOnGrabber = !!target?.closest('.cmn-drawer-grabber');
-    this.dragStartY = event.clientY;
-    this.dragTravel = 0;
-    this.dragging.set(true);
-    try {
-      (event.currentTarget as Element).setPointerCapture(event.pointerId);
-    } catch {
-      // The pointer is already gone (or synthetic); moves still arrive by bubbling.
-    }
+    this.sheetDrag.start(event, !!target?.closest('.cmn-drawer-grabber'));
   }
 
   public onDragMove(event: PointerEvent): void {
-    if (this.dragStartY === null) {
-      return;
-    }
-    const delta = event.clientY - this.dragStartY;
-    this.dragTravel = Math.max(this.dragTravel, Math.abs(delta));
-    this.dragOffset.set(Math.max(0, delta));
+    this.sheetDrag.move(event);
   }
 
   public onDragEnd(): void {
-    this.finishDrag(false);
+    this.sheetDrag.end();
   }
 
   public onDragCancel(): void {
-    this.finishDrag(true);
-  }
-
-  private finishDrag(cancelled: boolean): void {
-    if (this.dragStartY === null) {
-      return;
-    }
-    const offset = this.dragOffset();
-    const tapped = !cancelled && this.dragStartedOnGrabber && this.dragTravel < GRABBER_TAP_SLOP_PX;
-    this.dragStartY = null;
-    this.dragStartedOnGrabber = false;
-    this.dragging.set(false);
-    this.dragOffset.set(0);
-    if (tapped) {
-      this.cycleStop();
-    } else if (offset >= SHEET_DISMISS_DISTANCE_PX && !this.disableClose()) {
-      this.drawerRef.close();
-    }
+    this.sheetDrag.cancel();
   }
 
   /** Keyboard activation of the grabber; a pointer tap is handled in `onDragEnd`. */

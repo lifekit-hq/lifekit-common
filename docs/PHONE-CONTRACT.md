@@ -31,7 +31,7 @@ A page gets all of this without writing any code for it.
 | Top bar        | Owns the title, the back chevron (no "Back" text) and a trailing actions slot. A 44pt bar below `md` (the safe area on top of that). While the page's large title is showing and the page is at the top, the bar is transparent with no hairline (the iOS scroll-edge appearance), so it never reads as an empty band; any scroll gives it its material back, and the large title shrinks into it. No page renders its own back button or title. |
 | Back           | Back goes to the route's `parent`, or to history when there is none. A deep link to a detail still has a way up. The system swipe back works and is never overridden.                                                                                                                                                                                                                                                                            |
 | Scroll         | The shell owns the scroller. Back restores the scroll position. Overscroll does not chain to the browser (`overscroll-behavior-y: contain`).                                                                                                                                                                                                                                                                                                     |
-| Sheets         | One sheet implementation, `cmn-drawer`: half and full stops, a grabber (tap cycles the stops), drag to dismiss, opens at most half height. Do not open two at once.                                                                                                                                                                                                                                                                              |
+| Sheets         | `cmn-drawer` (half and full stops, grabber, drag to dismiss) and `cmn-dialog` (below `md`, see "Dialogs on a phone") share one drag controller. Do not open two at once.                                                                                                                                                                                                                                                                         |
 | Content insets | The shell measures its pinned chrome and publishes it as insets, so content never sits under the top bar, and the last row of a page scrolls clear of the tab bar and the floating action. See "Content clears the chrome".                                                                                                                                                                                                                      |
 | Overlays       | Install hint, offline banner and update prompt sit in the content area, below the top bar. They never cover the top bar or the tab bar. The floating action hides while a sheet is open.                                                                                                                                                                                                                                                         |
 | Touch          | 44pt hit areas for every chrome control, and on a phone for every `cmn-*` and `lk-*` control in the content too. Chrome text is not selectable. Keyboard hints are hidden on touch (`(hover: none)`).                                                                                                                                                                                                                                            |
@@ -274,6 +274,22 @@ reach asks again until the screen is full.
 Sheets that hold input ask for confirmation before a swipe dismisses unsaved changes. An alert has
 at most three buttons. A destination in the tab bar is a page, never a sheet.
 
+### Dialogs on a phone
+
+Below `md` a `cmn-dialog` is never a centred card (Apple HIG). The caller picks the presentation
+with `phone` on `CmnDialogService.open()`; from `md` up the option is ignored and the dialog is the
+centred card it always was.
+
+| `phone`             | HIG name     | Use it for                                | Behaviour                                                                                                                                                                              |
+| ------------------- | ------------ | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `'sheet'` (default) | Sheet        | A form or a quick look                    | Anchored to the bottom, grabber, swipe down or tap the backdrop to dismiss, never taller than the screen minus the status bar, content scrolls above the keyboard, pads the safe area. |
+| `'full-screen'`     | Full screen  | A long multi-step flow (the stepper)      | Fills the screen, clear of the status bar and home indicator. No swipe: it is left by its close button or its own Cancel and Finish. The default for `size: 'full'`.                   |
+| `'action-sheet'`    | Action sheet | A short list of actions or a confirmation | Floating card inset from the edge with the choices, and a separate Cancel card below it (`cancelLabel`, hidden under `disableClose`). `confirm()` uses it.                             |
+
+`disableClose` removes the swipe, the backdrop tap, Escape and the close affordances in every
+mode. The sheet slides in and out unless the user prefers reduced motion. A `cmn-dialog-actions`
+bar pins to the bottom of a sheet or full-screen body; in an action sheet its buttons stack.
+
 ### State pattern
 
 `cmn-async-state` covers every state, built on the policy's rules (skeletons, loading is not
@@ -427,7 +443,7 @@ exists.
 
 | Guarantee                               | Status                                                                                                                                                                              |
 | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Tab bar, sheets, safe areas             | Built: one sheet (`cmn-drawer`) with half and full stops, More is a page; no suite check yet                                                                                        |
+| Tab bar, sheets, safe areas             | Built: `cmn-drawer` sheets and phone `cmn-dialog` presentations, More is a page; the dialog stories carry VRT and behaviour specs                                                   |
 | Account on a phone                      | Built: `accountOnPhone`, `accountMenu()`, `cmn-more-page`; no suite check yet                                                                                                       |
 | Top bar title, back, actions            | Built: route data `title`, `parent`, `actions`; the suite checks the title at 320                                                                                                   |
 | Shell-owned scroll and tab state        | Built: checked by the suite's "back restores scroll"; see "Scroll and tab state"                                                                                                    |
