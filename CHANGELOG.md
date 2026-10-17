@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.7.0](https://github.com/lifekit-hq/lifekit-common/compare/v3.6.0...v3.7.0) (2026-10-17)
+
+
+### Features
+
+* **ui:** iOS-standard phone shell, 49pt edge-to-edge tab bar, scroll-edge top bar, no accidental zoom ([#170](https://github.com/lifekit-hq/lifekit-common/issues/170)) ([3d10434](https://github.com/lifekit-hq/lifekit-common/commit/3d104340900a33fb1965fbc4eeb11e6ae1278e6b))
+* **ui:** present cmn-dialog as a bottom sheet, full-screen or action sheet on phones ([#171](https://github.com/lifekit-hq/lifekit-common/issues/171)) ([f2b2ddd](https://github.com/lifekit-hq/lifekit-common/commit/f2b2ddd3cf2d88c8b51a83deb77c8fbbcfea71d9))
+
 ## [3.6.0](https://github.com/lifekit-hq/lifekit-common/compare/v3.5.0...v3.6.0) (2026-10-17)
 
 
