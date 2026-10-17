@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.8.0](https://github.com/lifekit-hq/lifekit-common/compare/v3.7.0...v3.8.0) (2026-10-17)
+
+
+### Features
+
+* **tokens:** add cmn-link and cmn-code-block text primitives ([#173](https://github.com/lifekit-hq/lifekit-common/issues/173)) ([516f568](https://github.com/lifekit-hq/lifekit-common/commit/516f568b3083e6024d50a19ad95627d1215149aa))
+
 ## [3.7.0](https://github.com/lifekit-hq/lifekit-common/compare/v3.6.0...v3.7.0) (2026-10-17)
 
 
