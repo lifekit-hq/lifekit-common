@@ -170,6 +170,38 @@ describe('TopBarComponent', () => {
     expect(header.className).not.toContain('backdrop-blur');
   });
 
+  describe('scroll edge', () => {
+    const header = (): HTMLElement => fixture.nativeElement.querySelector('header') as HTMLElement;
+
+    it('should drop its fill and hairline on a phone while a large title is in view', () => {
+      fixture.componentRef.setInput('largeTitle', 'visible');
+      fixture.detectChanges();
+      expect(header().classList).toContain('max-md:bg-transparent');
+      expect(header().classList).toContain('max-md:border-transparent');
+    });
+
+    it('should bring its material back once content scrolls under it', () => {
+      fixture.componentRef.setInput('largeTitle', 'visible');
+      fixture.componentRef.setInput('scrolled', true);
+      fixture.detectChanges();
+      expect(header().classList).not.toContain('max-md:bg-transparent');
+    });
+
+    it('should keep its material once the large title has collapsed into it', () => {
+      fixture.componentRef.setInput('largeTitle', 'collapsed');
+      fixture.detectChanges();
+      expect(header().classList).not.toContain('max-md:bg-transparent');
+    });
+
+    it('should keep its material when the bar holds the title itself', () => {
+      expect(header().classList).not.toContain('max-md:bg-transparent');
+    });
+
+    it('should be 44pt tall on a phone, the height of an iOS navigation bar', () => {
+      expect(header().classList).toContain('h-11');
+    });
+  });
+
   it('should render a translucent, blurred, safe-area-padded header in overlay mode', () => {
     fixture.componentRef.setInput('overlay', true);
     fixture.detectChanges();

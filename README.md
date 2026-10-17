@@ -77,6 +77,6 @@ Before shipping an app as a PWA, check:
 - [ ] **Serve `ngsw-worker.js` with `Cache-Control: no-cache`**, never `immutable` and never with
       a long max-age. A stale worker script means clients never learn that an update exists.
 - [ ] **Set `viewport-fit=cover` and pad for the safe area.** Use
-      `<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">`
+      `<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">`
       and `env(safe-area-inset-*)` padding on fixed headers, footers and tab bars so notches and
       home indicators don't cover content.

@@ -5,6 +5,11 @@
   box-sizing: border-box;
 }
 
+/* A double tap never zooms the page; pinch zoom stays. */
+html {
+  touch-action: manipulation;
+}
+
 /* Subtle, theme-aware scrollbars everywhere (thin thumb, no track chrome). */
 * {
   scrollbar-width: thin;

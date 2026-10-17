@@ -546,7 +546,7 @@ describe('AppLayoutComponent', () => {
       expect(el('cmn-top-bar').className).not.toContain('absolute');
       expect(el('cmn-bottom-tab-bar').className).not.toContain('absolute');
       expect(el('main').className).toBe('flex-1 overflow-y-auto overscroll-y-contain');
-      expect(el('cmn-bottom-tab-bar nav').classList).not.toContain('rounded-cmn-full');
+      expect(el('cmn-bottom-tab-bar nav').classList).not.toContain('backdrop-blur-md');
     });
 
     it('should lay both bars over main in the phone shell and float the tab bar', () => {
@@ -557,7 +557,7 @@ describe('AppLayoutComponent', () => {
       expect(el('cmn-top-bar header').classList).toContain('backdrop-blur-md');
       expect(el('cmn-bottom-tab-bar').classList).toContain('absolute');
       expect(el('cmn-bottom-tab-bar').classList).toContain('bottom-0');
-      expect(el('cmn-bottom-tab-bar nav').classList).toContain('rounded-cmn-full');
+      expect(el('cmn-bottom-tab-bar nav').classList).toContain('backdrop-blur-md');
     });
 
     it('should lay the bars over main on a landscape phone too', () => {
@@ -1100,15 +1100,25 @@ describe('AppLayoutComponent page chrome', () => {
       fixture.detectChanges();
     };
 
+    const barClasses = (): DOMTokenList =>
+      (host().querySelector('cmn-top-bar header') as HTMLElement).classList;
+
     await settle();
     expect(inlineTitle()?.classList).toContain('opacity-0');
+    expect(barClasses()).toContain('max-md:bg-transparent');
 
     main.scrollTop = SCROLL_PAST_TITLE_PX;
     await settle();
     expect(inlineTitle()?.classList).not.toContain('opacity-0');
+    expect(barClasses()).not.toContain('max-md:bg-transparent');
 
     main.scrollTop = 0;
     await settle();
     expect(inlineTitle()?.classList).toContain('opacity-0');
+    expect(barClasses()).toContain('max-md:bg-transparent');
+  });
+
+  it('should stop a double tap zooming the shell', () => {
+    expect(host().querySelector('.fixed.inset-0')?.classList).toContain('touch-manipulation');
   });
 });

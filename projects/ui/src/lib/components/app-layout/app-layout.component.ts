@@ -167,7 +167,8 @@ export const CMN_CONTENT_INSET_PROPERTIES = {
   template: `
     <!-- Pinned with fixed/inset-0, not viewport units: h-screen/h-dvh overshoot the real
          viewport in iOS home-screen apps, which scrolls the document -->
-    <div class="fixed inset-0 flex overflow-hidden bg-surface-bg">
+    <!-- touch-manipulation: a double tap never zooms the page -->
+    <div class="fixed inset-0 flex touch-manipulation overflow-hidden bg-surface-bg">
       <!-- The sidebar, or its rail, outside the phone shell; the phone shell has the bottom tab bar -->
       <cmn-sidebar-nav
         [items]="navItems()"
@@ -190,6 +191,7 @@ export const CMN_CONTENT_INSET_PROPERTIES = {
           [showBack]="back() !== null"
           [actions]="pageActions()"
           [largeTitle]="largeTitleMode()"
+          [scrolled]="scrolled()"
           [isDark]="isDark()"
           [showThemeToggle]="showThemeToggle()"
           [avatarLabel]="effectiveAvatarLabel()"
@@ -505,6 +507,9 @@ export class AppLayoutComponent {
 
   protected readonly noticesClasses = NOTICES_BASE_CLASSES;
 
+  /** Content has scrolled under the top bar (main is off its top edge). */
+  protected readonly scrolled = signal(false);
+
   protected readonly sheetOpen = inject(CmnDrawerService).sheetOpen;
 
   protected readonly largeTitleBoxClasses = LARGE_TITLE_BOX_CLASSES;
@@ -518,6 +523,13 @@ export class AppLayoutComponent {
       activeTab: () => this.effectiveActiveRoute(),
     });
     this.publishContentInsets();
+    effect(onCleanup => {
+      const main = this.main().nativeElement;
+      const update = (): void => this.scrolled.set(main.scrollTop > 0);
+      main.addEventListener('scroll', update, {passive: true});
+      update();
+      onCleanup(() => main.removeEventListener('scroll', update));
+    });
     // A plain effect, not afterRenderEffect: the title element exists once its query resolves, the
     // observers report asynchronously, and afterRenderEffect costs every consumer ~1.8 kB of runtime.
     effect(onCleanup => {

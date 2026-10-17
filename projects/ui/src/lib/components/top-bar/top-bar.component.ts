@@ -18,8 +18,9 @@ import {MenuComponent, type MenuHeader, type MenuItem} from '../menu/menu.compon
  */
 export type TopBarLargeTitle = 'none' | 'visible' | 'collapsed';
 
+/** 44pt below md, the height of an iOS navigation bar; desktop keeps 56px. */
 const HEADER_BASE_CLASSES =
-  'flex h-14 items-center border-b border-border-default px-cmn-4 md:gap-cmn-4 md:px-cmn-6';
+  'flex h-11 items-center border-b border-border-default px-cmn-4 md:h-14 md:gap-cmn-4 md:px-cmn-6';
 /**
  * Every chrome control meets the touch target (`--size-touch`) below md, desktop density from md.
  * The targets abut below md, so the bar has no gap there: the glyphs still sit a target apart.
@@ -72,8 +73,18 @@ const HEADER_SOLID_CLASSES = 'bg-surface-card';
  * and it grows by the top safe-area inset so it sits under the status bar of an edge-to-edge PWA.
  */
 const HEADER_OVERLAY_CLASSES =
-  'h-[calc(3.5rem+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] ' +
+  'h-[calc(2.75rem+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] ' +
+  'md:h-[calc(3.5rem+env(safe-area-inset-top))] ' +
   'bg-[color-mix(in_srgb,var(--color-surface-card)_80%,transparent)] backdrop-blur-md';
+/**
+ * A large title on a phone: at the scroll edge the bar is an iOS scroll-edge bar, with no fill,
+ * blur or hairline, so the row holding only the trailing buttons does not read as an empty band.
+ * Its material fades in as soon as content scrolls under it.
+ */
+const HEADER_SCROLL_EDGE_CLASSES =
+  'max-md:border-transparent max-md:bg-transparent max-md:backdrop-blur-none';
+const HEADER_FADE_CLASSES =
+  'transition-colors duration-cmn-short ease-cmn-standard motion-reduce:transition-none';
 
 @Component({
   selector: 'cmn-top-bar',
@@ -240,6 +251,11 @@ export class TopBarComponent {
   /** Trailing page actions, rendered as icon buttons before the search trigger. */
   public readonly actions = input<PageAction[]>([]);
   public readonly largeTitle = input<TopBarLargeTitle>('none');
+  /**
+   * Content has scrolled under the bar. While a large title is in view and nothing has, a phone's
+   * bar drops its fill and hairline (the iOS scroll edge).
+   */
+  public readonly scrolled = input<boolean>(false);
 
   public readonly backClick = output<void>();
   public readonly actionClick = output<PageAction>();
@@ -247,9 +263,11 @@ export class TopBarComponent {
   public readonly themeToggle = output<void>();
   public readonly avatarMenuSelect = output<MenuItem>();
 
-  public readonly headerClass = computed<string>(
-    () => `${HEADER_BASE_CLASSES} ${this.overlay() ? HEADER_OVERLAY_CLASSES : HEADER_SOLID_CLASSES}`
-  );
+  public readonly headerClass = computed<string>(() => {
+    const surface = this.overlay() ? HEADER_OVERLAY_CLASSES : HEADER_SOLID_CLASSES;
+    const atEdge = this.largeTitle() === 'visible' && !this.scrolled();
+    return `${HEADER_BASE_CLASSES} ${surface} ${HEADER_FADE_CLASSES}${atEdge ? ` ${HEADER_SCROLL_EDGE_CLASSES}` : ''}`;
+  });
 
   /** What the avatar's initials come from: the label, else the identity's name or email. */
   protected readonly avatarText = computed<string>(() => {

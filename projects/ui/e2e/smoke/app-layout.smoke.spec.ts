@@ -61,9 +61,9 @@ for (const theme of THEMES) {
         expect(clientHeight).toBe(scrollHeight);
       }
 
-      // The pill fits its content and sits fully inside the viewport.
+      // The bar is the 49pt iOS tab bar, fits its content and sits fully inside the viewport.
       const nav = await page.locator('cmn-bottom-tab-bar nav').boundingBox();
-      expect(nav?.height).toBe(64);
+      expect(nav?.height).toBe(49);
       expect((nav?.y ?? 0) + (nav?.height ?? 0)).toBeLessThanOrEqual(PHONE.height - IOS_STATUS_BAR);
       const overflow = await page
         .locator('cmn-bottom-tab-bar nav')
@@ -86,7 +86,7 @@ for (const theme of THEMES) {
       const fab = await page.getByRole('button', {name: 'Ask Ledger'}).boundingBox();
       const nav = await page.locator('cmn-bottom-tab-bar nav').boundingBox();
       expect(last && fab && nav).toBeTruthy();
-      // Fully above the button and the pill at scroll end, nothing hidden behind either.
+      // Fully above the button and the tab bar at scroll end, nothing hidden behind either.
       expect((last?.y ?? 0) + (last?.height ?? 0)).toBeLessThanOrEqual(fab?.y ?? 0);
       expect((last?.y ?? 0) + (last?.height ?? 0)).toBeLessThanOrEqual(nav?.y ?? 0);
       expect(await documentOverflow(page)).toEqual({doc: 0, body: 0});

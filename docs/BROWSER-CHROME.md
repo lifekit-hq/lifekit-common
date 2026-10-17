@@ -136,9 +136,10 @@ output, which is served under the base path.
 This is `@lifekit-hq/tokens/brand/head.html` with its `{App}` placeholder filled in. Place it
 after `<meta charset>`:
 
+<!-- prettier-ignore -->
 ```html
 <title>Finance Sentry</title>
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
 <meta name="color-scheme" content="light dark" />
 <meta name="theme-color" content="#f3f5f6" media="(prefers-color-scheme: light)" />
 <meta name="theme-color" content="#0c1113" media="(prefers-color-scheme: dark)" />
@@ -152,7 +153,10 @@ An app served under a base path prefixes the four link `href`s with it
 (`/console/favicon.ico`, …); `headMarkup({title, basePath})` emits that form, and the generated
 `head.html` is the root form shown above.
 
-- `viewport-fit=cover` lets the app pad for notches with `env(safe-area-inset-*)`. Never lock zoom.
+- `viewport-fit=cover` lets the app pad for notches with `env(safe-area-inset-*)`.
+- `maximum-scale=1` stops iOS Safari zooming the page into a focused field. Deliberate pinch zoom
+  stays (iOS ignores the cap for it), so never add `user-scalable=no`. Fields are also 16px on a
+  phone, and the shell sets `touch-action: manipulation` against double-tap zoom.
 - `color-scheme: light dark` gives native controls and scrollbars the right scheme before CSS loads.
 - `sizes="32x32"` on the ICO stops Chrome from choosing it over the SVG.
 - No other icon links, and no `data:,` placeholder.
