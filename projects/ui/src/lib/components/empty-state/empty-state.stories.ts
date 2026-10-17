@@ -36,6 +36,28 @@ export const Bare: Story = {
   },
 };
 
+export const WithActions: Story = {
+  args: {
+    message: 'No transactions on Monobank ••4242',
+    subMessage: 'Nothing matches this card in October.',
+    icon: 'Search',
+    actionLabel: 'Clear filter',
+    secondaryLabel: 'Show all time',
+  },
+};
+
+export const LongText: Story = {
+  args: {
+    message:
+      'No transactions match Monobank ••4242, Groceries and Utilities between 1 October and 31 October 2026',
+    subMessage:
+      'Try removing a category or widening the period, or check that the card has finished syncing with the bank before you filter again.',
+    icon: 'Search',
+    actionLabel: 'Clear all filters',
+    secondaryLabel: 'Show all time',
+  },
+};
+
 export const WithCallToAction: Story = {
   render: args => ({
     props: args,
