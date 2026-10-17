@@ -5,9 +5,9 @@ import {ChangeDetectionStrategy, Component, computed, effect, inject, signal} fr
 import {toSignal} from '@angular/core/rxjs-interop';
 import {map} from 'rxjs';
 
+import {CmnSheetDrag} from '../../sheet-drag/sheet-drag';
 import {CMN_MEDIA_MD} from '../../tokens/breakpoints';
 import {PHONE_HIT_AREA_CLASSES} from '../../tokens/hit-area';
-import {CmnSheetDrag} from '../sheet/sheet-drag';
 import {
   type CmnDialogConfig,
   type CmnDialogPhoneMode,

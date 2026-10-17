@@ -4,7 +4,7 @@ import {type ComponentFixture, TestBed} from '@angular/core/testing';
 import {BehaviorSubject, map} from 'rxjs';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
-import {SHEET_DISMISS_DISTANCE_PX} from '../sheet/sheet-drag';
+import {SHEET_DISMISS_DISTANCE_PX} from '../../sheet-drag/sheet-drag';
 import {CmnDialogConfig, type CmnDialogPhoneMode, type CmnDialogSize} from './dialog-config';
 import {CmnDialogContainerComponent} from './dialog-container.component';
 

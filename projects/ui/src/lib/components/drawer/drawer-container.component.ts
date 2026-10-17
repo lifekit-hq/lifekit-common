@@ -11,8 +11,8 @@ import {
 } from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
+import {CmnSheetDrag} from '../../sheet-drag/sheet-drag';
 import {IconComponent} from '../icon/icon.component';
-import {CmnSheetDrag} from '../sheet/sheet-drag';
 import {CmnDrawerRef} from './drawer-ref';
 
 type DrawerState = 'entering' | 'open' | 'closing';
