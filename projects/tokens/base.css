@@ -1,6 +1,7 @@
 /* Global base styles shared by every lifekit app: theme-aware scrollbars, accent links,
-   heading reset, button cursor, and the `.cmn-link` and `.cmn-code-block` text primitives. Plain CSS over the theme.css custom properties, so it
-   stays framework-agnostic. Import after theme.css. */
+   heading reset, button cursor, and the `.cmn-link` and `.cmn-code-block` text primitives.
+   Plain CSS over the theme.css custom properties, so it stays framework-agnostic. Import
+   after theme.css. */
 * {
   box-sizing: border-box;
 }
