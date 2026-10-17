@@ -1,5 +1,5 @@
 /* Global base styles shared by every lifekit app: theme-aware scrollbars, accent links,
-   heading reset and button cursor. Plain CSS over the theme.css custom properties, so it
+   heading reset, button cursor, and the `.cmn-link` and `.cmn-code-block` text primitives. Plain CSS over the theme.css custom properties, so it
    stays framework-agnostic. Import after theme.css. */
 * {
   box-sizing: border-box;
@@ -82,4 +82,77 @@ h6 {
   width: var(--size-touch);
   height: var(--size-touch);
   transform: translate(-50%, -50%);
+}
+
+/* Text link: the accent link an app puts on an `<a>` (also a router link), so it never re-spells
+   `text-accent-default hover:underline`. Underlined on hover, with a keyboard focus ring. It sets
+   colour and decoration only; size and weight stay with the surrounding text or a utility.
+   Modifiers pick the colour: `--primary`, `--secondary`, `--inherit`. Inside running text add
+   `--underlined`, so the link is not told apart by colour alone. Add `cmn-hit-slop` to a small
+   link on a phone. */
+.cmn-link {
+  color: var(--color-accent-default);
+  text-decoration: none;
+  text-underline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.cmn-link:hover {
+  text-decoration: underline;
+}
+
+.cmn-link:focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+.cmn-link--primary {
+  color: var(--color-text-primary);
+}
+
+.cmn-link--secondary {
+  color: var(--color-text-secondary);
+}
+
+.cmn-link--inherit {
+  color: inherit;
+}
+
+.cmn-link--underlined {
+  text-decoration: underline;
+}
+
+/* Code and log block: a `<pre>` for logs, JSON and briefs. Monospace, and long lines wrap
+   (a URL or a hash with no break breaks anywhere) so it never widens the page. Set
+   `--cmn-code-block-max-height` (e.g. `24rem`) to cap it; it then scrolls inside its own box,
+   and that box needs `tabindex="0"` and an accessible name so the keyboard can scroll it.
+   `--bare` drops the box for a block that sits in a section that already frames it. */
+.cmn-code-block {
+  box-sizing: border-box;
+  max-width: 100%;
+  max-height: var(--cmn-code-block-max-height, none);
+  margin: 0;
+  padding: 8px 12px;
+  overflow: auto;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-raised);
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.cmn-code-block:focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+.cmn-code-block--bare {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
 }

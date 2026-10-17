@@ -70,6 +70,25 @@ plus `.cmn-hit-slop`, which grows a small inline control (a link in a card) to t
 (44px) hit area without changing how it looks. Import it after `theme.css` so every app scrolls and
 links the same way.
 
+It also carries two text primitives, so an app does not re-spell their utilities. They are CSS
+classes, not elements, because both style a native node the app must own: an `<a>` the router
+turns into a `routerLink`, a `<pre>` whose text it interpolates. A custom element would hold that
+node in its shadow tree, out of reach of `routerLink`.
+
+- `.cmn-link` is the accent link: underlined on hover, with a `--color-border-focus` ring on
+  keyboard focus. Modifiers `--primary`, `--secondary` and `--inherit` pick the text colour, and
+  `--underlined` keeps the underline on, for a link inside running text. It sets no size or weight.
+  Add `.cmn-hit-slop` to a small link on a phone.
+- `.cmn-code-block` is a monospace `<pre>` in a bordered box that wraps long lines instead of
+  widening the page. `--cmn-code-block-max-height` caps it and makes it scroll; give that box
+  `tabindex="0"` and an `aria-label`. `--bare` drops the box.
+
+```html
+<a class="cmn-link" routerLink="/goals/42">Goal 42</a>
+<a class="cmn-link" href="https://github.com/..." target="_blank" rel="noopener noreferrer">PR</a>
+<pre class="cmn-code-block">{{ log }}</pre>
+```
+
 The icons, head template and manifest fragment under `brand/` are generated from
 `brand/mark.mjs` and `theme.css` by `scripts/build-brand.mjs` (`npm run build:brand` at the
 workspace root, and automatically on `prepack`). Never edit them by hand.
