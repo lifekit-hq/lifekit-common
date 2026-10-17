@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.6.0](https://github.com/lifekit-hq/lifekit-common/compare/v3.5.0...v3.6.0) (2026-10-17)
+
+
+### Features
+
+* **ui:** redesign cmn-empty-state as a full-width state with optional actions ([#168](https://github.com/lifekit-hq/lifekit-common/issues/168)) ([1f6e9c3](https://github.com/lifekit-hq/lifekit-common/commit/1f6e9c36194d693f8f790b977ac80edd20e599b1))
+
 ## [3.5.0](https://github.com/lifekit-hq/lifekit-common/compare/v3.4.0...v3.5.0) (2026-10-16)
 
 
