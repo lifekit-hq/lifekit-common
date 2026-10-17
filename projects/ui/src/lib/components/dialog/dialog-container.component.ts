@@ -233,7 +233,12 @@ export class CmnDialogContainerComponent extends CdkDialogContainer<CmnDialogCon
         return;
       }
       this.closing.set(true);
-      setTimeout(() => close(result, options), CLOSE_ANIMATION_MS);
+      setTimeout(() => {
+        close(result, options);
+        if (ref.containerInstance) {
+          this.closing.set(false);
+        }
+      }, CLOSE_ANIMATION_MS);
     };
   }
 
@@ -247,7 +252,7 @@ export class CmnDialogContainerComponent extends CdkDialogContainer<CmnDialogCon
       }
       overlay.removePanelClass(Object.values(PANEL_CLASS));
       if (presentation !== 'dialog') {
-        overlay.addPanelClass(PANEL_CLASS[presentation]);
+        overlay.addPanelClass(['cmn-dialog-panel', PANEL_CLASS[presentation]]);
       }
     });
   }

@@ -171,7 +171,10 @@ describe('CmnDialogContainerComponent', () => {
 
     it('anchors the overlay pane for the phone mode and releases it on desktop', () => {
       phone('full-screen');
-      expect(overlayRef.addPanelClass).toHaveBeenLastCalledWith('cmn-dialog-panel--full-screen');
+      expect(overlayRef.addPanelClass).toHaveBeenLastCalledWith([
+        'cmn-dialog-panel',
+        'cmn-dialog-panel--full-screen',
+      ]);
       desktop$.next(true);
       fixture.detectChanges();
       expect(overlayRef.removePanelClass).toHaveBeenCalled();
@@ -266,6 +269,19 @@ describe('CmnDialogContainerComponent', () => {
       expect(close).not.toHaveBeenCalled();
       vi.runAllTimers();
       expect(close).toHaveBeenCalledTimes(1);
+    });
+
+    it('slides back in when the close does not dismiss the dialog', () => {
+      phone();
+      vi.useFakeTimers();
+      const ref = TestBed.inject(DialogRef);
+      (ref as {containerInstance: unknown}).containerInstance = {};
+      ref.close();
+      fixture.detectChanges();
+      expect(host().classList.contains('cmn-dialog--closing')).toBe(true);
+      vi.runAllTimers();
+      fixture.detectChanges();
+      expect(host().classList.contains('cmn-dialog--closing')).toBe(false);
     });
 
     it('closes at once when the user prefers reduced motion', () => {
