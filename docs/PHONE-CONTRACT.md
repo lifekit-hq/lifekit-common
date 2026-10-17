@@ -286,6 +286,8 @@ centred card it always was.
 | `'full-screen'`     | Full screen  | A long multi-step flow (the stepper)      | Fills the screen, clear of the status bar and home indicator. No swipe: it is left by its close button or its own Cancel and Finish. The default for `size: 'full'`.                   |
 | `'action-sheet'`    | Action sheet | A short list of actions or a confirmation | Floating card inset from the edge with the choices, and a separate Cancel card below it (`cancelLabel`, hidden under `disableClose`). `confirm()` uses it.                             |
 
+`phone: 'dialog'` pins the centred card on a phone too, for a case that cannot be a sheet.
+
 `disableClose` removes the swipe, the backdrop tap, Escape and the close affordances in every
 mode. The sheet slides in and out unless the user prefers reduced motion. A `cmn-dialog-actions`
 bar pins to the bottom of a sheet or full-screen body; in an action sheet its buttons stack.
