@@ -58,17 +58,59 @@ describe('EmptyStateComponent — inputs', () => {
     expect(icon?.className).toContain('text-status-success');
   });
 
-  it('should apply card wrapper classes for the card variant', () => {
-    const wrapper: HTMLElement = fixture.nativeElement.querySelector('div');
-    expect(wrapper.className).toContain('bg-surface-card');
-    expect(wrapper.className).toContain('border-border-default');
+  it('should span its column without a box in the card variant', () => {
+    const host: HTMLElement = fixture.nativeElement;
+    const body: HTMLElement = host.querySelector('div') as HTMLElement;
+    expect(host.className).toContain('w-full');
+    expect(body.className).toContain('px-cmn-6');
+    expect(body.className).not.toContain('border');
+    expect(body.className).not.toContain('bg-surface-card');
   });
 
-  it('should apply no wrapper classes for the bare variant', () => {
+  it('should render a compact body in the bare variant', () => {
     fixture.componentRef.setInput('variant', 'bare');
     fixture.detectChanges();
-    const wrapper: HTMLElement = fixture.nativeElement.querySelector('div');
-    expect(wrapper.className).not.toContain('bg-surface-card');
+    const body: HTMLElement = fixture.nativeElement.querySelector('div');
+    expect(body.className).toContain('py-cmn-6');
+    expect(body.className).not.toContain('py-cmn-12');
+  });
+
+  it('should not render action buttons by default', () => {
+    expect(fixture.nativeElement.querySelector('cmn-button')).toBeNull();
+  });
+
+  it('should render the primary action and emit action on click', () => {
+    let emitted = 0;
+    fixture.componentInstance.action.subscribe(() => emitted++);
+    fixture.componentRef.setInput('actionLabel', 'Clear filter');
+    fixture.detectChanges();
+    const buttons: NodeListOf<HTMLElement> = fixture.nativeElement.querySelectorAll('button');
+    expect(buttons.length).toBe(1);
+    expect(buttons[0].textContent?.trim()).toBe('Clear filter');
+    buttons[0].click();
+    expect(emitted).toBe(1);
+  });
+
+  it('should render the secondary action after the primary and emit secondaryAction', () => {
+    let emitted = 0;
+    fixture.componentInstance.secondaryAction.subscribe(() => emitted++);
+    fixture.componentRef.setInput('actionLabel', 'Clear filter');
+    fixture.componentRef.setInput('secondaryLabel', 'Show all time');
+    fixture.detectChanges();
+    const buttons: NodeListOf<HTMLElement> = fixture.nativeElement.querySelectorAll('button');
+    expect(Array.from(buttons).map(b => b.textContent?.trim())).toEqual([
+      'Clear filter',
+      'Show all time',
+    ]);
+    buttons[1].click();
+    expect(emitted).toBe(1);
+  });
+
+  it('should keep a long unbroken title inside the column', () => {
+    fixture.componentRef.setInput('message', 'x'.repeat(200));
+    fixture.detectChanges();
+    const p: HTMLElement = fixture.nativeElement.querySelector('p');
+    expect(p.className).toContain('break-words');
   });
 
   it('should render icon in card variant', () => {
@@ -150,5 +192,30 @@ describe('EmptyStateComponent — CTA slot projection in bare variant', () => {
     const cta: HTMLElement | null = fixture.nativeElement.querySelector('[data-testid="bare-cta"]');
     expect(cta).toBeTruthy();
     expect(cta?.textContent?.trim()).toBe('Action');
+  });
+});
+
+@Component({
+  imports: [EmptyStateComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <cmn-empty-state message="No items found">
+      <button secondary data-testid="secondary" type="button">Widen period</button>
+    </cmn-empty-state>
+  `,
+})
+class EmptyStateSecondaryHostComponent {}
+
+describe('EmptyStateComponent — secondary slot projection', () => {
+  it('should project the secondary slot', async () => {
+    await TestBed.configureTestingModule({
+      imports: [EmptyStateSecondaryHostComponent],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(EmptyStateSecondaryHostComponent);
+    fixture.detectChanges();
+    const el: HTMLElement | null = fixture.nativeElement.querySelector(
+      'cmn-empty-state [data-testid="secondary"]'
+    );
+    expect(el?.textContent?.trim()).toBe('Widen period');
   });
 });
