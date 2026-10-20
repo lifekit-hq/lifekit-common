@@ -11,6 +11,8 @@ Shared lifekit design system and Angular component library.
 
 Extracted from [finance-sentry](https://github.com/lifekit-hq/finance-sentry) (`frontend/projects/dsdevq-common`) per lifekit-common#1.
 
+Licensed under the [MIT License](LICENSE).
+
 ## Development
 
 ```bash
