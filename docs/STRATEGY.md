@@ -77,8 +77,8 @@ The **Usage evidence** column counts the non-spec, non-story source files in eac
 
 - `fs` — `finance-sentry` (`bbf54d5f`)
 - `dash` — `lifekit-dashboard` (`2f61e16`)
-- `devclaw` is not a column: its console is React and references none of the `cmn-*` components
-  (0 files for every row).
+- `devclaw` is not a column: at measurement its console had not yet moved to this library (it is Angular on it now)
+  and referenced none of the `cmn-*` components (0 files for every row).
 
 Counts are files, not occurrences, so a component used five times in one template counts once.
 `0` means no consumer references it today. `sidebar-nav`, `top-bar` and `bottom-tab-bar` are
