@@ -1,10 +1,20 @@
 import {ChangeDetectionStrategy, Component, computed, input, output} from '@angular/core';
 
+import {PHONE_HIT_AREA_CLASSES} from '../../tokens/hit-area';
 import {IconComponent, type LucideIconName} from '../icon/icon.component';
 
 export type ToastVariant = 'info' | 'success' | 'warning' | 'error';
 
 const DEFAULT_DURATION_MS = 3000;
+
+const ACTION_CLASSES =
+  'ml-auto shrink-0 rounded-cmn-sm px-cmn-2 py-0.5 font-base text-cmn-sm font-semibold underline ' +
+  'underline-offset-2 hover:bg-black/20 focus:outline-none focus:ring-2 focus:ring-white/50 ' +
+  PHONE_HIT_AREA_CLASSES;
+
+const DISMISS_CLASSES =
+  'ml-cmn-2 inline-flex items-center justify-center rounded-cmn-sm p-0.5 hover:bg-black/20 ' +
+  `focus:outline-none focus:ring-2 focus:ring-white/50 ${PHONE_HIT_AREA_CLASSES}`;
 
 const VARIANT_CONTAINER_CLASSES: Record<ToastVariant, string> = {
   info: 'bg-status-info text-text-inverse',
@@ -35,10 +45,15 @@ const VARIANT_ROLE: Record<ToastVariant, string> = {
     <div [attr.role]="role()" [class]="containerClasses()">
       <cmn-icon [name]="iconName()" color="currentColor" size="sm" aria-hidden="true" />
       <span class="font-base text-cmn-sm">{{ message() }}</span>
+      @if (action(); as label) {
+        <button [class]="actionClasses" (click)="actioned.emit()" type="button">
+          {{ label }}
+        </button>
+      }
       <button
+        [class]="dismissClasses"
         (click)="dismissed.emit()"
         type="button"
-        class="ml-cmn-2 inline-flex items-center justify-center rounded-cmn-sm p-0.5 hover:bg-black/20 focus:outline-none focus:ring-2 focus:ring-white/50"
         aria-label="Dismiss"
       >
         <cmn-icon name="X" color="currentColor" size="sm" aria-hidden="true" />
@@ -49,8 +64,11 @@ const VARIANT_ROLE: Record<ToastVariant, string> = {
 export class ToastComponent {
   public readonly message = input<string>('');
   public readonly variant = input<ToastVariant>('info');
+  /** Label of the toast's one action (e.g. "Undo"); two words or fewer. No button when unset. */
+  public readonly action = input<string | undefined>(undefined);
 
   public readonly dismissed = output<void>();
+  public readonly actioned = output<void>();
 
   public readonly role = computed(() => VARIANT_ROLE[this.variant()]);
   public readonly iconName = computed(() => VARIANT_ICON_NAME[this.variant()]);
@@ -61,6 +79,9 @@ export class ToastComponent {
       VARIANT_CONTAINER_CLASSES[this.variant()],
     ].join(' ')
   );
+
+  protected readonly actionClasses = ACTION_CLASSES;
+  protected readonly dismissClasses = DISMISS_CLASSES;
 }
 
 export {DEFAULT_DURATION_MS};

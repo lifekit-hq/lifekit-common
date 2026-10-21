@@ -232,11 +232,11 @@ Enforcement labels:
 | S5  | Offline, then error, then empty; a failed refresh keeps the last data and offers a retry                                         | **exists**: phone (state pattern at 320 and 390), async-state spec                                                                                     |
 | S6  | Empty states carry a title and a body; first-use, no-results and error variants                                                  | **enforced**: story-state (`FirstUse`, `NoResults`, `Error` on `cmn-empty-state`)                                                                      |
 | S7  | Disable only for an unmet prerequisite and say why; hide for no permission; read-only is distinct                                | **enforced**: story-state (`Disabled` and `ReadOnly` on every field). Why a control is disabled is **review-only**: the prerequisite is app logic      |
-| F1  | Error toasts and toasts with an action never auto-dismiss                                                                        | **enforced** for errors: `toast.service.spec.ts`. **planned** for actions: the same spec, when toasts gain an action (F4)                              |
-| F2  | Timed toasts pause while hovered or focused (WCAG 2.2.1)                                                                         | **planned**: a toast spec, with the pause                                                                                                              |
-| F3  | Toasts stack with the newest nearest the thumb; at most three visible                                                            | **planned**: a toast spec and a `Stacked` story, with stacking                                                                                         |
-| F4  | One action, two words or fewer; Undo rather than a confirm where the action is reversible                                        | **planned**: the API shape (one optional `action`). The wording is **review-only**: copy needs judgement                                               |
-| F5  | A toast sits above the bottom inset and the tab bar on a phone                                                                   | **planned**: phone's notices check extended to toasts                                                                                                  |
+| F1  | Error toasts and toasts with an action never auto-dismiss                                                                        | **enforced**: `toast.service.spec.ts` "keeps an error toast up" and "action"                                                                           |
+| F2  | Timed toasts pause while hovered or focused (WCAG 2.2.1)                                                                         | **enforced**: `toast.service.spec.ts` "pause"                                                                                                          |
+| F3  | Toasts stack with the newest nearest the thumb; at most three visible                                                            | **enforced**: `toast.service.spec.ts` "stacking", the `Stacked` story                                                                                  |
+| F4  | One action, two words or fewer; Undo rather than a confirm where the action is reversible                                        | **enforced**: the API shape (one optional `action`), the `WithAction` stories. The wording is **review-only**                                          |
+| F5  | A toast sits above the bottom inset and the tab bar on a phone                                                                   | **enforced**: phone "toasts" check on `PhoneOverlayToast`                                                                                              |
 | F6  | Persistent conditions (offline, sync failed) use an inline alert or banner, never a toast                                        | **review-only**: whether a condition persists is app knowledge                                                                                         |
 | F7  | Destructive confirmation is an action sheet on a phone and a dialog on desktop, labelled with the verb                           | **exists**: the dialog's phone presentations, the `ConfirmActionSheet` story, phone (sheets)                                                           |
 | V1  | No validation on blur; errors appear on submit. A field with no `[formGroup]`/`ngForm` to submit it shows its error once touched | **enforced**: form-field spec "validation timing"                                                                                                      |
@@ -283,12 +283,11 @@ Enforcement labels:
 | X3  | One primary number per screen; detail behind disclosure                                                                          | **review-only**: which number is primary is a product decision                                                                                         |
 | X4  | The NN/g heuristics pass on every new flow                                                                                       | **review-only**: they judge whole flows                                                                                                                |
 
-The count: 22 **exists**; 20 **enforced** (S3, S4, S6, S7, F1 in part, V1 to V4, V5 forwarding,
-V8, T3 in part, T5 in part, K3, Y2, Ch2, $1, $2, X1, X2); 9 **planned** (F2 to F5, T2, T4, K2,
-Ch1, Ch3); 6 **review-only** (F6, V6, N3, C4, X3, X4), plus the wording in F4 and the reason in
-S7. Every planned check waits on a feature that is its own issue: toast actions and stacking,
-data-table features (T5's cell ellipsis among them), keyboard patterns and chart text
-alternatives.
+The count: 22 **exists**; 24 **enforced** (S3, S4, S6, S7, F1 to F5, V1 to V4, V5 forwarding,
+V8, T3 in part, T5 in part, K3, Y2, Ch2, $1, $2, X1, X2); 5 **planned** (T2, T4, K2, Ch1, Ch3);
+6 **review-only** (F6, V6, N3, C4, X3, X4), plus the wording in F4 and the reason in
+S7. Every planned check waits on a feature that is its own issue: data-table features (T5's cell
+ellipsis among them), keyboard patterns and chart text alternatives.
 
 ### Story-state categories (X2)
 

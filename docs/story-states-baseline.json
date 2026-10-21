@@ -97,14 +97,9 @@
       "reason": "WithHistory shows a multi-turn thread; a single over-long message story is a follow-up."
     },
     {
-      "component": "toast",
-      "state": "WithAction",
-      "reason": "Toasts have no action API yet (guardrails F4, a Part 3 gap: toast actions and stacking)."
-    },
-    {
       "component": "alert",
       "state": "WithAction",
-      "reason": "cmn-alert has no action slot yet; a follow-up with the toast action work (guardrails F4)."
+      "reason": "cmn-alert has no action slot yet; a follow-up to the toast action (guardrails F4)."
     }
   ]
 }

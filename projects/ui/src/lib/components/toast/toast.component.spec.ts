@@ -73,6 +73,25 @@ describe('ToastComponent', () => {
     expect(count).toBe(1);
   });
 
+  it('renders no action button without an action', () => {
+    fixture.detectChanges();
+    expect((fixture.nativeElement as HTMLElement).querySelectorAll('button')).toHaveLength(1);
+  });
+
+  it('renders the action and emits when it is used', () => {
+    let count = 0;
+    fixture.componentInstance.actioned.subscribe(() => count++);
+    fixture.componentRef.setInput('action', 'Undo');
+    fixture.detectChanges();
+
+    const button = [...(fixture.nativeElement as HTMLElement).querySelectorAll('button')].find(
+      el => el.textContent?.trim() === 'Undo'
+    );
+    expect(button).toBeDefined();
+    button?.click();
+    expect(count).toBe(1);
+  });
+
   it('publishes a positive default duration for the service to use', () => {
     expect(DEFAULT_DURATION_MS).toBeGreaterThan(0);
   });
