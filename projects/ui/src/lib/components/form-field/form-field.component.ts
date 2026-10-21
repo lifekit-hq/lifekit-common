@@ -38,10 +38,11 @@ let fieldCounter = 0;
  * `[formGroup]` / `ngForm` on submit). After that, a shown error is re-checked as the person types
  * and clears the moment the field is valid; typing never raises a new error before the next submit.
  * A validity that resolves after the submit (an async validator finishing, a server `setErrors`)
- * counts as part of that submit and shows. A form reset hides everything again. A control whose
- * root form is not bound to an enclosing `[formGroup]` or `ngForm` (a parentless control, or a group
- * saved by a button calling `markAllAsTouched()`) never sees a submit, so it shows its error once
- * touched. Without a `control`, a static `errorMessage` shows immediately.
+ * counts as part of that submit and shows. A form reset hides everything again, including a reset
+ * made by the `(ngSubmit)` handler itself. A control whose root form is not bound to an enclosing
+ * `[formGroup]` or `ngForm` (a parentless control, or a group saved by a button calling
+ * `markAllAsTouched()`) never sees a submit, so it shows its error once touched. Without a
+ * `control`, a static `errorMessage` shows immediately.
  */
 @Component({
   selector: 'cmn-form-field',
@@ -94,6 +95,8 @@ export class FormFieldComponent implements ControlValueAccessor, AfterContentIni
   private onTouchedFn: (() => void) | undefined;
   /** True between a value change and the status change it triggers: typing, not a late result. */
   private valueJustChanged = false;
+  /** True from a reset until the task ends; a submit in that window was reset by its own handler. */
+  private resetThisTask = false;
   /** True once the enclosing form has been submitted, until it is reset. */
   private readonly submitted = signal(false);
   /** True while a submit-time validator error is on screen; cleared once the field is valid. */
@@ -119,7 +122,7 @@ export class FormFieldComponent implements ControlValueAccessor, AfterContentIni
     if (!ctrl) {
       return this.errorMessage();
     }
-    const awaitsSubmit = (this.formGroupDirective?.form ?? this.ngForm?.form) === ctrl.root;
+    const awaitsSubmit = this.enclosingForm() === ctrl.root;
     if (this.errorMessage() && (awaitsSubmit ? this.submitted() : ctrl.touched)) {
       return this.errorMessage();
     }
@@ -138,16 +141,19 @@ export class FormFieldComponent implements ControlValueAccessor, AfterContentIni
           this.submitted.set(false);
           this.errorShown.set(false);
           this.valueJustChanged = false;
+          this.resetThisTask = false;
           if (!ctrl) {
             return EMPTY;
           }
-          // Submit and reset fire on the root form only; value and status changes fire on the control.
+          // Submit and reset fire on the directive's form only; value and status fire on the control.
+          // An ngModel control joins that form a tick after binding, so its root is not read here.
+          const form = this.enclosingForm();
           const events$ =
-            ctrl.root === ctrl
+            !form || form === ctrl
               ? ctrl.events
               : merge(
                   ctrl.events,
-                  ctrl.root.events.pipe(
+                  form.events.pipe(
                     filter(
                       event =>
                         event instanceof FormSubmittedEvent || event instanceof FormResetEvent
@@ -203,13 +209,22 @@ export class FormFieldComponent implements ControlValueAccessor, AfterContentIni
     this.inputChild()?.setDisabledState(isDisabled);
   }
 
+  /** The form bound by an enclosing `[formGroup]` or `ngForm`: the only source of submit events. */
+  private enclosingForm(): AbstractControl | undefined {
+    return this.formGroupDirective?.form ?? this.ngForm?.form;
+  }
+
   private onControlEvent(ctrl: AbstractControl, event: ControlEvent): void {
     if (event instanceof FormSubmittedEvent) {
-      this.submitted.set(true);
-      this.errorShown.set(ctrl.invalid);
+      if (!this.resetThisTask) {
+        this.submitted.set(true);
+        this.errorShown.set(ctrl.invalid);
+      }
     } else if (event instanceof FormResetEvent) {
       this.submitted.set(false);
       this.errorShown.set(false);
+      this.resetThisTask = true;
+      queueMicrotask(() => (this.resetThisTask = false));
     } else if (event instanceof ValueChangeEvent) {
       this.valueJustChanged = true;
     } else if (event instanceof StatusChangeEvent) {

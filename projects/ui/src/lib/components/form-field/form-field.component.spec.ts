@@ -4,6 +4,7 @@ import {
   type AsyncValidatorFn,
   FormControl,
   FormGroup,
+  FormsModule,
   ReactiveFormsModule,
   type ValidationErrors,
   Validators,
@@ -55,12 +56,12 @@ class HostComponent {
   template: `
     @if (withFormDirective) {
       <form [formGroup]="form">
-        <cmn-form-field label="Email" [control]="control">
+        <cmn-form-field [control]="control" label="Email">
           <cmn-input [formControl]="control" />
         </cmn-form-field>
       </form>
     } @else {
-      <cmn-form-field label="Email" [control]="control">
+      <cmn-form-field [control]="control" label="Email">
         <cmn-input [formControl]="control" />
       </cmn-form-field>
     }
@@ -74,6 +75,38 @@ class SaveButtonHostComponent {
   });
   public readonly form = new FormGroup({email: this.control});
 }
+
+@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [FormFieldComponent, InputComponent, ReactiveFormsModule],
+  template: `
+    <form [formGroup]="form" (ngSubmit)="form.reset()">
+      <cmn-form-field [control]="control" label="Email">
+        <cmn-input [formControl]="control" />
+      </cmn-form-field>
+    </form>
+  `,
+})
+class ResetOnSubmitReactiveHostComponent {
+  public readonly control = new FormControl('', {
+    nonNullable: true,
+    validators: [Validators.required],
+  });
+  public readonly form = new FormGroup({email: this.control});
+}
+
+@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [FormFieldComponent, InputComponent, FormsModule],
+  template: `
+    <form #f="ngForm" (ngSubmit)="f.reset()">
+      <cmn-form-field [control]="email.control" label="Email">
+        <cmn-input #email="ngModel" name="email" ngModel required />
+      </cmn-form-field>
+    </form>
+  `,
+})
+class ResetOnSubmitTemplateHostComponent {}
 
 describe('FormFieldComponent', () => {
   let fixture: ComponentFixture<HostComponent>;
@@ -340,6 +373,40 @@ describe('FormFieldComponent', () => {
       control.setValue('filled');
       bare.detectChanges();
       expect(bareError()).toBeNull();
+    });
+
+    describe('a reset inside the (ngSubmit) handler', () => {
+      async function submitAndReset(
+        hostType:
+          typeof ResetOnSubmitReactiveHostComponent | typeof ResetOnSubmitTemplateHostComponent
+      ): Promise<HTMLElement> {
+        const resetHost = TestBed.createComponent(hostType);
+        resetHost.detectChanges();
+        await resetHost.whenStable();
+        resetHost.detectChanges();
+        const root = resetHost.nativeElement as HTMLElement;
+        root.querySelector('form')?.dispatchEvent(new Event('submit'));
+        resetHost.detectChanges();
+        return root;
+      }
+
+      it('leaves a [formGroup] form clean', async () => {
+        const root = await submitAndReset(ResetOnSubmitReactiveHostComponent);
+        expect(root.querySelector('[role="alert"]')).toBeNull();
+      });
+
+      it('leaves an ngForm form clean', async () => {
+        const root = await submitAndReset(ResetOnSubmitTemplateHostComponent);
+        expect(root.querySelector('[role="alert"]')).toBeNull();
+      });
+
+      it('does not swallow a submit that follows an earlier reset', async () => {
+        fixture.detectChanges();
+        formEl().dispatchEvent(new Event('reset'));
+        await Promise.resolve();
+        submit();
+        expect(error()).not.toBeNull();
+      });
     });
 
     describe('a group saved by markAllAsTouched()', () => {
