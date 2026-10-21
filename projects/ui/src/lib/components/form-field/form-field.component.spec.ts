@@ -49,6 +49,32 @@ class HostComponent {
   public readonly form = new FormGroup({email: this.control});
 }
 
+@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [FormFieldComponent, InputComponent, ReactiveFormsModule],
+  template: `
+    @if (withFormDirective) {
+      <form [formGroup]="form">
+        <cmn-form-field label="Email" [control]="control">
+          <cmn-input [formControl]="control" />
+        </cmn-form-field>
+      </form>
+    } @else {
+      <cmn-form-field label="Email" [control]="control">
+        <cmn-input [formControl]="control" />
+      </cmn-form-field>
+    }
+  `,
+})
+class SaveButtonHostComponent {
+  public withFormDirective = false;
+  public readonly control = new FormControl('', {
+    nonNullable: true,
+    validators: [Validators.required],
+  });
+  public readonly form = new FormGroup({email: this.control});
+}
+
 describe('FormFieldComponent', () => {
   let fixture: ComponentFixture<HostComponent>;
   let host: HostComponent;
@@ -314,6 +340,29 @@ describe('FormFieldComponent', () => {
       control.setValue('filled');
       bare.detectChanges();
       expect(bareError()).toBeNull();
+    });
+
+    describe('a group saved by markAllAsTouched()', () => {
+      function render(withFormDirective: boolean): ComponentFixture<SaveButtonHostComponent> {
+        const saveHost = TestBed.createComponent(SaveButtonHostComponent);
+        saveHost.componentInstance.withFormDirective = withFormDirective;
+        saveHost.detectChanges();
+        saveHost.componentInstance.form.markAllAsTouched();
+        saveHost.detectChanges();
+        return saveHost;
+      }
+
+      function saveError(saveHost: ComponentFixture<SaveButtonHostComponent>): HTMLElement | null {
+        return (saveHost.nativeElement as HTMLElement).querySelector('[role="alert"]');
+      }
+
+      it('shows the error once touched when no form directive can submit it', () => {
+        expect(saveError(render(false))?.textContent?.trim()).toBeTruthy();
+      });
+
+      it('waits for the submit when the group is bound to [formGroup]', () => {
+        expect(saveError(render(true))).toBeNull();
+      });
     });
   });
 

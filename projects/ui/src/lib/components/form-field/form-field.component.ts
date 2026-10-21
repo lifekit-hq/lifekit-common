@@ -14,9 +14,11 @@ import {
   AbstractControl,
   type ControlEvent,
   ControlValueAccessor,
+  FormGroupDirective,
   FormResetEvent,
   FormSubmittedEvent,
   NG_VALUE_ACCESSOR,
+  NgForm,
   StatusChangeEvent,
   ValueChangeEvent,
 } from '@angular/forms';
@@ -36,9 +38,10 @@ let fieldCounter = 0;
  * `[formGroup]` / `ngForm` on submit). After that, a shown error is re-checked as the person types
  * and clears the moment the field is valid; typing never raises a new error before the next submit.
  * A validity that resolves after the submit (an async validator finishing, a server `setErrors`)
- * counts as part of that submit and shows. A form reset hides everything again. A control with no
- * enclosing form never sees a submit, so it shows its error once touched. Without a `control`, a
- * static `errorMessage` shows immediately.
+ * counts as part of that submit and shows. A form reset hides everything again. A control whose
+ * root form is not bound to an enclosing `[formGroup]` or `ngForm` (a parentless control, or a group
+ * saved by a button calling `markAllAsTouched()`) never sees a submit, so it shows its error once
+ * touched. Without a `control`, a static `errorMessage` shows immediately.
  */
 @Component({
   selector: 'cmn-form-field',
@@ -81,6 +84,8 @@ let fieldCounter = 0;
 })
 export class FormFieldComponent implements ControlValueAccessor, AfterContentInit {
   private readonly validationMessages = inject(VALIDATION_MESSAGES);
+  private readonly formGroupDirective = inject(FormGroupDirective, {optional: true});
+  private readonly ngForm = inject(NgForm, {optional: true});
   private readonly singleLineChild = contentChild(InputComponent);
   private readonly multiLineChild = contentChild(TextareaComponent);
   private pendingValue: unknown = undefined;
@@ -114,11 +119,11 @@ export class FormFieldComponent implements ControlValueAccessor, AfterContentIni
     if (!ctrl) {
       return this.errorMessage();
     }
-    const standalone = !ctrl.parent;
-    if (this.errorMessage() && (standalone ? ctrl.touched : this.submitted())) {
+    const awaitsSubmit = (this.formGroupDirective?.form ?? this.ngForm?.form) === ctrl.root;
+    if (this.errorMessage() && (awaitsSubmit ? this.submitted() : ctrl.touched)) {
       return this.errorMessage();
     }
-    if (!(standalone ? ctrl.touched : this.errorShown()) || !ctrl.errors) {
+    if (!(awaitsSubmit ? this.errorShown() : ctrl.touched) || !ctrl.errors) {
       return '';
     }
     const [key, params] = Object.entries(ctrl.errors)[0];
@@ -144,7 +149,8 @@ export class FormFieldComponent implements ControlValueAccessor, AfterContentIni
                   ctrl.events,
                   ctrl.root.events.pipe(
                     filter(
-                      event => event instanceof FormSubmittedEvent || event instanceof FormResetEvent
+                      event =>
+                        event instanceof FormSubmittedEvent || event instanceof FormResetEvent
                     )
                   )
                 );
