@@ -103,6 +103,7 @@ export class ToastService {
     clearTimeout(entry.timer);
     this.entries = this.entries.filter(item => item !== entry);
     this.sync();
+    this.stackRef?.instance.refreshPaused();
   }
 
   private runAction(id: number): void {

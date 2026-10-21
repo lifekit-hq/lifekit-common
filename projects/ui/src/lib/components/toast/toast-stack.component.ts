@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, input, output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, ElementRef, inject, input, output} from '@angular/core';
 
 import {ToastComponent, type ToastVariant} from './toast.component';
 
@@ -39,6 +39,8 @@ export interface ToastStackItem {
   `,
 })
 export class ToastStackComponent {
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+
   private hovered = false;
   private focused = false;
 
@@ -47,6 +49,16 @@ export class ToastStackComponent {
   public readonly dismissed = output<number>();
   public readonly actioned = output<number>();
   public readonly pausedChange = output<boolean>();
+
+  /**
+   * Re-reads hover and focus from the DOM. A removed toast can take the focused element, or the
+   * pointer's target, with it without a `focusout` or `mouseleave` ever firing.
+   */
+  public refreshPaused(): void {
+    this.hovered = this.host.matches(':hover');
+    this.focused = this.host.contains(document.activeElement);
+    this.emitPaused();
+  }
 
   protected setHovered(hovered: boolean): void {
     this.hovered = hovered;

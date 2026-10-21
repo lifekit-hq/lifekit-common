@@ -250,6 +250,23 @@ describe('ToastService', () => {
       stack().dispatchEvent(new FocusEvent('focusout', {relatedTarget: null}));
       vi.runAllTimers();
     });
+
+    it('resumes the clock when the focused toast is removed without a focusout', () => {
+      service.success('Saved', 3000);
+      service.error('Failed');
+      const [, errorDismiss] = [
+        ...document.querySelectorAll<HTMLButtonElement>('cmn-toast button[aria-label="Dismiss"]'),
+      ];
+      errorDismiss.focus();
+      errorDismiss.dispatchEvent(new FocusEvent('focusin', {bubbles: true}));
+      vi.advanceTimersByTime(10_000);
+      expect(toasts()).toHaveLength(2);
+
+      errorDismiss.click();
+      expect(toasts()).toHaveLength(1);
+      vi.advanceTimersByTime(3000);
+      expect(toasts()).toHaveLength(0);
+    });
   });
 
   describe('position (guardrails F5)', () => {
