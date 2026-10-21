@@ -10,8 +10,10 @@ import {TooltipDirective, type TooltipPlacement} from './tooltip.directive';
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ButtonComponent, TooltipDirective],
+  // Pinned to the top of the viewport: spec files share one page, so content another file
+  // leaves behind would otherwise push the trigger down to where the bubble flips sides.
   template: `
-    <div style="padding: 2rem">
+    <div style="position: fixed; top: 0; left: 0; padding: 2rem">
       <button
         [cmnTooltip]="text()"
         [cmnTooltipPlacement]="placement()"

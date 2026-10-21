@@ -22,6 +22,9 @@ describe('CmnDialogContainerComponent', () => {
     addPanelClass: ReturnType<typeof vi.fn>;
     removePanelClass: ReturnType<typeof vi.fn>;
   };
+  // The CDK container binds `id` from its config, clearing the `rootN` id TestBed's teardown
+  // finds hosts by, so each host would stay in the page the next spec files run in.
+  const hosts: HTMLElement[] = [];
 
   function setup(config: CmnDialogConfig, desktop = true): void {
     close = vi.fn();
@@ -43,6 +46,7 @@ describe('CmnDialogContainerComponent', () => {
       ],
     });
     fixture = TestBed.createComponent(CmnDialogContainerComponent);
+    hosts.push(fixture.nativeElement as HTMLElement);
     fixture.detectChanges();
   }
 
@@ -52,6 +56,10 @@ describe('CmnDialogContainerComponent', () => {
 
   beforeEach(() => {
     setup(makeConfig());
+  });
+
+  afterEach(() => {
+    hosts.splice(0).forEach(host => host.remove());
   });
 
   it('marks the shell as a modal dialog', () => {
