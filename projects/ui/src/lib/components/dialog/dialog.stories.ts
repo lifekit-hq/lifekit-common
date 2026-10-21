@@ -13,8 +13,6 @@ import {moduleMetadata} from '@storybook/angular';
 import {CmnDialogService} from '../../services/dialog/dialog.service';
 import {ButtonComponent} from '../button/button.component';
 import {InputComponent} from '../input/input.component';
-import {StepperDialogComponent} from '../stepper-dialog/stepper-dialog.component';
-import {CmnStepDirective} from '../stepper-dialog/stepper-step.directive';
 import {DialogActionsComponent} from './dialog-actions.component';
 import {CmnDialogBareContainerComponent} from './dialog-bare-container.component';
 import type {CmnDialogPhoneMode, CmnDialogSize} from './dialog-config';
@@ -89,29 +87,6 @@ class StoryFormDialogContentComponent {
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  selector: 'cmn-story-stepper-dialog-content',
-  imports: [CmnStepDirective, StepperDialogComponent],
-  template: `
-    <cmn-stepper-dialog [(step)]="step" (cancelled)="ref.close()" (finished)="ref.close(true)">
-      <ng-template cmnStep label="Provider">
-        <p class="text-cmn-sm text-text-secondary">Choose your institution.</p>
-      </ng-template>
-      <ng-template cmnStep label="Credentials">
-        <p class="text-cmn-sm text-text-secondary">Enter your credentials.</p>
-      </ng-template>
-      <ng-template cmnStep label="Done">
-        <p class="text-cmn-sm text-text-secondary">All set.</p>
-      </ng-template>
-    </cmn-stepper-dialog>
-  `,
-})
-class StoryStepperDialogContentComponent {
-  protected readonly ref = inject(DialogRef);
-  protected readonly step = signal(0);
-}
-
-@Component({
-  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'cmn-story-bare-dialog-content',
   imports: [ButtonComponent],
   template: `
@@ -149,7 +124,6 @@ class StoryBareDialogContentComponent {
       @for (mode of phoneModes; track mode) {
         <cmn-button (clicked)="openPhone(mode)" variant="secondary">{{ mode }}</cmn-button>
       }
-      <cmn-button (clicked)="openStepper()" variant="secondary">stepper (full-screen)</cmn-button>
       <cmn-button (clicked)="openForm()" variant="secondary">long form (sheet)</cmn-button>
     </div>
     <p class="mt-cmn-4 text-cmn-sm text-text-secondary">Last result: {{ result() }}</p>
@@ -159,9 +133,7 @@ class StoryDialogLauncherComponent {
   private readonly dialog = inject(CmnDialogService);
 
   /** Opens one dialog as soon as the story renders, so a story can show an open dialog. */
-  public readonly autoOpen = input<
-    CmnDialogPhoneMode | 'confirm' | 'stepper' | 'form' | 'locked' | null
-  >(null);
+  public readonly autoOpen = input<CmnDialogPhoneMode | 'confirm' | 'form' | 'locked' | null>(null);
 
   protected readonly sizes: CmnDialogSize[] = ['sm', 'md', 'lg', 'full'];
   protected readonly phoneModes: CmnDialogPhoneMode[] = ['sheet', 'full-screen', 'action-sheet'];
@@ -172,9 +144,6 @@ class StoryDialogLauncherComponent {
       switch (this.autoOpen()) {
         case 'confirm':
           this.confirm();
-          break;
-        case 'stepper':
-          this.openStepper();
           break;
         case 'form':
           this.openForm();
@@ -199,13 +168,6 @@ class StoryDialogLauncherComponent {
       return;
     }
     this.dialog.open(StoryDialogContentComponent, {title: `Dialog - ${phone}`, phone});
-  }
-
-  protected openStepper(): void {
-    this.dialog.open(StoryStepperDialogContentComponent, {
-      title: 'Connect an account',
-      size: 'full',
-    });
   }
 
   protected openForm(): void {
@@ -259,7 +221,6 @@ const meta: Meta<StoryDialogLauncherComponent> = {
         StoryBareDialogContentComponent,
         StoryActionSheetContentComponent,
         StoryFormDialogContentComponent,
-        StoryStepperDialogContentComponent,
       ],
     }),
   ],
@@ -293,12 +254,6 @@ export const Sheet: Story = {
  */
 export const FullScreen: Story = {
   args: {autoOpen: 'full-screen'},
-  globals: {viewport: PHONE.viewport},
-};
-
-/** A long multi-step flow, such as connecting an account, takes the whole screen. */
-export const FullScreenStepper: Story = {
-  args: {autoOpen: 'stepper'},
   globals: {viewport: PHONE.viewport},
 };
 

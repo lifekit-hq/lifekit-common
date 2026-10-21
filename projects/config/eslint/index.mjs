@@ -14,10 +14,23 @@ import rxjs from '@smarttools/eslint-plugin-rxjs';
 
 import prettier from 'eslint-plugin-prettier';
 
+import lifekit from './lifekit-plugin.mjs';
+
 const require = createRequire(import.meta.url);
 const noUnsanitized = require('eslint-plugin-no-unsanitized');
 
 const DEFAULT_IGNORES = ['.angular/**', 'coverage/**', 'dist/**', 'codegen.ts'];
+
+// The guardrail rules point apps at the library; the library is where the raw controls and the
+// money formatter live, so it lints itself with `consumerGuardrails: false`.
+const LIFEKIT_RULES_OFF = {
+  files: ['**/*.ts', '**/*.html'],
+  rules: {
+    'lifekit/no-raw-controls': 'off',
+    'lifekit/no-local-currency-format': 'off',
+    'lifekit/require-disable-reason': 'off',
+  },
+};
 
 export function createEslintConfig({
   selectorPrefix,
@@ -26,6 +39,7 @@ export function createEslintConfig({
   ignores = [],
   extraConfigs = [],
   tsconfigRootDir = process.cwd(),
+  consumerGuardrails = true,
 } = {}) {
   if (!selectorPrefix) {
     throw new Error('createEslintConfig: `selectorPrefix` is required');
@@ -60,8 +74,14 @@ export function createEslintConfig({
         'unused-imports': unusedImports,
         'simple-import-sort': simpleImportSort,
         'no-unsanitized': noUnsanitized,
+        lifekit,
       },
       rules: {
+        // Guardrails $1: money goes through @lifekit-hq/core/format. A warning for one release,
+        // then an error.
+        'lifekit/no-local-currency-format': 'warn',
+        'lifekit/require-disable-reason': 'warn',
+
         'import/no-cycle': [
           'error',
           {
@@ -435,6 +455,7 @@ export function createEslintConfig({
       files: ['**/*.html'],
       plugins: {
         prettier,
+        lifekit,
       },
       extends: [...angular.configs.templateRecommended, ...angular.configs.templateAccessibility],
       rules: {
@@ -447,8 +468,12 @@ export function createEslintConfig({
         '@angular-eslint/template/prefer-control-flow': ['error'],
         '@angular-eslint/template/prefer-self-closing-tags': ['error'],
         '@angular-eslint/template/prefer-ngsrc': ['error'],
-        '@angular-eslint/template/click-events-have-key-events': 'off',
-        '@angular-eslint/template/interactive-supports-focus': 'off',
+        '@angular-eslint/template/click-events-have-key-events': 'error',
+        '@angular-eslint/template/interactive-supports-focus': 'error',
+        // Guardrails X1 and $1: a warning for one release, then an error.
+        'lifekit/no-raw-controls': 'warn',
+        'lifekit/no-local-currency-format': 'warn',
+        'lifekit/require-disable-reason': 'warn',
         '@angular-eslint/template/attributes-order': [
           'error',
           {
@@ -464,6 +489,7 @@ export function createEslintConfig({
         ],
       },
     },
+    ...(consumerGuardrails ? [] : [LIFEKIT_RULES_OFF]),
     ...extraConfigs
   );
 }

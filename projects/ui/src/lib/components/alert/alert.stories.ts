@@ -38,8 +38,7 @@ export const Warning: Story = {
 
 export const Error: Story = {
   render: () => ({
-    template:
-      '<cmn-alert variant="error">Failed to sync transactions. Please try again.</cmn-alert>',
+    template: '<cmn-alert variant="error">Transactions did not sync. Try again.</cmn-alert>',
   }),
 };
 

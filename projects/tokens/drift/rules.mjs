@@ -1,5 +1,5 @@
 /**
- * The six static drift rules. Each takes a CSS-shaped `(prop, value)` pair and returns a message
+ * The static drift rules. Each takes a CSS-shaped `(prop, value)` pair and returns a message
  * when the value drifts from the lifekit contract, or `null`.
  *
  * Adapted from pbakaus/impeccable (Apache-2.0, https://github.com/pbakaus/impeccable, v0.1.11):
@@ -115,6 +115,50 @@ export function radiusMessage(value) {
     });
   if (!offScale.length) return null;
   return `radius ${offScale.join(' ')} is off the scale (${formatPx(RADIUS_SCALE_PX)}px, pill); use var(--radius-*) or rounded-cmn-*`;
+}
+
+/**
+ * The spacing scale (px): 0, the 1px hairline (a border's offset, the sr-only clip), Carbon's 2px
+ * mini-unit, and the preset's `cmn-*` spacing steps (guardrails Y2: an 8px base with 2px and 4px
+ * mini-units).
+ */
+export const SPACING_SCALE_PX = [
+  0,
+  1,
+  2,
+  ...Object.values(require('../tailwind/preset.cjs').theme.extend.spacing)
+    .map(value => toPx(value))
+    .filter(px => px !== null),
+].sort((a, b) => a - b);
+
+/** (g) Spacing: every padding, margin, gap or inset length on the scale; tokens and calc() pass. */
+export function spacingMessage(value) {
+  const text = clean(value).toLowerCase();
+  if (text.includes('(') || CSS_WIDE.test(text)) return null;
+  const offScale = text
+    .split(/[\s,_]+/)
+    .filter(Boolean)
+    .filter(part => {
+      const px = toPx(part.replace(/^-/, ''));
+      return px !== null && !onScale(px, SPACING_SCALE_PX);
+    });
+  if (!offScale.length) return null;
+  return `spacing ${offScale.join(' ')} is off the scale (${formatPx(SPACING_SCALE_PX)}px); use the cmn-* spacing steps`;
+}
+
+/** User-facing prose: a sentence that starts with a capital and has more than one word. */
+const PROSE = /^\s*[A-Z][a-z'’]*[\s,][^]*[a-z]/;
+const ERROR_COPY_WORD = /(?<![\w-])(please|sorry|oops|valid|invalid)(?![\w-])/i;
+
+/**
+ * (h) Error copy, after GOV.UK: say what went wrong and how to fix it, with no "please", "sorry",
+ * "oops", "valid" or "invalid" (guardrails V3). Checks one string literal; non-prose passes.
+ */
+export function errorCopyMessage(text) {
+  if (!PROSE.test(text)) return null;
+  const word = ERROR_COPY_WORD.exec(text)?.[1];
+  if (!word) return null;
+  return `copy says "${word}"; say what went wrong and how to fix it (GOV.UK error messages)`;
 }
 
 const LAYOUT_PROPERTY = /(?<![\w-])(?:(?:min|max)-)?(?:width|height)(?![\w-])/gi;

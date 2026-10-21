@@ -44,7 +44,7 @@ const visuallyHiddenLabel = (content: string): {content: string; styles: object}
 });
 
 const DEFAULT_ERROR = 'Something went wrong.';
-const UNAVAILABLE_ERROR = 'The agent is unavailable right now. Please try again.';
+const UNAVAILABLE_ERROR = 'The agent is unavailable right now. Try again in a moment.';
 
 /**
  * Thin wrapper over the framework-agnostic <a href="https://deepchat.dev">Deep Chat</a> web component

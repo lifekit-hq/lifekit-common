@@ -9,6 +9,9 @@
  *   radius                a radius off the --radius-* scale
  *   root-font-size        `html { font-size }`: the rem scale assumes the 16px root
  *   layout-transition     a transition on width or height
+ *   spacing               a padding, margin, gap or inset length off the spacing scale
+ *   error-copy            a TS prose string that says please, sorry, oops, valid or invalid
+ *                         (not in an inline template)
  *
  * Token definitions (`--custom-property: …`) and `@font-face` are the contract itself, not drift.
  */
@@ -19,16 +22,18 @@ import {
   blank,
   blankCallMirrors,
   colourLiterals,
+  errorCopyMessage,
   fontFamilyMessage,
   fontShorthandParts,
   layoutTransitionMessage,
   radiusMessage,
   rootFontSizeMessage,
+  spacingMessage,
   textSizeMessage,
 } from './rules.mjs';
 import {extractStrings, lineAt, maskComments, parseDeclarations} from './source.mjs';
 
-export {RADIUS_SCALE_PX, TEXT_FLOOR_PX, TEXT_RAMP_PX} from './rules.mjs';
+export {RADIUS_SCALE_PX, SPACING_SCALE_PX, TEXT_FLOOR_PX, TEXT_RAMP_PX} from './rules.mjs';
 
 export const DRIFT_RULES = [
   'font-family',
@@ -37,12 +42,16 @@ export const DRIFT_RULES = [
   'radius',
   'root-font-size',
   'layout-transition',
+  'spacing',
+  'error-copy',
 ];
 
 const SCANNED = new Set(['.css', '.scss', '.ts', '.tsx', '.html']);
 const SKIPPED_FILE = /\.(?:spec|test|stories)\.[cm]?[jt]sx?$|\.d\.ts$/;
 const SKIPPED_DIR = new Set(['node_modules', 'dist', 'storybook-static', 'coverage']);
 
+const SPACING_PROP =
+  /^(?:padding|margin|scroll-padding|scroll-margin)(?:-(?:top|right|bottom|left|inline|block)(?:-(?:start|end))?)?$|^(?:row-|column-)?gap$|^inset(?:-(?:inline|block)(?:-(?:start|end))?)?$/;
 const RADIUS_PROP =
   /^border-(?:(?:top|bottom)-(?:left|right)|(?:start|end)-(?:start|end))-radius$|^border-radius$/;
 const TS_KEYS = [
@@ -55,6 +64,9 @@ const TS_KEYS = [
   'borderBottomRightRadius',
   'transition',
   'transitionProperty',
+  'padding',
+  'margin',
+  'gap',
 ];
 const TS_KEY = new RegExp(
   `(?<![\\w$.-])(${TS_KEYS.join('|')})\\s*:\\s*(?:(['"\`])((?:\\\\.|(?!\\2)[^\\\\])*)\\2|(\\d+(?:\\.\\d+)?)(?![\\w.%]))`,
@@ -83,6 +95,7 @@ function declarationProblems({selector = '', atRules = [], prop, value}) {
       add('font-family', fontFamilyMessage(parts.family));
     }
   } else if (RADIUS_PROP.test(prop)) add('radius', radiusMessage(value));
+  else if (SPACING_PROP.test(prop)) add('spacing', spacingMessage(value));
   else if (prop === 'transition' || prop === 'transition-property') {
     add('layout-transition', layoutTransitionMessage(value));
   }
@@ -102,6 +115,11 @@ function* arbitraryClassProblems(text) {
       /(?<![\w-])transition-\[([^\]\s]+)\]/g,
       'layout-transition',
       value => layoutTransitionMessage(value.replace(/[_,]/g, ' ')),
+    ],
+    [
+      /(?<![\w-])-?(?:p|m|gap|space|inset|scroll-p|scroll-m)(?:-?[xytrblse])?-\[(-?[\d.]+(?:px|rem))\]/g,
+      'spacing',
+      spacingMessage,
     ],
     [
       /(?<![\w-])font-\[(?:family-name:)?(['"]?[a-z][^\]\s]*)\]/gi,
@@ -202,7 +220,12 @@ function scanTypeScript(text) {
       });
     }
   }
-  found.push(...colourProblems(strings.filter(({start}) => !templates.has(start))));
+  const literals = strings.filter(({start}) => !templates.has(start));
+  found.push(...colourProblems(literals));
+  for (const {text: body, line} of literals) {
+    const message = errorCopyMessage(body);
+    if (message) found.push({rule: 'error-copy', message, line});
+  }
   for (const match of masked.matchAll(/documentElement\.style\.fontSize\s*=/g)) {
     found.push({
       rule: 'root-font-size',

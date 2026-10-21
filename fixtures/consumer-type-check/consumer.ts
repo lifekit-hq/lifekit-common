@@ -9,7 +9,7 @@
 // any type the rollup references but drops (the #9 bug class) fails the build.
 // Peer deps (@angular/*) resolve from the repo's own node_modules — the
 // consumer-provides-peers contract. Ambient @types do NOT: tsconfig.json sets
-// `types: []`, so the repo's devDependency @types (google.accounts, node, …)
+// `types: []`, so the repo's devDependency @types (node, vitest, …)
 // are invisible here and any ambient namespace the rollup leans on without
 // declaring fails with TS2503 (issue #15).
 import * as api from '@lifekit-hq/ui';
@@ -18,8 +18,6 @@ import type {
   AreaChartComponent,
   AsyncStatus,
   ButtonComponent,
-  GoogleSignInButtonComponent,
-  GoogleSignInButtonConfiguration,
   Maybe,
   Nullable,
 } from '@lifekit-hq/ui';
@@ -50,10 +48,5 @@ const badgeLabel: Nullable<string> = alertItem.badgeLabel();
 declare const areaChart: AreaChartComponent;
 const stacked: boolean = areaChart.stacked();
 
-// cmn-google-sign-in-button's configuration must be the exported structural
-// type, not the ambient google.accounts namespace (issue #15).
-declare const googleButton: GoogleSignInButtonComponent;
-const buttonConfiguration: GoogleSignInButtonConfiguration = googleButton.buttonConfiguration();
-
 // Silence "unused variable" without removing the checks
-void [api, a, b, c, d, e, f, g, icon, badgeLabel, stacked, buttonConfiguration];
+void [api, a, b, c, d, e, f, g, icon, badgeLabel, stacked];

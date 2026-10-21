@@ -126,6 +126,8 @@ export function buildBarChartConfig(
         },
         y: {
           stacked,
+          // A bar's length is its value, so it only reads true from a zero baseline (guardrails Ch2).
+          beginAtZero: true,
           grid: {color: tokens.borderDefault},
           border: {display: false},
           ticks: {

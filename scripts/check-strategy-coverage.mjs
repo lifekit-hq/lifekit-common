@@ -37,16 +37,13 @@ export const LEGACY_SIMPLE_LEAVES = new Set([
   'chip',
   'donut-chart',
   'empty-state',
-  'google-sign-in-button',
   'icon',
   'institution-avatar',
   'line-chart',
   'page-container',
-  'password-strength',
   'skeleton',
   'status-indicator',
   'tag',
-  'usage-chip',
 ]);
 
 /**

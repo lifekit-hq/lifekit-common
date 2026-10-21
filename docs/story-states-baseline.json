@@ -1,0 +1,110 @@
+{
+  "note": "Justified gaps for scripts/check-story-states.mjs (guardrails X2). Each names a state a component's category needs but the component cannot show yet. The list only shrinks: an entry whose story lands fails the check until it is removed.",
+  "gaps": [
+    {
+      "component": "select",
+      "state": "ReadOnly",
+      "reason": "cmn-select has no read-only mode yet; disabled is its only inert state."
+    },
+    {
+      "component": "date-range",
+      "state": "ReadOnly",
+      "reason": "cmn-date-range has no read-only mode yet; disabled is its only inert state."
+    },
+    {
+      "component": "search-input",
+      "state": "ReadOnly",
+      "reason": "A search box is never read-only: with nothing to search it is hidden or disabled."
+    },
+    {
+      "component": "search-input",
+      "state": "Error",
+      "reason": "A search query has no validation; a failed search shows its error with the results, not on the field."
+    },
+    {
+      "component": "chip",
+      "state": "Disabled",
+      "reason": "cmn-chip has no disabled input; a filter that cannot apply is left out of the row."
+    },
+    {
+      "component": "data-table",
+      "state": "Error",
+      "reason": "cmn-data-table has no error slot inside its frame yet (guardrails T3, a Part 3 gap); hosts wrap it in cmn-async-state."
+    },
+    {
+      "component": "area-chart",
+      "state": "Loading",
+      "reason": "Charts render data only; the host's cmn-async-state owns loading (its skeleton story) until charts take a state input."
+    },
+    {
+      "component": "area-chart",
+      "state": "Error",
+      "reason": "Charts render data only; the host's cmn-async-state owns the error state until charts take a state input."
+    },
+    {
+      "component": "bar-chart",
+      "state": "Loading",
+      "reason": "Charts render data only; the host's cmn-async-state owns loading (its skeleton story) until charts take a state input."
+    },
+    {
+      "component": "bar-chart",
+      "state": "Error",
+      "reason": "Charts render data only; the host's cmn-async-state owns the error state until charts take a state input."
+    },
+    {
+      "component": "bar-chart",
+      "state": "LongContent",
+      "reason": "A long-range bar story waits on the chart text-alternative work (guardrails Ch1), which changes the same stories."
+    },
+    {
+      "component": "donut-chart",
+      "state": "Loading",
+      "reason": "Charts render data only; the host's cmn-async-state owns loading (its skeleton story) until charts take a state input."
+    },
+    {
+      "component": "donut-chart",
+      "state": "Error",
+      "reason": "Charts render data only; the host's cmn-async-state owns the error state until charts take a state input."
+    },
+    {
+      "component": "line-chart",
+      "state": "Loading",
+      "reason": "Charts render data only; the host's cmn-async-state owns loading (its skeleton story) until charts take a state input."
+    },
+    {
+      "component": "line-chart",
+      "state": "Error",
+      "reason": "Charts render data only; the host's cmn-async-state owns the error state until charts take a state input."
+    },
+    {
+      "component": "line-chart",
+      "state": "LongContent",
+      "reason": "A long-range line story waits on the chart text-alternative work (guardrails Ch1), which changes the same stories."
+    },
+    {
+      "component": "stat-card",
+      "state": "Empty",
+      "reason": "cmn-stat-card has no empty state yet; a metric with no data is left off the screen."
+    },
+    {
+      "component": "stat-card",
+      "state": "Error",
+      "reason": "cmn-stat-card has no error state yet; the host's cmn-async-state owns it."
+    },
+    {
+      "component": "chat",
+      "state": "LongContent",
+      "reason": "WithHistory shows a multi-turn thread; a single over-long message story is a follow-up."
+    },
+    {
+      "component": "toast",
+      "state": "WithAction",
+      "reason": "Toasts have no action API yet (guardrails F4, a Part 3 gap: toast actions and stacking)."
+    },
+    {
+      "component": "alert",
+      "state": "WithAction",
+      "reason": "cmn-alert has no action slot yet; a follow-up with the toast action work (guardrails F4)."
+    }
+  ]
+}

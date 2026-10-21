@@ -44,8 +44,8 @@ const QUICK_REFRESH_MS = 120;
   `,
 })
 class StoryRefreshComponent {
-  public readonly keepContent = input(false, {transform: booleanAttribute});
-  public readonly calm = input(false, {transform: booleanAttribute});
+  public readonly keepContent = input(true, {transform: booleanAttribute});
+  public readonly calm = input(true, {transform: booleanAttribute});
 
   protected readonly slow = REFRESH_MS;
   protected readonly quick = QUICK_REFRESH_MS;
@@ -433,29 +433,32 @@ export const PresetSkeleton: Story = {
 };
 
 /**
- * Every option off: a refresh swaps the content for the skeleton at once, however short the load.
- * This is how the component has always behaved.
+ * The defaults (`keepContent`, `showDelay` 200, `minDisplay` 400) with `crossfade`: the 120ms
+ * refresh shows no indicator at all, and a long one keeps the content on screen, dimmed once the
+ * delay passes. Nothing flashes.
  */
 export const RefreshDefault: Story = {
   render: () => ({template: '<cmn-story-refresh />'}),
 };
 
-/** `keepContent`: the loaded content stays on screen, dimmed, while the refresh loads. */
-export const RefreshKeepsContent: Story = {
-  render: () => ({template: '<cmn-story-refresh keepContent />'}),
+/**
+ * `[keepContent]="false"` with the default timing: a long refresh swaps the content for the
+ * skeleton after 200ms and holds it at least 400ms; a quick one shows nothing. The content fades
+ * back in. Content already loaded when the story opens does not fade.
+ */
+export const RefreshSkeletonCalm: Story = {
+  render: () => ({template: '<cmn-story-refresh [keepContent]="false" />'}),
+};
+
+/** Timing off (`showDelay` and `minDisplay` 0): the kept content dims at once, even for 120ms. */
+export const RefreshKeepsContentInstant: Story = {
+  render: () => ({template: '<cmn-story-refresh [calm]="false" />'}),
 };
 
 /**
- * `showDelay` and `minDisplay` (200 and 400ms) with `crossfade`: the 120ms refresh shows no
- * indicator at all, a long one shows the skeleton for at least 400ms, and the content fades in.
- * The content already loaded when the story opens (a revisit whose store kept its data) does not
- * fade: only content that replaces the skeleton, or nothing, does.
+ * Every option off: a refresh swaps the content for the skeleton at once, however short the load.
+ * This was the default before the guardrails (S3, S4) turned calm loading on.
  */
-export const RefreshCalm: Story = {
-  render: () => ({template: '<cmn-story-refresh calm />'}),
-};
-
-/** All of it: content kept and dimmed after the delay, no flash for a quick refresh. */
-export const RefreshKeepsContentCalm: Story = {
-  render: () => ({template: '<cmn-story-refresh keepContent calm />'}),
+export const RefreshInstant: Story = {
+  render: () => ({template: '<cmn-story-refresh [keepContent]="false" [calm]="false" />'}),
 };

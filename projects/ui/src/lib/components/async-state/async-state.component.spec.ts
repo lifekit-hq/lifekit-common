@@ -5,6 +5,8 @@ import {type ComponentFixture, TestBed} from '@angular/core/testing';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
 import {
+  ASYNC_STATE_MIN_DISPLAY_MS,
+  ASYNC_STATE_SHOW_DELAY_MS,
   AsyncStateComponent,
   type AsyncStateErrorPlacement,
   type AsyncStateStatus,
@@ -18,6 +20,9 @@ import {
       [status]="status()"
       [errorMessage]="errorMessage()"
       [isEmpty]="isEmpty()"
+      [keepContent]="false"
+      [showDelay]="0"
+      [minDisplay]="0"
       [emptyMessage]="emptyMessage()"
       [skeletonRows]="skeletonRows()"
       [skeletonHeight]="skeletonHeight()"
@@ -141,6 +146,9 @@ describe('AsyncStateComponent', () => {
       [errorMessage]="errorMessage()"
       [errorPlacement]="errorPlacement()"
       [isEmpty]="isEmpty()"
+      [keepContent]="false"
+      [showDelay]="0"
+      [minDisplay]="0"
     >
       <div class="row-skeleton" skeleton>Row-shaped skeleton</div>
       <div class="rich-empty" empty>
@@ -277,6 +285,9 @@ describe('AsyncStateComponent slots', () => {
       [lastSynced]="lastSynced()"
       [retryable]="retryable()"
       [emptySubMessage]="emptySubMessage()"
+      [keepContent]="false"
+      [showDelay]="0"
+      [minDisplay]="0"
       (retry)="retries = retries + 1"
     >
       <p class="projected">Loaded content</p>
@@ -707,5 +718,84 @@ describe('AsyncStateComponent calm loading', () => {
       await settle();
       expect(fading()).toBe(true);
     });
+  });
+});
+
+@Component({
+  imports: [AsyncStateComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <cmn-async-state [status]="status()">
+      <p class="projected">Loaded content</p>
+    </cmn-async-state>
+  `,
+})
+class DefaultsHostComponent {
+  public readonly status = signal<AsyncStateStatus>('idle');
+}
+
+describe('AsyncStateComponent calm-loading defaults (guardrails S3, S4)', () => {
+  let fixture: ComponentFixture<DefaultsHostComponent>;
+  let host: DefaultsHostComponent;
+
+  const root = (): HTMLElement => fixture.nativeElement as HTMLElement;
+  const projected = (): HTMLElement | null => root().querySelector('.projected');
+  const skeletons = (): number => root().querySelectorAll('cmn-skeleton').length;
+
+  async function settle(ms = 0): Promise<void> {
+    fixture.detectChanges();
+    await vi.advanceTimersByTimeAsync(ms);
+    fixture.detectChanges();
+  }
+
+  beforeEach(async () => {
+    vi.useFakeTimers();
+    await TestBed.configureTestingModule({imports: [DefaultsHostComponent]}).compileComponents();
+    fixture = TestBed.createComponent(DefaultsHostComponent);
+    host = fixture.componentInstance;
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('defaults to keepContent, a 200ms showDelay and a 400ms minDisplay', () => {
+    fixture.detectChanges();
+    const state = fixture.debugElement.children[0].componentInstance as AsyncStateComponent;
+    expect(state.keepContent()).toBe(true);
+    expect(state.showDelay()).toBe(ASYNC_STATE_SHOW_DELAY_MS);
+    expect(state.minDisplay()).toBe(ASYNC_STATE_MIN_DISPLAY_MS);
+  });
+
+  it('shows no skeleton for a first load shorter than 200ms', async () => {
+    host.status.set('loading');
+    await settle(ASYNC_STATE_SHOW_DELAY_MS - 1);
+    expect(skeletons()).toBe(0);
+
+    host.status.set('success');
+    await settle();
+    expect(projected()).not.toBeNull();
+  });
+
+  it('holds a shown skeleton for 400ms', async () => {
+    host.status.set('loading');
+    await settle(ASYNC_STATE_SHOW_DELAY_MS);
+    expect(skeletons()).toBeGreaterThan(0);
+
+    host.status.set('success');
+    await settle(ASYNC_STATE_MIN_DISPLAY_MS - 1);
+    expect(skeletons()).toBeGreaterThan(0);
+
+    await settle(1);
+    expect(skeletons()).toBe(0);
+  });
+
+  it('keeps loaded content on screen through a slow refresh', async () => {
+    host.status.set('success');
+    await settle();
+    host.status.set('loading');
+    await settle(ASYNC_STATE_SHOW_DELAY_MS * 2);
+    expect(projected()).not.toBeNull();
+    expect(skeletons()).toBe(0);
   });
 });

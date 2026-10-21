@@ -64,7 +64,7 @@ describe('ChatComponent — streaming adapter', () => {
     fixture.componentInstance.connect.handler(BODY, signals);
 
     expect(signals.onResponse).toHaveBeenCalledWith({
-      error: 'The agent is unavailable right now. Please try again.',
+      error: 'The agent is unavailable right now. Try again in a moment.',
     });
     expect(signals.onClose).toHaveBeenCalledOnce();
   });

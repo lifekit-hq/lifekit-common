@@ -69,13 +69,13 @@ describe('withAsyncStatus', () => {
 
   it('falls back to the default message for an unknown code', () => {
     store.setError('never_seen');
-    expect(store.errorMessage()).toBe('Something went wrong. Please try again.');
+    expect(store.errorMessage()).toBe('Something went wrong. Try again.');
   });
 
   it('falls back to the default message when the error carries no code', () => {
     store.setError(null);
     expect(store.errorCode()).toBeNull();
-    expect(store.errorMessage()).toBe('Something went wrong. Please try again.');
+    expect(store.errorMessage()).toBe('Something went wrong. Try again.');
   });
 
   it('honours a caller-supplied default message', () => {
@@ -151,20 +151,20 @@ describe('withNamedAsyncStatus', () => {
 
   it('falls back to the default message for an unknown code', () => {
     store.setProfileError('never_seen');
-    expect(store.profileErrorMessage()).toBe('Something went wrong. Please try again.');
+    expect(store.profileErrorMessage()).toBe('Something went wrong. Try again.');
   });
 
   it('falls back to the default message when the error carries no code', () => {
     store.setProfileError(null);
     expect(store.profileErrorCode()).toBeNull();
-    expect(store.profileErrorMessage()).toBe('Something went wrong. Please try again.');
+    expect(store.profileErrorMessage()).toBe('Something went wrong. Try again.');
   });
 
   it('honours a caller-supplied default message per key', () => {
     store.setEventsError('never_seen');
     expect(store.eventsErrorMessage()).toBe('Custom fallback.');
     store.setProfileError('never_seen');
-    expect(store.profileErrorMessage()).toBe('Something went wrong. Please try again.');
+    expect(store.profileErrorMessage()).toBe('Something went wrong. Try again.');
   });
 
   it('reports no message while not in the error state, even with a stale code', () => {

@@ -43,7 +43,6 @@ export * from './components/drawer/drawer-ref';
 export * from './components/empty-state/empty-state.component';
 export * from './components/filter-bar/filter-bar.component';
 export * from './components/form-field/form-field.component';
-export * from './components/google-sign-in-button/google-sign-in-button.component';
 export * from './components/icon/icon.component';
 export * from './components/input/input.component';
 export * from './components/institution-avatar/institution-avatar.component';
@@ -53,10 +52,8 @@ export * from './components/list-section/list-section.component';
 export * from './components/menu/menu.component';
 export * from './components/month-stepper/month-stepper.component';
 export * from './components/more-page/more-page.component';
-export * from './components/multi-select/multi-select.component';
 export * from './components/page-container/page-container.component';
 export * from './components/page-header/page-header.component';
-export * from './components/password-strength/password-strength.component';
 export * from './components/search-input/search-input.component';
 export * from './components/segmented/segmented.component';
 export * from './components/select/select.component';
@@ -67,8 +64,6 @@ export * from './components/sidebar-nav/sidebar-nav.component';
 export * from './components/skeleton/skeleton.component';
 export * from './components/stat-card/stat-card.component';
 export * from './components/status-indicator/status-indicator.component';
-export * from './components/stepper-dialog/stepper-dialog.component';
-export * from './components/stepper-dialog/stepper-step.directive';
 export * from './components/tab-group/tab-group.component';
 export * from './components/tag/tag.component';
 export * from './components/textarea/textarea.component';
@@ -77,13 +72,14 @@ export * from './components/toast/toast.component';
 export * from './components/toast/toast.service';
 export * from './components/toggle/toggle.component';
 export * from './components/top-bar/top-bar.component';
-export * from './components/usage-chip/usage-chip.component';
 
 // Directives
 export * from './directives/skeleton/skeleton.directive';
 export * from './directives/typography/typography.directive';
 
 // Pipes
+export * from './pipes/money/money.pipe';
+export * from './pipes/money/number.pipe';
 export * from './pipes/relative-time/relative-time.pipe';
 
 // Services

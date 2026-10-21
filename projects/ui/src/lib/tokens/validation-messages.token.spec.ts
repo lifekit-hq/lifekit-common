@@ -29,16 +29,16 @@ describe('VALIDATION_MESSAGES', () => {
 describe('DEFAULT_VALIDATION_MESSAGES', () => {
   it.each<[string, string]>([
     ['required', 'This field is required.'],
-    ['email', 'Enter a valid email address.'],
-    ['pattern', 'Format is invalid.'],
+    ['email', 'Enter an email address in the correct format, like name@example.com.'],
+    ['pattern', 'Enter this in the correct format.'],
     ['passwordsMismatch', 'Passwords do not match.'],
   ])('renders the parameter-less message for "%s"', (key, expected) => {
     expect(DEFAULT_VALIDATION_MESSAGES[key]()).toBe(expected);
   });
 
   it.each<[string, string]>([
-    ['minlength', 'Minimum 8 characters.'],
-    ['maxlength', 'Maximum 8 characters.'],
+    ['minlength', 'Enter at least 8 characters.'],
+    ['maxlength', 'Enter 8 characters or fewer.'],
   ])('interpolates requiredLength into the "%s" message', (key, expected) => {
     expect(DEFAULT_VALIDATION_MESSAGES[key]({requiredLength: 8})).toBe(expected);
   });

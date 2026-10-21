@@ -52,15 +52,15 @@ interface PaletteGroup {
     `,
   ],
   template: `
-    <div
-      (click)="close()"
-      class="fixed inset-0 z-[2000] flex items-start justify-center"
-      style="padding-top: 18vh"
-    >
-      <div class="cmn-palette-backdrop absolute inset-0 bg-black/45"></div>
+    <div class="fixed inset-0 z-[2000] flex items-start justify-center" style="padding-top: 18vh">
+      <!-- Pointer-only dismissal; Escape is the keyboard path (window keydown). -->
+      <div
+        (click)="close()"
+        class="cmn-palette-backdrop absolute inset-0 bg-black/45"
+        aria-hidden="true"
+      ></div>
 
       <div
-        (click)="$event.stopPropagation()"
         class="cmn-palette-panel relative z-10 w-full max-w-[560px] overflow-hidden rounded-2xl border border-border-default bg-surface-card shadow-cmn-md"
       >
         <!-- Search row -->
@@ -97,7 +97,9 @@ interface PaletteGroup {
                     [class.border-accent-default]="entry.idx === selectedIndex()"
                     [class.border-transparent]="entry.idx !== selectedIndex()"
                     (click)="activate(entry.item)"
+                    (keydown.enter)="activate(entry.item)"
                     (mouseenter)="selectedIndex.set(entry.idx)"
+                    tabindex="-1"
                     class="flex cursor-pointer items-center gap-cmn-3 border-l-2 px-cmn-4 py-2.5 transition-colors duration-75"
                   >
                     <div

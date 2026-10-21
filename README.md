@@ -6,10 +6,13 @@ Shared lifekit design system and Angular component library.
 | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
 | `@lifekit-hq/tokens` | Design tokens — CSS custom properties (`theme.css`, light/dark) + Tailwind preset, self-hosted IBM Plex Sans, and the lifekit brand mark + [browser-chrome standard](docs/BROWSER-CHROME.md). Framework-agnostic. | Every lifekit frontend (Angular) |
 | `@lifekit-hq/ui`     | Angular component library (`cmn-*` selectors), developed Storybook-first                                                                                                                                          | Angular apps                     |
-| `@lifekit-hq/core`   | Angular signal-store features and helpers; framework-free `@lifekit-hq/core/format` (relative-time formatters); `@lifekit-hq/core/preferences` (device and account preference storage)                            | Angular apps                     |
-| `@lifekit-hq/config` | Shared tooling presets — ESLint, Prettier, Stylelint, base tsconfig                                                                                                                                               | lifekit repos (build-time only)  |
+| `@lifekit-hq/core`   | Angular signal-store features and helpers; framework-free `@lifekit-hq/core/format` (money, number and relative-time formatters); `@lifekit-hq/core/preferences` (device and account preference storage)          | Angular apps                     |
+| `@lifekit-hq/config` | Shared tooling presets — ESLint (with the `lifekit/*` guardrail rules), Prettier, Stylelint, base tsconfig                                                                                                        | lifekit repos (build-time only)  |
 
 Extracted from [finance-sentry](https://github.com/lifekit-hq/finance-sentry) (`frontend/projects/dsdevq-common`) per lifekit-common#1.
+
+The UI/UX policy every component and app follows, with the published source behind each rule and
+the check that enforces it, is [docs/design/guardrails.md](docs/design/guardrails.md).
 
 Licensed under the [MIT License](LICENSE).
 

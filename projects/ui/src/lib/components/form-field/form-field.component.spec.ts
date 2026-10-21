@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, viewChild} from '@angular/core';
 import {type ComponentFixture, TestBed} from '@angular/core/testing';
-import {FormControl, ReactiveFormsModule, Validators} from '@angular/forms';
+import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {beforeEach, describe, expect, it} from 'vitest';
 
 import {InputComponent} from '../input/input.component';
@@ -10,17 +10,19 @@ import {FormFieldComponent} from './form-field.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FormFieldComponent, InputComponent, ReactiveFormsModule],
   template: `
-    <cmn-form-field
-      [label]="label"
-      [hint]="hint"
-      [errorMessage]="errorMessage"
-      [required]="required"
-      [control]="control"
-    >
-      @if (withInput) {
-        <cmn-input [formControl]="control" />
-      }
-    </cmn-form-field>
+    <form [formGroup]="form">
+      <cmn-form-field
+        [label]="label"
+        [hint]="hint"
+        [errorMessage]="errorMessage"
+        [required]="required"
+        [control]="control"
+      >
+        @if (withInput) {
+          <cmn-input [formControl]="control" />
+        }
+      </cmn-form-field>
+    </form>
   `,
 })
 class HostComponent {
@@ -34,8 +36,9 @@ class HostComponent {
   public withInput = true;
   public control = new FormControl('', {
     nonNullable: true,
-    validators: [Validators.required],
+    validators: [Validators.required, Validators.email],
   });
+  public readonly form = new FormGroup({email: this.control});
 }
 
 describe('FormFieldComponent', () => {
@@ -57,6 +60,25 @@ describe('FormFieldComponent', () => {
 
   function error(): HTMLElement | null {
     return (fixture.nativeElement as HTMLElement).querySelector('[role="alert"]');
+  }
+
+  function formEl(): HTMLFormElement {
+    return (fixture.nativeElement as HTMLElement).querySelector('form') as HTMLFormElement;
+  }
+
+  function submit(): void {
+    formEl().dispatchEvent(new Event('submit'));
+    fixture.detectChanges();
+  }
+
+  function type(value: string): void {
+    const inputEl = (fixture.nativeElement as HTMLElement).querySelector(
+      'input'
+    ) as HTMLInputElement;
+    inputEl.value = value;
+    inputEl.dispatchEvent(new Event('input'));
+    inputEl.dispatchEvent(new Event('blur'));
+    fixture.detectChanges();
   }
 
   function hint(): HTMLElement | null {
@@ -115,18 +137,19 @@ describe('FormFieldComponent', () => {
 
     host.hint = '';
     host.errorMessage = 'Something went wrong';
-    host.control.markAsTouched();
     fixture.detectChanges();
+    submit();
     expect(error()?.classList).toContain('leading-relaxed');
   });
 
-  it('keeps a static error hidden until the control is touched', () => {
+  it('keeps a static error hidden until the form is submitted', () => {
     host.errorMessage = 'Server rejected this value';
+    fixture.detectChanges();
+    host.control.markAsTouched();
     fixture.detectChanges();
     expect(error()).toBeNull();
 
-    host.control.markAsTouched();
-    fixture.detectChanges();
+    submit();
     expect(error()?.textContent?.trim()).toBe('Server rejected this value');
   });
 
@@ -141,17 +164,16 @@ describe('FormFieldComponent', () => {
   it('replaces the hint with the error once one is shown', () => {
     host.hint = 'We never share it.';
     host.errorMessage = 'Required';
-    host.control.markAsTouched();
     fixture.detectChanges();
+    submit();
 
     expect(error()).not.toBeNull();
     expect((fixture.nativeElement as HTMLElement).textContent).not.toContain('We never share it.');
   });
 
-  it('resolves a validator error through the injected message map', () => {
-    host.control.markAsTouched();
-    host.control.updateValueAndValidity();
+  it('resolves a validator error through the injected message map on submit', () => {
     fixture.detectChanges();
+    submit();
 
     const text = error()?.textContent?.trim() ?? '';
     expect(text.length).toBeGreaterThan(0);
@@ -161,6 +183,67 @@ describe('FormFieldComponent', () => {
     host.control.updateValueAndValidity();
     fixture.detectChanges();
     expect(error()).toBeNull();
+  });
+
+  describe('validation timing (guardrails V1, V4)', () => {
+    it('shows no error on blur or while typing before the first submit', () => {
+      fixture.detectChanges();
+      type('not-an-email');
+      expect(host.control.touched).toBe(true);
+      expect(host.control.invalid).toBe(true);
+      expect(error()).toBeNull();
+    });
+
+    it('shows the error on submit', () => {
+      fixture.detectChanges();
+      type('not-an-email');
+      submit();
+      expect(error()).not.toBeNull();
+    });
+
+    it('shows nothing on submit when the field is valid', () => {
+      fixture.detectChanges();
+      type('a@b.co');
+      submit();
+      expect(error()).toBeNull();
+    });
+
+    it('re-checks a shown error as the person types and clears it once valid', () => {
+      fixture.detectChanges();
+      submit();
+      const requiredText = error()?.textContent?.trim();
+      expect(requiredText).toBeTruthy();
+
+      type('not-an-email');
+      expect(error()?.textContent?.trim()).not.toBe(requiredText);
+
+      type('a@b.co');
+      expect(error()).toBeNull();
+    });
+
+    it('shows no new error after a fix until the next submit', () => {
+      fixture.detectChanges();
+      submit();
+      type('a@b.co');
+      expect(error()).toBeNull();
+
+      type('');
+      expect(error()).toBeNull();
+
+      submit();
+      expect(error()).not.toBeNull();
+    });
+
+    it('hides errors again when the form is reset', () => {
+      host.errorMessage = 'Server rejected this value';
+      fixture.detectChanges();
+      submit();
+      expect(error()).not.toBeNull();
+
+      formEl().dispatchEvent(new Event('reset'));
+      fixture.detectChanges();
+      expect(error()).toBeNull();
+    });
   });
 
   it('forwards the form-model value and disabled state down to the input', () => {

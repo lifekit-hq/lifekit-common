@@ -5,6 +5,10 @@ line sits, and which reference app each pattern is judged against. Each section 
 pattern. The tokens themselves live in `@lifekit-hq/tokens` (`projects/tokens/theme.css`); the
 components in Storybook.
 
+The rules every pattern obeys (states, feedback, forms, tables, keyboard, motion, type, colour,
+charts and money), with the published source each one adopts and the check that holds it, are
+[guardrails.md](guardrails.md). A pattern here applies them; it never overrides one.
+
 This page is the single compare-against list. The captain's rule (2026-10-07): keep the reference
 resources and compare with them as we go. So every pattern section names its reference with a
 **Compare against** link, the lifekit-common piece that owns it (or "gap"), and its consumer.
