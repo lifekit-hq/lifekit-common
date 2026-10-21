@@ -1,6 +1,14 @@
 import {ChangeDetectionStrategy, Component, viewChild} from '@angular/core';
 import {type ComponentFixture, TestBed} from '@angular/core/testing';
-import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {
+  type AsyncValidatorFn,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  type ValidationErrors,
+  Validators,
+} from '@angular/forms';
+import {Subject} from 'rxjs';
 import {beforeEach, describe, expect, it} from 'vitest';
 
 import {InputComponent} from '../input/input.component';
@@ -243,6 +251,69 @@ describe('FormFieldComponent', () => {
       formEl().dispatchEvent(new Event('reset'));
       fixture.detectChanges();
       expect(error()).toBeNull();
+    });
+
+    it('shows a server error set after the submit handler has run', () => {
+      fixture.detectChanges();
+      type('a@b.co');
+      submit();
+      expect(error()).toBeNull();
+
+      host.control.setErrors({emailTaken: true});
+      fixture.detectChanges();
+      expect(error()?.textContent?.trim()).toBeTruthy();
+    });
+
+    it('does not show a server error before the form is submitted', () => {
+      fixture.detectChanges();
+      type('a@b.co');
+      host.control.setErrors({emailTaken: true});
+      fixture.detectChanges();
+      expect(error()).toBeNull();
+    });
+
+    it('shows an async validator error that resolves after the submit', () => {
+      const pending: Subject<ValidationErrors | null>[] = [];
+      const taken: AsyncValidatorFn = () => {
+        const result = new Subject<ValidationErrors | null>();
+        pending.push(result);
+        return result;
+      };
+      host.control.setAsyncValidators(taken);
+      fixture.detectChanges();
+      type('a@b.co');
+      pending.at(-1)?.next(null);
+      pending.at(-1)?.complete();
+      expect(host.control.valid).toBe(true);
+
+      type('taken@b.co');
+      expect(host.control.pending).toBe(true);
+      submit();
+      expect(error()).toBeNull();
+
+      pending.at(-1)?.next({emailTaken: true});
+      pending.at(-1)?.complete();
+      fixture.detectChanges();
+      expect(host.control.invalid).toBe(true);
+      expect(error()?.textContent?.trim()).toBeTruthy();
+    });
+
+    it('shows an error once touched on a control with no enclosing form', () => {
+      const bare = TestBed.createComponent(FormFieldComponent);
+      const control = new FormControl('', {nonNullable: true, validators: [Validators.required]});
+      bare.componentRef.setInput('control', control);
+      bare.detectChanges();
+      const bareError = (): HTMLElement | null =>
+        (bare.nativeElement as HTMLElement).querySelector('[role="alert"]');
+      expect(bareError()).toBeNull();
+
+      control.markAsTouched();
+      bare.detectChanges();
+      expect(bareError()?.textContent?.trim()).toBeTruthy();
+
+      control.setValue('filled');
+      bare.detectChanges();
+      expect(bareError()).toBeNull();
     });
   });
 

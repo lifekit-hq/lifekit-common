@@ -17,8 +17,10 @@ import {
   FormResetEvent,
   FormSubmittedEvent,
   NG_VALUE_ACCESSOR,
+  StatusChangeEvent,
+  ValueChangeEvent,
 } from '@angular/forms';
-import {EMPTY, map, merge, switchMap} from 'rxjs';
+import {EMPTY, filter, map, merge, switchMap} from 'rxjs';
 
 import {VALIDATION_MESSAGES} from '../../tokens/validation-messages.token';
 import {InputComponent} from '../input/input.component';
@@ -32,8 +34,11 @@ let fieldCounter = 0;
  * Validation timing follows GOV.UK (guardrails V1, V4): with a `control`, nothing shows on blur or
  * while typing; errors appear when the enclosing form is submitted (`FormSubmittedEvent`, fired by
  * `[formGroup]` / `ngForm` on submit). After that, a shown error is re-checked as the person types
- * and clears the moment the field is valid; no new error appears before the next submit. A form
- * reset hides everything again. Without a `control`, a static `errorMessage` shows immediately.
+ * and clears the moment the field is valid; typing never raises a new error before the next submit.
+ * A validity that resolves after the submit (an async validator finishing, a server `setErrors`)
+ * counts as part of that submit and shows. A form reset hides everything again. A control with no
+ * enclosing form never sees a submit, so it shows its error once touched. Without a `control`, a
+ * static `errorMessage` shows immediately.
  */
 @Component({
   selector: 'cmn-form-field',
@@ -82,6 +87,8 @@ export class FormFieldComponent implements ControlValueAccessor, AfterContentIni
   private pendingDisabled: boolean | undefined = undefined;
   private onChangeFn: ((v: unknown) => void) | undefined;
   private onTouchedFn: (() => void) | undefined;
+  /** True between a value change and the status change it triggers: typing, not a late result. */
+  private valueJustChanged = false;
   /** True once the enclosing form has been submitted, until it is reset. */
   private readonly submitted = signal(false);
   /** True while a submit-time validator error is on screen; cleared once the field is valid. */
@@ -104,10 +111,14 @@ export class FormFieldComponent implements ControlValueAccessor, AfterContentIni
   protected readonly resolvedError = computed(() => {
     this.revision();
     const ctrl = this.control();
-    if (this.errorMessage() && (!ctrl || this.submitted())) {
+    if (!ctrl) {
       return this.errorMessage();
     }
-    if (!ctrl || !this.errorShown() || !ctrl.errors) {
+    const standalone = !ctrl.parent;
+    if (this.errorMessage() && (standalone ? ctrl.touched : this.submitted())) {
+      return this.errorMessage();
+    }
+    if (!(standalone ? ctrl.touched : this.errorShown()) || !ctrl.errors) {
       return '';
     }
     const [key, params] = Object.entries(ctrl.errors)[0];
@@ -121,11 +132,22 @@ export class FormFieldComponent implements ControlValueAccessor, AfterContentIni
         switchMap(ctrl => {
           this.submitted.set(false);
           this.errorShown.set(false);
+          this.valueJustChanged = false;
           if (!ctrl) {
             return EMPTY;
           }
           // Submit and reset fire on the root form only; value and status changes fire on the control.
-          const events$ = ctrl.root === ctrl ? ctrl.events : merge(ctrl.events, ctrl.root.events);
+          const events$ =
+            ctrl.root === ctrl
+              ? ctrl.events
+              : merge(
+                  ctrl.events,
+                  ctrl.root.events.pipe(
+                    filter(
+                      event => event instanceof FormSubmittedEvent || event instanceof FormResetEvent
+                    )
+                  )
+                );
           return events$.pipe(map(event => [ctrl, event] as const));
         }),
         takeUntilDestroyed()
@@ -182,6 +204,16 @@ export class FormFieldComponent implements ControlValueAccessor, AfterContentIni
     } else if (event instanceof FormResetEvent) {
       this.submitted.set(false);
       this.errorShown.set(false);
+    } else if (event instanceof ValueChangeEvent) {
+      this.valueJustChanged = true;
+    } else if (event instanceof StatusChangeEvent) {
+      const typed = this.valueJustChanged;
+      this.valueJustChanged = false;
+      if (ctrl.valid) {
+        this.errorShown.set(false);
+      } else if (ctrl.invalid && this.submitted() && !typed) {
+        this.errorShown.set(true);
+      }
     } else if (ctrl.valid) {
       this.errorShown.set(false);
     }
