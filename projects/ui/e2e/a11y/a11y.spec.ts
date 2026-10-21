@@ -47,10 +47,11 @@ for (const theme of THEMES) {
     for (const story of stories) {
       test(story, async ({page}) => {
         await page.goto(`/iframe.html?id=${story}&viewMode=story&globals=theme:${theme}`);
-        await page.waitForSelector('#storybook-root > *, #storybook-docs', {
+        await page.waitForSelector('#storybook-root > *', {
           state: 'attached',
           timeout: STORY_READY_TIMEOUT,
         });
+        await expect(page.locator('.sb-show-errordisplay')).toBeHidden();
         await page.evaluate(() => document.fonts.ready);
 
         const {violations} = await new AxeBuilder({page}).withTags(AXE_TAGS).analyze();

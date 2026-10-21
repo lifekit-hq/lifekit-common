@@ -26,6 +26,10 @@ import {
   PALETTE_APPEARANCE_ACTIONS,
 } from './app-layout.component';
 
+const MAIN_BASE_CLASSES =
+  'flex-1 overflow-y-auto overscroll-y-contain ' +
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-border-focus';
+
 const NAV_ITEMS: NavItem[] = [
   {label: 'Dashboard', icon: 'LayoutDashboard', route: '/dashboard'},
   {label: 'Accounts', icon: 'Building2', route: '/accounts'},
@@ -549,7 +553,7 @@ describe('AppLayoutComponent', () => {
     it('should keep the bars in flow and main unpadded by default', () => {
       expect(el('cmn-top-bar').className).not.toContain('absolute');
       expect(el('cmn-bottom-tab-bar').className).not.toContain('absolute');
-      expect(el('main').className).not.toContain('pt-[');
+      expect(el('main').className).toBe(MAIN_BASE_CLASSES);
       expect(el('cmn-bottom-tab-bar nav').classList).not.toContain('backdrop-blur-md');
     });
 
@@ -583,7 +587,7 @@ describe('AppLayoutComponent', () => {
         expect(el('cmn-top-bar').className).not.toContain('absolute');
         expect(el('cmn-top-bar header').className).not.toContain('backdrop-blur');
         expect(el('cmn-bottom-tab-bar').className).not.toContain('absolute');
-        expect(el('main').className).not.toContain('pt-[');
+        expect(el('main').className).toBe(MAIN_BASE_CLASSES);
         expect(el('main').style.getPropertyValue('--cmn-fab-clearance')).toBe('');
       }
     );
