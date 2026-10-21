@@ -4,6 +4,8 @@ import {
   Component,
   computed,
   contentChild,
+  DestroyRef,
+  ElementRef,
   forwardRef,
   inject,
   input,
@@ -25,6 +27,7 @@ import {
 import {EMPTY, filter, map, merge, switchMap} from 'rxjs';
 
 import {VALIDATION_MESSAGES} from '../../tokens/validation-messages.token';
+import {ErrorSummaryRegistry} from '../error-summary/error-summary-registry';
 import {InputComponent} from '../input/input.component';
 import {TextareaComponent} from '../textarea/textarea.component';
 
@@ -44,6 +47,9 @@ let fieldCounter = 0;
  * `[formGroup]` or `ngForm` (a parentless control, or a group saved by a button calling
  * `markAllAsTouched()`) never sees a submit, so it shows its error once touched. Without a
  * `control`, a static `errorMessage` shows immediately.
+ *
+ * Inside a `[formGroup]` or `ngForm`, the field offers the error a submit put on screen to that
+ * form's `cmn-error-summary` (guardrails V2), which repeats it word for word and links to the field.
  */
 @Component({
   selector: 'cmn-form-field',
@@ -88,6 +94,7 @@ export class FormFieldComponent implements ControlValueAccessor, AfterContentIni
   private readonly validationMessages = inject(VALIDATION_MESSAGES);
   private readonly formGroupDirective = inject(FormGroupDirective, {optional: true});
   private readonly ngForm = inject(NgForm, {optional: true});
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly singleLineChild = contentChild(InputComponent);
   private readonly multiLineChild = contentChild(TextareaComponent);
   private pendingValue: unknown = undefined;
@@ -104,6 +111,8 @@ export class FormFieldComponent implements ControlValueAccessor, AfterContentIni
   private readonly errorShown = signal(false);
   /** Bumped on every control event so the message tracks the control's current errors. */
   private readonly revision = signal(0);
+  /** The error on screen because of a submit, or `''`: what the form's error summary lists. */
+  private readonly submitError = computed(() => (this.submitted() ? this.resolvedError() : ''));
 
   public readonly label = input<string>('');
   public readonly hint = input<string>('');
@@ -136,6 +145,16 @@ export class FormFieldComponent implements ControlValueAccessor, AfterContentIni
 
   constructor() {
     this.fieldId = `cmn-field-${++fieldCounter}`;
+    const summaryForm = this.formGroupDirective ?? this.ngForm;
+    if (summaryForm) {
+      const unregister = inject(ErrorSummaryRegistry).register(summaryForm, {
+        fieldId: this.fieldId,
+        host: this.host.nativeElement,
+        submitError: this.submitError,
+        focusControl: () => this.focusControl(),
+      });
+      inject(DestroyRef).onDestroy(unregister);
+    }
     toObservable(this.control)
       .pipe(
         switchMap(ctrl => {
@@ -213,6 +232,13 @@ export class FormFieldComponent implements ControlValueAccessor, AfterContentIni
   /** The form bound by an enclosing `[formGroup]` or `ngForm`: the only source of submit events. */
   private enclosingForm(): AbstractControl | undefined {
     return this.formGroupDirective?.form ?? this.ngForm?.form;
+  }
+
+  /** Focuses the projected control and scrolls so its label shows too, as a summary link does. */
+  private focusControl(): void {
+    const host = this.host.nativeElement;
+    host.querySelector<HTMLElement>(`#${this.fieldId}`)?.focus({preventScroll: true});
+    host.scrollIntoView({block: 'center'});
   }
 
   private onControlEvent(ctrl: AbstractControl, event: ControlEvent): void {

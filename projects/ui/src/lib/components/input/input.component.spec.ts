@@ -123,6 +123,20 @@ describe('InputComponent', () => {
     expect(input().placeholder).toBe('Code');
   });
 
+  it('forwards the phone keyboard hints only when asked (guardrails V5)', () => {
+    fixture.detectChanges();
+    expect(input().hasAttribute('inputmode')).toBe(false);
+    expect(input().hasAttribute('enterkeyhint')).toBe(false);
+
+    fixture.componentRef.setInput('autocomplete', 'transaction-amount');
+    fixture.componentRef.setInput('inputmode', 'decimal');
+    fixture.componentRef.setInput('enterkeyhint', 'next');
+    fixture.detectChanges();
+    expect(input().getAttribute('autocomplete')).toBe('transaction-amount');
+    expect(input().getAttribute('inputmode')).toBe('decimal');
+    expect(input().getAttribute('enterkeyhint')).toBe('next');
+  });
+
   it('names the native input from aria-label', () => {
     fixture.componentRef.setInput('aria-label', 'Email');
     fixture.detectChanges();

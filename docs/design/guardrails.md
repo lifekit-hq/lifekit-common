@@ -213,7 +213,7 @@ Enforcement labels:
 | Label           | Meaning                                                                               |
 | --------------- | ------------------------------------------------------------------------------------- |
 | **exists**      | A CI gate held it before this policy.                                                 |
-| **enforced**    | Its check landed with this policy (#183).                                             |
+| **enforced**    | Its check landed with this policy (#183) or since.                                    |
 | **planned**     | It is the rule; the named check is still to build, with the feature it needs.         |
 | **review-only** | No check can decide it, for the reason given; PR review holds it.                     |
 | phone           | `npm run test:phone`, the phone conformance gate.                                     |
@@ -240,13 +240,13 @@ Enforcement labels:
 | F6  | Persistent conditions (offline, sync failed) use an inline alert or banner, never a toast                                        | **review-only**: whether a condition persists is app knowledge                                                                                         |
 | F7  | Destructive confirmation is an action sheet on a phone and a dialog on desktop, labelled with the verb                           | **exists**: the dialog's phone presentations, the `ConfirmActionSheet` story, phone (sheets)                                                           |
 | V1  | No validation on blur; errors appear on submit. A field with no `[formGroup]`/`ngForm` to submit it shows its error once touched | **enforced**: form-field spec "validation timing"                                                                                                      |
-| V2  | Submit shows an error summary and moves focus to it; a short sheet focuses the first invalid field                               | **planned**: `cmn-error-summary` with a unit test and a Playwright focus check                                                                         |
+| V2  | Submit shows an error summary and moves focus to it; a short sheet focuses the first invalid field                               | **enforced**: error-summary spec, and the phone suite's `error-summary.spec.ts` focus check                                                            |
 | V3  | Error copy says what went wrong and how to fix it; no "please", "sorry", "valid", "invalid"                                      | **enforced**: drift `error-copy`                                                                                                                       |
 | V4  | A shown error clears once valid; an async or server error after the submit shows unless the value was edited since               | **enforced**: form-field spec "validation timing"                                                                                                      |
-| V5  | Fields carry `autocomplete`, `inputmode` and `enterkeyhint`; 16px on a phone                                                     | 16px **exists**: phone rule 9. Forwarding is **planned**: a `cmn-input` spec (it forwards only `autocomplete` today)                                   |
+| V5  | Fields carry `autocomplete`, `inputmode` and `enterkeyhint`; 16px on a phone                                                     | 16px **exists**: phone rule 9. Forwarding is **enforced**: input spec "forwards the phone keyboard hints"                                              |
 | V6  | Invalid input never disables submit                                                                                              | **review-only**: the disabling condition is app logic, and the library ships no API for it                                                             |
 | V7  | Every field has a visible label; a placeholder is never the label                                                                | **exists**: axe label rules                                                                                                                            |
-| V8  | Every form control works with Angular forms                                                                                      | **planned**: a forms spec per control (checkbox and toggle have no forms integration yet)                                                              |
+| V8  | Every form control works with Angular forms                                                                                      | **enforced**: a forms spec per control ("Angular forms" in the checkbox and toggle specs)                                                              |
 | T1  | Amounts are right-aligned with tabular figures                                                                                   | **exists**: the `AlignedColumns` story; Plex figures are tabular by default                                                                            |
 | T2  | An empty cell shows "-"                                                                                                          | **planned**: a spec on the cell formatter                                                                                                              |
 | T3  | Table loading uses skeleton rows; empty and error sit inside the table frame                                                     | Loading and empty **exist** (stories). Error is **enforced** by story-state, with data-table `Error` a recorded gap until the table has an error state |
@@ -283,12 +283,11 @@ Enforcement labels:
 | X3  | One primary number per screen; detail behind disclosure                                                                          | **review-only**: which number is primary is a product decision                                                                                         |
 | X4  | The NN/g heuristics pass on every new flow                                                                                       | **review-only**: they judge whole flows                                                                                                                |
 
-The count: 22 **exists**; 16 **enforced** (S3, S4, S6, S7, F1 in part, V1, V3, V4, T3 in part,
-K3, Y2, Ch2, $1, $2, X1, X2); 13 **planned** (F2 to F5, V2, V5 forwarding, V8, T2, T4, T5, K2,
-Ch1, Ch3); 6 **review-only** (F6, V6, N3, C4, X3, X4), plus the wording in F4 and the reason in S7.
-Every planned check waits on a feature that is its own issue: toast actions and stacking, the
-error summary, input forwarding, forms integration for checkbox and toggle, data-table features,
-the tooltip primitive, keyboard patterns and chart text alternatives.
+The count: 22 **exists**; 19 **enforced** (S3, S4, S6, S7, F1 in part, V1 to V4, V5 forwarding,
+V8, T3 in part, K3, Y2, Ch2, $1, $2, X1, X2); 10 **planned** (F2 to F5, T2, T4, T5, K2, Ch1,
+Ch3); 6 **review-only** (F6, V6, N3, C4, X3, X4), plus the wording in F4 and the reason in S7.
+Every planned check waits on a feature that is its own issue: toast actions and stacking,
+data-table features, the tooltip primitive, keyboard patterns and chart text alternatives.
 
 ### Story-state categories (X2)
 

@@ -79,3 +79,19 @@ export const AllSizes: Story = {
     `,
   }),
 };
+
+/** A money field: the decimal keypad, a Done key and no autofill (guardrails V5). */
+export const KeyboardHints: Story = {
+  render: () => ({
+    template: `
+      <cmn-input
+        type="text"
+        inputmode="decimal"
+        enterkeyhint="done"
+        autocomplete="off"
+        aria-label="Amount"
+        placeholder="0.00"
+      />
+    `,
+  }),
+};
