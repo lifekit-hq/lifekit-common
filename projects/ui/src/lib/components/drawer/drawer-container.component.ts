@@ -72,7 +72,10 @@ export type CmnSheetStop = 'half' | 'full';
         </div>
       </div>
       <!-- Body -->
-      <div class="min-h-0 flex-1 overflow-y-auto">
+      <div
+        class="min-h-0 flex-1 overflow-y-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-border-focus"
+        tabindex="0"
+      >
         <ng-template cdkPortalOutlet />
       </div>
     </div>

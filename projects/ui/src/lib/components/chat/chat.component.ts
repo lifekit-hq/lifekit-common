@@ -27,6 +27,22 @@ interface DeepChatConnect {
   handler: (body: DeepChatRequestBody, signals: DeepChatSignals) => void;
 }
 
+// Deep Chat draws its buttons as icons only. A button with text content is named by it, so each
+// state carries a label that is clipped out of sight.
+const visuallyHiddenLabel = (content: string): {content: string; styles: object} => ({
+  content,
+  styles: {
+    default: {
+      position: 'absolute',
+      width: '1px',
+      height: '1px',
+      overflow: 'hidden',
+      clip: 'rect(0 0 0 0)',
+      whiteSpace: 'nowrap',
+    },
+  },
+});
+
 const DEFAULT_ERROR = 'Something went wrong.';
 const UNAVAILABLE_ERROR = 'The agent is unavailable right now. Please try again.';
 
@@ -123,7 +139,11 @@ export class ChatComponent {
         },
       },
       svg: {styles: {default: {filter: 'brightness(0) invert(1)'}}},
+      text: visuallyHiddenLabel('Send message'),
     },
+    loading: {text: visuallyHiddenLabel('Sending message')},
+    stop: {text: visuallyHiddenLabel('Stop response')},
+    disabled: {text: visuallyHiddenLabel('Send message')},
   };
 
   public readonly auxiliaryStyle = `

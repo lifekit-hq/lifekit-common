@@ -66,3 +66,24 @@ jobs:
         run: npm run test:phone
         env:
           PHONE_CONFORMANCE: gate
+
+  # Gate: accessibility (WCAG 2.2 AA). axe-core over every story in light and dark; a serious or
+  # critical violation fails the build unless projects/ui/e2e/a11y/a11y-exceptions.json lists it.
+  # Sharded so the sweep of the whole catalog stays a few minutes of wall time.
+  a11y:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build-storybook
+      - name: Accessibility (axe)
+        run: npm run test:a11y -- --shard=${{ matrix.shard }}/4

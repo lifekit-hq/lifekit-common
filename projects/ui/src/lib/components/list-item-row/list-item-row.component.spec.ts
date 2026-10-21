@@ -66,8 +66,8 @@ describe('ListItemRowComponent', () => {
     expect(labelEl().classList).toContain('text-text-secondary');
     expect(labelEl().classList).not.toContain('text-text-primary');
     const sublabel: HTMLElement = fixture.nativeElement.querySelectorAll('.flex-1 > div')[1];
-    expect(sublabel.classList).toContain('text-text-disabled');
-    expect(sublabel.classList).not.toContain('text-text-secondary');
+    expect(sublabel.classList).toContain('text-text-secondary');
+    expect(sublabel.classList).not.toContain('text-text-disabled');
   });
 
   it('should fade only the avatar slot when dimmed', () => {

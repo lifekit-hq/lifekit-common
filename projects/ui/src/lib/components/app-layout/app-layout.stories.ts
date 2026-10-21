@@ -738,7 +738,7 @@ const OVERFLOWING_HOST_BODY = `
 
 const CHAT_HOST_BODY = `
   <div class="relative flex h-full flex-col" data-chat-host>
-    <div class="flex min-h-0 flex-1 flex-col gap-cmn-2 overflow-y-auto p-cmn-4" data-chat-log>
+    <div class="flex min-h-0 flex-1 flex-col gap-cmn-2 overflow-y-auto p-cmn-4" role="log" aria-label="Messages" tabindex="0" data-chat-log>
       @for (day of days; track day) {
         @for (row of rows; track row) {
           <p class="rounded-cmn-lg bg-surface-card p-cmn-3 text-cmn-sm text-text-primary">

@@ -2,6 +2,7 @@ import {ChangeDetectionStrategy, Component, computed, input} from '@angular/core
 
 export type UsageChipTone = 'success' | 'warning' | 'error';
 
+const DEFAULT_LABEL = 'Usage';
 const PERCENT = 100;
 const WARN_AT = 0.8;
 
@@ -27,7 +28,7 @@ const BASE_CLASSES =
   template: `
     <span
       [class]="classes()"
-      [attr.aria-label]="label() || null"
+      [attr.aria-label]="label() || DEFAULT_LABEL"
       [attr.aria-valuemax]="total()"
       [attr.aria-valuenow]="clampedUsed()"
       [attr.aria-valuetext]="readout()"
@@ -81,4 +82,6 @@ export class UsageChipComponent {
   public readonly classes = computed(() => BASE_CLASSES);
   public readonly fillClasses = computed(() => TONE_FILL[this.tone()]);
   public readonly textClasses = computed(() => TONE_TEXT[this.tone()]);
+
+  protected readonly DEFAULT_LABEL = DEFAULT_LABEL;
 }

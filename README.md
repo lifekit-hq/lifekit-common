@@ -45,6 +45,11 @@ visual regression, `playwright.phone.config.ts` for the phone conformance suite 
 `npm run test`. The phone suite checks `docs/PHONE-CONTRACT.md`; CI runs it with
 `PHONE_CONFORMANCE=gate`, which makes every check except the advisory ones fail the build.
 
+`playwright.a11y.config.ts` (`npm run test:a11y`) is the accessibility gate: axe-core (WCAG 2.2 AA)
+over every story in light and dark. A serious or critical violation fails CI unless
+`projects/ui/e2e/a11y/a11y-exceptions.json` lists it with a one-line reason. Fix violations in the
+component, not in the story.
+
 ## PWA checklist
 
 Installable, offline-tolerant apps use Angular's own `@angular/pwa` / `@angular/service-worker` —

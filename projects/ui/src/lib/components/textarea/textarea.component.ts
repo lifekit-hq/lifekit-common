@@ -34,6 +34,7 @@ const DEFAULT_ROWS = 3;
 @Component({
   selector: 'cmn-textarea',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {'[attr.aria-label]': 'null'},
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -50,6 +51,7 @@ const DEFAULT_ROWS = 3;
       [readOnly]="readonly()"
       [placeholder]="placeholder()"
       [attr.maxlength]="maxlength()"
+      [attr.aria-label]="ariaLabel()"
       [attr.aria-invalid]="hasError() ? true : null"
       [attr.aria-describedby]="showCounter() ? counterId() : null"
       [attr.autocomplete]="autocomplete()"
@@ -74,6 +76,8 @@ export class TextareaComponent implements ControlValueAccessor {
   public readonly readonly = input<boolean>(false);
   public readonly hasError = input<boolean>(false);
   public readonly autocomplete = input<string | null>(null);
+  /** Names the field when there is no `cmn-form-field` label; moves to the native element. */
+  public readonly ariaLabel = input<string | null>(null, {alias: 'aria-label'});
   /** Visible lines before the user resizes the field. */
   public readonly rows = input<number>(DEFAULT_ROWS);
   /** Caps the text and shows a `length / maxlength` counter under the field; null for no cap. */

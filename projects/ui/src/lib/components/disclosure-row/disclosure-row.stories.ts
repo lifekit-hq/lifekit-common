@@ -79,7 +79,7 @@ export const WithActionButtons: Story = {
       <cmn-disclosure-row label="Binance" sublabel="Crypto holdings" avatarName="Binance" [amount]="4210.50" currency="USD">
         <div actions class="flex gap-2">
           <button class="text-xs text-text-secondary hover:text-text-primary px-2 py-1 rounded border border-border-default">Sync</button>
-          <button class="text-xs text-red-500 hover:text-red-600 px-2 py-1 rounded border border-border-default">Disconnect</button>
+          <button class="text-xs text-status-error hover:text-status-error px-2 py-1 rounded border border-border-default">Disconnect</button>
         </div>
         <p class="px-4 py-3 text-sm text-text-secondary">Crypto holdings appear here.</p>
       </cmn-disclosure-row>
@@ -97,7 +97,7 @@ export const FullFeatures: Story = {
           </span>
           <div actions class="flex gap-2">
             <button class="text-xs text-text-secondary hover:text-text-primary px-2 py-1 rounded border border-border-default">Sync</button>
-            <button class="text-xs text-red-500 hover:text-red-600 px-2 py-1 rounded border border-border-default">Disconnect</button>
+            <button class="text-xs text-status-error hover:text-status-error px-2 py-1 rounded border border-border-default">Disconnect</button>
           </div>
           <div class="px-4 py-3 space-y-1">
             <p class="text-sm text-text-primary">Checking ••••4242 — $3,540.22</p>
@@ -109,7 +109,7 @@ export const FullFeatures: Story = {
             Active
           </span>
           <div actions class="flex gap-2">
-            <button class="text-xs text-red-500 hover:text-red-600 px-2 py-1 rounded border border-border-default">Disconnect</button>
+            <button class="text-xs text-status-error hover:text-status-error px-2 py-1 rounded border border-border-default">Disconnect</button>
           </div>
           <div class="px-4 py-3">
             <p class="text-sm text-text-primary">Checking ••••1234 — $12,450.00</p>

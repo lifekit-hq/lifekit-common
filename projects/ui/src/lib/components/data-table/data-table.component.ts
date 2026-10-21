@@ -157,7 +157,8 @@ type ListSlotColumns = Record<CmnListSlot, CmnColumnComponent[]>;
       </div>
     } @else {
       <div
-        class="min-h-0 flex-1 overflow-auto rounded-cmn-lg border border-border-default bg-surface-card"
+        class="min-h-0 flex-1 overflow-auto rounded-cmn-lg border border-border-default bg-surface-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-border-focus"
+        tabindex="0"
       >
         @if (loading()) {
           <div class="p-cmn-4 space-y-cmn-3" data-testid="table-skeleton">

@@ -38,7 +38,8 @@ export const Default: Story = {
 
 export const WithValue: Story = {
   render: () => ({
-    template: '<cmn-input type="text" size="md" [ngModel]="\'hello@example.com\'" />',
+    template:
+      '<cmn-input type="text" size="md" aria-label="Email" [ngModel]="\'hello@example.com\'" />',
   }),
 };
 
@@ -51,7 +52,7 @@ export const Disabled: Story = {
 export const Readonly: Story = {
   render: () => ({
     template:
-      '<cmn-input type="text" size="md" [readonly]="true" [ngModel]="\'Read-only value\'" />',
+      '<cmn-input type="text" size="md" aria-label="Reference" [readonly]="true" [ngModel]="\'Read-only value\'" />',
   }),
 };
 

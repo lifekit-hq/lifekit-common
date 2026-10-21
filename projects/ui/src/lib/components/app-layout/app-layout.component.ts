@@ -120,8 +120,13 @@ const OVERLAY_TAB_BAR_CLASSES = 'absolute inset-x-0 bottom-0 z-30';
  * padding already shifts below the bar, so top-0 is flush under it on every size.
  */
 const NOTICES_BASE_CLASSES = 'sticky top-0 z-20 flex flex-col empty:hidden';
-/** Overscroll stops at main: it never chains to the browser (pull-to-refresh, page bounce). */
-const MAIN_BASE_CLASSES = 'flex-1 overflow-y-auto overscroll-y-contain';
+/**
+ * Overscroll stops at main: it never chains to the browser (pull-to-refresh, page bounce). Main
+ * takes keyboard focus so a page with nothing focusable in it still scrolls from the keyboard.
+ */
+const MAIN_BASE_CLASSES =
+  'flex-1 overflow-y-auto overscroll-y-contain ' +
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-border-focus';
 /**
  * Clears the top bar by its measured cover (`--cmn-content-inset-top`). Scrolling an element into
  * view also clears the pinned notices (`--cmn-sticky-top`).
@@ -205,7 +210,12 @@ export const CMN_CONTENT_INSET_PROPERTIES = {
           (actionClick)="onPageAction($event)"
         />
         <!-- In the phone overlay main carries the measured content insets as custom properties -->
-        <main #main [class]="mainClass()" [style.--cmn-fab-clearance.px]="fabClearance()">
+        <main
+          #main
+          [class]="mainClass()"
+          [style.--cmn-fab-clearance.px]="fabClearance()"
+          tabindex="0"
+        >
           <!-- The page's large title, declared in route data; shrinks into the top bar on scroll -->
           @if (largeTitle(); as text) {
             <div [class]="largeTitleBoxClasses">

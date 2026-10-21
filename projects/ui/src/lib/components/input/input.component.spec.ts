@@ -122,4 +122,11 @@ describe('InputComponent', () => {
     expect(input().getAttribute('autocomplete')).toBe('one-time-code');
     expect(input().placeholder).toBe('Code');
   });
+
+  it('names the native input from aria-label', () => {
+    fixture.componentRef.setInput('aria-label', 'Email');
+    fixture.detectChanges();
+    expect(input().getAttribute('aria-label')).toBe('Email');
+    expect((fixture.nativeElement as HTMLElement).hasAttribute('aria-label')).toBe(false);
+  });
 });

@@ -1,0 +1,7 @@
+[
+  {
+    "rule": "color-contrast",
+    "story": "foundations--colour-tokens",
+    "reason": "The contrast matrix renders each foreground token on each surface, including the pairs it documents as failing AA."
+  }
+]

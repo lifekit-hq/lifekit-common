@@ -9,6 +9,12 @@ import {DisclosureRowComponent} from './disclosure-row.component';
 describe('DisclosureRowComponent', () => {
   let fixture: ComponentFixture<DisclosureRowComponent>;
 
+  const toggleButton = (): HTMLButtonElement => fixture.nativeElement.querySelector('button');
+  const bodyEl = (): HTMLElement => {
+    const id = toggleButton().getAttribute('aria-controls');
+    return fixture.nativeElement.querySelector(`#${id}`);
+  };
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [DisclosureRowComponent],
@@ -27,22 +33,22 @@ describe('DisclosureRowComponent', () => {
     expect(host.style.display).toBe('block');
   });
 
-  it('should render the label in the summary', () => {
-    const summary: HTMLElement = fixture.nativeElement.querySelector('summary');
-    expect(summary.textContent).toContain('Chase Bank');
+  it('should render the label in the toggle button', () => {
+    const toggle: HTMLElement = fixture.nativeElement.querySelector('button');
+    expect(toggle.textContent).toContain('Chase Bank');
   });
 
   it('should not render sublabel by default', () => {
-    const paragraphs: NodeListOf<HTMLElement> = fixture.nativeElement.querySelectorAll('summary p');
-    expect(paragraphs.length).toBe(1);
+    const lines: NodeListOf<HTMLElement> = fixture.nativeElement.querySelectorAll('button .block');
+    expect(lines.length).toBe(1);
   });
 
   it('should render sublabel when provided', () => {
     fixture.componentRef.setInput('sublabel', '3 accounts connected');
     fixture.detectChanges();
-    const paragraphs: NodeListOf<HTMLElement> = fixture.nativeElement.querySelectorAll('summary p');
-    expect(paragraphs.length).toBe(2);
-    expect(paragraphs[1].textContent?.trim()).toBe('3 accounts connected');
+    const lines: NodeListOf<HTMLElement> = fixture.nativeElement.querySelectorAll('button .block');
+    expect(lines.length).toBe(2);
+    expect(lines[1].textContent?.trim()).toBe('3 accounts connected');
   });
 
   it('should not render institution avatar when avatarName is null', () => {
@@ -113,15 +119,15 @@ describe('DisclosureRowComponent', () => {
   });
 
   it('should be open by default', () => {
-    const details: HTMLDetailsElement = fixture.nativeElement.querySelector('details');
-    expect(details.open).toBe(true);
+    expect(toggleButton().getAttribute('aria-expanded')).toBe('true');
+    expect(bodyEl().hidden).toBe(false);
   });
 
   it('should be closed when open input is false', () => {
     fixture.componentRef.setInput('open', false);
     fixture.detectChanges();
-    const details: HTMLDetailsElement = fixture.nativeElement.querySelector('details');
-    expect(details.open).toBe(false);
+    expect(toggleButton().getAttribute('aria-expanded')).toBe('false');
+    expect(bodyEl().hidden).toBe(true);
   });
 
   it('should re-open when open input changes back to true', () => {
@@ -129,8 +135,21 @@ describe('DisclosureRowComponent', () => {
     fixture.detectChanges();
     fixture.componentRef.setInput('open', true);
     fixture.detectChanges();
-    const details: HTMLDetailsElement = fixture.nativeElement.querySelector('details');
-    expect(details.open).toBe(true);
+    expect(bodyEl().hidden).toBe(false);
+  });
+
+  it('should toggle the body when the button is pressed', () => {
+    toggleButton().click();
+    fixture.detectChanges();
+    expect(toggleButton().getAttribute('aria-expanded')).toBe('false');
+    expect(bodyEl().hidden).toBe(true);
+    toggleButton().click();
+    fixture.detectChanges();
+    expect(bodyEl().hidden).toBe(false);
+  });
+
+  it('should point the button at the body it controls', () => {
+    expect(toggleButton().getAttribute('aria-controls')).toBe(bodyEl().id);
   });
 });
 
@@ -158,21 +177,22 @@ describe('DisclosureRowComponent — content projection', () => {
     fixture.detectChanges();
   });
 
-  it('should project status content into the summary', () => {
+  it('should project status content into the row', () => {
     const status: HTMLElement | null =
       fixture.nativeElement.querySelector('[data-testid="status"]');
     expect(status).toBeTruthy();
     expect(status?.textContent?.trim()).toBe('Active');
   });
 
-  it('should project actions content into the summary', () => {
+  it('should project actions content next to the toggle, not inside it', () => {
     const action: HTMLElement | null =
       fixture.nativeElement.querySelector('[data-testid="action"]');
     expect(action).toBeTruthy();
     expect(action?.textContent?.trim()).toBe('Disconnect');
+    expect(action?.closest('button[aria-expanded]')).toBeNull();
   });
 
-  it('should project default slot content into the details body', () => {
+  it('should project default slot content into the body', () => {
     const body: HTMLElement | null = fixture.nativeElement.querySelector('[data-testid="body"]');
     expect(body).toBeTruthy();
     expect(body?.textContent?.trim()).toBe('Account details here');

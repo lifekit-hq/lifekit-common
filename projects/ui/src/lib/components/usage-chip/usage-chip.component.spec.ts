@@ -99,8 +99,8 @@ describe('UsageChipComponent', () => {
     expect(fill().className).toContain('bg-status-success');
   });
 
-  it('omits aria-label when no label is given', () => {
-    expect(meter().hasAttribute('aria-label')).toBe(false);
+  it('names the meter "Usage" when no label is given', () => {
+    expect(meter().getAttribute('aria-label')).toBe('Usage');
   });
 
   it('clamps negative usage to zero', () => {

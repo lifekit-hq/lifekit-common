@@ -12,7 +12,7 @@ import {ChangeDetectionStrategy, Component, computed, input} from '@angular/core
           {{ label() }}
         </div>
         @if (sublabel()) {
-          <div [class]="sublabelClasses()">
+          <div class="text-cmn-xs truncate text-text-secondary">
             {{ sublabel() }}
           </div>
         }
@@ -39,9 +39,5 @@ export class ListItemRowComponent {
   protected readonly labelClasses = computed(
     () =>
       `font-label text-cmn-sm font-medium truncate ${this.dimmed() ? 'text-text-secondary' : 'text-text-primary'}`
-  );
-
-  protected readonly sublabelClasses = computed(
-    () => `text-cmn-xs truncate ${this.dimmed() ? 'text-text-disabled' : 'text-text-secondary'}`
   );
 }
