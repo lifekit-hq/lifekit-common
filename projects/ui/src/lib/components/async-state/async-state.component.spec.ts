@@ -4,6 +4,7 @@ import {ChangeDetectionStrategy, Component, signal} from '@angular/core';
 import {type ComponentFixture, TestBed} from '@angular/core/testing';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
+import {type EmptyStateKind} from '../empty-state/empty-state.component';
 import {
   ASYNC_STATE_MIN_DISPLAY_MS,
   ASYNC_STATE_SHOW_DELAY_MS,
@@ -26,6 +27,7 @@ import {
       [emptyMessage]="emptyMessage()"
       [skeletonRows]="skeletonRows()"
       [skeletonHeight]="skeletonHeight()"
+      emptySubMessage="Nothing here yet."
     >
       <p class="projected">Loaded content</p>
     </cmn-async-state>
@@ -149,6 +151,7 @@ describe('AsyncStateComponent', () => {
       [keepContent]="false"
       [showDelay]="0"
       [minDisplay]="0"
+      emptySubMessage="Nothing here yet."
     >
       <div class="row-skeleton" skeleton>Row-shaped skeleton</div>
       <div class="rich-empty" empty>
@@ -285,6 +288,7 @@ describe('AsyncStateComponent slots', () => {
       [lastSynced]="lastSynced()"
       [retryable]="retryable()"
       [emptySubMessage]="emptySubMessage()"
+      [emptyKind]="emptyKind()"
       [keepContent]="false"
       [showDelay]="0"
       [minDisplay]="0"
@@ -302,7 +306,8 @@ class StatePatternHostComponent {
   public readonly offline = signal(false);
   public readonly lastSynced = signal<Date | number | string | null>(null);
   public readonly retryable = signal(false);
-  public readonly emptySubMessage = signal<string | null>(null);
+  public readonly emptySubMessage = signal('Nothing here yet.');
+  public readonly emptyKind = signal<EmptyStateKind>('first-use');
   public retries = 0;
 }
 
@@ -521,15 +526,31 @@ describe('AsyncStateComponent state pattern', () => {
       expect(query('cmn-empty-state')?.textContent).toContain('No data available.');
     });
 
-    it('gives the empty state a default body without a sub-message', () => {
-      render('success', {isEmpty: true});
-      expect(query('cmn-empty-state')?.textContent).toContain('There is nothing to show here yet.');
-    });
-
     it('passes a sub-message to the empty state', () => {
       host.emptySubMessage.set('Add a transaction to get started.');
       render('success', {isEmpty: true});
       expect(query('cmn-empty-state')?.textContent).toContain('Add a transaction to get started.');
+    });
+
+    it('is a first-use empty state unless the caller says why it is empty', () => {
+      render('success', {isEmpty: true});
+      expect(query('cmn-empty-state')?.getAttribute('data-kind')).toBe('first-use');
+    });
+
+    it('passes the empty kind through, so a filtered list reads as no results', () => {
+      host.emptyKind.set('no-results');
+      render('success', {isEmpty: true});
+      expect(query('cmn-empty-state')?.getAttribute('data-kind')).toBe('no-results');
+      expect(query('cmn-empty-state [role="status"]')).not.toBeNull();
+    });
+
+    it('rejects a blank sub-message instead of rendering an empty body', () => {
+      host.emptySubMessage.set('   ');
+      host.status.set('success');
+      host.isEmpty.set(true);
+      expect(() => {
+        fixture.detectChanges();
+      }).toThrow(/non-empty body/);
     });
   });
 });
@@ -544,6 +565,7 @@ describe('AsyncStateComponent state pattern', () => {
       [showDelay]="showDelay()"
       [minDisplay]="minDisplay()"
       [crossfade]="crossfade()"
+      emptySubMessage="Nothing here yet."
     >
       <p class="projected">Loaded content</p>
     </cmn-async-state>
@@ -730,7 +752,7 @@ describe('AsyncStateComponent calm loading', () => {
   imports: [AsyncStateComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <cmn-async-state [status]="status()">
+    <cmn-async-state [status]="status()" emptySubMessage="Nothing here yet.">
       <p class="projected">Loaded content</p>
     </cmn-async-state>
   `,

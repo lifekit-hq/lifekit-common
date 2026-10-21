@@ -19,6 +19,14 @@ export type EmptyStateVariant = 'card' | 'bare';
  */
 export type EmptyStateKind = 'first-use' | 'no-results' | 'error';
 
+/** The body is required, and a blank one is a caller mistake, so it fails loudly rather than rendering an empty paragraph. */
+export function requireEmptyStateBody(body: string): string {
+  if (body.trim() === '') {
+    throw new Error('cmn-empty-state needs a non-empty body (subMessage), as Carbon requires.');
+  }
+  return body;
+}
+
 const KIND_ROLES: Record<EmptyStateKind, Nullable<string>> = {
   'first-use': null,
   'no-results': 'status',
@@ -92,7 +100,7 @@ const ACTIONS_CLASSES =
 })
 export class EmptyStateComponent {
   public readonly message = input.required<string>();
-  public readonly subMessage = input.required<string>();
+  public readonly subMessage = input.required<string, string>({transform: requireEmptyStateBody});
   public readonly icon = input<Nullable<IconName>>(null);
   public readonly iconClass = input<string>('');
   public readonly variant = input<EmptyStateVariant>('card');

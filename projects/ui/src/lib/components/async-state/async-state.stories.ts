@@ -34,6 +34,7 @@ const QUICK_REFRESH_MS = 120;
         [skeletonRows]="3"
         [status]="status()"
         [crossfade]="calm()"
+        emptySubMessage="New activity appears here after the next sync."
         skeletonShape="row"
       >
         <div class="rounded-cmn-md border border-border-default bg-surface-card p-cmn-4">
@@ -95,7 +96,7 @@ const CONTENT = `
 export const Loading: Story = {
   render: args => ({
     props: args,
-    template: `<cmn-async-state [status]="status" [skeletonRows]="skeletonRows">${CONTENT}</cmn-async-state>`,
+    template: `<cmn-async-state emptySubMessage="New activity appears here after the next sync." [status]="status" [skeletonRows]="skeletonRows">${CONTENT}</cmn-async-state>`,
   }),
   args: {status: 'loading', skeletonRows: 3},
 };
@@ -103,14 +104,14 @@ export const Loading: Story = {
 export const Error: Story = {
   render: args => ({
     props: args,
-    template: `<cmn-async-state [status]="status" [errorMessage]="errorMessage">${CONTENT}</cmn-async-state>`,
+    template: `<cmn-async-state emptySubMessage="New activity appears here after the next sync." [status]="status" [errorMessage]="errorMessage">${CONTENT}</cmn-async-state>`,
   }),
   args: {status: 'error', errorMessage: 'The upstream provider timed out.'},
 };
 
 export const ErrorWithoutMessage: Story = {
   render: () => ({
-    template: `<cmn-async-state status="error">${CONTENT}</cmn-async-state>`,
+    template: `<cmn-async-state emptySubMessage="New activity appears here after the next sync." status="error">${CONTENT}</cmn-async-state>`,
   }),
 };
 
@@ -118,23 +119,28 @@ export const Empty: Story = {
   render: args => ({
     props: args,
     template: `
-      <cmn-async-state [status]="status" [isEmpty]="isEmpty" [emptyMessage]="emptyMessage">
+      <cmn-async-state [status]="status" [isEmpty]="isEmpty" [emptyMessage]="emptyMessage" [emptySubMessage]="emptySubMessage">
         ${CONTENT}
       </cmn-async-state>
     `,
   }),
-  args: {status: 'success', isEmpty: true, emptyMessage: 'No transactions this month.'},
+  args: {
+    status: 'success',
+    isEmpty: true,
+    emptyMessage: 'No transactions this month.',
+    emptySubMessage: 'New activity appears here after the next sync.',
+  },
 };
 
 export const Success: Story = {
   render: () => ({
-    template: `<cmn-async-state status="success">${CONTENT}</cmn-async-state>`,
+    template: `<cmn-async-state emptySubMessage="New activity appears here after the next sync." status="success">${CONTENT}</cmn-async-state>`,
   }),
 };
 
 export const Idle: Story = {
   render: () => ({
-    template: `<cmn-async-state status="idle">${CONTENT}</cmn-async-state>`,
+    template: `<cmn-async-state emptySubMessage="New activity appears here after the next sync." status="idle">${CONTENT}</cmn-async-state>`,
   }),
 };
 
@@ -164,7 +170,7 @@ export const RowShapedSkeleton: Story = {
   render: args => ({
     props: args,
     template: `
-      <cmn-async-state [status]="status">
+      <cmn-async-state emptySubMessage="New activity appears here after the next sync." [status]="status">
         <cmn-card skeleton padding="none">
           <div class="divide-y divide-border-default">
             @for (_ of [1, 2, 3]; track $index) {
@@ -191,7 +197,7 @@ export const ColumnSkeleton: Story = {
   render: args => ({
     props: args,
     template: `
-      <cmn-async-state [status]="status">
+      <cmn-async-state emptySubMessage="New activity appears here after the next sync." [status]="status">
         <cmn-card skeleton>
           <div class="space-y-cmn-3 p-cmn-4">
             @for (_ of [1, 2, 3, 4, 5]; track $index) {
@@ -217,7 +223,7 @@ export const CompositeSkeleton: Story = {
   render: args => ({
     props: args,
     template: `
-      <cmn-async-state [status]="status">
+      <cmn-async-state emptySubMessage="New activity appears here after the next sync." [status]="status">
         <div skeleton class="space-y-cmn-5">
           <cmn-skeleton height="2rem" width="40%" />
           <cmn-skeleton height="10rem" />
@@ -244,7 +250,7 @@ export const PerStatSkeletons: Story = {
           <cmn-card>
             <div class="space-y-cmn-1">
               <span class="block font-label text-cmn-xs font-semibold uppercase tracking-wide text-text-secondary">{{ stat[0] }}</span>
-              <cmn-async-state [status]="status" class="block">
+              <cmn-async-state emptySubMessage="New activity appears here after the next sync." [status]="status" class="block">
                 <cmn-skeleton skeleton height="1.5rem" width="70%" />
                 <span class="block font-mono text-cmn-2xl font-semibold tabular-nums text-text-primary">{{ stat[1] }}</span>
               </cmn-async-state>
@@ -262,7 +268,7 @@ export const ErrorWithRetry: Story = {
   render: args => ({
     props: args,
     template: `
-      <cmn-async-state [status]="status" [errorMessage]="errorMessage">
+      <cmn-async-state emptySubMessage="New activity appears here after the next sync." [status]="status" [errorMessage]="errorMessage">
         <cmn-button error-action variant="secondary" size="sm">Retry</cmn-button>
         ${CONTENT}
       </cmn-async-state>
@@ -279,7 +285,7 @@ export const PersistentErrorBanner: Story = {
   render: args => ({
     props: args,
     template: `
-      <cmn-async-state [status]="status" [errorMessage]="errorMessage" errorPlacement="above">
+      <cmn-async-state emptySubMessage="New activity appears here after the next sync." [status]="status" [errorMessage]="errorMessage" errorPlacement="above">
         <cmn-button error-action variant="secondary" size="sm">Retry</cmn-button>
         ${ROWS}
       </cmn-async-state>
@@ -293,7 +299,7 @@ export const EmptyWithCallToAction: Story = {
   render: args => ({
     props: args,
     template: `
-      <cmn-async-state [status]="status" [isEmpty]="isEmpty">
+      <cmn-async-state emptySubMessage="New activity appears here after the next sync." [status]="status" [isEmpty]="isEmpty">
         <cmn-empty-state
           empty
           icon="Link"
@@ -314,7 +320,7 @@ export const ErrorWithBuiltInRetry: Story = {
   render: args => ({
     props: args,
     template: `
-      <cmn-async-state [status]="status" [errorMessage]="errorMessage" [retryable]="retryable" (retry)="status = 'loading'">
+      <cmn-async-state emptySubMessage="New activity appears here after the next sync." [status]="status" [errorMessage]="errorMessage" [retryable]="retryable" (retry)="status = 'loading'">
         ${CONTENT}
       </cmn-async-state>
     `,
@@ -334,7 +340,7 @@ export const ErrorNeverEmpty: Story = {
   render: args => ({
     props: args,
     template: `
-      <cmn-async-state [status]="status" [isEmpty]="isEmpty" [errorMessage]="errorMessage" errorPlacement="above" [retryable]="true">
+      <cmn-async-state emptySubMessage="New activity appears here after the next sync." [status]="status" [isEmpty]="isEmpty" [errorMessage]="errorMessage" errorPlacement="above" [retryable]="true">
         ${CONTENT}
       </cmn-async-state>
     `,
@@ -360,6 +366,25 @@ export const EmptyWithSubMessage: Story = {
   },
 };
 
+/** The empty state of a search or filter that hides everything, via the `emptyKind` passthrough. */
+export const EmptyNoResults: Story = {
+  render: args => ({
+    props: args,
+    template: `
+      <cmn-async-state [status]="status" [isEmpty]="isEmpty" [emptyMessage]="emptyMessage" [emptySubMessage]="emptySubMessage" [emptyKind]="emptyKind" emptyIcon="Search">
+        ${CONTENT}
+      </cmn-async-state>
+    `,
+  }),
+  args: {
+    status: 'success',
+    isEmpty: true,
+    emptyKind: 'no-results',
+    emptyMessage: 'No transactions match your filters.',
+    emptySubMessage: 'Clear a filter or widen the date range to see more.',
+  },
+};
+
 /**
  * A cold start with no network and nothing to show: an offline panel with the time of the last
  * sync, never "no data". Offline beats both an error and an empty result.
@@ -368,7 +393,7 @@ export const OfflineColdStart: Story = {
   render: args => ({
     props: args,
     template: `
-      <cmn-async-state [status]="status" [offline]="offline" [lastSynced]="lastSynced" [isEmpty]="isEmpty" [retryable]="true">
+      <cmn-async-state emptySubMessage="New activity appears here after the next sync." [status]="status" [offline]="offline" [lastSynced]="lastSynced" [isEmpty]="isEmpty" [retryable]="true">
         ${CONTENT}
       </cmn-async-state>
     `,
@@ -382,7 +407,7 @@ export const OfflineInsteadOfEmpty: Story = {
   render: args => ({
     props: args,
     template: `
-      <cmn-async-state [status]="status" [offline]="offline" [lastSynced]="lastSynced" [isEmpty]="isEmpty">
+      <cmn-async-state emptySubMessage="New activity appears here after the next sync." [status]="status" [offline]="offline" [lastSynced]="lastSynced" [isEmpty]="isEmpty">
         ${CONTENT}
       </cmn-async-state>
     `,
@@ -395,7 +420,7 @@ export const OfflineNeverSynced: Story = {
   render: args => ({
     props: args,
     template: `
-      <cmn-async-state [status]="status" [offline]="offline" [lastSynced]="lastSynced">
+      <cmn-async-state emptySubMessage="New activity appears here after the next sync." [status]="status" [offline]="offline" [lastSynced]="lastSynced">
         ${CONTENT}
       </cmn-async-state>
     `,
@@ -408,7 +433,7 @@ export const OfflineWithContent: Story = {
   render: args => ({
     props: args,
     template: `
-      <cmn-async-state [status]="status" [offline]="offline" [lastSynced]="lastSynced" [retryable]="true">
+      <cmn-async-state emptySubMessage="New activity appears here after the next sync." [status]="status" [offline]="offline" [lastSynced]="lastSynced" [retryable]="true">
         ${ROWS}
       </cmn-async-state>
     `,
@@ -424,7 +449,7 @@ export const PresetSkeleton: Story = {
   render: args => ({
     props: args,
     template: `
-      <cmn-async-state [status]="status" skeletonShape="section" [skeletonRows]="skeletonRows">
+      <cmn-async-state emptySubMessage="New activity appears here after the next sync." [status]="status" skeletonShape="section" [skeletonRows]="skeletonRows">
         ${CONTENT}
       </cmn-async-state>
     `,

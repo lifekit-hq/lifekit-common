@@ -16,7 +16,11 @@ import {
 
 import {type Nullable} from '../../types';
 import {AlertComponent} from '../alert/alert.component';
-import {EmptyStateComponent} from '../empty-state/empty-state.component';
+import {
+  EmptyStateComponent,
+  type EmptyStateKind,
+  requireEmptyStateBody,
+} from '../empty-state/empty-state.component';
 import {type IconName} from '../icon/icon.component';
 import {SkeletonComponent, type SkeletonShape} from '../skeleton/skeleton.component';
 
@@ -33,8 +37,6 @@ export type AsyncStateErrorPlacement = 'replace' | 'above';
 export type AsyncStateSyncedAt = Date | number | string;
 
 const DEFAULT_SKELETON_ROWS = 3;
-/** The empty-state body when the caller gives no `emptySubMessage`; the body is required (S6). */
-const DEFAULT_EMPTY_BODY = 'There is nothing to show here yet.';
 
 /**
  * The calm-loading defaults: no indicator for a load under 200ms, and once one shows it stays at
@@ -135,7 +137,8 @@ const DATE_AND_TIME: Intl.DateTimeFormatOptions = {dateStyle: 'medium', timeStyl
           <cmn-empty-state
             [icon]="emptyIcon()"
             [message]="emptyMessage()"
-            [subMessage]="emptySubMessage() ?? emptyBody"
+            [kind]="emptyKind()"
+            [subMessage]="emptySubMessage()"
             variant="bare"
           />
         </ng-content>
@@ -210,8 +213,12 @@ export class AsyncStateComponent {
   public readonly errorPlacement = input<AsyncStateErrorPlacement>('replace');
   public readonly isEmpty = input<boolean>(false);
   public readonly emptyMessage = input<string>('No data available.');
-  /** The empty-state body; without it a generic one stands in, so pass one naming the situation. */
-  public readonly emptySubMessage = input<Nullable<string>>(null);
+  /** The empty-state body, required (S6): name the situation and say what to do next. Blank throws. */
+  public readonly emptySubMessage = input.required<string, string>({
+    transform: requireEmptyStateBody,
+  });
+  /** Why the region is empty: `first-use` (the default), `no-results` or `error`. */
+  public readonly emptyKind = input<EmptyStateKind>('first-use');
   public readonly emptyIcon = input<Nullable<IconName>>(null);
   public readonly skeletonHeight = input<string>('1.25rem');
   public readonly skeletonRows = input<number>(DEFAULT_SKELETON_ROWS);
@@ -254,7 +261,6 @@ export class AsyncStateComponent {
   });
 
   /** Only a settled, successful load can be empty: an error never is. */
-  protected readonly emptyBody = DEFAULT_EMPTY_BODY;
   protected readonly showEmpty = computed(() => this.status() === 'success' && this.isEmpty());
 
   /** The alert stands alone: a failed first load, or a failed refresh with nothing to keep. */

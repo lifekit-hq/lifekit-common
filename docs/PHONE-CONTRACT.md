@@ -310,6 +310,7 @@ empty, keep cached data, errors keep context). A page binds `status`, `isEmpty`,
   [isEmpty]="rows().length === 0"
   [offline]="offline()"
   [lastSynced]="lastSynced()"
+  emptySubMessage="Transactions appear here after the next sync."
   retryable
   (retry)="reload()"
 >

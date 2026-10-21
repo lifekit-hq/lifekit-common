@@ -26,6 +26,12 @@ describe('EmptyStateComponent — inputs', () => {
     expect(p?.textContent?.trim()).toBe('Nothing here yet.');
   });
 
+  it('should reject a blank body instead of rendering an empty paragraph', () => {
+    expect(() => {
+      fixture.componentRef.setInput('subMessage', '  ');
+    }).toThrow(/non-empty body/);
+  });
+
   it('should render the body as a second paragraph', () => {
     const paragraphs: NodeListOf<HTMLElement> = fixture.nativeElement.querySelectorAll('p');
     expect(paragraphs.length).toBe(2);

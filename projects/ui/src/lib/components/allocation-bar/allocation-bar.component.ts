@@ -83,6 +83,7 @@ function defaultColor(index: number): string {
   template: `
     <cmn-async-state
       [emptyMessage]="emptyMessage()"
+      [emptySubMessage]="emptySubMessage()"
       [errorMessage]="errorMessage()"
       [isEmpty]="drawn().length === 0"
       [minDisplay]="minDisplay"
@@ -188,6 +189,9 @@ export class AllocationBarComponent implements OnInit {
   public readonly status = input<AsyncStateStatus>('success');
   public readonly errorMessage = input<string>('');
   public readonly emptyMessage = input<string>('Nothing to show yet');
+  public readonly emptySubMessage = input<string>(
+    'Balances appear here once an account has funds.'
+  );
   /** Renders the built-in Retry button beside the error message; it emits `retry`. */
   public readonly retryable = input(false, {transform: booleanAttribute});
 
