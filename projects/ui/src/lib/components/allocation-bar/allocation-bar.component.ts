@@ -120,7 +120,7 @@ function defaultColor(index: number): string {
           @for (segment of drawn(); track segment.index) {
             <span
               [style.background-color]="segment.color"
-              [style.flex-grow]="segment.value"
+              [style.flex-grow]="segment.share * 100"
               class="h-full min-w-0.5 basis-0"
             ></span>
           }

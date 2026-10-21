@@ -60,10 +60,24 @@ describe('AllocationBarComponent', () => {
     ]);
   });
 
-  it('sizes each bar segment by its value and paints it in its colour', () => {
+  it('sizes each bar segment by its share and paints it in its colour', () => {
     const parts = [...bar(root).children] as HTMLElement[];
-    expect(parts.map(p => p.style.flexGrow)).toEqual(['6200', '3000', '800']);
+    const grows = parts.map(p => Number(p.style.flexGrow));
+    expect(grows[0]).toBeCloseTo(62);
+    expect(grows[1]).toBeCloseTo(30);
+    expect(grows[2]).toBeCloseTo(8);
     expect(parts[1].style.backgroundColor).toBe('var(--color-asset-cash)');
+  });
+
+  it('fills the bar when the values total less than one', () => {
+    fixture.componentRef.setInput('segments', [
+      {label: 'Cash', value: 0.3},
+      {label: 'Crypto', value: 0.2},
+    ]);
+    fixture.detectChanges();
+    const grows = ([...bar(root).children] as HTMLElement[]).map(p => Number(p.style.flexGrow));
+    expect(grows[0] + grows[1]).toBeGreaterThanOrEqual(1);
+    expect(grows[0] / grows[1]).toBeCloseTo(1.5);
   });
 
   it('names the bar with every segment and its share', () => {
