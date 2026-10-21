@@ -1,3 +1,6 @@
+import {JsonPipe} from '@angular/common';
+import {ChangeDetectionStrategy, Component} from '@angular/core';
+import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {componentWrapperDecorator, type Meta, type StoryObj} from '@storybook/angular';
 
 import {CheckboxComponent} from './checkbox.component';
@@ -56,5 +59,36 @@ export const Dark: Story = {
         <cmn-checkbox [checked]="true" [disabled]="true" label="Disabled" />
       </div>
     `,
+  }),
+};
+
+@Component({
+  selector: 'cmn-checkbox-form-example',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [CheckboxComponent, JsonPipe, ReactiveFormsModule],
+  template: `
+    <form [formGroup]="form" class="flex flex-col gap-cmn-3">
+      <cmn-checkbox formControlName="remember" label="Keep me signed in">
+        <span class="font-label text-cmn-sm text-text-primary">Keep me signed in</span>
+      </cmn-checkbox>
+      <cmn-checkbox formControlName="news" label="Send me product news">
+        <span class="font-label text-cmn-sm text-text-primary">Send me product news</span>
+      </cmn-checkbox>
+      <p class="text-cmn-xs text-text-secondary">Form value: {{ form.value | json }}</p>
+    </form>
+  `,
+})
+class FormExampleComponent {
+  protected readonly form = new FormGroup({
+    remember: new FormControl(true, {nonNullable: true}),
+    news: new FormControl(false, {nonNullable: true}),
+  });
+}
+
+/** Bound with `formControlName`: the form owns the value (guardrails V8). */
+export const InAReactiveForm: Story = {
+  render: () => ({
+    moduleMetadata: {imports: [FormExampleComponent]},
+    template: '<cmn-checkbox-form-example />',
   }),
 };

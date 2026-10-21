@@ -10,6 +10,11 @@ import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 
 export type InputType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'search';
 export type InputSize = 'sm' | 'md' | 'lg';
+/** The virtual keyboard a phone shows for the field (the HTML `inputmode` attribute). */
+export type InputMode =
+  'none' | 'text' | 'decimal' | 'numeric' | 'tel' | 'search' | 'email' | 'url';
+/** The label on a phone keyboard's enter key (the HTML `enterkeyhint` attribute). */
+export type EnterKeyHint = 'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send';
 
 const BASE_CLASSES =
   'block w-full rounded-cmn-md border font-base bg-surface-card text-text-primary ' +
@@ -52,6 +57,8 @@ const ERROR_BORDER = 'border-status-error';
       [attr.aria-label]="ariaLabel()"
       [attr.aria-invalid]="hasError() ? true : null"
       [attr.autocomplete]="autocomplete()"
+      [attr.inputmode]="inputmode()"
+      [attr.enterkeyhint]="enterkeyhint()"
       [class]="classes()"
       (input)="onInput($event)"
       (blur)="onBlur()"
@@ -66,6 +73,8 @@ export class InputComponent implements ControlValueAccessor {
   public readonly readonly = input<boolean>(false);
   public readonly hasError = input<boolean>(false);
   public readonly autocomplete = input<string | null>(null);
+  public readonly inputmode = input<InputMode | null>(null);
+  public readonly enterkeyhint = input<EnterKeyHint | null>(null);
   /** Names the field when there is no `cmn-form-field` label; moves to the native element. */
   public readonly ariaLabel = input<string | null>(null, {alias: 'aria-label'});
 

@@ -1,5 +1,6 @@
 import {ChangeDetectionStrategy, Component, signal} from '@angular/core';
 import {type ComponentFixture, TestBed} from '@angular/core/testing';
+import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {beforeEach, describe, expect, it} from 'vitest';
 
 import {CheckboxComponent} from './checkbox.component';
@@ -17,6 +18,24 @@ class LabelHostComponent {
   public readonly checked = signal(false);
   public readonly disabled = signal(false);
   public readonly emitted: boolean[] = [];
+}
+
+@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [CheckboxComponent, ReactiveFormsModule],
+  template: '<cmn-checkbox [formControl]="control" label="Accept the terms" />',
+})
+class ReactiveHostComponent {
+  public readonly control = new FormControl(false, {nonNullable: true});
+}
+
+@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [CheckboxComponent, FormsModule],
+  template: '<cmn-checkbox [(ngModel)]="accepted" label="Accept the terms" />',
+})
+class TemplateHostComponent {
+  public readonly accepted = signal(true);
 }
 
 describe('CheckboxComponent', () => {
@@ -109,6 +128,70 @@ describe('CheckboxComponent', () => {
     it('emits once when the box itself is clicked', () => {
       ((host.nativeElement as HTMLElement).querySelector('button') as HTMLElement).click();
       expect(host.componentInstance.emitted).toEqual([true]);
+    });
+  });
+
+  describe('Angular forms (guardrails V8)', () => {
+    const boxIn = (host: ComponentFixture<unknown>): HTMLButtonElement =>
+      (host.nativeElement as HTMLElement).querySelector('button') as HTMLButtonElement;
+
+    it('takes its value from a reactive control and writes clicks back', () => {
+      const host = TestBed.createComponent(ReactiveHostComponent);
+      const {control} = host.componentInstance;
+      control.setValue(true);
+      host.detectChanges();
+      expect(boxIn(host).getAttribute('aria-checked')).toBe('true');
+
+      boxIn(host).click();
+      host.detectChanges();
+      expect(control.value).toBe(false);
+      expect(control.dirty).toBe(true);
+      expect(boxIn(host).getAttribute('aria-checked')).toBe('false');
+    });
+
+    it('marks the control touched on blur', () => {
+      const host = TestBed.createComponent(ReactiveHostComponent);
+      host.detectChanges();
+      boxIn(host).dispatchEvent(new Event('blur'));
+      expect(host.componentInstance.control.touched).toBe(true);
+    });
+
+    it('follows the control disabled state', () => {
+      const host = TestBed.createComponent(ReactiveHostComponent);
+      const {control} = host.componentInstance;
+      host.detectChanges();
+
+      control.disable();
+      host.detectChanges();
+      expect(boxIn(host).disabled).toBe(true);
+      expect(boxIn(host).getAttribute('aria-disabled')).toBe('true');
+
+      control.enable();
+      host.detectChanges();
+      expect(boxIn(host).disabled).toBe(false);
+    });
+
+    it('binds two ways through ngModel', async () => {
+      const host = TestBed.createComponent(TemplateHostComponent);
+      host.detectChanges();
+      await host.whenStable();
+      host.detectChanges();
+      expect(boxIn(host).getAttribute('aria-checked')).toBe('true');
+
+      boxIn(host).click();
+      host.detectChanges();
+      expect(host.componentInstance.accepted()).toBe(false);
+    });
+
+    it('leaves the value to `checked` when no forms directive binds', () => {
+      const emitted: boolean[] = [];
+      fixture.componentInstance.changed.subscribe(v => emitted.push(v));
+      fixture.detectChanges();
+
+      box().click();
+      fixture.detectChanges();
+      expect(emitted).toEqual([true]);
+      expect(box().getAttribute('aria-checked')).toBe('false');
     });
   });
 });

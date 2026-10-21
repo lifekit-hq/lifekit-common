@@ -41,6 +41,7 @@ export * from './components/drawer/drawer-config';
 export * from './components/drawer/drawer-container.component';
 export * from './components/drawer/drawer-ref';
 export * from './components/empty-state/empty-state.component';
+export * from './components/error-summary/error-summary.component';
 export * from './components/filter-bar/filter-bar.component';
 export * from './components/form-field/form-field.component';
 export * from './components/icon/icon.component';
