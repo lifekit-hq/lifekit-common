@@ -66,14 +66,14 @@ export const Default: Story = {
   },
 };
 
-// Story props are named `selected` and `inert`, never `value` or `disabled`: Storybook copies
-// props onto the component instance, where those two names are its internal signals.
+// Story props are named `picked` and `inert`, never `value`, `selected` or `disabled`: Storybook
+// copies props onto the component instance, where those names are its internal signals.
 export const Filled: Story = {
   render: () => ({
-    props: {options: accountOptions, selected: 'savings-vault'},
+    props: {options: accountOptions, picked: 'savings-vault'},
     template: `
       <div class="w-80">
-        <cmn-select [options]="options" [(ngModel)]="selected" placeholder="Choose account" />
+        <cmn-select [options]="options" [(ngModel)]="picked" placeholder="Choose account" />
       </div>
     `,
   }),
@@ -81,12 +81,12 @@ export const Filled: Story = {
 
 export const Disabled: Story = {
   render: () => ({
-    props: {options: accountOptions, selected: 'main-current', inert: true},
+    props: {options: accountOptions, picked: 'main-current', inert: true},
     template: `
       <div class="w-80">
         <cmn-select
           [options]="options"
-          [ngModel]="selected"
+          [ngModel]="picked"
           [disabled]="inert"
           placeholder="Choose account"
         />
@@ -101,12 +101,12 @@ export const Disabled: Story = {
  */
 export const Multiple: Story = {
   render: () => ({
-    props: {options: accountOptions, selected: []},
+    props: {options: accountOptions, picked: []},
     template: `
       <div class="w-80">
         <cmn-select
           [options]="options"
-          [(ngModel)]="selected"
+          [(ngModel)]="picked"
           mode="multiple"
           placeholder="All accounts"
           aria-label="Accounts"
@@ -118,12 +118,12 @@ export const Multiple: Story = {
 
 export const MultiplePreselected: Story = {
   render: () => ({
-    props: {options: accountOptions, selected: ['main-current', 'savings-vault']},
+    props: {options: accountOptions, picked: ['main-current', 'savings-vault']},
     template: `
       <div class="w-80">
         <cmn-select
           [options]="options"
-          [(ngModel)]="selected"
+          [(ngModel)]="picked"
           mode="multiple"
           placeholder="All accounts"
           aria-label="Accounts"
@@ -135,12 +135,12 @@ export const MultiplePreselected: Story = {
 
 export const MultipleDisabled: Story = {
   render: () => ({
-    props: {options: accountOptions, selected: ['main-current'], inert: true},
+    props: {options: accountOptions, picked: ['main-current'], inert: true},
     template: `
       <div class="w-80">
         <cmn-select
           [options]="options"
-          [ngModel]="selected"
+          [ngModel]="picked"
           [disabled]="inert"
           mode="multiple"
           placeholder="All accounts"
