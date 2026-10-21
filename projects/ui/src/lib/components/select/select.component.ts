@@ -728,12 +728,17 @@ export class SelectComponent implements ControlValueAccessor {
     const now = Date.now();
     this.typeahead = now - this.typeaheadAt > TYPEAHEAD_RESET_MS ? key : this.typeahead + key;
     this.typeaheadAt = now;
+    const wasOpen = this.isOpen();
     this.open();
 
     const search = this.typeahead.toLocaleLowerCase();
     const options = this.visibleOptions();
-    // A fresh key searches from the option after the active one, so repeating it cycles.
-    const start = this.typeahead.length === 1 ? this.activeIndex() + 1 : this.activeIndex();
+    // A closed popup searches from the top; an open one searches from the option after the active
+    // one for a fresh key, so repeating it cycles.
+    let start = 0;
+    if (wasOpen) {
+      start = this.typeahead.length === 1 ? this.activeIndex() + 1 : this.activeIndex();
+    }
     for (let n = 0; n < options.length; n++) {
       const i = (Math.max(start, 0) + n) % options.length;
       if (!options[i].disabled && options[i].label.toLocaleLowerCase().startsWith(search)) {

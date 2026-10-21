@@ -476,6 +476,45 @@ describe('SelectComponent multiple mode', () => {
       now.mockRestore();
     });
 
+    it('lands type-ahead on the first match when the popup was closed', () => {
+      fixture.componentRef.setInput('options', [
+        {label: 'Apple', value: 'apple'},
+        {label: 'Avocado', value: 'avocado'},
+      ]);
+      fixture.detectChanges();
+
+      ui.key('a');
+
+      expect(fixture.componentInstance.isOpen()).toBe(true);
+      expect(ui.activeLabel()).toBe('Apple');
+    });
+
+    it('lands type-ahead on a matching selected option when the popup was closed', () => {
+      fixture.componentRef.setInput('options', [
+        {label: 'Rent', value: 'rent'},
+        {label: 'Repairs', value: 'repairs'},
+        {label: 'Refunds', value: 'refunds'},
+      ]);
+      fixture.componentInstance.writeValue(['repairs']);
+      fixture.detectChanges();
+
+      ui.key('r');
+
+      expect(ui.activeLabel()).toBe('Rent');
+    });
+
+    it('cycles a repeated key through the matches once the popup is open', () => {
+      fixture.componentRef.setInput('options', [
+        {label: 'Apple', value: 'apple'},
+        {label: 'Avocado', value: 'avocado'},
+      ]);
+      fixture.detectChanges();
+
+      ui.key('a');
+      ui.key('a');
+      expect(ui.activeLabel()).toBe('Avocado');
+    });
+
     it('closes on Alt+ArrowUp and on Tab', () => {
       ui.key('ArrowDown');
       ui.key('ArrowUp', {altKey: true});
