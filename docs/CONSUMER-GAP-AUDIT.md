@@ -60,7 +60,7 @@ mode replaces `cmn-multi-select`.
 
 | Export                                                                    | Package    |
 | ------------------------------------------------------------------------- | ---------- |
-| `cmn-date-range`, `cmn-search-input`                                      | `ui`       |
+| `cmn-date-range`, `cmn-search-input`, `cmn-description-list`              | `ui`       |
 | `cmnTypography`, `cmnSkeleton`, `cmnTooltip` directives                   | `ui`       |
 | `provideLucideIcons`, `PageActionsService`, `ShellService`                | `ui`       |
 | `lk-line-chart`, `lk-segmented`, `lk-theme-picker`, `lk-dismissible-chip` | `elements` |
