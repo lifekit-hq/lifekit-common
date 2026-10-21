@@ -1,6 +1,8 @@
 import {OverlayContainer} from '@angular/cdk/overlay';
+import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {type ComponentFixture, TestBed} from '@angular/core/testing';
-import {afterEach, beforeEach, describe, expect, it} from 'vitest';
+import {FormControl, ReactiveFormsModule} from '@angular/forms';
+import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
 import {
   SelectComponent,
@@ -139,15 +141,89 @@ describe('SelectComponent', () => {
   });
 });
 
+/** Drives the combobox (`showSearch` or `mode="multiple"`) the way a person would. */
+class ComboboxHarness {
+  constructor(
+    private readonly fixture: ComponentFixture<unknown>,
+    private readonly overlayContainer: OverlayContainer
+  ) {}
+
+  public get host(): HTMLElement {
+    return this.fixture.nativeElement as HTMLElement;
+  }
+
+  public combobox(): HTMLElement {
+    return this.host.querySelector('[role="combobox"]') as HTMLElement;
+  }
+
+  public field(): HTMLElement {
+    return this.host.querySelector('[cdkoverlayorigin]') as HTMLElement;
+  }
+
+  public listbox(): HTMLElement | null {
+    return this.overlayContainer.getContainerElement().querySelector('[role="listbox"]');
+  }
+
+  public panelText(): string {
+    return this.overlayContainer.getContainerElement().textContent ?? '';
+  }
+
+  public options(): HTMLElement[] {
+    return Array.from(
+      this.overlayContainer.getContainerElement().querySelectorAll('[role="option"]')
+    );
+  }
+
+  public optionLabels(): string[] {
+    return this.options().map(o => o.textContent?.trim() ?? '');
+  }
+
+  public activeLabel(): string | null {
+    const id = this.combobox().getAttribute('aria-activedescendant');
+    return id ? (document.getElementById(id)?.textContent?.trim() ?? null) : null;
+  }
+
+  public chips(): string[] {
+    return Array.from(this.host.querySelectorAll('cmn-chip')).map(c => c.textContent?.trim() ?? '');
+  }
+
+  public button(label: string): HTMLButtonElement | undefined {
+    return Array.from(this.host.querySelectorAll('button')).find(
+      b => b.getAttribute('aria-label') === label
+    );
+  }
+
+  public click(el: HTMLElement): void {
+    el.click();
+    this.fixture.detectChanges();
+  }
+
+  public key(key: string, init: KeyboardEventInit = {}): KeyboardEvent {
+    const event = new KeyboardEvent('keydown', {key, bubbles: true, cancelable: true, ...init});
+    this.combobox().dispatchEvent(event);
+    this.fixture.detectChanges();
+    return event;
+  }
+
+  public type(text: string): void {
+    const input = this.combobox() as HTMLInputElement;
+    input.value = text;
+    input.dispatchEvent(new Event('input'));
+    this.fixture.detectChanges();
+  }
+}
+
 describe('SelectComponent multiple mode', () => {
   let fixture: ComponentFixture<SelectComponent>;
   let overlayContainer: OverlayContainer;
+  let ui: ComboboxHarness;
   let seen: SelectOptionValue[][];
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({imports: [SelectComponent]}).compileComponents();
     fixture = TestBed.createComponent(SelectComponent);
     overlayContainer = TestBed.inject(OverlayContainer);
+    ui = new ComboboxHarness(fixture, overlayContainer);
     seen = [];
     fixture.componentInstance.registerOnChange(v => seen.push(v as SelectOptionValue[]));
     fixture.componentRef.setInput('mode', 'multiple');
@@ -161,33 +237,62 @@ describe('SelectComponent multiple mode', () => {
     overlayContainer.ngOnDestroy();
   });
 
-  const trigger = (): HTMLButtonElement => fixture.nativeElement.querySelector('button');
-  const panel = (): HTMLElement => overlayContainer.getContainerElement();
-
   function open(): void {
-    trigger().click();
-    fixture.detectChanges();
+    ui.click(ui.combobox());
   }
 
-  function checkboxes(): HTMLButtonElement[] {
-    return Array.from(panel().querySelectorAll('[role="checkbox"]'));
-  }
-
-  it('shows the placeholder when nothing is selected', () => {
-    expect(trigger().textContent).toContain('All categories');
-    expect(fixture.componentInstance.hasSelection()).toBe(false);
-    // The Placeholder Rule: placeholder text is text-placeholder (4.5:1), never text-disabled.
-    const summary = trigger().querySelector('span.truncate');
-    expect(summary?.classList).toContain('text-text-placeholder');
-    expect(summary?.classList).not.toContain('text-text-disabled');
+  it('renders a select-only combobox, not a native multi-select box', () => {
+    expect(fixture.nativeElement.querySelector('select')).toBeNull();
+    expect(ui.combobox().tagName).toBe('DIV');
+    expect(ui.combobox().getAttribute('tabindex')).toBe('0');
+    expect(ui.combobox().getAttribute('aria-haspopup')).toBe('listbox');
+    expect(ui.combobox().getAttribute('aria-expanded')).toBe('false');
   });
 
-  it('summarises one selection by label and several by count', () => {
+  it('shows the placeholder when nothing is selected', () => {
+    expect(ui.combobox().textContent).toContain('All categories');
+    expect(fixture.componentInstance.hasSelection()).toBe(false);
+    // The Placeholder Rule: placeholder text is text-placeholder (4.5:1), never text-disabled.
+    const placeholder = ui.combobox().querySelector('span');
+    expect(placeholder?.classList).toContain('text-text-placeholder');
+    expect(placeholder?.classList).not.toContain('text-text-disabled');
+  });
+
+  it('shows each selection as a removable chip', () => {
+    fixture.componentInstance.writeValue(['rent', 'groceries']);
+    fixture.detectChanges();
+
+    expect(ui.chips()).toEqual(['Rent', 'Groceries']);
+    expect(ui.button('Remove Rent')).toBeDefined();
+    expect(ui.combobox().textContent).not.toContain('All categories');
+  });
+
+  it('removes one value when its chip × is pressed', () => {
+    fixture.componentInstance.writeValue(['rent', 'groceries']);
+    fixture.detectChanges();
+
+    ui.click(ui.button('Remove Rent') as HTMLButtonElement);
+
+    expect(seen).toEqual([['groceries']]);
+    expect(ui.chips()).toEqual(['Groceries']);
+  });
+
+  it('names the chip × from removeLabelPrefix', () => {
+    fixture.componentRef.setInput('removeLabelPrefix', 'Unselect');
+    fixture.componentInstance.writeValue(['rent']);
+    fixture.detectChanges();
+
+    expect(ui.button('Unselect Rent')).toBeDefined();
+  });
+
+  it('summarises the selection for screen readers by label or count', () => {
     fixture.componentInstance.writeValue(['rent']);
     expect(fixture.componentInstance.summary()).toBe('Rent');
 
     fixture.componentInstance.writeValue(['rent', 'groceries']);
+    fixture.detectChanges();
     expect(fixture.componentInstance.summary()).toBe('2 selected');
+    expect(ui.combobox().querySelector('.sr-only')?.textContent).toContain('2 selected');
   });
 
   it('never shows the placeholder while values outside the options are selected', () => {
@@ -195,67 +300,67 @@ describe('SelectComponent multiple mode', () => {
     fixture.detectChanges();
 
     expect(fixture.componentInstance.summary()).toBe('1 selected');
-    expect(trigger().textContent).not.toContain('All categories');
+    expect(ui.combobox().textContent).not.toContain('All categories');
+    expect(ui.chips()).toEqual([]);
 
     fixture.componentInstance.writeValue(['rent', 'unknown']);
     expect(fixture.componentInstance.summary()).toBe('2 selected');
   });
 
-  it('opens a panel listing every option and toggles aria-expanded', () => {
+  it('opens a multiselectable listbox of every option and sets aria-expanded', () => {
     open();
 
-    expect(panel().textContent).toContain('Groceries');
-    expect(panel().textContent).toContain('Travel');
-    expect(trigger().getAttribute('aria-expanded')).toBe('true');
+    expect(ui.optionLabels()).toEqual(['Groceries', 'Rent', 'Travel']);
+    expect(ui.listbox()?.getAttribute('aria-multiselectable')).toBe('true');
+    expect(ui.combobox().getAttribute('aria-expanded')).toBe('true');
+    expect(ui.combobox().getAttribute('aria-controls')).toBe(ui.listbox()?.id);
+    expect(ui.options()[2].getAttribute('aria-disabled')).toBe('true');
   });
 
   it('floats its panel on its shadow alone, with no border', () => {
     open();
 
-    const listbox = panel().querySelector('[role="listbox"]');
-    expect(listbox?.classList).toContain('shadow-cmn-lg');
-    expect(listbox?.classList).not.toContain('border');
+    const panel = ui.listbox()?.parentElement;
+    expect(panel?.classList).toContain('shadow-cmn-lg');
+    expect(panel?.classList).not.toContain('border');
+    // The CDK pane is a flex row; the panel must fill it to reach the field's width.
+    expect(panel?.classList).toContain('w-full');
   });
 
-  it('adds and removes values as options are toggled', () => {
+  it('toggles values as options are clicked and keeps the popup open', () => {
     open();
 
-    checkboxes()[0].click();
-    fixture.detectChanges();
-    checkboxes()[1].click();
-    fixture.detectChanges();
-    checkboxes()[0].click();
-    fixture.detectChanges();
+    ui.click(ui.options()[0]);
+    ui.click(ui.options()[1]);
+    ui.click(ui.options()[0]);
 
     expect(seen).toEqual([['groceries'], ['groceries', 'rent'], ['rent']]);
+    expect(fixture.componentInstance.isOpen()).toBe(true);
+    expect(ui.options()[1].getAttribute('aria-selected')).toBe('true');
+    expect(ui.options()[0].getAttribute('aria-selected')).toBe('false');
   });
 
   it('does not toggle disabled options', () => {
     open();
 
-    checkboxes()[2].click();
+    ui.click(ui.options()[2]);
 
     expect(seen).toEqual([]);
   });
 
-  it('clears the selection from the panel', () => {
+  it('clears the selection from the field', () => {
     fixture.componentInstance.writeValue(['rent']);
-    open();
-
-    const clear = Array.from(panel().querySelectorAll('button')).find(b =>
-      b.textContent?.includes('Clear selection')
-    );
-    clear?.click();
     fixture.detectChanges();
 
+    ui.click(ui.button('Clear selection') as HTMLButtonElement);
+
     expect(seen).toEqual([[]]);
-    expect(trigger().textContent).toContain('All categories');
+    expect(ui.combobox().textContent).toContain('All categories');
+    expect(ui.button('Clear selection')).toBeUndefined();
   });
 
   it('hides the clear action when nothing is selected', () => {
-    open();
-
-    expect(panel().textContent).not.toContain('Clear selection');
+    expect(ui.button('Clear selection')).toBeUndefined();
   });
 
   it('closes on Escape and marks touched', () => {
@@ -263,19 +368,19 @@ describe('SelectComponent multiple mode', () => {
     fixture.componentInstance.registerOnTouched(() => touched++);
     open();
 
-    fixture.componentInstance.onOverlayKeydown(new KeyboardEvent('keydown', {key: 'Escape'}));
-    fixture.detectChanges();
+    const event = ui.key('Escape');
 
+    expect(event.defaultPrevented).toBe(true);
     expect(fixture.componentInstance.isOpen()).toBe(false);
     expect(touched).toBe(1);
   });
 
-  it('toggles closed on a second trigger click and ignores other keys', () => {
+  it('toggles closed on a second click and ignores Escape from the overlay for other keys', () => {
     open();
     fixture.componentInstance.onOverlayKeydown(new KeyboardEvent('keydown', {key: 'a'}));
     expect(fixture.componentInstance.isOpen()).toBe(true);
 
-    trigger().click();
+    ui.click(ui.combobox());
     expect(fixture.componentInstance.isOpen()).toBe(false);
   });
 
@@ -284,15 +389,316 @@ describe('SelectComponent multiple mode', () => {
     fixture.componentRef.setInput('emptyLabel', 'Nothing here');
     open();
 
-    expect(panel().textContent).toContain('Nothing here');
+    expect(ui.panelText()).toContain('Nothing here');
   });
 
   it('normalises null writes and honours disabled state', () => {
-    fixture.componentInstance.writeValue(null);
-    expect(fixture.componentInstance.hasSelection()).toBe(false);
-
+    fixture.componentInstance.writeValue(['rent']);
     fixture.componentInstance.setDisabledState(true);
     fixture.detectChanges();
-    expect(trigger().disabled).toBe(true);
+
+    expect(ui.combobox().hasAttribute('tabindex')).toBe(false);
+    expect(ui.combobox().getAttribute('aria-disabled')).toBe('true');
+    expect(ui.button('Remove Rent')?.disabled).toBe(true);
+    expect(ui.button('Clear selection')).toBeUndefined();
+    ui.click(ui.field());
+    ui.key('ArrowDown');
+    expect(fixture.componentInstance.isOpen()).toBe(false);
+
+    fixture.componentInstance.writeValue(null);
+    expect(fixture.componentInstance.hasSelection()).toBe(false);
+  });
+
+  describe('keyboard', () => {
+    it('opens on ArrowDown with the first enabled option active', () => {
+      ui.key('ArrowDown');
+
+      expect(fixture.componentInstance.isOpen()).toBe(true);
+      expect(ui.activeLabel()).toBe('Groceries');
+    });
+
+    it('opens on ArrowUp with the last enabled option active', () => {
+      ui.key('ArrowUp');
+
+      expect(ui.activeLabel()).toBe('Rent');
+    });
+
+    it('opens on the first selected option', () => {
+      fixture.componentInstance.writeValue(['rent']);
+      ui.key('Enter');
+
+      expect(ui.activeLabel()).toBe('Rent');
+    });
+
+    it('moves with the arrows, skips disabled options and stops at the ends', () => {
+      ui.key('ArrowDown');
+      ui.key('ArrowDown');
+      expect(ui.activeLabel()).toBe('Rent');
+
+      ui.key('ArrowDown');
+      expect(ui.activeLabel()).toBe('Rent');
+
+      ui.key('ArrowUp');
+      ui.key('ArrowUp');
+      expect(ui.activeLabel()).toBe('Groceries');
+    });
+
+    it('jumps with Home and End', () => {
+      ui.key('End');
+      expect(ui.activeLabel()).toBe('Rent');
+
+      ui.key('Home');
+      expect(ui.activeLabel()).toBe('Groceries');
+    });
+
+    it('toggles the active option with Enter and Space, staying open', () => {
+      ui.key('ArrowDown');
+      ui.key('Enter');
+      ui.key('ArrowDown');
+      ui.key(' ');
+      ui.key(' ');
+
+      expect(seen).toEqual([['groceries'], ['groceries', 'rent'], ['groceries']]);
+      expect(fixture.componentInstance.isOpen()).toBe(true);
+    });
+
+    it('moves by type-ahead on the option labels', () => {
+      const now = vi.spyOn(Date, 'now').mockReturnValue(1000);
+      ui.key('r');
+      ui.key('e');
+      expect(fixture.componentInstance.isOpen()).toBe(true);
+      expect(ui.activeLabel()).toBe('Rent');
+
+      // A pause starts a fresh search.
+      now.mockReturnValue(2000);
+      ui.key('g');
+      expect(ui.activeLabel()).toBe('Groceries');
+      now.mockRestore();
+    });
+
+    it('closes on Alt+ArrowUp and on Tab', () => {
+      ui.key('ArrowDown');
+      ui.key('ArrowUp', {altKey: true});
+      expect(fixture.componentInstance.isOpen()).toBe(false);
+
+      ui.key('ArrowDown');
+      ui.key('Tab');
+      expect(fixture.componentInstance.isOpen()).toBe(false);
+    });
+
+    it('drops aria-activedescendant once closed', () => {
+      ui.key('ArrowDown');
+      expect(ui.combobox().getAttribute('aria-activedescendant')).not.toBeNull();
+
+      ui.key('Escape');
+      expect(ui.combobox().getAttribute('aria-activedescendant')).toBeNull();
+    });
+  });
+});
+
+describe('SelectComponent showSearch', () => {
+  let fixture: ComponentFixture<SelectComponent>;
+  let overlayContainer: OverlayContainer;
+  let ui: ComboboxHarness;
+  let seen: SelectValue[];
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({imports: [SelectComponent]}).compileComponents();
+    fixture = TestBed.createComponent(SelectComponent);
+    overlayContainer = TestBed.inject(OverlayContainer);
+    ui = new ComboboxHarness(fixture, overlayContainer);
+    seen = [];
+    fixture.componentInstance.registerOnChange(v => seen.push(v));
+    fixture.componentRef.setInput('showSearch', true);
+    fixture.componentRef.setInput('options', [
+      ...OPTIONS,
+      {label: 'Restaurants', value: 'restaurants'},
+    ]);
+    fixture.componentRef.setInput('placeholder', 'Category');
+    fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    fixture.destroy();
+    overlayContainer.ngOnDestroy();
+  });
+
+  const input = (): HTMLInputElement => ui.combobox() as HTMLInputElement;
+
+  it('renders an editable combobox with list autocomplete', () => {
+    expect(fixture.nativeElement.querySelector('select')).toBeNull();
+    expect(input().tagName).toBe('INPUT');
+    expect(input().getAttribute('aria-autocomplete')).toBe('list');
+    expect(input().getAttribute('aria-expanded')).toBe('false');
+    expect(input().getAttribute('aria-label')).toBe('Category');
+    expect(input().placeholder).toBe('Category');
+  });
+
+  it('filters the options by label as you type, ignoring case', () => {
+    ui.type('RE');
+
+    expect(fixture.componentInstance.isOpen()).toBe(true);
+    expect(ui.optionLabels()).toEqual(['Rent', 'Restaurants']);
+    expect(ui.activeLabel()).toBe('Rent');
+
+    ui.type('res');
+    expect(ui.optionLabels()).toEqual(['Restaurants']);
+    expect(ui.activeLabel()).toBe('Restaurants');
+  });
+
+  it('says so when nothing matches', () => {
+    fixture.componentRef.setInput('noMatchesLabel', 'Nothing matches');
+    ui.type('zzz');
+
+    expect(ui.options()).toEqual([]);
+    expect(ui.panelText()).toContain('Nothing matches');
+    expect(ui.combobox().getAttribute('aria-activedescendant')).toBeNull();
+  });
+
+  it('picks the active match with Enter, closes and shows its label', () => {
+    ui.type('ren');
+    ui.key('Enter');
+
+    expect(seen).toEqual(['rent']);
+    expect(fixture.componentInstance.isOpen()).toBe(false);
+    expect(input().value).toBe('Rent');
+  });
+
+  it('picks a clicked option', () => {
+    ui.click(ui.field());
+    ui.click(ui.options()[3]);
+
+    expect(seen).toEqual(['restaurants']);
+    expect(input().value).toBe('Restaurants');
+  });
+
+  it('shows the picked label as the placeholder while searching', () => {
+    fixture.componentInstance.writeValue('rent');
+    fixture.detectChanges();
+    expect(input().value).toBe('Rent');
+
+    ui.key('ArrowDown');
+
+    expect(input().value).toBe('');
+    expect(input().placeholder).toBe('Rent');
+    expect(ui.activeLabel()).toBe('Rent');
+  });
+
+  it('leaves Home, End and Space to the text field', () => {
+    ui.type('re');
+    expect(ui.key('Home').defaultPrevented).toBe(false);
+    expect(ui.key(' ').defaultPrevented).toBe(false);
+    expect(seen).toEqual([]);
+  });
+
+  it('closes on Escape, discarding the search', () => {
+    ui.type('ren');
+    ui.key('Escape');
+
+    expect(fixture.componentInstance.isOpen()).toBe(false);
+    expect(input().value).toBe('');
+    expect(seen).toEqual([]);
+  });
+
+  it('closes and marks touched when focus leaves the field', () => {
+    let touched = 0;
+    fixture.componentInstance.registerOnTouched(() => touched++);
+    ui.type('ren');
+
+    input().dispatchEvent(new FocusEvent('focusout', {bubbles: true, relatedTarget: null}));
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.isOpen()).toBe(false);
+    expect(touched).toBe(1);
+  });
+
+  it('offers a clear × only with allowClear and a value', () => {
+    fixture.componentInstance.writeValue('rent');
+    fixture.detectChanges();
+    expect(ui.button('Clear selection')).toBeUndefined();
+
+    fixture.componentRef.setInput('allowClear', true);
+    fixture.detectChanges();
+    ui.click(ui.button('Clear selection') as HTMLButtonElement);
+
+    expect(seen).toEqual([null]);
+    expect(input().value).toBe('');
+  });
+
+  it('disables the search field', () => {
+    fixture.componentInstance.setDisabledState(true);
+    fixture.detectChanges();
+
+    expect(input().disabled).toBe(true);
+  });
+
+  it('filters in multiple mode and removes the last chip on Backspace in an empty field', () => {
+    let values: SelectValue[] = [];
+    fixture.componentInstance.registerOnChange(v => (values = [...values, v]));
+    fixture.componentRef.setInput('mode', 'multiple');
+    fixture.componentInstance.writeValue(['groceries']);
+    fixture.detectChanges();
+
+    ui.type('ren');
+    expect(ui.optionLabels()).toEqual(['Rent']);
+    ui.key('Enter');
+    expect(values).toEqual([['groceries', 'rent']]);
+    expect(input().value).toBe('');
+    expect(fixture.componentInstance.isOpen()).toBe(true);
+
+    ui.key('Backspace');
+    expect(values.at(-1)).toEqual(['groceries']);
+    expect(ui.chips()).toEqual(['Groceries']);
+  });
+});
+
+@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [SelectComponent, ReactiveFormsModule],
+  template: `
+    <cmn-select
+      [formControl]="control"
+      [options]="options"
+      [showSearch]="true"
+      mode="multiple"
+      aria-label="Categories"
+    />
+  `,
+})
+class FormHostComponent {
+  public readonly options = OPTIONS;
+  public readonly control = new FormControl<SelectOptionValue[]>(['rent'], {nonNullable: true});
+}
+
+describe('SelectComponent forms integration', () => {
+  it('reads, writes, touches and disables through a FormControl', async () => {
+    await TestBed.configureTestingModule({imports: [FormHostComponent]}).compileComponents();
+    const fixture = TestBed.createComponent(FormHostComponent);
+    const overlayContainer = TestBed.inject(OverlayContainer);
+    const ui = new ComboboxHarness(fixture, overlayContainer);
+    const {control} = fixture.componentInstance;
+    fixture.detectChanges();
+
+    expect(ui.chips()).toEqual(['Rent']);
+
+    // Opens on the selected Rent; Groceries sits above it.
+    ui.key('ArrowDown');
+    ui.key('ArrowUp');
+    ui.key('Enter');
+    expect(control.value).toEqual(['rent', 'groceries']);
+
+    ui.combobox().dispatchEvent(new FocusEvent('focusout', {bubbles: true, relatedTarget: null}));
+    expect(control.touched).toBe(true);
+
+    control.setValue(['groceries']);
+    fixture.detectChanges();
+    expect(ui.chips()).toEqual(['Groceries']);
+
+    control.disable();
+    fixture.detectChanges();
+    expect((ui.combobox() as HTMLInputElement).disabled).toBe(true);
+
+    fixture.destroy();
+    overlayContainer.ngOnDestroy();
   });
 });

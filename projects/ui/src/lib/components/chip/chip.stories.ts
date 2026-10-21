@@ -50,3 +50,22 @@ export const LongLabel: Story = {
     `,
   }),
 };
+
+export const Disabled: Story = {
+  render: () => ({
+    template: '<cmn-chip [disabled]="true">All accounts</cmn-chip>',
+  }),
+};
+
+/** `removable`: an input chip, the label plus an × named by `removeLabel`. */
+export const Removable: Story = {
+  render: () => ({
+    template: `
+      <div class="flex flex-wrap gap-cmn-2">
+        <cmn-chip removable removeLabel="Remove Groceries">Groceries</cmn-chip>
+        <cmn-chip removable removeLabel="Remove Rent">Rent</cmn-chip>
+        <cmn-chip [disabled]="true" removable removeLabel="Remove Travel">Travel</cmn-chip>
+      </div>
+    `,
+  }),
+};

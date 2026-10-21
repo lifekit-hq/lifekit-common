@@ -164,10 +164,11 @@ verdict is grounded in a code-read of the current implementation.
 
 ### select
 
-**What it does today:** `ControlValueAccessor` wrapping a native HTML `<select>` element. Supports
-`single` and `multiple` modes, `size` variants (`sm`/`md`/`lg`), `allowClear`, `showSearch`,
-`hasError`, and `placeholder`. Exposes computed CSS classes via `SIZE_CLASSES` and `ICON_SIZE`
-maps. No external stylesheet, no custom dropdown widget.
+**What it does today:** a `ControlValueAccessor`. The plain single mode wraps a native HTML
+`<select>` element; `showSearch` and `mode="multiple"` render a bespoke WAI-ARIA APG combobox with
+a listbox popup in a CDK overlay, and `multiple` shows each pick as a removable `cmn-chip`. Supports
+`size` variants (`sm`/`md`/`lg`), `allowClear`, `hasError`, and `placeholder`. Exposes computed
+CSS classes via `SIZE_CLASSES` and `ICON_SIZE` maps. No external stylesheet or third-party widget.
 
 **The finance-sentry#319 rationale — fetched verbatim from the PR body via unauthenticated
 GitHub REST API (`GET https://api.github.com/repos/lifekit-hq/finance-sentry/pulls/319`,

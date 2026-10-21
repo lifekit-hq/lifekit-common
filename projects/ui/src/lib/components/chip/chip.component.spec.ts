@@ -66,3 +66,79 @@ describe('ChipComponent', () => {
     expect(count).toBe(1);
   });
 });
+
+@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [ChipComponent],
+  template: '<cmn-chip removable removeLabel="Remove Rent">Rent</cmn-chip>',
+})
+class RemovableChipHostComponent {}
+
+describe('ChipComponent removable', () => {
+  let fixture: ComponentFixture<ChipComponent>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({imports: [ChipComponent]}).compileComponents();
+    fixture = TestBed.createComponent(ChipComponent);
+    fixture.componentRef.setInput('removable', true);
+    fixture.componentRef.setInput('removeLabel', 'Remove Rent');
+  });
+
+  const buttons = (): HTMLButtonElement[] =>
+    Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('button'));
+
+  it('renders the label beside a single named × button, not a toggle', () => {
+    const host = TestBed.createComponent(RemovableChipHostComponent);
+    host.detectChanges();
+    const element = host.nativeElement as HTMLElement;
+    const remove = element.querySelectorAll('button');
+
+    expect(remove.length).toBe(1);
+    expect(remove[0].getAttribute('aria-label')).toBe('Remove Rent');
+    expect(remove[0].hasAttribute('aria-pressed')).toBe(false);
+    expect(element.textContent?.trim()).toBe('Rent');
+  });
+
+  it('emits removed, not clicked, when the × is pressed', () => {
+    let removed = 0;
+    let clicked = 0;
+    fixture.componentInstance.removed.subscribe(() => removed++);
+    fixture.componentInstance.clicked.subscribe(() => clicked++);
+    fixture.detectChanges();
+
+    buttons()[0].click();
+
+    expect(removed).toBe(1);
+    expect(clicked).toBe(0);
+  });
+
+  it('grows the × to a touch-sized target below md', () => {
+    fixture.detectChanges();
+
+    expect(buttons()[0].classList).toContain('max-md:after:h-cmn-touch');
+  });
+
+  it('disables the × when disabled', () => {
+    let removed = 0;
+    fixture.componentInstance.removed.subscribe(() => removed++);
+    fixture.componentRef.setInput('disabled', true);
+    fixture.detectChanges();
+
+    buttons()[0].click();
+
+    expect(buttons()[0].disabled).toBe(true);
+    expect(removed).toBe(0);
+  });
+});
+
+describe('ChipComponent disabled', () => {
+  it('disables the toggle button', async () => {
+    await TestBed.configureTestingModule({imports: [ChipComponent]}).compileComponents();
+    const fixture = TestBed.createComponent(ChipComponent);
+    fixture.componentRef.setInput('disabled', true);
+    fixture.detectChanges();
+
+    const button = (fixture.nativeElement as HTMLElement).querySelector('button');
+    expect(button?.disabled).toBe(true);
+  });
+});
