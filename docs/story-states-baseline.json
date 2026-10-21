@@ -22,11 +22,6 @@
       "reason": "A search query has no validation; a failed search shows its error with the results, not on the field."
     },
     {
-      "component": "chip",
-      "state": "Disabled",
-      "reason": "cmn-chip has no disabled input; a filter that cannot apply is left out of the row."
-    },
-    {
       "component": "data-table",
       "state": "Error",
       "reason": "cmn-data-table has no error slot inside its frame yet (guardrails T3, a Part 3 gap); hosts wrap it in cmn-async-state."

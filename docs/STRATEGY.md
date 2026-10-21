@@ -138,7 +138,7 @@ Counts are a point-in-time measurement; re-measure before relying on them for a 
 | page-header         | fs 15 · dash 5                                                                  | interactive | keep-own        | Depends on `ButtonComponent` internally; action button with loading/disabled state                                                                                                                                             |
 | search-input        | new (added for ledger filter bar); fs 0 · dash 0                                | interactive | keep-own        | `ControlValueAccessor` over native `type=search` with leading icon and clear button; Angular forms integration, depends on `icon`                                                                                              |
 | segmented           | new (added for the Appearance settings mode choice); fs 0 · dash 0              | interactive | keep-own        | `role=radiogroup` over native buttons with roving tabindex and arrow/Home/End stepping; `model()` two-way value; keyboard and focus behaviour                                                                                  |
-| select              | fs 4 · dash 0                                                                   | interactive | keep-own        | Deliberate native `<select>` — see §"finance-sentry#319 history"; `multiple` mode (checklist panel in a CDK overlay) absorbed the former `multi-select`                                                                        |
+| select              | fs 4 · dash 0                                                                   | interactive | keep-own        | Native `<select>` for plain single mode (§"finance-sentry#319 history"); `showSearch`/`multiple` use an APG combobox + CDK overlay listbox, `cmn-chip` chips for `multiple`; absorbed `multi-select`                           |
 | selectable-card     | fs 8 · dash 1                                                                   | interactive | element-rewrite | Button + named slots (leading/body/trailing) + `aria-pressed`; maps cleanly to Lit                                                                                                                                             |
 | setting-row         | new (added for the app-shell Settings standard); fs 0 · dash 0                  | templated   | keep-own        | Label and description beside a projected control; labelled group for assistive technology; slot-based, app-shell concern                                                                                                       |
 | settings-section    | new (added for the app-shell Settings standard); fs 0 · dash 0                  | templated   | keep-own        | Titled Settings block with a heading column from md up and an optional per-section Save; slot-based, app-shell concern                                                                                                         |
@@ -164,10 +164,11 @@ verdict is grounded in a code-read of the current implementation.
 
 ### select
 
-**What it does today:** `ControlValueAccessor` wrapping a native HTML `<select>` element. Supports
-`single` and `multiple` modes, `size` variants (`sm`/`md`/`lg`), `allowClear`, `showSearch`,
-`hasError`, and `placeholder`. Exposes computed CSS classes via `SIZE_CLASSES` and `ICON_SIZE`
-maps. No external stylesheet, no custom dropdown widget.
+**What it does today:** a `ControlValueAccessor`. The plain single mode wraps a native HTML
+`<select>` element; `showSearch` and `mode="multiple"` render a bespoke WAI-ARIA APG combobox with
+a listbox popup in a CDK overlay, and `multiple` shows each pick as a removable `cmn-chip`. Supports
+`size` variants (`sm`/`md`/`lg`), `allowClear`, `hasError`, and `placeholder`. Exposes computed
+CSS classes via `SIZE_CLASSES` and `ICON_SIZE` maps. No external stylesheet or third-party widget.
 
 **The finance-sentry#319 rationale — fetched verbatim from the PR body via unauthenticated
 GitHub REST API (`GET https://api.github.com/repos/lifekit-hq/finance-sentry/pulls/319`,
@@ -185,11 +186,11 @@ GitHub REST API (`GET https://api.github.com/repos/lifekit-hq/finance-sentry/pul
 > systems / drop ng-zorro).
 
 **Verdict: keep-own.** The native `<select>` gives us a11y and keyboard type-ahead at zero cost
-and zero dependency surface. A custom combobox widget (whether ng-zorro's, Angular Material's,
-or bespoke) would be warranted only if the product needs richer affordances (async option loading,
-option grouping with avatars, multi-select chips) — none of which are current requirements. When
-those requirements land, the correct replacement is a Lit combobox element (element-rewrite),
-not ng-zorro.
+and zero dependency surface, so the plain single mode keeps it. The custom combobox covers only
+what a native control cannot: option search and multi-select chips, built on the CDK overlay and
+`cmn-chip` with no new dependency. Further affordances (async option loading, option grouping with
+avatars) are not current requirements; when they land, the correct replacement is a Lit combobox
+element (element-rewrite), not ng-zorro.
 
 ---
 
