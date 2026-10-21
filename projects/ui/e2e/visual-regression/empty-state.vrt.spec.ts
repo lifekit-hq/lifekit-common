@@ -2,7 +2,7 @@ import {expect, test} from '@playwright/test';
 
 import {openStory} from './open-story';
 
-const STORIES = ['card', 'message-only', 'bare', 'with-actions', 'long-text'];
+const STORIES = ['card', 'bare', 'with-actions', 'long-text'];
 
 const VIEWPORTS = [
   {name: 'phone-320', width: 320, height: 667},

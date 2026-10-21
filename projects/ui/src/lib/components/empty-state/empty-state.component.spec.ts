@@ -13,6 +13,7 @@ describe('EmptyStateComponent — inputs', () => {
     }).compileComponents();
     fixture = TestBed.createComponent(EmptyStateComponent);
     fixture.componentRef.setInput('message', 'Nothing here yet.');
+    fixture.componentRef.setInput('subMessage', 'Connect an account first.');
     fixture.detectChanges();
   });
 
@@ -25,14 +26,13 @@ describe('EmptyStateComponent — inputs', () => {
     expect(p?.textContent?.trim()).toBe('Nothing here yet.');
   });
 
-  it('should not render a subMessage element when subMessage is null', () => {
-    const paragraphs: NodeListOf<HTMLElement> = fixture.nativeElement.querySelectorAll('p');
-    expect(paragraphs.length).toBe(1);
+  it('should reject a blank body instead of rendering an empty paragraph', () => {
+    expect(() => {
+      fixture.componentRef.setInput('subMessage', '  ');
+    }).toThrow(/non-empty body/);
   });
 
-  it('should render a second paragraph when subMessage is provided', () => {
-    fixture.componentRef.setInput('subMessage', 'Connect an account first.');
-    fixture.detectChanges();
+  it('should render the body as a second paragraph', () => {
     const paragraphs: NodeListOf<HTMLElement> = fixture.nativeElement.querySelectorAll('p');
     expect(paragraphs.length).toBe(2);
     expect(paragraphs[1].textContent?.trim()).toBe('Connect an account first.');
@@ -113,6 +113,48 @@ describe('EmptyStateComponent — inputs', () => {
     expect(p.className).toContain('break-words');
   });
 
+  it('should default to the first-use kind with no live region', () => {
+    const host: HTMLElement = fixture.nativeElement;
+    expect(host.getAttribute('data-kind')).toBe('first-use');
+    expect(host.querySelector('div')?.hasAttribute('role')).toBe(false);
+  });
+
+  it('should announce the no-results kind politely as a status', () => {
+    fixture.componentRef.setInput('kind', 'no-results');
+    fixture.detectChanges();
+    const host: HTMLElement = fixture.nativeElement;
+    expect(host.getAttribute('data-kind')).toBe('no-results');
+    expect(host.querySelector('div')?.getAttribute('role')).toBe('status');
+  });
+
+  it('should announce the error kind as an alert and tint its icon', () => {
+    fixture.componentRef.setInput('kind', 'error');
+    fixture.componentRef.setInput('icon', 'CircleAlert');
+    fixture.detectChanges();
+    const host: HTMLElement = fixture.nativeElement;
+    expect(host.getAttribute('data-kind')).toBe('error');
+    expect(host.querySelector('div')?.getAttribute('role')).toBe('alert');
+    expect(host.querySelector('cmn-icon')?.className).toContain('text-status-error');
+  });
+
+  it('should let iconClass override the error tint', () => {
+    fixture.componentRef.setInput('kind', 'error');
+    fixture.componentRef.setInput('icon', 'CircleAlert');
+    fixture.componentRef.setInput('iconClass', 'text-status-warning');
+    fixture.detectChanges();
+    const icon: HTMLElement | null = fixture.nativeElement.querySelector('cmn-icon');
+    expect(icon?.className).toContain('text-status-warning');
+    expect(icon?.className).not.toContain('text-status-error');
+  });
+
+  it('should not tint the icon outside the error kind', () => {
+    fixture.componentRef.setInput('kind', 'no-results');
+    fixture.componentRef.setInput('icon', 'Search');
+    fixture.detectChanges();
+    const icon: HTMLElement | null = fixture.nativeElement.querySelector('cmn-icon');
+    expect(icon?.className).not.toContain('text-status-error');
+  });
+
   it('should render icon in card variant', () => {
     fixture.componentRef.setInput('icon', 'AlertCircle');
     fixture.detectChanges();
@@ -133,7 +175,7 @@ describe('EmptyStateComponent — inputs', () => {
   imports: [EmptyStateComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <cmn-empty-state message="No items found">
+    <cmn-empty-state message="No items found" subMessage="Connect an account to start.">
       <button cta data-testid="cta-button" type="button">Connect Now</button>
     </cmn-empty-state>
   `,
@@ -170,7 +212,11 @@ describe('EmptyStateComponent — CTA slot projection', () => {
   imports: [EmptyStateComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <cmn-empty-state message="No items found" variant="bare">
+    <cmn-empty-state
+      message="No items found"
+      subMessage="Connect an account to start."
+      variant="bare"
+    >
       <button cta data-testid="bare-cta" type="button">Action</button>
     </cmn-empty-state>
   `,
@@ -199,7 +245,7 @@ describe('EmptyStateComponent — CTA slot projection in bare variant', () => {
   imports: [EmptyStateComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <cmn-empty-state message="No items found">
+    <cmn-empty-state message="No items found" subMessage="Connect an account to start.">
       <button secondary data-testid="secondary" type="button">Widen period</button>
     </cmn-empty-state>
   `,

@@ -16,7 +16,11 @@ import {
 
 import {type Nullable} from '../../types';
 import {AlertComponent} from '../alert/alert.component';
-import {EmptyStateComponent} from '../empty-state/empty-state.component';
+import {
+  EmptyStateComponent,
+  type EmptyStateKind,
+  requireEmptyStateBody,
+} from '../empty-state/empty-state.component';
 import {type IconName} from '../icon/icon.component';
 import {SkeletonComponent, type SkeletonShape} from '../skeleton/skeleton.component';
 
@@ -133,6 +137,7 @@ const DATE_AND_TIME: Intl.DateTimeFormatOptions = {dateStyle: 'medium', timeStyl
           <cmn-empty-state
             [icon]="emptyIcon()"
             [message]="emptyMessage()"
+            [kind]="emptyKind()"
             [subMessage]="emptySubMessage()"
             variant="bare"
           />
@@ -208,7 +213,12 @@ export class AsyncStateComponent {
   public readonly errorPlacement = input<AsyncStateErrorPlacement>('replace');
   public readonly isEmpty = input<boolean>(false);
   public readonly emptyMessage = input<string>('No data available.');
-  public readonly emptySubMessage = input<Nullable<string>>(null);
+  /** The empty-state body, required (S6): name the situation and say what to do next. Blank throws. */
+  public readonly emptySubMessage = input.required<string, string>({
+    transform: requireEmptyStateBody,
+  });
+  /** Why the region is empty: `first-use` (the default), `no-results` or `error`. */
+  public readonly emptyKind = input<EmptyStateKind>('first-use');
   public readonly emptyIcon = input<Nullable<IconName>>(null);
   public readonly skeletonHeight = input<string>('1.25rem');
   public readonly skeletonRows = input<number>(DEFAULT_SKELETON_ROWS);
