@@ -1,5 +1,22 @@
 # Changelog
 
+## [3.9.0](https://github.com/lifekit-hq/lifekit-common/compare/v3.8.0...v3.9.0) (2026-10-21)
+
+
+### Features
+
+* **ui:** gate CI on axe accessibility over every story ([#180](https://github.com/lifekit-hq/lifekit-common/issues/180)) ([df030bb](https://github.com/lifekit-hq/lifekit-common/commit/df030bb214dcd0b5e51bd532e7b70265f87df657))
+
+
+### Bug Fixes
+
+* **ui:** fix design-scan findings and gate CI on the design baseline ([#181](https://github.com/lifekit-hq/lifekit-common/issues/181)) ([a223700](https://github.com/lifekit-hq/lifekit-common/commit/a2237009cb6891115ac3022aca0459bae2bb2b77)), closes [#175](https://github.com/lifekit-hq/lifekit-common/issues/175)
+
+
+### Documentation
+
+* add MIT LICENSE and fix stale README/STRATEGY claims ([#178](https://github.com/lifekit-hq/lifekit-common/issues/178)) ([e070ae0](https://github.com/lifekit-hq/lifekit-common/commit/e070ae01dd995b65c701abeb3dfa93b9febc7935))
+
 ## [3.8.0](https://github.com/lifekit-hq/lifekit-common/compare/v3.7.0...v3.8.0) (2026-10-17)
 
 
