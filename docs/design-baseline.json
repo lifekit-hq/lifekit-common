@@ -56,6 +56,12 @@
       "rule": "flat-type-hierarchy",
       "stories": ["components-app-layout--phone-overlay-sheet-open"],
       "reason": "iOS chrome: the top bar's inline title (h1) and an open sheet's title (h2) are both nav-bar titles at one size, and the sheet is modal over the page."
+    },
+    {
+      "rule": "text-overflow",
+      "stories": ["directives-tooltip--truncated"],
+      "match": "truncate",
+      "reason": "Guardrail T5's demonstration: the text is cut off with an ellipsis on purpose, and cmnTooltip shows the full value on hover and focus."
     }
   ],
   "source": {

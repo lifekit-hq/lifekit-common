@@ -251,7 +251,7 @@ Enforcement labels:
 | T2  | An empty cell shows "-"                                                                                                          | **planned**: a spec on the cell formatter                                                                                                              |
 | T3  | Table loading uses skeleton rows; empty and error sit inside the table frame                                                     | Loading and empty **exist** (stories). Error is **enforced** by story-state, with data-table `Error` a recorded gap until the table has an error state |
 | T4  | Sortable headers cycle through ascending, descending and none with `aria-sort`                                                   | **planned**: a data-table spec plus axe                                                                                                                |
-| T5  | Overflowing text truncates, with the full value on hover and focus                                                               | **planned**: a story and a spec, once the tooltip primitive exists                                                                                     |
+| T5  | Overflowing text truncates, with the full value on hover and focus                                                               | **enforced** for text: `cmnTooltipTruncatedOnly`, its `Truncated` story and the tooltip spec. **planned** for table cells: data-table ellipsis         |
 | T6  | Below 600px, tables are list rows with continuous paging and no pager                                                            | **exists**: phone rule 8                                                                                                                               |
 | N1  | Five or fewer tabs, one-word labels, badges only for critical items                                                              | **exists**: phone (tab labels, shell by device)                                                                                                        |
 | N2  | Root pages have a collapsing large title; child pages have back and the parent's title                                           | **exists**: phone (title at 320, scroll edge)                                                                                                          |
@@ -283,11 +283,12 @@ Enforcement labels:
 | X3  | One primary number per screen; detail behind disclosure                                                                          | **review-only**: which number is primary is a product decision                                                                                         |
 | X4  | The NN/g heuristics pass on every new flow                                                                                       | **review-only**: they judge whole flows                                                                                                                |
 
-The count: 22 **exists**; 19 **enforced** (S3, S4, S6, S7, F1 in part, V1 to V4, V5 forwarding,
-V8, T3 in part, K3, Y2, Ch2, $1, $2, X1, X2); 10 **planned** (F2 to F5, T2, T4, T5, K2, Ch1,
-Ch3); 6 **review-only** (F6, V6, N3, C4, X3, X4), plus the wording in F4 and the reason in S7.
-Every planned check waits on a feature that is its own issue: toast actions and stacking,
-data-table features, the tooltip primitive, keyboard patterns and chart text alternatives.
+The count: 22 **exists**; 20 **enforced** (S3, S4, S6, S7, F1 in part, V1 to V4, V5 forwarding,
+V8, T3 in part, T5 in part, K3, Y2, Ch2, $1, $2, X1, X2); 9 **planned** (F2 to F5, T2, T4, K2,
+Ch1, Ch3); 6 **review-only** (F6, V6, N3, C4, X3, X4), plus the wording in F4 and the reason in
+S7. Every planned check waits on a feature that is its own issue: toast actions and stacking,
+data-table features (T5's cell ellipsis among them), keyboard patterns and chart text
+alternatives.
 
 ### Story-state categories (X2)
 
