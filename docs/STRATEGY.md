@@ -186,11 +186,11 @@ GitHub REST API (`GET https://api.github.com/repos/lifekit-hq/finance-sentry/pul
 > systems / drop ng-zorro).
 
 **Verdict: keep-own.** The native `<select>` gives us a11y and keyboard type-ahead at zero cost
-and zero dependency surface. A custom combobox widget (whether ng-zorro's, Angular Material's,
-or bespoke) would be warranted only if the product needs richer affordances (async option loading,
-option grouping with avatars, multi-select chips) — none of which are current requirements. When
-those requirements land, the correct replacement is a Lit combobox element (element-rewrite),
-not ng-zorro.
+and zero dependency surface, so the plain single mode keeps it. The custom combobox covers only
+what a native control cannot: option search and multi-select chips, built on the CDK overlay and
+`cmn-chip` with no new dependency. Further affordances (async option loading, option grouping with
+avatars) are not current requirements; when they land, the correct replacement is a Lit combobox
+element (element-rewrite), not ng-zorro.
 
 ---
 
