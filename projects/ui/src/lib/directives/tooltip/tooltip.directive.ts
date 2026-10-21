@@ -243,6 +243,7 @@ export class TooltipDirective {
       this.overlayRef?.detach();
     }
     this.panelRef = null;
+    this.panelHovered = false;
   }
 
   private text(): string {

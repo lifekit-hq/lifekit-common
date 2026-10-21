@@ -252,6 +252,25 @@ describe('TooltipDirective', () => {
       expect(bubble()).not.toBeNull();
     });
 
+    it('shows again after Escape dismissed it while the pointer was on the bubble', () => {
+      hover();
+      const pane = bubble()?.parentElement as HTMLElement;
+      pointer(trigger(), 'pointerleave');
+      pointer(pane, 'pointerenter');
+      pressEscape(pane);
+      expect(bubble()).toBeNull();
+
+      hover();
+      pointer(trigger(), 'pointerleave');
+      vi.advanceTimersByTime(HOVER_HIDE_DELAY_MS);
+      hover();
+      expect(bubble()).not.toBeNull();
+
+      pointer(trigger(), 'pointerleave');
+      vi.advanceTimersByTime(HOVER_HIDE_DELAY_MS);
+      expect(bubble()).toBeNull();
+    });
+
     it('ignores other keys and Escape with a modifier', () => {
       focusMonitor.focusVia(trigger(), 'keyboard');
       trigger().dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter', bubbles: true}));
