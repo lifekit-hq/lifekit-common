@@ -5,6 +5,7 @@ export type * from './types';
 export * from './components/account-avatar/account-avatar.component';
 export * from './components/alert/alert.component';
 export * from './components/alert-item/alert-item.component';
+export * from './components/allocation-bar/allocation-bar.component';
 export * from './components/app-layout/app-layout.component';
 export * from './components/appearance-settings/appearance-settings.component';
 export * from './components/area-chart/area-chart.component';
