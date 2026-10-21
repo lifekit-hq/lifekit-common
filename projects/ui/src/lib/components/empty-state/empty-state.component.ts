@@ -45,7 +45,7 @@ const MESSAGE_CLASSES: Record<EmptyStateVariant, string> = {
 
 const DESCRIPTION_CLASSES: Record<EmptyStateVariant, string> = {
   card: 'max-w-prose text-cmn-sm text-text-secondary text-pretty break-words',
-  bare: 'max-w-prose text-cmn-xs text-text-secondary text-pretty break-words',
+  bare: 'max-w-prose text-cmn-xs leading-relaxed text-text-secondary text-pretty break-words',
 };
 
 // Stacked and full width on a phone so each action is an easy thumb target; a centred row from sm.
