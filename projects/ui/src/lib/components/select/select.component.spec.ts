@@ -3,6 +3,7 @@ import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {type ComponentFixture, TestBed} from '@angular/core/testing';
 import {FormControl, ReactiveFormsModule} from '@angular/forms';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
+import {userEvent} from 'vitest/browser';
 
 import {
   SelectComponent,
@@ -277,6 +278,32 @@ describe('SelectComponent multiple mode', () => {
     expect(ui.chips()).toEqual(['Groceries']);
   });
 
+  it('closes when the chevron of the open field is clicked', async () => {
+    open();
+    expect(fixture.componentInstance.isOpen()).toBe(true);
+
+    await userEvent.click(ui.host.querySelector('cmn-icon[name="ChevronDown"]') as HTMLElement);
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.isOpen()).toBe(false);
+    expect(document.activeElement).toBe(ui.combobox());
+  });
+
+  it('keeps focus on the combobox for presses on the field, not on its buttons', () => {
+    fixture.componentInstance.writeValue(['rent']);
+    fixture.detectChanges();
+    const press = (el: HTMLElement): MouseEvent => {
+      const event = new MouseEvent('mousedown', {bubbles: true, cancelable: true});
+      el.dispatchEvent(event);
+      return event;
+    };
+
+    const chevron = ui.host.querySelector('cmn-icon[name="ChevronDown"]') as HTMLElement;
+    expect(press(chevron).defaultPrevented).toBe(true);
+    expect(press(ui.host.querySelector('cmn-chip') as HTMLElement).defaultPrevented).toBe(true);
+    expect(press(ui.button('Remove Rent') as HTMLButtonElement).defaultPrevented).toBe(false);
+  });
+
   it('names the chip × from removeLabelPrefix', () => {
     fixture.componentRef.setInput('removeLabelPrefix', 'Unselect');
     fixture.componentInstance.writeValue(['rent']);
@@ -510,9 +537,12 @@ describe('SelectComponent multiple mode', () => {
       ]);
       fixture.detectChanges();
 
+      const now = vi.spyOn(Date, 'now').mockReturnValue(1000);
       ui.key('a');
+      now.mockReturnValue(2000);
       ui.key('a');
       expect(ui.activeLabel()).toBe('Avocado');
+      now.mockRestore();
     });
 
     it('closes on Alt+ArrowUp and on Tab', () => {

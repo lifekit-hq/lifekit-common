@@ -122,6 +122,7 @@ const POSITIONS: ConnectedPosition[] = [
         #origin="cdkOverlayOrigin"
         #field
         [class]="fieldClasses()"
+        (mousedown)="onFieldMousedown($event)"
         (click)="onFieldClick($event)"
         (focusout)="onFocusOut($event)"
         cdkOverlayOrigin
@@ -600,6 +601,13 @@ export class SelectComponent implements ControlValueAccessor {
       this.activeIndex.set(this.initialIndex('first'));
     } else {
       this.open('first');
+    }
+  }
+
+  /** Pointer presses on the field's non-focusable parts keep focus on the combobox. */
+  protected onFieldMousedown(event: MouseEvent): void {
+    if (!(event.target as HTMLElement).closest('input, button')) {
+      event.preventDefault();
     }
   }
 
