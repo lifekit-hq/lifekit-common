@@ -486,6 +486,11 @@ for (const size of NOTICE_WIDTHS) {
       }
       // The newest (the error, shown last) sits at the bottom, nearest the thumb.
       expect(boxes[1].top).toBeGreaterThan(boxes[0].bottom);
+      // Undo and Dismiss draw small but press as touch targets.
+      const toastTargets = (await undersizedTargets(page, MIN_TARGET)).filter(target =>
+        /^button\[(Undo|Dismiss)\]/.test(target)
+      );
+      expect(toastTargets).toEqual([]);
       expect(
         await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)
       ).toBe(false);

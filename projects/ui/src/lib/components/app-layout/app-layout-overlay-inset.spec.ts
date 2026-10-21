@@ -40,6 +40,20 @@ describe('AppLayoutComponent overlay inset', () => {
     expect(root.getPropertyValue(CMN_OVERLAY_INSET_BOTTOM)).toBe('');
   });
 
+  it('should keep it published, with no frame unset, when the floating action changes', async () => {
+    const fixture = TestBed.createComponent(AppLayoutComponent);
+    fixture.componentRef.setInput('navItems', [
+      {label: 'Dashboard', icon: 'LayoutDashboard', route: '/dashboard'},
+    ]);
+    fixture.componentRef.setInput('phoneOverlay', true);
+    fixture.detectChanges();
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+    fixture.componentRef.setInput('floatingActionClearance', 56);
+    fixture.detectChanges();
+    expect(root.getPropertyValue(CMN_OVERLAY_INSET_BOTTOM)).toMatch(/^\d+px$/);
+  });
+
   it('should drop it when the layout is destroyed', async () => {
     const fixture = TestBed.createComponent(AppLayoutComponent);
     fixture.componentRef.setInput('phoneOverlay', true);

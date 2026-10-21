@@ -10,6 +10,9 @@ export interface ToastStackItem {
   readonly action?: string;
 }
 
+/** Hover only pauses where a pointer can hover; on touch a tap leaves a sticky `:hover` behind. */
+const CAN_HOVER = '(hover: hover)';
+
 /**
  * The column `ToastService` attaches to its overlay: oldest at the top, the newest at the bottom,
  * nearest the thumb (guardrails F3). Hovering or focusing it pauses every timed toast in it
@@ -79,6 +82,6 @@ export class ToastStackComponent {
   }
 
   private emitPaused(): void {
-    this.pausedChange.emit(this.hovered || this.focused);
+    this.pausedChange.emit((this.hovered && matchMedia(CAN_HOVER).matches) || this.focused);
   }
 }

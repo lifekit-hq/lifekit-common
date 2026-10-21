@@ -202,6 +202,23 @@ describe('ToastService', () => {
   });
 
   describe('pause (guardrails F2, WCAG 2.2.1)', () => {
+    /** Answers `(hover: hover)`: true for a mouse or trackpad, false on a touch screen. */
+    function canHover(hover: boolean): void {
+      const matchMedia = window.matchMedia.bind(window);
+      const answer: Pick<MediaQueryList, 'matches'> = {matches: hover};
+      vi.spyOn(window, 'matchMedia').mockImplementation(query =>
+        query === '(hover: hover)' ? (answer as MediaQueryList) : matchMedia(query)
+      );
+    }
+
+    beforeEach(() => {
+      canHover(true);
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
     it('pauses while hovered and resumes with the time that was left', () => {
       service.success('Saved', 3000);
       vi.advanceTimersByTime(1000);
@@ -214,6 +231,25 @@ describe('ToastService', () => {
       expect(toasts()).toHaveLength(1);
       vi.advanceTimersByTime(1);
       expect(toasts()).toHaveLength(0);
+    });
+
+    it('does not pause on a hover left behind by a tap on a touch screen', () => {
+      vi.restoreAllMocks();
+      canHover(false);
+      service.success('Saved', 3000);
+      stack().dispatchEvent(new MouseEvent('mouseenter'));
+      vi.advanceTimersByTime(3000);
+      expect(toasts()).toHaveLength(0);
+    });
+
+    it('still pauses on focus on a touch screen', () => {
+      vi.restoreAllMocks();
+      canHover(false);
+      service.info('Saved', 1000);
+      button('Dismiss')?.dispatchEvent(new FocusEvent('focusin', {bubbles: true}));
+      vi.advanceTimersByTime(5000);
+      expect(toasts()).toHaveLength(1);
+      button('Dismiss')?.click();
     });
 
     it('pauses while focus is inside the stack, and resumes once it leaves', () => {

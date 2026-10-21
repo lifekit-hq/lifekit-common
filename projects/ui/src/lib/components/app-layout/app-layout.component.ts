@@ -651,6 +651,7 @@ export class AppLayoutComponent {
         }
       };
       observeAll();
+      measure();
       // Children added or removed anywhere in the page change what overflows the frame, which no
       // resize reports; only the slots' own children are (un)observed.
       const changes = new MutationObserver(records => {
