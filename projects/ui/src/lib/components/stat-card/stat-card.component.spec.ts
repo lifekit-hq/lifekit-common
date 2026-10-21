@@ -1,3 +1,4 @@
+import {LOCALE_ID} from '@angular/core';
 import {type ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {StatCardComponent} from './stat-card.component';
@@ -26,6 +27,37 @@ describe('StatCardComponent', () => {
     const text: string = fixture.nativeElement.textContent;
     expect(text).toContain('Total Wealth');
     expect(text).toContain('$1,420,892.12');
+  });
+
+  it('should show a string value as given', () => {
+    fixture.componentRef.setInput('value', 'n/a');
+    fixture.componentRef.setInput('currency', 'EUR');
+    fixture.detectChanges();
+    expect(fixture.componentInstance.displayValue()).toBe('n/a');
+  });
+
+  it('should format a numeric amount with a currency as money', () => {
+    fixture.componentRef.setInput('value', 1420892.12);
+    fixture.componentRef.setInput('currency', 'EUR');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('€1,420,892.12');
+  });
+
+  it('should format a numeric value without a currency as a plain number', () => {
+    fixture.componentRef.setInput('value', 1234.5);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.displayValue()).toBe('1,234.5');
+  });
+
+  it('should show the empty dash for a missing or non-finite number', () => {
+    fixture.componentRef.setInput('value', null);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.displayValue()).toBe('—');
+
+    fixture.componentRef.setInput('value', Number.NaN);
+    fixture.componentRef.setInput('currency', 'EUR');
+    fixture.detectChanges();
+    expect(fixture.componentInstance.displayValue()).toBe('—');
   });
 
   it('should wrap a value wider than the card instead of hiding digits behind an ellipsis', () => {
@@ -111,5 +143,21 @@ describe('StatCardComponent', () => {
     fixture.detectChanges();
     const skeleton: HTMLElement | null = fixture.nativeElement.querySelector('cmn-skeleton > div');
     expect(skeleton?.style.height).toBe('1.875rem');
+  });
+});
+
+describe('StatCardComponent locale', () => {
+  it('should format a numeric value in the app LOCALE_ID', async () => {
+    await TestBed.configureTestingModule({
+      imports: [StatCardComponent],
+      providers: [{provide: LOCALE_ID, useValue: 'uk-UA'}],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(StatCardComponent);
+    fixture.componentRef.setInput('label', 'Balance');
+    fixture.componentRef.setInput('value', 18981.48);
+    fixture.componentRef.setInput('currency', 'UAH');
+    fixture.detectChanges();
+    const plain = fixture.componentInstance.displayValue().replace(/[\u00a0\u202f]/g, ' ');
+    expect(plain).toBe('18 981,48 ₴');
   });
 });
