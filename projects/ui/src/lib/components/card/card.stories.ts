@@ -67,7 +67,7 @@ export const WithNestedContent: Story = {
   render: () => ({
     template: `
       <cmn-card padding="md" [elevated]="true">
-        <h3 class="text-text-primary font-headline text-cmn-lg font-semibold mb-cmn-2">Account Balance</h3>
+        <h2 class="text-text-primary font-headline text-cmn-lg font-semibold mb-cmn-2">Account Balance</h2>
         <p class="text-text-secondary text-cmn-sm">Checking · ••••4242</p>
         <p class="text-accent-default font-headline text-cmn-2xl font-bold mt-cmn-2">$12,450.00</p>
       </cmn-card>

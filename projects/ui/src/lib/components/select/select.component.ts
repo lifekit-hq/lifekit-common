@@ -26,7 +26,7 @@ export interface SelectOption {
 const SIZE_CLASSES: Record<SelectSize, string> = {
   sm: 'py-1 text-cmn-md md:text-cmn-xs',
   md: 'py-1.5 text-cmn-md md:text-cmn-sm',
-  lg: 'py-2 text-cmn-base',
+  lg: 'py-2 text-cmn-md',
 };
 
 const ICON_SIZE: Record<SelectSize, 'sm' | 'md' | 'lg'> = {

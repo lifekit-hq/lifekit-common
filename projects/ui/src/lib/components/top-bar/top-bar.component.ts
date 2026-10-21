@@ -64,7 +64,7 @@ const KEY_HINT_CLASSES =
 /** The chevron's glyph sits on the content edge below md, as on iOS. */
 const BACK_BUTTON_CLASSES = `${CHROME_BUTTON_CLASSES} -ml-cmn-2 md:ml-0`;
 const INLINE_TITLE_CLASSES =
-  'min-w-0 truncate font-headline text-cmn-base font-semibold text-text-primary';
+  'min-w-0 truncate font-headline text-cmn-md font-semibold text-text-primary';
 /** The inline copy of a large title fades, never slides; Reduce Motion drops the fade. */
 const INLINE_LABEL_CLASSES = `${INLINE_TITLE_CLASSES} transition-opacity duration-cmn-short ease-cmn-standard motion-reduce:transition-none`;
 const HEADER_SOLID_CLASSES = 'bg-surface-card';

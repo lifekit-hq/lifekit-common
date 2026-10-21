@@ -108,6 +108,18 @@ describe('FormFieldComponent', () => {
     expect(error()).toBeNull();
   });
 
+  it('opens the leading of hint and error text, which wrap under a narrow field', () => {
+    host.hint = 'We never share it.';
+    fixture.detectChanges();
+    expect(hint()?.classList).toContain('leading-relaxed');
+
+    host.hint = '';
+    host.errorMessage = 'Something went wrong';
+    host.control.markAsTouched();
+    fixture.detectChanges();
+    expect(error()?.classList).toContain('leading-relaxed');
+  });
+
   it('keeps a static error hidden until the control is touched', () => {
     host.errorMessage = 'Server rejected this value';
     fixture.detectChanges();

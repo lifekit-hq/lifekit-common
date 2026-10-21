@@ -84,6 +84,18 @@ describe('ButtonComponent', () => {
     expect((fixture.nativeElement as HTMLElement).querySelector('.animate-spin')).not.toBeNull();
   });
 
+  it('keeps a loading button at full opacity so its label stays legible', () => {
+    fixture.componentRef.setInput('loading', true);
+    fixture.detectChanges();
+
+    expect(button()?.className).not.toContain('opacity-50');
+    expect(button()?.className).toContain('pointer-events-none');
+
+    fixture.componentRef.setInput('disabled', true);
+    fixture.detectChanges();
+    expect(button()?.className).toContain('opacity-50');
+  });
+
   it('drops aria-busy when not loading', () => {
     fixture.detectChanges();
     expect(button()?.getAttribute('aria-busy')).toBeNull();

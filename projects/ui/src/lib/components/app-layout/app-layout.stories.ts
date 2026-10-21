@@ -702,7 +702,7 @@ const AFTER_CONTAINER_BODY = `
   <cmn-page-container spacing="md">
     @for (row of rows; track row) {${STORY_ROW}}
   </cmn-page-container>
-  <p class="px-cmn-4 py-cmn-2 text-center text-cmn-xs text-text-secondary" data-last-content>
+  <p class="mx-cmn-4 py-cmn-2 text-center text-cmn-xs leading-relaxed text-text-secondary" data-last-content>
     Bare content after the page container clears the tab bar
   </p>
 `;

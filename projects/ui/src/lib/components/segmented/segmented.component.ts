@@ -45,6 +45,9 @@ const CELL_BASE_CLASSES =
   'focus-visible:ring-border-focus disabled:cursor-not-allowed disabled:text-text-disabled';
 const CELL_CHECKED_CLASSES =
   'bg-accent-subtle font-semibold text-accent-default ring-1 ring-inset ring-border-strong';
+/** Disabled text on the accent tint is gray on colour; a disabled choice sits on a neutral surface. */
+const CELL_CHECKED_DISABLED_CLASSES =
+  'bg-surface-card font-semibold ring-1 ring-inset ring-border-strong';
 const CELL_UNCHECKED_CLASSES =
   'text-text-secondary enabled:hover:bg-surface-hover enabled:hover:text-text-primary';
 
@@ -141,12 +144,13 @@ export class SegmentedComponent implements AfterViewChecked {
     const stop = this.tabStop(options);
     return options.map(option => {
       const checked = option.value === this.value();
+      const enabled = this.isEnabled(option);
       return {
         option,
         checked,
-        enabled: this.isEnabled(option),
+        enabled,
         tabStop: option === stop,
-        classes: `${CELL_BASE_CLASSES} ${checked ? CELL_CHECKED_CLASSES : CELL_UNCHECKED_CLASSES}`,
+        classes: `${CELL_BASE_CLASSES} ${this.stateClasses(checked, enabled)}`,
       };
     });
   });
@@ -187,6 +191,13 @@ export class SegmentedComponent implements AfterViewChecked {
 
   private isEnabled(option: SegmentedOption): boolean {
     return !this.disabled() && !option.disabled;
+  }
+
+  private stateClasses(checked: boolean, enabled: boolean): string {
+    if (!checked) {
+      return CELL_UNCHECKED_CLASSES;
+    }
+    return enabled ? CELL_CHECKED_CLASSES : CELL_CHECKED_DISABLED_CLASSES;
   }
 
   /** The one cell Tab can land on: the chosen one, else the first enabled one. */

@@ -52,7 +52,7 @@ const INDEX_OFFSET = 1;
     @if (current(); as s) {
       <h3
         #heading
-        class="font-headline text-base font-semibold text-text-primary mb-cmn-3 focus:outline-none"
+        class="font-headline text-cmn-sm font-semibold text-text-primary mb-cmn-3 focus:outline-none"
         tabindex="-1"
       >
         {{ s.label() }}

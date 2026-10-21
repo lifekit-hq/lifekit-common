@@ -68,7 +68,7 @@ export const Bare: Story = {
     props: args,
     template: `
       <section class="rounded-cmn-lg border border-border-default bg-surface-card p-cmn-4">
-        <h3 class="mb-cmn-2 font-headline text-cmn-sm font-semibold text-text-primary">Brief</h3>
+        <h2 class="mb-cmn-2 font-headline text-cmn-sm font-semibold text-text-primary">Brief</h2>
         <pre class="cmn-code-block cmn-code-block--bare">{{ text }}</pre>
       </section>
     `,

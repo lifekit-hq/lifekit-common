@@ -136,7 +136,7 @@ export class LkInfiniteList extends LitElement {
 
     .bar {
       height: 0.75rem;
-      border-radius: var(--radius-sm, 0.25rem);
+      border-radius: var(--radius-sm, 3px);
     }
 
     .bar.title {
@@ -221,7 +221,7 @@ export class LkInfiniteList extends LitElement {
       min-height: var(--size-touch, 44px);
       padding: 0 var(--space-4, 1rem);
       border: 1px solid var(--color-border-default, #d9e0e3);
-      border-radius: var(--radius-md, 0.5rem);
+      border-radius: var(--radius-md, 6px);
       background: var(--color-surface-card, #ffffff);
       color: var(--color-accent-default, #175a6d);
       font: inherit;

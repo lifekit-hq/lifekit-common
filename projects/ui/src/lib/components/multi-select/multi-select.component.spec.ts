@@ -47,6 +47,10 @@ describe('MultiSelectComponent', () => {
   it('shows the placeholder when nothing is selected', () => {
     expect(trigger().textContent).toContain('All categories');
     expect(fixture.componentInstance.hasSelection()).toBe(false);
+    // The Placeholder Rule: placeholder text is text-placeholder (4.5:1), never text-disabled.
+    const summary = trigger().querySelector('span.truncate');
+    expect(summary?.classList).toContain('text-text-placeholder');
+    expect(summary?.classList).not.toContain('text-text-disabled');
   });
 
   it('summarises one selection by label and several by count', () => {

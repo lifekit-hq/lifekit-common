@@ -18,16 +18,59 @@ const TINT_ALPHA = 0.15;
 
 // ─── Type ramp ───────────────────────────────────────────────────────────────
 
-/** Class names of the Tailwind preset's `cmn-*` size scale; sizes and line heights are read from the DOM. */
-const RAMP: readonly {name: string; cls: string}[] = [
-  {name: 'cmn-4xl', cls: 'text-cmn-4xl'},
-  {name: 'cmn-3xl', cls: 'text-cmn-3xl'},
-  {name: 'cmn-2xl', cls: 'text-cmn-2xl'},
-  {name: 'cmn-xl', cls: 'text-cmn-xl'},
-  {name: 'cmn-lg', cls: 'text-cmn-lg'},
-  {name: 'cmn-md', cls: 'text-cmn-md'},
-  {name: 'cmn-sm', cls: 'text-cmn-sm'},
-  {name: 'cmn-xs', cls: 'text-cmn-xs'},
+/**
+ * Class names of the Tailwind preset's `cmn-*` size scale; sizes and line heights are read from the
+ * DOM. Each step sets its own Latin and Cyrillic line, as a real ledger would.
+ */
+const RAMP: readonly {name: string; cls: string; latin: string; cyrillic: string}[] = [
+  {
+    name: 'cmn-4xl',
+    cls: 'text-cmn-4xl',
+    latin: 'Net worth 1 234,56',
+    cyrillic: 'Чистий капітал, Київ',
+  },
+  {
+    name: 'cmn-3xl',
+    cls: 'text-cmn-3xl',
+    latin: 'Groceries and household, 1 234,56',
+    cyrillic: 'Продукти та господарські товари, Київ',
+  },
+  {
+    name: 'cmn-2xl',
+    cls: 'text-cmn-2xl',
+    latin: 'Rent for October, 18 500,00',
+    cyrillic: 'Оренда квартири за жовтень',
+  },
+  {
+    name: 'cmn-xl',
+    cls: 'text-cmn-xl',
+    latin: 'Salary from the studio, 62 500,00',
+    cyrillic: 'Зарплата від студії, Львів',
+  },
+  {
+    name: 'cmn-lg',
+    cls: 'text-cmn-lg',
+    latin: 'Coffee and a croissant, 145,00',
+    cyrillic: 'Кава та круасан біля вокзалу',
+  },
+  {
+    name: 'cmn-md',
+    cls: 'text-cmn-md',
+    latin: 'Train tickets to Odesa and back, 1 080,00',
+    cyrillic: 'Квитки на потяг до Одеси і назад',
+  },
+  {
+    name: 'cmn-sm',
+    cls: 'text-cmn-sm',
+    latin: 'Refund from the hardware shop, 0,50',
+    cyrillic: 'Повернення коштів від крамниці',
+  },
+  {
+    name: 'cmn-xs',
+    cls: 'text-cmn-xs',
+    latin: 'Card ending 4417, posted yesterday',
+    cyrillic: 'Картка 4417, проведено вчора',
+  },
 ];
 
 const WEIGHTS: readonly {name: string; cls: string}[] = [
@@ -37,18 +80,15 @@ const WEIGHTS: readonly {name: string; cls: string}[] = [
   {name: 'Bold 700', cls: 'font-bold'},
 ];
 
-const SPECIMEN_LATIN = 'Groceries and household, 1 234,56';
-const SPECIMEN_CYRILLIC = 'Продукти та господарські товари — Київ';
-
 export const TypeRamp: Story = {
   name: 'Type ramp',
   render: () => ({
-    props: {ramp: RAMP, weights: WEIGHTS, latin: SPECIMEN_LATIN, cyrillic: SPECIMEN_CYRILLIC},
+    props: {ramp: RAMP, weights: WEIGHTS},
     template: `
       <section class="flex flex-col gap-cmn-8 text-text-primary">
         <header class="flex flex-col gap-cmn-1">
           <h1 class="text-cmn-2xl font-semibold">Type ramp</h1>
-          <p class="text-cmn-sm text-text-secondary">
+          <p class="max-w-md text-cmn-sm text-text-secondary">
             One family, IBM Plex Sans, carries every role including money. Sizes and line heights below are read from the rendered elements,
             so they cannot drift from the Tailwind preset. 12px (<code>cmn-xs</code>) is the floor: nothing smaller ships.
           </p>
@@ -62,8 +102,8 @@ export const TypeRamp: Story = {
                 <span data-ramp-metrics>…</span>
               </div>
               <div class="flex flex-col gap-cmn-1">
-                <span [class]="step.cls" data-ramp-sample>{{ latin }}</span>
-                <span [class]="step.cls" lang="uk">{{ cyrillic }}</span>
+                <span [class]="step.cls" data-ramp-sample>{{ step.latin }}</span>
+                <span [class]="step.cls" lang="uk">{{ step.cyrillic }}</span>
               </div>
             </div>
           }
@@ -75,7 +115,7 @@ export const TypeRamp: Story = {
             @for (w of weights; track w.name) {
               <div class="rounded-cmn-lg border border-border-default bg-surface-card p-cmn-4">
                 <div class="text-cmn-xs text-text-secondary">{{ w.name }}</div>
-                <div [class]="'text-cmn-xl ' + w.cls">Aa Бб Ґґ — 0123456789</div>
+                <div [class]="'text-cmn-xl ' + w.cls">Aa Бб Ґґ 0123456789</div>
               </div>
             }
           </div>
@@ -172,6 +212,8 @@ interface Row {
   readonly fgHex: string;
   readonly use: string;
   readonly min: number;
+  /** Text-grade pairings are shown as a glyph; non-text ones (outlines, rings) as a drawn edge. */
+  readonly text: boolean;
   readonly cells: Cell[];
 }
 
@@ -197,7 +239,14 @@ function pairingRows(theme: ThemeName): Row[] {
         bgHex: toHex(bg),
       };
     });
-    return {fg: short(p.fg), fgHex: toHex(fg), use: p.use, min: p.min, cells};
+    return {
+      fg: short(p.fg),
+      fgHex: toHex(fg),
+      use: p.use,
+      min: p.min,
+      text: p.min >= TEXT_MIN,
+      cells,
+    };
   });
 }
 
@@ -223,14 +272,14 @@ export const ColourTokens: Story = {
       <section class="flex flex-col gap-cmn-8 text-text-primary">
         <header class="flex flex-col gap-cmn-1">
           <h1 class="text-cmn-2xl font-semibold">Colour tokens</h1>
-          <p class="text-cmn-sm text-text-secondary">
+          <p class="max-w-md text-cmn-sm text-text-secondary">
             Token names are discovered from the loaded <code>theme.css</code>; hex values and contrast ratios are computed live from the
             resolved colours, in both themes regardless of the toolbar. Required: 4.5:1 for text, 3:1 for UI components.
           </p>
         </header>
 
         @for (t of themes; track t.theme) {
-          <div [attr.data-theme]="t.theme" class="flex flex-col gap-cmn-6 rounded-cmn-lg border border-border-default bg-surface-bg p-cmn-6 text-text-primary">
+          <div [attr.data-theme]="t.theme" class="flex flex-col gap-cmn-6 rounded-cmn-lg bg-surface-bg p-cmn-6 text-text-primary">
             <h2 class="text-cmn-xl font-semibold capitalize">{{ t.theme }}</h2>
 
             <div class="grid gap-cmn-2" style="grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr))">
@@ -270,10 +319,14 @@ export const ColourTokens: Story = {
                         <div class="flex flex-wrap gap-cmn-2">
                           @for (c of r.cells; track c.bg) {
                             <span
-                              class="inline-flex items-center gap-cmn-2 rounded-cmn-md border border-border-default px-cmn-2 py-cmn-1 text-cmn-xs"
+                              class="inline-flex items-center gap-cmn-2 py-cmn-1 pr-cmn-2 text-cmn-xs"
                               [attr.data-pass]="c.pass"
                             >
-                              <span class="flex size-6 items-center justify-center rounded-cmn-sm font-semibold" [style.background]="c.bgHex" [style.color]="r.fgHex">Aa</span>
+                              @if (r.text) {
+                                <span class="flex size-6 items-center justify-center rounded-cmn-sm font-semibold" [style.background]="c.bgHex" [style.color]="r.fgHex">Aa</span>
+                              } @else {
+                                <span class="size-6 rounded-cmn-sm border-2" [style.background]="c.bgHex" [style.border-color]="r.fgHex" aria-hidden="true"></span>
+                              }
                               <span class="tabular-nums">{{ c.ratio }}:1</span>
                               <span class="font-semibold" [class.text-status-success]="c.pass" [class.text-status-error]="!c.pass">{{ c.grade }}</span>
                               <span class="text-text-secondary">on {{ c.bg }}</span>
@@ -365,7 +418,7 @@ export const MoneySpecimen: Story = {
       <section class="flex flex-col gap-cmn-8 text-text-primary">
         <header class="flex flex-col gap-cmn-1">
           <h1 class="text-cmn-2xl font-semibold">Money specimen</h1>
-          <p class="text-cmn-sm text-text-secondary">
+          <p class="max-w-md text-cmn-sm text-text-secondary">
             Money is set in the text face with <code>tabular-nums</code>, right-aligned, so columns of amounts line up in any currency.
             Sign is carried by the glyph (+ / −) as well as colour; amounts are never mono, never colour-only, and each currency keeps its own
             locale formatting. Descriptions are free-form Cyrillic and Latin.

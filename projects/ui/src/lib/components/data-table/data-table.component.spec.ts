@@ -3,6 +3,7 @@ import {ChangeDetectionStrategy, Component, input} from '@angular/core';
 import {type ComponentFixture, TestBed} from '@angular/core/testing';
 import {BehaviorSubject} from 'rxjs';
 
+import {CardComponent} from '../card/card.component';
 import {DataTableComponent} from './data-table.component';
 import {CmnCellDirective, CmnHeaderCellDirective} from './data-table-cell.directive';
 import {CmnColumnComponent} from './data-table-column.component';
@@ -12,6 +13,11 @@ interface Row {
   name: string;
   amount: number;
 }
+
+const ROWS: Row[] = [
+  {name: 'Groceries', amount: 54},
+  {name: 'Salary', amount: 5000},
+];
 
 @Component({
   selector: 'cmn-test-host',
@@ -49,10 +55,21 @@ class TestHostComponent {
 })
 class LoadingHostComponent {}
 
-const ROWS: Row[] = [
-  {name: 'Groceries', amount: 54},
-  {name: 'Salary', amount: 5000},
-];
+@Component({
+  selector: 'cmn-test-card-host',
+  imports: [CardComponent, CmnColumnComponent, DataTableComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <cmn-card [fill]="true" padding="none">
+      <cmn-data-table [rows]="rows">
+        <cmn-column key="name" header="Name" />
+      </cmn-data-table>
+    </cmn-card>
+  `,
+})
+class CardHostComponent {
+  protected readonly rows = ROWS;
+}
 
 describe('DataTableComponent', () => {
   let fixture: ComponentFixture<TestHostComponent>;
@@ -133,6 +150,21 @@ describe('DataTableComponent', () => {
       '[data-testid="skeleton-row"] cmn-skeleton'
     );
     expect(Array.from(bars).every(bar => bar.style.width !== '')).toBe(true);
+  });
+
+  it('draws its own frame on its own', () => {
+    const frame: HTMLElement = fixture.nativeElement.querySelector('table').parentElement;
+    expect(frame.classList).toContain('border');
+    expect(frame.classList).toContain('bg-surface-card');
+  });
+
+  it('leaves the frame to an enclosing card, so a card never holds a second card', () => {
+    const cardFixture = TestBed.createComponent(CardHostComponent);
+    cardFixture.detectChanges();
+    const frame: HTMLElement = cardFixture.nativeElement.querySelector('table').parentElement;
+    expect(frame.classList).toContain('overflow-auto');
+    expect(frame.classList).not.toContain('border');
+    expect(frame.classList).not.toContain('bg-surface-card');
   });
 
   it('pins header cells with the sticky classes', () => {
