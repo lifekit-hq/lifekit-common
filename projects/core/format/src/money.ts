@@ -53,10 +53,12 @@ export function isCurrencySymbolAmbiguous(
   locale: string = DEFAULT_FORMAT_LOCALE
 ): boolean {
   const code = currency.toUpperCase();
+  const others = screenCurrencies.map(other => other.toUpperCase()).filter(other => other !== code);
+  if (others.length === 0) {
+    return false;
+  }
   const symbol = narrowSymbol(code, locale);
-  return screenCurrencies.some(
-    other => other.toUpperCase() !== code && narrowSymbol(other.toUpperCase(), locale) === symbol
-  );
+  return others.some(other => narrowSymbol(other, locale) === symbol);
 }
 
 function sharedOptions(options: NumberDisplayOptions): Intl.NumberFormatOptions {

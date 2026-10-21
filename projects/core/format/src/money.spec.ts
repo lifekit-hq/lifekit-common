@@ -56,6 +56,17 @@ describe('formatMoney', () => {
       expect(isCurrencySymbolAmbiguous('USD', ['USD', 'EUR'], 'en-IE')).toBe(false);
       expect(isCurrencySymbolAmbiguous('USD', ['USD'], 'en-IE')).toBe(false);
     });
+
+    it('builds no formatter to check ambiguity when no other currency is on the screen', () => {
+      const numberFormat = vi.spyOn(Intl, 'NumberFormat');
+      try {
+        expect(isCurrencySymbolAmbiguous('USD', [], 'en-IE')).toBe(false);
+        expect(isCurrencySymbolAmbiguous('USD', ['usd', 'USD'], 'en-IE')).toBe(false);
+        expect(numberFormat).not.toHaveBeenCalled();
+      } finally {
+        numberFormat.mockRestore();
+      }
+    });
   });
 
   it('formats compact amounts', () => {
