@@ -15,6 +15,16 @@ export const Default: Story = {
   args: {label: 'Total Wealth', value: '$1,420,892.12', delta: null},
 };
 
+/** A numeric amount plus a currency code is formatted in the app's locale by the library formatter. */
+export const NumericMoney: Story = {
+  args: {label: 'Total Wealth', value: 1420892.12, currency: 'EUR', delta: null},
+};
+
+/** A numeric value with no currency renders as a plain, locale-grouped number. */
+export const NumericCount: Story = {
+  args: {label: 'Accounts', value: 12480, delta: null},
+};
+
 export const WithPositiveDelta: Story = {
   args: {
     label: 'Banks',
