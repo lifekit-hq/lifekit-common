@@ -63,7 +63,7 @@ const SIZE_CLASSES: Record<SearchInputSize, string> = {
       <button
         [attr.aria-label]="clearLabel()"
         (click)="clear()"
-        class="absolute right-cmn-2 top-1/2 -translate-y-1/2 rounded-cmn-sm text-text-secondary hover:text-text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-border-focus"
+        class="absolute right-cmn-1 top-1/2 flex size-6 -translate-y-1/2 items-center justify-center rounded-cmn-sm text-text-secondary max-md:-right-1.5 max-md:size-cmn-touch hover:text-text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-border-focus"
         type="button"
       >
         <cmn-icon name="X" size="sm" />

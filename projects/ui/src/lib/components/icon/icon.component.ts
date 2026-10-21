@@ -37,6 +37,7 @@ const SIZE_PX: Record<IconSize, number> = {
         [style.color]="color()"
         [attr.aria-hidden]="ariaLabel() ? null : 'true'"
         [attr.aria-label]="ariaLabel() || null"
+        [attr.role]="ariaLabel() ? 'img' : null"
         class="cmn-icon-custom"
       ></span>
     } @else if (isLucide()) {
@@ -46,6 +47,7 @@ const SIZE_PX: Record<IconSize, number> = {
         [color]="color()"
         [attr.aria-hidden]="ariaLabel() ? null : 'true'"
         [attr.aria-label]="ariaLabel() || null"
+        [attr.role]="ariaLabel() ? 'img' : null"
       />
     } @else {
       <span
@@ -54,6 +56,7 @@ const SIZE_PX: Record<IconSize, number> = {
         [style.height.px]="resolvedSize()"
         [attr.aria-hidden]="ariaLabel() ? null : 'true'"
         [attr.aria-label]="ariaLabel() || null"
+        [attr.role]="ariaLabel() ? 'img' : null"
       ></span>
     }
   `,

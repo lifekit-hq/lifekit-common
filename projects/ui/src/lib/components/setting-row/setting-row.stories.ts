@@ -50,7 +50,7 @@ export const SelectRow: Story = {
     template: `
       <div class="max-w-xl">
         <cmn-setting-row [label]="label" [description]="description">
-          <cmn-select [options]="options" class="block w-40" />
+          <cmn-select [options]="options" [aria-label]="label" class="block w-40" />
         </cmn-setting-row>
       </div>
     `,
@@ -117,7 +117,7 @@ export const Stack: Story = {
           <cmn-toggle [checked]="false" label="Low balance warnings" />
         </cmn-setting-row>
         <cmn-setting-row label="Language">
-          <cmn-select [options]="[{label: 'English', value: 'en'}, {label: 'Ukrainian', value: 'uk'}]" class="block w-40" />
+          <cmn-select [options]="[{label: 'English', value: 'en'}, {label: 'Ukrainian', value: 'uk'}]" aria-label="Language" class="block w-40" />
         </cmn-setting-row>
       </div>
     `,

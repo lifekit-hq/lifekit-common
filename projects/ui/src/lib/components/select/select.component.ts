@@ -44,6 +44,7 @@ const ICON_SIZE: Record<SelectSize, 'sm' | 'md' | 'lg'> = {
   selector: 'cmn-select',
   imports: [IconComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {'[attr.aria-label]': 'null'},
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -58,6 +59,7 @@ const ICON_SIZE: Record<SelectSize, 'sm' | 'md' | 'lg'> = {
         [class]="selectClasses()"
         [disabled]="disabled()"
         [multiple]="mode() === 'multiple'"
+        [attr.aria-label]="ariaLabel() || placeholder() || null"
         [attr.aria-invalid]="hasError() ? 'true' : null"
         (change)="onNativeChange($event)"
         (blur)="onBlur()"
@@ -96,6 +98,8 @@ export class SelectComponent implements ControlValueAccessor {
   // Kept for API compatibility; native selects have built-in keyboard type-ahead.
   public readonly showSearch = input<boolean>(false);
   public readonly hasError = input<boolean>(false);
+  /** Names the select when there is no `cmn-form-field` label; defaults to the placeholder. */
+  public readonly ariaLabel = input<string | null>(null, {alias: 'aria-label'});
 
   public readonly iconSize = computed(() => ICON_SIZE[this.size()]);
   public readonly selectClasses = computed(() =>

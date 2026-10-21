@@ -205,4 +205,11 @@ describe('TextareaComponent', () => {
       );
     });
   });
+
+  it('names the native textarea from aria-label', () => {
+    fixture.componentRef.setInput('aria-label', 'Notes');
+    fixture.detectChanges();
+    expect(textarea().getAttribute('aria-label')).toBe('Notes');
+    expect((fixture.nativeElement as HTMLElement).hasAttribute('aria-label')).toBe(false);
+  });
 });

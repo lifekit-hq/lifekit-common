@@ -51,11 +51,11 @@ export const WithAllSlots: Story = {
         </div>
         <div meta class="min-w-[100px] text-center">
           <div class="text-cmn-xs text-text-secondary">Feb 1, 2026</div>
-          <div class="text-cmn-xs text-text-disabled">in 14d</div>
+          <div class="text-cmn-xs text-text-secondary">in 14d</div>
         </div>
         <div amount class="min-w-[72px] text-right">
           <div class="text-cmn-sm font-semibold tabular-nums text-text-primary">$15.99</div>
-          <div class="text-cmn-xs text-text-disabled">/ mo</div>
+          <div class="text-cmn-xs text-text-secondary">/ mo</div>
         </div>
         <div actions class="flex shrink-0 gap-cmn-1">
           <button class="px-cmn-2 py-1 text-cmn-xs rounded border border-border-default text-text-secondary hover:text-text-primary">Dismiss</button>
@@ -75,7 +75,7 @@ export const DimmedWithActions: Story = {
         </div>
         <div amount class="min-w-[72px] text-right">
           <div class="text-cmn-sm font-semibold tabular-nums text-text-primary">$9.99</div>
-          <div class="text-cmn-xs text-text-disabled">/ mo</div>
+          <div class="text-cmn-xs text-text-secondary">/ mo</div>
         </div>
         <div actions class="flex shrink-0 gap-cmn-1">
           <button class="px-cmn-2 py-1 text-cmn-xs rounded border border-border-default text-text-secondary hover:text-text-primary">Restore</button>
@@ -100,7 +100,7 @@ export const MultipleRowsInCard: Story = {
           </div>
           <div amount class="min-w-[72px] text-right">
             <div class="text-cmn-sm font-semibold tabular-nums text-text-primary">$15.99</div>
-            <div class="text-cmn-xs text-text-disabled">/ mo</div>
+            <div class="text-cmn-xs text-text-secondary">/ mo</div>
           </div>
           <div actions class="flex shrink-0 gap-cmn-1">
             <button class="px-cmn-2 py-1 text-cmn-xs rounded border border-border-default text-text-secondary">Dismiss</button>
@@ -113,11 +113,11 @@ export const MultipleRowsInCard: Story = {
           </div>
           <div meta class="min-w-[100px] text-center">
             <div class="text-cmn-xs text-text-secondary">Feb 5, 2026</div>
-            <div class="text-cmn-xs text-text-disabled">in 15d</div>
+            <div class="text-cmn-xs text-text-secondary">in 15d</div>
           </div>
           <div amount class="min-w-[72px] text-right">
             <div class="text-cmn-sm font-semibold tabular-nums text-text-primary">$9.99</div>
-            <div class="text-cmn-xs text-text-disabled">/ mo</div>
+            <div class="text-cmn-xs text-text-secondary">/ mo</div>
           </div>
           <div actions class="flex shrink-0 gap-cmn-1">
             <button class="px-cmn-2 py-1 text-cmn-xs rounded border border-border-default text-text-secondary">Dismiss</button>
@@ -130,7 +130,7 @@ export const MultipleRowsInCard: Story = {
           </div>
           <div amount class="min-w-[72px] text-right">
             <div class="text-cmn-sm font-semibold tabular-nums text-text-primary">$54.99</div>
-            <div class="text-cmn-xs text-text-disabled">/ mo</div>
+            <div class="text-cmn-xs text-text-secondary">/ mo</div>
           </div>
           <div actions class="flex shrink-0 gap-cmn-1">
             <button class="px-cmn-2 py-1 text-cmn-xs rounded border border-border-default text-text-secondary">Restore</button>

@@ -13,36 +13,38 @@ import {
   imports: [RouterLink],
   template: `
     <div class="flex max-w-prose flex-col gap-cmn-4 text-cmn-sm text-text-primary">
-      <p>
+      <p class="flex flex-wrap items-baseline gap-x-cmn-2">
         <a class="cmn-link" href="#project">Accent</a>
-        — the default: an in-app or outside link.
+        <span>— the default: an in-app or outside link.</span>
       </p>
-      <p>
+      <p class="flex flex-wrap items-baseline gap-x-cmn-2">
         <a class="cmn-link" routerLink="/goals/42">Router link</a>
-        — the class sits on a real anchor, so
-        <code class="font-mono text-cmn-xs">routerLink</code> still works.
+        <span
+          >— the class sits on a real anchor, so
+          <code class="font-mono text-cmn-xs">routerLink</code> still works.</span
+        >
       </p>
-      <p>
+      <p class="flex flex-wrap items-baseline gap-x-cmn-2">
         <a class="cmn-link" href="https://example.com" target="_blank" rel="noopener noreferrer"
           >External link</a
         >
-        — opens in a new tab.
+        <span>— opens in a new tab.</span>
       </p>
-      <p>
+      <p class="flex flex-wrap items-baseline gap-x-cmn-2">
         <a class="cmn-link cmn-link--primary font-semibold" href="#row">Primary text</a>
-        — a title that links, such as a row or card heading.
+        <span>— a title that links, such as a row or card heading.</span>
       </p>
-      <p class="text-text-secondary">
+      <p class="flex flex-wrap items-baseline gap-x-cmn-2 text-text-secondary">
         <a class="cmn-link cmn-link--secondary" href="#sub">Secondary text</a>
-        — a quiet link inside secondary text.
+        <span>— a quiet link inside secondary text.</span>
       </p>
-      <p class="text-text-secondary">
+      <p class="flex flex-wrap items-baseline gap-x-cmn-2 text-text-secondary">
         <a class="cmn-link cmn-link--inherit" href="#inherit">Inherited colour</a>
-        — takes the colour of the text around it.
+        <span>— takes the colour of the text around it.</span>
       </p>
-      <p>
+      <p class="flex flex-wrap items-baseline gap-x-cmn-2">
         <a class="cmn-link cmn-link--underlined" href="#prose">Underlined</a>
-        — for a link inside a sentence, so colour is not the only cue.
+        <span>— for a link inside a sentence, so colour is not the only cue.</span>
       </p>
     </div>
   `,

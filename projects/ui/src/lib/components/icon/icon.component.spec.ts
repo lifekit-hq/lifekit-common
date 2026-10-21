@@ -97,4 +97,15 @@ describe('IconComponent', () => {
     expect(custom.style.height).toBe('24px');
     expect(custom.style.color).toBe('rgb(1, 2, 3)');
   });
+
+  it('exposes a labelled icon as an image and hides an unlabelled one', () => {
+    fixture.componentRef.setInput('name', 'Bell');
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('[role="img"]')).toBeNull();
+
+    fixture.componentRef.setInput('ariaLabel', 'Notifications');
+    fixture.detectChanges();
+    expect(el.querySelector('[role="img"][aria-label="Notifications"]')).not.toBeNull();
+  });
 });

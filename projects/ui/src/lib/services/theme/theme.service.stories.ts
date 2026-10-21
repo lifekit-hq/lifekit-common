@@ -90,7 +90,7 @@ const CHART_SEGMENTS = [
           <span class="text-gain">+4.2%</span>
           <span class="text-loss">-1.8%</span>
         </div>
-        <div class="flex gap-cmn-1" aria-label="Chart series 1 to 8">
+        <div class="flex gap-cmn-1" role="img" aria-label="Chart series 1 to 8">
           @for (n of series; track n) {
             <span
               [style.background]="'var(--color-chart-series-' + n + ')'"

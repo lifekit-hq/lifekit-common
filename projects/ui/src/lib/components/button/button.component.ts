@@ -39,11 +39,13 @@ const DISABLED_CLASSES = 'opacity-50 pointer-events-none cursor-not-allowed';
 @Component({
   selector: 'cmn-button',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {'[attr.aria-label]': 'null'},
   imports: [IconComponent],
   template: `
     <button
       [type]="type()"
       [disabled]="disabled() || loading()"
+      [attr.aria-label]="ariaLabel()"
       [attr.aria-busy]="loading() ? true : null"
       [attr.aria-disabled]="disabled() ? true : null"
       [class]="classes()"
@@ -71,6 +73,8 @@ export class ButtonComponent {
   public readonly loading = input<boolean>(false);
   public readonly icon = input<Nullable<LucideIconName>>(null);
   public readonly iconPosition = input<ButtonIconPosition>('prefix');
+  /** Names an icon-only button; moves to the inner `<button>` so the host element carries no label. */
+  public readonly ariaLabel = input<Nullable<string>>(null, {alias: 'aria-label'});
 
   public readonly clicked = output<MouseEvent>();
 

@@ -322,4 +322,10 @@ describe('CmnDrawerContainerComponent as a bottom sheet', () => {
     pointer('pointermove', DISMISS_DRAG_PX);
     expect(fixture.componentInstance.dragging()).toBe(false);
   });
+
+  it('makes the scrolling body keyboard focusable', () => {
+    fixture.detectChanges();
+    const body = (fixture.nativeElement as HTMLElement).querySelector('.overflow-y-auto');
+    expect(body?.getAttribute('tabindex')).toBe('0');
+  });
 });

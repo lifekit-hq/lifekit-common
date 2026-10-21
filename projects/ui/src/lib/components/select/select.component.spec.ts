@@ -113,4 +113,15 @@ describe('SelectComponent', () => {
 
     expect(internals().disabled()).toBe(true);
   });
+
+  it('names the native select from aria-label, falling back to the placeholder', () => {
+    fixture.componentRef.setInput('options', [{label: 'One', value: 1}]);
+    fixture.componentRef.setInput('placeholder', 'Pick one');
+    fixture.detectChanges();
+    expect(nativeSelect()?.getAttribute('aria-label')).toBe('Pick one');
+
+    fixture.componentRef.setInput('aria-label', 'Currency');
+    fixture.detectChanges();
+    expect(nativeSelect()?.getAttribute('aria-label')).toBe('Currency');
+  });
 });

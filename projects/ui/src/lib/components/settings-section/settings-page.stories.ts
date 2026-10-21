@@ -152,6 +152,7 @@ const CURRENCIES: SelectOption[] = [
             [ngModel]="currency()"
             [options]="currencies"
             (ngModelChange)="apply('Base currency', $event); currency.set($event)"
+            aria-label="Base currency"
             class="block w-44"
           />
         </cmn-setting-row>

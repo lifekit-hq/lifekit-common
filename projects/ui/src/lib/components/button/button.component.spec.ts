@@ -108,4 +108,16 @@ describe('ButtonComponent', () => {
     expect(icons).toHaveLength(1);
     expect((fixture.nativeElement as HTMLElement).querySelector('.animate-spin')).not.toBeNull();
   });
+
+  it('moves a consumer aria-label from the host onto the native button', () => {
+    fixture.componentRef.setInput('aria-label', 'Send message');
+    fixture.detectChanges();
+    expect(button()?.getAttribute('aria-label')).toBe('Send message');
+    expect((fixture.nativeElement as HTMLElement).hasAttribute('aria-label')).toBe(false);
+  });
+
+  it('leaves the native button unnamed when no aria-label is given', () => {
+    fixture.detectChanges();
+    expect(button()?.hasAttribute('aria-label')).toBe(false);
+  });
 });

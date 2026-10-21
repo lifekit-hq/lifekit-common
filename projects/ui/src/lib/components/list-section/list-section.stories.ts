@@ -61,7 +61,7 @@ export const StickyOnPhone: Story = {
   render: () => ({
     props: {days: DAYS, rows: ROWS},
     template: `
-      <div class="h-96 overflow-y-auto bg-surface-bg px-cmn-4">
+      <div class="h-96 overflow-y-auto bg-surface-bg px-cmn-4" tabindex="0" role="region" aria-label="Transactions">
         @for (day of days; track day) {
           <cmn-list-section class="mb-cmn-5" [heading]="day">
             <span cmnListSectionAside class="normal-case tabular-nums">-€44.50</span>

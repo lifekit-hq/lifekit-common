@@ -41,13 +41,14 @@ export const Default: Story = {
 /** `maxlength` caps the text and counts it under the field. */
 export const WithCounter: Story = {
   render: () => ({
-    template: `<cmn-textarea [maxlength]="${REPORT_LIMIT}" [ngModel]="'The balance never refreshes.'" />`,
+    template: `<cmn-textarea aria-label="Report" [maxlength]="${REPORT_LIMIT}" [ngModel]="'The balance never refreshes.'" />`,
   }),
 };
 
 export const WithValue: Story = {
   render: () => ({
-    template: '<cmn-textarea [ngModel]="\'First line\\nSecond line\\nThird line\'" />',
+    template:
+      '<cmn-textarea aria-label="Notes" [ngModel]="\'First line\\nSecond line\\nThird line\'" />',
   }),
 };
 
@@ -59,7 +60,8 @@ export const Disabled: Story = {
 
 export const Readonly: Story = {
   render: () => ({
-    template: '<cmn-textarea [readonly]="true" [ngModel]="\'Read-only\\nvalue\'" />',
+    template:
+      '<cmn-textarea aria-label="Notes" [readonly]="true" [ngModel]="\'Read-only\\nvalue\'" />',
   }),
 };
 

@@ -542,10 +542,14 @@ describe('AppLayoutComponent', () => {
       fixture.detectChanges();
     });
 
+    it('should make main keyboard focusable so a scrolling page is reachable without a pointer', () => {
+      expect(el('main').getAttribute('tabindex')).toBe('0');
+    });
+
     it('should keep the bars in flow and main unpadded by default', () => {
       expect(el('cmn-top-bar').className).not.toContain('absolute');
       expect(el('cmn-bottom-tab-bar').className).not.toContain('absolute');
-      expect(el('main').className).toBe('flex-1 overflow-y-auto overscroll-y-contain');
+      expect(el('main').className).not.toContain('pt-[');
       expect(el('cmn-bottom-tab-bar nav').classList).not.toContain('backdrop-blur-md');
     });
 
@@ -579,7 +583,7 @@ describe('AppLayoutComponent', () => {
         expect(el('cmn-top-bar').className).not.toContain('absolute');
         expect(el('cmn-top-bar header').className).not.toContain('backdrop-blur');
         expect(el('cmn-bottom-tab-bar').className).not.toContain('absolute');
-        expect(el('main').className).toBe('flex-1 overflow-y-auto overscroll-y-contain');
+        expect(el('main').className).not.toContain('pt-[');
         expect(el('main').style.getPropertyValue('--cmn-fab-clearance')).toBe('');
       }
     );

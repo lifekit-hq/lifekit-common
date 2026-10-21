@@ -1,10 +1,12 @@
 import {DecimalPipe} from '@angular/common';
-import {ChangeDetectionStrategy, Component, input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, input, linkedSignal} from '@angular/core';
 
 import {
   InstitutionAvatarComponent,
   type InstitutionAvatarStatus,
 } from '../institution-avatar/institution-avatar.component';
+
+let rowCounter = 0;
 
 @Component({
   selector: 'cmn-disclosure-row',
@@ -12,11 +14,19 @@ import {
   imports: [InstitutionAvatarComponent, DecimalPipe],
   host: {style: 'display: block'},
   template: `
-    <details [open]="open()" class="group border-b border-border-default last:border-0">
-      <summary
-        class="flex items-center justify-between gap-cmn-4 px-cmn-4 py-cmn-4 cursor-pointer hover:bg-surface-bg transition-colors"
+    <div class="border-b border-border-default last:border-0">
+      <!-- The row is one press target (the button's ::after covers it); actions sit above it, so
+           their controls are never nested inside the toggle. -->
+      <div
+        class="relative flex items-center justify-between gap-cmn-4 px-cmn-4 py-cmn-4 hover:bg-surface-bg transition-colors"
       >
-        <div class="flex items-center gap-cmn-3 flex-1 min-w-0">
+        <button
+          [attr.aria-expanded]="expanded()"
+          [attr.aria-controls]="bodyId"
+          (click)="toggle()"
+          class="flex min-w-0 flex-1 cursor-pointer items-center gap-cmn-3 text-left after:absolute after:inset-0 focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-border-focus"
+          type="button"
+        >
           @if (avatarName()) {
             <cmn-institution-avatar
               [name]="avatarName()!"
@@ -25,13 +35,13 @@ import {
               [statusLabel]="avatarStatusLabel()"
             />
           }
-          <div class="min-w-0">
-            <p class="font-medium text-text-primary">{{ label() }}</p>
+          <span class="min-w-0">
+            <span class="block font-medium text-text-primary">{{ label() }}</span>
             @if (sublabel()) {
-              <p class="text-cmn-xs text-text-secondary">{{ sublabel() }}</p>
+              <span class="block text-cmn-xs text-text-secondary">{{ sublabel() }}</span>
             }
-          </div>
-        </div>
+          </span>
+        </button>
         <ng-content select="[status]" />
         @if (amount() !== null) {
           <div class="tabular-nums font-medium text-text-primary text-right min-w-[7rem]">
@@ -41,9 +51,10 @@ import {
             {{ amount() | number: '1.2-2' }}
           </div>
         }
-        <ng-content select="[actions]" />
+        <div class="relative z-10 empty:hidden"><ng-content select="[actions]" /></div>
         <svg
-          class="w-4 h-4 text-text-secondary transition-transform group-open:rotate-180 shrink-0"
+          [class.rotate-180]="expanded()"
+          class="w-4 h-4 text-text-secondary transition-transform shrink-0"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -56,9 +67,11 @@ import {
             d="M19 9l-7 7-7-7"
           />
         </svg>
-      </summary>
-      <ng-content />
-    </details>
+      </div>
+      <div [id]="bodyId" [hidden]="!expanded()">
+        <ng-content />
+      </div>
+    </div>
   `,
 })
 export class DisclosureRowComponent {
@@ -73,5 +86,13 @@ export class DisclosureRowComponent {
   public readonly avatarStatus = input<InstitutionAvatarStatus | null>(null);
   /** Accessible name for the avatar's state dot. */
   public readonly avatarStatusLabel = input<string | null>(null);
+  /** Whether the row starts expanded; a later change to it re-applies. */
   public readonly open = input<boolean>(true);
+
+  protected readonly bodyId = `cmn-disclosure-row-${++rowCounter}`;
+  protected readonly expanded = linkedSignal(() => this.open());
+
+  protected toggle(): void {
+    this.expanded.update(open => !open);
+  }
 }

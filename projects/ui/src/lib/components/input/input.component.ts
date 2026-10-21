@@ -33,6 +33,7 @@ const ERROR_BORDER = 'border-status-error';
 @Component({
   selector: 'cmn-input',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {'[attr.aria-label]': 'null'},
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -48,6 +49,7 @@ const ERROR_BORDER = 'border-status-error';
       [disabled]="disabled()"
       [readOnly]="readonly()"
       [placeholder]="placeholder()"
+      [attr.aria-label]="ariaLabel()"
       [attr.aria-invalid]="hasError() ? true : null"
       [attr.autocomplete]="autocomplete()"
       [class]="classes()"
@@ -64,6 +66,8 @@ export class InputComponent implements ControlValueAccessor {
   public readonly readonly = input<boolean>(false);
   public readonly hasError = input<boolean>(false);
   public readonly autocomplete = input<string | null>(null);
+  /** Names the field when there is no `cmn-form-field` label; moves to the native element. */
+  public readonly ariaLabel = input<string | null>(null, {alias: 'aria-label'});
 
   // Public computed
   public readonly classes = computed(() => {

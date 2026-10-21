@@ -24,3 +24,4 @@ projects/tokens/brand/dist/
 .impeccable/config.local.json
 projects/ui/e2e/phone/results.json
 projects/ui/e2e/phone/.output
+projects/ui/e2e/a11y/.output
