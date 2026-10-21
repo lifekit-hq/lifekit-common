@@ -10,7 +10,7 @@ Angular signal-store features and helpers for the lifekit apps (`withAsyncStatus
 Request status for a store: `status` (`'idle' | 'loading' | 'success' | 'error'`) and `errorCode`,
 with the `isLoading`, `hasError` and `errorMessage` computeds and `setLoading()`, `setSuccess()`,
 `setError(code)` and `setIdle()`. `errorMessage` resolves the code through `ErrorMessageService` and
-falls back to `defaultErrorMessage` (default: "Something went wrong. Please try again.").
+falls back to `defaultErrorMessage` (default: "Something went wrong. Try again.").
 
 ```ts
 signalStore(withAsyncStatus({defaultErrorMessage: 'Could not load accounts.'}));
@@ -113,6 +113,24 @@ reduced motion. The other `withViewTransitions()` options, such as `skipInitialT
 through unchanged. An `onViewTransitionCreated` you pass runs only for a transition that goes ahead.
 The crossfade's timing (`--cmn-duration-medium`, `--cmn-ease-standard`) comes from the
 `::view-transition-old/new(root)` rule in `@lifekit-hq/tokens/theme.css`.
+
+## Money and numbers: `@lifekit-hq/core/format`
+
+All money and number display goes through one formatter ([guardrails](../../docs/design/guardrails.md)
+$1 and $2): CLDR through `Intl`, the narrow symbol first (`₴18,981.48`), the ISO code only when
+another currency on the same screen shares the symbol, and a sign on every non-zero delta.
+
+```ts
+formatMoney(18981.48, 'UAH'); // '₴18,981.48'
+formatMoney(-12.5, 'USD', {delta: true}); // '-$12.50'
+formatMoney(10, 'CAD', {screenCurrencies: ['USD', 'CAD']}); // 'CAD 10.00'
+formatNumber(0.042, {percent: true, delta: true, fractionDigits: 1}); // '+4.2%'
+```
+
+`locale` defaults to `en-IE`; in Angular use the `cmnMoney` and `cmnNumber` pipes from
+`@lifekit-hq/ui`, which pass the app's `LOCALE_ID`. A missing or non-finite value formats as `''`.
+Apps do not format currency themselves: `lifekit/no-local-currency-format` in `@lifekit-hq/config`
+flags a local `Intl.NumberFormat`, `toLocaleString` or `currency` pipe.
 
 ## `@lifekit-hq/core/preferences`
 

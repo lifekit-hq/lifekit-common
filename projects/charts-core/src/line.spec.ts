@@ -38,6 +38,12 @@ describe('buildLineChartConfig', () => {
     expect(config.data.datasets[0].backgroundColor).toBe('#4f46e51a');
   });
 
+  it('never interpolates across a gap (guardrails Ch2)', () => {
+    const config = buildLineChartConfig(POINTS, TOKENS, 'USD');
+    expect((config.options as {spanGaps?: unknown}).spanGaps).toBeFalsy();
+    expect(config.data.datasets[0].spanGaps).toBeFalsy();
+  });
+
   it('sets fill and tension', () => {
     const config = buildLineChartConfig(POINTS, TOKENS, 'USD');
     expect(config.data.datasets[0].fill).toBe(true);

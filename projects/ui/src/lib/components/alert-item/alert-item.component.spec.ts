@@ -26,6 +26,10 @@ describe('AlertItemComponent', () => {
     return (fixture.nativeElement as HTMLElement).querySelector('div') as HTMLElement;
   }
 
+  function titleButton(): HTMLButtonElement | null {
+    return (fixture.nativeElement as HTMLElement).querySelector('button:not([aria-label])');
+  }
+
   function dismissButton(): HTMLButtonElement | null {
     return (fixture.nativeElement as HTMLElement).querySelector('button[aria-label="Dismiss"]');
   }
@@ -57,15 +61,26 @@ describe('AlertItemComponent', () => {
     fixture.detectChanges();
 
     expect(unreadDot()).not.toBeNull();
-    row().click();
+    titleButton()?.click();
     expect(reads).toBe(1);
 
     fixture.componentRef.setInput('isRead', true);
     fixture.detectChanges();
     expect(unreadDot()).toBeNull();
+    expect(titleButton()).toBeNull();
 
     row().click();
     expect(reads).toBe(1);
+  });
+
+  it('makes the unread title a real button stretched over the card (guardrails K3)', () => {
+    fixture.detectChanges();
+    const button = titleButton();
+    expect(button?.type).toBe('button');
+    expect(button?.textContent?.trim()).toBe('Sync failed');
+    expect(button?.className).toContain('after:inset-0');
+    expect(row().classList).toContain('relative');
+    expect(dismissButton()?.classList).toContain('z-10');
   });
 
   it('dismisses without also marking the item read', () => {

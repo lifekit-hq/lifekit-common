@@ -104,7 +104,6 @@ function keyStep(key: string): 1 | -1 | 'first' | 'last' | undefined {
       [attr.aria-label]="label() || null"
       [attr.aria-disabled]="disabled() ? 'true' : null"
       [class]="groupClasses"
-      (keydown)="onKeydown($event)"
       role="radiogroup"
     >
       @for (cell of cells(); track cell.option.value) {
@@ -115,6 +114,7 @@ function keyStep(key: string): 1 | -1 | 'first' | 'last' | undefined {
           [class]="cell.classes"
           [disabled]="!cell.enabled"
           (click)="choose(cell.option)"
+          (keydown)="onKeydown($event)"
           role="radio"
           type="button"
         >

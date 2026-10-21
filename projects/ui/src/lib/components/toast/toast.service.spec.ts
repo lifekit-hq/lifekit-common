@@ -76,6 +76,22 @@ describe('ToastService', () => {
     vi.runAllTimers();
   });
 
+  it('keeps an error toast up until it is dismissed (guardrails F1)', () => {
+    service.error('Could not save that change.');
+    render();
+    vi.advanceTimersByTime(60_000);
+    expect(toasts()).toHaveLength(1);
+
+    document.querySelector<HTMLButtonElement>('cmn-toast button[aria-label="Dismiss"]')?.click();
+    expect(toasts()).toHaveLength(0);
+  });
+
+  it('ignores a duration passed with an error toast', () => {
+    service.show('Could not save that change.', 'error', 1000);
+    vi.advanceTimersByTime(1000);
+    expect(toasts()).toHaveLength(1);
+  });
+
   it('stacks independent toasts', () => {
     service.info('One');
     service.info('Two');

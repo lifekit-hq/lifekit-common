@@ -20,7 +20,8 @@ const LONG_DURATION_MS = 20_000;
       <cmn-button (clicked)="showLong()" variant="secondary">long duration</cmn-button>
     </div>
     <p class="mt-cmn-4 text-cmn-sm text-text-secondary">
-      Toasts dock bottom-centre and dismiss themselves, or on the close button.
+      Toasts dock bottom-centre. Info, success and warning dismiss themselves after 3s; an error
+      stays until its close button is used.
     </p>
   `,
 })
@@ -40,7 +41,7 @@ class StoryToastLauncherComponent {
   }
 
   protected showLong(): void {
-    this.toast.warning('This one stays up until you dismiss it.', LONG_DURATION_MS);
+    this.toast.warning('This one stays up for 20 seconds.', LONG_DURATION_MS);
   }
 }
 
@@ -54,7 +55,7 @@ export default meta;
 type Story = StoryObj<StoryToastLauncherComponent>;
 
 /**
- * `ToastService` in its real states: one toast per variant, several stacked at
- * once, and one held open long enough to dismiss by hand.
+ * `ToastService` in its real states: one toast per variant (the error one persists until
+ * dismissed), several stacked at once, and one held open for 20 seconds.
  */
 export const Playground: Story = {};

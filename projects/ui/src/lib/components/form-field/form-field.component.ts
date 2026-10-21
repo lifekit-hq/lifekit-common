@@ -7,10 +7,22 @@ import {
   forwardRef,
   inject,
   input,
+  signal,
 } from '@angular/core';
-import {toObservable, toSignal} from '@angular/core/rxjs-interop';
-import {AbstractControl, ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
-import {of, switchMap} from 'rxjs';
+import {takeUntilDestroyed, toObservable} from '@angular/core/rxjs-interop';
+import {
+  AbstractControl,
+  type ControlEvent,
+  ControlValueAccessor,
+  FormGroupDirective,
+  FormResetEvent,
+  FormSubmittedEvent,
+  NG_VALUE_ACCESSOR,
+  NgForm,
+  StatusChangeEvent,
+  ValueChangeEvent,
+} from '@angular/forms';
+import {EMPTY, filter, map, merge, switchMap} from 'rxjs';
 
 import {VALIDATION_MESSAGES} from '../../tokens/validation-messages.token';
 import {InputComponent} from '../input/input.component';
@@ -18,6 +30,21 @@ import {TextareaComponent} from '../textarea/textarea.component';
 
 let fieldCounter = 0;
 
+/**
+ * A label, hint and error around a projected `cmn-input` or `cmn-textarea`.
+ *
+ * Validation timing follows GOV.UK (guardrails V1, V4): with a `control`, nothing shows on blur or
+ * while typing; errors appear when the enclosing form is submitted (`FormSubmittedEvent`, fired by
+ * `[formGroup]` / `ngForm` on submit). After that, a shown error is re-checked as the person types
+ * and clears the moment the field is valid; typing never raises a new error before the next submit.
+ * A validity that resolves after the submit (an async validator finishing, a server `setErrors`)
+ * counts as part of that submit and shows, unless the value was edited since; then it waits for the
+ * next submit. A form reset hides everything again, including a reset
+ * made by the `(ngSubmit)` handler itself. A control whose root form is not bound to an enclosing
+ * `[formGroup]` or `ngForm` (a parentless control, or a group saved by a button calling
+ * `markAllAsTouched()`) never sees a submit, so it shows its error once touched. Without a
+ * `control`, a static `errorMessage` shows immediately.
+ */
 @Component({
   selector: 'cmn-form-field',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -59,12 +86,24 @@ let fieldCounter = 0;
 })
 export class FormFieldComponent implements ControlValueAccessor, AfterContentInit {
   private readonly validationMessages = inject(VALIDATION_MESSAGES);
+  private readonly formGroupDirective = inject(FormGroupDirective, {optional: true});
+  private readonly ngForm = inject(NgForm, {optional: true});
   private readonly singleLineChild = contentChild(InputComponent);
   private readonly multiLineChild = contentChild(TextareaComponent);
   private pendingValue: unknown = undefined;
   private pendingDisabled: boolean | undefined = undefined;
   private onChangeFn: ((v: unknown) => void) | undefined;
   private onTouchedFn: (() => void) | undefined;
+  /** True once the value changes after the last submit or reset: a later result belongs to the edit. */
+  private editedSinceSubmit = false;
+  /** True from a reset until the task ends; a submit in that window was reset by its own handler. */
+  private resetThisTask = false;
+  /** True once the enclosing form has been submitted, until it is reset. */
+  private readonly submitted = signal(false);
+  /** True while a submit-time validator error is on screen; cleared once the field is valid. */
+  private readonly errorShown = signal(false);
+  /** Bumped on every control event so the message tracks the control's current errors. */
+  private readonly revision = signal(0);
 
   public readonly label = input<string>('');
   public readonly hint = input<string>('');
@@ -78,18 +117,17 @@ export class FormFieldComponent implements ControlValueAccessor, AfterContentIni
   protected readonly inputChild = computed<InputComponent | TextareaComponent | undefined>(
     () => this.singleLineChild() ?? this.multiLineChild()
   );
-  protected readonly controlChanges = toSignal(
-    toObservable(this.control).pipe(switchMap(ctrl => (ctrl ? ctrl.events : of(null))))
-  );
-
   protected readonly resolvedError = computed(() => {
-    this.controlChanges();
+    this.revision();
     const ctrl = this.control();
-    const showStatic = !ctrl || ctrl.touched;
-    if (showStatic && this.errorMessage()) {
+    if (!ctrl) {
       return this.errorMessage();
     }
-    if (!ctrl?.touched || !ctrl.errors) {
+    const awaitsSubmit = this.enclosingForm() === ctrl.root;
+    if (this.errorMessage() && (awaitsSubmit ? this.submitted() : ctrl.touched)) {
+      return this.errorMessage();
+    }
+    if (!(awaitsSubmit ? this.errorShown() : ctrl.touched) || !ctrl.errors) {
       return '';
     }
     const [key, params] = Object.entries(ctrl.errors)[0];
@@ -98,6 +136,36 @@ export class FormFieldComponent implements ControlValueAccessor, AfterContentIni
 
   constructor() {
     this.fieldId = `cmn-field-${++fieldCounter}`;
+    toObservable(this.control)
+      .pipe(
+        switchMap(ctrl => {
+          this.submitted.set(false);
+          this.errorShown.set(false);
+          this.editedSinceSubmit = false;
+          this.resetThisTask = false;
+          if (!ctrl) {
+            return EMPTY;
+          }
+          // Submit and reset fire on the directive's form only; value and status fire on the control.
+          // An ngModel control joins that form a tick after binding, so its root is not read here.
+          const form = this.enclosingForm();
+          const events$ =
+            !form || form === ctrl
+              ? ctrl.events
+              : merge(
+                  ctrl.events,
+                  form.events.pipe(
+                    filter(
+                      event =>
+                        event instanceof FormSubmittedEvent || event instanceof FormResetEvent
+                    )
+                  )
+                );
+          return events$.pipe(map(event => [ctrl, event] as const));
+        }),
+        takeUntilDestroyed()
+      )
+      .subscribe(([ctrl, event]) => this.onControlEvent(ctrl, event));
   }
 
   public ngAfterContentInit(): void {
@@ -140,5 +208,37 @@ export class FormFieldComponent implements ControlValueAccessor, AfterContentIni
   public setDisabledState(isDisabled: boolean): void {
     this.pendingDisabled = isDisabled;
     this.inputChild()?.setDisabledState(isDisabled);
+  }
+
+  /** The form bound by an enclosing `[formGroup]` or `ngForm`: the only source of submit events. */
+  private enclosingForm(): AbstractControl | undefined {
+    return this.formGroupDirective?.form ?? this.ngForm?.form;
+  }
+
+  private onControlEvent(ctrl: AbstractControl, event: ControlEvent): void {
+    if (event instanceof FormSubmittedEvent) {
+      if (!this.resetThisTask) {
+        this.submitted.set(true);
+        this.errorShown.set(ctrl.invalid);
+        this.editedSinceSubmit = false;
+      }
+    } else if (event instanceof FormResetEvent) {
+      this.submitted.set(false);
+      this.errorShown.set(false);
+      this.editedSinceSubmit = false;
+      this.resetThisTask = true;
+      queueMicrotask(() => (this.resetThisTask = false));
+    } else if (event instanceof ValueChangeEvent) {
+      this.editedSinceSubmit = true;
+    } else if (event instanceof StatusChangeEvent) {
+      if (ctrl.valid) {
+        this.errorShown.set(false);
+      } else if (ctrl.invalid && this.submitted() && !this.editedSinceSubmit) {
+        this.errorShown.set(true);
+      }
+    } else if (ctrl.valid) {
+      this.errorShown.set(false);
+    }
+    this.revision.update(n => n + 1);
   }
 }

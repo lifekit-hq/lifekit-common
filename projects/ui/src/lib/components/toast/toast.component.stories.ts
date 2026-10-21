@@ -54,7 +54,7 @@ export const Error: Story = {
     template: '<cmn-toast [message]="message" [variant]="variant" />',
   }),
   args: {
-    message: 'Unable to connect to server. Please try again.',
+    message: 'Unable to connect to the server. Check your connection and try again.',
     variant: 'error',
   },
 };
@@ -70,4 +70,17 @@ export const AllVariants: Story = {
       </div>
     `,
   }),
+};
+
+/** A message long enough to wrap: the toast grows in height and keeps its width. */
+export const LongContent: Story = {
+  render: args => ({
+    props: args,
+    template: '<cmn-toast [message]="message" [variant]="variant" />',
+  }),
+  args: {
+    message:
+      'Monobank ••4242 did not sync. The bank asked for a new consent, so open Settings, Connections and reconnect the card to bring in October.',
+    variant: 'warning',
+  },
 };

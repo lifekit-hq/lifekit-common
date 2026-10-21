@@ -4,11 +4,17 @@ import {inject, Injectable, Injector} from '@angular/core';
 
 import {DEFAULT_DURATION_MS, ToastComponent, type ToastVariant} from './toast.component';
 
+/**
+ * Shows toasts in a CDK overlay. Success, warning and info close themselves after `duration`
+ * (3s by default). An error toast stays until it is dismissed (guardrails F1, Carbon
+ * notifications): a message someone has to act on must not time out under them.
+ */
 @Injectable({providedIn: 'root'})
 export class ToastService {
   private readonly overlay = inject(Overlay);
   private readonly injector = inject(Injector);
 
+  /** `duration` applies to non-error toasts only; an error toast ignores it and persists. */
   public show(message: string, variant: ToastVariant, duration = DEFAULT_DURATION_MS): void {
     const positionStrategy = this.overlay.position().global().centerHorizontally().bottom('24px');
     const overlayRef: OverlayRef = this.overlay.create({positionStrategy});
@@ -26,15 +32,18 @@ export class ToastService {
     };
 
     ref.instance.dismissed.subscribe(dispose);
-    setTimeout(dispose, duration);
+    if (variant !== 'error') {
+      setTimeout(dispose, duration);
+    }
   }
 
   public success(message: string, duration?: number): void {
     this.show(message, 'success', duration);
   }
 
-  public error(message: string, duration?: number): void {
-    this.show(message, 'error', duration);
+  /** Persists until dismissed. */
+  public error(message: string): void {
+    this.show(message, 'error');
   }
 
   public warning(message: string, duration?: number): void {

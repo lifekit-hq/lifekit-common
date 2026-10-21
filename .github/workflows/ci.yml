@@ -22,6 +22,8 @@ jobs:
       - run: npm run lint
       - name: Design drift (zero tolerance)
         run: npm run check:drift
+      - name: Story states (justified gaps in docs/story-states-baseline.json)
+        run: npm run check:story-states
       - run: npm run format:check
       - run: npm run test
       - run: npm run build

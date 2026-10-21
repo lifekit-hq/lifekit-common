@@ -5,7 +5,8 @@ guarantees the chrome and the behaviour around it; a page only declares what is 
 the mobile chapter of the [UX continuity policy](STRATEGY.md#ux-continuity-policy): where the policy
 already rules (loading, empty, error, page frame), the policy wins and this page adapts it. The
 browser-level chrome (tab title, icons, `theme-color`, manifest) is the
-[browser chrome standard](BROWSER-CHROME.md).
+[browser chrome standard](BROWSER-CHROME.md). The UI/UX policy as a whole, with the source each
+rule comes from and the check that enforces it, is [design/guardrails.md](design/guardrails.md).
 
 ## Decisions behind it
 
@@ -313,15 +314,17 @@ empty, keep cached data, errors keep context). A page binds `status`, `isEmpty`,
 
 Offline beats error, and error beats empty, so a failed or offline load never reads as "no data".
 
-Calm loading is opt-in: a region that sets none of the options below behaves as it always has.
+Calm loading is the default (guardrails S3, S4): `keepContent` is on, `showDelay` is 200ms and
+`minDisplay` is 400ms. A region that needs the old behaviour sets `[keepContent]="false"` or a
+delay of `0`.
 
-| Input           | Does                                                                                                                                                                                                     |
-| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `keepContent`   | A refresh keeps the loaded content on screen, dimmed, instead of swapping it for the skeleton. A first load (nothing to keep) still shows the skeleton. The dim follows `showDelay`.                     |
-| `showDelay`     | Milliseconds a load must last before any loading indicator shows. Until then the content already on screen stays put, so a fast load shows no flash. `ASYNC_STATE_SHOW_DELAY_MS` is the standard's 200.  |
-| `minDisplay`    | Milliseconds an indicator that has shown stays up, so it never flashes away. `ASYNC_STATE_MIN_DISPLAY_MS` is the standard's 400. Not applied to a kept (dimmed) body: fresh content replaces it at once. |
-| `crossfade`     | The content fades in (`--cmn-duration-short`) when it replaces the skeleton; content already there at first render paints at once; nothing under Reduce Motion.                                          |
-| `skeletonShape` | Draws the placeholder as a `cmn-skeleton` preset (`skeletonRows` rows) instead of the default bars; a projected `[skeleton]` still wins.                                                                 |
+| Input           | Does                                                                                                                                                                                                |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `keepContent`   | On by default. A refresh keeps the loaded content on screen, dimmed, instead of swapping it for the skeleton. A first load (nothing to keep) still shows the skeleton. The dim follows `showDelay`. |
+| `showDelay`     | Milliseconds a load must last before any loading indicator shows; 200 by default (`ASYNC_STATE_SHOW_DELAY_MS`). Until then the content already on screen stays put, so a fast load shows no flash.  |
+| `minDisplay`    | Milliseconds an indicator that has shown stays up, so it never flashes away; 400 by default (`ASYNC_STATE_MIN_DISPLAY_MS`). Not applied to a kept (dimmed) body: fresh content replaces it at once. |
+| `crossfade`     | The content fades in (`--cmn-duration-short`) when it replaces the skeleton; content already there at first render paints at once; nothing under Reduce Motion.                                     |
+| `skeletonShape` | Draws the placeholder as a `cmn-skeleton` preset (`skeletonRows` rows) instead of the default bars; a projected `[skeleton]` still wins.                                                            |
 
 A skeleton goes on a container, never inside the text it stands for. `cmn-skeleton` draws a bar by
 default; `shape` draws a component's whole silhouette from that component's own geometry, so the
@@ -349,7 +352,9 @@ the loaded component at 375, 390 and 402 (`Conformance/Skeleton Geometry`).
 
 ## Forms and notifications
 
-- Keyboard matches content, validation happens as people type, and an error says how to fix it.
+- Keyboard matches content. Validation follows GOV.UK: errors show when the form is submitted,
+  never on blur or while typing; a shown error clears as soon as the field is fixed; and an error
+  says what went wrong and how to fix it (guardrails V1 to V4). `cmn-form-field` does the timing.
 - Push (when it ships) asks for permission after an in-context explainer, has an in-app settings
   page, shows an app-icon badge for unread alerts, and keeps amounts out of the notification text.
 - Sign-in is never asked for again while a session is valid. Passkeys are supported when the
@@ -357,8 +362,9 @@ the loaded component at 375, 390 and 402 (`Conformance/Skeleton Geometry`).
 
 ## Accessibility and performance floor
 
-- Targets 44x44pt (28 at the very minimum), body text 17pt where the layout allows and 11pt as the
-  floor, 200% text size supported, contrast 4.5:1.
+- Targets 44x44pt (28 at the very minimum); text on the Instrument ramp (14px body, a 12px floor
+  the suite checks, 16px in inputs per rule 9); 200% text size supported (WCAG 1.4.4); contrast
+  4.5:1.
 - A cold first load stays within Core Web Vitals "good": LCP at most 2.5 s, INP at most 200 ms,
   CLS at most 0.1.
 - Haptics are not possible in an iOS PWA and are not part of the contract.
@@ -389,11 +395,11 @@ that holds each one. A rule marked "follow-up" is the target; its parts and chec
    1.4.10, 1.4.12, 1.4.4. Check: no segmented cell or chip label overflows at 375, 390 and 402, and an over-long segmented row never scrolls the page sideways.
 5. **Skeletons and states.** Every async region uses `cmn-async-state` with a skeleton shaped like
    the rendered content (the `cmn-skeleton` `shape` presets), on containers only, with no
-   indicator for loads under about 200ms (`showDelay`) and a minimum display time once shown
-   (`minDisplay`). The sweep stops under Reduce Motion. Sources: NN/g "Skeleton Screens 101"; M3
+   indicator for loads under 200ms (`showDelay`, on by default) and a 400ms minimum display time
+   once shown (`minDisplay`, on by default). The sweep stops under Reduce Motion. Sources: NN/g "Skeleton Screens 101"; M3
    Progress indicators; Atlassian and Carbon loading; web.dev CLS. Check: each preset's box is
    within 8px of the loaded component's; the state pattern. To come: CLS at most 0.1 per route.
-6. **Continuity.** Data on screen stays while it refreshes (`keepContent`); a tab return paints at
+6. **Continuity.** Data on screen stays while it refreshes (`keepContent`, on by default); a tab return paints at
    once and revalidates; scroll restore waits for the data; tab destinations preload on idle, after
    first paint, except under Save-Data or on a metered connection (`TabPreloadStrategy`, `projects/core/README.md`),
    and a tab switch is a View Transition (`withLkViewTransitions()`, `DESIGN.md` Motion). Sources:

@@ -152,7 +152,9 @@ describe('CommandPaletteComponent', () => {
   });
 
   it('closes with no result when the backdrop is clicked', () => {
-    (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>('.fixed')?.click();
+    (fixture.nativeElement as HTMLElement)
+      .querySelector<HTMLElement>('.cmn-palette-backdrop')
+      ?.click();
     expect(close).toHaveBeenCalledWith();
   });
 

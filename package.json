@@ -9,7 +9,8 @@
     "build:seeds": "node projects/tokens/scripts/build-seeds.mjs",
     "build": "npm run build:brand && ng build @lifekit-hq/charts-core && ng build @lifekit-hq/elements && ng build @lifekit-hq/core && ng build @lifekit-hq/ui",
     "pretest": "playwright install chromium",
-    "test": "ng test @lifekit-hq/charts-core --configuration ci && ng test @lifekit-hq/elements --configuration ci && ng test @lifekit-hq/ui --configuration ci && ng test @lifekit-hq/core --configuration ci && npm run test:tokens",
+    "test": "ng test @lifekit-hq/charts-core --configuration ci && ng test @lifekit-hq/elements --configuration ci && ng test @lifekit-hq/ui --configuration ci && ng test @lifekit-hq/core --configuration ci && npm run test:tokens && npm run test:config",
+    "test:config": "node --test \"projects/config/test/*.spec.mjs\"",
     "test:tokens": "npm run build:brand && node --test \"projects/tokens/test/*.spec.mjs\"",
     "lint": "ng lint",
     "format": "prettier --write \"projects/**/*.{ts,html,scss,css}\"",
@@ -24,7 +25,8 @@
     "consumer-type-check": "bash fixtures/consumer-type-check/run.sh",
     "prepare": "husky",
     "design:scan": "node scripts/design-scan.mjs",
-    "check:drift": "node projects/tokens/bin/lifekit-chrome-check.mjs drift projects"
+    "check:drift": "node projects/tokens/bin/lifekit-chrome-check.mjs drift projects",
+    "check:story-states": "node scripts/check-story-states.mjs"
   },
   "workspaces": [
     "projects/*"
@@ -62,7 +64,6 @@
     "@resvg/resvg-js": "^2.6.2",
     "@smarttools/eslint-plugin-rxjs": "^1.0.22",
     "@storybook/angular": "^10.5.10",
-    "@types/google.accounts": "^0.0.14",
     "@types/node": "^25.5.0",
     "@vitest/browser-playwright": "^4.1.10",
     "@vitest/coverage-v8": "^4.1.10",

@@ -12,16 +12,11 @@ const PHONE_STORIES = [
   'sheet-with-long-form',
   'sheet-that-cannot-be-dismissed',
   'full-screen',
-  'full-screen-stepper',
   'action-sheet',
   'confirm-action-sheet',
 ] as const;
 
-const DESKTOP_STORIES = [
-  'desktop-unchanged',
-  'confirm-action-sheet',
-  'full-screen-stepper',
-] as const;
+const DESKTOP_STORIES = ['desktop-unchanged', 'confirm-action-sheet'] as const;
 
 // A sheet slides in; every shot and measurement is taken at rest.
 async function settled(page: Page): Promise<void> {

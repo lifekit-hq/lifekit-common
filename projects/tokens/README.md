@@ -43,8 +43,9 @@ Design tokens for the lifekit ecosystem, framework-agnostic.
   (`npm run build:seeds`). Import it after `theme.css`; with none, the app gets the default
   (finance-sentry's petrol) palette.
 - `drift`: `lifekit-chrome-check drift <path>…`, a static scan of an app's source for what
-  bypasses these tokens (font, colour, text size, radius, root font size, layout transitions). Run
-  it in CI; it exits 1 on any finding. Rules and options: the last section of
+  bypasses these tokens (font, colour, text size, radius, root font size, layout transitions,
+  spacing) and error copy that says "please" or "invalid". Run it in CI; it exits 1 on any
+  finding. Rules and options: the last section of
   [`docs/BROWSER-CHROME.md`](../../docs/BROWSER-CHROME.md). Rule logic adapted from impeccable
   (Apache-2.0), see [`NOTICE.md`](NOTICE.md).
 

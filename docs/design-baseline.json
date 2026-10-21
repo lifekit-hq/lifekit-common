@@ -9,8 +9,6 @@
         "components-pageheader--action-disabled",
         "components-settingssection--save-disabled-until-dirty",
         "components-settingssection--saving",
-        "components-stepperdialog--busy",
-        "components-stepperdialog--invalid-step",
         "patterns-settings-page--*"
       ],
       "match": "opacity stack",

@@ -35,9 +35,9 @@ export type AsyncStateSyncedAt = Date | number | string;
 const DEFAULT_SKELETON_ROWS = 3;
 
 /**
- * The calm-loading values the standard recommends: no indicator for a load under 200ms, and once
- * one shows it stays at least 400ms, so a fast load never flashes a skeleton. Pass them to
- * `showDelay` and `minDisplay`; both default to 0 (show at once, hide at once).
+ * The calm-loading defaults: no indicator for a load under 200ms, and once one shows it stays at
+ * least 400ms, so a fast load never flashes a skeleton. `showDelay` and `minDisplay` default to
+ * them; pass 0 to show or hide at once.
  */
 export const ASYNC_STATE_SHOW_DELAY_MS = 200;
 export const ASYNC_STATE_MIN_DISPLAY_MS = 400;
@@ -67,7 +67,8 @@ const DATE_AND_TIME: Intl.DateTimeFormatOptions = {dateStyle: 'medium', timeStyl
  * - `[empty]` — a rich empty state (icon, sub-message, call to action), shown on an empty success.
  * - `[error-action]` — an action rendered next to the error or offline message.
  *
- * Calm loading, all opt-in so a caller that sets none of it behaves as before:
+ * Calm loading, on by default (`keepContent`, `showDelay` 200 and `minDisplay` 400, the
+ * guardrails' S3 and S4); set `[keepContent]="false"` or a 0 delay to opt out:
  *
  * - `keepContent` keeps the content on screen, dimmed, while a refresh loads (only once there
  *   is content to keep; a first load still shows the skeleton).
@@ -219,11 +220,11 @@ export class AsyncStateComponent {
   public readonly retryable = input(false, {transform: booleanAttribute});
 
   /** Keeps the content on screen, dimmed, while a refresh loads; a first load still shows the skeleton. */
-  public readonly keepContent = input(false, {transform: booleanAttribute});
+  public readonly keepContent = input(true, {transform: booleanAttribute});
   /** Milliseconds a load must last before any loading indicator shows. 0 shows it at once. */
-  public readonly showDelay = input<number>(0);
+  public readonly showDelay = input<number>(ASYNC_STATE_SHOW_DELAY_MS);
   /** Milliseconds a shown loading indicator stays up, so it never flashes. 0 hides it at once. */
-  public readonly minDisplay = input<number>(0);
+  public readonly minDisplay = input<number>(ASYNC_STATE_MIN_DISPLAY_MS);
   /** Fades the content in when it replaces the skeleton; content there at first render does not fade. */
   public readonly crossfade = input(false, {transform: booleanAttribute});
   /** Draws the loading placeholder as a `cmn-skeleton` preset (`skeletonRows` rows) instead of bars. */

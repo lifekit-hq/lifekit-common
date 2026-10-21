@@ -82,3 +82,34 @@ export const TintedIcon: Story = {
     iconClass: 'text-status-warning',
   },
 };
+
+/** First use (guardrails S6): nothing exists yet, so say what goes here and how to add it. */
+export const FirstUse: Story = {
+  args: {
+    message: 'No budgets yet',
+    subMessage: 'Set a monthly limit for a category to see how much is left.',
+    icon: 'Plus',
+    actionLabel: 'Add a budget',
+  },
+};
+
+/** No results (guardrails S6): the data exists but the filter hides it, so offer the way back. */
+export const NoResults: Story = {
+  args: {
+    message: 'No transactions match "rent"',
+    subMessage: 'Check the spelling or search for a payee instead.',
+    icon: 'Search',
+    actionLabel: 'Clear search',
+  },
+};
+
+/** Error (guardrails S6): say what failed and offer a retry; never an empty state that hides it. */
+export const Error: Story = {
+  args: {
+    message: 'Transactions did not load',
+    subMessage: 'The bank did not answer. Your saved data is unchanged.',
+    icon: 'CircleAlert',
+    iconClass: 'text-status-error',
+    actionLabel: 'Try again',
+  },
+};

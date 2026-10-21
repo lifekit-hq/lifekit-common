@@ -84,6 +84,22 @@ describe('buildAreaChartConfig', () => {
     expect(beginAtZero(buildAreaChartConfig(SERIES, TOKENS, 'USD'))).toBe(true);
   });
 
+  it('never interpolates across a gap (guardrails Ch2)', () => {
+    for (const stacked of [true, false]) {
+      const config = buildAreaChartConfig(SERIES, TOKENS, 'USD', stacked);
+      expect((config.options as {spanGaps?: unknown}).spanGaps).toBeFalsy();
+      for (const dataset of config.data.datasets) {
+        expect(dataset.spanGaps).toBeFalsy();
+      }
+    }
+  });
+
+  it('fills only a band that starts at zero: unstacked draws unfilled lines (guardrails Ch2)', () => {
+    const lines = buildAreaChartConfig(SERIES, TOKENS, 'USD', false);
+    expect(fills(lines.data.datasets)).toEqual([false, false]);
+    expect(beginAtZero(lines)).toBe(false);
+  });
+
   it('leaves the value axis auto-ranged when not stacked', () => {
     expect(beginAtZero(buildAreaChartConfig(SERIES, TOKENS, 'USD', false))).toBe(false);
   });

@@ -124,6 +124,14 @@ describe('buildBarChartConfig', () => {
     expect(scaleStacking(config)).toEqual({x: false, y: false});
   });
 
+  it.each([false, true])('starts the value axis at zero (guardrails Ch2), stacked: %s', stacked => {
+    const config = buildBarChartConfig(SERIES, TOKENS, 'USD', stacked, 'currency');
+    const y = (config.options?.scales as Record<string, {beginAtZero?: boolean}> | undefined)?.[
+      'y'
+    ];
+    expect(y?.beginAtZero).toBe(true);
+  });
+
   it('stacks both scales when asked', () => {
     const config = buildBarChartConfig(SERIES, TOKENS, 'USD', true, 'currency');
     expect(scaleStacking(config)).toEqual({x: true, y: true});

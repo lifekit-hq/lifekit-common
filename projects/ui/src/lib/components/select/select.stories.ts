@@ -1,4 +1,6 @@
+import {FormsModule} from '@angular/forms';
 import type {Meta, StoryObj} from '@storybook/angular';
+import {moduleMetadata} from '@storybook/angular';
 
 import type {SelectMode, SelectOption, SelectSize} from './select.component';
 import {SelectComponent} from './select.component';
@@ -23,6 +25,7 @@ const meta: Meta<SelectStoryArgs> = {
   title: 'Components/Select',
   component: SelectComponent,
   tags: ['autodocs'],
+  decorators: [moduleMetadata({imports: [FormsModule]})],
   argTypes: {
     size: {control: 'select', options: ['sm', 'md', 'lg']},
     mode: {control: 'select', options: ['default', 'multiple']},
@@ -63,12 +66,86 @@ export const Default: Story = {
   },
 };
 
-export const Multiple: Story = {
+// Story props are named `picked` and `inert`, never `value`, `selected` or `disabled`: Storybook
+// copies props onto the component instance, where those names are its internal signals.
+export const Filled: Story = {
   render: () => ({
-    props: {options: accountOptions},
+    props: {options: accountOptions, picked: 'savings-vault'},
     template: `
       <div class="w-80">
-        <cmn-select [options]="options" mode="multiple" placeholder="Choose accounts" />
+        <cmn-select [options]="options" [(ngModel)]="picked" placeholder="Choose account" />
+      </div>
+    `,
+  }),
+};
+
+export const Disabled: Story = {
+  render: () => ({
+    props: {options: accountOptions, picked: 'main-current', inert: true},
+    template: `
+      <div class="w-80">
+        <cmn-select
+          [options]="options"
+          [ngModel]="picked"
+          [disabled]="inert"
+          placeholder="Choose account"
+        />
+      </div>
+    `,
+  }),
+};
+
+/**
+ * `mode="multiple"`: a dropdown checklist bound to an array. The trigger shows the placeholder,
+ * the one label picked, or a count; the panel has a Clear action once something is picked.
+ */
+export const Multiple: Story = {
+  render: () => ({
+    props: {options: accountOptions, picked: []},
+    template: `
+      <div class="w-80">
+        <cmn-select
+          [options]="options"
+          [(ngModel)]="picked"
+          mode="multiple"
+          placeholder="All accounts"
+          aria-label="Accounts"
+        />
+      </div>
+    `,
+  }),
+};
+
+export const MultiplePreselected: Story = {
+  render: () => ({
+    props: {options: accountOptions, picked: ['main-current', 'savings-vault']},
+    template: `
+      <div class="w-80">
+        <cmn-select
+          [options]="options"
+          [(ngModel)]="picked"
+          mode="multiple"
+          placeholder="All accounts"
+          aria-label="Accounts"
+        />
+      </div>
+    `,
+  }),
+};
+
+export const MultipleDisabled: Story = {
+  render: () => ({
+    props: {options: accountOptions, picked: ['main-current'], inert: true},
+    template: `
+      <div class="w-80">
+        <cmn-select
+          [options]="options"
+          [ngModel]="picked"
+          [disabled]="inert"
+          mode="multiple"
+          placeholder="All accounts"
+          aria-label="Accounts"
+        />
       </div>
     `,
   }),

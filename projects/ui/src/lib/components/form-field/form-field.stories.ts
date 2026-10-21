@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component} from '@angular/core';
+import {ChangeDetectionStrategy, Component, signal} from '@angular/core';
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import type {Meta, StoryObj} from '@storybook/angular';
 
@@ -45,7 +45,7 @@ export const WithError: Story = {
   render: () => ({
     moduleMetadata: {imports: FORM_IMPORTS},
     template: `
-      <cmn-form-field label="Email" errorMessage="Please enter a valid email address.">
+      <cmn-form-field label="Email" errorMessage="Enter an email address in the correct format, like name@example.com.">
         <cmn-input type="email" [hasError]="true" placeholder="you@example.com" />
       </cmn-form-field>
     `,
@@ -105,24 +105,15 @@ export const Disabled: Story = {
     <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-cmn-4 max-w-sm">
       <cmn-form-field
         [required]="true"
-        [errorMessage]="emailError"
-        [hint]="emailError ? '' : 'Use your work email'"
+        [control]="form.controls.email"
+        [errorMessage]="serverError()"
+        hint="Use your work email"
         label="Email"
       >
-        <cmn-input
-          [hasError]="!!emailError"
-          formControlName="email"
-          type="email"
-          placeholder="you@example.com"
-        />
+        <cmn-input formControlName="email" type="email" placeholder="you@example.com" />
       </cmn-form-field>
-      <cmn-form-field [required]="true" [errorMessage]="passwordError" label="Password">
-        <cmn-input
-          [hasError]="!!passwordError"
-          formControlName="password"
-          type="password"
-          placeholder="••••••••"
-        />
+      <cmn-form-field [required]="true" [control]="form.controls.password" label="Password">
+        <cmn-input formControlName="password" type="password" placeholder="••••••••" />
       </cmn-form-field>
       <cmn-button type="submit" variant="primary">Sign In</cmn-button>
     </form>
@@ -134,39 +125,23 @@ class FormExampleComponent {
     password: new FormControl('', [Validators.required, Validators.minLength(MIN_PASSWORD_LENGTH)]),
   });
 
-  public get emailError(): string {
-    const ctrl = this.form.get('email');
-    if (!ctrl?.touched || ctrl.valid) {
-      return '';
-    }
-    if (ctrl.errors?.['required']) {
-      return 'Email is required';
-    }
-    if (ctrl.errors?.['email']) {
-      return 'Enter a valid email';
-    }
-    return '';
-  }
-
-  public get passwordError(): string {
-    const ctrl = this.form.get('password');
-    if (!ctrl?.touched || ctrl.valid) {
-      return '';
-    }
-    if (ctrl.errors?.['required']) {
-      return 'Password is required';
-    }
-    if (ctrl.errors?.['minlength']) {
-      return 'At least 8 characters required';
-    }
-    return '';
-  }
+  /** A server rejection, set only after a submit the validators accepted. */
+  protected readonly serverError = signal('');
 
   public onSubmit(): void {
-    this.form.markAllAsTouched();
+    this.serverError.set(
+      this.form.valid
+        ? 'This email and password do not match an account. Check both and sign in again.'
+        : ''
+    );
   }
 }
 
+/**
+ * Validators plus a server error. Nothing shows on blur or while typing; submit shows the
+ * validator errors, fixing a field clears its error as you type, and a submit the validators accept
+ * shows the server's message.
+ */
 export const FullReactiveFormExample: Story = {
   render: () => ({
     props: {},
@@ -180,15 +155,15 @@ export const FullReactiveFormExample: Story = {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FormFieldComponent, InputComponent, ButtonComponent, ReactiveFormsModule],
   template: `
-    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-cmn-4 max-w-sm">
+    <form [formGroup]="form" class="flex flex-col gap-cmn-4 max-w-sm">
       <p class="text-cmn-sm text-text-secondary">
-        No getter methods — errors auto-resolved from the registry via
-        <code>[control]</code> input.
+        Errors resolve from the validation-message registry through the
+        <code>[control]</code> input. They appear on submit and clear as each field is fixed.
       </p>
-      <cmn-form-field [required]="true" [control]="form.get('email')" label="Email">
+      <cmn-form-field [required]="true" [control]="form.controls.email" label="Email">
         <cmn-input formControlName="email" type="email" placeholder="you@example.com" />
       </cmn-form-field>
-      <cmn-form-field [required]="true" [control]="form.get('password')" label="Password">
+      <cmn-form-field [required]="true" [control]="form.controls.password" label="Password">
         <cmn-input formControlName="password" type="password" placeholder="••••••••" />
       </cmn-form-field>
       <cmn-button type="submit" variant="primary">Sign In</cmn-button>
@@ -200,10 +175,6 @@ class ControlInputExampleComponent {
     email: new FormControl('', [Validators.required, Validators.email]),
     password: new FormControl('', [Validators.required, Validators.minLength(MIN_PASSWORD_LENGTH)]),
   });
-
-  public onSubmit(): void {
-    this.form.markAllAsTouched();
-  }
 }
 
 export const WithControlInput: Story = {
@@ -213,4 +184,21 @@ export const WithControlInput: Story = {
     moduleMetadata: {imports: [ControlInputExampleComponent]},
     template: '<cmn-control-input-example />',
   }),
+};
+
+/** The same form after an empty submit: every field shows its error (guardrails V1). */
+export const SubmittedWithErrors: Story = {
+  ...WithControlInput,
+  name: 'Submitted with errors',
+  play: async ({canvasElement}) => {
+    const frames = 60;
+    for (let frame = 0; frame < frames; frame++) {
+      const form = canvasElement.querySelector('form');
+      if (form) {
+        form.requestSubmit();
+        return;
+      }
+      await new Promise(resolve => requestAnimationFrame(resolve));
+    }
+  },
 };

@@ -118,6 +118,8 @@ components:
 
 lifekit's interface is a precision instrument for reading money: flat, quiet surfaces, one engineered sans family, a single petrol accent, and figures that line up. Nothing decorates; every pixel serves reading a balance, a transaction or a status correctly at a glance. Density serves daily checking on desktop and phone, in light and dark.
 
+This page is the look. How the interface behaves (loading and empty states, feedback, form validation, tables, keyboard, charts and money) follows the published sources adopted in [docs/design/guardrails.md](docs/design/guardrails.md), which also names the check behind each rule.
+
 **Characteristics:**
 
 - One family: IBM Plex Sans (variable 100-700, self-hosted, Cyrillic) for every role; Plex Mono for code only. Money is set in the text face.
@@ -153,11 +155,11 @@ Cool graphite neutrals with a single petrol voice (restrained: accent only for t
 
 ## Layout
 
-A 4px spacing base (`cmn-1` to `cmn-16`). App chrome comes from `cmn-app-layout`: a collapsible sidebar with a top bar on desktop, and a bottom tab bar on phones whose last tab, More, is a page the app builds. Content sits in `cmn-page-container`. Data tables become list rows on phones. More space above a heading than below it.
+A 4px spacing base (`cmn-1` to `cmn-16`), a subset of Carbon's 8px scale with its 2px and 4px mini-units; an arbitrary length off that scale fails the drift check. App chrome comes from `cmn-app-layout`: a collapsible sidebar with a top bar on desktop, and a bottom tab bar on phones whose last tab, More, is a page the app builds. Content sits in `cmn-page-container`. Data tables become list rows on phones. More space above a heading than below it.
 
 ## Elevation & Depth
 
-Flat by default: hairline border on `surface-card`. Shadows are for overlays only (menu, popover, dialog, bottom sheet). A surface is held by its border or its shadow, never both, with one exception: the menu, dialog and command palette carry a shadow and a hairline `border-default`, because a shadow alone is invisible on near-black dark surfaces. Multi-select floats on its shadow alone. Backdrop blur is allowed in exactly one place: the fixed bars that scroll content passes under (the bottom tab bar and the top bar), at `backdrop-blur-md` over an 80% `surface-card` mix. Nothing else blurs, and a card, sheet or menu stays an opaque surface.
+Flat by default: hairline border on `surface-card`. Shadows are for overlays only (menu, popover, dialog, bottom sheet). A surface is held by its border or its shadow, never both, with one exception: the menu, dialog and command palette carry a shadow and a hairline `border-default`, because a shadow alone is invisible on near-black dark surfaces. The select's multiple-choice panel floats on its shadow alone. Backdrop blur is allowed in exactly one place: the fixed bars that scroll content passes under (the bottom tab bar and the top bar), at `backdrop-blur-md` over an 80% `surface-card` mix. Nothing else blurs, and a card, sheet or menu stays an opaque surface.
 
 ## Shapes
 
@@ -188,7 +190,7 @@ The D16 decision: the tab bar and the top bar blur what scrolls under them (`bac
 - **Buttons:** accent fill with `text-inverse` label; secondary bordered; destructive uses the error colour; ghost text-only. Focus is a 2px ring in `border-focus`.
 - **Chips:** pill, `surface-raised` fill; selected fills with the accent.
 - **Cards:** hairline border, `surface-card`, 12/16/24px padding. Never nested.
-- **Inputs:** `border-strong` border (3:1), accent focus ring, red border plus helper text for errors.
+- **Inputs:** `border-strong` border (3:1), accent focus ring, red border plus helper text for errors. Errors show when the form is submitted and clear as soon as the field is fixed (GOV.UK); the text says what went wrong and how to fix it, with no "please", "sorry", "valid" or "invalid".
 - **Data table / list rows:** sentence-case headers, hairline dividers, right-aligned tabular amounts.
 - **Stat card:** the balance is the content. Value in the text face with tabular figures; no uppercase label, no decorative accent. The hero-metric layout is deliberately kept for this product.
 - **Navigation:** sidebar rows with accent-subtle active fill; bottom tab bar on phones.
@@ -199,7 +201,7 @@ The D16 decision: the tab bar and the top bar blur what scrolls under them (`bac
 
 - **Do** use only `--color-*`, `--font-*`, `--radius-*`, `--shadow-*` and `cmn-*` tokens.
 - **Do** check every story in light and dark.
-- **Do** keep money in the text face with tabular figures.
+- **Do** keep money in the text face with tabular figures, formatted by `cmnMoney` / `formatMoney` (symbol first, a sign on deltas), never a local `Intl.NumberFormat`.
 
 ### Don't:
 

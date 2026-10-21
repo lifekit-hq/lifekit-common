@@ -54,12 +54,16 @@ Not removed in step 7: they are outside its candidate list, several are new, and
 some are reached through `cmn-app-layout` rather than by selector. Each needs its
 own keep-or-remove call.
 
-| Export                                                                                                                    | Package    |
-| ------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| `cmn-date-range`, `cmn-multi-select`, `cmn-password-strength`, `cmn-search-input`, `cmn-stepper-dialog`, `cmn-usage-chip` | `ui`       |
-| `cmnTypography`, `cmnSkeleton` directives                                                                                 | `ui`       |
-| `provideLucideIcons`, `PageActionsService`, `ShellService`                                                                | `ui`       |
-| `lk-line-chart`, `lk-segmented`, `lk-theme-picker`, `lk-dismissible-chip`                                                 | `elements` |
+`cmn-multi-select`, `cmn-password-strength`, `cmn-stepper-dialog`, `cmn-usage-chip` and
+`cmn-google-sign-in-button` were removed in 4.0 (guardrails Q7, #183); `cmn-select`'s `multiple`
+mode replaces `cmn-multi-select`.
+
+| Export                                                                    | Package    |
+| ------------------------------------------------------------------------- | ---------- |
+| `cmn-date-range`, `cmn-search-input`                                      | `ui`       |
+| `cmnTypography`, `cmnSkeleton` directives                                 | `ui`       |
+| `provideLucideIcons`, `PageActionsService`, `ShellService`                | `ui`       |
+| `lk-line-chart`, `lk-segmented`, `lk-theme-picker`, `lk-dismissible-chip` | `elements` |
 
 `charts-core` is a dependency of finance-sentry only;
 it is used internally by the `ui` chart components and `lk-line-chart`.

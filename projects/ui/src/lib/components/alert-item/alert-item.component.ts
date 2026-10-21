@@ -11,7 +11,7 @@ export type AlertItemDensity = 'card' | 'flat';
 
 /** 24px drawn, at least --size-touch pressed on a phone. */
 const DISMISS_CLASSES =
-  'flex shrink-0 rounded p-1 text-text-disabled transition-colors hover:bg-surface-raised ' +
+  'relative z-10 flex shrink-0 rounded p-1 text-text-disabled transition-colors hover:bg-surface-raised ' +
   `hover:text-text-primary ${PHONE_HIT_AREA_CLASSES}`;
 
 const SEVERITY_COLOR: Record<AlertItemSeverity, string> = {
@@ -42,8 +42,8 @@ const SEVERITY_ICON: Record<AlertItemSeverity, LucideIconName> = {
       [class.py-cmn-3]="flat()"
       [style.border-color]="!flat() && !isRead() ? color() + '30' : ''"
       [style.background]="!flat() && !isRead() ? color() + '08' : ''"
-      (click)="onContainerClick()"
-      class="relative flex cursor-pointer items-start gap-cmn-3 transition-colors"
+      [class.cursor-pointer]="!isRead()"
+      class="relative flex items-start gap-cmn-3 transition-colors"
     >
       <div
         [style.background]="color() + '18'"
@@ -54,12 +54,22 @@ const SEVERITY_ICON: Record<AlertItemSeverity, LucideIconName> = {
 
       <div class="flex-1 min-w-0">
         <div class="mb-cmn-1 flex flex-wrap items-center gap-cmn-2">
-          <span
-            [class.text-text-primary]="isRead()"
-            [style.color]="isRead() ? '' : color()"
-            class="font-label text-cmn-sm font-semibold"
-            >{{ title() }}</span
-          >
+          @if (isRead()) {
+            <span class="font-label text-cmn-sm font-semibold text-text-primary">{{
+              title()
+            }}</span>
+          } @else {
+            <!-- The title is the card's one control: its ::after stretches over the whole card, so a
+                 tap anywhere marks the item read and a keyboard reaches it as a real button. -->
+            <button
+              [style.color]="color()"
+              (click)="onContainerClick()"
+              class="text-left font-label text-cmn-sm font-semibold after:absolute after:inset-0 after:content-['']"
+              type="button"
+            >
+              {{ title() }}
+            </button>
+          }
           @if (badgeLabel()) {
             <cmn-tag [variant]="severity()">{{ badgeLabel() }}</cmn-tag>
           }

@@ -21,7 +21,7 @@ export interface AsyncStatusConfig {
   defaultErrorMessage?: string;
 }
 
-const DEFAULT_ERROR_MESSAGE = 'Something went wrong. Please try again.';
+const DEFAULT_ERROR_MESSAGE = 'Something went wrong. Try again.';
 const INITIAL_STATE: AsyncStatusState = {status: 'idle', errorCode: null};
 
 export function withAsyncStatus({

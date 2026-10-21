@@ -11,6 +11,7 @@ import {
   DRIFT_RULES,
   RADIUS_SCALE_PX,
   scanSource,
+  SPACING_SCALE_PX,
   TEXT_RAMP_PX,
 } from '../drift/index.mjs';
 
@@ -23,6 +24,7 @@ describe('contract', () => {
   it('reads the ramp and the radius scale from the package', () => {
     assert.deepEqual(TEXT_RAMP_PX, [12, 14, 16, 18, 20, 24, 30, 36]);
     assert.deepEqual(RADIUS_SCALE_PX, [3, 6, 8, 9999]);
+    assert.deepEqual(SPACING_SCALE_PX, [0, 1, 2, 4, 8, 12, 16, 20, 24, 28, 32, 40, 48, 64]);
   });
 });
 
@@ -303,6 +305,54 @@ describe('layout-transition', () => {
   });
 });
 
+describe('spacing', () => {
+  it('flags padding, margin, gap and inset lengths off the scale', () => {
+    assert.deepEqual(scan('a.css', 'a {\n  padding: 13px;\n}'), ['spacing:2']);
+    assert.deepEqual(scan('a.css', 'a { margin: 0 10px; }'), ['spacing:1']);
+    assert.deepEqual(scan('a.css', 'a { gap: 0.4rem; } b { inset-inline-start: 6px; }'), [
+      'spacing:1',
+      'spacing:1',
+    ]);
+    assert.deepEqual(scan('a.ts', "const o = {padding: '5px'};"), ['spacing:1']);
+    assert.deepEqual(scan('a.html', '<p class="p-[13px] -mt-[3px] gap-x-[0.3rem]">x</p>'), [
+      'spacing:1',
+      'spacing:1',
+      'spacing:1',
+    ]);
+    assert.deepEqual(scan('a.html', '<p style="padding-top: 7px">x</p>'), ['spacing:1']);
+  });
+
+  it('accepts the scale, the hairline, tokens, calc, auto and percentages', () => {
+    clean(
+      'a.css',
+      'a { padding: 8px 16px; margin: -1px auto; gap: 1.5rem; inset: 0; } b { padding: var(--x); margin: calc(100% - 3px); padding-left: 10%; }'
+    );
+    clean('a.html', '<p class="p-[12px] gap-[2px] m-[var(--x)] w-[13px]">x</p>');
+  });
+});
+
+describe('error-copy', () => {
+  it('flags please, sorry, oops, valid and invalid in prose literals', () => {
+    assert.deepEqual(scan('a.ts', "const e = 'Something went wrong. Please try again.';"), [
+      'error-copy:1',
+    ]);
+    assert.deepEqual(scan('a.ts', "const e = {\n  email: () => 'Enter a valid email.',\n};"), [
+      'error-copy:2',
+    ]);
+    assert.deepEqual(scan('a.ts', 'const e = `Format is invalid for ${x}.`;'), ['error-copy:1']);
+    assert.deepEqual(scan('a.ts', "const e = 'Sorry, that failed.';"), ['error-copy:1']);
+  });
+
+  it('accepts fixed copy, identifiers, attribute names and inline templates', () => {
+    clean(
+      'a.ts',
+      "const e = 'Enter an email address in the correct format.'; const k = 'invalid'; const a = 'aria-invalid';"
+    );
+    clean('a.ts', "const c = 'ng-invalid is-valid';");
+    clean('a.ts', "@Component({template: '<p>Please wait</p>'})\nclass A {}");
+  });
+});
+
 describe('scanning', () => {
   it('reports each problem once, in line order, with the file', () => {
     const text = 'a {\n  border-radius: 10px;\n  font-size: 11px;\n}\n';
@@ -331,6 +381,8 @@ describe('scanning', () => {
       'radius',
       'root-font-size',
       'layout-transition',
+      'spacing',
+      'error-copy',
     ]);
   });
 });

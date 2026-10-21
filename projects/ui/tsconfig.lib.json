@@ -8,7 +8,7 @@
     "composite": true,
     "declaration": true,
     "declarationMap": true,
-    "types": ["google.accounts"],
+    "types": [],
     "paths": {
       "@lifekit-hq/charts-core": ["../../dist/lifekit-hq/charts-core"],
       "@lifekit-hq/elements": ["../../dist/lifekit-hq/elements"],
