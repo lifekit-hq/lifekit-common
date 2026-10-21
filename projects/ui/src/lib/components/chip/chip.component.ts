@@ -50,7 +50,7 @@ const REMOVE_BUTTON_CLASSES =
   template: `
     <ng-template #label><ng-content /></ng-template>
     @if (removable()) {
-      <span [class]="removablePillClasses">
+      <span [class]="removablePillClasses" [attr.aria-disabled]="disabled() ? 'true' : null">
         <span class="truncate"><ng-container [ngTemplateOutlet]="label" /></span>
         <button
           [class]="removeButtonClasses"

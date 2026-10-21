@@ -129,6 +129,17 @@ describe('ChipComponent removable', () => {
     expect(buttons()[0].disabled).toBe(true);
     expect(removed).toBe(0);
   });
+
+  it('marks the pill aria-disabled when disabled so the label is exempt from contrast checks', () => {
+    fixture.detectChanges();
+    const pill = buttons()[0].parentElement as HTMLElement;
+    expect(pill.hasAttribute('aria-disabled')).toBe(false);
+
+    fixture.componentRef.setInput('disabled', true);
+    fixture.detectChanges();
+
+    expect(pill.getAttribute('aria-disabled')).toBe('true');
+  });
 });
 
 describe('ChipComponent disabled', () => {
