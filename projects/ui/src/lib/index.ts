@@ -76,6 +76,7 @@ export * from './components/top-bar/top-bar.component';
 
 // Directives
 export * from './directives/skeleton/skeleton.directive';
+export * from './directives/tooltip/tooltip.directive';
 export * from './directives/typography/typography.directive';
 
 // Pipes
