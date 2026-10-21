@@ -1,5 +1,24 @@
 # Changelog
 
+## [4.0.0](https://github.com/lifekit-hq/lifekit-common/compare/v3.9.0...v4.0.0) (2026-10-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* **ui:** cmn-empty-state's `subMessage` (the body) is now a required string input; every cmn-empty-state must pass a body alongside `message`.
+* cmn-form-field no longer shows errors on blur or after markAllAsTouched alone; errors appear when the form is submitted and clear live once fixed. Error toasts no longer auto-dismiss. cmn-async-state turns on keepContent, showDelay 200 and minDisplay 400 by default (opt out with [keepContent]="false" or a 0 delay). cmn-google-sign-in-button, cmn-password-strength, cmn-stepper-dialog, cmn-usage-chip and cmn-multi-select are removed (use cmn-select with multiple). An unread cmn-alert-item's title is now a real button stretched over the card (a click anywhere still marks it read); a read item's card is no longer clickable. The default validation messages and withAsyncStatus's default error message have new wording. The @lifekit-hq/config template preset makes click-events-have-key-events and interactive-supports-focus errors.
+
+### Features
+
+* adopt the UI/UX guardrails and enforce them ([#187](https://github.com/lifekit-hq/lifekit-common/issues/187)) ([e07517f](https://github.com/lifekit-hq/lifekit-common/commit/e07517fbde706eb3d5f2a464584b268ffee86f51))
+* **ui:** add cmn-allocation-bar proportional split bar ([#185](https://github.com/lifekit-hq/lifekit-common/issues/185)) ([b30a4ba](https://github.com/lifekit-hq/lifekit-common/commit/b30a4ba91c01f76542e642b59afeefb117684bb2))
+* **ui:** add cmn-description-list, a key-value list on dl/dt/dd ([#199](https://github.com/lifekit-hq/lifekit-common/issues/199)) ([b6fcf5a](https://github.com/lifekit-hq/lifekit-common/commit/b6fcf5ac3cfdaa1c993b7b1d63a66a93334e2d88)), closes [#198](https://github.com/lifekit-hq/lifekit-common/issues/198)
+* **ui:** add cmn-error-summary, input hints and forms support for checkbox and toggle ([#189](https://github.com/lifekit-hq/lifekit-common/issues/189)) ([5a06974](https://github.com/lifekit-hq/lifekit-common/commit/5a0697413254111669945677ab98eb43021928b6))
+* **ui:** add cmnTooltip, a WCAG 1.4.13 tooltip directive ([#193](https://github.com/lifekit-hq/lifekit-common/issues/193)) ([d3a4b04](https://github.com/lifekit-hq/lifekit-common/commit/d3a4b042324935a53311c8586ed07dc420ea05bb))
+* **ui:** add first-use, no-results and error kinds to cmn-empty-state ([#197](https://github.com/lifekit-hq/lifekit-common/issues/197)) ([04b868b](https://github.com/lifekit-hq/lifekit-common/commit/04b868bdee71cac8fefc35dee643594371ce107e))
+* **ui:** add toast actions, a newest-last stack and a hover/focus pause ([#195](https://github.com/lifekit-hq/lifekit-common/issues/195)) ([2ded6ee](https://github.com/lifekit-hq/lifekit-common/commit/2ded6ee2e0eb3d32220496a334689a4292155558))
+* **ui:** let cmn-stat-card format a numeric value through the library formatter ([#191](https://github.com/lifekit-hq/lifekit-common/issues/191)) ([90e72ad](https://github.com/lifekit-hq/lifekit-common/commit/90e72adde85cd9d29badf12927f3de6da9749411))
+
 ## [3.9.0](https://github.com/lifekit-hq/lifekit-common/compare/v3.8.0...v3.9.0) (2026-10-21)
 
 
