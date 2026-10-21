@@ -74,7 +74,9 @@ export const Dark: Story = {
       <cmn-checkbox formControlName="news" label="Send me product news">
         <span class="font-label text-cmn-sm text-text-primary">Send me product news</span>
       </cmn-checkbox>
-      <p class="text-cmn-xs text-text-secondary">Form value: {{ form.value | json }}</p>
+      <p class="text-cmn-xs leading-relaxed text-text-secondary">
+        Form value: {{ form.value | json }}
+      </p>
     </form>
   `,
 })
