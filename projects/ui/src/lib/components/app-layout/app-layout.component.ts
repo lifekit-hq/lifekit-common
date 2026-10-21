@@ -632,7 +632,9 @@ export class AppLayoutComponent {
           main.style.setProperty(property, `${Math.ceil(insets[key as keyof typeof insets])}px`);
         }
         // The same bottom cover, measured from the viewport, for overlays outside main (toasts).
-        const viewportCover = insets.bottom ? insets.bottom + window.innerHeight - box.bottom : 0;
+        const viewportCover = insets.bottom
+          ? Math.max(0, insets.bottom + window.innerHeight - box.bottom)
+          : 0;
         root.style.setProperty(CMN_OVERLAY_INSET_BOTTOM, `${Math.ceil(viewportCover)}px`);
         const padding = parseFloat(getComputedStyle(main).paddingTop);
         const above = page.getBoundingClientRect().top - box.top + main.scrollTop - padding;

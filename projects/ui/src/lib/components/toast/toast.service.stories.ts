@@ -20,7 +20,7 @@ const LONG_DURATION_MS = 20_000;
       <cmn-button (clicked)="showStacked()" class="cmn-story-stack">stack four</cmn-button>
       <cmn-button (clicked)="showLong()" variant="secondary">long duration</cmn-button>
     </div>
-    <p class="mt-cmn-4 text-cmn-sm text-text-secondary">
+    <p class="mt-cmn-4 max-w-prose text-cmn-sm text-text-secondary">
       Toasts dock bottom-centre, above the tab bar and the bottom inset, newest at the bottom and at
       most three in view. Info, success and warning dismiss themselves after 3s, paused while the
       stack is hovered or focused; an error, or a toast with an action, stays until it is used or
