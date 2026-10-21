@@ -23,10 +23,6 @@ export const Card: Story = {
   },
 };
 
-export const MessageOnly: Story = {
-  args: {message: 'Nothing to show'},
-};
-
 export const Bare: Story = {
   args: {
     message: 'No results',
@@ -89,6 +85,7 @@ export const FirstUse: Story = {
     message: 'No budgets yet',
     subMessage: 'Set a monthly limit for a category to see how much is left.',
     icon: 'Plus',
+    kind: 'first-use',
     actionLabel: 'Add a budget',
   },
 };
@@ -99,17 +96,21 @@ export const NoResults: Story = {
     message: 'No transactions match "rent"',
     subMessage: 'Check the spelling or search for a payee instead.',
     icon: 'Search',
+    kind: 'no-results',
     actionLabel: 'Clear search',
   },
 };
 
-/** Error (guardrails S6): say what failed and offer a retry; never an empty state that hides it. */
+/**
+ * Error (guardrails S6): say what failed and offer a retry; never an empty state that hides it.
+ * The `error` kind announces the state and tints the icon without an `iconClass`.
+ */
 export const Error: Story = {
   args: {
     message: 'Transactions did not load',
     subMessage: 'The bank did not answer. Your saved data is unchanged.',
     icon: 'CircleAlert',
-    iconClass: 'text-status-error',
+    kind: 'error',
     actionLabel: 'Try again',
   },
 };

@@ -521,6 +521,11 @@ describe('AsyncStateComponent state pattern', () => {
       expect(query('cmn-empty-state')?.textContent).toContain('No data available.');
     });
 
+    it('gives the empty state a default body without a sub-message', () => {
+      render('success', {isEmpty: true});
+      expect(query('cmn-empty-state')?.textContent).toContain('There is nothing to show here yet.');
+    });
+
     it('passes a sub-message to the empty state', () => {
       host.emptySubMessage.set('Add a transaction to get started.');
       render('success', {isEmpty: true});
