@@ -29,6 +29,7 @@ import type {MenuItem} from '../menu/menu.component';
 import {PageContainerComponent} from '../page-container/page-container.component';
 import {SegmentedComponent, type SegmentedOption} from '../segmented/segmented.component';
 import type {NavItem} from '../sidebar-nav/sidebar-nav.component';
+import {ToastService} from '../toast/toast.service';
 import {
   accountMenu,
   APPEARANCE_PALETTE_ITEMS,
@@ -131,6 +132,22 @@ class StorySheetLauncherComponent {
   }
 }
 
+/** Shows two toasts that stay up (an action, an error), so the stack's place can be checked. */
+@Component({
+  selector: 'cmn-story-toast-launcher',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template:
+    '<button (click)="show()" type="button" class="cmn-story-show-toasts">Show toasts</button>',
+})
+class StoryToastLauncherComponent {
+  private readonly toast = inject(ToastService);
+
+  protected show(): void {
+    this.toast.success('Transaction deleted.', {action: {label: 'Undo', run: () => undefined}});
+    this.toast.error('Monobank did not sync.');
+  }
+}
+
 const NAV_ITEMS: NavItem[] = [
   {label: 'Dashboard', icon: 'LayoutDashboard', route: '/dashboard'},
   {label: 'Accounts', icon: 'Building2', route: '/accounts'},
@@ -186,7 +203,7 @@ const meta: Meta<AppLayoutComponent> = {
   tags: ['autodocs'],
   decorators: [
     moduleMetadata({
-      imports: [StorySheetLauncherComponent],
+      imports: [StorySheetLauncherComponent, StoryToastLauncherComponent],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
     }),
   ],
@@ -547,6 +564,33 @@ export const PhoneOverlaySheetOpen: Story = {
         [phoneOverlay]="phoneOverlay"
         [floatingActionClearance]="floatingActionClearance"
       ><cmn-story-sheet-launcher />${NOTICES}${NOTICES_FAB}</cmn-app-layout>
+    `,
+  }),
+};
+
+/**
+ * Toasts stack bottom-centre above the tab bar, the floating action and the bottom inset, never
+ * over the chrome; the newest sits at the bottom, nearest the thumb.
+ */
+export const PhoneOverlayToast: Story = {
+  ...PhoneOverlayNotices,
+  play: async ({canvasElement}) => {
+    canvasElement.querySelector<HTMLButtonElement>('.cmn-story-show-toasts')?.click();
+  },
+  render: args => ({
+    props: {...args, rows: Array.from({length: OVERLAY_ROWS}, (_, i) => i + 1)},
+    template: `
+      <cmn-app-layout
+        [navItems]="navItems"
+        [activeRoute]="activeRoute"
+        [title]="title"
+        [avatarLabel]="avatarLabel"
+        [avatarMenuItems]="avatarMenuItems"
+        [tabRoutes]="tabRoutes"
+        [moreRoute]="moreRoute"
+        [phoneOverlay]="phoneOverlay"
+        [floatingActionClearance]="floatingActionClearance"
+      ><cmn-story-toast-launcher />${OVERLAY_BODY}${NOTICES_FAB}</cmn-app-layout>
     `,
   }),
 };

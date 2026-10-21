@@ -424,8 +424,8 @@ for (const device of SHELLS) {
 
 const NOTICE_WIDTHS = [NARROW_PHONE, {width: 390, height: 844}] as const;
 
-// Overlays never cover the chrome: notices sit between the top bar and the tab bar, and the
-// floating action hides while a bottom sheet is open.
+// Overlays never cover the chrome: notices sit between the top bar and the tab bar, toasts above
+// the tab bar and the floating action, and the floating action hides while a bottom sheet is open.
 for (const size of NOTICE_WIDTHS) {
   test.describe(`overlays ${size.width}x${size.height}`, () => {
     test.use({viewport: size, hasTouch: true, isMobile: true});
@@ -458,6 +458,34 @@ for (const size of NOTICE_WIDTHS) {
           );
         }
       }
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)
+      ).toBe(false);
+    });
+
+    test('toasts | sit above the tab bar, the floating action and the bottom inset', async ({
+      page,
+    }) => {
+      await open(page, layoutStory('phone-overlay-toast'));
+      const toasts = page.locator('cmn-toast [role]');
+      await expect(toasts).toHaveCount(2);
+      const boxes = await toasts.evaluateAll(els =>
+        els.map(el => {
+          const {top, bottom} = el.getBoundingClientRect();
+          return {top, bottom};
+        })
+      );
+      const chrome = await page.evaluate(() => {
+        const tabs = document.querySelector('cmn-bottom-tab-bar nav')?.getBoundingClientRect();
+        const fab = document.querySelector('[cmnAppLayoutFab]')?.getBoundingClientRect();
+        return Math.min(tabs?.top ?? Infinity, fab?.height ? fab.top : Infinity);
+      });
+      expect(chrome).toBeLessThan(Infinity);
+      for (const box of boxes) {
+        expect(box.bottom).toBeLessThanOrEqual(chrome + SURFACE_TOLERANCE);
+      }
+      // The newest (the error, shown last) sits at the bottom, nearest the thumb.
+      expect(boxes[1].top).toBeGreaterThan(boxes[0].bottom);
       expect(
         await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)
       ).toBe(false);

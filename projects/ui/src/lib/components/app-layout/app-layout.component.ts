@@ -4,6 +4,7 @@ import {
   Component,
   computed,
   DestroyRef,
+  DOCUMENT,
   effect,
   ElementRef,
   inject,
@@ -24,6 +25,7 @@ import {CmnDrawerService} from '../../services/drawer/drawer.service';
 import {CmnPageActionsService} from '../../services/page-actions/page-actions.service';
 import {CmnShellService} from '../../services/shell/shell.service';
 import {ThemeService} from '../../services/theme/theme.service';
+import {CMN_OVERLAY_INSET_BOTTOM} from '../../tokens/overlay-inset';
 import {type AccountIdentity} from '../account-avatar/account-avatar.component';
 import {BottomTabBarComponent} from '../bottom-tab-bar/bottom-tab-bar.component';
 import {CommandPaletteComponent} from '../command-palette/command-palette.component';
@@ -256,6 +258,7 @@ export class AppLayoutComponent {
   private readonly location = inject(Location);
   private readonly pageActionsService = inject(CmnPageActionsService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly document = inject(DOCUMENT);
   private readonly shell = inject(ShellNavigationService);
   private readonly shellService = inject(CmnShellService);
   private paletteOpen = false;
@@ -592,11 +595,13 @@ export class AppLayoutComponent {
       const page = this.pageRef().nativeElement;
       const pageOverflow = this.pageOverflowRef().nativeElement;
       const clearance = this.fabClearance() ?? 0;
+      const root = this.document.documentElement;
       if (!this.overlay() || typeof ResizeObserver === 'undefined') {
         for (const property of Object.values(CMN_CONTENT_INSET_PROPERTIES)) {
           main.style.removeProperty(property);
         }
         main.style.removeProperty(PAGE_ABOVE_PROPERTY);
+        root.style.removeProperty(CMN_OVERLAY_INSET_BOTTOM);
         pageOverflow.style.removeProperty('height');
         return;
       }
@@ -626,6 +631,9 @@ export class AppLayoutComponent {
         for (const [key, property] of Object.entries(CMN_CONTENT_INSET_PROPERTIES)) {
           main.style.setProperty(property, `${Math.ceil(insets[key as keyof typeof insets])}px`);
         }
+        // The same bottom cover, measured from the viewport, for overlays outside main (toasts).
+        const viewportCover = insets.bottom ? insets.bottom + window.innerHeight - box.bottom : 0;
+        root.style.setProperty(CMN_OVERLAY_INSET_BOTTOM, `${Math.ceil(viewportCover)}px`);
         const padding = parseFloat(getComputedStyle(main).paddingTop);
         const above = page.getBoundingClientRect().top - box.top + main.scrollTop - padding;
         main.style.setProperty(PAGE_ABOVE_PROPERTY, `${Math.max(0, Math.ceil(above))}px`);
@@ -656,6 +664,7 @@ export class AppLayoutComponent {
       onCleanup(() => {
         observer.disconnect();
         changes.disconnect();
+        root.style.removeProperty(CMN_OVERLAY_INSET_BOTTOM);
       });
     });
   }

@@ -35,6 +35,15 @@ const VARIANT_ROLE: Record<ToastVariant, string> = {
     <div [attr.role]="role()" [class]="containerClasses()">
       <cmn-icon [name]="iconName()" color="currentColor" size="sm" aria-hidden="true" />
       <span class="font-base text-cmn-sm">{{ message() }}</span>
+      @if (action(); as label) {
+        <button
+          (click)="actioned.emit()"
+          type="button"
+          class="ml-auto shrink-0 rounded-cmn-sm px-cmn-2 py-0.5 font-base text-cmn-sm font-semibold underline underline-offset-2 hover:bg-black/20 focus:outline-none focus:ring-2 focus:ring-white/50"
+        >
+          {{ label }}
+        </button>
+      }
       <button
         (click)="dismissed.emit()"
         type="button"
@@ -49,8 +58,11 @@ const VARIANT_ROLE: Record<ToastVariant, string> = {
 export class ToastComponent {
   public readonly message = input<string>('');
   public readonly variant = input<ToastVariant>('info');
+  /** Label of the toast's one action (e.g. "Undo"); two words or fewer. No button when unset. */
+  public readonly action = input<string | undefined>(undefined);
 
   public readonly dismissed = output<void>();
+  public readonly actioned = output<void>();
 
   public readonly role = computed(() => VARIANT_ROLE[this.variant()]);
   public readonly iconName = computed(() => VARIANT_ICON_NAME[this.variant()]);

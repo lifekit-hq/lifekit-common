@@ -99,4 +99,5 @@ export * from './providers/provide-lucide-icons';
 
 // Tokens
 export * from './tokens/breakpoints';
+export * from './tokens/overlay-inset';
 export * from './tokens/validation-messages.token';

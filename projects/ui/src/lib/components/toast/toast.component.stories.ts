@@ -6,6 +6,7 @@ import {ToastComponent} from './toast.component';
 interface ToastStoryArgs {
   message: string;
   variant: ToastVariant;
+  action?: string;
 }
 
 const meta: Meta<ToastStoryArgs> = {
@@ -18,6 +19,7 @@ const meta: Meta<ToastStoryArgs> = {
       options: ['info', 'success', 'warning', 'error'],
     },
     message: {control: 'text'},
+    action: {control: 'text'},
   },
 };
 
@@ -57,6 +59,18 @@ export const Error: Story = {
     message: 'Unable to connect to the server. Check your connection and try again.',
     variant: 'error',
   },
+};
+
+/**
+ * One action of two words or fewer (guardrails F4). `ToastService` keeps a toast with an action up
+ * until it is used or dismissed (F1).
+ */
+export const WithAction: Story = {
+  render: args => ({
+    props: args,
+    template: '<cmn-toast [message]="message" [variant]="variant" [action]="action" />',
+  }),
+  args: {message: 'Transaction deleted.', variant: 'success', action: 'Undo'},
 };
 
 export const AllVariants: Story = {
