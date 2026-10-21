@@ -23,7 +23,7 @@ npm run lint             # ESLint (angular-eslint) across all projects
 npm run build            # build:brand (tokens icons), then ng-packagr: charts-core → elements → ui → core (order matters)
 npm run build-storybook  # static Storybook catalog (deployed to Pages on merge)
 npm run check:drift      # static design-drift scan of source (font/colour/size/radius/root-size/transition literals outside tokens); CI fails on any finding, no baseline — rules in docs/BROWSER-CHROME.md
-npm run design:scan      # impeccable detector over source (+ `-- --storybook <url>` for a built catalog); report-only, compares to docs/design-baseline.json
+npm run design:scan      # impeccable detector over source (+ `-- --storybook <url>` for a built catalog); fails on any finding not justified in docs/design-baseline.json
 ```
 
 ## Verify gate

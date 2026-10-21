@@ -192,6 +192,7 @@ export const RoutedShortPage: StoryObj<RoutedShortShellComponent> = {
         provideRouter(
           [
             {path: '', redirectTo: 'detail', pathMatch: 'full'},
+            {path: 'list', component: RoutedListPageComponent, data: {title: 'List'}},
             {path: 'detail', component: RoutedDetailPageComponent, data: {title: 'Detail'}},
           ],
           withHashLocation()

@@ -28,6 +28,20 @@ describe('StatCardComponent', () => {
     expect(text).toContain('$1,420,892.12');
   });
 
+  it('should wrap a value wider than the card instead of hiding digits behind an ellipsis', () => {
+    const host: HTMLElement = fixture.nativeElement;
+    host.style.display = 'block';
+    host.style.width = '160px';
+    fixture.componentRef.setInput('value', '$12,345,678,901.23');
+    fixture.detectChanges();
+    const value = host.querySelector<HTMLElement>('.text-cmn-2xl');
+    if (!value) {
+      throw new Error('value span not rendered');
+    }
+    expect(value.classList).not.toContain('truncate');
+    expect(value.scrollWidth).toBeLessThanOrEqual(value.clientWidth);
+  });
+
   it('should show loading skeleton when loading is true', () => {
     fixture.componentRef.setInput('loading', true);
     fixture.detectChanges();

@@ -35,10 +35,8 @@ const NEUTRAL_DELTA_CLASSES = 'text-text-secondary';
           </div>
         }
       } @else {
-        <span
-          title="{{ value() }}"
-          class="truncate text-cmn-2xl font-semibold tabular-nums text-text-primary"
-        >
+        <!-- A long value wraps rather than truncating: an ellipsis would hide digits of an amount -->
+        <span class="break-words text-cmn-2xl font-semibold tabular-nums text-text-primary">
           {{ value() }}
         </span>
         @if (delta() !== null) {

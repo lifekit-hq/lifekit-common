@@ -29,11 +29,12 @@ export class ListItemRowComponent {
   public readonly dimmed = input<boolean>(false);
 
   // Dimmed recolours the text rather than fading the row: opacity would drag text and tags under
-  // 4.5:1. Only the leading avatar/icon slot is faded.
+  // 4.5:1. The label steps down to the sublabel's grade, which stays readable, and the leading
+  // avatar/icon slot is desaturated, not faded, so initials in an avatar keep their contrast.
   protected readonly rowClasses = computed(() => {
     const base =
       'flex items-center gap-cmn-3 border-b border-border-default px-cmn-4 py-cmn-3 last:border-b-0 hover:bg-surface-bg transition-colors';
-    return this.dimmed() ? `${base} [&>[avatar]]:opacity-55` : base;
+    return this.dimmed() ? `${base} [&>[avatar]]:grayscale` : base;
   });
 
   protected readonly labelClasses = computed(

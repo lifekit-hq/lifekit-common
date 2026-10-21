@@ -43,13 +43,16 @@ let fieldCounter = 0;
       <ng-content />
 
       @if (hint() && !resolvedError()) {
-        <span class="text-cmn-xs text-text-secondary">{{ hint() }}</span>
+        <span class="text-cmn-xs leading-relaxed text-text-secondary">{{ hint() }}</span>
       }
 
       @if (resolvedError()) {
-        <span role="alert" aria-live="polite" class="text-cmn-xs text-status-error">{{
-          resolvedError()
-        }}</span>
+        <span
+          role="alert"
+          aria-live="polite"
+          class="text-cmn-xs leading-relaxed text-status-error"
+          >{{ resolvedError() }}</span
+        >
       }
     </div>
   `,

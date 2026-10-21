@@ -157,6 +157,19 @@ describe('SegmentedComponent', () => {
     expect(emitted).toEqual([]);
   });
 
+  it('moves a disabled choice off the accent tint, so its disabled text is never gray on colour', () => {
+    const chosen = (): HTMLButtonElement =>
+      cells().find(c => c.getAttribute('aria-checked') === 'true') as HTMLButtonElement;
+    expect(chosen().classList).toContain('bg-accent-subtle');
+
+    fixture.componentRef.setInput('disabled', true);
+    fixture.detectChanges();
+
+    expect(chosen().classList).not.toContain('bg-accent-subtle');
+    expect(chosen().classList).toContain('bg-surface-card');
+    expect(chosen().classList).toContain('ring-border-strong');
+  });
+
   it('drops aria-label when no label is given', () => {
     fixture.componentRef.setInput('label', '');
     fixture.detectChanges();

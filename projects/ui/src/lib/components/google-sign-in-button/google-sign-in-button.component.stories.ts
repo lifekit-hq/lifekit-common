@@ -14,7 +14,7 @@ const meta: Meta<GoogleSignInButtonComponent> = {
     docs: {
       description: {
         component:
-          'Renders the Google Identity Services (GSI) sign-in button. Requires a valid `clientId` from Google Cloud Console. In Storybook the button renders but the GSI popup will not complete without a real OAuth origin.',
+          'Renders the Google Identity Services (GSI) sign-in button. Requires a valid `clientId` from Google Cloud Console and the GSI client script (`https://accounts.google.com/gsi/client`) on the page. Until that script loads it renders nothing, so this catalog, which does not load it, shows an empty slot.',
       },
     },
   },

@@ -18,8 +18,10 @@ const meta: Meta<StepperDialogComponent> = {
 export default meta;
 type Story = StoryObj<StepperDialogComponent>;
 
+/** Stands in for the dialog container, whose title is the h2 the step headings sit under. */
 const shell = (inner: string): string => `
   <div class="w-[32rem] bg-surface-card border border-border-default rounded-cmn-lg p-cmn-6">
+    <h2 class="mb-cmn-4 text-cmn-lg font-medium text-text-primary">Connect a bank</h2>
     ${inner}
   </div>`;
 
@@ -30,8 +32,8 @@ const STEPS = `
   <ng-template cmnStep label="Credentials">
     <p class="text-cmn-sm text-text-secondary">Enter your credentials.</p>
   </ng-template>
-  <ng-template cmnStep label="Done">
-    <p class="text-cmn-sm text-text-secondary">All set.</p>
+  <ng-template cmnStep label="Confirm">
+    <p class="text-cmn-sm text-text-secondary">Check the details, then connect.</p>
   </ng-template>`;
 
 export const Default: Story = {
@@ -48,7 +50,7 @@ export const MiddleStep: Story = {
 };
 
 export const LastStep: Story = {
-  args: {step: 2, finishLabel: 'Done'},
+  args: {step: 2, finishLabel: 'Connect'},
   render: args => ({
     props: args,
     template: shell(

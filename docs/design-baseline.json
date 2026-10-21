@@ -1,43 +1,95 @@
 {
   "detector": "0.1.11",
+  "accepted": [
+    {
+      "rule": "low-contrast",
+      "stories": [
+        "components-button--disabled",
+        "components-dangerzone--disabled",
+        "components-pageheader--action-disabled",
+        "components-settingssection--save-disabled-until-dirty",
+        "components-settingssection--saving",
+        "components-stepperdialog--busy",
+        "components-stepperdialog--invalid-step",
+        "patterns-settings-page--*"
+      ],
+      "match": "opacity stack",
+      "reason": "A disabled control is dimmed on purpose; WCAG 1.4.3 exempts inactive components."
+    },
+    {
+      "rule": "low-contrast",
+      "stories": ["components-topbar--overlay"],
+      "match": "backdrop filter",
+      "reason": "The frosted bar's median contrast is above 8:1; the low tail is content scrolling under the blur."
+    },
+    {
+      "rule": "marquee",
+      "stories": ["*"],
+      "match": ".cmn-skeleton-sweep::after",
+      "reason": "The skeleton shimmer is a loading signal, and it stops under prefers-reduced-motion."
+    },
+    {
+      "rule": "pulsing-dot",
+      "stories": [
+        "components-badge--dot",
+        "components-chat-chatmessage--thinking",
+        "components-chat-chatmessage--with-tool-progress"
+      ],
+      "max": 6,
+      "reason": "The pulse signals live activity (processing, typing, a running tool) and stops under prefers-reduced-motion."
+    },
+    {
+      "rule": "gpt-thin-border-wide-shadow",
+      "stories": ["components-dialog--*"],
+      "reason": "DESIGN.md gives every overlay a hairline plus shadow so it separates in both themes."
+    },
+    {
+      "rule": "clipped-overflow-container",
+      "stories": ["components-app-layout--*"],
+      "max": 4,
+      "reason": "Detector false positive: the shell CSS-hides the nav it is not using (the sidebar on a phone, the tab bar elsewhere); a badge in that display:none subtree has no box, so its negative offsets read as escaping the clip."
+    },
+    {
+      "rule": "cramped-padding",
+      "stories": ["primitives-code-block--capped-height", "components-drawer--bottom-sheet-*"],
+      "reason": "Detector false positive: text clipped at the edge of a scroll box is read as missing padding."
+    },
+    {
+      "rule": "flat-type-hierarchy",
+      "stories": ["components-app-layout--phone-overlay-sheet-open"],
+      "reason": "iOS chrome: the top bar's inline title (h1) and an open sheet's title (h2) are both nav-bar titles at one size, and the sheet is modal over the page."
+    }
+  ],
   "source": {
-    "total": 4,
+    "total": 0,
     "groups": {
       "low-contrast": 0,
       "undersized-and-tiny-text": 0,
       "overused-font": 0,
       "layout-transition": 0,
-      "design-system-drift": 4
+      "design-system-drift": 0
     },
-    "byRule": {
-      "design-system-color": 2,
-      "design-system-radius": 1,
-      "design-system-font-size": 1
-    }
+    "byRule": {}
   },
   "storybook": {
-    "stories": 312,
-    "scans": 624,
-    "total": 128,
+    "stories": 488,
+    "scans": 976,
+    "total": 180,
     "groups": {
-      "low-contrast": 45,
+      "low-contrast": 18,
       "undersized-and-tiny-text": 0,
       "overused-font": 0,
-      "layout-transition": 38,
+      "layout-transition": 0,
       "design-system-drift": 0
     },
     "byRule": {
-      "low-contrast": 45,
-      "text-occlusion": 2,
-      "layout-transition": 38,
-      "clipped-overflow-container": 16,
-      "pulsing-dot": 7,
-      "gpt-thin-border-wide-shadow": 5,
-      "skipped-heading": 3,
-      "tight-leading": 2,
-      "script-error": 8,
-      "text-overflow": 1,
-      "em-dash-overuse": 1
+      "cramped-padding": 8,
+      "clipped-overflow-container": 96,
+      "flat-type-hierarchy": 2,
+      "marquee": 38,
+      "pulsing-dot": 10,
+      "low-contrast": 18,
+      "gpt-thin-border-wide-shadow": 8
     }
   }
 }

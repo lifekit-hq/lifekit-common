@@ -53,27 +53,30 @@ describe('ListItemRowComponent', () => {
     return fixture.nativeElement.querySelector('.flex-1 > div');
   }
 
-  it('should not fade the row or its avatar by default', () => {
-    expect(rowEl().className).not.toContain('opacity-55');
+  it('should not fade the row or mute its avatar by default', () => {
+    expect(rowEl().className).not.toContain('opacity');
+    expect(rowEl().className).not.toContain('grayscale');
     expect(labelEl().classList).toContain('text-text-primary');
   });
 
-  it('should recolour the label and sublabel instead of fading the row when dimmed', () => {
+  it('should recolour the label instead of fading the row when dimmed', () => {
     fixture.componentRef.setInput('sublabel', 'Video streaming');
     fixture.componentRef.setInput('dimmed', true);
     fixture.detectChanges();
-    expect(rowEl().classList).not.toContain('opacity-55');
+    expect(rowEl().className).not.toContain('opacity');
     expect(labelEl().classList).toContain('text-text-secondary');
     expect(labelEl().classList).not.toContain('text-text-primary');
     const sublabel: HTMLElement = fixture.nativeElement.querySelectorAll('.flex-1 > div')[1];
+    // The sublabel keeps its readable grade: a disabled-grade colour would fall under 4.5:1.
     expect(sublabel.classList).toContain('text-text-secondary');
     expect(sublabel.classList).not.toContain('text-text-disabled');
   });
 
-  it('should fade only the avatar slot when dimmed', () => {
+  it('should desaturate the avatar slot when dimmed, never fade it under its text contrast', () => {
     fixture.componentRef.setInput('dimmed', true);
     fixture.detectChanges();
-    expect(rowEl().className).toContain('[&>[avatar]]:opacity-55');
+    expect(rowEl().className).toContain('[&>[avatar]]:grayscale');
+    expect(rowEl().className).not.toContain('opacity');
   });
 
   it('should restore the full-strength colours when dimmed changes back to false', () => {

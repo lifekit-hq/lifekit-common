@@ -56,6 +56,7 @@ export const ZeroDelta: Story = {
   },
 };
 
+/** A value wider than the card wraps onto a second line; no digit is ever cut off. */
 export const LongValue: Story = {
   args: {
     label: 'International Holdings',

@@ -30,6 +30,14 @@ export interface GoogleSignInButtonConfiguration {
   click_listener?: () => void;
 }
 
+/**
+ * The GIS client, or null while the consumer's `https://accounts.google.com/gsi/client` script has
+ * not loaded (or is blocked): the button then renders nothing instead of throwing.
+ */
+function gsiClient(): typeof google.accounts.id | null {
+  return typeof google === 'undefined' ? null : google.accounts.id;
+}
+
 @Component({
   selector: 'cmn-google-sign-in-button',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -55,7 +63,11 @@ export class GoogleSignInButtonComponent implements AfterViewInit, OnDestroy {
   public readonly credential = output<string>();
 
   public ngAfterViewInit(): void {
-    google.accounts.id.initialize({
+    const gsi = gsiClient();
+    if (!gsi) {
+      return;
+    }
+    gsi.initialize({
       // eslint-disable-next-line @typescript-eslint/naming-convention
       client_id: this.clientId(),
       callback: (r: google.accounts.id.CredentialResponse) =>
@@ -63,14 +75,11 @@ export class GoogleSignInButtonComponent implements AfterViewInit, OnDestroy {
     });
     const locale = this.locale();
     const config = this.buttonConfiguration();
-    google.accounts.id.renderButton(
-      this.btnRef().nativeElement,
-      locale ? {...config, locale} : config
-    );
-    google.accounts.id.prompt();
+    gsi.renderButton(this.btnRef().nativeElement, locale ? {...config, locale} : config);
+    gsi.prompt();
   }
 
   public ngOnDestroy(): void {
-    google.accounts.id.cancel();
+    gsiClient()?.cancel();
   }
 }

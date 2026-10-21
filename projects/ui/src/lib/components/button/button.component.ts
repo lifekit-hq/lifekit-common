@@ -35,6 +35,8 @@ const ICON_SIZE: Record<ButtonSize, 'sm' | 'md'> = {
 };
 
 const DISABLED_CLASSES = 'opacity-50 pointer-events-none cursor-not-allowed';
+/** A busy button is not dimmed: its label stays at full contrast while the spinner turns. */
+const BUSY_CLASSES = 'pointer-events-none';
 
 @Component({
   selector: 'cmn-button',
@@ -80,8 +82,10 @@ export class ButtonComponent {
 
   public readonly classes = computed(() => {
     const parts = [BASE_CLASSES, VARIANT_CLASSES[this.variant()], SIZE_CLASSES[this.size()]];
-    if (this.disabled() || this.loading()) {
+    if (this.disabled()) {
       parts.push(DISABLED_CLASSES);
+    } else if (this.loading()) {
+      parts.push(BUSY_CLASSES);
     }
     return parts.join(' ');
   });

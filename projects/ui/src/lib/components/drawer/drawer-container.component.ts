@@ -59,7 +59,7 @@ export type CmnSheetStop = 'half' | 'full';
         <div
           class="flex items-center justify-between border-b border-border-default px-cmn-6 py-cmn-4"
         >
-          <h2 class="text-cmn-base font-semibold text-text-primary">
+          <h2 class="text-cmn-md font-semibold text-text-primary">
             {{ title() }}
           </h2>
           <button

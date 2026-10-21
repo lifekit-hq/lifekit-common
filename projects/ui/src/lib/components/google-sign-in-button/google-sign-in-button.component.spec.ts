@@ -52,6 +52,18 @@ describe('GoogleSignInButtonComponent', () => {
     fixture.componentRef.setInput('clientId', 'client-123');
   });
 
+  it('renders nothing and never throws while the GIS script has not loaded', () => {
+    globalThis['google'] = undefined;
+    try {
+      expect(() => fixture.detectChanges()).not.toThrow();
+      expect(() => fixture.destroy()).not.toThrow();
+    } finally {
+      globalThis['google'] = {accounts: {id}};
+    }
+    expect(id.initialize).not.toHaveBeenCalled();
+    expect(id.cancel).not.toHaveBeenCalled();
+  });
+
   it('initializes the Google client with the supplied client id', () => {
     fixture.detectChanges();
     expect(id.initialize).toHaveBeenCalledTimes(1);

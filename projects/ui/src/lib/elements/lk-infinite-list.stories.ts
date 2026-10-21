@@ -102,7 +102,7 @@ const meta: Meta<StoryFeedComponent> = {
       <div class="max-w-sm rounded-cmn-md border border-border-default bg-surface-card">
         <cmn-story-feed [failFirst]="failFirst" />
       </div>
-      <p class="mt-cmn-2 text-cmn-xs text-text-secondary">Scroll to the end of the page to load the next one.</p>
+      <p class="mt-cmn-2 text-cmn-sm text-text-secondary">Scroll to the end of the page to load the next one.</p>
     `,
   }),
 };

@@ -51,7 +51,7 @@ class StoryDrawerContentComponent {
     <div class="flex flex-col gap-cmn-3 p-cmn-6">
       @for (i of rows; track i) {
         <p class="text-cmn-sm text-text-secondary">
-          Row {{ i }} — the body scrolls, the header does not.
+          Row {{ i }}: the body scrolls, the header does not.
         </p>
       }
     </div>

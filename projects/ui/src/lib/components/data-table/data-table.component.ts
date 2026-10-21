@@ -16,6 +16,7 @@ import {map} from 'rxjs';
 
 import {CMN_MEDIA_MD} from '../../tokens/breakpoints';
 import {ButtonComponent} from '../button/button.component';
+import {CardComponent} from '../card/card.component';
 import {SkeletonComponent} from '../skeleton/skeleton.component';
 import {CmnColumnAlign, CmnColumnComponent, CmnListSlot} from './data-table-column.component';
 import {type CmnTablePagination} from './data-table-pagination.model';
@@ -30,6 +31,14 @@ const ALIGN_CLASSES: Record<CmnColumnAlign, string> = {
   center: 'text-center',
   right: 'text-right',
 };
+
+/** The table's own frame. Inside a `cmn-card` the card frames it, so it is dropped (no nested card). */
+const FRAME_CLASSES = 'rounded-cmn-lg border border-border-default bg-surface-card';
+
+/** The table's scroll box: focusable so a keyboard can scroll it, with an inset focus ring. */
+const SCROLL_CLASSES =
+  'min-h-0 flex-1 overflow-auto focus-visible:outline-none focus-visible:ring-2 ' +
+  'focus-visible:ring-inset focus-visible:ring-border-focus';
 
 const ROW_BASE_CLASS = 'transition-colors';
 const ROW_ACTIONABLE_CLASS =
@@ -59,7 +68,7 @@ type ListSlotColumns = Record<CmnListSlot, CmnColumnComponent[]>;
     </ng-template>
 
     @if (showList()) {
-      <div class="rounded-cmn-lg border border-border-default bg-surface-card">
+      <div [class]="frameClasses">
         @if (loading()) {
           <div class="divide-y divide-border-default" data-testid="list-skeleton">
             @for (_ of skeletonRows; track $index) {
@@ -156,10 +165,7 @@ type ListSlotColumns = Record<CmnListSlot, CmnColumnComponent[]>;
         }
       </div>
     } @else {
-      <div
-        class="min-h-0 flex-1 overflow-auto rounded-cmn-lg border border-border-default bg-surface-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-border-focus"
-        tabindex="0"
-      >
+      <div [class]="scrollClasses" tabindex="0">
         @if (loading()) {
           <div class="p-cmn-4 space-y-cmn-3" data-testid="table-skeleton">
             @for (_ of skeletonRows; track $index) {
@@ -296,6 +302,9 @@ export class DataTableComponent<T = Record<string, unknown>> {
         return !this.isWide() && this.columns().some(c => c.listSlot() !== null);
     }
   });
+
+  protected readonly frameClasses = inject(CardComponent, {optional: true}) ? '' : FRAME_CLASSES;
+  protected readonly scrollClasses = `${SCROLL_CLASSES} ${this.frameClasses}`;
 
   protected readonly listColumns = computed(() => {
     const slots: ListSlotColumns = {

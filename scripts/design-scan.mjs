@@ -1,13 +1,18 @@
-// Report-only design scan: runs the impeccable detector over the library source
-// and over every Storybook story (light + dark), then prints the measured bar
-// and compares it with docs/design-baseline.json. Never fails on findings.
+// Design scan ratchet: runs the impeccable detector over the library source and over every
+// Storybook story (light + dark), then gates the result against docs/design-baseline.json.
 //
-//   node scripts/design-scan.mjs [--storybook <base-url>] [--write-baseline]
+//   node scripts/design-scan.mjs [--storybook <base-url>] [--filter <text>] [--write-baseline]
 //
-// The source scan always runs; the Storybook scan runs when --storybook is given.
-// The Storybook base URL serves a built catalog (projects/ui/storybook-static).
-// A scan step that fails (exit other than 0/2, timeout, unparseable output) aborts the
-// run with a non-zero exit and never writes a baseline.
+// The source scan always runs and must find nothing. The Storybook scan runs when --storybook is
+// given (a base URL serving a built catalog, projects/ui/storybook-static). Every Storybook finding
+// must be covered by an `accepted` entry in the baseline: a rule, the stories it applies to, an
+// optional snippet match, a one-line reason and at most `max` findings per story (both themes
+// together, default one per theme). Anything else fails the run, so the bar only moves one way.
+//
+// --filter scans only the stories whose id contains the text (for a quick local check).
+// --write-baseline records the measured counts; the accepted entries are written by hand.
+// A scan step that fails (exit other than 0/2, timeout, unparseable output) aborts the run with a
+// non-zero exit and never writes a baseline.
 import {spawn} from 'node:child_process';
 import {readFileSync, writeFileSync, existsSync} from 'node:fs';
 import {resolve, dirname} from 'node:path';
@@ -17,20 +22,29 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const DETECTOR = resolve(ROOT, '.claude/skills/impeccable/scripts/impeccable');
 const BASELINE = resolve(ROOT, 'docs/design-baseline.json');
 const THEMES = ['light', 'dark'];
-const BATCH = 10;
 const CONCURRENCY = 4;
 const SCAN_TIMEOUT_MS = 300_000;
 const FINDINGS_EXIT = 2;
 
 const args = process.argv.slice(2);
-const sbIdx = args.indexOf('--storybook');
-const sbUrl = sbIdx >= 0 ? args[sbIdx + 1] : null;
-if (sbIdx >= 0 && (!sbUrl || sbUrl.startsWith('--'))) {
-  console.error('--storybook requires a base URL');
+const option = name => {
+  const i = args.indexOf(name);
+  if (i < 0) return null;
+  const value = args[i + 1];
+  if (!value || value.startsWith('--')) {
+    console.error(`${name} requires a value`);
+    process.exit(2);
+  }
+  return value;
+};
+const sbUrl = option('--storybook');
+const storybook = sbUrl ? sbUrl.replace(/\/$/, '') : null;
+const filter = option('--filter');
+const writeBaseline = args.includes('--write-baseline');
+if (writeBaseline && filter) {
+  console.error('--write-baseline needs the full catalog; drop --filter');
   process.exit(2);
 }
-const storybook = sbUrl ? sbUrl.replace(/\/$/, '') : null;
-const writeBaseline = args.includes('--write-baseline');
 
 // Rule groups reported as the measured bar.
 const GROUPS = {
@@ -84,30 +98,72 @@ const tally = findings => {
   return {total: findings.length, groups, byRule};
 };
 
-const scanSource = async () => tally(await detect(['projects'], []));
+const storyOf = url => new URL(url).searchParams.get('id');
+const themeOf = url => new URL(url).searchParams.get('globals')?.replace('theme:', '') ?? '';
+
+const scanSource = async () => {
+  const findings = await detect(['projects'], []);
+  return {findings, ...tally(findings)};
+};
 
 const scanStorybook = async base => {
   const res = await fetch(`${base}/index.json`);
   if (!res.ok) throw new Error(`${base}/index.json responded ${res.status}`);
   const index = await res.json();
   const ids = Object.values(index.entries)
-    .filter(e => e.type === 'story')
+    .filter(e => e.type === 'story' && (!filter || e.id.includes(filter)))
     .map(e => e.id);
   const urls = THEMES.flatMap(theme =>
     ids.map(id => `${base}/iframe.html?id=${id}&viewMode=story&globals=theme:${theme}`)
   );
-  const batches = [];
-  for (let i = 0; i < urls.length; i += BATCH) batches.push(urls.slice(i, i + BATCH));
+  // One URL per detector run: a multi-URL run waits only for `load` (+100ms), which fires before
+  // Storybook mounts the story, so it scans half-rendered pages and misses findings at random. A
+  // single-URL run waits for network idle, after the story has rendered.
   const findings = [];
   let next = 0;
   await Promise.all(
     Array.from({length: CONCURRENCY}, async () => {
-      while (next < batches.length)
-        findings.push(...(await detect(batches[next++], ['--no-config'])));
+      while (next < urls.length) findings.push(...(await detect([urls[next++]], ['--no-config'])));
     })
   );
-  return {stories: ids.length, scans: urls.length, ...tally(findings)};
+  return {stories: ids.length, scans: urls.length, findings, ...tally(findings)};
 };
+
+// An entry's `stories` are story ids; a trailing `*` matches every id with that prefix.
+const coversStory = (entry, story) =>
+  entry.stories.some(s => (s.endsWith('*') ? story.startsWith(s.slice(0, -1)) : s === story));
+
+const covers = (entry, story, finding) =>
+  entry.rule === finding.antipattern &&
+  coversStory(entry, story) &&
+  (!entry.match || finding.snippet.includes(entry.match));
+
+/** Splits Storybook findings into accepted ones and violations (unaccepted, or over `max`). */
+const gate = (findings, accepted) => {
+  const perStory = new Map();
+  const unaccepted = [];
+  const overMax = [];
+  for (const f of findings) {
+    const story = storyOf(f.file);
+    const entry = accepted.find(e => covers(e, story, f));
+    if (!entry) {
+      unaccepted.push(f);
+      continue;
+    }
+    const key = `${accepted.indexOf(entry)}|${story}`;
+    const seen = (perStory.get(key) ?? 0) + 1;
+    perStory.set(key, seen);
+    if (seen > (entry.max ?? THEMES.length)) overMax.push(f);
+  }
+  const used = new Set([...perStory.keys()].map(k => Number(k.split('|')[0])));
+  const unused = accepted.filter((_, i) => !used.has(i));
+  return {acceptedCount: findings.length - unaccepted.length, unaccepted, overMax, unused};
+};
+
+const describe = f =>
+  f.file.includes('iframe.html')
+    ? `${f.antipattern}  ${storyOf(f.file)} [${themeOf(f.file)}]  ${f.snippet}`
+    : `${f.antipattern}  ${f.file}:${f.line}  ${f.snippet}`;
 
 const result = {
   detector: readFileSync(resolve(ROOT, '.claude/skills/impeccable/scripts/VERSION'), 'utf8').trim(),
@@ -121,13 +177,14 @@ try {
 }
 
 const baseline = existsSync(BASELINE) ? JSON.parse(readFileSync(BASELINE, 'utf8')) : null;
+const accepted = baseline?.accepted ?? [];
 for (const area of ['source', 'storybook']) {
   if (!result[area]) continue;
   console.log(`\n${area}: ${result[area].total} findings`);
   for (const [group, n] of Object.entries(result[area].groups)) {
     const was = baseline?.[area]?.groups?.[group];
     const delta =
-      was === undefined
+      filter || was === undefined
         ? ''
         : n === was
           ? ' (= baseline)'
@@ -136,9 +193,42 @@ for (const area of ['source', 'storybook']) {
   }
 }
 
+const violations = [...result.source.findings];
+if (result.storybook) {
+  const {acceptedCount, unaccepted, overMax, unused} = gate(result.storybook.findings, accepted);
+  console.log(
+    `\nstorybook: ${acceptedCount} accepted by ${accepted.length - unused.length} of ${accepted.length} baseline entries`
+  );
+  violations.push(...unaccepted, ...overMax);
+  // A flaky finding (one theme, some runs) leaves its entry unused now and then: listed, not failed.
+  if (!filter && unused.length)
+    console.log(
+      `\nunused baseline entries (fixed? remove them):\n${unused.map(e => `  ${e.rule}  ${e.stories.join(', ')}`).join('\n')}`
+    );
+}
+
+if (violations.length) {
+  console.log(
+    `\n${violations.length} finding(s) not covered by docs/design-baseline.json:\n${violations.map(f => `  ${describe(f)}`).join('\n')}`
+  );
+  console.log(
+    '\nFix them in the component, or justify them in the baseline with a one-line reason.'
+  );
+}
+
 if (writeBaseline) {
   const keep = {...(baseline ?? {}), detector: result.detector};
-  for (const area of ['source', 'storybook']) if (result[area]) keep[area] = result[area];
-  writeFileSync(BASELINE, `${JSON.stringify(keep, null, 2)}\n`);
-  console.log(`\nbaseline written to ${BASELINE}`);
+  for (const area of ['source', 'storybook']) {
+    if (!result[area]) continue;
+    const {findings: _findings, ...counts} = result[area];
+    keep[area] = counts;
+  }
+  keep.accepted = accepted;
+  // Through the repo's Prettier config, so a rewritten baseline passes format:check as written.
+  const prettier = await import('prettier');
+  const options = {...(await prettier.resolveConfig(BASELINE)), filepath: BASELINE};
+  writeFileSync(BASELINE, await prettier.format(JSON.stringify(keep), options));
+  console.log(`\nbaseline counts written to ${BASELINE}`);
 }
+
+process.exit(violations.length ? 1 : 0);

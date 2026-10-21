@@ -154,7 +154,7 @@ const MANY_ROWS: Transaction[] = Array.from({length: 40}, (_, i) => ({
 
 /**
  * Inside a height-constrained \`<cmn-card fill>\` the table scrolls internally and the
- * header row stays pinned to the top.
+ * header row stays pinned to the top. The card frames it, so the table drops its own frame.
  */
 export const ManyRowsScrolling: Story = {
   args: {rows: MANY_ROWS},

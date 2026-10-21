@@ -43,7 +43,7 @@ describe('SelectComponent', () => {
     fixture.componentRef.setInput('size', 'lg');
     fixture.detectChanges();
 
-    expect(nativeSelect()?.className).toContain('text-cmn-base');
+    expect(nativeSelect()?.className).toContain('text-cmn-md');
   });
 
   it('bounds the field with the 3:1 border and a focus ring', () => {

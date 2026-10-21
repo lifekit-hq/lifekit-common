@@ -69,7 +69,7 @@ const POSITIONS: ConnectedPosition[] = [
       aria-haspopup="listbox"
       type="button"
     >
-      <span [class.text-text-disabled]="!hasSelection()" class="truncate">{{ summary() }}</span>
+      <span [class.text-text-placeholder]="!hasSelection()" class="truncate">{{ summary() }}</span>
       <cmn-icon class="shrink-0 text-text-secondary" name="ChevronDown" size="sm" />
     </button>
 
