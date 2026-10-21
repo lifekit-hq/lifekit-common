@@ -82,7 +82,8 @@ save yet" is an unmet prerequisite (area 1) and may disable Save; invalid input 
   moment the field is valid; no new error appears before the next submit. **Why:** on a phone the
   submit button is often under the keyboard, so clearing live confirms the fix without another
   round trip. A result that arrives after the submit (an async validator finishing, a server
-  error set after the submit handler) belongs to that submit and shows.
+  error set after the submit handler) belongs to that submit and shows, unless the value was edited
+  since; a result for an edit waits for the next submit.
 - **Deviation:** a field whose form is not bound to a `[formGroup]` or `ngForm` (a parentless
   control, or a group saved by a button calling `markAllAsTouched()`) shows its error once
   touched. **Why:** no submit event can reach it, so waiting for one would hide the error for good.
@@ -241,7 +242,7 @@ Enforcement labels:
 | V1  | No validation on blur; errors appear on submit. A field with no `[formGroup]`/`ngForm` to submit it shows its error once touched | **enforced**: form-field spec "validation timing"                                                                                                      |
 | V2  | Submit shows an error summary and moves focus to it; a short sheet focuses the first invalid field                               | **planned**: `cmn-error-summary` with a unit test and a Playwright focus check                                                                         |
 | V3  | Error copy says what went wrong and how to fix it; no "please", "sorry", "valid", "invalid"                                      | **enforced**: drift `error-copy`                                                                                                                       |
-| V4  | A shown error clears when the field becomes valid; an async or server error that arrives after the submit shows                  | **enforced**: form-field spec "validation timing"                                                                                                      |
+| V4  | A shown error clears once valid; an async or server error after the submit shows unless the value was edited since               | **enforced**: form-field spec "validation timing"                                                                                                      |
 | V5  | Fields carry `autocomplete`, `inputmode` and `enterkeyhint`; 16px on a phone                                                     | 16px **exists**: phone rule 9. Forwarding is **planned**: a `cmn-input` spec (it forwards only `autocomplete` today)                                   |
 | V6  | Invalid input never disables submit                                                                                              | **review-only**: the disabling condition is app logic, and the library ships no API for it                                                             |
 | V7  | Every field has a visible label; a placeholder is never the label                                                                | **exists**: axe label rules                                                                                                                            |

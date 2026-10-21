@@ -357,6 +357,39 @@ describe('FormFieldComponent', () => {
       expect(error()?.textContent?.trim()).toBeTruthy();
     });
 
+    it('keeps an async error for a post-submit edit hidden until the next submit', () => {
+      const pending: Subject<ValidationErrors | null>[] = [];
+      const taken: AsyncValidatorFn = () => {
+        const result = new Subject<ValidationErrors | null>();
+        pending.push(result);
+        return result;
+      };
+      host.control.setAsyncValidators(taken);
+      fixture.detectChanges();
+      type('a@b.co');
+      pending.at(-1)?.next(null);
+      pending.at(-1)?.complete();
+      submit();
+      expect(error()).toBeNull();
+
+      type('taken@b.co');
+      pending.at(-1)?.next({emailTaken: true});
+      pending.at(-1)?.complete();
+      fixture.detectChanges();
+      expect(host.control.invalid).toBe(true);
+      expect(error()).toBeNull();
+
+      type('other@b.co');
+      expect(host.control.pending).toBe(true);
+      submit();
+      expect(error()).toBeNull();
+
+      pending.at(-1)?.next({emailTaken: true});
+      pending.at(-1)?.complete();
+      fixture.detectChanges();
+      expect(error()?.textContent?.trim()).toBeTruthy();
+    });
+
     it('shows an error once touched on a control with no enclosing form', () => {
       const bare = TestBed.createComponent(FormFieldComponent);
       const control = new FormControl('', {nonNullable: true, validators: [Validators.required]});

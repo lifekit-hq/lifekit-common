@@ -38,7 +38,8 @@ let fieldCounter = 0;
  * `[formGroup]` / `ngForm` on submit). After that, a shown error is re-checked as the person types
  * and clears the moment the field is valid; typing never raises a new error before the next submit.
  * A validity that resolves after the submit (an async validator finishing, a server `setErrors`)
- * counts as part of that submit and shows. A form reset hides everything again, including a reset
+ * counts as part of that submit and shows, unless the value was edited since; then it waits for the
+ * next submit. A form reset hides everything again, including a reset
  * made by the `(ngSubmit)` handler itself. A control whose root form is not bound to an enclosing
  * `[formGroup]` or `ngForm` (a parentless control, or a group saved by a button calling
  * `markAllAsTouched()`) never sees a submit, so it shows its error once touched. Without a
@@ -93,8 +94,8 @@ export class FormFieldComponent implements ControlValueAccessor, AfterContentIni
   private pendingDisabled: boolean | undefined = undefined;
   private onChangeFn: ((v: unknown) => void) | undefined;
   private onTouchedFn: (() => void) | undefined;
-  /** True between a value change and the status change it triggers: typing, not a late result. */
-  private valueJustChanged = false;
+  /** True once the value changes after the last submit or reset: a later result belongs to the edit. */
+  private editedSinceSubmit = false;
   /** True from a reset until the task ends; a submit in that window was reset by its own handler. */
   private resetThisTask = false;
   /** True once the enclosing form has been submitted, until it is reset. */
@@ -140,7 +141,7 @@ export class FormFieldComponent implements ControlValueAccessor, AfterContentIni
         switchMap(ctrl => {
           this.submitted.set(false);
           this.errorShown.set(false);
-          this.valueJustChanged = false;
+          this.editedSinceSubmit = false;
           this.resetThisTask = false;
           if (!ctrl) {
             return EMPTY;
@@ -219,20 +220,20 @@ export class FormFieldComponent implements ControlValueAccessor, AfterContentIni
       if (!this.resetThisTask) {
         this.submitted.set(true);
         this.errorShown.set(ctrl.invalid);
+        this.editedSinceSubmit = false;
       }
     } else if (event instanceof FormResetEvent) {
       this.submitted.set(false);
       this.errorShown.set(false);
+      this.editedSinceSubmit = false;
       this.resetThisTask = true;
       queueMicrotask(() => (this.resetThisTask = false));
     } else if (event instanceof ValueChangeEvent) {
-      this.valueJustChanged = true;
+      this.editedSinceSubmit = true;
     } else if (event instanceof StatusChangeEvent) {
-      const typed = this.valueJustChanged;
-      this.valueJustChanged = false;
       if (ctrl.valid) {
         this.errorShown.set(false);
-      } else if (ctrl.invalid && this.submitted() && !typed) {
+      } else if (ctrl.invalid && this.submitted() && !this.editedSinceSubmit) {
         this.errorShown.set(true);
       }
     } else if (ctrl.valid) {
