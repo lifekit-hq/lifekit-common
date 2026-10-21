@@ -286,8 +286,8 @@ Enforcement labels:
 The count: 22 **exists**; 24 **enforced** (S3, S4, S6, S7, F1 to F5, V1 to V4, V5 forwarding,
 V8, T3 in part, T5 in part, K3, Y2, Ch2, $1, $2, X1, X2); 5 **planned** (T2, T4, K2, Ch1, Ch3);
 6 **review-only** (F6, V6, N3, C4, X3, X4), plus the wording in F4 and the reason in
-S7. Every planned check waits on a feature that is its own issue: data-table features (T5's cell ellipsis among them), keyboard patterns and chart text
-alternatives.
+S7. Every planned check waits on a feature that is its own issue: data-table features (T5's cell
+ellipsis among them), keyboard patterns and chart text alternatives.
 
 ### Story-state categories (X2)
 
