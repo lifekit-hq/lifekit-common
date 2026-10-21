@@ -13,38 +13,44 @@ import {
   imports: [RouterLink],
   template: `
     <div class="flex max-w-prose flex-col gap-cmn-4 text-cmn-sm text-text-primary">
-      <p class="flex flex-wrap items-baseline gap-x-cmn-2">
-        <a class="cmn-link" href="#project">Accent</a>
-        <span>— the default: an in-app or outside link.</span>
+      <p>
+        <a class="cmn-link cmn-link--underlined" href="#project">Accent</a>
+        — the default: an in-app or outside link.
       </p>
-      <p class="flex flex-wrap items-baseline gap-x-cmn-2">
-        <a class="cmn-link" routerLink="/goals/42">Router link</a>
-        <span
-          >— the class sits on a real anchor, so
-          <code class="font-mono text-cmn-xs">routerLink</code> still works.</span
-        >
+      <p>
+        <a class="cmn-link cmn-link--underlined" routerLink="/goals/42">Router link</a>
+        — the class sits on a real anchor, so
+        <code class="font-mono text-cmn-xs">routerLink</code> still works.
       </p>
-      <p class="flex flex-wrap items-baseline gap-x-cmn-2">
-        <a class="cmn-link" href="https://example.com" target="_blank" rel="noopener noreferrer"
+      <p>
+        <a
+          class="cmn-link cmn-link--underlined"
+          href="https://example.com"
+          target="_blank"
+          rel="noopener noreferrer"
           >External link</a
         >
-        <span>— opens in a new tab.</span>
+        — opens in a new tab.
       </p>
-      <p class="flex flex-wrap items-baseline gap-x-cmn-2">
-        <a class="cmn-link cmn-link--primary font-semibold" href="#row">Primary text</a>
-        <span>— a title that links, such as a row or card heading.</span>
+      <p>
+        <a class="cmn-link cmn-link--primary cmn-link--underlined font-semibold" href="#row"
+          >Primary text</a
+        >
+        — a title that links, such as a row or card heading.
       </p>
-      <p class="flex flex-wrap items-baseline gap-x-cmn-2 text-text-secondary">
-        <a class="cmn-link cmn-link--secondary" href="#sub">Secondary text</a>
-        <span>— a quiet link inside secondary text.</span>
+      <p class="text-text-secondary">
+        <a class="cmn-link cmn-link--secondary cmn-link--underlined" href="#sub">Secondary text</a>
+        — a quiet link inside secondary text.
       </p>
-      <p class="flex flex-wrap items-baseline gap-x-cmn-2 text-text-secondary">
-        <a class="cmn-link cmn-link--inherit" href="#inherit">Inherited colour</a>
-        <span>— takes the colour of the text around it.</span>
+      <p class="text-text-secondary">
+        <a class="cmn-link cmn-link--inherit cmn-link--underlined" href="#inherit"
+          >Inherited colour</a
+        >
+        — takes the colour of the text around it.
       </p>
-      <p class="flex flex-wrap items-baseline gap-x-cmn-2">
+      <p>
         <a class="cmn-link cmn-link--underlined" href="#prose">Underlined</a>
-        <span>— for a link inside a sentence, so colour is not the only cue.</span>
+        — required for a link inside prose, so colour is not the only cue.
       </p>
     </div>
   `,
@@ -92,7 +98,9 @@ class LinkInCardComponent {}
  * link needs the anchor in the app's own template, which a custom element would hide in its
  * shadow tree. It sets colour and decoration only, so size and weight stay with the text around
  * it. Modifiers: `cmn-link--primary`, `--secondary` and `--inherit` pick the text colour, and
- * `--underlined` keeps the underline on.
+ * `--underlined` keeps the underline on. A link placed inside prose must use `--underlined`, so
+ * it is not told apart by colour alone; every link on this page sits in a sentence, so each
+ * carries it.
  */
 const meta: Meta<LinkShowcaseComponent> = {
   title: 'Primitives/Link',
@@ -105,10 +113,10 @@ const meta: Meta<LinkShowcaseComponent> = {
 export default meta;
 type Story = StoryObj<LinkShowcaseComponent>;
 
-/** Every colour variant on one page. */
+/** Every colour variant on one page, each inside a sentence and so with `--underlined`. */
 export const Variants: Story = {};
 
-/** Inside a sentence the link stays underlined, so it is not told apart by colour alone. */
+/** A link inside prose must use `--underlined`, so it is not told apart by colour alone. */
 export const InRunningText: Story = {
   render: () => ({
     template: '<cmn-link-in-text />',
