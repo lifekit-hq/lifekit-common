@@ -51,18 +51,18 @@ Robinhood-style percent-move price alerts, which IBKR and Binance already send.
 
 The captain's picks (2026-10-07, reference round 1) and what each means for this library.
 
-| #   | Pick          | Pattern it chose                                                                                                            | Owner in lifekit-common                                  | Consumer                               |
-| --- | ------------- | --------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- | -------------------------------------- |
-| 1   | 1-charts-a    | [Chart period and scrub](#chart-period-and-scrub): one-row period control, scrub-to-read, delta-only colour                 | `cmn-segmented`, charts-core scrub (gap)                 | dashboard, events, dossier             |
-| 2   | 2-dashboard-a | [Hero card](#hero-card): number and delta, then chart, then the period control under it                                     | `cmn-card`, `cmn-stat-card`, chart pieces (gap)          | finance-sentry dashboard               |
-| 3   | 3-holdings-a  | [Positions row](#positions-row): day change per row, 1M sparkline later                                                     | sparkline mode (gap)                                     | finance-sentry holdings                |
-| 4   | 4-dossier-a   | [Entity page order](#entity-page-order): Robinhood/Taras order                                                              | `cmn-card`, `cmn-key-value-grid` (gap), stat strip (gap) | finance-sentry asset dossier (#824)    |
-| 5   | 5-verdict-a   | [Verdict idea card](#verdict-idea-card): STRONG BUY / BUY / WAIT / AVOID word, four raw axis facts, what would change it    | verdict badge and axis strip (gap)                       | dossier header, ranked universe (#726) |
-| 6   | 6-notify-a    | [Scoped notifications](#scoped-notifications): held names on by default, watchlist opt-in, consensus and timing on earnings | `cmn-alert-item`, `cmn-chip`                             | finance-sentry alerts (#466)           |
-| 7   | 7-nav-a       | [Search lands on the entity](#search-lands-on-the-entity): held names, watchlist and accounts as palette items              | `cmn-command-palette`                                    | finance-sentry shell                   |
-| 8   | 8-tx-b        | [Transaction period chips](#transaction-period-chips): monobank-style period chip row beside the restored filters           | `cmn-chip`, `cmn-segmented`                              | finance-sentry transactions            |
-| 9   | 9-digest-a    | [Terse digest](#terse-digest): bullets, one headline number each, every bullet linked to its entity                         | none, a content rule                                     | finance-sentry Ledger digests          |
-| 10  | 10-playbook-a | This page                                                                                                                   | `docs/design/patterns.md`                                | all lifekit apps                       |
+| #   | Pick          | Pattern it chose                                                                                                            | Owner in lifekit-common                              | Consumer                               |
+| --- | ------------- | --------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- | -------------------------------------- |
+| 1   | 1-charts-a    | [Chart period and scrub](#chart-period-and-scrub): one-row period control, scrub-to-read, delta-only colour                 | `cmn-segmented`, charts-core scrub (gap)             | dashboard, events, dossier             |
+| 2   | 2-dashboard-a | [Hero card](#hero-card): number and delta, then chart, then the period control under it                                     | `cmn-card`, `cmn-stat-card`, chart pieces (gap)      | finance-sentry dashboard               |
+| 3   | 3-holdings-a  | [Positions row](#positions-row): day change per row, 1M sparkline later                                                     | sparkline mode (gap)                                 | finance-sentry holdings                |
+| 4   | 4-dossier-a   | [Entity page order](#entity-page-order): Robinhood/Taras order                                                              | `cmn-card`, `cmn-description-list`, stat strip (gap) | finance-sentry asset dossier (#824)    |
+| 5   | 5-verdict-a   | [Verdict idea card](#verdict-idea-card): STRONG BUY / BUY / WAIT / AVOID word, four raw axis facts, what would change it    | verdict badge and axis strip (gap)                   | dossier header, ranked universe (#726) |
+| 6   | 6-notify-a    | [Scoped notifications](#scoped-notifications): held names on by default, watchlist opt-in, consensus and timing on earnings | `cmn-alert-item`, `cmn-chip`                         | finance-sentry alerts (#466)           |
+| 7   | 7-nav-a       | [Search lands on the entity](#search-lands-on-the-entity): held names, watchlist and accounts as palette items              | `cmn-command-palette`                                | finance-sentry shell                   |
+| 8   | 8-tx-b        | [Transaction period chips](#transaction-period-chips): monobank-style period chip row beside the restored filters           | `cmn-chip`, `cmn-segmented`                          | finance-sentry transactions            |
+| 9   | 9-digest-a    | [Terse digest](#terse-digest): bullets, one headline number each, every bullet linked to its entity                         | none, a content rule                                 | finance-sentry Ledger digests          |
+| 10  | 10-playbook-a | This page                                                                                                                   | `docs/design/patterns.md`                            | all lifekit apps                       |
 
 Pick 8 went against the scout's recommendation (keep the restored bar as is). It is the captain's
 explicit word on a filter he uses, so the standing rule (no redesign of a filter or selection
@@ -78,14 +78,14 @@ What the library does not have yet, named so a PR can say which row it closes.
 | charts-core multi-series line (benchmark overlay)           | Webull, Taras                     | dossier chart (C2a)                                | November        |
 | sparkline mode (`lk-line-chart` minimal or `cmn-sparkline`) | Robinhood positions row           | holdings rows                                      | November        |
 | verdict badge plus axis strip                               | Trading Central card, #726 FR-009 | dossier header, ranked universe                    | November (#726) |
-| key/value definition grid                                   | Yahoo Statistics, Taras           | dossier key stats                                  | with #824       |
 | compact stat strip                                          | Taras perf strip                  | dossier                                            | with #824       |
 | bull/bear split list                                        | Seeking Alpha                     | dossier thesis                                     | later (C5a)     |
 | treemap                                                     | Finviz                            | book heatmap                                       | not now (C4a)   |
 
 Already covered by existing components (no new work): `cmn-chip`, `cmn-command-palette`,
 `cmn-alert-item`, `cmn-card`, `cmn-stat-card`, `cmn-tag`, `cmn-disclosure-row`, `cmn-date-range`,
-`cmn-month-stepper`, `cmn-donut-chart`, `cmn-area-chart`.
+`cmn-month-stepper`, `cmn-donut-chart`, `cmn-area-chart`. The key/value definition grid (Yahoo
+Statistics, Taras) is now `cmn-description-list`.
 
 Each pattern section below has the same shape: what it is, **Compare against**, **Owner**,
 **Consumer**, and what is explicitly not copied.
@@ -165,8 +165,8 @@ why it moved; thesis; key stats; analysts and earnings; events; news.
   only); Yahoo Finance ([2023
   redesign](https://www.businesswire.com/news/home/20231107696257/en/Yahoo-Finance-Debuts-New-Design-and-Features-to-Empower-Everyday-Investors));
   Taras Guk (registry #1).
-- **Owner:** `cmn-card`, `cmn-stat-card`, `cmn-tag`, `cmn-disclosure-row`; `cmn-key-value-grid`
-  (gap), compact stat strip (gap), bull/bear split list (gap, later).
+- **Owner:** `cmn-card`, `cmn-stat-card`, `cmn-tag`, `cmn-disclosure-row`,
+  `cmn-description-list` (key stats); compact stat strip (gap), bull/bear split list (gap, later).
 - **Consumer:** finance-sentry asset dossier (#824).
 - **Not copied:** the Snowflake radar, Yahoo's ad density, coverage-maximalism.
 
