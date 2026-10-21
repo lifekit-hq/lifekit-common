@@ -271,6 +271,28 @@ describe('TooltipDirective', () => {
       expect(bubble()).toBeNull();
     });
 
+    it('shows on the first hover after Escape dismissed it from under the pointer', () => {
+      // A browser fires no pointerleave for a bubble removed from under the pointer.
+      hover();
+      const pane = bubble()?.parentElement as HTMLElement;
+      pointer(trigger(), 'pointerleave');
+      pointer(pane, 'pointerenter');
+      pressEscape(pane);
+      expect(bubble()).toBeNull();
+
+      hover();
+      expect(bubble()).not.toBeNull();
+    });
+
+    it('keeps the dismissal while the pointer stays on the trigger', () => {
+      hover();
+      pressEscape(trigger());
+      expect(bubble()).toBeNull();
+
+      hover();
+      expect(bubble()).toBeNull();
+    });
+
     it('ignores other keys and Escape with a modifier', () => {
       focusMonitor.focusVia(trigger(), 'keyboard');
       trigger().dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter', bubbles: true}));

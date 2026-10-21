@@ -264,6 +264,9 @@ export class TooltipDirective {
     this.dismissed = true;
     this.releaseTouch();
     this.hide();
+    // Hiding removes the bubble from under a pointer resting on it, which fires no
+    // `pointerleave`; with nothing else holding it open, the dismissal ends here.
+    this.hideWhenIdle(0);
   }
 
   private releaseTouch(): void {
