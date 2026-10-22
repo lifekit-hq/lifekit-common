@@ -161,10 +161,13 @@ area; outside the phone shell the property is unset.
   followed by a spacer the shell sizes to the frame's overflow. So the last row clears the tab bar after bare content following a page
   container, after two sibling top-level page containers (no gap opens between them), and after an
   `h-full` host whose content overflows it. A page container adds no end inset of its own.
-- **Page height.** A page is as tall as its content unless it is a fill page. `cmn-page-container fill`
-  bounds the page to the frame below the large title and notices at every width: the shell makes that
-  frame exactly what main has left (in the overlay and outside it), so main does not scroll and a
-  `cmn-page-scroll` inside it is the only scroller. The page's own host element needs no height classes.
+- **Page height.** A page is as tall as its content unless it is a fill page. A `cmn-page-container fill`
+  holding a `cmn-page-scroll` is bounded to the frame below the large title and notices at every width:
+  the shell makes that frame exactly what main has left (in the overlay and outside it), so main does
+  not scroll and the `cmn-page-scroll` is the only scroller. The page's own host element needs no height
+  classes. A `fill` page without a `cmn-page-scroll` is at least the frame tall on a phone and grows
+  with its content, so main scrolls it and its bottom padding stays above the tab bar; the cap applies
+  from `md`.
   A page without `fill` keeps the frame as it was: `h-full` resolves to the frame's height, so a short page
   under a large title and notices leaves main nothing to scroll, and a chat-style
   host (`relative flex h-full` with an internal scroller) fills exactly the visible area and main

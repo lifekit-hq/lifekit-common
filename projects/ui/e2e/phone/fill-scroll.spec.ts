@@ -13,6 +13,7 @@ const STORIES = {
   long: 'conformance-fill-app-layout--long-list',
   empty: 'conformance-fill-app-layout--empty-list',
   grouped: 'conformance-fill-app-layout--grouped-list',
+  unscrolled: 'conformance-fill-app-layout--fill-without-list-scroll',
 } as const;
 
 interface Scroll {
@@ -94,3 +95,34 @@ for (const viewport of [DESKTOP, PHONE]) {
     });
   });
 }
+
+test.describe(`fill page without a list scroller ${PHONE.name}`, () => {
+  test.use({
+    viewport: {width: PHONE.width, height: PHONE.height},
+    hasTouch: true,
+    isMobile: true,
+  });
+
+  test('main scrolls the page and keeps its bottom padding above the tab bar', async ({page}) => {
+    await openStory(page, STORIES.unscrolled, 'light', '[data-row]');
+    const geometry = await page.evaluate(() => {
+      const main = document.querySelector('main') as HTMLElement;
+      const box = document.querySelector('cmn-page-container > div') as HTMLElement;
+      const rows = document.querySelectorAll('[data-row]');
+      const last = rows[rows.length - 1] as HTMLElement;
+      return {
+        scrollHeight: main.scrollHeight,
+        clientHeight: main.clientHeight,
+        mainPaddingBottom: parseFloat(getComputedStyle(main).paddingBottom),
+        boxPaddingBottom: parseFloat(getComputedStyle(box).paddingBottom),
+        lastRowBottom:
+          last.getBoundingClientRect().bottom - main.getBoundingClientRect().top + main.scrollTop,
+      };
+    });
+    expect(geometry.scrollHeight).toBeGreaterThan(geometry.clientHeight);
+    expect(geometry.boxPaddingBottom).toBeGreaterThan(0);
+    const belowLastRow =
+      geometry.scrollHeight - geometry.mainPaddingBottom - geometry.lastRowBottom;
+    expect(belowLastRow).toBeGreaterThanOrEqual(geometry.boxPaddingBottom - 1);
+  });
+});

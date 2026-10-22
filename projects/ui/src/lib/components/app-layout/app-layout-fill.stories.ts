@@ -93,6 +93,24 @@ class GroupedListPageComponent {
   protected readonly rowsPerGroup = Array.from({length: ROWS_PER_GROUP}, (_, i) => i + 1);
 }
 
+/** A `fill` page with no `cmn-page-scroll`: on a phone it grows with its rows and main scrolls it. */
+@Component({
+  selector: 'cmn-fill-unscrolled-page',
+  imports: [ListItemRowComponent, PageContainerComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <cmn-page-container spacing="none" fill>
+      <p class="pb-cmn-4 text-cmn-sm text-text-secondary">Rows straight in the page, no list scroller</p>
+      @for (row of rows; track row) {
+        <cmn-list-item-row [label]="'Report ' + row" sublabel="Monthly" data-row />
+      }
+    </cmn-page-container>
+  `,
+})
+class UnscrolledFillPageComponent {
+  protected readonly rows = Array.from({length: ROWS}, (_, i) => i + 1);
+}
+
 @Component({
   selector: 'cmn-fill-shell',
   imports: [AppLayoutComponent, RouterOutlet],
@@ -132,6 +150,7 @@ const fillStory = (path: string, title: string): StoryObj<FillShellComponent> =>
             {path: 'events', component: LongListPageComponent, data: {title}},
             {path: 'alerts', component: EmptyListPageComponent, data: {title}},
             {path: 'transactions', component: GroupedListPageComponent, data: {title}},
+            {path: 'reports', component: UnscrolledFillPageComponent, data: {title}},
           ],
           withHashLocation()
         ),
@@ -148,3 +167,6 @@ export const EmptyList = fillStory('alerts', 'Alerts');
 
 /** A generic grouped list page (transactions): sticky day headings inside the scrolling list. */
 export const GroupedList = fillStory('transactions', 'Transactions');
+
+/** A `fill` page without a `cmn-page-scroll`: on a phone main scrolls it, bottom padding included. */
+export const FillWithoutListScroll = fillStory('reports', 'Reports');
