@@ -38,8 +38,8 @@
     },
     {
       "rule": "gpt-thin-border-wide-shadow",
-      "stories": ["components-dialog--*"],
-      "reason": "DESIGN.md gives every overlay a hairline plus shadow so it separates in both themes."
+      "stories": ["components-dialog--*", "components-menu--opened-from-keyboard"],
+      "reason": "DESIGN.md gives every overlay (dialog, open menu) a hairline plus shadow so it separates in both themes."
     },
     {
       "rule": "clipped-overflow-container",

@@ -59,6 +59,11 @@ export const NoActiveTab: Story = {
   },
 };
 
+/**
+ * Content projected below the tab bar becomes the selected tab's panel (`role="tabpanel"`,
+ * labelled by its tab). Only the selected tab is in the page's tab order; the arrow keys, Home
+ * and End move between tabs and select the one they land on.
+ */
 export const WithPanelContent: Story = {
   render: () => ({
     template: `

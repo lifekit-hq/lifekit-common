@@ -1,9 +1,31 @@
+import {
+  DOWN_ARROW,
+  END,
+  ESCAPE,
+  HOME,
+  LEFT_ARROW,
+  RIGHT_ARROW,
+  TAB,
+  UP_ARROW,
+} from '@angular/cdk/keycodes';
 import {OverlayContainer} from '@angular/cdk/overlay';
 import {type ComponentFixture, TestBed} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
-import {afterEach, beforeEach, describe, expect, it} from 'vitest';
+import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
 import {MenuComponent, type MenuHeader, type MenuItem} from './menu.component';
+
+// The CDK key managers read `keyCode`, which a synthetic event only carries when given one.
+const KEY_CODES = new Map<string, number>([
+  ['Tab', TAB],
+  ['Escape', ESCAPE],
+  ['End', END],
+  ['Home', HOME],
+  ['ArrowLeft', LEFT_ARROW],
+  ['ArrowUp', UP_ARROW],
+  ['ArrowRight', RIGHT_ARROW],
+  ['ArrowDown', DOWN_ARROW],
+]);
 
 const MENU_ITEMS: MenuItem[] = [
   {id: 'settings', label: 'Settings', icon: 'Settings2'},
@@ -166,6 +188,169 @@ describe('MenuComponent', () => {
       fixture.detectChanges();
 
       expect(open().querySelector('[role="separator"]')).toBeNull();
+    });
+  });
+
+  describe('keyboard (APG menu button)', () => {
+    const ITEMS: MenuItem[] = [
+      {id: 'profile', label: 'Profile'},
+      {id: 'settings', label: 'Settings'},
+      {id: 'billing', label: 'Billing', disabled: true},
+      {id: 'logout', label: 'Log out'},
+    ];
+
+    let trigger: HTMLButtonElement;
+
+    beforeEach(() => {
+      fixture.componentRef.setInput('items', ITEMS);
+      fixture.detectChanges();
+      trigger = fixture.nativeElement.querySelector('button');
+      trigger.focus();
+    });
+
+    async function settle(): Promise<void> {
+      fixture.detectChanges();
+      await fixture.whenStable();
+    }
+
+    function press(key: string, target: EventTarget = document.activeElement ?? document.body) {
+      target.dispatchEvent(
+        new KeyboardEvent('keydown', {
+          key,
+          keyCode: KEY_CODES.get(key),
+          bubbles: true,
+          cancelable: true,
+        })
+      );
+      fixture.detectChanges();
+    }
+
+    function focusedLabel(): string | undefined {
+      return document.activeElement?.textContent?.trim();
+    }
+
+    async function openFromKeyboard(): Promise<void> {
+      // Enter and Space reach a button as a click with no pointer detail.
+      trigger.dispatchEvent(new MouseEvent('click', {bubbles: true, detail: 0}));
+      await settle();
+    }
+
+    it('should keep every item out of the page tab order', async () => {
+      await openFromKeyboard();
+      const items = overlayContainer.getContainerElement().querySelectorAll('[role="menuitem"]');
+      items.forEach(item => expect(item.getAttribute('tabindex')).toBe('-1'));
+    });
+
+    it('should open on the first item from Enter or Space', async () => {
+      await openFromKeyboard();
+      expect(focusedLabel()).toBe('Profile');
+    });
+
+    it('should open on the first item from ArrowDown on the trigger', async () => {
+      press('ArrowDown', trigger);
+      await settle();
+      expect(fixture.componentInstance.isOpen()).toBe(true);
+      expect(focusedLabel()).toBe('Profile');
+    });
+
+    it('should open on the last item from ArrowUp on the trigger', async () => {
+      press('ArrowUp', trigger);
+      await settle();
+      expect(focusedLabel()).toBe('Log out');
+    });
+
+    it('should open on the panel, not an item, from a pointer click', async () => {
+      trigger.dispatchEvent(new MouseEvent('click', {bubbles: true, detail: 1}));
+      await settle();
+      expect(document.activeElement?.getAttribute('role')).toBe('menu');
+
+      press('ArrowDown');
+      expect(focusedLabel()).toBe('Profile');
+    });
+
+    it('should move to the last item on ArrowUp from the panel', async () => {
+      trigger.dispatchEvent(new MouseEvent('click', {bubbles: true, detail: 1}));
+      await settle();
+      press('ArrowUp');
+      expect(focusedLabel()).toBe('Log out');
+    });
+
+    it('should move with the arrow keys, skip disabled items and wrap', async () => {
+      await openFromKeyboard();
+      press('ArrowDown');
+      expect(focusedLabel()).toBe('Settings');
+      press('ArrowDown');
+      expect(focusedLabel()).toBe('Log out');
+      press('ArrowDown');
+      expect(focusedLabel()).toBe('Profile');
+      press('ArrowUp');
+      expect(focusedLabel()).toBe('Log out');
+    });
+
+    it('should jump to the first and last items on Home and End', async () => {
+      await openFromKeyboard();
+      press('End');
+      expect(focusedLabel()).toBe('Log out');
+      press('Home');
+      expect(focusedLabel()).toBe('Profile');
+    });
+
+    it('should move to the next item starting with a typed character', async () => {
+      vi.useFakeTimers();
+      try {
+        await openFromKeyboard();
+        press('l');
+        vi.advanceTimersByTime(250);
+        expect(focusedLabel()).toBe('Log out');
+        press('s');
+        vi.advanceTimersByTime(250);
+        expect(focusedLabel()).toBe('Settings');
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('should return focus to the trigger on Escape', async () => {
+      await openFromKeyboard();
+      press('Escape');
+      expect(fixture.componentInstance.isOpen()).toBe(false);
+      expect(document.activeElement).toBe(trigger);
+    });
+
+    it('should close and return focus to the trigger on Tab', async () => {
+      await openFromKeyboard();
+      press('Tab');
+      expect(fixture.componentInstance.isOpen()).toBe(false);
+      expect(document.activeElement).toBe(trigger);
+    });
+
+    it('should return focus to the trigger after choosing an item', async () => {
+      const selected: MenuItem[] = [];
+      fixture.componentInstance.itemSelect.subscribe(item => selected.push(item));
+      await openFromKeyboard();
+      press('ArrowDown');
+      (document.activeElement as HTMLButtonElement).click();
+      fixture.detectChanges();
+
+      expect(selected.map(item => item.id)).toEqual(['settings']);
+      expect(document.activeElement).toBe(trigger);
+    });
+
+    it('should return focus to the trigger when the backdrop is clicked', async () => {
+      await openFromKeyboard();
+      overlayContainer
+        .getContainerElement()
+        .querySelector<HTMLElement>('.cdk-overlay-backdrop')
+        ?.click();
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.isOpen()).toBe(false);
+      expect(document.activeElement).toBe(trigger);
+    });
+
+    it('should leave other keys on the trigger alone', () => {
+      press('a', trigger);
+      expect(fixture.componentInstance.isOpen()).toBe(false);
     });
   });
 });
