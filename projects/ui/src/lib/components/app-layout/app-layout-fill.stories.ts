@@ -100,7 +100,9 @@ class GroupedListPageComponent {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <cmn-page-container spacing="none" fill>
-      <p class="pb-cmn-4 text-cmn-sm text-text-secondary">Rows straight in the page, no list scroller</p>
+      <p class="pb-cmn-4 text-cmn-sm text-text-secondary">
+        Rows straight in the page, no list scroller
+      </p>
       @for (row of rows; track row) {
         <cmn-list-item-row [label]="'Report ' + row" sublabel="Monthly" data-row />
       }
