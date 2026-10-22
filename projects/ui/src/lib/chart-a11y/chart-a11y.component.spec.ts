@@ -61,8 +61,11 @@ describe('ChartA11yComponent', () => {
     fixture.detectChanges();
     const wrapper = query('[data-testid="chart-data-table"]');
     expect(wrapper?.classList).toContain('sr-only');
+    // The hidden wrapper already clips; a caption positioned inside it would be clipped twice.
+    expect(query('caption')?.classList).not.toContain('sr-only');
     fixture.componentRef.setInput('visible', true);
     fixture.detectChanges();
     expect(wrapper?.classList).not.toContain('sr-only');
+    expect(query('caption')?.classList).toContain('sr-only');
   });
 });

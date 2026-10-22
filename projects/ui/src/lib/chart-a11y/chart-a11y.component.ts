@@ -17,7 +17,7 @@ import {type ChartTable} from '@lifekit-hq/charts-core';
     @if (table(); as t) {
       <div [class]="visible() ? 'overflow-x-auto' : 'sr-only'" data-testid="chart-data-table">
         <table class="w-full text-cmn-sm">
-          <caption class="sr-only">
+          <caption [class.sr-only]="visible()">
             {{
               caption()
             }}
