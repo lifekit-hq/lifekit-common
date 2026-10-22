@@ -62,17 +62,34 @@ describe('PageContainerComponent', () => {
   });
 
   it('should not be a flex column unless fill is set', () => {
-    expect(host().classList).not.toContain('md:h-full');
+    expect(host().classList).not.toContain('h-full');
+    expect(host().hasAttribute('data-cmn-fill')).toBe(false);
     expect(box().classList).not.toContain('flex-1');
   });
 
   it('should make the host a full-height flex column when fill is set', () => {
     fixture.componentRef.setInput('fill', true);
     fixture.detectChanges();
-    for (const cls of ['flex', 'min-h-full', 'flex-col', 'md:h-full']) {
+    for (const cls of ['flex', 'flex-col', 'h-full']) {
       expect(host().classList).toContain(cls);
     }
     expect(host().classList).not.toContain('block');
+  });
+
+  it('should bound the host at every width, not let it grow with its content', () => {
+    fixture.componentRef.setInput('fill', true);
+    fixture.detectChanges();
+    expect(host().classList).not.toContain('min-h-full');
+    expect(host().classList).not.toContain('md:h-full');
+  });
+
+  it('should mark a fill page so the shell can bound its page frame', () => {
+    fixture.componentRef.setInput('fill', true);
+    fixture.detectChanges();
+    expect(host().hasAttribute('data-cmn-fill')).toBe(true);
+    fixture.componentRef.setInput('fill', false);
+    fixture.detectChanges();
+    expect(host().hasAttribute('data-cmn-fill')).toBe(false);
   });
 
   it('should let the box grow into the remaining height when fill is set', () => {

@@ -109,7 +109,7 @@ export interface AppLayoutAccount extends AccountIdentity {
 
 /** The large title lines up with `cmn-page-container`'s default box; the page's own top padding spaces it. */
 const LARGE_TITLE_BOX_CLASSES =
-  'mx-auto w-full max-w-[1200px] px-cmn-4 pt-cmn-4 md:px-cmn-8 md:pt-cmn-8';
+  'mx-auto w-full max-w-[1200px] shrink-0 px-cmn-4 pt-cmn-4 md:px-cmn-8 md:pt-cmn-8';
 
 /** Only the phone shell shows the tab bar; the other shells show the sidebar or its rail. */
 const PHONE_ONLY_CLASSES = 'hidden';
@@ -122,7 +122,7 @@ const OVERLAY_TAB_BAR_CLASSES = 'absolute inset-x-0 bottom-0 z-30';
  * the top bar. Sticky offsets are measured from main's content box, which main's overlay
  * padding already shifts below the bar, so top-0 is flush under it on every size.
  */
-const NOTICES_BASE_CLASSES = 'sticky top-0 z-20 flex flex-col empty:hidden';
+const NOTICES_BASE_CLASSES = 'sticky top-0 z-20 flex shrink-0 flex-col empty:hidden';
 /**
  * Overscroll stops at main: it never chains to the browser (pull-to-refresh, page bounce). Main
  * takes keyboard focus so a page with nothing focusable in it still scrolls from the keyboard.
@@ -144,10 +144,27 @@ const MAIN_OVERLAY_TOP_CLASSES =
  */
 const MAIN_OVERLAY_BOTTOM_CLASSES =
   'pb-[var(--cmn-content-inset-bottom,0px)] scroll-pb-[var(--cmn-content-inset-bottom,0px)]';
+/**
+ * A `cmn-page-container fill` anywhere in main marks itself `data-cmn-fill`. While one is showing
+ * the page frame is a column that is exactly what main has left below the title and notices, and
+ * whatever the route renders into it (the page's own host element) takes all of it, so a page
+ * needs no height classes of its own: its `fill` container and a scrolling child
+ * (`cmn-page-scroll`) are the only things that size. Non-fill pages keep the frame as it was.
+ */
+// Spelled out in full: Tailwind finds classes by scanning for whole class names.
+const PAGE_FRAME_FILL_CLASSES =
+  'has-[[data-cmn-fill]]:flex has-[[data-cmn-fill]]:flex-col ' +
+  'has-[[data-cmn-fill]]:[&>:not(router-outlet)]:min-h-0 ' +
+  'has-[[data-cmn-fill]]:[&>:not(router-outlet)]:flex-1';
 /** The phone overlay's page frame: it fills what is left of main below the title and notices. */
-const PAGE_FRAME_OVERLAY_CLASSES = 'flow-root h-[calc(100%-var(--cmn-page-above,0px))]';
-/** Outside the overlay the frame does not exist as a box: page hosts size against main itself. */
-const PAGE_FRAME_PLAIN_CLASSES = 'contents';
+const PAGE_FRAME_OVERLAY_CLASSES = `flow-root h-[calc(100%-var(--cmn-page-above,0px))] ${PAGE_FRAME_FILL_CLASSES}`;
+/**
+ * Outside the overlay the frame does not exist as a box (`contents`): page hosts size against main
+ * itself. With a fill page it becomes that box, and main becomes a column so the title and notices
+ * keep their height and the frame takes the rest: main does not scroll at any width.
+ */
+const PAGE_FRAME_PLAIN_CLASSES = `contents has-[[data-cmn-fill]]:min-h-0 has-[[data-cmn-fill]]:flex-1 ${PAGE_FRAME_FILL_CLASSES}`;
+const MAIN_FILL_CLASSES = 'has-[[data-cmn-fill]]:flex has-[[data-cmn-fill]]:flex-col';
 /** What sits above the page frame in main (large title, notices): the frame is that much shorter. */
 const PAGE_ABOVE_PROPERTY = '--cmn-page-above';
 /** Breathing room between the last row and the bar or floating action it scrolls clear of. */
@@ -430,7 +447,7 @@ export class AppLayoutComponent {
   public readonly mainClass = computed<string>(() =>
     this.overlay()
       ? `${MAIN_BASE_CLASSES} ${MAIN_OVERLAY_TOP_CLASSES} ${MAIN_OVERLAY_BOTTOM_CLASSES}`
-      : MAIN_BASE_CLASSES
+      : `${MAIN_BASE_CLASSES} ${MAIN_FILL_CLASSES}`
   );
 
   /** The shell this window and device call for: tab bar, rail or sidebar. */

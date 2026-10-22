@@ -34,6 +34,7 @@ const MAIN_BASE_CLASSES = [
   'focus-visible:ring-2',
   'focus-visible:ring-inset',
   'focus-visible:ring-border-focus',
+  ...'has-[[data-cmn-fill]]:flex has-[[data-cmn-fill]]:flex-col'.split(' '), // only while a fill page shows
 ];
 
 /** The element's exact class set; order is not behaviour. */
