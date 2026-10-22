@@ -1,6 +1,7 @@
 import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {type ComponentFixture, TestBed} from '@angular/core/testing';
-import {beforeEach, describe, expect, it} from 'vitest';
+import {beforeEach, describe, expect, it, type Mock, vi} from 'vitest';
+import {userEvent} from 'vitest/browser';
 
 import {ListItemRowComponent} from './list-item-row.component';
 
@@ -101,6 +102,81 @@ describe('ListItemRowComponent', () => {
   it('should have last:border-b-0 to suppress the border on the final row', () => {
     const row: HTMLElement = fixture.nativeElement.querySelector('div');
     expect(row.className).toContain('last:border-b-0');
+  });
+
+  it('should render a plain row, not a button, by default', () => {
+    expect(fixture.nativeElement.querySelector('button')).toBeNull();
+    expect(rowEl().className).not.toContain('cursor-pointer');
+    expect(rowEl().className).not.toContain('focus-visible:ring-2');
+  });
+});
+
+describe('ListItemRowComponent — action mode', () => {
+  let fixture: ComponentFixture<ListItemRowComponent>;
+  let activated: Mock<() => void>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [ListItemRowComponent],
+    }).compileComponents();
+    fixture = TestBed.createComponent(ListItemRowComponent);
+    fixture.componentRef.setInput('label', 'Manual holding');
+    fixture.componentRef.setInput('sublabel', 'Opens the editor');
+    fixture.componentRef.setInput('action', true);
+    activated = vi.fn<() => void>();
+    fixture.componentInstance.activated.subscribe(activated);
+    fixture.detectChanges();
+  });
+
+  function buttonEl(): HTMLButtonElement {
+    return fixture.nativeElement.querySelector('button');
+  }
+
+  it('should render the whole row as one native button', () => {
+    const button = buttonEl();
+    expect(button).toBeTruthy();
+    expect(button.type).toBe('button');
+    expect(button.hasAttribute('role')).toBe(false);
+    expect(fixture.nativeElement.querySelectorAll('button').length).toBe(1);
+    expect(button.textContent).toContain('Manual holding');
+    expect(button.textContent).toContain('Opens the editor');
+  });
+
+  it('should keep the row layout and add the focus ring and pressed state', () => {
+    const button = buttonEl();
+    for (const cls of ['flex', 'items-center', 'border-b', 'px-cmn-4', 'py-cmn-3', 'w-full']) {
+      expect(button.classList).toContain(cls);
+    }
+    expect(button.className).toContain('focus-visible:ring-border-focus');
+    expect(button.className).toContain('active:bg-surface-raised');
+    expect(button.querySelector('.flex-1 > div')?.classList).toContain('text-text-primary');
+  });
+
+  it('should emit activated on click', async () => {
+    await userEvent.click(buttonEl());
+    expect(activated).toHaveBeenCalledTimes(1);
+  });
+
+  it('should emit activated on Enter and on Space', async () => {
+    buttonEl().focus();
+    await userEvent.keyboard('{Enter}');
+    expect(activated).toHaveBeenCalledTimes(1);
+    await userEvent.keyboard(' ');
+    expect(activated).toHaveBeenCalledTimes(2);
+  });
+
+  it('should still dim an action row', () => {
+    fixture.componentRef.setInput('dimmed', true);
+    fixture.detectChanges();
+    expect(buttonEl().className).toContain('[&>[avatar]]:grayscale');
+    expect(buttonEl().querySelector('.flex-1 > div')?.classList).toContain('text-text-secondary');
+  });
+
+  it('should fall back to a plain row when action turns off', () => {
+    fixture.componentRef.setInput('action', false);
+    fixture.detectChanges();
+    expect(buttonEl()).toBeNull();
+    expect(fixture.nativeElement.querySelector('div')?.textContent).toContain('Manual holding');
   });
 });
 
