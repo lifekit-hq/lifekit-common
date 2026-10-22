@@ -172,6 +172,17 @@ describe('highlight on a bar chart', () => {
     expect(h.reads).toEqual([2, null]);
   });
 
+  it('releases a held bar when destroyed, and nothing otherwise', () => {
+    const idle = bars();
+    idle.chart.destroy();
+    expect(idle.reads).toEqual([]);
+    const held = bars();
+    held.press('End');
+    held.chart.destroy();
+    mounted.splice(0);
+    expect(held.reads).toEqual([2, null]);
+  });
+
   it('lets go of the canvas when destroyed', () => {
     const h = bars();
     h.chart.destroy();

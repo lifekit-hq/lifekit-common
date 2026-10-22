@@ -104,7 +104,7 @@ export function highlightPlugin(handlers: ChartHighlightHandlers): Plugin {
     afterDestroy() {
       detach?.();
       detach = null;
-      current = null;
+      report(null);
     },
   };
 }
