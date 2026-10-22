@@ -668,14 +668,15 @@ describe('DataTableComponent sorting', () => {
     it('renders a dash for null and blank values, with a label for screen readers', () => {
       const [, nullCell, blankCell] = noteCells();
       for (const cell of [nullCell, blankCell]) {
-        expect(cell.querySelector('[aria-hidden="true"]')?.textContent?.trim()).toBe('\u2014');
-        expect(cell.querySelector('.sr-only')?.textContent?.trim()).toBe('Not set');
+        const dash = cell.querySelector('[role="img"]');
+        expect(dash?.textContent?.trim()).toBe('\u2014');
+        expect(dash?.getAttribute('aria-label')).toBe('Not set');
       }
     });
 
     it('renders values as they are', () => {
       expect(noteCells()[0].textContent?.trim()).toBe('Rainy day');
-      expect(noteCells()[0].querySelector('.sr-only')).toBeNull();
+      expect(noteCells()[0].querySelector('[role="img"]')).toBeNull();
     });
 
     it('leaves a projected cell template alone', () => {

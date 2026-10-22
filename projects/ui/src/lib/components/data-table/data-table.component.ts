@@ -142,8 +142,7 @@ function compareValues(a: unknown, b: unknown): number {
         @if (text) {
           {{ text }}
         } @else {
-          <span aria-hidden="true">{{ emptyCellText }}</span>
-          <span class="sr-only">{{ emptyCellLabel() }}</span>
+          <span [attr.aria-label]="emptyCellLabel()" role="img">{{ emptyCellText }}</span>
         }
       }
     </ng-template>
