@@ -12,6 +12,8 @@ const meta: Meta<ListItemRowComponent> = {
     label: {control: 'text'},
     sublabel: {control: 'text'},
     dimmed: {control: 'boolean'},
+    action: {control: 'boolean'},
+    activated: {action: 'activated'},
   },
 };
 
@@ -28,6 +30,25 @@ export const WithSublabel: Story = {
 
 export const Dimmed: Story = {
   args: {label: 'Spotify', sublabel: 'Music', dimmed: true},
+};
+
+// The whole row is one button that opens a dialog or detail view; the amount stays read-only text
+// because a button cannot hold other controls.
+export const Action: Story = {
+  render: args => ({
+    props: args,
+    template: `
+      <div class="border border-border-default rounded-cmn-md overflow-hidden">
+        <cmn-list-item-row label="Manual holding" sublabel="Edit value and notes" [action]="true" (activated)="activated($event)">
+          <cmn-institution-avatar avatar name="Manual holding" size="lg" />
+          <div amount class="min-w-[72px] text-right">
+            <div class="text-cmn-sm font-semibold tabular-nums text-text-primary">$1,250.00</div>
+          </div>
+        </cmn-list-item-row>
+        <cmn-list-item-row label="Chrome on Windows" sublabel="Signed in Oct 20" [action]="true" (activated)="activated($event)" />
+      </div>
+    `,
+  }),
 };
 
 export const WithAvatar: Story = {
