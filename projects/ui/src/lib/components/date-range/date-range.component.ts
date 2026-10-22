@@ -3,10 +3,14 @@ import {
   Component,
   computed,
   forwardRef,
+  inject,
   input,
   signal,
 } from '@angular/core';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
+
+import {ChipComponent} from '../chip/chip.component';
+import {DATE_RANGE_TODAY, type DateRangePreset, resolveDateRangePreset} from './date-range-presets';
 
 /** Inclusive range of ISO `yyyy-MM-dd` dates; either bound may be open (`null`). */
 export interface DateRange {
@@ -23,13 +27,25 @@ const FIELD_CLASSES =
   'text-text-primary focus:outline-none focus:ring-2 focus:ring-border-focus ' +
   'focus:border-border-focus disabled:opacity-50 disabled:cursor-not-allowed transition-colors max-md:min-h-cmn-touch';
 
+interface PresetChip {
+  label: string;
+  preset: DateRangePreset;
+  selected: boolean;
+}
+
 /**
  * Two native date inputs bound as one `{from, to}` value. An inverted range (`from > to`) is only
  * flagged visually (`aria-invalid` and an error border); it is still emitted and the control has no
  * validator, so consumers must validate `from <= to` themselves.
+ *
+ * `presets` adds a row of chips above the fields (none by default; `DATE_RANGE_PRESETS` holds the
+ * built-ins). Choosing one sets both bounds and emits the change like typing would. The chip whose
+ * range matches the current value reads as selected (`aria-pressed`), so editing a field by hand
+ * clears it. Resolvers are evaluated against `DATE_RANGE_TODAY`.
  */
 @Component({
   selector: 'cmn-date-range',
+  imports: [ChipComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
@@ -40,6 +56,23 @@ const FIELD_CLASSES =
   ],
   host: {class: 'block'},
   template: `
+    @if (presetChips().length > 0) {
+      <div
+        [attr.aria-label]="presetsLabel()"
+        class="mb-cmn-2 flex flex-wrap gap-cmn-1"
+        role="group"
+      >
+        @for (chip of presetChips(); track $index) {
+          <cmn-chip
+            [selected]="chip.selected"
+            [disabled]="disabled()"
+            (clicked)="choosePreset(chip.preset)"
+          >
+            {{ chip.label }}
+          </cmn-chip>
+        }
+      </div>
+    }
     <div [attr.aria-label]="groupLabel()" class="flex items-center gap-cmn-2" role="group">
       <label class="flex-1">
         <span class="sr-only">{{ fromLabel() }}</span>
@@ -72,9 +105,15 @@ const FIELD_CLASSES =
   `,
 })
 export class DateRangeComponent implements ControlValueAccessor {
+  private readonly today = inject(DATE_RANGE_TODAY);
+
   public readonly groupLabel = input<string>('Date range');
   public readonly fromLabel = input<string>('From date');
   public readonly toLabel = input<string>('To date');
+  /** Quick picks shown as chips above the fields; none render unless passed. */
+  public readonly presets = input<readonly DateRangePreset[]>([]);
+  /** Accessible name of the preset chip row. */
+  public readonly presetsLabel = input<string>('Date range presets');
 
   public readonly invalid = computed(() => {
     const {from, to} = this.value();
@@ -86,6 +125,24 @@ export class DateRangeComponent implements ControlValueAccessor {
 
   protected readonly value = signal<DateRange>(EMPTY_RANGE);
   protected readonly disabled = signal<boolean>(false);
+
+  /** Each preset resolved against today, flagged when its range is the current value. */
+  protected readonly presetChips = computed<PresetChip[]>(() => {
+    const presets = this.presets();
+    if (presets.length === 0) {
+      return [];
+    }
+    const today = this.today();
+    const {from, to} = this.value();
+    return presets.map(preset => {
+      const range = resolveDateRangePreset(preset, today);
+      return {
+        label: preset.label,
+        preset,
+        selected: range.from === from && range.to === to,
+      };
+    });
+  });
 
   private onChange: (value: DateRange) => void = (_: DateRange) => void 0;
 
@@ -114,6 +171,14 @@ export class DateRangeComponent implements ControlValueAccessor {
     };
     this.value.set(next);
     this.onChange(next);
+  }
+
+  protected choosePreset(preset: DateRangePreset): void {
+    const {from, to} = resolveDateRangePreset(preset, this.today());
+    const next: DateRange = {from, to};
+    this.value.set(next);
+    this.onChange(next);
+    this.onTouched();
   }
 
   protected onBlur(): void {

@@ -60,7 +60,7 @@ The captain's picks (2026-10-07, reference round 1) and what each means for this
 | 5   | 5-verdict-a   | [Verdict idea card](#verdict-idea-card): STRONG BUY / BUY / WAIT / AVOID word, four raw axis facts, what would change it    | verdict badge and axis strip (gap)                   | dossier header, ranked universe (#726) |
 | 6   | 6-notify-a    | [Scoped notifications](#scoped-notifications): held names on by default, watchlist opt-in, consensus and timing on earnings | `cmn-alert-item`, `cmn-chip`                         | finance-sentry alerts (#466)           |
 | 7   | 7-nav-a       | [Search lands on the entity](#search-lands-on-the-entity): held names, watchlist and accounts as palette items              | `cmn-command-palette`                                | finance-sentry shell                   |
-| 8   | 8-tx-b        | [Transaction period chips](#transaction-period-chips): monobank-style period chip row beside the restored filters           | `cmn-chip`, `cmn-segmented`                          | finance-sentry transactions            |
+| 8   | 8-tx-b        | [Transaction period chips](#transaction-period-chips): monobank-style period chip row beside the restored filters           | `cmn-date-range` presets (`cmn-chip`)                | finance-sentry transactions            |
 | 9   | 9-digest-a    | [Terse digest](#terse-digest): bullets, one headline number each, every bullet linked to its entity                         | none, a content rule                                 | finance-sentry Ledger digests          |
 | 10  | 10-playbook-a | This page                                                                                                                   | `docs/design/patterns.md`                            | all lifekit apps                       |
 
@@ -231,14 +231,20 @@ Typing a ticker, an account or a budget opens its page.
 
 ## Transaction period chips
 
-A fast period chip row (This month / Last month / 3M) beside the transaction filters.
+A fast period chip row (This month / Last month / Last 90 days) beside the transaction filters.
 
 - **What it is:** the monobank list filters (period, category, search), met by the restored
-  filter bar, with a period chip row added by the captain's pick (8-tx-b), reusing the dashboard
-  presets. `cmn-segmented` is the candidate control.
+  filter bar, with a period chip row added by the captain's pick (8-tx-b). The row is
+  `cmn-date-range` with `[presets]`: a `cmn-chip` per preset above the two date fields. Choosing a
+  chip sets both bounds and emits the usual change; the chip whose range matches the value reads
+  as selected (`aria-pressed`), so a hand-edited range clears it. The built-ins
+  (`DATE_RANGE_PRESETS`: this month, last month, last 30 days, last 90 days, year to date) resolve
+  against `DATE_RANGE_TODAY`; a consumer can pass a subset or its own `{label, range}` pairs. It is
+  a chip row, not `cmn-segmented`, because the list is the consumer's and can outgrow five short
+  segments, and the fields stay beside it for a custom range.
 - **Compare against:** monobank statement and transaction filters ([monobank knowledge
   base](https://monobank.ua/en/knowledge-base/acquiring/online/website/platforms/statement)).
-- **Owner:** `cmn-chip`, `cmn-date-range`, `cmn-segmented`.
+- **Owner:** `cmn-date-range` presets (built on `cmn-chip`). Nothing missing.
 - **Consumer:** finance-sentry transactions.
 - **Not copied:** statement export (monobank already exports statements), bank-only surfaces,
   gamification.

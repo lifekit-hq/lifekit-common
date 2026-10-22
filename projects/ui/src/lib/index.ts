@@ -30,6 +30,16 @@ export * from './components/data-table/data-table-column.component';
 export type * from './components/data-table/data-table-pagination.model';
 export type * from './components/data-table/data-table-sort.model';
 export * from './components/date-range/date-range.component';
+export {
+  DATE_RANGE_PRESETS,
+  DATE_RANGE_TODAY,
+  type DateRangePreset,
+  LAST_30_DAYS_PRESET,
+  LAST_90_DAYS_PRESET,
+  LAST_MONTH_PRESET,
+  THIS_MONTH_PRESET,
+  YEAR_TO_DATE_PRESET,
+} from './components/date-range/date-range-presets';
 export * from './components/description-list/description-list.component';
 export * from './components/dialog/confirm-dialog.component';
 export * from './components/dialog/dialog-actions.component';
