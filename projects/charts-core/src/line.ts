@@ -62,10 +62,11 @@ export interface LineChartScale {
 const TIME_TICK_FORMAT = new Intl.DateTimeFormat('en-US', {month: 'short', day: 'numeric'});
 
 /**
- * The points a chart draws. Time spacing needs a timestamp, so points without a finite `time`
- * are left out, and the rest are ordered by it so the line never doubles back.
+ * The points a chart draws, in drawing order: the indexes scrub and highlight report count into
+ * this list. Time spacing needs a timestamp, so points without a finite `time` are left out, and
+ * the rest are ordered by it so the line never doubles back.
  */
-function drawnPoints(points: ChartPoint[], xSpacing: ChartXSpacing): ChartPoint[] {
+export function drawnLinePoints(points: ChartPoint[], xSpacing: ChartXSpacing): ChartPoint[] {
   if (xSpacing !== 'time') {
     return points;
   }
@@ -133,7 +134,7 @@ export function buildLineChartConfig(
   const format = valueFormatter(valueFormat, currency);
   const xSpacing = scale.xSpacing ?? 'even';
   const timed = xSpacing === 'time';
-  const drawn = drawnPoints(points, xSpacing);
+  const drawn = drawnLinePoints(points, xSpacing);
   return {
     type: 'line',
     ...(scrubbing ? {plugins: [scrubPlugin(scrub, tokens.textSecondary)]} : {}),
@@ -208,7 +209,7 @@ export function updateLineChart(
   scale: LineChartScale = {}
 ): void {
   const xSpacing = scale.xSpacing ?? 'even';
-  const drawn = drawnPoints(points, xSpacing);
+  const drawn = drawnLinePoints(points, xSpacing);
   if (xSpacing !== 'time') {
     // eslint-disable-next-line no-param-reassign
     chart.data.labels = drawn.map(p => p.label);

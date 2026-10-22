@@ -108,3 +108,19 @@ export interface DonutSegmentClick {
   label: string;
   value: number;
 }
+
+/** What a chart tells its host while a pointer or a key highlights one of its items. */
+export interface ChartHighlightHandlers {
+  /** The highlight moved onto item `index`: a column of bars, a ring segment, or a line point. */
+  onHighlight(index: number): void;
+  /** Nothing is highlighted any more: the pointer left, or the keyboard reading ended. */
+  onRelease(): void;
+}
+
+/** A chart's data as a table: the text alternative a screen reader, or a toggle, can show. */
+export interface ChartTable {
+  /** Column headers; the first heads the row labels. */
+  headers: string[];
+  /** One row per point, bar or segment: its label, then one formatted value per remaining header. */
+  rows: string[][];
+}

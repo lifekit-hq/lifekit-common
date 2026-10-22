@@ -297,4 +297,112 @@ describe('AreaChartComponent', () => {
       expect(canvas.style.cursor).toBe('');
     });
   });
+
+  describe('accessibility', () => {
+    const canvas = (): HTMLCanvasElement => fixture.nativeElement.querySelector('canvas');
+    const announcement = (): string =>
+      fixture.nativeElement.querySelector('[data-testid="chart-announcement"]').textContent.trim();
+    const table = (): HTMLElement | null =>
+      fixture.nativeElement.querySelector('[data-testid="chart-data-table"]');
+    const rows = (): string[] =>
+      [...fixture.nativeElement.querySelectorAll('tbody tr')].map(tr =>
+        tr.textContent.replace(/\s+/g, ' ').trim()
+      );
+
+    function press(key: string): void {
+      canvas().dispatchEvent(new KeyboardEvent('keydown', {key, bubbles: true, cancelable: true}));
+      fixture.detectChanges();
+    }
+
+    /** Moves a mouse onto item `index` and waits for Chart.js to read it. */
+    async function hover(index: number): Promise<void> {
+      const chart = (fixture.componentInstance as unknown as {chart: Chart}).chart;
+      const element = chart.getDatasetMeta(0).data[index] as unknown as {
+        getCenterPoint(): {x: number; y: number};
+      };
+      const {x, y} = element.getCenterPoint();
+      const rect = canvas().getBoundingClientRect();
+      canvas().dispatchEvent(
+        new MouseEvent('mousemove', {clientX: rect.left + x, clientY: rect.top + y, bubbles: true})
+      );
+      await new Promise<void>(resolve => {
+        requestAnimationFrame(() => resolve());
+      });
+      fixture.detectChanges();
+    }
+
+    it('names an empty chart by its empty message, out of the tab order and without a table', () => {
+      expect(canvas().getAttribute('role')).toBe('img');
+      expect(canvas().getAttribute('aria-label')).toBe('Area chart. No data yet');
+      expect(canvas().hasAttribute('tabindex')).toBe(false);
+      expect(table()).toBeNull();
+    });
+
+    it('takes a summary over the derived one, under the generic name without a label', () => {
+      fixture.componentRef.setInput('series', SAMPLE);
+      fixture.componentRef.setInput('summary', 'Mostly steady');
+      fixture.detectChanges();
+      expect(canvas().getAttribute('aria-label')).toBe('Area chart. Mostly steady');
+    });
+
+    it('shows the hidden table when asked', () => {
+      fixture.componentRef.setInput('series', SAMPLE);
+      fixture.detectChanges();
+      expect(canvas().getAttribute('tabindex')).toBe('0');
+      expect(table()?.classList).toContain('sr-only');
+      fixture.componentRef.setInput('showDataTable', true);
+      fixture.detectChanges();
+      expect(table()?.classList).not.toContain('sr-only');
+    });
+
+    it('names the canvas with the label and the stacked total', () => {
+      fixture.componentRef.setInput('series', SAMPLE);
+      fixture.componentRef.setInput('label', 'Net worth');
+      fixture.detectChanges();
+      expect(canvas().getAttribute('aria-label')).toBe(
+        'Net worth. Banking and Crypto, 2 points from Jan to Feb; total $140 to $175, up 25.0%'
+      );
+    });
+
+    it('tables each band with their total when stacked, and without it when not', () => {
+      fixture.componentRef.setInput('series', SAMPLE);
+      fixture.detectChanges();
+      expect(rows()).toEqual(['Jan $100 $40 $140', 'Feb $120 $55 $175']);
+      fixture.componentRef.setInput('stacked', false);
+      fixture.detectChanges();
+      expect(rows()).toEqual(['Jan $100 $40', 'Feb $120 $55']);
+    });
+
+    it('announces the point a key reads, and clears on Escape', () => {
+      fixture.componentRef.setInput('series', SAMPLE);
+      fixture.detectChanges();
+      press('End');
+      expect(announcement()).toBe('Feb: Banking $120, Crypto $55, total $175');
+      press('Escape');
+      expect(announcement()).toBe('');
+    });
+
+    it('announces the point a pointer highlights when not scrubbing', async () => {
+      fixture.componentRef.setInput('series', SAMPLE);
+      fixture.detectChanges();
+      await hover(1);
+      expect(announcement()).toBe('Feb: Banking $120, Crypto $55, total $175');
+    });
+
+    it('scrubs by key when scrubbable, announcing and emitting the point', () => {
+      const scrubs: number[] = [];
+      let ends = 0;
+      fixture.componentInstance.scrub.subscribe(p => scrubs.push(p.index));
+      fixture.componentInstance.scrubEnd.subscribe(() => ends++);
+      fixture.componentRef.setInput('series', SAMPLE);
+      fixture.componentRef.setInput('scrubbable', true);
+      fixture.detectChanges();
+      press('ArrowRight');
+      expect(scrubs).toEqual([0]);
+      expect(announcement()).toBe('Jan: Banking $100, Crypto $40, total $140');
+      press('Escape');
+      expect(ends).toBe(1);
+      expect(announcement()).toBe('');
+    });
+  });
 });

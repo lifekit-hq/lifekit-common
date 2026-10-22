@@ -155,4 +155,103 @@ describe('DonutChartComponent', () => {
       expect(canvas.style.cursor).toBe('');
     });
   });
+
+  describe('accessibility', () => {
+    const canvas = (): HTMLCanvasElement => fixture.nativeElement.querySelector('canvas');
+    const announcement = (): string =>
+      fixture.nativeElement.querySelector('[data-testid="chart-announcement"]').textContent.trim();
+    const table = (): HTMLElement | null =>
+      fixture.nativeElement.querySelector('[data-testid="chart-data-table"]');
+    const rows = (): string[] =>
+      [...fixture.nativeElement.querySelectorAll('tbody tr')].map(tr =>
+        tr.textContent.replace(/\s+/g, ' ').trim()
+      );
+
+    function press(key: string): void {
+      canvas().dispatchEvent(new KeyboardEvent('keydown', {key, bubbles: true, cancelable: true}));
+      fixture.detectChanges();
+    }
+
+    /** Moves a mouse onto item `index` and waits for Chart.js to read it. */
+    async function hover(index: number): Promise<void> {
+      const chart = (fixture.componentInstance as unknown as {chart: Chart}).chart;
+      const element = chart.getDatasetMeta(0).data[index] as unknown as {
+        getCenterPoint(): {x: number; y: number};
+      };
+      const {x, y} = element.getCenterPoint();
+      const rect = canvas().getBoundingClientRect();
+      canvas().dispatchEvent(
+        new MouseEvent('mousemove', {clientX: rect.left + x, clientY: rect.top + y, bubbles: true})
+      );
+      await new Promise<void>(resolve => {
+        requestAnimationFrame(() => resolve());
+      });
+      fixture.detectChanges();
+    }
+
+    it('names an empty chart by its empty message, out of the tab order and without a table', () => {
+      expect(canvas().getAttribute('role')).toBe('img');
+      expect(canvas().getAttribute('aria-label')).toBe('Donut chart. No data yet');
+      expect(canvas().hasAttribute('tabindex')).toBe(false);
+      expect(table()).toBeNull();
+    });
+
+    it('takes a summary over the derived one, under the generic name without a label', () => {
+      fixture.componentRef.setInput('segments', SEGMENTS);
+      fixture.componentRef.setInput('summary', 'Mostly steady');
+      fixture.detectChanges();
+      expect(canvas().getAttribute('aria-label')).toBe('Donut chart. Mostly steady');
+    });
+
+    it('shows the hidden table when asked', () => {
+      fixture.componentRef.setInput('segments', SEGMENTS);
+      fixture.detectChanges();
+      expect(canvas().getAttribute('tabindex')).toBe('0');
+      expect(table()?.classList).toContain('sr-only');
+      fixture.componentRef.setInput('showDataTable', true);
+      fixture.detectChanges();
+      expect(table()?.classList).not.toContain('sr-only');
+    });
+
+    it('names the canvas with the label, the total and the largest share', () => {
+      fixture.componentRef.setInput('segments', SEGMENTS);
+      fixture.componentRef.setInput('label', 'Allocation');
+      fixture.detectChanges();
+      expect(canvas().getAttribute('aria-label')).toBe(
+        'Allocation. 3 segments totalling $1,400; largest Brokerage, $900 (64.3%)'
+      );
+    });
+
+    it('tables each segment with its share', () => {
+      fixture.componentRef.setInput('segments', SEGMENTS);
+      fixture.detectChanges();
+      expect(rows()).toEqual(['Banks $400 28.6%', 'Brokerage $900 64.3%', 'Crypto $100 7.1%']);
+    });
+
+    it('announces the segment a key reads, and clears when focus leaves', () => {
+      fixture.componentRef.setInput('segments', SEGMENTS);
+      fixture.detectChanges();
+      press('Home');
+      press('ArrowRight');
+      expect(announcement()).toBe('Brokerage: $900, 64.3%');
+      canvas().dispatchEvent(new FocusEvent('blur'));
+      fixture.detectChanges();
+      expect(announcement()).toBe('');
+    });
+
+    it('announces the segment a pointer highlights', async () => {
+      fixture.componentRef.setInput('segments', SEGMENTS);
+      fixture.detectChanges();
+      await hover(2);
+      expect(announcement()).toBe('Crypto: $100, 7.1%');
+    });
+
+    it('carries the name and table in the ring-only layout too', () => {
+      fixture.componentRef.setInput('segments', SEGMENTS);
+      fixture.componentRef.setInput('chrome', false);
+      fixture.detectChanges();
+      expect(canvas().getAttribute('aria-label')).toContain('Donut chart. 3 segments');
+      expect(rows()).toHaveLength(SEGMENTS.length);
+    });
+  });
 });

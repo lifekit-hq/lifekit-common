@@ -147,4 +147,99 @@ describe('BarChartComponent', () => {
       expect(canvas.style.cursor).toBe('');
     });
   });
+
+  describe('accessibility', () => {
+    const canvas = (): HTMLCanvasElement => fixture.nativeElement.querySelector('canvas');
+    const announcement = (): string =>
+      fixture.nativeElement.querySelector('[data-testid="chart-announcement"]').textContent.trim();
+    const table = (): HTMLElement | null =>
+      fixture.nativeElement.querySelector('[data-testid="chart-data-table"]');
+    const rows = (): string[] =>
+      [...fixture.nativeElement.querySelectorAll('tbody tr')].map(tr =>
+        tr.textContent.replace(/\s+/g, ' ').trim()
+      );
+
+    function press(key: string): void {
+      canvas().dispatchEvent(new KeyboardEvent('keydown', {key, bubbles: true, cancelable: true}));
+      fixture.detectChanges();
+    }
+
+    /** Moves a mouse onto item `index` and waits for Chart.js to read it. */
+    async function hover(index: number): Promise<void> {
+      const chart = (fixture.componentInstance as unknown as {chart: Chart}).chart;
+      const element = chart.getDatasetMeta(0).data[index] as unknown as {
+        getCenterPoint(): {x: number; y: number};
+      };
+      const {x, y} = element.getCenterPoint();
+      const rect = canvas().getBoundingClientRect();
+      canvas().dispatchEvent(
+        new MouseEvent('mousemove', {clientX: rect.left + x, clientY: rect.top + y, bubbles: true})
+      );
+      await new Promise<void>(resolve => {
+        requestAnimationFrame(() => resolve());
+      });
+      fixture.detectChanges();
+    }
+
+    it('names an empty chart by its empty message, out of the tab order and without a table', () => {
+      expect(canvas().getAttribute('role')).toBe('img');
+      expect(canvas().getAttribute('aria-label')).toBe('Bar chart. No data yet');
+      expect(canvas().hasAttribute('tabindex')).toBe(false);
+      expect(table()).toBeNull();
+    });
+
+    it('takes a summary over the derived one, under the generic name without a label', () => {
+      fixture.componentRef.setInput('series', SAMPLE);
+      fixture.componentRef.setInput('summary', 'Mostly steady');
+      fixture.detectChanges();
+      expect(canvas().getAttribute('aria-label')).toBe('Bar chart. Mostly steady');
+    });
+
+    it('shows the hidden table when asked', () => {
+      fixture.componentRef.setInput('series', SAMPLE);
+      fixture.detectChanges();
+      expect(canvas().getAttribute('tabindex')).toBe('0');
+      expect(table()?.classList).toContain('sr-only');
+      fixture.componentRef.setInput('showDataTable', true);
+      fixture.detectChanges();
+      expect(table()?.classList).not.toContain('sr-only');
+    });
+
+    it('names one series by its span and its highest and lowest bar', () => {
+      fixture.componentRef.setInput('series', [SAMPLE[0]]);
+      fixture.componentRef.setInput('label', 'Income');
+      fixture.detectChanges();
+      expect(canvas().getAttribute('aria-label')).toBe(
+        'Income. 2 bars from Jan to Feb; highest Feb, $3,200; lowest Jan, $3,000'
+      );
+    });
+
+    it('tables a column per series', () => {
+      fixture.componentRef.setInput('series', SAMPLE);
+      fixture.detectChanges();
+      expect(rows()).toEqual(['Jan $3,000 $2,100', 'Feb $3,200 $2,400']);
+    });
+
+    it('highlights and announces the column a key reads, and clears on Escape', () => {
+      fixture.componentRef.setInput('series', SAMPLE);
+      fixture.detectChanges();
+      press('ArrowLeft');
+      expect(announcement()).toBe('Feb: Income $3,200, Spending $2,400');
+      const chart = (fixture.componentInstance as unknown as {chart: Chart}).chart;
+      expect(chart.getActiveElements().map(e => [e.datasetIndex, e.index])).toEqual([
+        [0, 1],
+        [1, 1],
+      ]);
+      press('Escape');
+      expect(announcement()).toBe('');
+      expect(chart.getActiveElements()).toEqual([]);
+    });
+
+    it('announces the bar a pointer highlights', async () => {
+      fixture.componentRef.setInput('series', [SAMPLE[0]]);
+      fixture.detectChanges();
+      await hover(0);
+      expect(announcement()).toBe('Jan: $3,000');
+    });
+  });
 });

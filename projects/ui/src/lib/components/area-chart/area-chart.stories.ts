@@ -88,7 +88,8 @@ export const LongRange: Story = {args: {series: LONG_RANGE_SERIES}};
 
 /**
  * Opt into scrub-to-read with `scrubbable`: a crosshair follows a hovering mouse or a pressed
- * finger and `(scrub)` reports every band at the point, with the stacked total as its `y`.
+ * finger and `(scrub)` reports every band at the point, with the stacked total as its `y`. A
+ * focused chart scrubs by key too: ArrowLeft/ArrowRight, Home and End; Escape releases.
  */
 export const Scrubbable: Story = {args: {scrubbable: true}};
 
@@ -108,3 +109,10 @@ export const Clickable: Story = {
     `,
   }),
 };
+
+/**
+ * The canvas is an image named by `label` and a derived summary (bands, span, how the total
+ * moved; replace it with `summary`), and a screen reader reaches every point in a data table with
+ * the stacked total. `showDataTable` shows that table under the chart.
+ */
+export const DataTable: Story = {args: {showDataTable: true}};

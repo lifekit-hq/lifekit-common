@@ -47,11 +47,6 @@
       "reason": "Charts render data only; the host's cmn-async-state owns the error state until charts take a state input."
     },
     {
-      "component": "bar-chart",
-      "state": "LongContent",
-      "reason": "A long-range bar story waits on the chart text-alternative work (guardrails Ch1), which changes the same stories."
-    },
-    {
       "component": "donut-chart",
       "state": "Loading",
       "reason": "Charts render data only; the host's cmn-async-state owns loading (its skeleton story) until charts take a state input."
@@ -70,11 +65,6 @@
       "component": "line-chart",
       "state": "Error",
       "reason": "Charts render data only; the host's cmn-async-state owns the error state until charts take a state input."
-    },
-    {
-      "component": "line-chart",
-      "state": "LongContent",
-      "reason": "A long-range line story waits on the chart text-alternative work (guardrails Ch1), which changes the same stories."
     },
     {
       "component": "stat-card",

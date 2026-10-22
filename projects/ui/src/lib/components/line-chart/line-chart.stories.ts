@@ -26,6 +26,29 @@ const SCORE_DATA: ChartPoint[] = [
   {label: 'Sep', value: 25},
 ];
 
+const LONG_MONTHS = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+];
+const LONG_YEARS = 4;
+const LONG_RANGE_DATA: ChartPoint[] = Array.from(
+  {length: LONG_MONTHS.length * LONG_YEARS},
+  (_, i) => ({
+    label: `${LONG_MONTHS[i % LONG_MONTHS.length]} '${22 + Math.floor(i / LONG_MONTHS.length)}`,
+    value: 980000 + i * 9500 + (i % 5) * 14000,
+  })
+);
+
 const meta: Meta<LineChartComponent> = {
   title: 'Components/LineChart',
   component: LineChartComponent,
@@ -147,8 +170,27 @@ export const EmptyDark: Story = {
 /**
  * Opt into scrub-to-read with `scrubbable`: a hovering mouse or a pressed finger gets a crosshair
  * and `(scrub)` reports the point under it; `(scrubEnd)` fires on release. The chart's own tooltip
- * steps aside. See "Patterns/Period hero" for the headline wired to it.
+ * steps aside. A focused chart scrubs by key too: Tab to it, then ArrowLeft/ArrowRight, Home and
+ * End; Escape or Tab away releases. See "Patterns/Period hero" for the headline wired to it.
  */
 export const Scrubbable: Story = {
   args: {data: SAMPLE_DATA, label: 'Net Worth Performance', scrubbable: true},
+};
+
+/**
+ * Four years of months: x labels thin out so neighbours never touch, while the accessible name
+ * still summarises the whole span and the hidden table carries every point.
+ */
+export const LongRange: Story = {
+  args: {data: LONG_RANGE_DATA, label: 'Net Worth Performance', currency: 'USD'},
+};
+
+/**
+ * The canvas is an image named by `label` and a derived summary (span, ends, trend; replace it
+ * with `summary`), and a screen reader reaches every point in a data table. `showDataTable` shows
+ * that table under the chart. Tab to the chart and ArrowLeft/ArrowRight, Home and End read a
+ * point, announced politely.
+ */
+export const DataTable: Story = {
+  args: {data: SCORE_DATA, label: 'Health score', valueFormat: 'number', showDataTable: true},
 };
