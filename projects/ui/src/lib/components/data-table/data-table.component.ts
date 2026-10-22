@@ -328,11 +328,11 @@ function compareValues(a: unknown, b: unknown): number {
                   </th>
                   <td
                     *cdkCellDef="let row; let i = index"
-                    [class]="dataCellClass(col.align(), col.truncate())"
+                    [class]="dataCellClass(col.align(), truncatesCell(col, row))"
                     [style.width]="col.width()"
                     cdk-cell
                   >
-                    @if (col.truncate()) {
+                    @if (truncatesCell(col, row)) {
                       <div
                         [class]="truncateClasses"
                         [cmnTooltip]="defaultCell(row, col.key())"
@@ -512,7 +512,7 @@ export class DataTableComponent<T = Record<string, unknown>> {
     if (!sort || this.sortMode() === 'server') {
       return rows;
     }
-    const col = this.columns().find(c => c.key() === sort.key);
+    const col = this.columns().find(c => c.key() === sort.key && c.sortable());
     if (!col) {
       return rows;
     }
@@ -713,6 +713,11 @@ export class DataTableComponent<T = Record<string, unknown>> {
     if (limit > 0) {
       this.pageChange.emit({offset: 0, limit});
     }
+  }
+
+  /** Only a default text cell with a value truncates; a custom template and an empty cell render as they are. */
+  protected truncatesCell(col: CmnColumnComponent<T>, row: T): boolean {
+    return col.truncate() && !col.cell() && !!this.defaultCell(row, col.key());
   }
 
   /** A cell's own text, or `''` when the value is empty (the template then shows a dash). */

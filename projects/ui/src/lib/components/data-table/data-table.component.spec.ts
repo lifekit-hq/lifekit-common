@@ -539,7 +539,7 @@ const ACCOUNTS: Account[] = [
         <ng-template cmnSummaryCell><b class="sum">1,480</b></ng-template>
       </cmn-column>
       <cmn-column [truncate]="truncate()" key="note" header="Note" />
-      <cmn-column key="custom" header="Custom">
+      <cmn-column key="custom" header="Custom" truncate>
         <ng-template let-row cmnCell>{{ row.note ?? '' }}</ng-template>
       </cmn-column>
     </cmn-data-table>
@@ -653,6 +653,13 @@ describe('DataTableComponent sorting', () => {
     expect(names()).toEqual(given);
   });
 
+  it('ignores a sort on a column that is not sortable', () => {
+    const given = names();
+    fixture.componentInstance.sort.set({key: 'note', direction: 'desc'});
+    fixture.detectChanges();
+    expect(names()).toEqual(given);
+  });
+
   describe('empty cells', () => {
     function noteCells(): HTMLElement[] {
       return Array.from(el.querySelectorAll<HTMLElement>('td.cdk-cell.cdk-column-note'));
@@ -690,6 +697,19 @@ describe('DataTableComponent sorting', () => {
         .map(d => d.injector.get(TooltipDirective));
       expect(tooltips.map(t => t.cmnTooltip())).toContain(ACCOUNTS[3].note);
       expect(tooltips.every(t => t.cmnTooltipTruncatedOnly())).toBe(true);
+    });
+
+    it('leaves empty cells and custom cell templates untruncated', () => {
+      const notes = el.querySelectorAll<HTMLElement>('td.cdk-cell.cdk-column-note');
+      for (const empty of [notes[1], notes[2]]) {
+        expect(empty.classList).not.toContain('max-w-0');
+        expect(empty.querySelector('[data-testid="truncated-cell"]')).toBeNull();
+      }
+      const custom = el.querySelectorAll<HTMLElement>('td.cdk-cell.cdk-column-custom');
+      custom.forEach(td => {
+        expect(td.classList).not.toContain('max-w-0');
+        expect(td.querySelector('[data-testid="truncated-cell"]')).toBeNull();
+      });
     });
 
     it('renders cells directly without truncate', () => {
