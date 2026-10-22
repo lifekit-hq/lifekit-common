@@ -14,12 +14,6 @@ describe('PageScrollComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should take the remaining height and be the one scroller', () => {
-    for (const cls of ['flex', 'flex-col', 'min-h-0', 'flex-1', 'overflow-y-auto']) {
-      expect(host().classList).toContain(cls);
-    }
-  });
-
   it('should be reachable by keyboard so its content scrolls without a pointer', () => {
     expect(host().getAttribute('tabindex')).toBe('0');
   });

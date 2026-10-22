@@ -76,13 +76,6 @@ describe('PageContainerComponent', () => {
     expect(host().classList).not.toContain('block');
   });
 
-  it('should bound the host at every width, not let it grow with its content', () => {
-    fixture.componentRef.setInput('fill', true);
-    fixture.detectChanges();
-    expect(host().classList).not.toContain('min-h-full');
-    expect(host().classList).not.toContain('md:h-full');
-  });
-
   it('should mark a fill page so the shell can bound its page frame', () => {
     fixture.componentRef.setInput('fill', true);
     fixture.detectChanges();

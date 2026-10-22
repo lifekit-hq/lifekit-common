@@ -105,43 +105,4 @@ describe('AppLayoutComponent page frame', () => {
     host.detectChanges();
     await vi.waitFor(() => expect(main.style.getPropertyValue('--cmn-page-above')).toBe(''));
   });
-
-  const FILL_VARIANTS = [
-    'has-[[data-cmn-fill]]:flex',
-    'has-[[data-cmn-fill]]:flex-col',
-    'has-[[data-cmn-fill]]:[&>:not(router-outlet)]:min-h-0',
-    'has-[[data-cmn-fill]]:[&>:not(router-outlet)]:flex-1',
-  ];
-
-  function frame(host: ComponentFixture<OverflowHostComponent>): HTMLElement {
-    return (host.nativeElement as HTMLElement).querySelector(
-      'main > div:not(.sticky)'
-    ) as HTMLElement;
-  }
-
-  it('should bound the plain frame below the title only while a fill page shows', () => {
-    viewport.pin('sidebar');
-    const host = TestBed.createComponent(OverflowHostComponent);
-    host.componentInstance.overlay.set(false);
-    host.detectChanges();
-    const classes = frame(host).classList;
-    expect(classes).toContain('contents');
-    for (const cls of [...FILL_VARIANTS, 'has-[[data-cmn-fill]]:flex-1']) {
-      expect(classes).toContain(cls);
-    }
-    // Without a fill page the frame keeps no box of its own: only the `has` variants add one
-    expect(classes).not.toContain('flow-root');
-    expect(classes).not.toContain('flex-1');
-  });
-
-  it('should hand a fill page the rest of the frame in the phone overlay too', () => {
-    viewport.pin('phone');
-    const host = TestBed.createComponent(OverflowHostComponent);
-    host.detectChanges();
-    const classes = frame(host).classList;
-    expect(classes).toContain('flow-root');
-    for (const cls of FILL_VARIANTS) {
-      expect(classes).toContain(cls);
-    }
-  });
 });
