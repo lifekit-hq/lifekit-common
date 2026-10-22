@@ -28,6 +28,7 @@ export * from './components/data-table/data-table.component';
 export * from './components/data-table/data-table-cell.directive';
 export * from './components/data-table/data-table-column.component';
 export type * from './components/data-table/data-table-pagination.model';
+export type * from './components/data-table/data-table-sort.model';
 export * from './components/date-range/date-range.component';
 export * from './components/description-list/description-list.component';
 export * from './components/dialog/confirm-dialog.component';

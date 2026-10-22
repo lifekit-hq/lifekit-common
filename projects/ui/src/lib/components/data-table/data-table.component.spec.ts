@@ -1,13 +1,20 @@
 import {BreakpointObserver, type BreakpointState} from '@angular/cdk/layout';
-import {ChangeDetectionStrategy, Component, input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, input, signal} from '@angular/core';
 import {type ComponentFixture, TestBed} from '@angular/core/testing';
+import {By} from '@angular/platform-browser';
 import {BehaviorSubject} from 'rxjs';
 
+import {TooltipDirective} from '../../directives/tooltip/tooltip.directive';
 import {CardComponent} from '../card/card.component';
 import {DataTableComponent} from './data-table.component';
-import {CmnCellDirective, CmnHeaderCellDirective} from './data-table-cell.directive';
+import {
+  CmnCellDirective,
+  CmnHeaderCellDirective,
+  CmnSummaryCellDirective,
+} from './data-table-cell.directive';
 import {CmnColumnComponent} from './data-table-column.component';
-import {type CmnTablePagination} from './data-table-pagination.model';
+import {type CmnPageChange, type CmnTablePagination} from './data-table-pagination.model';
+import {type CmnSortMode, type CmnTableSort} from './data-table-sort.model';
 
 interface Row {
   name: string;
@@ -492,5 +499,377 @@ describe('DataTableComponent column widths', () => {
     fixture.componentRef.setInput('amountWidth', null);
     fixture.detectChanges();
     cellsOf('amount').forEach(cell => expect(cell.style.width).toBe(''));
+  });
+});
+
+interface Account {
+  name: string;
+  balance: number | null;
+  note: string | null;
+}
+
+const ACCOUNTS: Account[] = [
+  {name: 'savings 10', balance: 300, note: 'Rainy day'},
+  {name: 'Checking', balance: null, note: null},
+  {name: 'savings 9', balance: -20, note: ''},
+  {name: 'Brokerage', balance: 1200, note: 'Long-term index funds held across two providers'},
+];
+
+@Component({
+  selector: 'cmn-test-sort-host',
+  imports: [CmnCellDirective, CmnColumnComponent, CmnSummaryCellDirective, DataTableComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <cmn-data-table
+      [mode]="mode()"
+      [rows]="rows()"
+      [sortMode]="sortMode()"
+      [(sort)]="sort"
+      emptyCellLabel="Not set"
+    >
+      <cmn-column key="name" header="Name" listSlot="primary" sortable summary="Total" />
+      <cmn-column
+        [compare]="byAbsolute()"
+        key="balance"
+        align="right"
+        header="Balance"
+        listSlot="trailing"
+        sortable
+      >
+        <ng-template cmnSummaryCell><b class="sum">1,480</b></ng-template>
+      </cmn-column>
+      <cmn-column [truncate]="truncate()" key="note" header="Note" />
+      <cmn-column key="custom" header="Custom">
+        <ng-template let-row cmnCell>{{ row.note ?? '' }}</ng-template>
+      </cmn-column>
+    </cmn-data-table>
+  `,
+})
+class SortHostComponent {
+  public readonly rows = input<Account[]>(ACCOUNTS);
+  public readonly sortMode = input<CmnSortMode>('client');
+  public readonly mode = input<'responsive' | 'table' | 'list'>('table');
+  public readonly truncate = input(true);
+  public readonly sort = signal<CmnTableSort | null>(null);
+  public readonly byAbsolute = signal<((a: Account, b: Account) => number) | null>(null);
+}
+
+describe('DataTableComponent sorting', () => {
+  let fixture: ComponentFixture<SortHostComponent>;
+  let el: HTMLElement;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({imports: [SortHostComponent]}).compileComponents();
+    fixture = TestBed.createComponent(SortHostComponent);
+    fixture.detectChanges();
+    el = fixture.nativeElement as HTMLElement;
+  });
+
+  function header(key: string): HTMLElement {
+    return el.querySelector(`th.cdk-column-${key}`) as HTMLElement;
+  }
+
+  function names(): string[] {
+    return Array.from(el.querySelectorAll('td.cdk-cell.cdk-column-name')).map(
+      td => td.textContent?.trim() ?? ''
+    );
+  }
+
+  function clickSort(key: string): void {
+    (header(key).querySelector('button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+  }
+
+  it('marks only sortable headers with aria-sort and a button', () => {
+    expect(header('name').getAttribute('aria-sort')).toBe('none');
+    expect(header('name').querySelector('button')?.type).toBe('button');
+    expect(header('note').hasAttribute('aria-sort')).toBe(false);
+    expect(header('note').querySelector('button')).toBeNull();
+  });
+
+  it('cycles ascending, descending and back to the given order', () => {
+    const given = names();
+
+    clickSort('name');
+    expect(header('name').getAttribute('aria-sort')).toBe('ascending');
+    expect(names()).toEqual(['Brokerage', 'Checking', 'savings 9', 'savings 10']);
+    expect(fixture.componentInstance.sort()).toEqual({key: 'name', direction: 'asc'});
+
+    clickSort('name');
+    expect(header('name').getAttribute('aria-sort')).toBe('descending');
+    expect(names()).toEqual(['savings 10', 'savings 9', 'Checking', 'Brokerage']);
+
+    clickSort('name');
+    expect(header('name').getAttribute('aria-sort')).toBe('none');
+    expect(names()).toEqual(given);
+    expect(fixture.componentInstance.sort()).toBeNull();
+  });
+
+  it('sorts numbers by value and keeps empty values last in both directions', () => {
+    clickSort('balance');
+    expect(names()).toEqual(['savings 9', 'savings 10', 'Brokerage', 'Checking']);
+    clickSort('balance');
+    expect(names()).toEqual(['Brokerage', 'savings 10', 'savings 9', 'Checking']);
+  });
+
+  it('starts another column ascending and resets the previous header', () => {
+    clickSort('name');
+    clickSort('name');
+    clickSort('balance');
+    expect(header('balance').getAttribute('aria-sort')).toBe('ascending');
+    expect(header('name').getAttribute('aria-sort')).toBe('none');
+  });
+
+  it('uses the column compare function when given', () => {
+    fixture.componentInstance.byAbsolute.set(
+      (a, b): number => Math.abs(a.balance ?? 0) - Math.abs(b.balance ?? 0)
+    );
+    fixture.componentInstance.sort.set({key: 'balance', direction: 'asc'});
+    fixture.detectChanges();
+    expect(names()).toEqual(['Checking', 'savings 9', 'savings 10', 'Brokerage']);
+  });
+
+  it('applies a sort bound from outside', () => {
+    fixture.componentInstance.sort.set({key: 'name', direction: 'desc'});
+    fixture.detectChanges();
+    expect(names()[0]).toBe('savings 10');
+    expect(header('name').getAttribute('aria-sort')).toBe('descending');
+  });
+
+  it('leaves rows in the given order and only reports the sort in server mode', () => {
+    fixture.componentRef.setInput('sortMode', 'server');
+    fixture.detectChanges();
+    const given = names();
+    clickSort('name');
+    expect(fixture.componentInstance.sort()).toEqual({key: 'name', direction: 'asc'});
+    expect(header('name').getAttribute('aria-sort')).toBe('ascending');
+    expect(names()).toEqual(given);
+  });
+
+  it('ignores a sort on an unknown column', () => {
+    const given = names();
+    fixture.componentInstance.sort.set({key: 'missing', direction: 'asc'});
+    fixture.detectChanges();
+    expect(names()).toEqual(given);
+  });
+
+  describe('empty cells', () => {
+    function noteCells(): HTMLElement[] {
+      return Array.from(el.querySelectorAll<HTMLElement>('td.cdk-cell.cdk-column-note'));
+    }
+
+    it('renders a dash for null and blank values, with a label for screen readers', () => {
+      const [, nullCell, blankCell] = noteCells();
+      for (const cell of [nullCell, blankCell]) {
+        expect(cell.querySelector('[aria-hidden="true"]')?.textContent?.trim()).toBe('\u2014');
+        expect(cell.querySelector('.sr-only')?.textContent?.trim()).toBe('Not set');
+      }
+    });
+
+    it('renders values as they are', () => {
+      expect(noteCells()[0].textContent?.trim()).toBe('Rainy day');
+      expect(noteCells()[0].querySelector('.sr-only')).toBeNull();
+    });
+
+    it('leaves a projected cell template alone', () => {
+      const custom = el.querySelectorAll<HTMLElement>('td.cdk-cell.cdk-column-custom')[1];
+      expect(custom.textContent?.trim()).toBe('');
+    });
+  });
+
+  describe('truncation', () => {
+    it('wraps a truncated cell in a focusable box carrying the full value as its tooltip', () => {
+      const cell = el.querySelectorAll<HTMLElement>('td.cdk-cell.cdk-column-note')[3];
+      expect(cell.classList).toContain('max-w-0');
+      const box = cell.querySelector('[data-testid="truncated-cell"]') as HTMLElement;
+      expect(box.classList).toContain('truncate');
+      expect(box.tabIndex).toBe(0);
+
+      const tooltips = fixture.debugElement
+        .queryAll(By.directive(TooltipDirective))
+        .map(d => d.injector.get(TooltipDirective));
+      expect(tooltips.map(t => t.cmnTooltip())).toContain(ACCOUNTS[3].note);
+      expect(tooltips.every(t => t.cmnTooltipTruncatedOnly())).toBe(true);
+    });
+
+    it('renders cells directly without truncate', () => {
+      fixture.componentRef.setInput('truncate', false);
+      fixture.detectChanges();
+      expect(el.querySelector('[data-testid="truncated-cell"]')).toBeNull();
+      expect(el.querySelector('td.cdk-cell.cdk-column-note')?.classList).not.toContain('max-w-0');
+    });
+  });
+
+  describe('summary row', () => {
+    it('renders each column summary text or template in a footer row', () => {
+      const row = el.querySelector('[data-testid="summary-row"]') as HTMLElement;
+      expect(row.closest('tfoot')).not.toBeNull();
+      expect(row.querySelector('.cdk-column-name')?.textContent?.trim()).toBe('Total');
+      expect(row.querySelector('.cdk-column-balance .sum')?.textContent).toBe('1,480');
+      expect(row.querySelector('.cdk-column-note')?.textContent?.trim()).toBe('');
+    });
+
+    it('hides the summary row when there are no rows', () => {
+      fixture.componentRef.setInput('rows', []);
+      fixture.detectChanges();
+      expect(el.querySelector('[data-testid="summary-row"]')?.classList).toContain('hidden');
+
+      fixture.componentRef.setInput('rows', ACCOUNTS);
+      fixture.detectChanges();
+      expect(el.querySelector('[data-testid="summary-row"]')?.classList).not.toContain('hidden');
+    });
+
+    it('shows the summary as the last list row on a phone', () => {
+      fixture.componentRef.setInput('mode', 'list');
+      fixture.detectChanges();
+      const summary = el.querySelector('[data-testid="list-summary"]') as HTMLElement;
+      expect(summary.textContent).toContain('Total');
+      expect(summary.querySelector('.sum')?.textContent).toBe('1,480');
+    });
+  });
+});
+
+@Component({
+  selector: 'cmn-test-no-summary-host',
+  imports: [CmnColumnComponent, DataTableComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <cmn-data-table [rows]="rows" mode="list">
+      <cmn-column key="name" header="Name" listSlot="primary" />
+    </cmn-data-table>
+    <cmn-data-table [rows]="rows" mode="table">
+      <cmn-column key="name" header="Name" />
+    </cmn-data-table>
+  `,
+})
+class NoSummaryHostComponent {
+  protected readonly rows = ROWS;
+}
+
+describe('DataTableComponent without summaries', () => {
+  it('renders no summary row in either layout', async () => {
+    await TestBed.configureTestingModule({imports: [NoSummaryHostComponent]}).compileComponents();
+    const fixture = TestBed.createComponent(NoSummaryHostComponent);
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('[data-testid="list-summary"]')).toBeNull();
+    expect(el.querySelector('[data-testid="summary-row"]')).toBeNull();
+    expect(el.querySelector('tfoot tr')).toBeNull();
+  });
+});
+
+@Component({
+  selector: 'cmn-test-pager-host',
+  imports: [CmnColumnComponent, DataTableComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <cmn-data-table
+      [pageSizeOptions]="sizes()"
+      [pagination]="pagination()"
+      [rows]="rows"
+      (nextPage)="events.push('next')"
+      (pageChange)="pages.push($event)"
+      (previousPage)="events.push('previous')"
+    >
+      <cmn-column key="name" header="Name" />
+    </cmn-data-table>
+  `,
+})
+class PagerHostComponent {
+  public readonly pagination = input<CmnTablePagination | null>(null);
+  public readonly sizes = input<number[]>([]);
+  public readonly events: string[] = [];
+  public readonly pages: CmnPageChange[] = [];
+  protected readonly rows = ROWS;
+}
+
+describe('DataTableComponent pager', () => {
+  let fixture: ComponentFixture<PagerHostComponent>;
+  let el: HTMLElement;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({imports: [PagerHostComponent]}).compileComponents();
+    fixture = TestBed.createComponent(PagerHostComponent);
+    el = fixture.nativeElement as HTMLElement;
+  });
+
+  function show(offset: number, totalCount = 200, limit = 10): void {
+    fixture.componentRef.setInput('pagination', {
+      totalCount,
+      offset,
+      limit,
+      hasMore: offset + limit < totalCount,
+    });
+    fixture.detectChanges();
+  }
+
+  function items(): string[] {
+    return Array.from(el.querySelectorAll('[data-testid="page-numbers"] li')).map(
+      li => li.textContent?.trim() ?? ''
+    );
+  }
+
+  function pageButton(label: string): HTMLButtonElement {
+    return el.querySelector(`button[aria-label="Page ${label}"]`) as HTMLButtonElement;
+  }
+
+  it.each([
+    [0, 30, ['1', '2', '3']],
+    [0, 70, ['1', '2', '3', '4', '5', '6', '7']],
+    [0, 200, ['1', '2', '3', '4', '5', '\u2026', '20']],
+    [30, 200, ['1', '2', '3', '4', '5', '\u2026', '20']],
+    [90, 200, ['1', '\u2026', '9', '10', '11', '\u2026', '20']],
+    [160, 200, ['1', '\u2026', '16', '17', '18', '19', '20']],
+    [190, 200, ['1', '\u2026', '16', '17', '18', '19', '20']],
+  ] as const)('lists pages for offset %i of %i', (offset, total, expected) => {
+    show(offset, total);
+    expect(items()).toEqual(expected);
+  });
+
+  it('marks the current page', () => {
+    show(90);
+    expect(pageButton('10').getAttribute('aria-current')).toBe('page');
+    expect(pageButton('9').hasAttribute('aria-current')).toBe(false);
+  });
+
+  it('keeps the page count as text for narrow screens', () => {
+    show(90);
+    expect(el.textContent).toContain('Page 10 of 20');
+  });
+
+  it('emits the page a number asks for, and nothing for the current page', () => {
+    show(90);
+    pageButton('20').click();
+    pageButton('10').click();
+    expect(fixture.componentInstance.pages).toEqual([{offset: 190, limit: 10}]);
+  });
+
+  it('emits both the legacy event and pageChange from Previous and Next', () => {
+    show(90);
+    (el.querySelector('button[aria-label="Previous page"]') as HTMLButtonElement).click();
+    (el.querySelector('button[aria-label="Next page"]') as HTMLButtonElement).click();
+    expect(fixture.componentInstance.events).toEqual(['previous', 'next']);
+    expect(fixture.componentInstance.pages).toEqual([
+      {offset: 80, limit: 10},
+      {offset: 100, limit: 10},
+    ]);
+  });
+
+  it('hides the page size choice by default', () => {
+    show(0);
+    expect(el.querySelector('[data-testid="page-size"]')).toBeNull();
+  });
+
+  it('goes back to the first page with the new size when one is picked', async () => {
+    fixture.componentRef.setInput('sizes', [10, 25, 50]);
+    show(90);
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const select = el.querySelector('[data-testid="page-size"] select') as HTMLSelectElement;
+    expect(select.getAttribute('aria-label')).toBe('Rows per page');
+    expect(select.value).toBe('10');
+    select.value = '25';
+    select.dispatchEvent(new Event('change'));
+    expect(fixture.componentInstance.pages).toEqual([{offset: 0, limit: 25}]);
   });
 });

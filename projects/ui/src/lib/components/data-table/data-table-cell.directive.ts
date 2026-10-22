@@ -26,3 +26,9 @@ export class CmnCellDirective<T = any> {
 export class CmnHeaderCellDirective {
   public readonly template = inject<TemplateRef<unknown>>(TemplateRef);
 }
+
+/** A column's cell in the summary row, in place of its `summary` text. */
+@Directive({selector: '[cmnSummaryCell]'})
+export class CmnSummaryCellDirective {
+  public readonly template = inject<TemplateRef<unknown>>(TemplateRef);
+}
