@@ -36,9 +36,9 @@ const MAIN_BASE_CLASSES = [
   'focus-visible:ring-border-focus',
 ];
 
-/** The element's exact class set; order is not behaviour. */
+/** The element's exact class set, fill-page variants aside; order is not behaviour. */
 function classSet(element: HTMLElement): string[] {
-  return Array.from(element.classList).sort();
+  return [...element.classList].filter(cls => !cls.includes('data-cmn-fill')).sort();
 }
 
 const NAV_ITEMS: NavItem[] = [

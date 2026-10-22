@@ -9,20 +9,27 @@ const SPACING_CLASSES: Record<PageContainerSpacing, string> = {
 };
 
 const HOST_CLASSES = 'block';
-// Full-height column: the host fills its parent (from md up) and the box below grows into it.
-const HOST_FILL_CLASSES = 'flex min-h-full flex-col md:h-full';
+// Full-height column: the host fills its parent and the box below grows into it. A phone page grows
+// with its content unless it holds a `cmn-page-scroll`, which needs the host bounded at every width.
+const HOST_FILL_CLASSES = 'flex min-h-full flex-col md:h-full has-[cmn-page-scroll]:h-full';
 const BOX_CLASSES = 'mx-auto w-full p-cmn-4 md:p-cmn-8';
 const BOX_FILL_CLASSES = 'flex min-h-0 flex-1 flex-col';
 
 /**
  * Page frame: a centred box capped at `maxWidth` (default 1200px) with the padding counted
  * inside that cap. `spacing` stacks projected children; `fill` makes the page a full-height
- * flex column so projected content can take the remaining height with `flex-1`.
+ * flex column so projected content can take the remaining height with `flex-1`. Put a
+ * `cmn-page-scroll` in it for a list that scrolls on its own: the page is then bounded to the space
+ * below the app shell's title at every width.
  */
 @Component({
   selector: 'cmn-page-container',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {'[class]': 'hostClasses()'},
+  host: {
+    '[class]': 'hostClasses()',
+    // The shell bounds its page frame to the space below the title when a fill page is showing
+    '[attr.data-cmn-fill]': 'fill() ? "" : null',
+  },
   template: `
     <div [class]="boxClasses()">
       <ng-content />
