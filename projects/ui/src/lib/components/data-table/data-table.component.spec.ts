@@ -788,9 +788,9 @@ describe('DataTableComponent without summaries', () => {
       [pagination]="pagination()"
       [rows]="rows"
       (nextPage)="events.push('next')"
-      showPageNumbers
       (pageChange)="pages.push($event)"
       (previousPage)="events.push('previous')"
+      showPageNumbers
     >
       <cmn-column key="name" header="Name" />
     </cmn-data-table>
