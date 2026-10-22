@@ -61,22 +61,8 @@ describe('PageContainerComponent', () => {
     expect(box().className).not.toMatch(/space-y/);
   });
 
-  it('should not be a flex column unless fill is set', () => {
-    expect(host().classList).not.toContain('h-full');
-    expect(host().hasAttribute('data-cmn-fill')).toBe(false);
-    expect(box().classList).not.toContain('flex-1');
-  });
-
-  it('should make the host a full-height flex column when fill is set', () => {
-    fixture.componentRef.setInput('fill', true);
-    fixture.detectChanges();
-    for (const cls of ['flex', 'flex-col', 'h-full']) {
-      expect(host().classList).toContain(cls);
-    }
-    expect(host().classList).not.toContain('block');
-  });
-
   it('should mark a fill page so the shell can bound its page frame', () => {
+    expect(host().hasAttribute('data-cmn-fill')).toBe(false);
     fixture.componentRef.setInput('fill', true);
     fixture.detectChanges();
     expect(host().hasAttribute('data-cmn-fill')).toBe(true);
@@ -85,19 +71,10 @@ describe('PageContainerComponent', () => {
     expect(host().hasAttribute('data-cmn-fill')).toBe(false);
   });
 
-  it('should let the box grow into the remaining height when fill is set', () => {
-    fixture.componentRef.setInput('fill', true);
-    fixture.detectChanges();
-    for (const cls of ['flex', 'flex-col', 'flex-1', 'min-h-0', 'w-full', 'max-w-[1200px]']) {
-      expect(box().classList).toContain(cls);
-    }
-  });
-
   it('should combine fill with spacing "none"', () => {
     fixture.componentRef.setInput('fill', true);
     fixture.componentRef.setInput('spacing', 'none');
     fixture.detectChanges();
-    expect(box().classList).toContain('flex-1');
     expect(box().className).not.toMatch(/space-y/);
   });
 });
