@@ -1,10 +1,15 @@
 import type {Meta, StoryObj} from '@storybook/angular';
 import {moduleMetadata} from '@storybook/angular';
 
+import {AsyncStateComponent} from '../async-state/async-state.component';
 import {CardComponent} from '../card/card.component';
 import {InstitutionAvatarComponent} from '../institution-avatar/institution-avatar.component';
 import {DataTableComponent} from './data-table.component';
-import {CmnCellDirective, CmnHeaderCellDirective} from './data-table-cell.directive';
+import {
+  CmnCellDirective,
+  CmnHeaderCellDirective,
+  CmnSummaryCellDirective,
+} from './data-table-cell.directive';
 import {CmnColumnComponent} from './data-table-column.component';
 
 interface Transaction {
@@ -60,10 +65,12 @@ const meta: Meta<DataTableComponent<Transaction>> = {
   decorators: [
     moduleMetadata({
       imports: [
+        AsyncStateComponent,
         CardComponent,
         CmnCellDirective,
         CmnColumnComponent,
         CmnHeaderCellDirective,
+        CmnSummaryCellDirective,
         InstitutionAvatarComponent,
       ],
     }),
@@ -397,5 +404,238 @@ export const ListRowsHoldings: StoryObj = {
 /** Holdings-shaped list rows in the dark theme. */
 export const ListRowsHoldingsDark: StoryObj = {
   ...ListRowsHoldings,
+  globals: {theme: 'dark'},
+};
+
+/**
+ * A failed load: the table sits in \`cmn-async-state\`, which shows the error in its place (never
+ * the empty message) with a retry action.
+ */
+export const LoadError: Story = {
+  name: 'Error',
+  args: {rows: []},
+  render: args => ({
+    props: args,
+    template: `
+      <cmn-async-state
+        status="error"
+        errorMessage="Transactions could not be loaded. The bank connection timed out."
+        emptySubMessage="New activity appears here after the next sync."
+        retryable
+      >
+        ${READ_ONLY_TEMPLATE}
+      </cmn-async-state>
+    `,
+  }),
+};
+
+/** A failed refresh keeps the rows already on screen under a persistent banner. */
+export const ErrorAboveRows: Story = {
+  args: {rows: ROWS},
+  render: args => ({
+    props: args,
+    template: `
+      <cmn-async-state
+        status="error"
+        errorPlacement="above"
+        errorMessage="Showing the last synced transactions. The refresh failed."
+        emptySubMessage="New activity appears here after the next sync."
+      >
+        ${READ_ONLY_TEMPLATE}
+      </cmn-async-state>
+    `,
+  }),
+};
+
+interface Account {
+  name: string;
+  institution: string;
+  balance: number | null;
+  updated: Date | null;
+  note: string | null;
+}
+
+const ACCOUNTS: Account[] = [
+  {
+    name: 'Everyday Checking',
+    institution: 'Chase',
+    balance: 2480.12,
+    updated: new Date(2026, 3, 24),
+    note: 'Bills and card payments',
+  },
+  {
+    name: 'Brokerage',
+    institution: 'IBKR',
+    balance: 18240.5,
+    updated: new Date(2026, 3, 22),
+    note: 'Long-term index funds, rebalanced every quarter against the target allocation',
+  },
+  {
+    name: 'Spot Wallet',
+    institution: 'Binance',
+    balance: 3206,
+    updated: null,
+    note: null,
+  },
+  {
+    name: 'Emergency Savings',
+    institution: 'Ally',
+    balance: 12000,
+    updated: new Date(2026, 3, 1),
+    note: '',
+  },
+  {
+    name: 'Old Card',
+    institution: 'Amex',
+    balance: null,
+    updated: new Date(2025, 11, 31),
+    note: 'Closed; kept for statements',
+  },
+];
+
+const MONEY = new Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'});
+const DAY = new Intl.DateTimeFormat('en-US', {month: 'short', day: 'numeric', year: 'numeric'});
+
+const SORTABLE_TEMPLATE = `
+  <cmn-data-table [rows]="rows" [sortMode]="sortMode" [(sort)]="sort">
+    <cmn-column key="name" header="Account" sortable />
+    <cmn-column key="institution" header="Institution" sortable />
+    <cmn-column key="updated" header="Updated" sortable>
+      <ng-template cmnCell let-row>{{ row.updated ? day.format(row.updated) : '\u2014' }}</ng-template>
+    </cmn-column>
+    <cmn-column key="balance" header="Balance" align="right" sortable>
+      <ng-template cmnCell let-row>{{ row.balance === null ? '\u2014' : money.format(row.balance) }}</ng-template>
+    </cmn-column>
+  </cmn-data-table>
+  <p class="mt-cmn-3 text-cmn-xs text-text-secondary">sort: {{ sort ? sort.key + ' ' + sort.direction : 'none' }}</p>
+`;
+
+/**
+ * Columns opt in with \`sortable\`. Click a header, or Tab to it and press Enter or Space, to cycle
+ * ascending, descending and back to the given order; the header carries \`aria-sort\`. Numbers and
+ * dates sort by value, text by locale, and empty values stay last.
+ */
+export const Sorting: StoryObj = {
+  args: {rows: ACCOUNTS, sortMode: 'client', sort: {key: 'balance', direction: 'desc'}},
+  render: args => ({props: {...args, money: MONEY, day: DAY}, template: SORTABLE_TEMPLATE}),
+};
+
+/**
+ * \`sortMode="server"\` leaves \`rows\` in the order given and only emits \`sortChange\`, so the
+ * caller fetches the sorted page. Here the rows never change, while the header and the readout
+ * follow the requested sort.
+ */
+export const ServerSorting: StoryObj = {
+  args: {rows: ACCOUNTS, sortMode: 'server', sort: null},
+  render: args => ({props: {...args, money: MONEY, day: DAY}, template: SORTABLE_TEMPLATE}),
+};
+
+const SUMMARY_TEMPLATE = `
+  <cmn-data-table [rows]="rows" [mode]="mode">
+    <cmn-column key="name" header="Account" listSlot="primary" summary="Total" />
+    <cmn-column key="institution" header="Institution" listSlot="secondary" />
+    <cmn-column key="balance" header="Balance" align="right" listSlot="trailing">
+      <ng-template cmnCell let-row>{{ row.balance === null ? '\u2014' : money.format(row.balance) }}</ng-template>
+      <ng-template cmnSummaryCell>{{ money.format(total) }}</ng-template>
+    </cmn-column>
+  </cmn-data-table>
+`;
+
+const TOTAL = ACCOUNTS.reduce((sum, a) => sum + (a.balance ?? 0), 0);
+
+/**
+ * A column's \`summary\` text, or a \`cmnSummaryCell\` template, fills a summary row pinned to the
+ * bottom of the table. The table shows what it is given; the caller computes the totals.
+ */
+export const SummaryRow: StoryObj = {
+  args: {rows: ACCOUNTS, mode: 'table'},
+  render: args => ({props: {...args, money: MONEY, total: TOTAL}, template: SUMMARY_TEMPLATE}),
+};
+
+/** On a phone the summary is the last list row: primary text at the start, the total at the end. */
+export const SummaryRowList: StoryObj = {
+  args: {rows: ACCOUNTS, mode: 'list'},
+  render: args => ({props: {...args, money: MONEY, total: TOTAL}, template: SUMMARY_TEMPLATE}),
+};
+
+/**
+ * A cell whose value is \`null\`, \`undefined\` or blank renders a dash, read to screen readers
+ * as \`emptyCellLabel\` ("No value"). Cells from a \`cmnCell\` template render as written.
+ */
+export const EmptyCells: StoryObj = {
+  args: {rows: ACCOUNTS},
+  render: args => ({
+    props: args,
+    template: `
+      <cmn-data-table [rows]="rows">
+        <cmn-column key="name" header="Account" />
+        <cmn-column key="institution" header="Institution" />
+        <cmn-column key="note" header="Note" />
+        <cmn-column key="balance" header="Balance" align="right" />
+      </cmn-data-table>
+    `,
+  }),
+};
+
+/**
+ * \`truncate\` cuts long text to one line with an ellipsis. Hover a cut-off cell, or Tab to it,
+ * to see the full value in a tooltip; text that fits shows none.
+ */
+export const LongText: StoryObj = {
+  args: {rows: ACCOUNTS},
+  render: args => ({
+    props: args,
+    template: `
+      <div style="max-width: 36rem">
+        <cmn-data-table [rows]="rows">
+          <cmn-column key="name" header="Account" width="11rem" />
+          <cmn-column key="note" header="Note" truncate />
+          <cmn-column key="balance" header="Balance" align="right" width="7rem" />
+        </cmn-data-table>
+      </div>
+    `,
+  }),
+};
+
+const PAGER_TEMPLATE = `
+  <cmn-data-table
+    [rows]="rows"
+    [pagination]="pagination"
+    [pageSizeOptions]="pageSizeOptions"
+    showPageNumbers
+    (pageChange)="onPageChange($event)"
+  >
+    <cmn-column key="date" header="Date" />
+    <cmn-column key="description" header="Description" />
+    <cmn-column key="amount" header="Amount" align="right" />
+  </cmn-data-table>
+`;
+
+/**
+ * With \`showPageNumbers\`, from \`md\` up the pager lists page numbers, eliding long runs, with the
+ * first and last page always one click away; below \`md\` it shows "Page X of Y".
+ * \`pageSizeOptions\` adds a rows per page choice. Every control emits \`pageChange\` with the
+ * offset and limit to fetch.
+ */
+export const PageNumbers: StoryObj = {
+  args: {
+    rows: ROWS,
+    pagination: {totalCount: 240, offset: 90, limit: 10, hasMore: true},
+    pageSizeOptions: [10, 25, 50],
+  },
+  render: args => ({
+    props: {
+      ...args,
+      onPageChange(this: {pagination: object}, page: {offset: number; limit: number}): void {
+        this.pagination = {...page, totalCount: 240, hasMore: page.offset + page.limit < 240};
+      },
+    },
+    template: PAGER_TEMPLATE,
+  }),
+};
+
+/** The fuller pager in the dark theme. */
+export const PageNumbersDark: StoryObj = {
+  ...PageNumbers,
   globals: {theme: 'dark'},
 };

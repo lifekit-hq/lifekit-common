@@ -22,11 +22,6 @@
       "reason": "A search query has no validation; a failed search shows its error with the results, not on the field."
     },
     {
-      "component": "data-table",
-      "state": "Error",
-      "reason": "cmn-data-table has no error slot inside its frame yet (guardrails T3, a Part 3 gap); hosts wrap it in cmn-async-state."
-    },
-    {
       "component": "area-chart",
       "state": "Loading",
       "reason": "Charts render data only; the host's cmn-async-state owns loading (its skeleton story) until charts take a state input."

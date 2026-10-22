@@ -4,3 +4,9 @@ export interface CmnTablePagination {
   limit: number;
   hasMore: boolean;
 }
+
+/** The page a pager control asks for: fetch `limit` rows from `offset`. */
+export interface CmnPageChange {
+  offset: number;
+  limit: number;
+}
