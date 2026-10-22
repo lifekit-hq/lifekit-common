@@ -70,11 +70,94 @@ function pointXs(chart: Chart): number[] {
   return chart.getDatasetMeta(0).data.map(element => element.x);
 }
 
+/** The direction a scrub key reads in: +1 toward the last point, -1 toward the first. */
+type KeyDirection = 1 | -1;
+
+/**
+ * Where scrub key `key` moves a reading at `current` (null when nothing is read yet) among
+ * `count` points, and the way to keep looking if that point has nothing to read; null when `key`
+ * is not a scrub key. ArrowRight and ArrowLeft step one point (from nothing, they start at the
+ * first and the last point); Home and End jump to the ends.
+ */
+export function scrubKeyStep(
+  key: string,
+  current: number | null,
+  count: number
+): {index: number; direction: KeyDirection} | null {
+  if (count === 0) {
+    return null;
+  }
+  const last = count - 1;
+  switch (key) {
+    case 'ArrowRight':
+      return {index: current === null ? 0 : Math.min(current + 1, last), direction: 1};
+    case 'ArrowLeft':
+      return {index: current === null ? last : Math.max(current - 1, 0), direction: -1};
+    case 'Home':
+      return {index: 0, direction: 1};
+    case 'End':
+      return {index: last, direction: -1};
+    default:
+      return null;
+  }
+}
+
+/** What a chart's keyboard reading does; the plugin that owns the reading supplies each step. */
+export interface ChartKeyHandlers {
+  /** The index read now, or null when nothing is. */
+  current(): number | null;
+  /** How many points or items the keys step through. */
+  count(): number;
+  /** Reads `index`; false when it has nothing to read, so the key keeps looking past it. */
+  readAt(index: number): boolean;
+  /** Escape or a lost focus: stop reading. */
+  release(): void;
+}
+
+/**
+ * Wires the scrub keys onto a focusable canvas: ArrowLeft/ArrowRight, Home and End move the
+ * reading (skipping points with nothing to read), Escape and blur end it. A key chorded with Alt,
+ * Ctrl, Cmd or Shift stays with the browser (history, page top and bottom). Returns the detach.
+ * The canvas only takes key events once the host makes it focusable (a `tabindex`).
+ */
+export function attachScrubKeys(canvas: HTMLCanvasElement, keys: ChartKeyHandlers): () => void {
+  const onKeyDown = (event: KeyboardEvent): void => {
+    if (event.key === 'Escape') {
+      keys.release();
+      return;
+    }
+    if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) {
+      return;
+    }
+    const count = keys.count();
+    const step = scrubKeyStep(event.key, keys.current(), count);
+    if (!step) {
+      return;
+    }
+    // The keys read the chart rather than scroll the page.
+    event.preventDefault();
+    for (let i = step.index; i >= 0 && i < count; i += step.direction) {
+      if (i === keys.current() || keys.readAt(i)) {
+        return;
+      }
+    }
+  };
+  const onBlur = (): void => keys.release();
+  canvas.addEventListener('keydown', onKeyDown);
+  canvas.addEventListener('blur', onBlur);
+  return () => {
+    canvas.removeEventListener('keydown', onKeyDown);
+    canvas.removeEventListener('blur', onBlur);
+  };
+}
+
 /**
  * Scrub-to-read for a Chart.js line chart: while a pointer is on the chart a crosshair marks the
  * point under it and `handlers.onScrub` reports it; `handlers.onRelease` fires when the pointer
  * lifts or leaves. A mouse or pen scrubs while hovering; touch scrubs while the finger is down
- * (horizontal drag reads the chart, vertical drag still scrolls the page).
+ * (horizontal drag reads the chart, vertical drag still scrolls the page). A focused canvas reads
+ * by key too: ArrowLeft/ArrowRight step a point, Home and End jump to the ends, and Escape or
+ * leaving the canvas releases (see `attachScrubKeys`).
  *
  * The crosshair is the only thing drawn; colouring the host's number is the host's business.
  */
@@ -92,21 +175,26 @@ export function scrubPlugin(handlers: ChartScrubHandlers, crosshairColor: string
     handlers.onRelease();
   }
 
+  /** Reads point `index`; false when no visible series has a value there. */
+  function scrubAt(chart: Chart, index: number): boolean {
+    const point = scrubPointAt(chart, index);
+    if (!point) {
+      return false;
+    }
+    active = index;
+    chart.draw();
+    handlers.onScrub(point);
+    return true;
+  }
+
   function scrubTo(chart: Chart, event: PointerEvent): void {
     const rect = chart.canvas.getBoundingClientRect();
     const {left, right} = chart.chartArea;
     const x = Math.min(Math.max(event.clientX - rect.left, left), right);
     const index = nearestIndex(pointXs(chart), x);
-    if (index === -1 || index === active) {
-      return;
+    if (index !== -1 && index !== active) {
+      scrubAt(chart, index);
     }
-    const point = scrubPointAt(chart, index);
-    if (!point) {
-      return;
-    }
-    active = index;
-    chart.draw();
-    handlers.onScrub(point);
   }
 
   function attach(chart: Chart): () => void {
@@ -158,7 +246,14 @@ export function scrubPlugin(handlers: ChartScrubHandlers, crosshairColor: string
     canvas.addEventListener('pointercancel', onCancel);
     canvas.addEventListener('pointerleave', onLeave);
     canvas.addEventListener('contextmenu', onContextMenu);
+    const detachKeys = attachScrubKeys(canvas, {
+      current: () => active,
+      count: () => pointXs(chart).length,
+      readAt: index => scrubAt(chart, index),
+      release: () => release(chart),
+    });
     return () => {
+      detachKeys();
       canvas.removeEventListener('pointerdown', onDown);
       canvas.removeEventListener('pointermove', onMove);
       canvas.removeEventListener('pointerup', onEnd);

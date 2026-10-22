@@ -8,20 +8,27 @@ import {
   input,
   OnDestroy,
   output,
+  signal,
   viewChild,
 } from '@angular/core';
 import {
   bindChartClick,
+  bindChartHighlight,
   buildDonutChartConfig,
+  describeDonutChart,
+  describeSegmentAt,
   type DonutSegment,
   type DonutSegmentClick,
   isDonutEmpty,
+  money,
   resolveDonutChartTokens,
   resolveDonutClick,
+  segmentsTable,
   updateDonutChart,
 } from '@lifekit-hq/charts-core';
 import {Chart} from 'chart.js';
 
+import {ChartA11yComponent} from '../../chart-a11y/chart-a11y.component';
 import {isOutputObserved} from '../../chart-click/output-observed';
 import {injectChartThemeKey} from '../../chart-theme/chart-theme';
 
@@ -29,6 +36,7 @@ export type {DonutSegment, DonutSegmentClick} from '@lifekit-hq/charts-core';
 
 @Component({
   selector: 'cmn-donut-chart',
+  imports: [ChartA11yComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   // A custom element is inline by default, which lets the ring-only wrapper's percentage
   // height collapse; block gives Chart.js a real box to size against.
@@ -42,7 +50,14 @@ export type {DonutSegment, DonutSegmentClick} from '@lifekit-hq/charts-core';
           {{ label() }}
         </span>
         <div class="relative w-full" style="min-height: 280px">
-          <canvas #chartCanvas [class.invisible]="isEmpty()"></canvas>
+          <canvas
+            #chartCanvas
+            [attr.aria-label]="accessibleName()"
+            [attr.tabindex]="isEmpty() ? null : 0"
+            [class.invisible]="isEmpty()"
+            role="img"
+            class="rounded-cmn-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus"
+          ></canvas>
           @if (isEmpty()) {
             <p
               class="absolute inset-0 flex items-center justify-center text-center text-cmn-sm text-text-secondary"
@@ -52,10 +67,23 @@ export type {DonutSegment, DonutSegmentClick} from '@lifekit-hq/charts-core';
             </p>
           }
         </div>
+        <cmn-chart-a11y
+          [announcement]="announcement()"
+          [caption]="name()"
+          [table]="table()"
+          [visible]="showDataTable()"
+        />
       </div>
     } @else {
       <div class="relative h-full w-full" style="min-height: 220px">
-        <canvas #chartCanvas [class.invisible]="isEmpty()"></canvas>
+        <canvas
+          #chartCanvas
+          [attr.aria-label]="accessibleName()"
+          [attr.tabindex]="isEmpty() ? null : 0"
+          [class.invisible]="isEmpty()"
+          role="img"
+          class="rounded-cmn-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus"
+        ></canvas>
         @if (isEmpty()) {
           <p
             class="absolute inset-0 flex items-center justify-center text-center text-cmn-sm text-text-secondary"
@@ -65,6 +93,12 @@ export type {DonutSegment, DonutSegmentClick} from '@lifekit-hq/charts-core';
           </p>
         }
       </div>
+      <cmn-chart-a11y
+        [announcement]="announcement()"
+        [caption]="name()"
+        [table]="table()"
+        [visible]="showDataTable()"
+      />
     }
   `,
 })
@@ -73,6 +107,10 @@ export class DonutChartComponent implements AfterViewInit, OnDestroy {
   private chart: Chart | null = null;
   private builtThemeKey = '';
   private readonly themeKey = injectChartThemeKey();
+  private readonly format = computed(() => {
+    const currency = this.currency();
+    return (value: number): string => money(value, currency);
+  });
 
   public readonly segments = input<DonutSegment[]>([]);
   public readonly label = input<string>('');
@@ -86,10 +124,28 @@ export class DonutChartComponent implements AfterViewInit, OnDestroy {
   /**
    * Emits the ring segment a click landed on: its index, label and value. Binding it makes the
    * segments clickable (pointer cursor); unbound, the chart behaves as before.
-   * Pointer only - the canvas has no focusable items, so offer a keyboard-reachable equivalent.
+   * Pointer only - keys read the chart but do not click it, so offer a keyboard-reachable equivalent.
    */
   public readonly segmentClick = output<DonutSegmentClick>();
+  /**
+   * Replaces the derived summary in the canvas' accessible name (by default
+   * how many segments, their total and the largest one's share).
+   */
+  public readonly summary = input<string | undefined>(undefined);
+  /** Shows the data table under the chart; otherwise only a screen reader reaches it. */
+  public readonly showDataTable = input<boolean>(false);
   protected readonly isEmpty = computed(() => isDonutEmpty(this.segments()));
+  protected readonly name = computed(() => this.label() || 'Donut chart');
+  protected readonly accessibleName = computed(() => {
+    const summary = this.isEmpty()
+      ? this.emptyMessage()
+      : (this.summary() ?? describeDonutChart(this.segments(), this.format()));
+    return summary ? `${this.name()}. ${summary}` : this.name();
+  });
+  protected readonly table = computed(() =>
+    this.isEmpty() ? null : segmentsTable(this.segments(), this.format())
+  );
+  protected readonly announcement = signal('');
 
   constructor() {
     effect(() => {
@@ -129,7 +185,13 @@ export class DonutChartComponent implements AfterViewInit, OnDestroy {
       this.currency(),
       this.showLegend()
     );
-    const bound = bindChartClick(config, {
+    // The chart's own hover highlights a segment; this announces it and lets the keyboard step it.
+    const read = bindChartHighlight(config, {
+      onHighlight: index =>
+        this.announcement.set(describeSegmentAt(this.segments(), index, this.format())),
+      onRelease: () => this.announcement.set(''),
+    });
+    const bound = bindChartClick(read, {
       resolve: resolveDonutClick,
       isActive: () => isOutputObserved(this.segmentClick),
       emit: hit => this.segmentClick.emit(hit),

@@ -48,6 +48,11 @@
       "reason": "Detector false positive: the shell CSS-hides the nav it is not using (the sidebar on a phone, the tab bar elsewhere); a badge in that display:none subtree has no box, so its negative offsets read as escaping the clip."
     },
     {
+      "rule": "nested-cards",
+      "stories": ["patterns-period-hero--*"],
+      "reason": "The hero story frames the chart's own card inside the hero section on purpose; the detector reads it as nested only since the chart carries its visually hidden data table."
+    },
+    {
       "rule": "cramped-padding",
       "stories": ["primitives-code-block--capped-height", "components-drawer--bottom-sheet-*"],
       "reason": "Detector false positive: text clipped at the edge of a scroll box is read as missing padding."

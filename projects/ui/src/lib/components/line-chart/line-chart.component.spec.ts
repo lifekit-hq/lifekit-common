@@ -205,4 +205,105 @@ describe('LineChartComponent', () => {
       expect(scrubs).toEqual([]);
     });
   });
+
+  describe('accessibility', () => {
+    const POINTS = [
+      {label: 'May', value: 100},
+      {label: 'Jun', value: 300},
+      {label: 'Jul', value: 200},
+    ];
+
+    const canvas = (): HTMLCanvasElement => fixture.nativeElement.querySelector('canvas');
+    const announcement = (): string =>
+      fixture.nativeElement.querySelector('[data-testid="chart-announcement"]').textContent.trim();
+    const table = (): HTMLElement | null =>
+      fixture.nativeElement.querySelector('[data-testid="chart-data-table"]');
+
+    function press(key: string): void {
+      canvas().dispatchEvent(new KeyboardEvent('keydown', {key, bubbles: true, cancelable: true}));
+      fixture.detectChanges();
+    }
+
+    function withData(): void {
+      fixture.componentRef.setInput('data', POINTS);
+      fixture.componentRef.setInput('label', 'Net worth');
+      fixture.componentRef.setInput('valueFormat', 'number');
+      fixture.detectChanges();
+    }
+
+    it('names the canvas an image with the label and a derived summary', () => {
+      withData();
+      expect(canvas().getAttribute('role')).toBe('img');
+      expect(canvas().getAttribute('aria-label')).toBe(
+        'Net worth. 3 points from May to Jul: 100 to 200, up 100.0%'
+      );
+    });
+
+    it('falls back to a generic name, and takes a summary over the derived one', () => {
+      fixture.componentRef.setInput('data', POINTS);
+      fixture.componentRef.setInput('summary', 'Doubled since spring');
+      fixture.detectChanges();
+      expect(canvas().getAttribute('aria-label')).toBe('Line chart. Doubled since spring');
+    });
+
+    it('names an empty chart by its empty message, out of the tab order and without a table', () => {
+      expect(canvas().getAttribute('aria-label')).toBe('Line chart. No data yet');
+      expect(canvas().hasAttribute('tabindex')).toBe(false);
+      expect(table()).toBeNull();
+    });
+
+    it('puts a chart with data in the tab order, with its data as a hidden table', () => {
+      withData();
+      expect(canvas().getAttribute('tabindex')).toBe('0');
+      expect(table()?.classList).toContain('sr-only');
+      const rows = [...fixture.nativeElement.querySelectorAll('tbody tr')].map(tr =>
+        tr.textContent.replace(/\s+/g, ' ').trim()
+      );
+      expect(rows).toEqual(['May 100', 'Jun 300', 'Jul 200']);
+    });
+
+    it('shows the table when asked', () => {
+      withData();
+      fixture.componentRef.setInput('showDataTable', true);
+      fixture.detectChanges();
+      expect(table()?.classList).not.toContain('sr-only');
+    });
+
+    it('keeps a compact chart a named image, but neither focusable nor tabled', () => {
+      withData();
+      fixture.componentRef.setInput('compact', true);
+      fixture.componentRef.setInput('showDataTable', true);
+      fixture.detectChanges();
+      expect(canvas().getAttribute('aria-label')).toContain('3 points from May to Jul');
+      expect(canvas().hasAttribute('tabindex')).toBe(false);
+      expect(table()).toBeNull();
+    });
+
+    it('announces the point a key reads, and clears on Escape', () => {
+      withData();
+      press('ArrowRight');
+      expect(announcement()).toBe('May: 100');
+      press('End');
+      expect(announcement()).toBe('Jul: 200');
+      press('Escape');
+      expect(announcement()).toBe('');
+    });
+
+    it('scrubs by key when scrubbable, announcing and emitting the point', () => {
+      const scrubs: number[] = [];
+      let ends = 0;
+      fixture.componentInstance.scrub.subscribe(p => scrubs.push(p.index));
+      fixture.componentInstance.scrubEnd.subscribe(() => ends++);
+      fixture.componentRef.setInput('scrubbable', true);
+      withData();
+      press('Home');
+      press('ArrowRight');
+      expect(scrubs).toEqual([0, 1]);
+      expect(announcement()).toBe('Jun: 300');
+      canvas().dispatchEvent(new FocusEvent('blur'));
+      fixture.detectChanges();
+      expect(ends).toBe(1);
+      expect(announcement()).toBe('');
+    });
+  });
 });

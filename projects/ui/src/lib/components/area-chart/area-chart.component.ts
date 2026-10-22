@@ -8,21 +8,28 @@ import {
   input,
   OnDestroy,
   output,
+  signal,
   viewChild,
 } from '@angular/core';
 import {
   type AreaSeries,
   bindChartClick,
+  bindChartHighlight,
   buildAreaChartConfig,
   type ChartPointClick,
   type ChartScrubPoint,
+  describeAreaChart,
+  describeSeriesAt,
   isSeriesEmpty,
+  money,
   resolveAreaChartTokens,
   resolveAreaClick,
+  seriesTable,
   updateAreaChart,
 } from '@lifekit-hq/charts-core';
 import {Chart} from 'chart.js';
 
+import {ChartA11yComponent} from '../../chart-a11y/chart-a11y.component';
 import {isOutputObserved} from '../../chart-click/output-observed';
 import {injectChartThemeKey} from '../../chart-theme/chart-theme';
 
@@ -30,6 +37,7 @@ export type {AreaSeries, ChartPointClick, ChartScrubPoint} from '@lifekit-hq/cha
 
 @Component({
   selector: 'cmn-area-chart',
+  imports: [ChartA11yComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
@@ -39,7 +47,14 @@ export type {AreaSeries, ChartPointClick, ChartScrubPoint} from '@lifekit-hq/cha
         {{ label() }}
       </span>
       <div class="relative h-64">
-        <canvas #chartCanvas [class.invisible]="isEmpty()"></canvas>
+        <canvas
+          #chartCanvas
+          [attr.aria-label]="accessibleName()"
+          [attr.tabindex]="isEmpty() ? null : 0"
+          [class.invisible]="isEmpty()"
+          role="img"
+          class="rounded-cmn-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus"
+        ></canvas>
         @if (isEmpty()) {
           <p
             class="absolute inset-0 flex items-center justify-center text-center text-cmn-sm text-text-secondary"
@@ -49,6 +64,12 @@ export type {AreaSeries, ChartPointClick, ChartScrubPoint} from '@lifekit-hq/cha
           </p>
         }
       </div>
+      <cmn-chart-a11y
+        [announcement]="announcement()"
+        [caption]="name()"
+        [table]="table()"
+        [visible]="showDataTable()"
+      />
     </div>
   `,
 })
@@ -58,6 +79,10 @@ export class AreaChartComponent implements AfterViewInit, OnDestroy {
   private builtScrubbable = false;
   private builtThemeKey = '';
   private readonly themeKey = injectChartThemeKey();
+  private readonly format = computed(() => {
+    const currency = this.currency();
+    return (value: number): string => money(value, currency);
+  });
 
   public readonly series = input<AreaSeries[]>([]);
   public readonly label = input<string>('');
@@ -79,10 +104,28 @@ export class AreaChartComponent implements AfterViewInit, OnDestroy {
   /**
    * Emits the point a click landed on: its x position, its series and the series' value there.
    * Binding it makes the plot clickable (pointer cursor); unbound, the chart behaves as before.
-   * Pointer only - the canvas has no focusable items, so offer a keyboard-reachable equivalent.
+   * Pointer only - keys read the chart but do not click it, so offer a keyboard-reachable equivalent.
    */
   public readonly pointClick = output<ChartPointClick>();
+  /**
+   * Replaces the derived summary in the canvas' accessible name (by default
+   * the bands, their span and how the total moved across it).
+   */
+  public readonly summary = input<string | undefined>(undefined);
+  /** Shows the data table under the chart; otherwise only a screen reader reaches it. */
+  public readonly showDataTable = input<boolean>(false);
   protected readonly isEmpty = computed(() => isSeriesEmpty(this.series()));
+  protected readonly name = computed(() => this.label() || 'Area chart');
+  protected readonly accessibleName = computed(() => {
+    const summary = this.isEmpty()
+      ? this.emptyMessage()
+      : (this.summary() ?? describeAreaChart(this.series(), this.format(), this.stacked()));
+    return summary ? `${this.name()}. ${summary}` : this.name();
+  });
+  protected readonly table = computed(() =>
+    this.isEmpty() ? null : seriesTable(this.series(), this.format(), this.stacked())
+  );
+  protected readonly announcement = signal('');
 
   constructor() {
     effect(() => {
@@ -127,16 +170,34 @@ export class AreaChartComponent implements AfterViewInit, OnDestroy {
       this.stacked(),
       this.scrubbable()
         ? {
-            onScrub: point => this.scrub.emit(point),
-            onRelease: () => this.scrubEnd.emit(),
+            onScrub: point => {
+              this.announce(point.index);
+              this.scrub.emit(point);
+            },
+            onRelease: () => {
+              this.announcement.set('');
+              this.scrubEnd.emit();
+            },
           }
         : undefined
     );
-    const bound = bindChartClick(config, {
+    // Without scrub, the chart's own hover reads the points; the highlight announces them and
+    // gives the keyboard the same reading.
+    const read = this.scrubbable()
+      ? config
+      : bindChartHighlight(config, {
+          onHighlight: index => this.announce(index),
+          onRelease: () => this.announcement.set(''),
+        });
+    const bound = bindChartClick(read, {
       resolve: (chart, event) => resolveAreaClick(chart, event, this.stacked()),
       isActive: () => isOutputObserved(this.pointClick),
       emit: hit => this.pointClick.emit(hit),
     });
     this.chart = new Chart(ctx, bound);
+  }
+
+  private announce(index: number): void {
+    this.announcement.set(describeSeriesAt(this.series(), index, this.format(), this.stacked()));
   }
 }

@@ -3,7 +3,7 @@ import {afterEach, describe, expect, it, vi} from 'vitest';
 
 import {buildAreaChartConfig} from './area';
 import {buildLineChartConfig} from './line';
-import {nearestIndex, scrubPointAt} from './scrub';
+import {nearestIndex, scrubKeyStep, scrubPointAt} from './scrub';
 import {
   type AreaSeries,
   type ChartPoint,
@@ -32,6 +32,8 @@ interface Harness {
   releases: number;
   /** Fires a pointer event at `x` CSS px from the canvas' left edge. */
   fire: (type: string, x: number, init?: PointerEventInit) => PointerEvent;
+  /** Presses `key` on the canvas. */
+  press: (key: string, modifiers?: KeyboardEventInit) => KeyboardEvent;
   xOf: (index: number) => number;
 }
 
@@ -59,6 +61,16 @@ function mount(
         bubbles: true,
         cancelable: true,
         ...init,
+      });
+      canvas.dispatchEvent(event);
+      return event;
+    },
+    press: (key, modifiers) => {
+      const event = new KeyboardEvent('keydown', {
+        key,
+        bubbles: true,
+        cancelable: true,
+        ...modifiers,
       });
       canvas.dispatchEvent(event);
       return event;
@@ -288,6 +300,111 @@ describe('scrub on a line chart', () => {
     );
     h.fire('pointermove', h.xOf(2));
     expect(h.scrubs[0]).toMatchObject({index: 2, label: 'Mar', x: 3_000, y: 150});
+  });
+});
+
+describe('scrubKeyStep', () => {
+  it('steps one point either way and stops at the ends', () => {
+    expect(scrubKeyStep('ArrowRight', 1, 4)).toEqual({index: 2, direction: 1});
+    expect(scrubKeyStep('ArrowLeft', 1, 4)).toEqual({index: 0, direction: -1});
+    expect(scrubKeyStep('ArrowRight', 3, 4)).toEqual({index: 3, direction: 1});
+    expect(scrubKeyStep('ArrowLeft', 0, 4)).toEqual({index: 0, direction: -1});
+  });
+
+  it('starts an arrow from nothing at the end it points away from', () => {
+    expect(scrubKeyStep('ArrowRight', null, 4)).toEqual({index: 0, direction: 1});
+    expect(scrubKeyStep('ArrowLeft', null, 4)).toEqual({index: 3, direction: -1});
+  });
+
+  it('jumps Home and End to the ends, looking inward', () => {
+    expect(scrubKeyStep('Home', 2, 4)).toEqual({index: 0, direction: 1});
+    expect(scrubKeyStep('End', 0, 4)).toEqual({index: 3, direction: -1});
+  });
+
+  it('is null for any other key or nothing to step through', () => {
+    expect(scrubKeyStep('ArrowUp', 1, 4)).toBeNull();
+    expect(scrubKeyStep('Enter', 1, 4)).toBeNull();
+    expect(scrubKeyStep('ArrowRight', null, 0)).toBeNull();
+  });
+});
+
+describe('scrub by key', () => {
+  it('reads the first point on ArrowRight and steps on from it', () => {
+    const h = line();
+    h.press('ArrowRight');
+    h.press('ArrowRight');
+    expect(h.scrubs.map(p => p.label)).toEqual(['Jan', 'Feb']);
+  });
+
+  it('reads the ends on Home and End', () => {
+    const h = line();
+    h.press('End');
+    h.press('Home');
+    expect(h.scrubs.map(p => p.label)).toEqual(['Apr', 'Jan']);
+  });
+
+  it('takes the key from the page so it does not scroll, and leaves other keys alone', () => {
+    const h = line();
+    expect(h.press('ArrowLeft').defaultPrevented).toBe(true);
+    expect(h.press('ArrowDown').defaultPrevented).toBe(false);
+    expect(h.press('Tab').defaultPrevented).toBe(false);
+  });
+
+  it('leaves a key chorded with a modifier to the browser and reads nothing', () => {
+    const h = line();
+    const chords: [string, KeyboardEventInit][] = [
+      ['ArrowLeft', {altKey: true}],
+      ['ArrowRight', {metaKey: true}],
+      ['End', {ctrlKey: true}],
+      ['Home', {metaKey: true}],
+      ['ArrowRight', {shiftKey: true}],
+    ];
+    chords.forEach(([key, modifiers]) => {
+      expect(h.press(key, modifiers).defaultPrevented).toBe(false);
+    });
+    expect(h.scrubs).toEqual([]);
+  });
+
+  it('reports nothing for a key that cannot move past an end', () => {
+    const h = line();
+    h.press('End');
+    h.press('ArrowRight');
+    expect(h.scrubs.map(p => p.label)).toEqual(['Apr']);
+  });
+
+  it('skips a point with nothing to read', () => {
+    const h = line();
+    h.chart.data.datasets[0].data = [100, null, 150, 180];
+    h.chart.update();
+    h.press('Home');
+    h.press('ArrowRight');
+    expect(h.scrubs.map(p => p.label)).toEqual(['Jan', 'Mar']);
+  });
+
+  it('draws the crosshair at the point the key read', () => {
+    const h = line();
+    const moveTo = vi.spyOn(h.chart.ctx, 'moveTo');
+    h.press('End');
+    h.chart.draw();
+    expect(moveTo).toHaveBeenCalledWith(h.xOf(3), h.chart.chartArea.top);
+  });
+
+  it('releases on Escape and when the canvas loses focus', () => {
+    const h = line();
+    h.press('Home');
+    h.press('Escape');
+    expect(h.releases).toBe(1);
+    h.press('Home');
+    h.canvas.dispatchEvent(new FocusEvent('blur'));
+    expect(h.releases).toBe(2);
+  });
+
+  it('lets go of the keys when destroyed', () => {
+    const h = line();
+    h.chart.destroy();
+    mounted.splice(0);
+    h.press('Home');
+    expect(h.scrubs).toEqual([]);
   });
 });
 

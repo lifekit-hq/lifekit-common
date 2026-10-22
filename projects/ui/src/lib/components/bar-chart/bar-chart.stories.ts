@@ -9,6 +9,13 @@ function series(label: string, values: number[]): BarSeries {
   return {label, points: values.map((value, i) => ({label: MONTHS[i], value}))};
 }
 
+const LONG_RANGE: BarSeries = {
+  label: 'Spending',
+  points: ['2022', '2023', '2024', '2025']
+    .flatMap(year => ['Q1', 'Q2', 'Q3', 'Q4'].map(quarter => `${quarter} ${year}`))
+    .map((label, i) => ({label, value: 3600 + ((i * 7) % 11) * 240})),
+};
+
 const INCOME = series('Income', [5000, 5000, 5200, 5000, 5400, 5000]);
 const SPENDING = series('Spending', [1200, 980, 1440, 1310, 1120, 1560]);
 
@@ -99,4 +106,22 @@ export const Clickable: Story = {
       <p class="mt-cmn-3 text-cmn-sm text-text-secondary" data-testid="last-click">{{ last }}</p>
     `,
   }),
+};
+
+/**
+ * Sixteen quarters: x labels thin out so neighbours never touch, while the accessible name still
+ * reads the span and its highest and lowest bar.
+ */
+export const LongRange: Story = {
+  args: {series: [LONG_RANGE], label: 'Quarterly Spending'},
+};
+
+/**
+ * The canvas is an image named by `label` and a derived summary (span, highest and lowest bar;
+ * replace it with `summary`), and a screen reader reaches every bar in a data table.
+ * `showDataTable` shows that table under the chart. Hover a bar, or Tab to the chart and use
+ * ArrowLeft/ArrowRight, Home and End: the column highlights and its values are announced.
+ */
+export const DataTable: Story = {
+  args: {series: [INCOME, SPENDING], label: 'Income vs Spending', showDataTable: true},
 };

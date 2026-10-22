@@ -8,21 +8,28 @@ import {
   input,
   OnDestroy,
   output,
+  signal,
   viewChild,
 } from '@angular/core';
 import {
+  barFormat,
   type BarSeries,
   type BarValueFormat,
   bindChartClick,
+  bindChartHighlight,
   buildBarChartConfig,
   type ChartPointClick,
+  describeBarChart,
+  describeSeriesAt,
   isSeriesEmpty,
   resolveBarChartTokens,
   resolveBarClick,
+  seriesTable,
   updateBarChart,
 } from '@lifekit-hq/charts-core';
 import {Chart} from 'chart.js';
 
+import {ChartA11yComponent} from '../../chart-a11y/chart-a11y.component';
 import {isOutputObserved} from '../../chart-click/output-observed';
 import {injectChartThemeKey} from '../../chart-theme/chart-theme';
 
@@ -30,6 +37,7 @@ export type {BarSeries, BarValueFormat, ChartPointClick} from '@lifekit-hq/chart
 
 @Component({
   selector: 'cmn-bar-chart',
+  imports: [ChartA11yComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
@@ -39,7 +47,14 @@ export type {BarSeries, BarValueFormat, ChartPointClick} from '@lifekit-hq/chart
         {{ label() }}
       </span>
       <div class="relative h-64">
-        <canvas #chartCanvas [class.invisible]="isEmpty()"></canvas>
+        <canvas
+          #chartCanvas
+          [attr.aria-label]="accessibleName()"
+          [attr.tabindex]="isEmpty() ? null : 0"
+          [class.invisible]="isEmpty()"
+          role="img"
+          class="rounded-cmn-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus"
+        ></canvas>
         @if (isEmpty()) {
           <p
             class="absolute inset-0 flex items-center justify-center text-center text-cmn-sm text-text-secondary"
@@ -49,6 +64,12 @@ export type {BarSeries, BarValueFormat, ChartPointClick} from '@lifekit-hq/chart
           </p>
         }
       </div>
+      <cmn-chart-a11y
+        [announcement]="announcement()"
+        [caption]="name()"
+        [table]="table()"
+        [visible]="showDataTable()"
+      />
     </div>
   `,
 })
@@ -57,6 +78,11 @@ export class BarChartComponent implements AfterViewInit, OnDestroy {
   private chart: Chart | null = null;
   private builtThemeKey = '';
   private readonly themeKey = injectChartThemeKey();
+  private readonly format = computed(() => {
+    const valueFormat = this.valueFormat();
+    const currency = this.currency();
+    return (value: number): string => barFormat(value, valueFormat, currency);
+  });
 
   public readonly series = input<BarSeries[]>([]);
   public readonly label = input<string>('');
@@ -68,10 +94,28 @@ export class BarChartComponent implements AfterViewInit, OnDestroy {
   /**
    * Emits the bar a click landed on: its x position, its series and the bar's value. Binding it
    * makes the bars clickable (pointer cursor); unbound, the chart behaves as before.
-   * Pointer only - the canvas has no focusable items, so offer a keyboard-reachable equivalent.
+   * Pointer only - keys read the chart but do not click it, so offer a keyboard-reachable equivalent.
    */
   public readonly barClick = output<ChartPointClick>();
+  /**
+   * Replaces the derived summary in the canvas' accessible name (by default
+   * its span and, for one series, its highest and lowest bar).
+   */
+  public readonly summary = input<string | undefined>(undefined);
+  /** Shows the data table under the chart; otherwise only a screen reader reaches it. */
+  public readonly showDataTable = input<boolean>(false);
   protected readonly isEmpty = computed(() => isSeriesEmpty(this.series()));
+  protected readonly name = computed(() => this.label() || 'Bar chart');
+  protected readonly accessibleName = computed(() => {
+    const summary = this.isEmpty()
+      ? this.emptyMessage()
+      : (this.summary() ?? describeBarChart(this.series(), this.format()));
+    return summary ? `${this.name()}. ${summary}` : this.name();
+  });
+  protected readonly table = computed(() =>
+    this.isEmpty() ? null : seriesTable(this.series(), this.format(), this.stacked())
+  );
+  protected readonly announcement = signal('');
 
   constructor() {
     effect(() => {
@@ -112,7 +156,15 @@ export class BarChartComponent implements AfterViewInit, OnDestroy {
       this.stacked(),
       this.valueFormat()
     );
-    const bound = bindChartClick(config, {
+    // The chart's own hover highlights a column; this announces it and lets the keyboard step it.
+    const read = bindChartHighlight(config, {
+      onHighlight: index =>
+        this.announcement.set(
+          describeSeriesAt(this.series(), index, this.format(), this.stacked())
+        ),
+      onRelease: () => this.announcement.set(''),
+    });
+    const bound = bindChartClick(read, {
       resolve: resolveBarClick,
       isActive: () => isOutputObserved(this.barClick),
       emit: hit => this.barClick.emit(hit),

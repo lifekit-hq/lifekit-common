@@ -104,3 +104,13 @@ export const Clickable: Story = {
     `,
   }),
 };
+
+/**
+ * The canvas is an image named by `label` and a derived summary (count, total, largest share;
+ * replace it with `summary`), and a screen reader reaches every segment in a data table.
+ * `showDataTable` shows that table under the chart. Hover a segment, or Tab to the chart and use
+ * ArrowLeft/ArrowRight, Home and End: the segment highlights and its value and share are announced.
+ */
+export const DataTable: Story = {
+  args: {segments: SAMPLE_SEGMENTS, label: 'Allocation', currency: 'USD', showDataTable: true},
+};

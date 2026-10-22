@@ -273,9 +273,9 @@ Enforcement labels:
 | C2  | Fixed-meaning colours are never seed-derived                                                                                     | **exists**: `fixed-colours.spec.mjs`                                                                                                                   |
 | C3  | No colour literals outside tokens                                                                                                | **exists**: drift (`color`)                                                                                                                            |
 | C4  | Colour is never the only signal                                                                                                  | **review-only**: axe cannot see meaning. Stat-card deltas carry an icon, and money deltas a sign ($2)                                                  |
-| Ch1 | Every chart has an accessible name stating the trend, plus a data-table view                                                     | **planned**: a chart spec (canvas `role="img"` with a non-empty label) and a `DataTable` story                                                         |
+| Ch1 | Every chart has an accessible name stating the trend, plus a data-table view                                                     | **enforced**: each chart spec (canvas `role="img"` named by its label and a derived summary; a data table) and a `DataTable` story per chart           |
 | Ch2 | Bars and areas start at zero; gaps are never interpolated                                                                        | **enforced**: charts-core specs on the bar, area and line builders                                                                                     |
-| Ch3 | Scrub works by touch and by arrow keys                                                                                           | **planned**: a K2-style Playwright spec                                                                                                                |
+| Ch3 | Scrub works by touch and by arrow keys                                                                                           | **enforced**: charts-core `scrub` specs (touch and keys) and the line and area chart specs                                                             |
 | $1  | All money and number display goes through one library formatter                                                                  | **enforced**: `formatMoney`, `cmnMoney` and `cmnNumber`, plus consumer-lint `lifekit/no-local-currency-format`                                         |
 | $2  | Deltas carry a sign; an ISO code appears when same-symbol currencies share a screen                                              | **enforced**: `money.spec.ts` across en-IE and uk-UA                                                                                                   |
 | X1  | Zero local copies: no raw `<button>`, `<input>`, `<select>`, `<textarea>` or `<table>` where a `cmn-*` exists                    | **enforced**: consumer-lint `lifekit/no-raw-controls`, a warning for one release and then an error; a disable comment gives its reason                 |
@@ -283,11 +283,11 @@ Enforcement labels:
 | X3  | One primary number per screen; detail behind disclosure                                                                          | **review-only**: which number is primary is a product decision                                                                                         |
 | X4  | The NN/g heuristics pass on every new flow                                                                                       | **review-only**: they judge whole flows                                                                                                                |
 
-The count: 22 **exists**; 24 **enforced** (S3, S4, S6, S7, F1 to F5, V1 to V4, V5 forwarding,
-V8, T3 in part, T5 in part, K3, Y2, Ch2, $1, $2, X1, X2); 5 **planned** (T2, T4, K2, Ch1, Ch3);
+The count: 22 **exists**; 26 **enforced** (S3, S4, S6, S7, F1 to F5, V1 to V4, V5 forwarding,
+V8, T3 in part, T5 in part, K3, Y2, Ch1, Ch2, Ch3, $1, $2, X1, X2); 3 **planned** (T2, T4, K2);
 6 **review-only** (F6, V6, N3, C4, X3, X4), plus the wording in F4 and the reason in
 S7. Every planned check waits on a feature that is its own issue: data-table features (T5's cell
-ellipsis among them), keyboard patterns and chart text alternatives.
+ellipsis among them) and keyboard patterns.
 
 ### Story-state categories (X2)
 

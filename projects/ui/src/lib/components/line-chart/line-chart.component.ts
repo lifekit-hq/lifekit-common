@@ -8,20 +8,28 @@ import {
   input,
   OnDestroy,
   output,
+  signal,
   viewChild,
 } from '@angular/core';
 import {
+  bindChartHighlight,
   buildLineChartConfig,
   type ChartDomain,
   type ChartPoint,
   type ChartScrubPoint,
   type ChartValueFormat,
   type ChartXSpacing,
+  describeLineChart,
+  describeSeriesAt,
+  drawnLinePoints,
   resolveLineChartTokens,
+  seriesTable,
   updateLineChart,
+  valueFormatter,
 } from '@lifekit-hq/charts-core';
 import {Chart} from 'chart.js';
 
+import {ChartA11yComponent} from '../../chart-a11y/chart-a11y.component';
 import {injectChartThemeKey} from '../../chart-theme/chart-theme';
 
 export type {
@@ -34,6 +42,7 @@ export type {
 
 @Component({
   selector: 'cmn-line-chart',
+  imports: [ChartA11yComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {'[style.display]': "compact() ? 'block' : null"},
   template: `
@@ -52,9 +61,13 @@ export type {
       <div [class]="compact() ? 'relative h-full min-h-8' : 'relative h-48'">
         <canvas
           #chartCanvas
+          [attr.aria-label]="accessibleName()"
+          [attr.tabindex]="readable() ? 0 : null"
           [class.invisible]="isEmpty()"
           [class.absolute]="compact()"
           [class.inset-0]="compact()"
+          role="img"
+          class="rounded-cmn-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus"
         ></canvas>
         @if (isEmpty() && !compact()) {
           <p
@@ -65,6 +78,12 @@ export type {
           </p>
         }
       </div>
+      <cmn-chart-a11y
+        [announcement]="announcement()"
+        [caption]="name()"
+        [table]="table()"
+        [visible]="showDataTable()"
+      />
     </div>
   `,
 })
@@ -76,6 +95,14 @@ export class LineChartComponent implements AfterViewInit, OnDestroy {
   private builtScrubbable = false;
   private builtThemeKey = '';
   private readonly themeKey = injectChartThemeKey();
+  private readonly drawn = computed(() => drawnLinePoints(this.data(), this.xSpacing()));
+  private readonly format = computed(() => {
+    const format = valueFormatter(this.valueFormat(), this.currency());
+    return (value: number): string => format(value, false);
+  });
+  private readonly series = computed(() => [
+    {label: this.label() || 'Value', points: this.drawn()},
+  ]);
 
   public readonly data = input<ChartPoint[]>([]);
   public readonly label = input<string>('');
@@ -109,7 +136,28 @@ export class LineChartComponent implements AfterViewInit, OnDestroy {
   public readonly scrub = output<ChartScrubPoint>();
   /** The pointer lifted or left the chart: snap the headline back. */
   public readonly scrubEnd = output<void>();
+  /**
+   * Replaces the derived summary in the canvas' accessible name (by default its span, first and
+   * last values and the trend between them), e.g. to say what the trend means.
+   */
+  public readonly summary = input<string | undefined>(undefined);
+  /** Shows the data table under the chart; otherwise only a screen reader reaches it. Ignored when `compact`. */
+  public readonly showDataTable = input<boolean>(false);
   protected readonly isEmpty = computed(() => this.data().length === 0);
+  /** A focused chart reads its points by key; a compact one is a still glyph. */
+  protected readonly readable = computed(() => !this.compact() && !this.isEmpty());
+  protected readonly name = computed(() => this.label() || 'Line chart');
+  protected readonly accessibleName = computed(() => {
+    const summary = this.isEmpty()
+      ? this.emptyMessage()
+      : (this.summary() ?? describeLineChart(this.drawn(), this.format()));
+    return summary ? `${this.name()}. ${summary}` : this.name();
+  });
+  /** A sparkline's name carries its summary; a table per row of sparklines would bury the page. */
+  protected readonly table = computed(() =>
+    this.readable() ? seriesTable(this.series(), this.format()) : null
+  );
+  protected readonly announcement = signal('');
 
   constructor() {
     effect(() => {
@@ -155,22 +203,41 @@ export class LineChartComponent implements AfterViewInit, OnDestroy {
     this.builtXSpacing = this.xSpacing();
     this.builtScrubbable = this.scrubbable();
     this.builtThemeKey = this.themeKey();
+    const scrubbing = this.scrubbable() && !this.compact();
+    const config = buildLineChartConfig(
+      this.data(),
+      resolveLineChartTokens(),
+      this.currency(),
+      this.valueFormat(),
+      this.compact(),
+      {yDomain: this.yDomain(), xSpacing: this.xSpacing()},
+      scrubbing
+        ? {
+            onScrub: point => {
+              this.announce(point.index);
+              this.scrub.emit(point);
+            },
+            onRelease: () => {
+              this.announcement.set('');
+              this.scrubEnd.emit();
+            },
+          }
+        : undefined
+    );
+    // Without scrub, the chart's own hover reads the points; the highlight announces them and
+    // gives the keyboard the same reading. A compact chart reads nothing.
     this.chart = new Chart(
       ctx,
-      buildLineChartConfig(
-        this.data(),
-        resolveLineChartTokens(),
-        this.currency(),
-        this.valueFormat(),
-        this.compact(),
-        {yDomain: this.yDomain(), xSpacing: this.xSpacing()},
-        this.scrubbable()
-          ? {
-              onScrub: point => this.scrub.emit(point),
-              onRelease: () => this.scrubEnd.emit(),
-            }
-          : undefined
-      )
+      scrubbing || this.compact()
+        ? config
+        : bindChartHighlight(config, {
+            onHighlight: index => this.announce(index),
+            onRelease: () => this.announcement.set(''),
+          })
     );
+  }
+
+  private announce(index: number): void {
+    this.announcement.set(describeSeriesAt(this.series(), index, this.format()));
   }
 }
