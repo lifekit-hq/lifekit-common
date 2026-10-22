@@ -48,6 +48,7 @@ import {
 } from './page-chrome';
 import {overflowNavItems, phoneTabItems} from './phone-tabs';
 import {matchTab, ShellNavigationService} from './shell-navigation.service';
+import {healViewportOnBlur} from './viewport-heal';
 
 export {type NavItem} from '../sidebar-nav/sidebar-nav.component';
 export * from './account-menu';
@@ -175,7 +176,8 @@ export const CMN_CONTENT_INSET_PROPERTIES = {
     <!-- Pinned with fixed/inset-0, not viewport units: h-screen/h-dvh overshoot the real
          viewport in iOS home-screen apps, which scrolls the document -->
     <!-- touch-manipulation: a double tap never zooms the page -->
-    <div class="fixed inset-0 flex touch-manipulation overflow-hidden bg-surface-bg">
+    <!-- The phone shell re-measures it after the keyboard closes (see viewport-heal.ts) -->
+    <div #frame class="fixed inset-0 flex touch-manipulation overflow-hidden bg-surface-bg">
       <!-- The sidebar, or its rail, outside the phone shell; the phone shell has the bottom tab bar -->
       <cmn-sidebar-nav
         [items]="navItems()"
@@ -263,6 +265,7 @@ export class AppLayoutComponent {
   private readonly shellService = inject(CmnShellService);
   private paletteOpen = false;
 
+  private readonly frame = viewChild.required<ElementRef<HTMLElement>>('frame');
   private readonly main = viewChild.required<ElementRef<HTMLElement>>('main');
   private readonly topBarRef = viewChild.required(TopBarComponent, {read: ElementRef});
   private readonly tabBarRef = viewChild.required(BottomTabBarComponent, {read: ElementRef});
@@ -536,6 +539,20 @@ export class AppLayoutComponent {
       activeTab: () => this.effectiveActiveRoute(),
     });
     this.publishContentInsets();
+    // Phone shell only: a standalone iOS app's first keyboard leaves the frame status-bar-height short.
+    effect(onCleanup => {
+      const view = this.document.defaultView;
+      if (!view || !this.shellService.isPhone()) {
+        return;
+      }
+      onCleanup(
+        healViewportOnBlur(
+          view,
+          () => this.frame().nativeElement,
+          () => this.main().nativeElement
+        )
+      );
+    });
     effect(onCleanup => {
       const main = this.main().nativeElement;
       const update = (): void => this.scrolled.set(main.scrollTop > 0);
