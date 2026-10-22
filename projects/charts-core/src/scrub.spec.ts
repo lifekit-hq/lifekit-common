@@ -33,7 +33,7 @@ interface Harness {
   /** Fires a pointer event at `x` CSS px from the canvas' left edge. */
   fire: (type: string, x: number, init?: PointerEventInit) => PointerEvent;
   /** Presses `key` on the canvas. */
-  press: (key: string) => KeyboardEvent;
+  press: (key: string, modifiers?: KeyboardEventInit) => KeyboardEvent;
   xOf: (index: number) => number;
 }
 
@@ -65,8 +65,13 @@ function mount(
       canvas.dispatchEvent(event);
       return event;
     },
-    press: key => {
-      const event = new KeyboardEvent('keydown', {key, bubbles: true, cancelable: true});
+    press: (key, modifiers) => {
+      const event = new KeyboardEvent('keydown', {
+        key,
+        bubbles: true,
+        cancelable: true,
+        ...modifiers,
+      });
       canvas.dispatchEvent(event);
       return event;
     },
@@ -343,6 +348,21 @@ describe('scrub by key', () => {
     expect(h.press('ArrowLeft').defaultPrevented).toBe(true);
     expect(h.press('ArrowDown').defaultPrevented).toBe(false);
     expect(h.press('Tab').defaultPrevented).toBe(false);
+  });
+
+  it('leaves a key chorded with a modifier to the browser and reads nothing', () => {
+    const h = line();
+    const chords: [string, KeyboardEventInit][] = [
+      ['ArrowLeft', {altKey: true}],
+      ['ArrowRight', {metaKey: true}],
+      ['End', {ctrlKey: true}],
+      ['Home', {metaKey: true}],
+      ['ArrowRight', {shiftKey: true}],
+    ];
+    chords.forEach(([key, modifiers]) => {
+      expect(h.press(key, modifiers).defaultPrevented).toBe(false);
+    });
+    expect(h.scrubs).toEqual([]);
   });
 
   it('reports nothing for a key that cannot move past an end', () => {

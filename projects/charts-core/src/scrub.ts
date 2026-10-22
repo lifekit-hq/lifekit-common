@@ -116,13 +116,17 @@ export interface ChartKeyHandlers {
 
 /**
  * Wires the scrub keys onto a focusable canvas: ArrowLeft/ArrowRight, Home and End move the
- * reading (skipping points with nothing to read), Escape and blur end it. Returns the detach.
+ * reading (skipping points with nothing to read), Escape and blur end it. A key chorded with Alt,
+ * Ctrl, Cmd or Shift stays with the browser (history, page top and bottom). Returns the detach.
  * The canvas only takes key events once the host makes it focusable (a `tabindex`).
  */
 export function attachScrubKeys(canvas: HTMLCanvasElement, keys: ChartKeyHandlers): () => void {
   const onKeyDown = (event: KeyboardEvent): void => {
     if (event.key === 'Escape') {
       keys.release();
+      return;
+    }
+    if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) {
       return;
     }
     const count = keys.count();

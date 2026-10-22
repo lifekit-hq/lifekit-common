@@ -28,7 +28,7 @@ interface Harness {
   canvas: HTMLCanvasElement;
   /** Every report in order: an index, or null for a release. */
   reads: (number | null)[];
-  press: (key: string) => KeyboardEvent;
+  press: (key: string, modifiers?: KeyboardEventInit) => KeyboardEvent;
   /**
    * Moves a mouse to the centre of item `index`, or off the canvas for null; resolves once Chart.js
    * has handled it (it reads pointer events on the next animation frame).
@@ -57,8 +57,13 @@ function mount(config: ChartConfiguration): Harness {
     chart,
     canvas,
     reads,
-    press: key => {
-      const event = new KeyboardEvent('keydown', {key, bubbles: true, cancelable: true});
+    press: (key, modifiers) => {
+      const event = new KeyboardEvent('keydown', {
+        key,
+        bubbles: true,
+        cancelable: true,
+        ...modifiers,
+      });
       canvas.dispatchEvent(event);
       return event;
     },
@@ -133,6 +138,25 @@ describe('highlight on a bar chart', () => {
     const h = bars();
     expect(h.press('ArrowLeft').defaultPrevented).toBe(true);
     expect(h.press('ArrowUp').defaultPrevented).toBe(false);
+  });
+
+  it('leaves a key chorded with a modifier to the browser and reads nothing', () => {
+    const h = bars();
+    expect(h.press('ArrowRight', {altKey: true}).defaultPrevented).toBe(false);
+    expect(h.press('End', {ctrlKey: true}).defaultPrevented).toBe(false);
+    expect(h.reads).toEqual([]);
+  });
+
+  it('lets a key read win over a mouse resting on another bar', async () => {
+    const h = bars();
+    await h.hover(0);
+    h.press('End');
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    expect(h.reads).toEqual([0, 2]);
+    expect(h.chart.getActiveElements().map(e => e.index)).toEqual([2]);
+    expect(h.chart.tooltip?.getActiveElements().map(e => e.index)).toEqual([2]);
+    h.press('ArrowLeft');
+    expect(h.reads).toEqual([0, 2, 1]);
   });
 
   it('keeps vertical drags for the page', () => {
