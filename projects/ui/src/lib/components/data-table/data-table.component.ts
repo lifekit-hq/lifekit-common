@@ -2,6 +2,7 @@ import {BreakpointObserver} from '@angular/cdk/layout';
 import {CdkTableModule} from '@angular/cdk/table';
 import {NgTemplateOutlet} from '@angular/common';
 import {
+  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -424,28 +425,36 @@ function compareValues(a: unknown, b: unknown): number {
             >
               Previous
             </cmn-button>
-            <span class="text-cmn-sm text-text-secondary md:hidden">
+            <span
+              [class]="
+                showPageNumbers()
+                  ? 'text-cmn-sm text-text-secondary md:hidden'
+                  : 'text-cmn-sm text-text-secondary'
+              "
+            >
               Page {{ currentPage(p) }} of {{ totalPages(p) }}
             </span>
-            <ol class="hidden items-center gap-cmn-1 md:flex" data-testid="page-numbers">
-              @for (item of pagerItems(p); track $index) {
-                <li>
-                  @if (item === null) {
-                    <span class="px-cmn-1 text-cmn-sm text-text-secondary">&hellip;</span>
-                  } @else {
-                    <button
-                      [attr.aria-current]="item === currentPage(p) ? 'page' : null"
-                      [attr.aria-label]="'Page ' + item"
-                      [class]="pageButtonClass(item === currentPage(p))"
-                      (click)="goToPage(p, item)"
-                      type="button"
-                    >
-                      {{ item }}
-                    </button>
-                  }
-                </li>
-              }
-            </ol>
+            @if (showPageNumbers()) {
+              <ol class="hidden items-center gap-cmn-1 md:flex" data-testid="page-numbers">
+                @for (item of pagerItems(p); track $index) {
+                  <li>
+                    @if (item === null) {
+                      <span class="px-cmn-1 text-cmn-sm text-text-secondary">&hellip;</span>
+                    } @else {
+                      <button
+                        [attr.aria-current]="item === currentPage(p) ? 'page' : null"
+                        [attr.aria-label]="'Page ' + item"
+                        [class]="pageButtonClass(item === currentPage(p))"
+                        (click)="goToPage(p, item)"
+                        type="button"
+                      >
+                        {{ item }}
+                      </button>
+                    }
+                  </li>
+                }
+              </ol>
+            }
             <cmn-button
               [disabled]="!p.hasMore"
               (clicked)="onNextPage(p)"
@@ -474,6 +483,8 @@ export class DataTableComponent<T = Record<string, unknown>> {
   public readonly loading = input<boolean>(false);
   public readonly trackBy = input<TrackByFunction<T> | null>(null);
   public readonly pagination = input<CmnTablePagination | null>(null);
+  /** Lists page numbers in the pager from `md` up; off (the default) keeps "Page X of Y" only. */
+  public readonly showPageNumbers = input(false, {transform: booleanAttribute});
   /** Page sizes offered next to the pager; empty (the default) hides the choice. */
   public readonly pageSizeOptions = input<readonly number[]>([]);
   public readonly pageSizeLabel = input<string>('Rows per page');

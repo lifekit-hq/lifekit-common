@@ -602,6 +602,7 @@ const PAGER_TEMPLATE = `
     [rows]="rows"
     [pagination]="pagination"
     [pageSizeOptions]="pageSizeOptions"
+    showPageNumbers
     (pageChange)="onPageChange($event)"
   >
     <cmn-column key="date" header="Date" />
@@ -611,9 +612,10 @@ const PAGER_TEMPLATE = `
 `;
 
 /**
- * From \`md\` up the pager lists page numbers, eliding long runs, with the first and last page
- * always one click away; below \`md\` it shows "Page X of Y". \`pageSizeOptions\` adds a rows per
- * page choice. Every control emits \`pageChange\` with the offset and limit to fetch.
+ * With \`showPageNumbers\`, from \`md\` up the pager lists page numbers, eliding long runs, with the
+ * first and last page always one click away; below \`md\` it shows "Page X of Y".
+ * \`pageSizeOptions\` adds a rows per page choice. Every control emits \`pageChange\` with the
+ * offset and limit to fetch.
  */
 export const PageNumbers: StoryObj = {
   args: {

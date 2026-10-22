@@ -788,6 +788,7 @@ describe('DataTableComponent without summaries', () => {
       [pagination]="pagination()"
       [rows]="rows"
       (nextPage)="events.push('next')"
+      showPageNumbers
       (pageChange)="pages.push($event)"
       (previousPage)="events.push('previous')"
     >
@@ -873,6 +874,33 @@ describe('DataTableComponent pager', () => {
       {offset: 80, limit: 10},
       {offset: 100, limit: 10},
     ]);
+  });
+
+  it('shows only the page count by default, with no page numbers', () => {
+    const plain = TestBed.createComponent(DataTableComponent);
+    plain.componentRef.setInput('pagination', {
+      totalCount: 200,
+      offset: 90,
+      limit: 10,
+      hasMore: true,
+    });
+    plain.detectChanges();
+    const host = plain.nativeElement as HTMLElement;
+    expect(host.querySelector('[data-testid="page-numbers"]')).toBeNull();
+    expect(host.querySelector('button[aria-label="Page 10"]')).toBeNull();
+    const count = Array.from(host.querySelectorAll('span')).find(span =>
+      span.textContent?.includes('Page 10 of 20')
+    );
+    expect(count?.classList).not.toContain('md:hidden');
+  });
+
+  it('hides the page count from md up when page numbers are shown', () => {
+    show(90);
+    expect(pageButton('10')).not.toBeNull();
+    const count = Array.from(el.querySelectorAll('span')).find(span =>
+      span.textContent?.includes('Page 10 of 20')
+    );
+    expect(count?.classList).toContain('md:hidden');
   });
 
   it('hides the page size choice by default', () => {
