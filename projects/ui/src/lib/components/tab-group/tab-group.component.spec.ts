@@ -1,3 +1,13 @@
+import {
+  DOWN_ARROW,
+  END,
+  ESCAPE,
+  HOME,
+  LEFT_ARROW,
+  RIGHT_ARROW,
+  TAB,
+  UP_ARROW,
+} from '@angular/cdk/keycodes';
 import {ChangeDetectionStrategy, Component, signal} from '@angular/core';
 import {type ComponentFixture, TestBed} from '@angular/core/testing';
 import {provideRouter, Router} from '@angular/router';
@@ -5,6 +15,18 @@ import {RouterTestingHarness} from '@angular/router/testing';
 import {beforeEach, describe, expect, it} from 'vitest';
 
 import {type CmnTab, TabGroupComponent} from './tab-group.component';
+
+// The CDK key managers read `keyCode`, which a synthetic event only carries when given one.
+const KEY_CODES = new Map<string, number>([
+  ['Tab', TAB],
+  ['Escape', ESCAPE],
+  ['End', END],
+  ['Home', HOME],
+  ['ArrowLeft', LEFT_ARROW],
+  ['ArrowUp', UP_ARROW],
+  ['ArrowRight', RIGHT_ARROW],
+  ['ArrowDown', DOWN_ARROW],
+]);
 
 const SAMPLE_TABS: CmnTab[] = [
   {id: 'overview', label: 'Overview'},
@@ -272,5 +294,147 @@ describe('TabGroupComponent — routed mode', () => {
     expect(links[1].getAttribute('aria-current')).toBe('page');
     expect(links[1].classList).toContain('border-accent-default');
     expect(links[0].getAttribute('aria-current')).toBeNull();
+  });
+});
+
+@Component({
+  imports: [TabGroupComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <cmn-tab-group [tabs]="tabs" [(activeTab)]="current" ariaLabel="Sections">
+      @if (withPanel()) {
+        <p data-testid="panel">{{ current() }} panel</p>
+      }
+    </cmn-tab-group>
+  `,
+})
+class KeyboardHostComponent {
+  public readonly tabs: CmnTab[] = SAMPLE_TABS;
+  public readonly current = signal('overview');
+  public readonly withPanel = signal(true);
+}
+
+describe('TabGroupComponent — keyboard and ARIA (APG tabs)', () => {
+  let fixture: ComponentFixture<KeyboardHostComponent>;
+  let tabs: HTMLButtonElement[];
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [KeyboardHostComponent],
+    }).compileComponents();
+    fixture = TestBed.createComponent(KeyboardHostComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    tabs = Array.from(fixture.nativeElement.querySelectorAll('[role="tab"]'));
+  });
+
+  function press(key: string): void {
+    (document.activeElement ?? document.body).dispatchEvent(
+      new KeyboardEvent('keydown', {
+        key,
+        keyCode: KEY_CODES.get(key),
+        bubbles: true,
+        cancelable: true,
+      })
+    );
+    fixture.detectChanges();
+  }
+
+  function panel(): HTMLElement | null {
+    return fixture.nativeElement.querySelector('[role="tabpanel"]');
+  }
+
+  it('should keep only the selected tab in the page tab order', () => {
+    expect(tabs.map(tab => tab.getAttribute('tabindex'))).toEqual(['0', '-1', '-1']);
+  });
+
+  it('should keep the first tab in the tab order when none is selected', () => {
+    fixture.componentInstance.current.set('');
+    fixture.detectChanges();
+    expect(tabs.map(tab => tab.getAttribute('tabindex'))).toEqual(['0', '-1', '-1']);
+  });
+
+  it('should move focus and selection with the arrow keys, wrapping at the ends', () => {
+    tabs[0].focus();
+    press('ArrowRight');
+    expect(document.activeElement).toBe(tabs[1]);
+    expect(fixture.componentInstance.current()).toBe('details');
+    expect(tabs.map(tab => tab.getAttribute('tabindex'))).toEqual(['-1', '0', '-1']);
+
+    press('ArrowLeft');
+    press('ArrowLeft');
+    expect(document.activeElement).toBe(tabs[2]);
+    expect(fixture.componentInstance.current()).toBe('history');
+
+    press('ArrowRight');
+    expect(document.activeElement).toBe(tabs[0]);
+    expect(fixture.componentInstance.current()).toBe('overview');
+  });
+
+  it('should jump to the first and last tabs on Home and End', () => {
+    tabs[1].focus();
+    press('End');
+    expect(document.activeElement).toBe(tabs[2]);
+    expect(fixture.componentInstance.current()).toBe('history');
+    press('Home');
+    expect(document.activeElement).toBe(tabs[0]);
+    expect(fixture.componentInstance.current()).toBe('overview');
+  });
+
+  it('should ignore keys that are not tab navigation', () => {
+    tabs[0].focus();
+    press('ArrowDown');
+    press('a');
+    expect(document.activeElement).toBe(tabs[0]);
+    expect(fixture.componentInstance.current()).toBe('overview');
+  });
+
+  it('should wrap the projected content in a tabpanel labelled by the selected tab', () => {
+    expect(panel()?.querySelector('[data-testid="panel"]')).toBeTruthy();
+    expect(panel()?.getAttribute('aria-labelledby')).toBe(tabs[0].id);
+    expect(tabs[0].getAttribute('aria-controls')).toBe(panel()?.id);
+    expect(tabs[1].hasAttribute('aria-controls')).toBe(false);
+  });
+
+  it('should relabel the panel when the selection moves', () => {
+    tabs[2].click();
+    fixture.detectChanges();
+    expect(panel()?.getAttribute('aria-labelledby')).toBe(tabs[2].id);
+    expect(tabs[2].getAttribute('aria-controls')).toBe(panel()?.id);
+    expect(tabs[0].hasAttribute('aria-controls')).toBe(false);
+  });
+
+  it('should give every tab a unique id', () => {
+    const ids = tabs.map(tab => tab.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    ids.forEach(id => expect(id).not.toBe(''));
+  });
+
+  it('should drop the tabpanel role and aria-controls when nothing is projected', async () => {
+    fixture.componentInstance.withPanel.set(false);
+    fixture.detectChanges();
+    // The content observer reports the change asynchronously, after a MutationObserver callback.
+    await new Promise(resolve => setTimeout(resolve, 50));
+    fixture.detectChanges();
+
+    expect(panel()).toBeNull();
+    expect(tabs[0].hasAttribute('aria-controls')).toBe(false);
+  });
+});
+
+describe('TabGroupComponent — without projected content', () => {
+  it('should not claim a tabpanel the app draws elsewhere', async () => {
+    await TestBed.configureTestingModule({imports: [TabGroupComponent]}).compileComponents();
+    const fixture = TestBed.createComponent(TabGroupComponent);
+    fixture.componentRef.setInput('tabs', SAMPLE_TABS);
+    fixture.componentRef.setInput('activeTab', 'overview');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const el: HTMLElement = fixture.nativeElement;
+    expect(el.querySelector('[role="tabpanel"]')).toBeNull();
+    expect(el.querySelector('[role="tab"]')?.hasAttribute('aria-controls')).toBe(false);
   });
 });

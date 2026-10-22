@@ -81,3 +81,27 @@ export const LongIdentity: Story = {
     },
   },
 };
+
+const ARROW_DOWN_KEY_CODE = 40;
+
+/**
+ * Opened from the keyboard: ArrowDown (or Enter, Space) on the trigger opens on the first item,
+ * ArrowUp on the last. Inside, the arrow keys, Home and End move, typing a letter jumps to the
+ * next item that starts with it, and Escape, Tab or choosing an item closes the menu and puts
+ * focus back on the trigger.
+ */
+export const OpenedFromKeyboard: Story = {
+  ...AccountWithIdentity,
+  play: async ({canvasElement}) => {
+    const trigger = canvasElement.querySelector<HTMLButtonElement>('cmn-menu > button');
+    trigger?.focus();
+    trigger?.dispatchEvent(
+      new KeyboardEvent('keydown', {
+        key: 'ArrowDown',
+        keyCode: ARROW_DOWN_KEY_CODE,
+        bubbles: true,
+        cancelable: true,
+      })
+    );
+  },
+};

@@ -1,3 +1,4 @@
+import {type FocusableOption, FocusKeyManager} from '@angular/cdk/a11y';
 import {
   CdkConnectedOverlay,
   CdkOverlayOrigin,
@@ -5,13 +6,18 @@ import {
   Overlay,
 } from '@angular/cdk/overlay';
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   computed,
+  type ElementRef,
   inject,
+  Injector,
   input,
   output,
   signal,
+  viewChild,
+  viewChildren,
 } from '@angular/core';
 
 import {PHONE_HIT_AREA_CLASSES} from '../../tokens/hit-area';
@@ -64,6 +70,28 @@ const ITEM_BASE_CLASSES =
 const ITEM_DEFAULT_CLASSES = 'text-text-primary hover:bg-surface-raised';
 const ITEM_DESTRUCTIVE_CLASSES = 'text-status-error hover:bg-status-error/10';
 
+const PANEL_FOCUS_CLASSES = 'focus:outline-none';
+
+/** Where focus lands when the menu opens: an item from the keyboard, the panel from a pointer. */
+type OpenFocus = 'first' | 'last' | 'panel';
+
+/** A menu item as the key manager sees it: something to focus, with a label to type ahead on. */
+class MenuItemFocusTarget implements FocusableOption {
+  constructor(private readonly element: HTMLButtonElement) {}
+
+  public get disabled(): boolean {
+    return this.element.disabled;
+  }
+
+  public focus(): void {
+    this.element.focus();
+  }
+
+  public getLabel(): string {
+    return this.element.textContent?.trim() ?? '';
+  }
+}
+
 const MENU_POSITIONS: ConnectedPosition[] = [
   {
     originX: 'end',
@@ -88,11 +116,13 @@ const MENU_POSITIONS: ConnectedPosition[] = [
   template: `
     <button
       #menuOrigin="cdkOverlayOrigin"
+      #trigger
       [attr.aria-label]="ariaLabel()"
       [attr.aria-haspopup]="'menu'"
       [attr.aria-expanded]="isOpen()"
       [class]="triggerClasses()"
-      (click)="toggle()"
+      (click)="toggle($event)"
+      (keydown)="onTriggerKeydown($event)"
       cdkOverlayOrigin
       type="button"
     >
@@ -105,12 +135,19 @@ const MENU_POSITIONS: ConnectedPosition[] = [
       [cdkConnectedOverlayHasBackdrop]="true"
       [cdkConnectedOverlayPositions]="positions"
       [cdkConnectedOverlayScrollStrategy]="scrollStrategy"
+      (attach)="focusOnOpen()"
       (backdropClick)="close()"
       (overlayKeydown)="onOverlayKeydown($event)"
       cdkConnectedOverlay
       cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
     >
-      <div [class]="panelClasses()" [attr.aria-label]="panelLabel()" role="menu">
+      <div
+        #panel
+        [class]="panelClasses()"
+        [attr.aria-label]="panelLabel()"
+        role="menu"
+        tabindex="-1"
+      >
         @if (header(); as menuHeader) {
           <div [class]="headerClasses" role="presentation" data-menu-header>
             <cmn-account-avatar
@@ -133,12 +170,14 @@ const MENU_POSITIONS: ConnectedPosition[] = [
             <div [class]="separatorClasses" role="separator"></div>
           }
           <button
+            #menuItem
             [disabled]="item.disabled"
             [attr.aria-disabled]="item.disabled || null"
             [class]="itemClasses(item)"
             (click)="select(item)"
             type="button"
             role="menuitem"
+            tabindex="-1"
           >
             @if (item.icon) {
               <cmn-icon [name]="item.icon" size="sm" aria-hidden="true" />
@@ -152,6 +191,19 @@ const MENU_POSITIONS: ConnectedPosition[] = [
 })
 export class MenuComponent {
   private readonly overlay = inject(Overlay);
+  private readonly injector = inject(Injector);
+  private readonly trigger = viewChild.required<ElementRef<HTMLButtonElement>>('trigger');
+  private readonly panel = viewChild<ElementRef<HTMLElement>>('panel');
+  private readonly menuItems = viewChildren<ElementRef<HTMLButtonElement>>('menuItem');
+  private readonly keyManager = new FocusKeyManager(
+    computed(() => this.menuItems().map(ref => new MenuItemFocusTarget(ref.nativeElement))),
+    this.injector
+  )
+    .withVerticalOrientation()
+    .withWrap()
+    .withHomeAndEnd()
+    .withTypeAhead();
+  private openFocus: OpenFocus = 'panel';
 
   public readonly items = input<MenuItem[]>([]);
   /** Identity or context shown above the items; not a menu item, so it can't be selected. */
@@ -168,7 +220,7 @@ export class MenuComponent {
     this.joinClasses(TRIGGER_BASE_CLASSES, this.triggerClass())
   );
   public readonly panelClasses = computed(() =>
-    this.joinClasses(PANEL_BASE_CLASSES, this.panelClass())
+    this.joinClasses(PANEL_BASE_CLASSES, PANEL_FOCUS_CLASSES, this.panelClass())
   );
   public readonly scrollStrategy = this.overlay.scrollStrategies.reposition();
   /** The header's text names the menu, since a menu reads out its items and not the header. */
@@ -179,12 +231,51 @@ export class MenuComponent {
   public readonly headerClasses = HEADER_CLASSES;
   public readonly separatorClasses = SEPARATOR_CLASSES;
 
-  public toggle(): void {
-    this.isOpen.update(open => !open);
+  /**
+   * Opens or closes the menu. A click from the keyboard (Enter or Space, `detail` 0) opens on the
+   * first item; a pointer click opens on the panel, so no item looks picked before one is.
+   */
+  public toggle(event?: MouseEvent): void {
+    if (this.isOpen()) {
+      this.close();
+      return;
+    }
+    this.open(event?.detail === 0 ? 'first' : 'panel');
   }
 
+  /** Closes the menu and hands focus back to the trigger. */
   public close(): void {
+    if (!this.isOpen()) {
+      return;
+    }
+    this.trigger().nativeElement.focus();
+    this.keyManager.cancelTypeahead();
     this.isOpen.set(false);
+  }
+
+  public onTriggerKeydown(event: KeyboardEvent): void {
+    if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') {
+      return;
+    }
+    event.preventDefault();
+    this.open(event.key === 'ArrowDown' ? 'first' : 'last');
+  }
+
+  /** Moves focus into the menu once its items are on the page. */
+  public focusOnOpen(): void {
+    afterNextRender(
+      () => {
+        if (this.openFocus === 'first') {
+          this.keyManager.setFirstItemActive();
+        } else if (this.openFocus === 'last') {
+          this.keyManager.setLastItemActive();
+        } else {
+          this.keyManager.updateActiveItem(-1);
+          this.panel()?.nativeElement.focus();
+        }
+      },
+      {injector: this.injector}
+    );
   }
 
   public select(item: MenuItem): void {
@@ -195,10 +286,29 @@ export class MenuComponent {
     this.itemSelect.emit(item);
   }
 
+  /** The APG menu keys: arrows, Home, End and typeahead move; Escape and Tab close. */
   public onOverlayKeydown(event: KeyboardEvent): void {
     if (event.key === 'Escape') {
+      event.preventDefault();
       this.close();
+      return;
     }
+    if (event.key === 'Tab') {
+      // Focus goes back to the trigger first, so Tab carries on from there through the page.
+      this.close();
+      return;
+    }
+    if (event.key === 'ArrowUp' && this.keyManager.activeItemIndex === -1) {
+      event.preventDefault();
+      this.keyManager.setLastItemActive();
+      return;
+    }
+    this.keyManager.onKeydown(event);
+  }
+
+  private open(focus: OpenFocus): void {
+    this.openFocus = focus;
+    this.isOpen.set(true);
   }
 
   public itemClasses(item: MenuItem): string {
