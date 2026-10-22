@@ -2,13 +2,17 @@ import {type ComponentFixture, TestBed} from '@angular/core/testing';
 import {beforeEach, describe, expect, it} from 'vitest';
 
 import {type DateRange, DateRangeComponent} from './date-range.component';
+import {DATE_RANGE_PRESETS, DATE_RANGE_TODAY, type DateRangePreset} from './date-range-presets';
 
 describe('DateRangeComponent', () => {
   let fixture: ComponentFixture<DateRangeComponent>;
   let seen: DateRange[];
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({imports: [DateRangeComponent]}).compileComponents();
+    await TestBed.configureTestingModule({
+      imports: [DateRangeComponent],
+      providers: [{provide: DATE_RANGE_TODAY, useValue: () => new Date(2026, 9, 22)}],
+    }).compileComponents();
     fixture = TestBed.createComponent(DateRangeComponent);
     seen = [];
     fixture.componentInstance.registerOnChange(v => seen.push(v));
@@ -91,5 +95,91 @@ describe('DateRangeComponent', () => {
 
     expect(touched).toBe(1);
     expect(fields().every(f => f.disabled)).toBe(true);
+  });
+
+  describe('presets', () => {
+    const chips = (): HTMLButtonElement[] =>
+      Array.from(fixture.nativeElement.querySelectorAll('cmn-chip button'));
+
+    const pressed = (): string[] =>
+      chips()
+        .filter(c => c.getAttribute('aria-pressed') === 'true')
+        .map(c => c.textContent?.trim() ?? '');
+
+    function usePresets(presets: readonly DateRangePreset[]): void {
+      fixture.componentRef.setInput('presets', presets);
+      fixture.detectChanges();
+    }
+
+    it('renders no preset row unless presets are passed', () => {
+      expect(fixture.nativeElement.querySelector('cmn-chip')).toBeNull();
+      expect(fixture.nativeElement.querySelectorAll('[role="group"]')).toHaveLength(1);
+    });
+
+    it('renders one chip per preset in a named group', () => {
+      usePresets(DATE_RANGE_PRESETS);
+
+      const group = fixture.nativeElement.querySelector('[aria-label="Date range presets"]');
+      expect(group.getAttribute('role')).toBe('group');
+      expect(chips().map(c => c.textContent?.trim())).toEqual([
+        'This month',
+        'Last month',
+        'Last 30 days',
+        'Last 90 days',
+        'Year to date',
+      ]);
+    });
+
+    it('sets both bounds from the injected today, emits and marks touched', () => {
+      let touched = 0;
+      fixture.componentInstance.registerOnTouched(() => touched++);
+      usePresets(DATE_RANGE_PRESETS);
+
+      chips()[1].click();
+      fixture.detectChanges();
+
+      expect(seen).toEqual([{from: '2026-09-01', to: '2026-09-30'}]);
+      expect(touched).toBe(1);
+      expect(fields().map(f => f.value)).toEqual(['2026-09-01', '2026-09-30']);
+      expect(pressed()).toEqual(['Last month']);
+    });
+
+    it('shows a written value that matches a preset as selected', () => {
+      usePresets(DATE_RANGE_PRESETS);
+      fixture.componentInstance.writeValue({from: '2026-01-01', to: '2026-10-22'});
+      fixture.detectChanges();
+
+      expect(pressed()).toEqual(['Year to date']);
+    });
+
+    it('clears the selection when a field is edited away from the preset', () => {
+      usePresets(DATE_RANGE_PRESETS);
+      chips()[0].click();
+      fixture.detectChanges();
+
+      enter(0, '2026-10-02');
+
+      expect(pressed()).toEqual([]);
+    });
+
+    it('accepts fixed ranges alongside resolvers', () => {
+      usePresets([{label: 'Q1', range: {from: '2026-01-01', to: '2026-03-31'}}]);
+
+      chips()[0].click();
+      fixture.detectChanges();
+
+      expect(seen).toEqual([{from: '2026-01-01', to: '2026-03-31'}]);
+      expect(pressed()).toEqual(['Q1']);
+    });
+
+    it('keeps chips as native buttons in the tab order, disabled with the control', () => {
+      usePresets(DATE_RANGE_PRESETS);
+      expect(chips().every(c => c.type === 'button' && c.tabIndex === 0)).toBe(true);
+
+      fixture.componentInstance.setDisabledState(true);
+      fixture.detectChanges();
+
+      expect(chips().every(c => c.disabled)).toBe(true);
+    });
   });
 });
