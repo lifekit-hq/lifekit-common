@@ -7,11 +7,13 @@ import {DATE_RANGE_PRESETS, DATE_RANGE_TODAY, type DateRangePreset} from './date
 describe('DateRangeComponent', () => {
   let fixture: ComponentFixture<DateRangeComponent>;
   let seen: DateRange[];
+  let now: Date;
 
   beforeEach(async () => {
+    now = new Date(2026, 9, 22);
     await TestBed.configureTestingModule({
       imports: [DateRangeComponent],
-      providers: [{provide: DATE_RANGE_TODAY, useValue: () => new Date(2026, 9, 22)}],
+      providers: [{provide: DATE_RANGE_TODAY, useValue: () => now}],
     }).compileComponents();
     fixture = TestBed.createComponent(DateRangeComponent);
     seen = [];
@@ -142,6 +144,15 @@ describe('DateRangeComponent', () => {
       expect(touched).toBe(1);
       expect(fields().map(f => f.value)).toEqual(['2026-09-01', '2026-09-30']);
       expect(pressed()).toEqual(['Last month']);
+    });
+
+    it('resolves the chosen preset against the clock at click time, not at render time', () => {
+      usePresets(DATE_RANGE_PRESETS);
+
+      now = new Date(2026, 10, 1);
+      chips()[0].click();
+
+      expect(seen).toEqual([{from: '2026-11-01', to: '2026-11-01'}]);
     });
 
     it('shows a written value that matches a preset as selected', () => {

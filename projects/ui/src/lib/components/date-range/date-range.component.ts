@@ -29,7 +29,7 @@ const FIELD_CLASSES =
 
 interface PresetChip {
   label: string;
-  range: DateRange;
+  preset: DateRangePreset;
   selected: boolean;
 }
 
@@ -66,7 +66,7 @@ interface PresetChip {
           <cmn-chip
             [selected]="chip.selected"
             [disabled]="disabled()"
-            (clicked)="choosePreset(chip.range)"
+            (clicked)="choosePreset(chip.preset)"
           >
             {{ chip.label }}
           </cmn-chip>
@@ -138,7 +138,7 @@ export class DateRangeComponent implements ControlValueAccessor {
       const range = resolveDateRangePreset(preset, today);
       return {
         label: preset.label,
-        range,
+        preset,
         selected: range.from === from && range.to === to,
       };
     });
@@ -173,8 +173,9 @@ export class DateRangeComponent implements ControlValueAccessor {
     this.onChange(next);
   }
 
-  protected choosePreset(range: DateRange): void {
-    const next: DateRange = {from: range.from, to: range.to};
+  protected choosePreset(preset: DateRangePreset): void {
+    const {from, to} = resolveDateRangePreset(preset, this.today());
+    const next: DateRange = {from, to};
     this.value.set(next);
     this.onChange(next);
     this.onTouched();
