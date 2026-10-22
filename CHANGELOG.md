@@ -1,5 +1,22 @@
 # Changelog
 
+## [4.1.0](https://github.com/lifekit-hq/lifekit-common/compare/v4.0.0...v4.1.0) (2026-10-22)
+
+
+### Features
+
+* **ui:** add an action mode to cmn-list-item-row ([#214](https://github.com/lifekit-hq/lifekit-common/issues/214)) ([258dbc2](https://github.com/lifekit-hq/lifekit-common/commit/258dbc214f2c8d4822a87c5b25123500b6a0382f)), closes [#213](https://github.com/lifekit-hq/lifekit-common/issues/213)
+* **ui:** add presets to cmn-date-range ([#212](https://github.com/lifekit-hq/lifekit-common/issues/212)) ([1cc57ea](https://github.com/lifekit-hq/lifekit-common/commit/1cc57ead86798ac3fa2438c302438bad50f7939c))
+* **ui:** add searchable and chip-based multiple modes to cmn-select ([#202](https://github.com/lifekit-hq/lifekit-common/issues/202)) ([bcde83c](https://github.com/lifekit-hq/lifekit-common/commit/bcde83cb4d775b5899c3f1babdf15c0b275a13f8))
+* **ui:** add sorting, truncation, summary row and fuller pager to cmn-data-table ([#210](https://github.com/lifekit-hq/lifekit-common/issues/210)) ([3ea1ea3](https://github.com/lifekit-hq/lifekit-common/commit/3ea1ea3a700a85df85d7676e31e29109d6105a3a))
+* **ui:** follow APG keyboard patterns in cmn-menu and cmn-tab-group ([#206](https://github.com/lifekit-hq/lifekit-common/issues/206)) ([645a3e4](https://github.com/lifekit-hq/lifekit-common/commit/645a3e43bf6a0fde60c9039760f4ada8cb1fb156))
+* **ui:** give charts an accessible name, data table and keyboard reading ([#208](https://github.com/lifekit-hq/lifekit-common/issues/208)) ([e5cfc53](https://github.com/lifekit-hq/lifekit-common/commit/e5cfc5316d6463ca351df6edaaca885c0718005f))
+
+
+### Bug Fixes
+
+* **ui:** re-measure the phone shell after the keyboard closes in a standalone install ([#216](https://github.com/lifekit-hq/lifekit-common/issues/216)) ([63e9808](https://github.com/lifekit-hq/lifekit-common/commit/63e98085e3f283e0e34f74573557568c378a7ec6)), closes [#215](https://github.com/lifekit-hq/lifekit-common/issues/215)
+
 ## [4.0.0](https://github.com/lifekit-hq/lifekit-common/compare/v3.9.0...v4.0.0) (2026-10-21)
 
 
