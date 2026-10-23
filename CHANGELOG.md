@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.2.0](https://github.com/lifekit-hq/lifekit-common/compare/v4.1.0...v4.2.0) (2026-10-22)
+
+
+### Features
+
+* **ui:** scroll only the list inside fill pages with cmn-page-scroll ([#219](https://github.com/lifekit-hq/lifekit-common/issues/219)) ([901fba0](https://github.com/lifekit-hq/lifekit-common/commit/901fba05de2dd7da35e0740bf5f97c41d92adbfe))
+
 ## [4.1.0](https://github.com/lifekit-hq/lifekit-common/compare/v4.0.0...v4.1.0) (2026-10-22)
 
 
