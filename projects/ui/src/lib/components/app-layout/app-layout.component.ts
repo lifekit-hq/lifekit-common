@@ -48,7 +48,7 @@ import {
 } from './page-chrome';
 import {overflowNavItems, phoneTabItems} from './phone-tabs';
 import {matchTab, ShellNavigationService} from './shell-navigation.service';
-import {healViewportOnBlur} from './viewport-heal';
+import {healViewport} from './viewport-heal';
 
 export {type NavItem} from '../sidebar-nav/sidebar-nav.component';
 export * from './account-menu';
@@ -556,14 +556,14 @@ export class AppLayoutComponent {
       activeTab: () => this.effectiveActiveRoute(),
     });
     this.publishContentInsets();
-    // Phone shell only: a standalone iOS app's first keyboard leaves the frame status-bar-height short.
+    // Phone shell only: a standalone iOS app's keyboard leaves the frame status-bar-height short, also one used before the shell mounted.
     effect(onCleanup => {
       const view = this.document.defaultView;
       if (!view || !this.shellService.isPhone()) {
         return;
       }
       onCleanup(
-        healViewportOnBlur(
+        healViewport(
           view,
           () => this.frame().nativeElement,
           () => this.main().nativeElement

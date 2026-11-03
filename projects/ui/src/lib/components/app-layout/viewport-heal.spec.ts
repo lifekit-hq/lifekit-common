@@ -1,7 +1,7 @@
 import {afterEach, beforeEach, describe, expect, it} from 'vitest';
 
 import {
-  healViewportOnBlur,
+  healViewport,
   isTextEntry,
   remeasureFrame,
   VIEWPORT_SHRINK_TOLERANCE_PX,
@@ -20,11 +20,17 @@ class FakeView extends EventTarget {
   public innerWidth = PORTRAIT_WIDTH;
   public innerHeight = FULL_HEIGHT;
   public readonly document = document;
+  public readonly visualViewport = new EventTarget();
 
   public resizeTo(width: number, height: number): void {
     this.innerWidth = width;
     this.innerHeight = height;
     this.dispatchEvent(new Event('resize'));
+  }
+
+  public resizeVisualTo(height: number): void {
+    this.innerHeight = height;
+    this.visualViewport.dispatchEvent(new Event('resize'));
   }
 }
 
@@ -65,7 +71,7 @@ describe('isTextEntry', () => {
   });
 });
 
-describe('healViewportOnBlur', () => {
+describe('healViewport', () => {
   let view: FakeView;
   let frame: HTMLElement;
   let scroller: HTMLElement;
@@ -81,7 +87,7 @@ describe('healViewportOnBlur', () => {
     field = document.createElement('input');
     frame.append(scroller, field);
     document.body.append(frame);
-    teardown = healViewportOnBlur(
+    teardown = healViewport(
       view as unknown as Window,
       () => frame,
       () => scroller
@@ -144,6 +150,105 @@ describe('healViewportOnBlur', () => {
     teardown();
     view.resizeTo(PORTRAIT_WIDTH, FULL_HEIGHT - STATUS_BAR);
     expect(blurAndCountFlips()).toBe(0);
+  });
+});
+
+describe('healViewport without a text input', () => {
+  let view: FakeView;
+  let frame: HTMLElement;
+  let scroller: HTMLElement;
+  let teardown: () => void;
+  let watcher: MutationObserver;
+
+  function flips(): number {
+    return watcher.takeRecords().length;
+  }
+
+  /** Installs the heal on the view and returns how many frame flips that took. */
+  function install(): number {
+    watcher.takeRecords();
+    teardown = healViewport(
+      view as unknown as Window,
+      () => frame,
+      () => scroller
+    );
+    return flips();
+  }
+
+  beforeEach(() => {
+    view = new FakeView();
+    frame = document.createElement('div');
+    scroller = document.createElement('div');
+    frame.append(scroller);
+    document.body.append(frame);
+    watcher = new MutationObserver(() => undefined);
+    watcher.observe(frame, {attributes: true, attributeFilter: ['style']});
+  });
+
+  afterEach(() => {
+    teardown();
+    watcher.disconnect();
+    frame.remove();
+  });
+
+  it('should leave a window at its full height alone', () => {
+    expect(install()).toBe(0);
+    view.resizeTo(PORTRAIT_WIDTH, FULL_HEIGHT);
+    expect(flips()).toBe(0);
+  });
+
+  it('should re-measure on install when the window was shrunk before the shell mounted', () => {
+    install();
+    teardown();
+    // The first shell is gone and the window shrank (a keyboard on a page outside the shell)
+    view.innerHeight = FULL_HEIGHT - STATUS_BAR;
+    expect(install()).toBeGreaterThan(0);
+    expect(frame.style.display).toBe('');
+  });
+
+  it('should re-measure once per height when the window resizes short, and again when it grows back', () => {
+    install();
+    view.resizeTo(PORTRAIT_WIDTH, FULL_HEIGHT - STATUS_BAR);
+    expect(flips()).toBeGreaterThan(0);
+    view.resizeTo(PORTRAIT_WIDTH, FULL_HEIGHT - STATUS_BAR);
+    expect(flips()).toBe(0);
+    view.resizeTo(PORTRAIT_WIDTH, FULL_HEIGHT);
+    expect(flips()).toBeGreaterThan(0);
+    view.resizeTo(PORTRAIT_WIDTH, FULL_HEIGHT);
+    expect(flips()).toBe(0);
+  });
+
+  it('should re-measure when only the visual viewport resizes', () => {
+    install();
+    view.resizeVisualTo(FULL_HEIGHT - STATUS_BAR);
+    expect(flips()).toBeGreaterThan(0);
+  });
+
+  it('should wait for the blur while a text input holds the keyboard up', () => {
+    install();
+    const field = document.createElement('input');
+    frame.append(field);
+    field.focus();
+    watcher.takeRecords();
+    view.resizeTo(PORTRAIT_WIDTH, FULL_HEIGHT - STATUS_BAR);
+    expect(flips()).toBe(0);
+    field.blur();
+    expect(flips()).toBeGreaterThan(0);
+    field.remove();
+  });
+
+  it('should start over after a rotation', () => {
+    install();
+    view.resizeTo(LANDSCAPE_WIDTH, LANDSCAPE_HEIGHT);
+    expect(flips()).toBe(0);
+  });
+
+  it('should stop listening on teardown', () => {
+    install();
+    teardown();
+    view.resizeTo(PORTRAIT_WIDTH, FULL_HEIGHT - STATUS_BAR);
+    view.resizeVisualTo(FULL_HEIGHT - STATUS_BAR - STATUS_BAR);
+    expect(flips()).toBe(0);
   });
 });
 
