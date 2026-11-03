@@ -6,11 +6,15 @@ import {layoutStory, openStory, settleFrames} from './phone-helpers';
 // changes height, with no text input involved. Chromium measures the viewport correctly on its own,
 // so this holds the contract (and that the re-measure on resize leaves the geometry and the scroll
 // position alone); the iOS stale-viewport bug itself is covered by the unit specs with fake windows.
+// Nothing but a closing keyboard re-measures the frame: a re-measure on load or resize left the
+// standalone install's tab bar floating above the screen's bottom edge.
 const WIDTH = 390;
 const FULL_HEIGHT = 844;
 const SHORT_HEIGHT = 782;
 const SCROLLED = 40;
 const TOLERANCE = 1;
+const SAFE_AREA_BOTTOM = 34;
+const TAB_BAR_ITEMS = 49;
 
 test.use({
   viewport: {width: WIDTH, height: FULL_HEIGHT},
@@ -51,4 +55,29 @@ test('a resize keeps the page where it was scrolled', async ({page}) => {
   await settleFrames(page);
   const after = await page.locator('main').evaluate(main => main.scrollTop);
   expect(after).toBe(before);
+});
+
+test('the tab bar ends on the screen bottom with the safe-area inset inside its background', async ({
+  page,
+}) => {
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('Emulation.setSafeAreaInsetsOverride', {insets: {bottom: SAFE_AREA_BOTTOM}});
+  await openStory(page, layoutStory('phone'));
+  await settleFrames(page);
+  const bar = await page.evaluate(() => {
+    const nav = document.querySelector('cmn-bottom-tab-bar > nav') as HTMLElement;
+    const rect = nav.getBoundingClientRect();
+    const style = getComputedStyle(nav);
+    return {
+      gap: window.innerHeight - rect.bottom,
+      height: rect.height,
+      paddingBottom: parseFloat(style.paddingBottom),
+      background: style.backgroundColor,
+    };
+  });
+  expect(Math.abs(bar.gap)).toBeLessThanOrEqual(TOLERANCE);
+  // The inset is the bar's own padding, so its background paints behind the home indicator
+  expect(bar.paddingBottom).toBe(SAFE_AREA_BOTTOM);
+  expect(bar.height).toBeGreaterThanOrEqual(TAB_BAR_ITEMS + SAFE_AREA_BOTTOM);
+  expect(bar.background).not.toBe('rgba(0, 0, 0, 0)');
 });

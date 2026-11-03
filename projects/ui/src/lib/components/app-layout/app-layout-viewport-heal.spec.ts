@@ -58,23 +58,12 @@ describe('AppLayoutComponent keyboard viewport heal', () => {
     expect(blurShrunk()).toBeGreaterThan(0);
   });
 
-  it('should re-measure the phone frame on mount when the window is already shorter than at load', () => {
+  it('should not re-measure the phone frame on mount or resize while the window is short', () => {
     const frame = (fixture.nativeElement as HTMLElement).firstElementChild as HTMLElement;
     const watcher = new MutationObserver(() => undefined);
     watcher.observe(frame, {attributes: true, attributeFilter: ['style']});
     vi.spyOn(window, 'innerHeight', 'get').mockReturnValue(window.innerHeight - STATUS_BAR);
     show('phone');
-    const flips = watcher.takeRecords().length;
-    watcher.disconnect();
-    expect(flips).toBeGreaterThan(0);
-  });
-
-  it('should not re-measure the desktop shell when the window is short', () => {
-    const frame = (fixture.nativeElement as HTMLElement).firstElementChild as HTMLElement;
-    const watcher = new MutationObserver(() => undefined);
-    watcher.observe(frame, {attributes: true, attributeFilter: ['style']});
-    vi.spyOn(window, 'innerHeight', 'get').mockReturnValue(window.innerHeight - STATUS_BAR);
-    show('sidebar');
     window.dispatchEvent(new Event('resize'));
     const flips = watcher.takeRecords().length;
     watcher.disconnect();

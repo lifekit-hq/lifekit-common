@@ -48,7 +48,7 @@ import {
 } from './page-chrome';
 import {overflowNavItems, phoneTabItems} from './phone-tabs';
 import {matchTab, ShellNavigationService} from './shell-navigation.service';
-import {healViewport} from './viewport-heal';
+import {healViewportOnBlur} from './viewport-heal';
 
 export {type NavItem} from '../sidebar-nav/sidebar-nav.component';
 export * from './account-menu';
@@ -193,7 +193,7 @@ export const CMN_CONTENT_INSET_PROPERTIES = {
     <!-- Pinned with fixed/inset-0, not viewport units: h-screen/h-dvh overshoot the real
          viewport in iOS home-screen apps, which scrolls the document -->
     <!-- touch-manipulation: a double tap never zooms the page -->
-    <!-- The phone shell re-measures it when the window is short: on mount, after the keyboard closes, once a resize settles (see viewport-heal.ts) -->
+    <!-- The phone shell re-measures it after the keyboard closes (see viewport-heal.ts) -->
     <div #frame class="fixed inset-0 flex touch-manipulation overflow-hidden bg-surface-bg">
       <!-- The sidebar, or its rail, outside the phone shell; the phone shell has the bottom tab bar -->
       <cmn-sidebar-nav
@@ -556,13 +556,13 @@ export class AppLayoutComponent {
       activeTab: () => this.effectiveActiveRoute(),
     });
     this.publishContentInsets();
-    // Phone shell only: a standalone iOS app's keyboard leaves the frame status-bar-height short, also one used before the shell mounted.
+    // Phone shell only: a standalone iOS app's first keyboard leaves the frame status-bar-height short.
     effect(onCleanup => {
       const view = this.document.defaultView;
       if (!view || !this.shellService.isPhone()) {
         return;
       }
-      onCleanup(healViewport(view, () => this.frame().nativeElement));
+      onCleanup(healViewportOnBlur(view, () => this.frame().nativeElement));
     });
     effect(onCleanup => {
       const main = this.main().nativeElement;
