@@ -38,9 +38,14 @@ export function isTextEntry(target: EventTarget | null): boolean {
   return target instanceof HTMLElement && target.isContentEditable;
 }
 
-/** Hides the frame for one synchronous reflow and shows it again, keeping the scroller where it was. */
-export function remeasureFrame(frame: HTMLElement, scroller: HTMLElement): void {
-  const scrollTop = scroller.scrollTop;
+/** Hides the frame for one synchronous reflow and shows it again, keeping every scroller inside it where it was. */
+export function remeasureFrame(frame: HTMLElement): void {
+  const scrolled: {element: Element; top: number; left: number}[] = [];
+  for (const element of [frame, ...frame.querySelectorAll('*')]) {
+    if (element.scrollTop > 0 || element.scrollLeft > 0) {
+      scrolled.push({element, top: element.scrollTop, left: element.scrollLeft});
+    }
+  }
   const display = frame.style.getPropertyValue('display');
   const priority = frame.style.getPropertyPriority('display');
   frame.style.setProperty('display', 'none');
@@ -51,7 +56,9 @@ export function remeasureFrame(frame: HTMLElement, scroller: HTMLElement): void 
     frame.style.removeProperty('display');
   }
   void frame.offsetHeight;
-  scroller.scrollTo({top: scrollTop, behavior: 'instant'});
+  for (const {element, top, left} of scrolled) {
+    element.scrollTo({top, left, behavior: 'instant'});
+  }
 }
 
 /** The tallest `innerHeight` a window has had at its current width. */
@@ -97,14 +104,10 @@ function track(view: Window): HighWaterMark {
  * when a text input blurs, and when the window or visual viewport resizes with no text input
  * focused (once per height, and once more when it grows back). Returns the teardown.
  */
-export function healViewport(
-  view: Window,
-  frame: () => HTMLElement,
-  scroller: () => HTMLElement
-): () => void {
+export function healViewport(view: Window, frame: () => HTMLElement): () => void {
   /** The window height the frame was last re-measured at, while the window is short. */
   let healedAt: number | undefined;
-  const remeasure = (): void => remeasureFrame(frame(), scroller());
+  const remeasure = (): void => remeasureFrame(frame());
   const heal = (event: FocusEvent): void => {
     const mark = track(view);
     // Focus moving to another field keeps the keyboard up.

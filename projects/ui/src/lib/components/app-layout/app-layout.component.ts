@@ -562,13 +562,7 @@ export class AppLayoutComponent {
       if (!view || !this.shellService.isPhone()) {
         return;
       }
-      onCleanup(
-        healViewport(
-          view,
-          () => this.frame().nativeElement,
-          () => this.main().nativeElement
-        )
-      );
+      onCleanup(healViewport(view, () => this.frame().nativeElement));
     });
     effect(onCleanup => {
       const main = this.main().nativeElement;

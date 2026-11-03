@@ -87,11 +87,7 @@ describe('healViewport', () => {
     field = document.createElement('input');
     frame.append(scroller, field);
     document.body.append(frame);
-    teardown = healViewport(
-      view as unknown as Window,
-      () => frame,
-      () => scroller
-    );
+    teardown = healViewport(view as unknown as Window, () => frame);
   });
 
   afterEach(() => {
@@ -167,11 +163,7 @@ describe('healViewport without a text input', () => {
   /** Installs the heal on the view and returns how many frame flips that took. */
   function install(): number {
     watcher.takeRecords();
-    teardown = healViewport(
-      view as unknown as Window,
-      () => frame,
-      () => scroller
-    );
+    teardown = healViewport(view as unknown as Window, () => frame);
     return flips();
   }
 
@@ -253,6 +245,22 @@ describe('healViewport without a text input', () => {
 });
 
 describe('remeasureFrame', () => {
+  it('should keep a scroller nested deeper in the frame where it was', () => {
+    const frame = document.createElement('div');
+    const page = document.createElement('div');
+    page.style.cssText = 'width: 100px; height: 100px; overflow: hidden';
+    const list = document.createElement('div');
+    list.style.cssText = 'width: 100px; height: 100px; overflow-y: auto';
+    list.innerHTML = '<div style="height: 1000px"></div>';
+    page.append(list);
+    frame.append(page);
+    document.body.append(frame);
+    list.scrollTop = SCROLLED;
+    remeasureFrame(frame);
+    expect(list.scrollTop).toBe(SCROLLED);
+    frame.remove();
+  });
+
   it('should restore the scroll position and the frame display it found', () => {
     const frame = document.createElement('div');
     frame.style.display = 'flex';
@@ -262,7 +270,7 @@ describe('remeasureFrame', () => {
     frame.append(scroller);
     document.body.append(frame);
     scroller.scrollTop = SCROLLED;
-    remeasureFrame(frame, scroller);
+    remeasureFrame(frame);
     expect(scroller.scrollTop).toBe(SCROLLED);
     expect(frame.style.display).toBe('flex');
     frame.remove();
