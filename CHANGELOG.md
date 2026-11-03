@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.2.1](https://github.com/lifekit-hq/lifekit-common/compare/v4.2.0...v4.2.1) (2026-11-03)
+
+
+### Bug Fixes
+
+* **ui:** re-measure the phone shell height on load and viewport resize ([#222](https://github.com/lifekit-hq/lifekit-common/issues/222)) ([e77517c](https://github.com/lifekit-hq/lifekit-common/commit/e77517c9cbdfae0411ef29bb4b9eb3805bb8c441))
+
 ## [4.2.0](https://github.com/lifekit-hq/lifekit-common/compare/v4.1.0...v4.2.0) (2026-10-22)
 
 
