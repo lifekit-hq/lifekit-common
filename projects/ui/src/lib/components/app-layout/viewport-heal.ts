@@ -7,6 +7,12 @@
 /** Below this the window is taken as its full height: rounding and toolbar jitter, not the bug. */
 export const VIEWPORT_SHRINK_TOLERANCE_PX = 4;
 
+/** A resize re-measures only once the window has stopped resizing for this long. */
+export const RESIZE_SETTLE_MS = 200;
+
+/** A scroll (or the end of a touch, where momentum begins) is over after this long without a scroll event. */
+export const SCROLL_IDLE_MS = 100;
+
 const TEXT_INPUT_TYPES = new Set([
   'text',
   'search',
@@ -102,11 +108,19 @@ function track(view: Window): HighWaterMark {
  * Keeps the frame as tall as the window can be. Re-measures it when the window is shorter than the
  * tallest it has been since load (per window width, so a rotation starts over): once on install,
  * when a text input blurs, and when the window or visual viewport resizes with no text input
- * focused (once per height, and once more when it grows back). Returns the teardown.
+ * focused (once per height, and once more when it grows back). A resize waits until the window has
+ * stopped resizing and no touch or scroll is under way, so a Safari toolbar collapsing mid-scroll
+ * never hides the frame mid-gesture. Returns the teardown.
  */
 export function healViewport(view: Window, frame: () => HTMLElement): () => void {
   /** The window height the frame was last re-measured at, while the window is short. */
   let healedAt: number | undefined;
+  /** A resize is waiting for the window to settle and the gesture to end. */
+  let pending = false;
+  let touching = false;
+  let scrolling = false;
+  let resizeTimer: ReturnType<typeof setTimeout> | undefined;
+  let scrollTimer: ReturnType<typeof setTimeout> | undefined;
   const remeasure = (): void => remeasureFrame(frame());
   const heal = (event: FocusEvent): void => {
     const mark = track(view);
@@ -135,14 +149,58 @@ export function healViewport(view: Window, frame: () => HTMLElement): () => void
       remeasure();
     }
   };
+  const flush = (): void => {
+    if (pending && !touching && !scrolling && resizeTimer === undefined) {
+      pending = false;
+      settle();
+    }
+  };
+  const resized = (): void => {
+    track(view);
+    pending = true;
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      resizeTimer = undefined;
+      flush();
+    }, RESIZE_SETTLE_MS);
+  };
+  const scrolled = (): void => {
+    scrolling = true;
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(() => {
+      scrollTimer = undefined;
+      scrolling = false;
+      flush();
+    }, SCROLL_IDLE_MS);
+  };
+  const touchStarted = (): void => {
+    touching = true;
+  };
+  const touchEnded = (event: TouchEvent): void => {
+    touching = event.touches.length > 0;
+    if (!touching) {
+      scrolled();
+    }
+  };
   settle();
   const visual = view.visualViewport;
-  view.addEventListener('resize', settle, {passive: true});
-  visual?.addEventListener('resize', settle, {passive: true});
-  view.document.addEventListener('focusout', heal, true);
+  const doc = view.document;
+  view.addEventListener('resize', resized, {passive: true});
+  visual?.addEventListener('resize', resized, {passive: true});
+  doc.addEventListener('focusout', heal, true);
+  doc.addEventListener('scroll', scrolled, {capture: true, passive: true});
+  doc.addEventListener('touchstart', touchStarted, {capture: true, passive: true});
+  doc.addEventListener('touchend', touchEnded, {capture: true, passive: true});
+  doc.addEventListener('touchcancel', touchEnded, {capture: true, passive: true});
   return () => {
-    view.removeEventListener('resize', settle);
-    visual?.removeEventListener('resize', settle);
-    view.document.removeEventListener('focusout', heal, true);
+    clearTimeout(resizeTimer);
+    clearTimeout(scrollTimer);
+    view.removeEventListener('resize', resized);
+    visual?.removeEventListener('resize', resized);
+    doc.removeEventListener('focusout', heal, true);
+    doc.removeEventListener('scroll', scrolled, true);
+    doc.removeEventListener('touchstart', touchStarted, true);
+    doc.removeEventListener('touchend', touchEnded, true);
+    doc.removeEventListener('touchcancel', touchEnded, true);
   };
 }
