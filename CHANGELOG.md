@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.2.2](https://github.com/lifekit-hq/lifekit-common/compare/v4.2.1...v4.2.2) (2026-11-03)
+
+
+### Bug Fixes
+
+* **ui:** re-measure the phone shell only after the keyboard closes ([#224](https://github.com/lifekit-hq/lifekit-common/issues/224)) ([13919db](https://github.com/lifekit-hq/lifekit-common/commit/13919db01c9da3d3e09b635fbaa0ed78dac3aab2))
+
 ## [4.2.1](https://github.com/lifekit-hq/lifekit-common/compare/v4.2.0...v4.2.1) (2026-11-03)
 
 
