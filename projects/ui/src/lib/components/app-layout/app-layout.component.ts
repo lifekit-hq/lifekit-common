@@ -193,7 +193,7 @@ export const CMN_CONTENT_INSET_PROPERTIES = {
     <!-- Pinned with fixed/inset-0, not viewport units: h-screen/h-dvh overshoot the real
          viewport in iOS home-screen apps, which scrolls the document -->
     <!-- touch-manipulation: a double tap never zooms the page -->
-    <!-- The phone shell re-measures it after the keyboard closes (see viewport-heal.ts) -->
+    <!-- The phone shell re-measures it when the window is short: on mount, after the keyboard closes, once a resize settles (see viewport-heal.ts) -->
     <div #frame class="fixed inset-0 flex touch-manipulation overflow-hidden bg-surface-bg">
       <!-- The sidebar, or its rail, outside the phone shell; the phone shell has the bottom tab bar -->
       <cmn-sidebar-nav
