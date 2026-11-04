@@ -155,6 +155,13 @@ module.exports = {
         'cmn-touch': 'var(--size-touch)',
         'cmn-12': '48px',
         'cmn-16': '64px',
+        // Page rhythm (theme.css): semantic steps the page template owns. `px-cmn-page-gutter`,
+        // `mt-cmn-title-gap`, `gap-cmn-section-gap`, `gap-cmn-group-gap`, `h-cmn-control-h`.
+        'cmn-page-gutter': 'var(--cmn-page-gutter)',
+        'cmn-title-gap': 'var(--cmn-title-gap)',
+        'cmn-section-gap': 'var(--cmn-section-gap)',
+        'cmn-group-gap': 'var(--cmn-group-gap)',
+        'cmn-control-h': 'var(--cmn-control-h)',
       },
     },
   },

@@ -21,9 +21,9 @@ describe('ListItemRowComponent', () => {
     expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it('should have display:block on the host element', () => {
+  it('should be a block host', () => {
     const host = fixture.nativeElement as HTMLElement;
-    expect(host.style.display).toBe('block');
+    expect(host.classList).toContain('block');
   });
 
   it('should render the label text', () => {
@@ -89,19 +89,24 @@ describe('ListItemRowComponent', () => {
     expect(labelEl().classList).toContain('text-text-primary');
   });
 
-  it('should have the border and flex layout classes on the row div', () => {
+  it('should have the flex layout classes on the row div', () => {
     const row: HTMLElement = fixture.nativeElement.querySelector('div');
     expect(row.classList).toContain('flex');
     expect(row.classList).toContain('items-center');
-    expect(row.classList).toContain('border-b');
-    expect(row.classList).toContain('border-border-default');
     expect(row.classList).toContain('px-cmn-4');
     expect(row.classList).toContain('py-cmn-3');
   });
 
-  it('should have last:border-b-0 to suppress the border on the final row', () => {
-    const row: HTMLElement = fixture.nativeElement.querySelector('div');
-    expect(row.className).toContain('last:border-b-0');
+  it('should draw the hairline divider on the host, where last: sees the sibling rows', () => {
+    const host = fixture.nativeElement as HTMLElement;
+    expect(host.classList).toContain('border-b');
+    expect(host.classList).toContain('border-border-default');
+    expect(host.className).toContain('last:border-b-0');
+    expect(rowEl().className).not.toContain('border-b');
+  });
+
+  it('should render no trailing action by default', () => {
+    expect(fixture.nativeElement.querySelector('button')).toBeNull();
   });
 
   it('should render a plain row, not a button, by default', () => {
@@ -144,7 +149,7 @@ describe('ListItemRowComponent — action mode', () => {
 
   it('should keep the row layout and add the focus ring and pressed state', () => {
     const button = buttonEl();
-    for (const cls of ['flex', 'items-center', 'border-b', 'px-cmn-4', 'py-cmn-3', 'w-full']) {
+    for (const cls of ['flex', 'items-center', 'px-cmn-4', 'py-cmn-3', 'w-full']) {
       expect(button.classList).toContain(cls);
     }
     expect(button.className).toContain('focus-visible:ring-border-focus');
@@ -233,5 +238,83 @@ describe('ListItemRowComponent — content projection', () => {
     expect(actions).toBeTruthy();
     const btn: HTMLButtonElement | null = actions?.querySelector('button') ?? null;
     expect(btn?.textContent?.trim()).toBe('Dismiss');
+  });
+});
+
+@Component({
+  imports: [ListItemRowComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <cmn-list-item-row
+      [action]="action"
+      (activated)="activated = activated + 1"
+      (trailingAction)="trailing = trailing + 1"
+      label="Oat milk"
+      trailingIcon="Ellipsis"
+    />
+    <cmn-list-item-row label="Bananas" trailingIcon="Ellipsis" trailingLabel="Item options" />
+  `,
+})
+class TrailingHostComponent {
+  public action = false;
+  public activated = 0;
+  public trailing = 0;
+}
+
+describe('ListItemRowComponent — trailing action', () => {
+  let fixture: ComponentFixture<TrailingHostComponent>;
+
+  function rows(): HTMLElement[] {
+    return Array.from(fixture.nativeElement.querySelectorAll('cmn-list-item-row'));
+  }
+
+  function trailingOf(row: HTMLElement): HTMLButtonElement {
+    return row.querySelector('button[aria-label]') as HTMLButtonElement;
+  }
+
+  function create(action: boolean): void {
+    fixture = TestBed.createComponent(TrailingHostComponent);
+    fixture.componentInstance.action = action;
+    fixture.detectChanges();
+  }
+
+  it('draws a borderless, touch-sized icon button at the row end', () => {
+    create(false);
+    const button = trailingOf(rows()[0]);
+    expect(button.type).toBe('button');
+    expect(button.className).toContain('size-cmn-touch');
+    expect(button.className).toContain('text-text-secondary');
+    expect(button.className).not.toMatch(/(^|\s)border(\s|-)/);
+    expect(button.textContent?.trim()).toBe('');
+    expect(button.querySelector('cmn-icon')?.getAttribute('aria-hidden')).toBe('true');
+    expect(rows()[0].querySelector('div')?.lastElementChild).toBe(button);
+  });
+
+  it('names the action after the row unless a label is given', () => {
+    create(false);
+    expect(trailingOf(rows()[0]).getAttribute('aria-label')).toBe('More for Oat milk');
+    expect(trailingOf(rows()[1]).getAttribute('aria-label')).toBe('Item options');
+  });
+
+  it('emits trailingAction on press without activating a plain row', async () => {
+    create(false);
+    await userEvent.click(trailingOf(rows()[0]));
+    expect(fixture.componentInstance.trailing).toBe(1);
+    expect(fixture.componentInstance.activated).toBe(0);
+  });
+
+  it('sits beside an action row button, never inside it', async () => {
+    create(true);
+    const row = rows()[0];
+    const buttons = Array.from(row.querySelectorAll('button'));
+    expect(buttons.length).toBe(2);
+    const [rowButton, trailing] = buttons;
+    expect(rowButton.contains(trailing)).toBe(false);
+    expect(rowButton.className).toContain('flex-1');
+    await userEvent.click(trailing);
+    expect(fixture.componentInstance.trailing).toBe(1);
+    expect(fixture.componentInstance.activated).toBe(0);
+    await userEvent.click(rowButton);
+    expect(fixture.componentInstance.activated).toBe(1);
   });
 });

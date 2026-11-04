@@ -14,6 +14,7 @@ const meta: Meta<ListItemRowComponent> = {
     dimmed: {control: 'boolean'},
     action: {control: 'boolean'},
     activated: {action: 'activated'},
+    trailingAction: {action: 'trailingAction'},
   },
 };
 
@@ -46,6 +47,36 @@ export const Action: Story = {
           </div>
         </cmn-list-item-row>
         <cmn-list-item-row label="Chrome on Windows" sublabel="Signed in Oct 20" [action]="true" (activated)="activated($event)" />
+      </div>
+    `,
+  }),
+};
+
+/**
+ * The quiet trailing action: one borderless icon button at the row's end (here a row's menu),
+ * instead of a bordered text button repeated on every row.
+ */
+export const TrailingAction: Story = {
+  render: args => ({
+    props: args,
+    template: `
+      <div class="border border-border-default rounded-cmn-md overflow-hidden">
+        <cmn-list-item-row label="Oat milk" sublabel="Added by Ann" trailingIcon="Ellipsis" (trailingAction)="trailingAction($event)" />
+        <cmn-list-item-row label="Bananas" sublabel="Added by Bo" trailingIcon="Ellipsis" (trailingAction)="trailingAction($event)" />
+        <cmn-list-item-row label="Sourdough loaf" sublabel="Added by Ann" trailingIcon="Ellipsis" (trailingAction)="trailingAction($event)" />
+      </div>
+    `,
+  }),
+};
+
+/** An action row keeps its trailing action beside the row button, never inside it. */
+export const ActionWithTrailingAction: Story = {
+  render: args => ({
+    props: args,
+    template: `
+      <div class="border border-border-default rounded-cmn-md overflow-hidden">
+        <cmn-list-item-row label="Chrome on Windows" sublabel="Signed in Oct 20" [action]="true" trailingIcon="Ellipsis" (activated)="activated($event)" (trailingAction)="trailingAction($event)" />
+        <cmn-list-item-row label="Safari on iPhone" sublabel="Signed in Nov 2" [action]="true" trailingIcon="Ellipsis" (activated)="activated($event)" (trailingAction)="trailingAction($event)" />
       </div>
     `,
   }),

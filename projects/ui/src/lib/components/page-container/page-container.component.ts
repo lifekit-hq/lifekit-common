@@ -21,6 +21,10 @@ const BOX_FILL_CLASSES = 'flex min-h-0 flex-1 flex-col';
  * flex column so projected content can take the remaining height with `flex-1`. Put a
  * `cmn-page-scroll` in it for a list that scrolls on its own: the page is then bounded to the space
  * below the app shell's title at every width.
+ *
+ * @deprecated Use `cmn-page` (`PageComponent`), the page template: it owns this frame and also the
+ * large title, the reading width and the page rhythm, which this container leaves to each page.
+ * This container keeps working unchanged for the pages that still use it.
  */
 @Component({
   selector: 'cmn-page-container',

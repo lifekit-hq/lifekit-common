@@ -1,0 +1,143 @@
+<!doctype html>
+<!-- The same list composed the way `cmn-page kind="list"` composes it: one left edge for the
+     notice, the title and the content, the title gap, one control height, sentence-case headings
+     with more space above than below, one card per section and a quiet trailing icon per row. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>passing screen</title>
+    <style>
+      body {
+        color: #0f1a1f;
+        margin: 0;
+        font: 14px/1.5 sans-serif;
+      }
+      main {
+        display: block;
+      }
+      [data-cmn-notices] {
+        display: flex;
+        flex-direction: column;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 8px 16px 0;
+        box-sizing: border-box;
+      }
+      .notice {
+        border: 1px solid #7d8c93;
+        padding: 12px;
+      }
+      .frame {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 16px;
+        box-sizing: border-box;
+      }
+      h1 {
+        margin: 0 0 16px;
+        font-size: 1.5rem;
+        line-height: 1.25;
+      }
+      [data-cmn-page-column] {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        max-width: 640px;
+      }
+      form {
+        display: flex;
+        gap: 8px;
+      }
+      input {
+        flex: 1;
+        min-width: 0;
+        height: 44px;
+        box-sizing: border-box;
+        border: 1px solid #7d8c93;
+      }
+      .add {
+        height: 44px;
+        border: 0;
+      }
+      h2 {
+        margin: 0;
+        padding: 8px 4px;
+        font-size: 14px;
+      }
+      .card {
+        border: 1px solid #7d8c93;
+      }
+      .row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+      }
+      .more {
+        border: 0;
+        background: none;
+        width: 44px;
+        height: 44px;
+      }
+      @media (min-width: 768px) {
+        [data-cmn-notices],
+        .frame {
+          padding-left: 32px;
+          padding-right: 32px;
+        }
+        .frame {
+          padding-top: 32px;
+        }
+        h1 {
+          margin-bottom: 24px;
+        }
+        input,
+        .add {
+          height: 40px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div data-cmn-notices><div class="notice">A new version is available.</div></div>
+      <div data-cmn-page="list">
+        <div class="frame">
+          <h1 data-cmn-page-title>Shopping list</h1>
+          <div data-cmn-page-column>
+            <form>
+              <input type="text" placeholder="Add an item" aria-label="Add an item" />
+              <button class="add" type="submit">Add</button>
+            </form>
+            <section>
+              <h2>To buy · 3</h2>
+              <div class="card">
+                <div class="row">
+                  <span>Oat milk</span
+                  ><button class="more" type="button" aria-label="More for Oat milk">…</button>
+                </div>
+                <div class="row">
+                  <span>Bananas</span
+                  ><button class="more" type="button" aria-label="More for Bananas">…</button>
+                </div>
+                <div class="row">
+                  <span>Coffee</span
+                  ><button class="more" type="button" aria-label="More for Coffee">…</button>
+                </div>
+              </div>
+            </section>
+            <section>
+              <h2>Ticked · 1</h2>
+              <div class="card">
+                <div class="row">
+                  <span>Eggs</span
+                  ><button class="more" type="button" aria-label="More for Eggs">…</button>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>

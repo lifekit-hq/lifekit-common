@@ -46,6 +46,14 @@ describe('InputComponent', () => {
     expect(input().className).toContain(expected);
   });
 
+  it('gives the md field the shared control height a button beside it has', () => {
+    fixture.detectChanges();
+    expect(input().className).toContain('h-cmn-control-h');
+    fixture.componentRef.setInput('size', 'lg');
+    fixture.detectChanges();
+    expect(input().className).not.toContain('h-cmn-control-h');
+  });
+
   it('writes a value from the form model', () => {
     component.writeValue('hello');
     fixture.detectChanges();

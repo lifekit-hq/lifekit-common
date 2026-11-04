@@ -15,10 +15,16 @@ Design tokens for the lifekit ecosystem, framework-agnostic.
   tokens (`--cmn-duration-short|medium|long`, 150/250/400ms; `--cmn-ease-standard`,
   `--cmn-ease-emphasized-decelerate`, `--cmn-ease-emphasized-accelerate`) and the skeleton
   colours (`--color-skeleton`, `--color-skeleton-sheen`, derived from the surface tokens so a seed
-  carries through) with the `.cmn-skeleton-sweep` block `cmn-skeleton` draws.
+  carries through) with the `.cmn-skeleton-sweep` block `cmn-skeleton` draws. The page rhythm
+  tokens (`--cmn-page-gutter`, `--cmn-title-gap`, `--cmn-section-gap`, `--cmn-group-gap`,
+  `--cmn-control-h`) set the composed page: 16/16/24/8/44px on a phone, the gutter 32px, the
+  title gap 24px and the control height 40px from 768px. `cmn-page` reads them; values and
+  rules: the Layout section of [`DESIGN.md`](../../DESIGN.md#layout).
 - `tailwind`: a Tailwind preset mapping the tokens onto the `cmn-*` scale (`duration-cmn-short|medium|long`,
   `ease-cmn-standard|decelerate|accelerate`, `bg-skeleton`). Its fonts, radii,
   shadows and `cmn-touch` size read the `theme.css` custom properties, so a value change lands in `theme.css` only.
+  The rhythm tokens are spacing steps of the same name (`px-cmn-page-gutter`, `mb-cmn-title-gap`,
+  `gap-cmn-section-gap`, `gap-cmn-group-gap`, `h-cmn-control-h`), added beside Tailwind's defaults.
 - `fonts.css`: self-hosted IBM Plex Sans (variable), the `--font-sans` font, and IBM Plex Mono for code (`--font-mono`). No font CDN.
 - `brand`: the lifekit mark and the browser-chrome standard. That covers per-app icon sets under
   `brand/<app>/`, `brand/head.html`, `brand/manifest.fragment.json`, the pre-paint theme script
@@ -48,6 +54,12 @@ Design tokens for the lifekit ecosystem, framework-agnostic.
   finding. Rules and options: the last section of
   [`docs/BROWSER-CHROME.md`](../../docs/BROWSER-CHROME.md). Rule logic adapted from impeccable
   (Apache-2.0), see [`NOTICE.md`](NOTICE.md).
+- `screen`: the screen-composition check (`@lifekit-hq/tokens/screen`), rules C0 to C10 over a
+  rendered route: page template, one left edge, title clearance, control heights, stretched
+  fields, uppercase labels, row-action noise and the rest. `checkScreen(page)` runs it from an
+  app's Playwright e2e at `SCREEN_VIEWPORTS.phone` and `.desktop`; `lifekit-chrome-check screen
+<url>…` runs it ad hoc (needs Playwright in the calling project). Wiring and rules:
+  [`docs/SCREEN-CHECK.md`](../../docs/SCREEN-CHECK.md).
 
 ```js
 // tailwind.config.js

@@ -20,6 +20,10 @@
       "types": "./engine/index.d.mts",
       "default": "./engine/index.mjs"
     },
+    "./screen": {
+      "types": "./screen/index.d.mts",
+      "default": "./screen/index.mjs"
+    },
     "./seeds/*": "./seeds/*",
     "./brand": "./brand/index.mjs",
     "./brand/vite": "./brand/vite.mjs",
@@ -40,6 +44,7 @@
     "seeds/",
     "brand/",
     "drift/",
+    "screen/",
     "bin/",
     "LICENSES/",
     "NOTICE.md"
