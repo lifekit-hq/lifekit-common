@@ -40,8 +40,11 @@ const DEFAULT_SECTION_ROWS = 3;
         <ng-container *ngTemplateOutlet="rows" />
       }
       @case ('section') {
-        <div class="flex items-center px-cmn-1 py-cmn-2">
-          <div [class]="bar" style="width: 30%; height: 0.75rem"></div>
+        <!-- The heading's box: the group gap around one line of text-cmn-sm (1.3125rem) -->
+        <div class="px-cmn-1 py-cmn-group-gap">
+          <div class="flex items-center" style="height: 1.3125rem">
+            <div [class]="bar" style="width: 30%; height: 0.875rem"></div>
+          </div>
         </div>
         <div [class]="card"><ng-container *ngTemplateOutlet="rows" /></div>
       }

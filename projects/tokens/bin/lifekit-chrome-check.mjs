@@ -9,6 +9,9 @@
  *
  * `lifekit-chrome-check drift <path…>` is the other check: it scans source for design drift
  * (see drift/index.mjs and docs/BROWSER-CHROME.md).
+ *
+ * `lifekit-chrome-check screen <url…>` checks rendered screens' composition at the phone and
+ * desktop sizes (see screen/index.mjs and docs/SCREEN-CHECK.md).
  */
 import {parseArgs} from 'node:util';
 
@@ -16,10 +19,12 @@ import {checkBrowserChrome} from '../brand/check.mjs';
 import {BRAND_APPS} from '../brand/mark.mjs';
 import {normalizeBasePath} from '../brand/standard.mjs';
 import {checkDrift, DRIFT_RULES} from '../drift/index.mjs';
+import {runScreen, SCREEN_USAGE} from '../screen/cli.mjs';
 
 const USAGE =
   `usage: lifekit-chrome-check --app <${BRAND_APPS.join('|')}> [--name "<App name>"] ` +
-  '[--index index.html] [--base-path /] <dist-dir>\n       lifekit-chrome-check drift [<path>…]';
+  '[--index index.html] [--base-path /] <dist-dir>\n       lifekit-chrome-check drift [<path>…]\n' +
+  `       ${SCREEN_USAGE.split('\n')[0].replace(/^usage: /, '')} (see screen --help)`;
 
 const DRIFT_USAGE =
   'usage: lifekit-chrome-check drift [<path>…]   (files or directories; default: the current directory)\n' +
@@ -56,6 +61,7 @@ function runDrift(args) {
 }
 
 if (process.argv[2] === 'drift') runDrift(process.argv.slice(3));
+if (process.argv[2] === 'screen') await runScreen(process.argv.slice(3));
 
 let parsed;
 try {

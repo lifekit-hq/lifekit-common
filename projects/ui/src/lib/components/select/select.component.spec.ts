@@ -55,6 +55,11 @@ describe('SelectComponent', () => {
     expect(nativeSelect()).not.toBeNull();
   });
 
+  it('gives the md field at least the shared control height', () => {
+    fixture.detectChanges();
+    expect(nativeSelect()?.className).toContain('min-h-cmn-control-h');
+  });
+
   it('applies size classes', () => {
     fixture.componentRef.setInput('size', 'lg');
     fixture.detectChanges();

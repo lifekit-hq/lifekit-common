@@ -65,6 +65,7 @@ export * from './components/list-section/list-section.component';
 export * from './components/menu/menu.component';
 export * from './components/month-stepper/month-stepper.component';
 export * from './components/more-page/more-page.component';
+export * from './components/page/page.component';
 export * from './components/page-container/page-container.component';
 export * from './components/page-header/page-header.component';
 export * from './components/page-scroll/page-scroll.component';

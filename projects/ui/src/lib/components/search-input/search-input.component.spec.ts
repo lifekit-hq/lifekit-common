@@ -90,6 +90,10 @@ describe('SearchInputComponent', () => {
     expect(touched).toBe(1);
   });
 
+  it('gives the md field the shared control height', () => {
+    expect(input().className).toContain('h-cmn-control-h');
+  });
+
   it('applies size classes', () => {
     fixture.componentRef.setInput('size', 'lg');
     fixture.detectChanges();

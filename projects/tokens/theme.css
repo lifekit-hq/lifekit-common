@@ -23,6 +23,21 @@
      root font size cannot shrink it) */
   --size-touch: 44px;
 
+  /* Page rhythm — the composed screen's spacing, owned by the page template (`cmn-page`) rather
+     than chosen per call site. Values are steps already on the spacing scale; the gutter, the
+     title gap and the control height step up from 768px (Tailwind's md). Px for the same reason
+     as --size-touch.
+     page-gutter: the inset from main's edge to the page's one left edge (title, notices, content).
+     title-gap: from the large page title to the first block under it.
+     section-gap: between top-level sections of a page.
+     group-gap: inside a group (a section heading and its rows, a field and its button).
+     control-h: the one height of controls that sit side by side (input, button, select). */
+  --cmn-page-gutter: 16px;
+  --cmn-title-gap: 16px;
+  --cmn-section-gap: 24px;
+  --cmn-group-gap: 8px;
+  --cmn-control-h: var(--size-touch);
+
   /* Motion — durations and easings (M3). Short: small state changes (a toggle, a fade). Medium:
      a surface entering or leaving (sheet, drawer, crossfade). Long: a large or full-screen move.
      Decelerate what arrives, accelerate what leaves, standard for everything that stays on screen. */
@@ -285,6 +300,16 @@
   --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.2), 0 2px 8px rgba(0, 0, 0, 0.18);
   --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.35), 0 2px 8px rgba(0, 0, 0, 0.2);
   --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.5);
+}
+
+/* ─── Page rhythm from 768px (Tailwind's md): the desktop and tablet steps ──── */
+@media (min-width: 768px) {
+  :root,
+  [data-theme='light'] {
+    --cmn-page-gutter: 32px;
+    --cmn-title-gap: 24px;
+    --cmn-control-h: 40px;
+  }
 }
 
 /* ─── Document base — canvas follows the active theme ────────────────────── */

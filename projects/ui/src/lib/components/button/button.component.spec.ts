@@ -44,6 +44,14 @@ describe('ButtonComponent', () => {
     expect(fixture.componentInstance.iconSize()).toBe(iconSize);
   });
 
+  it('gives the md button at least the control height the md field beside it has', () => {
+    fixture.detectChanges();
+    expect(button()?.className).toContain('min-h-cmn-control-h');
+    fixture.componentRef.setInput('size', 'sm');
+    fixture.detectChanges();
+    expect(button()?.className).not.toContain('min-h-cmn-control-h');
+  });
+
   it.each<ButtonType>(['button', 'submit', 'reset'])('forwards type "%s"', type => {
     fixture.componentRef.setInput('type', type);
     fixture.detectChanges();

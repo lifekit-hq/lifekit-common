@@ -135,6 +135,7 @@ Counts are a point-in-time measurement; re-measure before relying on them for a 
 | month-stepper       | new (added for Budgets and Flow breakdown); fs 4 · dash 0                       | interactive | keep-own        | `model()` two-way `Date` binding with min/max clamping and arrow-key stepping; depends on `icon`                                                                                                                                                      |
 | more-page           | new (added for the account standard); fs 0 · dash 0                             | interactive | keep-own        | Phone More tab: overflow nav, account card, Settings/extras/Sign out rows; `RouterLink` navigation and an `itemSelect` output reported to the app; composes `card`, `list-item-row` and `account-avatar`; app-shell concern                           |
 | page-container      | fs 0 · dash 5                                                                   | simple-leaf | element-rewrite | Layout wrapper + token CSS; no logic                                                                                                                                                                                                                  |
+| page                | new (the page template layer, design-root-cause first slice); fs 0 · dash 0     | templated   | keep-own        | The page template (`kind`: list first): owns gutter, reading width, large title and section rhythm, and takes the title over from `app-layout` through DI (`PageFrameService`); moves with the shell                                                  |
 | page-header         | fs 15 · dash 5                                                                  | interactive | keep-own        | Depends on `ButtonComponent` internally; action button with loading/disabled state                                                                                                                                                                    |
 | page-scroll         | new (added for the fill-scroll contract); fs 0 · dash 0                         | interactive | keep-own        | Focusable scroll region (`tabindex=0`, optional `role=region` + label) that takes the height a `fill` page container has left; the one scroller on a list page                                                                                        |
 | search-input        | new (added for ledger filter bar); fs 0 · dash 0                                | interactive | keep-own        | `ControlValueAccessor` over native `type=search` with leading icon and clear button; Angular forms integration, depends on `icon`                                                                                                                     |
@@ -154,7 +155,7 @@ Counts are a point-in-time measurement; re-measure before relying on them for a 
 | toggle              | fs 2 · dash 1                                                                   | interactive | element-rewrite | Switch button + thumb animation + `aria-checked`; `role="switch"` + boolean attribute = clean Lit mapping                                                                                                                                             |
 | top-bar             | fs 0 · dash 0 (composed by `app-layout`)                                        | interactive | keep-own        | Uses `MenuComponent`; event orchestration (back/page actions/search/theme/avatar); app-shell concern                                                                                                                                                  |
 
-**Summary:** 38 keep-own · 18 element-rewrite · 1 wrap-base · 0 delete
+**Summary:** 39 keep-own · 18 element-rewrite · 1 wrap-base · 0 delete
 
 ---
 
@@ -297,7 +298,7 @@ rule with the check that enforces it.
 
 Every lifekit product applies one policy for how a screen behaves while data loads, refreshes or
 is absent. The policy lives here; the primitives (`cmn-skeleton`, `cmn-async-state`,
-`cmn-empty-state`, `cmn-page-container`) enforce some rules today and the rest are targets they
+`cmn-empty-state`, `cmn-page`) enforce some rules today and the rest are targets they
 grow into (see the status table below).
 
 1. **Skeletons, not spinners or "Loading…" text.** A first load shows a skeleton shaped like the
@@ -313,18 +314,19 @@ grow into (see the status table below).
    stable page width) so nothing jumps as it resolves.
 6. **Errors keep context.** A failed refresh keeps the last good data and offers a retry; a
    failed first load shows an error state in place of the skeleton.
-7. **One page frame.** Pages sit in `cmn-page-container` (1200px max width,
-   `p-cmn-4 md:p-cmn-8`) so width and padding match across products.
+7. **One page frame.** Pages sit in a page template, `cmn-page` (the 1200px frame inset by
+   `--cmn-page-gutter`, the kind's reading width, the title and the page rhythm), so width,
+   padding and rhythm match across products. `cmn-page-container` is deprecated for it.
 
-| Rule                                 | Status   | Where                                                                                  |
-| ------------------------------------ | -------- | -------------------------------------------------------------------------------------- |
-| 1. Skeletons, not spinners           | Enforced | `cmn-async-state` renders `cmn-skeleton` or its `[skeleton]` slot                      |
-| 2. Loading is not empty              | Enforced | `cmn-async-state` never shows empty while `idle` or `loading`                          |
-| 3. Keep cached data while refreshing | Enforced | `keepContent` keeps and dims it on a refresh; on by default                            |
-| 4. No micro-flashes                  | Enforced | `showDelay` 200ms and `minDisplay` 400ms by default                                    |
-| 5. No layout shift                   | Partial  | `cmn-page-container` width; `cmn-skeleton` `shape` presets copy the real component box |
-| 6. Errors keep context               | Partial  | `errorPlacement="above"` keeps content; `retryable` / `[error-action]` hold Retry      |
-| 7. One page frame                    | Enforced | `cmn-page-container` defaults                                                          |
+| Rule                                 | Status   | Where                                                                             |
+| ------------------------------------ | -------- | --------------------------------------------------------------------------------- |
+| 1. Skeletons, not spinners           | Enforced | `cmn-async-state` renders `cmn-skeleton` or its `[skeleton]` slot                 |
+| 2. Loading is not empty              | Enforced | `cmn-async-state` never shows empty while `idle` or `loading`                     |
+| 3. Keep cached data while refreshing | Enforced | `keepContent` keeps and dims it on a refresh; on by default                       |
+| 4. No micro-flashes                  | Enforced | `showDelay` 200ms and `minDisplay` 400ms by default                               |
+| 5. No layout shift                   | Partial  | `cmn-page` width; `cmn-skeleton` `shape` presets copy the real component box      |
+| 6. Errors keep context               | Partial  | `errorPlacement="above"` keeps content; `retryable` / `[error-action]` hold Retry |
+| 7. One page frame                    | Enforced | `cmn-page`; the screen check (`@lifekit-hq/tokens/screen`) on each app's routes   |
 
 Apps use `cmn-async-state` and `cmn-skeleton` rather than local loading markup; rules marked
 Target or Partial are not yet guaranteed by the primitives and must be handled in the app until they are.
@@ -365,7 +367,7 @@ Every data-entry flow depends on these. Polish them before touching any page tha
 
 ### Tier 4 — navigation shell
 
-`sidebar-nav` · `top-bar` · `bottom-tab-bar` · `app-layout` · `tab-group` · `page-container` · `page-header`
+`sidebar-nav` · `top-bar` · `bottom-tab-bar` · `app-layout` · `tab-group` · `page` · `page-container` · `page-header`
 
 ### Tier 5 — data and overlays
 

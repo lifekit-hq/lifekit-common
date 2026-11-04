@@ -10,10 +10,14 @@ import {CardComponent} from '../card/card.component';
  * already pushes below the top bar (`--cmn-content-inset-top`), so the header only adds the
  * notices' height (`--cmn-sticky-top`, 0px anywhere else). The surface fill hides the rows that
  * scroll under it.
+ *
+ * Sentence case at body size and semibold, in the secondary text colour: DESIGN.md allows no
+ * uppercase or tracked micro-labels. The group gap sits under it; the page's section gap above it
+ * is larger, so the heading reads as belonging to its rows.
  */
 const HEADING_CLASSES =
-  'flex items-baseline justify-between gap-cmn-2 bg-surface-bg px-cmn-1 py-cmn-2 ' +
-  'text-cmn-xs font-semibold uppercase tracking-wide text-text-secondary ' +
+  'flex items-baseline justify-between gap-cmn-2 bg-surface-bg px-cmn-1 py-cmn-group-gap ' +
+  'text-cmn-sm font-semibold text-text-secondary ' +
   'max-md:sticky max-md:top-[var(--cmn-sticky-top,0px)] max-md:z-10';
 
 /**

@@ -34,4 +34,18 @@ describe('tailwind preset', () => {
       assert.match(css, new RegExp(`\\.bg-${name}\\s*\\{[^}]*var\\(--color-${name}\\)`), name);
     }
   });
+
+  it('exposes the page rhythm tokens as spacing steps resolving to their custom properties', async () => {
+    const steps = ['page-gutter', 'title-gap', 'section-gap', 'group-gap', 'control-h'];
+    const css = await generate([
+      'px-cmn-page-gutter',
+      'mt-cmn-title-gap',
+      'gap-cmn-section-gap',
+      'gap-cmn-group-gap',
+      'h-cmn-control-h',
+    ]);
+    for (const step of steps) {
+      assert.match(css, new RegExp(`cmn-${step}\\s*\\{[^}]*var\\(--cmn-${step}\\)`), step);
+    }
+  });
 });

@@ -64,6 +64,17 @@ describe('ListSectionComponent', () => {
     expect(first().querySelectorAll('section > .row').length).toBe(2);
   });
 
+  it('sets the heading in sentence case, with no uppercase or tracking (DESIGN.md labels)', () => {
+    const heading = first().querySelector('h2') as HTMLElement;
+    expect(heading.className).not.toMatch(/(^|\s)(uppercase|tracking-[\w-]+)(\s|$)/);
+    expect(heading.className).toContain('text-cmn-sm');
+    expect(heading.firstElementChild?.textContent).toBe('Today');
+  });
+
+  it('puts the group gap under the heading', () => {
+    expect((first().querySelector('h2') as HTMLElement).className).toContain('py-cmn-group-gap');
+  });
+
   it('makes the heading sticky on a phone only, under the pinned notices', () => {
     const classes = (first().querySelector('h2') as HTMLElement).className;
     expect(classes).toContain('max-md:sticky');

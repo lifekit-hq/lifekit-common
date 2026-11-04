@@ -46,6 +46,7 @@ import {
   readPageChrome,
   resolveBack,
 } from './page-chrome';
+import {PageFrameService} from './page-frame';
 import {overflowNavItems, phoneTabItems} from './phone-tabs';
 import {matchTab, ShellNavigationService} from './shell-navigation.service';
 import {healViewportOnBlur} from './viewport-heal';
@@ -53,6 +54,7 @@ import {healViewportOnBlur} from './viewport-heal';
 export {type NavItem} from '../sidebar-nav/sidebar-nav.component';
 export * from './account-menu';
 export * from './page-chrome';
+export {PageFrameService} from './page-frame';
 export {LAST_TAB_STORAGE_KEY} from './shell-navigation.service';
 
 /**
@@ -107,7 +109,11 @@ export interface AppLayoutAccount extends AccountIdentity {
   menuItems: MenuItem[];
 }
 
-/** The large title lines up with `cmn-page-container`'s default box; the page's own top padding spaces it. */
+/**
+ * The large title of a page without a template: it lines up with `cmn-page-container`'s default
+ * box, and the page's own top padding spaces it. A `cmn-page` draws its own title instead (see
+ * `PageFrameService`), so its gutter and the gap under the title have one owner.
+ */
 const LARGE_TITLE_BOX_CLASSES =
   'mx-auto w-full max-w-[1200px] shrink-0 px-cmn-4 pt-cmn-4 md:px-cmn-8 md:pt-cmn-8';
 
@@ -121,8 +127,15 @@ const OVERLAY_TAB_BAR_CLASSES = 'absolute inset-x-0 bottom-0 z-30';
  * Notices (install hint, offline banner, update prompt) pin to the top of main, in flow below
  * the top bar. Sticky offsets are measured from main's content box, which main's overlay
  * padding already shifts below the bar, so top-0 is flush under it on every size.
+ *
+ * They sit in the page frame's box (the 1200px cap, inset by the page gutter), so a notice starts
+ * on the page's one left edge rather than running edge to edge; they stay flush under the bar
+ * (PHONE-CONTRACT.md) and a group gap separates stacked notices. The page background fills the
+ * inset so a page scrolling under a pinned notice never shows through beside it.
  */
-const NOTICES_BASE_CLASSES = 'sticky top-0 z-20 flex shrink-0 flex-col empty:hidden';
+const NOTICES_BASE_CLASSES =
+  'sticky top-0 z-20 mx-auto flex w-full max-w-[1200px] shrink-0 flex-col gap-cmn-group-gap ' +
+  'bg-surface-bg px-cmn-page-gutter empty:hidden';
 /**
  * Overscroll stops at main: it never chains to the browser (pull-to-refresh, page bounce). Main
  * takes keyboard focus so a page with nothing focusable in it still scrolls from the keyboard.
@@ -187,7 +200,7 @@ export const CMN_CONTENT_INSET_PROPERTIES = {
   selector: 'cmn-app-layout',
   imports: [BottomTabBarComponent, SidebarNavComponent, TopBarComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [ShellNavigationService],
+  providers: [ShellNavigationService, PageFrameService],
   host: {'(window:keydown)': 'onWindowKeydown($event)'},
   template: `
     <!-- Pinned with fixed/inset-0, not viewport units: h-screen/h-dvh overshoot the real
@@ -238,7 +251,7 @@ export const CMN_CONTENT_INSET_PROPERTIES = {
           tabindex="0"
         >
           <!-- The page's large title, declared in route data; shrinks into the top bar on scroll -->
-          @if (largeTitle(); as text) {
+          @if (shellTitle(); as text) {
             <div [class]="largeTitleBoxClasses">
               <h1
                 #largeTitle
@@ -248,7 +261,9 @@ export const CMN_CONTENT_INSET_PROPERTIES = {
               </h1>
             </div>
           }
-          <div #notices [class]="noticesClasses"><ng-content select="[cmnAppLayoutNotice]" /></div>
+          <div #notices [class]="noticesClasses" data-cmn-notices>
+            <ng-content select="[cmnAppLayoutNotice]" />
+          </div>
           <!-- The frame page hosts size against; whatever overflows it gets a spacer in the overlay -->
           <div #page [class]="pageFrameClass()"><ng-content /></div>
           <div #pageOverflow aria-hidden="true"></div>
@@ -280,6 +295,7 @@ export class AppLayoutComponent {
   private readonly document = inject(DOCUMENT);
   private readonly shell = inject(ShellNavigationService);
   private readonly shellService = inject(CmnShellService);
+  private readonly pageFrame = inject(PageFrameService);
   private paletteOpen = false;
 
   private readonly frame = viewChild.required<ElementRef<HTMLElement>>('frame');
@@ -291,6 +307,10 @@ export class AppLayoutComponent {
   private readonly pageRef = viewChild.required<ElementRef<HTMLElement>>('page');
   private readonly pageOverflowRef = viewChild.required<ElementRef<HTMLElement>>('pageOverflow');
   private readonly largeTitleRef = viewChild<ElementRef<HTMLElement>>('largeTitle');
+  /** The large title on screen: the page template's, or the shell's own. */
+  private readonly titleElement = computed<HTMLElement | undefined>(
+    () => this.pageFrame.titleElement() ?? this.largeTitleRef()?.nativeElement
+  );
   /** The large title has scrolled under the top bar; set by an IntersectionObserver only. */
   private readonly largeTitleScrolledAway = signal(false);
 
@@ -475,7 +495,15 @@ export class AppLayoutComponent {
     });
   });
 
-  protected readonly largeTitle = computed<string>(() => this.chrome()?.title ?? '');
+  /** The page's large title: the one its route declares, else the one its `cmn-page` declares. */
+  protected readonly largeTitle = computed<string>(
+    () => this.chrome()?.title || this.pageFrame.declaredTitle()
+  );
+
+  /** The title the shell draws itself: none while a page template draws its own. */
+  protected readonly shellTitle = computed<string>(() =>
+    this.pageFrame.pageOwnsTitle() ? '' : (this.chrome()?.title ?? '')
+  );
 
   protected readonly barTitle = computed<string>(() => this.largeTitle() || this.title());
 
@@ -550,6 +578,7 @@ export class AppLayoutComponent {
   protected readonly overlayTabBarClasses = OVERLAY_TAB_BAR_CLASSES;
 
   constructor() {
+    this.pageFrame.connect(() => this.chrome()?.title ?? '');
     this.shell.connect({
       scroller: () => this.main().nativeElement,
       tabs: () => this.destinations(),
@@ -574,7 +603,7 @@ export class AppLayoutComponent {
     // A plain effect, not afterRenderEffect: the title element exists once its query resolves, the
     // observers report asynchronously, and afterRenderEffect costs every consumer ~1.8 kB of runtime.
     effect(onCleanup => {
-      const title = this.largeTitleRef()?.nativeElement;
+      const title = this.titleElement();
       if (!title || typeof IntersectionObserver === 'undefined') {
         return;
       }

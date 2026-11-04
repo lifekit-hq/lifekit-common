@@ -1,0 +1,106 @@
+<!doctype html>
+<!-- A screen that breaks every composition rule (C0-C10) at 1280x800: no page template, a title
+     with no gap under it and content on another left edge, mismatched control heights, a
+     stretched input, nested and touching cards, uppercase labels, a cramped heading, a bordered
+     text button on every row and text running out of its card. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>failing screen</title>
+    <style>
+      body {
+        color: #0f1a1f;
+        margin: 0;
+        font: 14px/1.5 sans-serif;
+      }
+      main {
+        display: block;
+      }
+      .title-box {
+        padding: 32px 32px 0;
+      }
+      h1 {
+        margin: 0;
+        font-size: 1.5rem;
+        line-height: 1.25;
+      }
+      .page {
+        padding: 0 16px 16px;
+      }
+      form {
+        display: flex;
+        gap: 8px;
+      }
+      input {
+        height: 44px;
+        width: 900px;
+        box-sizing: border-box;
+        border: 1px solid #7d8c93;
+      }
+      .add {
+        height: 40px;
+        border: 0;
+      }
+      .card {
+        border: 1px solid #7d8c93;
+        padding: 12px;
+        min-height: 40px;
+        width: 600px;
+      }
+      .label {
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      h2 {
+        margin: 0 0 8px;
+        font-size: 14px;
+      }
+      ul {
+        list-style: none;
+        margin: 16px 0 0;
+        padding: 0;
+      }
+      li {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+      }
+      .more {
+        border: 1px solid #7d8c93;
+        height: 30px;
+      }
+      .narrow {
+        width: 200px;
+        white-space: nowrap;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="title-box"><h1>Shopping list</h1></div>
+      <div class="page">
+        <form>
+          <input type="text" placeholder="Add an item" aria-label="Add an item" />
+          <button class="add" type="submit">Add</button>
+        </form>
+        <div class="card">
+          Outer card
+          <div class="card">Nested card</div>
+        </div>
+        <div class="card">Touching card</div>
+        <p><span class="label">To buy · 6</span></p>
+        <h2>Ticked</h2>
+        <section>
+          <ul>
+            <li><span>Oat milk</span><button class="more" type="button">More</button></li>
+            <li><span>Bananas</span><button class="more" type="button">More</button></li>
+            <li><span>Coffee</span><button class="more" type="button">More</button></li>
+          </ul>
+        </section>
+        <div class="card narrow">
+          <span>A note far too long to fit inside this narrow card</span>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
