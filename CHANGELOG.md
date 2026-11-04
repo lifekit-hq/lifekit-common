@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.3.0](https://github.com/lifekit-hq/lifekit-common/compare/v4.2.2...v4.3.0) (2026-11-04)
+
+
+### Features
+
+* **ui:** add cmn-page list template, layout tokens and screen-composition check ([#226](https://github.com/lifekit-hq/lifekit-common/issues/226)) ([7e00a2e](https://github.com/lifekit-hq/lifekit-common/commit/7e00a2ed104651e644cb940ccddc95f603c3e25b))
+
 ## [4.2.2](https://github.com/lifekit-hq/lifekit-common/compare/v4.2.1...v4.2.2) (2026-11-03)
 
 
