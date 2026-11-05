@@ -134,7 +134,8 @@ for (const [size, viewport] of Object.entries(SCREEN_VIEWPORTS)) {
 
 The self-test (`projects/tokens/test/skeleton.spec.mjs`) runs the check against a fixture route
 and shows it pass on a skeleton drawn to the page's sections and fail on one drifted by a taller
-section, a missing section, an extra section and a page that never shows a skeleton.
+section, a missing section, an extra section, a page that never shows a skeleton and a page that
+keeps loading after its data lands.
 
 ## The golden screens
 
