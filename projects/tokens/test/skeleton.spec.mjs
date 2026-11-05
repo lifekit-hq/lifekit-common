@@ -153,6 +153,18 @@ describe('checkSkeleton', () => {
     );
   });
 
+  it('reports a page still loading after its data lands, without comparing sections', async () => {
+    const {result} = await check('?stuck=1', 'desktop', {timeout: 1500});
+    assert.deepEqual(rulesOf(result), ['K0'], formatSkeleton(result));
+    assert.match(result.findings[0].message, /still loading after the held data was released/);
+    assert.deepEqual(result.loaded, []);
+  });
+
+  it('does not bury a failed load under section findings when K0 is ignored', async () => {
+    const {result} = await check('?stuck=1', 'desktop', {timeout: 1500, ignore: ['K0']});
+    assert.deepEqual(result.findings, [], formatSkeleton(result));
+  });
+
   it('skips the rules an app ignores', async () => {
     const {result} = await check('?summary=140', 'desktop', {ignore: ['K2']});
     assert.deepEqual(result.findings, []);

@@ -3,7 +3,7 @@
      skeletons while the request is out and as content once it answers. The query string drifts the
      skeleton on purpose, for the self-test: ?summary=<px> sets the summary skeleton's height,
      ?drop=chart leaves the chart's stand-in out, ?extra=1 adds a stand-in the page does not have,
-     ?inert=1 never shows a skeleton. -->
+     ?inert=1 never shows a skeleton, ?stuck=1 keeps a loading marker on after the data lands. -->
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -78,6 +78,7 @@
             block('chart', 'chart', 0, '<p>Balance over time</p>'),
             block('list', '', 0, items.map(item => `<div class="row">${item}</div>`).join(''))
           );
+          if (query.get('stuck')) column.firstElementChild.setAttribute('data-cmn-loading', '');
         });
     </script>
   </body>
