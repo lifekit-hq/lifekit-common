@@ -59,7 +59,9 @@ Design tokens for the lifekit ecosystem, framework-agnostic.
   fields, uppercase labels, row-action noise and the rest. `checkScreen(page)` runs it from an
   app's Playwright e2e at `SCREEN_VIEWPORTS.phone` and `.desktop`; `lifekit-chrome-check screen
 <url>…` runs it ad hoc (needs Playwright in the calling project). Wiring and rules:
-  [`docs/SCREEN-CHECK.md`](../../docs/SCREEN-CHECK.md).
+  [`docs/SCREEN-CHECK.md`](../../docs/SCREEN-CHECK.md). `checkSkeleton(page, {url, hold})` is
+  its sibling for loading states: it holds a route's data requests, measures the page's
+  top-level sections as a skeleton and again once loaded, and fails any pair more than 8px apart.
 
 ```js
 // tailwind.config.js

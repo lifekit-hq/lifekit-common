@@ -1,0 +1,84 @@
+<!doctype html>
+<!-- A routed page that waits for /api/items: three sections in a page template's column, drawn as
+     skeletons while the request is out and as content once it answers. The query string drifts the
+     skeleton on purpose, for the self-test: ?summary=<px> sets the summary skeleton's height,
+     ?drop=chart leaves the chart's stand-in out, ?extra=1 adds a stand-in the page does not have,
+     ?inert=1 never shows a skeleton. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>skeleton fixture</title>
+    <style>
+      body {
+        margin: 0;
+        font: 14px/1.5 sans-serif;
+      }
+      [data-cmn-page-column] {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        max-width: 640px;
+        margin: 0 auto;
+        padding: 16px;
+      }
+      .block {
+        box-sizing: border-box;
+        border: 1px solid #7d8c93;
+      }
+      .skel {
+        background: #e4e9ec;
+      }
+      .summary {
+        height: 96px;
+      }
+      .chart {
+        height: 200px;
+      }
+      .row {
+        height: 56px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div data-cmn-page="overview">
+        <div data-cmn-page-column id="column"></div>
+      </div>
+    </main>
+    <script>
+      const query = new URLSearchParams(location.search);
+      const column = document.getElementById('column');
+      const block = (name, cls, height, extra = '') => {
+        const el = document.createElement('section');
+        el.className = `block ${cls}`;
+        el.dataset.cmnSection = name;
+        if (height) el.style.height = `${height}px`;
+        el.innerHTML = extra;
+        return el;
+      };
+      const skeleton = () => {
+        if (query.get('inert')) return;
+        const parts = [
+          block('summary', 'skel', Number(query.get('summary') || 96)),
+          block('chart', 'skel', 200),
+          block('list', 'skel', 168),
+        ].filter(el => el.dataset.cmnSection !== query.get('drop'));
+        if (query.get('extra')) parts.push(block('footer', 'skel', 40));
+        for (const part of parts) {
+          part.setAttribute('data-cmn-loading', '');
+          column.append(part);
+        }
+      };
+      skeleton();
+      fetch('/api/items')
+        .then(response => response.json())
+        .then(({items}) => {
+          column.replaceChildren(
+            block('summary', 'summary', 0, `<strong>${items.length} items</strong>`),
+            block('chart', 'chart', 0, '<p>Balance over time</p>'),
+            block('list', '', 0, items.map(item => `<div class="row">${item}</div>`).join(''))
+          );
+        });
+    </script>
+  </body>
+</html>

@@ -15,8 +15,18 @@
  * It needs no Playwright import of its own: it drives the `page` it is handed.
  */
 import {inspectScreen, SCREEN_RULES} from './rules.mjs';
+import {settleScreen} from './settle.mjs';
 
 export {inspectScreen, SCREEN_RULES} from './rules.mjs';
+export {settleScreen} from './settle.mjs';
+export {
+  checkSkeleton,
+  compareSections,
+  formatSkeleton,
+  measureSections,
+  SKELETON_RULES,
+  SKELETON_TOLERANCE_PX,
+} from './skeleton.mjs';
 
 /** The two sizes every route is checked at: an iPhone (390x844) and a 1280 laptop. */
 export const SCREEN_VIEWPORTS = Object.freeze({
@@ -28,59 +38,6 @@ export const SCREEN_VIEWPORTS = Object.freeze({
   }),
   desktop: Object.freeze({viewport: Object.freeze({width: 1280, height: 800})}),
 });
-
-const DEFAULT_SETTLE_TIMEOUT_MS = 10_000;
-/** How long the DOM must stay unchanged to count as settled (a route rendering, data arriving). */
-const QUIET_MS = 300;
-
-/**
- * Waits for the screen the owner would see: web fonts loaded, no skeleton or busy region left on
- * screen, the DOM quiet for a moment (the route has rendered and its data has landed), and two
- * frames painted after that. Judging earlier scores the loading state, not the page.
- *
- * @param {import('./index.d.mts').ScreenPage} page
- * @param {{timeout?: number}} [options]
- */
-export async function settleScreen(page, {timeout = DEFAULT_SETTLE_TIMEOUT_MS} = {}) {
-  await page.waitForFunction(
-    () => {
-      if (document.readyState !== 'complete' || document.fonts.status !== 'loaded') return false;
-      const busy = document.querySelectorAll(
-        'cmn-skeleton, [aria-busy="true"], [data-cmn-loading]'
-      );
-      return [...busy].every(el => {
-        const r = el.getBoundingClientRect();
-        return r.width === 0 || r.height === 0;
-      });
-    },
-    undefined,
-    {timeout}
-  );
-  await page.evaluate(
-    ({quiet, limit}) =>
-      new Promise(resolve => {
-        let timer;
-        let settled = false;
-        // A page that never stops changing (a clock, an animation) is judged at the limit.
-        const done = () => {
-          if (settled) return;
-          settled = true;
-          observer.disconnect();
-          clearTimeout(timer);
-          clearTimeout(cap);
-          requestAnimationFrame(() => requestAnimationFrame(resolve));
-        };
-        const observer = new MutationObserver(() => {
-          clearTimeout(timer);
-          timer = setTimeout(done, quiet);
-        });
-        observer.observe(document.body, {childList: true, subtree: true, attributes: true});
-        timer = setTimeout(done, quiet);
-        const cap = setTimeout(done, limit);
-      }),
-    {quiet: QUIET_MS, limit: timeout}
-  );
-}
 
 /**
  * Checks the screen `page` shows against every rule (C0-C10), after settling it.

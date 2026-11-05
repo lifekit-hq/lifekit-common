@@ -46,7 +46,11 @@ export interface ScreenPage {
   url(): string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Playwright's own parameter type
   evaluate(fn: (arg: any) => unknown, arg?: unknown): Promise<unknown>;
-  waitForFunction(fn: () => unknown, arg?: unknown, options?: {timeout?: number}): Promise<unknown>;
+  waitForFunction(
+    fn: (arg: any) => unknown, // eslint-disable-line @typescript-eslint/no-explicit-any
+    arg?: unknown,
+    options?: {timeout?: number}
+  ): Promise<unknown>;
 }
 
 /** Playwright `test.use` options for each size every route is checked at. */
@@ -67,3 +71,90 @@ export declare function checkScreen(
   options?: CheckScreenOptions
 ): Promise<ScreenResult>;
 export declare function formatScreen(result: ScreenResult): string;
+
+export type SkeletonRuleId = 'K0' | 'K1' | 'K2';
+
+export interface SkeletonRule {
+  id: SkeletonRuleId;
+  name: string;
+  /** The sentence the rule enforces. */
+  says: string;
+}
+
+export interface SkeletonFinding {
+  rule: SkeletonRuleId;
+  message: string;
+}
+
+/** A top-level section of the page and its box, in document pixels. */
+export interface SkeletonSection {
+  /** Its `data-cmn-section` name, else its 1-based position (`#2`): how the two states pair up. */
+  key: string;
+  label: string;
+  text: string;
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}
+
+/** A held request the check can release: the part of Playwright's `Route` it drives. */
+export interface SkeletonRoute {
+  fallback(): Promise<void>;
+}
+
+/** The part of a Playwright `Page` the skeleton check drives. */
+export interface SkeletonPage extends ScreenPage {
+  goto(
+    url: string,
+    options?: {waitUntil?: 'domcontentloaded' | 'load' | 'commit'}
+  ): Promise<unknown>;
+  route(
+    url: string | RegExp | ((url: URL) => boolean),
+    handler: (route: SkeletonRoute) => unknown
+  ): Promise<void>;
+  unroute(
+    url: string | RegExp | ((url: URL) => boolean),
+    handler?: (route: SkeletonRoute) => unknown
+  ): Promise<void>;
+}
+
+export interface CheckSkeletonOptions {
+  /** The route to visit. */
+  url: string;
+  /** Matcher (Playwright glob, RegExp or predicate) for the data requests to hold while the skeleton is measured. */
+  hold: string | RegExp | ((url: URL) => boolean);
+  /** How far a skeleton section may sit from its loaded section, in px per edge (default 8). */
+  tolerance?: number;
+  /** Rules to skip, each with a reason recorded where the app calls the check. */
+  ignore?: SkeletonRuleId[];
+  /** CSS selector for the sections to compare, instead of the page template's column children. */
+  sections?: string | null;
+  /** How long waiting for the skeleton, and for the loaded page to settle, may take, in ms (default 10000). */
+  timeout?: number;
+}
+
+export interface SkeletonResult {
+  url: string;
+  /** How many requests matched `hold` and were parked. */
+  held: number;
+  tolerance: number;
+  skeleton: SkeletonSection[];
+  loaded: SkeletonSection[];
+  findings: SkeletonFinding[];
+}
+
+export declare const SKELETON_RULES: readonly SkeletonRule[];
+export declare const SKELETON_TOLERANCE_PX: 8;
+
+export declare function measureSections(options?: {selector?: string | null}): SkeletonSection[];
+export declare function compareSections(
+  skeleton: SkeletonSection[],
+  loaded: SkeletonSection[],
+  options?: {tolerance?: number; ignore?: SkeletonRuleId[]}
+): SkeletonFinding[];
+export declare function checkSkeleton(
+  page: SkeletonPage,
+  options: CheckSkeletonOptions
+): Promise<SkeletonResult>;
+export declare function formatSkeleton(result: SkeletonResult): string;
