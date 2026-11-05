@@ -74,6 +74,69 @@ It needs `@playwright/test` (or `playwright`) installed in the current project, 
 the findings when a screen fails, and 2 on misuse. It cannot log in or mock an API: point it at a
 served build with fixture data, a public demo, or a Storybook story's `iframe.html` URL.
 
+## The skeleton check
+
+The screen check judges the loaded page. `checkSkeleton` judges the loading state against it: a
+page's skeleton must lay out like the page it stands in for, so nothing jumps when the data lands.
+The presets are held to this one at a time (`skeleton-conformance.stories.ts`, guardrail S1); this
+holds a whole route, which until now was only caught by eye.
+
+For a route it visits the page with its data requests held, so the page stays in its skeleton
+state, and measures the page's top-level sections. It then releases the requests, waits for the
+page to settle (the same settling as `checkScreen`) and measures the sections again. A section
+whose `top`, `left`, `width` or `height` differs by more than 8px, or a section one state has and
+the other lacks, fails.
+
+```ts
+// e2e/skeleton.spec.ts
+import {expect, test} from '@playwright/test';
+import {checkSkeleton, formatSkeleton, SCREEN_VIEWPORTS} from '@lifekit-hq/tokens/screen';
+
+import {mockApi} from './support/mock-api'; // the app's own fixture data
+
+const ROUTES = ['/now', '/people'];
+
+for (const [size, viewport] of Object.entries(SCREEN_VIEWPORTS)) {
+  test.describe(`skeleton ${size}`, () => {
+    test.use(viewport);
+
+    for (const url of ROUTES) {
+      test(url, async ({page}) => {
+        await mockApi(page); // register the app's mocks first
+        const result = await checkSkeleton(page, {url, hold: '**/api/**'});
+        expect(result.findings, formatSkeleton(result)).toEqual([]);
+      });
+    }
+  });
+}
+```
+
+- **Holding the data.** `hold` is any Playwright URL matcher (a glob, a `RegExp` or a predicate)
+  for the requests the route waits on. They are parked until the skeleton is measured, then
+  released to whatever would have answered them: the app's own `page.route` mocks, which must be
+  registered before the call, or the network. Hold only data requests, never the document or its
+  scripts.
+- **Sections.** On a `cmn-page` route they are the children of each `[data-cmn-page-column]`;
+  without a template, the visible children of `main`. `sections: '<css selector>'` names them
+  instead. A section is paired across the two states by its `data-cmn-section="<name>"` when it
+  has one, else by its position, so name sections whose count differs between the states.
+- **Rules.** K0 skeleton-state: something on screen was loading while the data was held (a
+  `cmn-skeleton`, `[aria-busy="true"]` or `[data-cmn-loading]`), at least one request matched
+  `hold`, and the page finished loading once released. K1 section-set: the skeleton stands in for
+  every section the page has and draws none it lacks. K2 section-box: each pair is within
+  `tolerance` (default 8px) per edge.
+- **Exceptions.** `checkSkeleton(page, {..., ignore: ['K2']})` skips a rule and `tolerance`
+  tightens or loosens the bar. Keep either next to the route with a one-line reason; a list whose
+  loaded height depends on its data is a reason to compare the sections above it with `sections`,
+  not to widen the bar.
+- **Sizes and theme.** The viewport is the caller's, as for `checkScreen`: run it at
+  `SCREEN_VIEWPORTS.phone` and `.desktop`.
+
+The self-test (`projects/tokens/test/skeleton.spec.mjs`) runs the check against a fixture route
+and shows it pass on a skeleton drawn to the page's sections and fail on one drifted by a taller
+section, a missing section, an extra section, a page that never shows a skeleton and a page that
+keeps loading after its data lands.
+
 ## The golden screens
 
 `Templates/List` in Storybook is the list template at 390 and 1280, light and dark, built from
