@@ -188,6 +188,7 @@ export async function checkSkeleton(
   await page.route(hold, handler);
   let skeleton = [];
   let loaded = [];
+  let loadedOk = false;
   try {
     await page.goto(url, {waitUntil: 'domcontentloaded'});
 
@@ -207,9 +208,6 @@ export async function checkSkeleton(
       if (!isTimeout(error)) throw error;
       showed = false;
     }
-    if (!held.length) {
-      add('K0', 'no request matched `hold`, so the page was never kept waiting for data');
-    }
     if (!showed) {
       add(
         'K0',
@@ -217,6 +215,9 @@ export async function checkSkeleton(
       );
     }
     await waitForQuietDom(page, timeout);
+    if (!held.length) {
+      add('K0', 'no request matched `hold`, so the page was never kept waiting for data');
+    }
     skeleton = await page.evaluate(measureSections, {selector: sections});
 
     released = true;
@@ -224,6 +225,7 @@ export async function checkSkeleton(
     try {
       await settleScreen(page, {timeout});
       loaded = await page.evaluate(measureSections, {selector: sections});
+      loadedOk = true;
     } catch (error) {
       if (!isTimeout(error)) throw error;
       add('K0', 'the page was still loading after the held data was released');
@@ -233,7 +235,7 @@ export async function checkSkeleton(
     await page.unroute(hold, handler).catch(() => undefined);
   }
 
-  if (loaded.length || !findings.some(finding => finding.rule === 'K0')) {
+  if (loadedOk) {
     findings.push(...compareSections(skeleton, loaded, {tolerance, ignore}));
   }
   return {url: page.url(), held: held.length, tolerance, skeleton, loaded, findings};
