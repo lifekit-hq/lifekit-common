@@ -74,6 +74,12 @@ describe('StatCardComponent', () => {
     expect(value.scrollWidth).toBeLessThanOrEqual(value.clientWidth);
   });
 
+  it('should fill its host, so cards in one grid row share its height', () => {
+    const host = fixture.nativeElement as HTMLElement;
+    expect(host.classList).toContain('block');
+    expect((host.firstElementChild as HTMLElement).classList).toContain('h-full');
+  });
+
   it('should show loading skeleton when loading is true', () => {
     fixture.componentRef.setInput('loading', true);
     fixture.detectChanges();

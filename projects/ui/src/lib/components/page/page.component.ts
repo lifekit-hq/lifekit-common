@@ -1,3 +1,4 @@
+import {NgTemplateOutlet} from '@angular/common';
 import {
   booleanAttribute,
   ChangeDetectionStrategy,
@@ -15,19 +16,25 @@ import {PageFrameService} from '../app-layout/page-frame';
 
 /**
  * The page archetype a routed screen is built on. Each kind owns the composition: its reading
- * width and the columns content may start on. `list`, `detail`, `form` and `settings` each have
- * an entry in `PAGE_TEMPLATES`; `overview` joins this union when it is designed and approved.
+ * width and the columns content may start on. Every kind has an entry in `PAGE_TEMPLATES`.
  */
-export type PageKind = 'list' | 'detail' | 'form' | 'settings';
+export type PageKind = 'list' | 'detail' | 'form' | 'settings' | 'overview';
 
-/** What one kind of page decides: how wide its single reading column runs. */
+/** What one kind of page decides: how wide its main column runs, and whether a rail sits beside it. */
 interface PageTemplate {
-  /** Width classes of the content column, which starts on the page's left edge. */
+  /** Width classes of the main column, which starts on the page's left edge. */
   readonly column: string;
+  /**
+   * Width classes of the rail, the second column, for a kind that has one. It holds the blocks the
+   * page marks `cmnPageRail`, beside the main column from xl (1280px) up and under it below that;
+   * a page that marks none has no rail, and its main column runs the frame's width.
+   */
+  readonly rail?: string;
 }
 
 /**
- * Every kind is one column on the page's left edge; they differ in how wide it reads.
+ * The single-column kinds are one column on the page's left edge; they differ in how wide it
+ * reads. The overview is the one multi-column kind.
  *
  * - List (640px): the HIG inset-grouped list. A text field at full column width stays inside the
  *   screen check's stretched-input limit.
@@ -37,12 +44,16 @@ interface PageTemplate {
  *   and the eye runs down one edge from label to label.
  * - Settings (720px): settings sections, whose heading column sits beside the controls from md up
  *   and still leaves a select or a text field its own width.
+ * - Overview (1200px): a dashboard. The main column takes the frame's whole width (the shell's
+ *   1200px cap less the gutter), for a card grid or a chart, and a 320px rail of secondary blocks
+ *   sits beside it from xl up. Below xl the rail stacks under the main column on the same edge.
  */
 export const PAGE_TEMPLATES: Readonly<Record<PageKind, PageTemplate>> = {
   list: {column: 'max-w-[640px]'},
   detail: {column: 'max-w-[720px]'},
   form: {column: 'max-w-[640px]'},
   settings: {column: 'max-w-[720px]'},
+  overview: {column: 'xl:min-w-0 xl:flex-1', rail: 'xl:w-[320px] xl:shrink-0'},
 };
 
 const HOST_CLASSES = 'block';
@@ -57,6 +68,10 @@ const TITLE_CLASSES =
 /** Top-level blocks stack a section apart; a tighter pair (a field and its chips) is one block. */
 const COLUMN_CLASSES = 'flex w-full flex-col gap-cmn-section-gap';
 const COLUMN_FILL_CLASSES = 'min-h-0 flex-1';
+/** The main column and the rail: stacked a section apart, side by side from xl up. */
+const COLUMNS_CLASSES = 'flex flex-col gap-cmn-section-gap xl:flex-row xl:items-start';
+/** A rail the page puts nothing in takes no room, so the main column runs the frame's width. */
+const RAIL_CLASSES = 'empty:hidden';
 
 /**
  * The page template: the root of every routed page. It owns what no part can: the gutter (16px on a
@@ -78,17 +93,23 @@ const COLUMN_FILL_CLASSES = 'min-h-0 flex-1';
  *   full width, one under another, and the actions close the column (640px).
  * - `settings`: `cmn-settings-section`s in the standard order, then the danger zone and Sign out;
  *   each section draws its divider a section gap below its content (720px).
+ * - `overview`: a dashboard: a card grid or a chart in the main column, which runs the frame's width
+ *   (1200px less the gutter), and secondary blocks marked `cmnPageRail` (a plain attribute on each
+ *   top-level block) in a 320px rail beside it from xl up, under it below xl. Only a kind with a
+ *   rail draws `cmnPageRail` blocks.
  *
- * Each kind has golden screens in Storybook (Templates/List, Detail, Form and Settings).
+ * Each kind has golden screens in Storybook (Templates/List, Detail, Form, Settings and Overview).
  *
  * `fill` makes it a full-height column whose content can take the remaining height (a
  * `cmn-page-scroll` list), as `cmn-page-container fill` does.
  *
- * The host carries `data-cmn-page="<kind>"` and the content column `data-cmn-page-column`, which
- * the screen check (`@lifekit-hq/tokens/screen`) reads to know the columns content may start on.
+ * The host carries `data-cmn-page="<kind>"`, the main column `data-cmn-page-column` and the rail
+ * `data-cmn-page-column="rail"`, which the screen check (`@lifekit-hq/tokens/screen`) reads to know
+ * the columns content may start on.
  */
 @Component({
   selector: 'cmn-page',
+  imports: [NgTemplateOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'hostClasses()',
@@ -101,13 +122,28 @@ const COLUMN_FILL_CLASSES = 'min-h-0 flex-1';
       @if (titleText(); as text) {
         <h1 #title [class]="titleClasses" data-cmn-page-title>{{ text }}</h1>
       }
-      <div [class]="columnClasses()" data-cmn-page-column><ng-content /></div>
+      @if (hasRail()) {
+        <div [class]="columnsClasses()">
+          <div [class]="columnClasses()" data-cmn-page-column>
+            <ng-container [ngTemplateOutlet]="main" />
+          </div>
+          <div [class]="railClasses()" data-cmn-page-column="rail">
+            <ng-content select="[cmnPageRail]" />
+          </div>
+        </div>
+      } @else {
+        <div [class]="columnClasses()" data-cmn-page-column>
+          <ng-container [ngTemplateOutlet]="main" />
+        </div>
+      }
     </div>
+    <ng-template #main><ng-content /></ng-template>
   `,
 })
 export class PageComponent {
   private readonly frame = inject(PageFrameService, {optional: true});
   private readonly titleRef = viewChild<ElementRef<HTMLElement>>('title');
+  private readonly template = computed(() => PAGE_TEMPLATES[this.kind()]);
 
   public readonly kind = input<PageKind>('list');
   /** The large title when the route declares none in its data (or outside `cmn-app-layout`). */
@@ -125,10 +161,20 @@ export class PageComponent {
     this.fill() ? `${FRAME_CLASSES} ${FRAME_FILL_CLASSES}` : FRAME_CLASSES
   );
 
+  protected readonly hasRail = computed(() => !!this.template().rail);
+
   protected readonly columnClasses = computed(() =>
-    [COLUMN_CLASSES, PAGE_TEMPLATES[this.kind()].column, this.fill() ? COLUMN_FILL_CLASSES : '']
+    [COLUMN_CLASSES, this.template().column, this.fill() ? COLUMN_FILL_CLASSES : '']
       .filter(Boolean)
       .join(' ')
+  );
+
+  protected readonly columnsClasses = computed(() =>
+    this.fill() ? `${COLUMNS_CLASSES} ${COLUMN_FILL_CLASSES}` : COLUMNS_CLASSES
+  );
+
+  protected readonly railClasses = computed(
+    () => `${COLUMN_CLASSES} ${RAIL_CLASSES} ${this.template().rail}`
   );
 
   constructor() {
