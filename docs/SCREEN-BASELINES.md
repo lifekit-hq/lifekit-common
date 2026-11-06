@@ -89,7 +89,8 @@ is an exception and needs a one-line reason next to it, like a screen-check exce
 
 If the `screens` job on the CI runner is flaky with no source change (regenerate and compare twice
 to tell), do not widen the default. Set the smallest ratio that is stable on that screen, at most 20
-pixels' worth (`20 / (width * height)`), on the route that needs it, with the reason beside it.
+pixels' worth (`20 / (width * height)`), on the screen that needs it (`screenMaxDiffPixelRatio`),
+with the reason beside it.
 
 Exceptions in use:
 
