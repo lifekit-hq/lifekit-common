@@ -30,7 +30,7 @@ The source of truth for lifekit's look: `@lifekit-hq/tokens` is the theming cont
 
 - Packages: tokens (CSS custom properties, light and dark, a Tailwind preset, self-hosted font, brand mark and the browser-chrome standard), charts-core (Chart.js configuration), elements (Lit `lk-*`), ui (Angular `cmn-*`), core (signal-store helpers), config (lint and format presets).
 - `projects/tokens/theme.css` stays framework-agnostic: pure custom properties and keyframes.
-- Two of the three consumers are React, so anything that has to cross frameworks lives in tokens or elements.
+- All five consumers are Angular apps, but `tokens` (plain custom properties) and `elements` (Lit) are the framework-free seams, so anything that has to cross frameworks lives there.
 - Brand assets (icons, theme colour, manifest) are generated from the tokens and verified by `lifekit-chrome-check`.
 - Open: how far the strangler conversion of Angular components to Lit elements goes. Each component's row is decided in docs/STRATEGY.md.
 [inferred: CLAUDE.md, docs/STRATEGY.md, projects/tokens/brand/]
