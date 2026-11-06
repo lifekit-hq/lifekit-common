@@ -77,14 +77,20 @@ module.exports = {
       },
 
       fontSize: {
-        'cmn-xs': ['0.75rem', {lineHeight: '1.25'}],
+        'cmn-xs': ['0.75rem', {lineHeight: '1.3'}],
         'cmn-sm': ['0.875rem', {lineHeight: '1.5'}],
         'cmn-md': ['1rem', {lineHeight: '1.5'}],
         'cmn-lg': ['1.125rem', {lineHeight: '1.5'}],
-        'cmn-xl': ['1.25rem', {lineHeight: '1.25'}],
-        'cmn-2xl': ['1.5rem', {lineHeight: '1.25'}],
-        'cmn-3xl': ['1.875rem', {lineHeight: '1.25'}],
+        'cmn-xl': ['1.25rem', {lineHeight: '1.3'}],
+        'cmn-2xl': ['1.5rem', {lineHeight: '1.3'}],
+        'cmn-3xl': ['1.875rem', {lineHeight: '1.3'}],
         'cmn-4xl': ['2.25rem', {lineHeight: '1.1'}],
+      },
+
+      // Tailwind's `leading-tight` is 1.25, under the 1.3 floor the design judge holds multi-line
+      // text to; the utility follows the type ramp instead.
+      lineHeight: {
+        tight: '1.3',
       },
 
       borderRadius: {

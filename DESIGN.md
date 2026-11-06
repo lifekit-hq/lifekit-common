@@ -50,7 +50,7 @@ typography:
     fontFamily: "'IBM Plex Sans Variable', 'IBM Plex Sans', system-ui, sans-serif"
     fontSize: '1.5rem'
     fontWeight: 600
-    lineHeight: 1.25
+    lineHeight: 1.3
   title:
     fontFamily: "'IBM Plex Sans Variable', 'IBM Plex Sans', system-ui, sans-serif"
     fontSize: '1.125rem'
@@ -65,7 +65,7 @@ typography:
     fontFamily: "'IBM Plex Sans Variable', 'IBM Plex Sans', system-ui, sans-serif"
     fontSize: '0.75rem'
     fontWeight: 600
-    lineHeight: 1.25
+    lineHeight: 1.3
   mono:
     fontFamily: "'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace"
     fontSize: '0.875rem'
@@ -143,10 +143,10 @@ Cool graphite neutrals with a single petrol voice (restrained: accent only for t
 **Family:** IBM Plex Sans for display, headline, title, body and label. Hierarchy is carried by size and weight.
 
 - **Display** (700, 2.25rem, 1.1): page titles in large layouts.
-- **Headline** (600, 1.5rem, 1.25): stat values and section titles.
+- **Headline** (600, 1.5rem, 1.3): stat values and section titles.
 - **Title** (600, 1.125rem, 1.5): card titles.
 - **Body** (400, 0.875rem, 1.5): default UI text.
-- **Label** (600, 0.75rem, 1.25): sentence case, 12px minimum. No uppercase or tracked micro-labels.
+- **Label** (600, 0.75rem, 1.3): sentence case, 12px minimum. No uppercase or tracked micro-labels.
 
 ### Named Rules
 

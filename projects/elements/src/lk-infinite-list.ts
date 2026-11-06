@@ -169,7 +169,7 @@ export class LkInfiniteList extends LitElement {
     }
 
     .line.sublabel {
-      height: 0.9375rem;
+      height: 0.975rem;
     }
 
     .disc::after,
