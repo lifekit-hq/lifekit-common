@@ -9,7 +9,8 @@
         "components-pageheader--action-disabled",
         "components-settingssection--save-disabled-until-dirty",
         "components-settingssection--saving",
-        "patterns-settings-page--*"
+        "patterns-settings-page--*",
+        "templates-settings--*"
       ],
       "match": "opacity stack",
       "reason": "A disabled control is dimmed on purpose; WCAG 1.4.3 exempts inactive components."
@@ -46,6 +47,12 @@
       "stories": ["components-app-layout--*"],
       "max": 4,
       "reason": "Detector false positive: the shell CSS-hides the nav it is not using (the sidebar on a phone, the tab bar elsewhere); a badge in that display:none subtree has no box, so its negative offsets read as escaping the clip."
+    },
+    {
+      "rule": "clipped-overflow-container",
+      "stories": ["templates-settings--*"],
+      "max": 4,
+      "reason": "Detector false positive: the toggles and the select below the fold sit in the shell's scrolling main, so they scroll into view; the detector reads a positioned control under the fold of the overflow-hidden shell as clipped."
     },
     {
       "rule": "nested-cards",
