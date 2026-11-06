@@ -11,9 +11,16 @@ it applies this one:
 
 - [STRATEGY.md](../STRATEGY.md): the UX continuity policy (loading, empty, error, page frame);
 - [PHONE-CONTRACT.md](../PHONE-CONTRACT.md): the phone chapter (shell, sheets, targets, paging);
-- [patterns.md](patterns.md): which component and reference app each screen pattern uses;
+- [patterns.md](patterns.md): how the colour system is used, and the pattern page each app keeps for its own domain;
 - [DESIGN.md](../../DESIGN.md): the Instrument look (tokens, type, colour, motion);
 - [BROWSER-CHROME.md](../BROWSER-CHROME.md): the drift rules that hold tokens in source.
+
+These rules are lifekit-wide. What a domain's figures mean and how they read is not decided here: it
+belongs to the app's own pattern page, and money belongs to Finance Sentry's
+([patterns.md](https://github.com/lifekit-hq/finance-sentry/blob/main/docs/design/patterns.md)).
+Several numbered rules below (T1, T2, C2, C4, Ch1 to Ch3, $1, $2, X3) name a check that the library
+implements and runs for every app, so they stay here with their check; that page says what they
+mean for a figure.
 
 To change a rule, change this page in the same PR as the code and its check. A rule is never
 dropped quietly: a rule with no check yet stays here, marked **planned** with the check it needs.
@@ -47,7 +54,7 @@ why a disabled control blocks the primary action.
 
 - **Deviation:** keep the continuity policy. No indicator before 200ms, held 400ms once shown;
   cached data stays on screen during a refresh; offline beats error, and error beats empty.
-  **Why:** Carbon is silent on refreshing over cached data, the daily case in a finance app; the
+  **Why:** Carbon is silent on refreshing over cached data, the daily case for any screen of figures; the
   numbers are the [NN/g response-time limits](https://www.nngroup.com/articles/response-times-3-important-limits/).
 
 ### 2. Feedback
@@ -136,7 +143,7 @@ each composite widget: tabs, menu button, listbox, radio group and dialog.
 the `--cmn-ease-*` tokens are the M3 curves.
 
 - **Deviation:** the longest duration is `--cmn-duration-long`, 400ms; M3 goes to 1000ms. **Why:**
-  the [Doherty threshold](https://lawsofux.com/doherty-threshold/), and a money app has no hero
+  the [Doherty threshold](https://lawsofux.com/doherty-threshold/), and a data-first app has no hero
   transitions to justify more.
 - **Deviation:** only `transform` and `opacity` animate, and under Reduce Motion movement becomes
   a fade or nothing. **Why:** the no-page-jumps ruling (2026-10-07) and
@@ -176,8 +183,8 @@ localized dates) and [colour palettes](https://carbondesignsystem.com/data-visua
 alternative ([WCAG 1.1.1](https://www.w3.org/TR/WCAG22/#non-text-content)).
 
 - **Deviation:** scrub-to-read on touch: hold a finger to read a past point, the headline number
-  follows and snaps back on release; arrow keys do the same. **Why:** phone-first finance has no
-  hover; it is the pattern picked in patterns.md "Chart period and scrub".
+  follows and snaps back on release; arrow keys do the same. **Why:** a phone has no hover; it is the pattern picked in Finance Sentry's "Chart period and scrub"
+  ([patterns.md](https://github.com/lifekit-hq/finance-sentry/blob/main/docs/design/patterns.md#chart-period-and-scrub)).
 - **Deviation:** the fixed asset and `category-N` colours replace Carbon's sequence, keeping its
   count of 14. **Why:** ruled 2026-10-07, so a category keeps one colour across screens.
 
@@ -192,7 +199,8 @@ and the `cmnMoney` and `cmnNumber` pipes over it in `@lifekit-hq/ui`.
   a screen that shows two currencies sharing a narrow symbol (USD and CAD), which shows the ISO
   code. **Why:** the symbol-first ruling (2026-10-01), plus Polaris's rule for the ambiguous case.
 - **Deviation:** deltas use `signDisplay: 'exceptZero'` plus an arrow plus the fixed gain or loss
-  colour, never colour alone. **Why:** WCAG 1.4.1 and patterns.md "Delta-only colour".
+  colour, never colour alone. **Why:** WCAG 1.4.1 and Finance Sentry's "Deltas"
+  ([patterns.md](https://github.com/lifekit-hq/finance-sentry/blob/main/docs/design/patterns.md#deltas)).
 
 ### Across every area
 
