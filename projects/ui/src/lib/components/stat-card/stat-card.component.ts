@@ -37,7 +37,7 @@ const EMPTY_VALUE = '—';
       </div>
 
       @if (loading()) {
-        <cmn-skeleton height="1.875rem" width="75%" />
+        <cmn-skeleton height="1.95rem" width="75%" />
         @if (delta() !== null) {
           <div class="flex items-center gap-1">
             <cmn-skeleton height="1rem" width="50%" />
