@@ -72,6 +72,79 @@ export declare function checkScreen(
 ): Promise<ScreenResult>;
 export declare function formatScreen(result: ScreenResult): string;
 
+export type BaselineSize = 'phone' | 'desktop';
+export type BaselineScheme = 'light' | 'dark';
+
+/** What a route's callbacks are told about the capture they belong to. */
+export interface BaselineVariant {
+  size: BaselineSize;
+  scheme: BaselineScheme;
+}
+
+/** The part of Playwright's `toHaveScreenshot` options a route may set (the rest is the fixture's). */
+export interface CaptureBaselineOptions {
+  /** Capture the whole scrolling page, not the viewport (default false: the screen as shown). */
+  fullPage?: boolean;
+  /** Locators painted over before the comparison: anything that changes between runs. */
+  mask?: unknown[];
+  /** Loosens the exact comparison (default 0) for one screen; an exception, say why next to it. */
+  maxDiffPixelRatio?: number;
+  /** How long settling may take, in ms (default 10000). */
+  timeout?: number;
+}
+
+/** One route of an app. `page` is Playwright's `Page`. */
+export interface BaselineRoute {
+  /** Names the baseline files (`<name>-<size>-<scheme>`); unique within the call. */
+  name: string;
+  /** The route to open, or a function of the capture when the URL carries the scheme. */
+  url: string | ((variant: BaselineVariant) => string);
+  /** Runs before navigation: register the route's mocks, pin the clock. */
+  prepare?: (page: any, variant: BaselineVariant) => Promise<void> | void;
+  /** Runs after navigation: wait for what proves the route's data has rendered. */
+  ready?: (page: any, variant: BaselineVariant) => Promise<void> | void;
+  /** Locators to mask (a version number, a relative timestamp). */
+  mask?: (page: any) => unknown[];
+  fullPage?: boolean;
+  maxDiffPixelRatio?: number;
+}
+
+export interface DefineBaselinesOptions {
+  routes: BaselineRoute[];
+  /** Default both schemes. */
+  schemes?: readonly BaselineScheme[];
+  /** Default both sizes. */
+  sizes?: readonly BaselineSize[];
+}
+
+export declare const BASELINE_PLATFORM: 'linux';
+export declare const BASELINE_SCHEMES: readonly BaselineScheme[];
+export declare const BASELINE_SIZES: readonly BaselineSize[];
+export declare const SCREEN_BASELINE_OPTIONS: Readonly<{
+  animations: 'disabled';
+  caret: 'hide';
+  scale: 'css';
+  maxDiffPixelRatio: 0;
+  threshold: 0;
+}>;
+
+/** The Playwright config the fixture owns (`updateSnapshots: 'none'` and the capture options). */
+export declare function screenBaselineConfig(): {
+  updateSnapshots: 'none';
+  expect: {toHaveScreenshot: typeof SCREEN_BASELINE_OPTIONS};
+};
+export declare function screenBaselineName(variant: BaselineVariant & {name: string}): string;
+export declare function captureScreenBaseline(
+  page: ScreenPage,
+  expectation: {toHaveScreenshot(name: string, options?: object): Promise<void>},
+  file: string,
+  options?: CaptureBaselineOptions
+): Promise<void>;
+export declare function defineScreenBaselines(
+  playwright: {test: any; expect: any},
+  options: DefineBaselinesOptions
+): void;
+
 export type SkeletonRuleId = 'K0' | 'K1' | 'K2';
 
 export interface SkeletonRule {
