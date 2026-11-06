@@ -304,7 +304,7 @@ entry whose story lands fails the check until it is removed.
 | Empty state   | empty-state                                                  | `FirstUse`, `NoResults`, `Error`                                  |
 | Overlay       | dialog, drawer, command palette                              | one launcher story per service                                    |
 
-### Consumer lint (X1, $1, K3)
+### Consumer lint (X1, $1, K3, page-root)
 
 `@lifekit-hq/config`'s ESLint preset carries the `lifekit` plugin for apps:
 
@@ -313,10 +313,26 @@ entry whose story lands fails the check until it is removed.
   no component yet (`file`, `date`, `range` and the like) pass.
 - `lifekit/no-local-currency-format` flags `Intl.NumberFormat` and `toLocaleString` with
   `style: 'currency'`, and the Angular `currency` pipe.
+- `lifekit/page-root` holds a routed page to its template: the template root is `<cmn-page>`
+  (whitespace, comments, `@let` and `<ng-template>` aside), and the page sets no padding, margin
+  or width of its own. The page template owns them, so a spacing finding is fixed in
+  `@lifekit-hq/ui` once, not per page. It flags a root that is anything else, content outside the
+  `<cmn-page>`, and spacing on the `<cmn-page>` element (`class`, `style`, `[class.x]`,
+  `[style.x]`) or on the page host: `host` metadata, `@HostBinding`, `styles`, and a `styleUrl`
+  stylesheet it can read (flat CSS or SCSS; a nested `:host` block is not followed). Spacing on
+  the page's own children is content, not the page. Spacing is a Tailwind `p-*`, `m-*`, `w-*`,
+  `min-w-*`, `max-w-*` or `size-*` utility (any variant or `!`), or the CSS `padding`, `margin`,
+  `width`, `min-width`, `max-width` and `inline-size` families. A dynamic `[class]` or `[ngClass]`
+  expression is not read.
 - `lifekit/require-disable-reason` asks a comment that disables a `lifekit/*` rule to say why
   after `--`, so each exception can be reviewed.
 
-All three are warnings for one release, then errors. The library lints its own source with
+A lint rule sees one file, not the route table, so the preset applies `page-root` where a routed
+page lives: `*.page.ts` and `*.page.html`, and anything under a `pages/` folder (inline templates
+included; specs and stories excluded). A component there that is not a routed page, such as an
+auth screen or a layout shell with its own frame, disables the rule with a reason.
+
+All four are warnings for one release, then errors. The library lints its own source with
 `createEslintConfig({consumerGuardrails: false})`, since that is where the components themselves
 are built. K3's two template rules are errors
 from the start.

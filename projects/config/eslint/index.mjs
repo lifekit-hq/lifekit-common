@@ -29,8 +29,21 @@ const LIFEKIT_RULES_OFF = {
     'lifekit/no-raw-controls': 'off',
     'lifekit/no-local-currency-format': 'off',
     'lifekit/require-disable-reason': 'off',
+    'lifekit/page-root': 'off',
   },
 };
+
+// A lint rule sees one file, not the route table, so a routed page is recognised by where it lives:
+// `*.page.ts` (basket) or a `pages/` folder (finance-sentry, dashboard). Inline templates reach the
+// template rules as virtual `<file>.ts/<n>_inline-template-<n>.component.html` files.
+const PAGE_ROOT_TEMPLATES = ['**/*.page.html', '**/*.page.ts/*.html', '**/pages/**/*.html'];
+const PAGE_ROOT_SCRIPTS = ['**/*.page.ts', '**/pages/**/*.ts'];
+const PAGE_ROOT_IGNORES = [
+  '**/*.spec.ts',
+  '**/*.spec.ts/*.html',
+  '**/*.stories.ts',
+  '**/*.stories.ts/*.html',
+];
 
 export function createEslintConfig({
   selectorPrefix,
@@ -488,6 +501,13 @@ export function createEslintConfig({
           },
         ],
       },
+    },
+    {
+      // Guardrails: a routed page is rooted on `cmn-page` and sets no spacing of its own. A
+      // warning for one release, then an error.
+      files: [...PAGE_ROOT_TEMPLATES, ...PAGE_ROOT_SCRIPTS],
+      ignores: PAGE_ROOT_IGNORES,
+      rules: {'lifekit/page-root': 'warn'},
     },
     ...(consumerGuardrails ? [] : [LIFEKIT_RULES_OFF]),
     ...extraConfigs
