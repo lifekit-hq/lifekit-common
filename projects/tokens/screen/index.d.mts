@@ -87,7 +87,7 @@ export interface CaptureBaselineOptions {
   fullPage?: boolean;
   /** Locators painted over before the comparison: anything that changes between runs. */
   mask?: unknown[];
-  /** Overrides the fixture's pixel ratio (default 0.001) for one screen; say why next to it. */
+  /** Loosens the exact comparison (default 0) for one screen; an exception, say why next to it. */
   maxDiffPixelRatio?: number;
   /** How long settling may take, in ms (default 10000). */
   timeout?: number;
@@ -124,7 +124,8 @@ export declare const SCREEN_BASELINE_OPTIONS: Readonly<{
   animations: 'disabled';
   caret: 'hide';
   scale: 'css';
-  maxDiffPixelRatio: number;
+  maxDiffPixelRatio: 0;
+  threshold: 0;
 }>;
 
 /** The Playwright config the fixture owns (`updateSnapshots: 'none'` and the capture options). */

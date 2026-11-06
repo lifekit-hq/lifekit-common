@@ -137,26 +137,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Attach the before and after images
-        env:
-          GH_TOKEN: ${{ github.token }}
-          REPO: ${{ github.repository }}
-          PR: ${{ github.event.pull_request.number }}
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        run: |
-          set -euo pipefail
-          base="$(git merge-base "$BASE_SHA" "$HEAD_SHA")"
-          node scripts/baseline-report.mjs --repo "$REPO" --base "$base" --head "$HEAD_SHA" > report.md
-          existing="$(gh api "repos/$REPO/issues/$PR/comments" --paginate \
-            --jq '.[] | select(.body | contains("<!-- screen-baseline-report -->")) | .id' | head -n 1)"
-          if [ -s report.md ]; then
-            if [ -n "$existing" ]; then
-              gh api -X PATCH "repos/$REPO/issues/comments/$existing" -F body=@report.md > /dev/null
-            else
-              gh pr comment "$PR" --repo "$REPO" --body-file report.md
-            fi
-            cat report.md >> "$GITHUB_STEP_SUMMARY"
-          elif [ -n "$existing" ]; then
-            gh api -X DELETE "repos/$REPO/issues/comments/$existing"
-          fi
+      - uses: ./.github/actions/baseline-report
+        with:
+          token: ${{ github.token }}
+          repo: ${{ github.repository }}
+          pr: ${{ github.event.pull_request.number }}
+          base: ${{ github.event.pull_request.base.sha }}
+          head: ${{ github.event.pull_request.head.sha }}

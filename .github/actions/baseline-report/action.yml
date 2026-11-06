@@ -1,0 +1,49 @@
+name: Attach the screen baseline before and after
+description: >-
+  Posts (or edits in place, or removes when nothing differs) the pull request comment that shows each
+  changed screen baseline on the base and on the head (docs/SCREEN-BASELINES.md). Needs a checkout
+  with full history and a token that may write pull requests.
+inputs:
+  pr:
+    description: Pull request number
+    required: true
+  base:
+    description: Base commit; the report compares from its merge base with head
+    required: true
+  head:
+    description: Head commit that holds the baselines
+    required: true
+  repo:
+    description: owner/name
+    required: true
+  token:
+    description: Token that may comment on the pull request
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Attach the before and after images
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        REPO: ${{ inputs.repo }}
+        PR: ${{ inputs.pr }}
+        BASE_SHA: ${{ inputs.base }}
+        HEAD_SHA: ${{ inputs.head }}
+      run: |
+        set -euo pipefail
+        base="$(git merge-base "$BASE_SHA" "$HEAD_SHA")"
+        report="$(mktemp)"
+        node scripts/baseline-report.mjs --repo "$REPO" --base "$base" --head "$HEAD_SHA" > "$report"
+        existing="$(gh api "repos/$REPO/issues/$PR/comments" --paginate \
+          --jq '.[] | select(.body | contains("<!-- screen-baseline-report -->")) | .id' | head -n 1)"
+        if [ -s "$report" ]; then
+          if [ -n "$existing" ]; then
+            gh api -X PATCH "repos/$REPO/issues/comments/$existing" -F body=@"$report" > /dev/null
+          else
+            gh pr comment "$PR" --repo "$REPO" --body-file "$report"
+          fi
+          cat "$report" >> "$GITHUB_STEP_SUMMARY"
+        elif [ -n "$existing" ]; then
+          gh api -X DELETE "repos/$REPO/issues/comments/$existing"
+        fi

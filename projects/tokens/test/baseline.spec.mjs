@@ -78,9 +78,14 @@ describe('screenBaselineConfig', () => {
     assert.equal(SCREEN_BASELINE_OPTIONS.scale, 'css');
   });
 
+  it('compares exactly: no differing pixel, no per-pixel colour slack', () => {
+    assert.equal(SCREEN_BASELINE_OPTIONS.maxDiffPixelRatio, 0);
+    assert.equal(SCREEN_BASELINE_OPTIONS.threshold, 0);
+  });
+
   it('hands out a copy, so an app cannot change the fixture for another', () => {
     screenBaselineConfig().expect.toHaveScreenshot.maxDiffPixelRatio = 1;
-    assert.equal(screenBaselineConfig().expect.toHaveScreenshot.maxDiffPixelRatio, 0.001);
+    assert.equal(screenBaselineConfig().expect.toHaveScreenshot.maxDiffPixelRatio, 0);
   });
 });
 

@@ -27,14 +27,17 @@ export const BASELINE_SIZES = Object.freeze(['phone', 'desktop']);
 /**
  * How a screen is captured. Animations and the caret are stilled and the image is sized in CSS
  * pixels (390 and 1280 wide, whatever the device scale factor), so a baseline is the screen and
- * not the machine's pixel density. The ratio absorbs glyph anti-aliasing between renderers and
- * nothing a person would see: one pixel in a thousand.
+ * not the machine's pixel density. The comparison is exact: no differing pixel and no per-pixel
+ * colour slack, because a baseline is drawn and compared on the same CI runner image, so a change
+ * of a word or a shade is never under the tolerance. A route may loosen its own
+ * `maxDiffPixelRatio`, as an exception with a one-line reason (docs/SCREEN-BASELINES.md).
  */
 export const SCREEN_BASELINE_OPTIONS = Object.freeze({
   animations: 'disabled',
   caret: 'hide',
   scale: 'css',
-  maxDiffPixelRatio: 0.001,
+  maxDiffPixelRatio: 0,
+  threshold: 0,
 });
 
 /**

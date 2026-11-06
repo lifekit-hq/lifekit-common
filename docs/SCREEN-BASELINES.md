@@ -19,8 +19,10 @@ Linux baselines) into one fixture any app calls.
    one on its own. The first image per template and screen is committed through the update step
    below and reviewed by the owner: `.github/CODEOWNERS` asks for their review on any
    `*-linux.png`, and the pull request comment marks it as a new screen.
-3. **After that CI diffs.** A screen that differs by more than one pixel in a thousand fails, and
-   the run uploads the actual, expected and diff images.
+3. **After that CI diffs, exactly.** A screen that differs from its baseline by a single pixel fails
+   (`maxDiffPixelRatio: 0`, `threshold: 0`), and the run uploads the actual, expected and diff
+   images. A baseline is drawn and compared on the same CI runner image, so a changed word or shade
+   is never under a tolerance and never silent.
 4. **Updating is a step you take.** Nothing in CI or in a plain test run rewrites a baseline
    (`updateSnapshots: 'none'`). See "Updating a baseline".
 
@@ -36,7 +38,7 @@ import {screenBaselineConfig} from '@lifekit-hq/tokens/screen';
 import {defineConfig} from '@playwright/test';
 
 export default defineConfig({
-  ...screenBaselineConfig(), // updateSnapshots: 'none', animations off, 1/1000 pixels
+  ...screenBaselineConfig(), // updateSnapshots: 'none', animations off, exact comparison
   testDir: './e2e/screens',
   // …the app's own webServer / baseURL
 });
@@ -79,9 +81,13 @@ For each route it registers one test per size and scheme (`list light`, `list da
   DOM quiet) and compares it with `<name>-<size>-<scheme>-chromium-linux.png` beside the spec.
 
 Options per route: `fullPage` for a page that scrolls (default is the viewport, the screen as
-shown), `mask` for what legitimately changes, and `maxDiffPixelRatio` to loosen one screen; give a
-loosened ratio a one-line reason next to it, like a screen-check exception. `sizes` and `schemes`
-on the call narrow the matrix.
+shown), `mask` for what legitimately changes, and `maxDiffPixelRatio` to loosen one screen. The fixture
+never loosens by default; a loosened ratio is an exception and needs a one-line reason next to it,
+like a screen-check exception. `sizes` and `schemes` on the call narrow the matrix.
+
+If the `screens` job on the CI runner is flaky with no source change (regenerate and compare twice
+to tell), do not widen the default. Set the smallest ratio that is stable on that screen, at most 20
+pixels' worth (`20 / (width * height)`), on the route that needs it, with the reason beside it.
 
 Images are CSS pixels (`scale: 'css'`): 390 and 1280 wide whatever the device scale factor.
 
@@ -111,7 +117,8 @@ A baseline changes only when you run the update step on the branch that changes 
 
 - **On the CI renderer (preferred).** Run the **Update screen baselines** workflow from the Actions
   tab on the branch. It renders the screens on the runner every later comparison runs on, commits
-  the changed `*-linux.png` files to the branch and starts CI on it. It refuses to run on `main`.
+  the changed `*-linux.png` files to the branch, starts CI on it and posts the before and after
+  comment on the branch's pull request (see below). It refuses to run on `main`.
 - **On a Linux machine.** `npm run build-storybook && npm run test:screens:update` rewrites the
   baselines that differ and writes the ones that are missing. A different CPU or distribution may
   anti-alias text a little differently from CI; if the `screens` job then disagrees with your
@@ -122,7 +129,9 @@ this from now on.
 
 ## Before and after on the pull request
 
-The `baseline-report` job in CI compares the baselines on the branch with those at the point it
+The `baseline-report` job in CI (and the **Update screen baselines** workflow, through the same
+`.github/actions/baseline-report` action, because a push made with the workflow token does not start
+the pull request run) compares the baselines on the branch with those at the point it
 left the base branch. When any `*-linux.png` was added, changed or removed, it posts (and on every
 push edits, and when the difference goes away deletes) one comment on the pull request:
 
