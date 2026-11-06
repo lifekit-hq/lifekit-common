@@ -88,12 +88,16 @@ describe('PageComponent', () => {
     }
   });
 
-  it('keeps every kind inside the 640 to 720px reading band', () => {
-    for (const template of Object.values(PAGE_TEMPLATES)) {
+  it('keeps every single-column kind inside the 640 to 720px reading band', () => {
+    for (const template of Object.values(PAGE_TEMPLATES).filter(each => !each.rail)) {
       const width = Number(/max-w-\[(\d+)px\]/.exec(template.column)?.[1]);
       expect(width).toBeGreaterThanOrEqual(640);
       expect(width).toBeLessThanOrEqual(720);
     }
+  });
+
+  it('draws no rail and leaves rail blocks out on a single-column kind', () => {
+    expect(page().querySelector('[data-cmn-page-column="rail"]')).toBeNull();
   });
 
   it('becomes a full-height column that the shell bounds when it fills', () => {
@@ -105,6 +109,109 @@ describe('PageComponent', () => {
     expect(frame().classList).toContain('flex-1');
     expect(column().classList).toContain('flex-1');
     expect(column().classList).toContain('min-h-0');
+  });
+});
+
+describe('PageComponent overview', () => {
+  @Component({
+    imports: [PageComponent],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    template: `
+      <cmn-page [kind]="kind()" [fill]="fill()" title="This week">
+        <div class="stats">Stats</div>
+        @if (rail()) {
+          <section cmnPageRail class="coming-up">Coming up</section>
+        }
+        <section class="due">Due today</section>
+        @if (rail()) {
+          <section cmnPageRail class="people">People</section>
+        }
+      </cmn-page>
+    `,
+  })
+  class OverviewHostComponent {
+    public readonly kind = signal<PageKind>('overview');
+    public readonly rail = signal(true);
+    public readonly fill = signal(false);
+  }
+
+  let fixture: ComponentFixture<OverviewHostComponent>;
+  const page = (): HTMLElement =>
+    (fixture.nativeElement as HTMLElement).querySelector('cmn-page') as HTMLElement;
+  const columns = (): HTMLElement[] =>
+    Array.from(page().querySelectorAll('[data-cmn-page-column]'));
+  const main = (): HTMLElement => columns()[0];
+  const rail = (): HTMLElement =>
+    page().querySelector('[data-cmn-page-column="rail"]') as HTMLElement;
+  const classesOf = (el: Element): string[] =>
+    Array.from(el.children).map(child => child.className);
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(OverviewHostComponent);
+    fixture.detectChanges();
+  });
+
+  it('marks an overview page with a main column and a rail, in that order', () => {
+    expect(page().getAttribute('data-cmn-page')).toBe('overview');
+    expect(columns().map(column => column.getAttribute('data-cmn-page-column'))).toEqual([
+      '',
+      'rail',
+    ]);
+    expect(main().parentElement).toBe(rail().parentElement);
+    expect(page().querySelector('h1')?.nextElementSibling).toBe(main().parentElement);
+  });
+
+  it('projects the blocks marked cmnPageRail into the rail and the rest into the main column', () => {
+    expect(classesOf(main())).toEqual(['stats', 'due']);
+    expect(classesOf(rail())).toEqual(['coming-up', 'people']);
+  });
+
+  it('runs the main column the frame wide, with no reading width, and the rail 320px from xl', () => {
+    for (const cls of ['flex-col', 'gap-cmn-section-gap', 'xl:flex-1', 'xl:min-w-0']) {
+      expect(main().classList).toContain(cls);
+    }
+    expect(Array.from(main().classList).some(cls => cls.startsWith('max-w-'))).toBe(false);
+    for (const cls of ['flex-col', 'gap-cmn-section-gap', 'xl:w-[320px]', 'xl:shrink-0']) {
+      expect(rail().classList).toContain(cls);
+    }
+  });
+
+  it('stacks the rail under the main column, a section apart, and puts it beside from xl', () => {
+    const row = main().parentElement as HTMLElement;
+    for (const cls of [
+      'flex',
+      'flex-col',
+      'gap-cmn-section-gap',
+      'xl:flex-row',
+      'xl:items-start',
+    ]) {
+      expect(row.classList).toContain(cls);
+    }
+  });
+
+  it('leaves the rail empty, so it takes no room, when the page marks no block for it', () => {
+    fixture.componentInstance.rail.set(false);
+    fixture.detectChanges();
+    expect(rail().classList).toContain('empty:hidden');
+    expect(rail().matches(':empty')).toBe(true);
+    expect(classesOf(main())).toEqual(['stats', 'due']);
+  });
+
+  it('keeps the main blocks when the kind changes to one without a rail', () => {
+    fixture.componentInstance.kind.set('list');
+    fixture.detectChanges();
+    expect(columns()).toHaveLength(1);
+    expect(classesOf(main())).toEqual(['stats', 'due']);
+    expect(main().classList).toContain(PAGE_TEMPLATES.list.column);
+  });
+
+  it('lets the main column and the rail take the remaining height when it fills', () => {
+    fixture.componentInstance.fill.set(true);
+    fixture.detectChanges();
+    const row = main().parentElement as HTMLElement;
+    expect(row.classList).toContain('flex-1');
+    expect(row.classList).toContain('min-h-0');
+    expect(main().classList).toContain('flex-1');
   });
 });
 

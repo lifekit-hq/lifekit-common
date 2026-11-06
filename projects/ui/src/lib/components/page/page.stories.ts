@@ -12,10 +12,10 @@ interface PageStoryArgs {
 }
 
 /**
- * `cmn-page` on its own, outside the app shell: the frame, the title and the kind's column (pick
+ * `cmn-page` on its own, outside the app shell: the frame, the title and the kind's columns (pick
  * the kind to see its reading width). The golden screens (Templates/List, Templates/Detail,
- * Templates/Form and Templates/Settings) show each kind composed in the shell at the sizes the
- * owner approves.
+ * Templates/Form, Templates/Settings and Templates/Overview) show each kind composed in the shell
+ * at the sizes the owner approves.
  */
 const meta: Meta<PageStoryArgs> = {
   title: 'Components/Page',
@@ -23,7 +23,10 @@ const meta: Meta<PageStoryArgs> = {
   tags: ['autodocs'],
   parameters: {layout: 'fullscreen'},
   argTypes: {
-    kind: {control: 'select', options: ['list', 'detail', 'form', 'settings'] satisfies PageKind[]},
+    kind: {
+      control: 'select',
+      options: ['list', 'detail', 'form', 'settings', 'overview'] satisfies PageKind[],
+    },
     fill: {control: 'boolean'},
   },
   args: {kind: 'list', title: 'Reading list', fill: false},
@@ -63,4 +66,30 @@ export const WithoutTitle: Story = {
 export const LongTitle: Story = {
   ...Default,
   args: {title: 'Everything saved from the newsletters this autumn, sorted by when it arrived'},
+};
+
+/**
+ * The overview template: the main column runs the frame's width, and the blocks marked
+ * `cmnPageRail` sit in a 320px rail beside it from 1280px up (under it, on the same edge, below
+ * that). Another kind draws no rail.
+ */
+export const OverviewWithRail: Story = {
+  args: {kind: 'overview', title: 'This week'},
+  render: args => ({
+    props: args,
+    moduleMetadata: {imports: [ListItemRowComponent, ListSectionComponent]},
+    template: `
+      <cmn-page [kind]="kind" [title]="title" [fill]="fill">
+        <p class="text-cmn-sm text-text-secondary">Seven tasks are due this week, two of them overdue.</p>
+        <cmn-list-section heading="Due today">
+          <cmn-list-item-row label="Call the dentist about the crown" sublabel="Overdue · Alex" />
+          <cmn-list-item-row label="Book the boiler service" sublabel="Today · Sam" />
+        </cmn-list-section>
+        <cmn-list-section cmnPageRail heading="Coming up">
+          <cmn-list-item-row label="Parents' evening" sublabel="Thursday, 18:30" />
+          <cmn-list-item-row label="Bin day: recycling" sublabel="Friday morning" />
+        </cmn-list-section>
+      </cmn-page>
+    `,
+  }),
 };

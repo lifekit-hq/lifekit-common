@@ -20,9 +20,12 @@ const EMPTY_VALUE = '—';
   selector: 'cmn-stat-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [IconComponent, SkeletonComponent],
+  // The surface fills the host, so cards side by side in a grid row share the row's height even
+  // when one carries a delta line the others lack.
+  host: {class: 'block'},
   template: `
     <div
-      class="flex flex-col gap-cmn-2 rounded-cmn-lg border border-border-default bg-surface-card p-cmn-4"
+      class="flex h-full flex-col gap-cmn-2 rounded-cmn-lg border border-border-default bg-surface-card p-cmn-4"
     >
       <div class="flex items-center justify-between gap-cmn-2">
         <span

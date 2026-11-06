@@ -25,6 +25,7 @@ const {chromium} = require('@playwright/test');
 const FIXTURES = new URL('./fixtures/screen/', import.meta.url);
 const FAILING = readFileSync(new URL('failing.html', FIXTURES), 'utf8');
 const PASSING = readFileSync(new URL('passing.html', FIXTURES), 'utf8');
+const OVERVIEW = readFileSync(new URL('overview.html', FIXTURES), 'utf8');
 const BIN = fileURLToPath(new URL('../bin/lifekit-chrome-check.mjs', import.meta.url));
 const ROOT = fileURLToPath(new URL('../../../', import.meta.url));
 const ALL_RULES = SCREEN_RULES.map(rule => rule.id);
@@ -182,10 +183,13 @@ describe('template-aware one left edge (C1)', () => {
   }
 
   it('accepts a declared second column for a kind that is not held to a count', async () => {
-    const html = PASSING.replace('data-cmn-page="list"', 'data-cmn-page="overview"');
+    const html = PASSING.replace('data-cmn-page="list"', 'data-cmn-page="board"').replace(
+      '</h1>',
+      '</h1><div data-cmn-page-column style="max-width: 200px"><p>A second column</p></div>'
+    );
     const result = await inspect(html, 'desktop');
-    assert.equal(result.kind, 'overview');
-    assert.deepEqual(result.findings, []);
+    assert.equal(result.kind, 'board');
+    assert.deepEqual(result.findings, [], formatScreen(result));
   });
 
   it('reads the kind passed in over the one the page declares', async () => {
@@ -201,6 +205,127 @@ describe('template-aware one left edge (C1)', () => {
     } finally {
       await close();
     }
+  });
+});
+
+describe('the overview kind and its rail (C1)', () => {
+  const messages = result => result.findings.map(finding => `${finding.rule} ${finding.message}`);
+
+  for (const size of ['phone', 'desktop']) {
+    it(`accepts the rail beside the main column as the overview's second column, at ${size}`, async () => {
+      const result = await inspect(OVERVIEW, size);
+      assert.equal(result.kind, 'overview');
+      assert.deepEqual(result.findings, [], formatScreen(result));
+    });
+  }
+
+  it('lays the rail beside the main column at 1280 and under it on the phone', async () => {
+    for (const [size, beside] of [
+      ['desktop', true],
+      ['phone', false],
+    ]) {
+      const {page, close} = await open(OVERVIEW, size);
+      try {
+        const [main, rail] = await page
+          .locator('[data-cmn-page-column]')
+          .evaluateAll(columns => columns.map(column => column.getBoundingClientRect().toJSON()));
+        assert.equal(rail.left > main.right, beside, size);
+        assert.equal(rail.left === main.left, !beside, size);
+      } finally {
+        await close();
+      }
+    }
+  });
+
+  it('reads the same rail as a stray second column on a single-column kind', async () => {
+    const html = OVERVIEW.replace('data-cmn-page="overview"', 'data-cmn-page="detail"');
+    const result = await inspect(html, 'desktop');
+    assert.ok(
+      messages(result).includes('C1 a detail page has 1 column(s); this one has 2'),
+      messages(result).join('\n')
+    );
+  });
+
+  it('accepts an overview without a rail, its main column the frame wide', async () => {
+    const html = OVERVIEW.replace(
+      /<div data-cmn-page-column="rail">[\s\S]*?<\/section>\s*<\/div>/,
+      ''
+    );
+    assert.ok(!html.includes('data-cmn-page-column="rail"'));
+    const result = await inspect(html, 'desktop');
+    assert.deepEqual(result.findings, [], formatScreen(result));
+  });
+
+  for (const [where, column] of [
+    ['rail', '<div data-cmn-page-column="rail">'],
+    ['main column', '<div data-cmn-page-column>'],
+  ]) {
+    it(`refuses a block in the ${where} that starts off its column`, async () => {
+      const html = OVERVIEW.replace(
+        column,
+        `${column}<p style="margin-left: 24px">Indented on its own</p>`
+      );
+      const result = await inspect(html, 'desktop');
+      assert.deepEqual(
+        result.findings.map(finding => finding.rule),
+        ['C1'],
+        formatScreen(result)
+      );
+      assert.match(result.findings[0].message, /vs its column/);
+    });
+  }
+
+  it('refuses a third column', async () => {
+    const html = OVERVIEW.replace(
+      '<div class="columns">',
+      '<div class="columns"><div data-cmn-page-column="aside"><p>A third column</p></div>'
+    );
+    const result = await inspect(html, 'desktop');
+    assert.ok(
+      messages(result).includes('C1 an overview page has 2 column(s); this one has 3'),
+      messages(result).join('\n')
+    );
+  });
+
+  it('refuses a second column the kind does not name', async () => {
+    const html = OVERVIEW.replace('data-cmn-page-column="rail"', 'data-cmn-page-column="aside"');
+    const result = await inspect(html, 'desktop');
+    assert.ok(
+      messages(result).includes(
+        'C1 an overview page has the columns main, rail; this one has main, aside'
+      ),
+      messages(result).join('\n')
+    );
+  });
+
+  it('refuses a rail with no main column', async () => {
+    const html = OVERVIEW.replace(
+      '<div data-cmn-page-column>',
+      '<div data-cmn-page-column="rail">'
+    );
+    const result = await inspect(html, 'desktop');
+    assert.ok(
+      messages(result).includes(
+        'C1 an overview page has the columns main, rail; this one has rail, rail'
+      ),
+      messages(result).join('\n')
+    );
+  });
+
+  it('measures stacked surfaces within a column, past a rail surface that sits between them', async () => {
+    // The main column's list card 2px under the stat grid, with no heading between them; sorted
+    // by top, the rail's first card falls between the two.
+    const html = OVERVIEW.replace('<h2>Due today · 2</h2>', '').replace(
+      '<div data-cmn-page-column>',
+      '<div data-cmn-page-column style="gap: 2px">'
+    );
+    const result = await inspect(html, 'desktop');
+    assert.deepEqual(
+      result.findings.map(finding => finding.rule),
+      ['C3'],
+      formatScreen(result)
+    );
+    assert.match(result.findings[0].message, /^2px between div\.stat .* and div\.card/);
   });
 });
 

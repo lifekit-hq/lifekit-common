@@ -12,22 +12,29 @@ sentence in [DESIGN.md](../DESIGN.md) (Layout, "The screen check") or the HIG.
 
 ## Templates make it exact
 
-A page built on `cmn-page` marks itself `data-cmn-page="<kind>"` and its content column
+A page built on `cmn-page` marks itself `data-cmn-page="<kind>"` and each of its content columns
 `data-cmn-page-column`. The check reads those to know the columns content may start on, so "one
 left edge" (C1) is measured against the template rather than guessed from the title, and a page
-is held to the number of columns its kind intends:
+is held to the columns its kind intends. A column is `main` unless its `data-cmn-page-column` names
+another; the overview's second column is its `rail`:
 
-| Kind       | Columns | Reading width | Golden screens       |
-| ---------- | ------- | ------------- | -------------------- |
-| `list`     | 1       | 640px         | `Templates/List`     |
-| `detail`   | 1       | 720px         | `Templates/Detail`   |
-| `form`     | 1       | 640px         | `Templates/Form`     |
-| `settings` | 1       | 720px         | `Templates/Settings` |
+| Kind       | Columns               | Reading width                    | Golden screens       |
+| ---------- | --------------------- | -------------------------------- | -------------------- |
+| `list`     | main                  | 640px                            | `Templates/List`     |
+| `detail`   | main                  | 720px                            | `Templates/Detail`   |
+| `form`     | main                  | 640px                            | `Templates/Form`     |
+| `settings` | main                  | 720px                            | `Templates/Settings` |
+| `overview` | main, rail (optional) | 1200px; the rail 320px from 1280 | `Templates/Overview` |
 
-A page that declares a different number of columns than its kind intends fails C1, as does a
-notice, the title or a top-level block that starts off a declared column. A kind the check does not
-know yet is still held to the columns its page declares, only without a count. A route without a
-template fails C0 and is checked against its title's left edge instead.
+A page with more columns than its kind has, without one its kind requires, or with a column its
+kind does not name fails C1, as does a notice, the title or a top-level block that starts off a
+declared column; a block in the rail is measured against the rail's edge, not the title's. The
+overview's rail sits beside the main column from 1280px and under it on the same edge below that,
+so a dashboard's rail is read as the deliberate second column it is, never as a block off the one
+left edge. A kind the check does not know yet is still held to the columns its page declares, only
+without a count. Stacked surfaces (C3) are measured within a column, so a rail's cards never stand
+between two of the main column's. A route without a template fails C0 and is checked against its
+title's left edge instead.
 
 ## Wiring it into an app's CI
 
@@ -150,8 +157,8 @@ keeps loading after its data lands.
 
 ## The golden screens
 
-Each kind has golden screens in Storybook (`Templates/List`, `Templates/Detail`, `Templates/Form`
-and `Templates/Settings`): the template at 390 and 1280, light and dark, in the real shell, built
+Each kind has golden screens in Storybook (`Templates/List`, `Templates/Detail`, `Templates/Form`,
+`Templates/Settings` and `Templates/Overview`): the template at 390 and 1280, light and dark, in the real shell, built
 from real components with realistic content. Every golden passes the check with no findings, and
 they are what the owner approves once per template. Check them against a built catalog with:
 
@@ -160,12 +167,13 @@ npx lifekit-chrome-check screen \
   "http://127.0.0.1:6006/iframe.html?id=templates-list--phone&viewMode=story" \
   "http://127.0.0.1:6006/iframe.html?id=templates-detail--desktop-dark&viewMode=story" \
   "http://127.0.0.1:6006/iframe.html?id=templates-form--phone-dark&viewMode=story" \
-  "http://127.0.0.1:6006/iframe.html?id=templates-settings--desktop&viewMode=story"
+  "http://127.0.0.1:6006/iframe.html?id=templates-settings--desktop&viewMode=story" \
+  "http://127.0.0.1:6006/iframe.html?id=templates-overview--desktop&viewMode=story"
 ```
 
 `Templates/List` is also held pixel for pixel, so a change that moves it is visible on the pull
-request that makes it: [SCREEN-BASELINES.md](SCREEN-BASELINES.md). Detail, Form and Settings join
-it when their first baselines are added.
+request that makes it: [SCREEN-BASELINES.md](SCREEN-BASELINES.md). Detail, Form, Settings and
+Overview join it when their first baselines are added.
 The story ids are `templates-<kind>--<phone|phone-dark|desktop|desktop-dark>`.
 
 ## What it caught first

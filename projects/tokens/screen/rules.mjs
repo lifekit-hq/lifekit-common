@@ -78,9 +78,18 @@ export const SCREEN_RULES = [
  * @returns {{kind: string | null, template: boolean, findings: {rule: string, message: string}[]}}
  */
 export function inspectScreen(options = {}) {
-  // Columns each template kind declares. A kind not listed here is still checked against the
-  // columns its page declares, only without a count to hold it to.
-  const KIND_COLUMNS = {list: 1, detail: 1, form: 1, settings: 1};
+  // The columns each template kind declares, by name: a page's column is `main` unless its
+  // `data-cmn-page-column` names another. The overview's `rail` is optional; every other column
+  // is drawn whenever the page is. A kind not listed here is still checked against the columns its
+  // page declares, only without a count or names to hold it to.
+  const KIND_COLUMNS = {
+    list: ['main'],
+    detail: ['main'],
+    form: ['main'],
+    settings: ['main'],
+    overview: ['main', 'rail'],
+  };
+  const OPTIONAL_COLUMNS = new Set(['rail']);
   const TITLE_GAP_MIN = 16;
   const SURFACE_GAP_MIN = 8;
   const HEIGHT_TOLERANCE = 1;
@@ -178,9 +187,25 @@ export function inspectScreen(options = {}) {
   // C1 one left edge
   if (page) {
     const columns = [...page.querySelectorAll('[data-cmn-page-column]')].filter(vis);
-    const expected = KIND_COLUMNS[kind];
-    if (expected !== undefined && columns.length !== expected) {
-      add('C1', `a ${kind} page has ${expected} column(s); this one has ${columns.length}`);
+    const declared = KIND_COLUMNS[kind];
+    if (declared) {
+      const names = columns.map(column => column.getAttribute('data-cmn-page-column') || 'main');
+      const required = declared.filter(column => !OPTIONAL_COLUMNS.has(column));
+      const unknown = names.filter(column => !declared.includes(column));
+      const twice = names.filter((column, i) => names.indexOf(column) !== i);
+      const missing = required.filter(column => !names.includes(column));
+      const a = /^[aeiou]/.test(kind) ? 'an' : 'a';
+      if (columns.length > declared.length || columns.length < required.length) {
+        add(
+          'C1',
+          `${a} ${kind} page has ${declared.length} column(s); this one has ${columns.length}`
+        );
+      } else if (unknown.length || twice.length || missing.length) {
+        add(
+          'C1',
+          `${a} ${kind} page has the columns ${declared.join(', ')}; this one has ${names.join(', ')}`
+        );
+      }
     }
     const edges = columns.map(column => Math.round(R(column).left));
     const onAnEdge = x => edges.some(edge => Math.abs(x - edge) <= EDGE_TOLERANCE);
@@ -240,15 +265,19 @@ export function inspectScreen(options = {}) {
     }
   }
 
-  // C3 touching stacked surfaces (outermost only)
+  // C3 touching stacked surfaces (outermost only). Each is measured against the nearest surface
+  // above it in the same column, so a second column's surfaces never stand between the two.
   const stacked = [...outer].sort((a, b) => R(a).top - R(b).top);
   for (let i = 1; i < stacked.length; i++) {
-    const a = R(stacked[i - 1]);
     const b = R(stacked[i]);
-    const overlapX = Math.min(a.right, b.right) - Math.max(a.left, b.left) > OVERLAP_MIN;
-    const gap = Math.round(b.top - a.bottom);
-    if (overlapX && gap >= -1 && gap < SURFACE_GAP_MIN) {
-      add('C3', `${gap}px between ${name(stacked[i - 1])} and ${name(stacked[i])}`);
+    const above = stacked
+      .slice(0, i)
+      .filter(el => Math.min(R(el).right, b.right) - Math.max(R(el).left, b.left) > OVERLAP_MIN)
+      .sort((x, y) => R(y).bottom - R(x).bottom)[0];
+    if (!above) continue;
+    const gap = Math.round(b.top - R(above).bottom);
+    if (gap >= -1 && gap < SURFACE_GAP_MIN) {
+      add('C3', `${gap}px between ${name(above)} and ${name(stacked[i])}`);
     }
   }
 

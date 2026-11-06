@@ -159,10 +159,10 @@ A 4px spacing base (`cmn-1` to `cmn-16`), a subset of Carbon's 8px scale with it
 
 ### Page templates
 
-Every routed page sits in a page template, `cmn-page`. Its `kind` names the archetype of the screen (`list`, `detail`, `form` or `settings`; `overview` follows), and the template, not the page, owns the composition:
+Every routed page sits in a page template, `cmn-page`. Its `kind` names the archetype of the screen (`list`, `detail`, `form`, `settings` or `overview`), and the template, not the page, owns the composition:
 
-- **One left edge.** The title, the notices and the content share the page's left edge, inset from main by the page gutter. A template's kind names the columns content may start on: a list, a detail, a form and a settings page each have one.
-- **Reading width.** Each kind sets its column's width: a list and a form read at 640px, a detail and a settings page at 720px (a key-value list's values, and a settings section's heading column beside its controls, need the room). A text field keeps a reading width (at most 640px), never a phone layout stretched to the desktop.
+- **One left edge.** The title, the notices and the content share the page's left edge, inset from main by the page gutter. A template's kind names the columns content may start on: a list, a detail, a form and a settings page each have one; an overview has a main column and a rail, a deliberate second column beside it.
+- **Reading width.** Each kind sets its column's width: a list and a form read at 640px, a detail and a settings page at 720px (a key-value list's values, and a settings section's heading column beside its controls, need the room). An overview runs the page's 1200px: its main column takes the frame's width less a 320px rail, which sits beside it from 1280px and under it below that. A text field keeps a reading width (at most 640px), never a phone layout stretched to the desktop.
 - **The title.** The large title the route declares is drawn inside the page frame, and the title gap (at least 16px) sits under the large title. The shell still collapses it into the top bar on scroll.
 - **Rhythm.** Top-level blocks sit a section gap apart; inside a group (a heading and its rows, a field and its button) the gap is the group gap. Stacked surfaces keep at least the group gap (8px) apart.
 - **Controls side by side share one height** (`--cmn-control-h`): the md input, button, select and search field.
@@ -179,7 +179,7 @@ The rhythm is five tokens in `theme.css`, read through the preset's `cmn-*` spac
 | `--cmn-group-gap`   | 8px   | 8px        | `gap-cmn-group-gap`   |
 | `--cmn-control-h`   | 44px  | 40px       | `h-cmn-control-h`     |
 
-Each template has golden screens in Storybook (`Templates/List`, `Templates/Detail`, `Templates/Form`, `Templates/Settings`), at 390 and 1280, light and dark, built from real components with realistic content. The owner approves them once per template; they are the reference an app copies, and the screen check holds every app to them.
+Each template has golden screens in Storybook (`Templates/List`, `Templates/Detail`, `Templates/Form`, `Templates/Settings`, `Templates/Overview`), at 390 and 1280, light and dark, built from real components with realistic content. The owner approves them once per template; they are the reference an app copies, and the screen check holds every app to them.
 
 ### The screen check
 
