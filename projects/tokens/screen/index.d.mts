@@ -106,7 +106,13 @@ export interface BaselineRoute {
   /** Locators to mask (a version number, a relative timestamp). */
   mask?: (page: any) => unknown[];
   fullPage?: boolean;
+  /** Loosens the comparison for every screen of the route; an exception, say why next to it. */
   maxDiffPixelRatio?: number;
+  /**
+   * Loosens the comparison for single screens, keyed by baseline name without `.png`
+   * (`<name>-<size>-<scheme>`); wins over `maxDiffPixelRatio`. An exception, say why next to it.
+   */
+  screenMaxDiffPixelRatio?: Record<string, number>;
 }
 
 export interface DefineBaselinesOptions {

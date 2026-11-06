@@ -81,13 +81,25 @@ For each route it registers one test per size and scheme (`list light`, `list da
   DOM quiet) and compares it with `<name>-<size>-<scheme>-chromium-linux.png` beside the spec.
 
 Options per route: `fullPage` for a page that scrolls (default is the viewport, the screen as
-shown), `mask` for what legitimately changes, and `maxDiffPixelRatio` to loosen one screen. The fixture
-never loosens by default; a loosened ratio is an exception and needs a one-line reason next to it,
-like a screen-check exception. `sizes` and `schemes` on the call narrow the matrix.
+shown), `mask` for what legitimately changes, `maxDiffPixelRatio` to loosen every screen of the
+route, and `screenMaxDiffPixelRatio` to loosen single screens, keyed by baseline name without
+`.png` (`{'templates-overview-desktop-dark': ratio}`); a screen's own key wins over the route's
+ratio, and every unkeyed screen stays exact. The fixture never loosens by default; a loosened ratio
+is an exception and needs a one-line reason next to it, like a screen-check exception. `sizes` and `schemes` on the call narrow the matrix.
 
 If the `screens` job on the CI runner is flaky with no source change (regenerate and compare twice
 to tell), do not widen the default. Set the smallest ratio that is stable on that screen, at most 20
-pixels' worth (`20 / (width * height)`), on the route that needs it, with the reason beside it.
+pixels' worth (`20 / (width * height)`), on the screen that needs it (`screenMaxDiffPixelRatio`),
+with the reason beside it.
+
+Exceptions in use:
+
+- `templates-overview-desktop-dark` (`projects/ui/e2e/screens/templates.spec.ts`): 20 pixels' worth.
+  The anti-aliased edge of the header avatar initials 'AM' rasterises 1-2 colour levels apart
+  between runs on the CI runner (one pixel at around x=1235, y=12).
+- `templates-overview-phone-dark` (same spec): 20 pixels' worth. The anti-aliased rounded corners
+  of the stat cards (x=16-17, y=120-219) rasterise 1 colour level apart between runs on the CI
+  runner (2 pixels counted).
 
 Images are CSS pixels (`scale: 'css'`): 390 and 1280 wide whatever the device scale factor.
 
@@ -99,8 +111,8 @@ and mask the rest. A baseline that depends on the day it was taken fails on the 
 
 ## The reference app: lifekit-common
 
-The golden screens of the page templates (today `Templates/List` in Storybook; Detail, Form,
-Settings and Overview follow once their baselines are added) are the reference app. Their
+The golden screens of the page templates (`Templates/List`, `Templates/Detail`, `Templates/Form`,
+`Templates/Settings` and `Templates/Overview` in Storybook) are the reference app. Their
 spec is `projects/ui/e2e/screens/templates.spec.ts`, their config `projects/ui/playwright.screens.config.ts`,
 and their baselines sit in `projects/ui/e2e/screens/templates.spec.ts-snapshots/`.
 
