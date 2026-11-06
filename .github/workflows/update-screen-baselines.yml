@@ -1,0 +1,45 @@
+name: Update screen baselines
+
+# The one step that rewrites the screen baselines (docs/SCREEN-BASELINES.md). Run it from the
+# Actions tab on a branch whose screens changed on purpose: it renders them on the CI runner, the
+# machine every later run compares on, commits the changed images to that branch and starts CI on
+# it. The pull request then carries the before and after images for review. It never runs on its own
+# and never on main.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  update:
+    if: github.ref != 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build-storybook
+      - name: Render the baselines
+        run: npm run test:screens:update
+      - name: Commit the changed baselines
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          git add -A -- 'projects/**/*-snapshots/*-linux.png'
+          if git diff --cached --quiet; then
+            echo "No baseline changed." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "test(ui): update screen baselines"
+          git push origin "HEAD:$BRANCH"
+          gh workflow run ci.yml --ref "$BRANCH"

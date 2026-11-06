@@ -62,6 +62,10 @@ Design tokens for the lifekit ecosystem, framework-agnostic.
   [`docs/SCREEN-CHECK.md`](../../docs/SCREEN-CHECK.md). `checkSkeleton(page, {url, hold})` is
   its sibling for loading states: it holds a route's data requests, measures the page's
   top-level sections as a skeleton and again once loaded, and fails any pair more than 8px apart.
+  `defineScreenBaselines({test, expect}, {routes})` is the pixel sibling: every route at 390 and
+  1280, light and dark, against committed Linux baselines, with the before and after images
+  attached to any pull request that changes one
+  ([`docs/SCREEN-BASELINES.md`](../../docs/SCREEN-BASELINES.md)).
 
 ```js
 // tailwind.config.js

@@ -16,9 +16,21 @@
  */
 import {inspectScreen, SCREEN_RULES} from './rules.mjs';
 import {settleScreen} from './settle.mjs';
+import {SCREEN_VIEWPORTS} from './viewports.mjs';
 
 export {inspectScreen, SCREEN_RULES} from './rules.mjs';
+export {
+  BASELINE_PLATFORM,
+  BASELINE_SCHEMES,
+  BASELINE_SIZES,
+  captureScreenBaseline,
+  defineScreenBaselines,
+  SCREEN_BASELINE_OPTIONS,
+  screenBaselineConfig,
+  screenBaselineName,
+} from './baseline.mjs';
 export {settleScreen} from './settle.mjs';
+export {SCREEN_VIEWPORTS} from './viewports.mjs';
 export {
   checkSkeleton,
   compareSections,
@@ -27,17 +39,6 @@ export {
   SKELETON_RULES,
   SKELETON_TOLERANCE_PX,
 } from './skeleton.mjs';
-
-/** The two sizes every route is checked at: an iPhone (390x844) and a 1280 laptop. */
-export const SCREEN_VIEWPORTS = Object.freeze({
-  phone: Object.freeze({
-    viewport: Object.freeze({width: 390, height: 844}),
-    deviceScaleFactor: 2,
-    isMobile: true,
-    hasTouch: true,
-  }),
-  desktop: Object.freeze({viewport: Object.freeze({width: 1280, height: 800})}),
-});
 
 /**
  * Checks the screen `page` shows against every rule (C0-C10), after settling it.

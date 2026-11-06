@@ -3,6 +3,9 @@ on:
   pull_request:
   push:
     branches: [main]
+  # The baseline update workflow starts CI on the branch it commits to (a push made with the
+  # workflow token does not).
+  workflow_dispatch:
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -90,3 +93,70 @@ jobs:
       - run: npm run build-storybook
       - name: Accessibility (axe)
         run: npm run test:a11y -- --shard=${{ matrix.shard }}/4
+
+  # Gate: screen baselines (docs/SCREEN-BASELINES.md). The reference app's screens at 390 and 1280,
+  # light and dark, against the Linux baselines in the repository. A screen that drifts, or has no
+  # baseline yet, fails the build; the actual, expected and diff images are uploaded with the report.
+  screens:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build-storybook
+      - name: Screen baselines
+        run: npm run test:screens
+      - name: Upload the diff images
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screen-baseline-diff
+          path: |
+            projects/ui/e2e/screens/.output
+            projects/ui/playwright-report
+          if-no-files-found: ignore
+
+  # A pull request that changes a baseline gets the screen before (base) and after (this branch)
+  # attached as one comment, edited in place on every push and removed when the baselines no longer
+  # differ. Same-repository branches only: a fork's token cannot comment.
+  baseline-report:
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Attach the before and after images
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          base="$(git merge-base "$BASE_SHA" "$HEAD_SHA")"
+          node scripts/baseline-report.mjs --repo "$REPO" --base "$base" --head "$HEAD_SHA" > report.md
+          existing="$(gh api "repos/$REPO/issues/$PR/comments" --paginate \
+            --jq '.[] | select(.body | contains("<!-- screen-baseline-report -->")) | .id' | head -n 1)"
+          if [ -s report.md ]; then
+            if [ -n "$existing" ]; then
+              gh api -X PATCH "repos/$REPO/issues/comments/$existing" -F body=@report.md > /dev/null
+            else
+              gh pr comment "$PR" --repo "$REPO" --body-file report.md
+            fi
+            cat report.md >> "$GITHUB_STEP_SUMMARY"
+          elif [ -n "$existing" ]; then
+            gh api -X DELETE "repos/$REPO/issues/comments/$existing"
+          fi

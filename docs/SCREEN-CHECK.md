@@ -149,6 +149,9 @@ npx lifekit-chrome-check screen \
   "http://127.0.0.1:6006/iframe.html?id=templates-list--desktop-dark&viewMode=story"
 ```
 
+The golden screens are also held pixel for pixel, so a change that moves one is visible on the
+pull request that makes it: [SCREEN-BASELINES.md](SCREEN-BASELINES.md).
+
 ## What it caught first
 
 Against basket's list route before it adopted the template, the check reported the defects the
