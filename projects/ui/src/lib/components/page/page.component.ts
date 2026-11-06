@@ -15,11 +15,10 @@ import {PageFrameService} from '../app-layout/page-frame';
 
 /**
  * The page archetype a routed screen is built on. Each kind owns the composition: its reading
- * width and the columns content may start on. `list` is the first; `detail`, `form`, `settings`
- * and `overview` join this union, each with its own entry in `PAGE_TEMPLATES`, as they are designed
- * and approved.
+ * width and the columns content may start on. `list`, `detail`, `form` and `settings` each have
+ * an entry in `PAGE_TEMPLATES`; `overview` joins this union when it is designed and approved.
  */
-export type PageKind = 'list';
+export type PageKind = 'list' | 'detail' | 'form' | 'settings';
 
 /** What one kind of page decides: how wide its single reading column runs. */
 interface PageTemplate {
@@ -28,11 +27,22 @@ interface PageTemplate {
 }
 
 /**
- * List: one column at a reading width (640px), the HIG inset-grouped list. A text field at full
- * column width stays inside the screen check's stretched-input limit.
+ * Every kind is one column on the page's left edge; they differ in how wide it reads.
+ *
+ * - List (640px): the HIG inset-grouped list. A text field at full column width stays inside the
+ *   screen check's stretched-input limit.
+ * - Detail (720px): one record read top to bottom, its facts, related rows and actions. A
+ *   key-value list's value column needs the extra room more than a row does.
+ * - Form (640px): fields at full column width, so no field is wider than the stretched-input limit
+ *   and the eye runs down one edge from label to label.
+ * - Settings (720px): settings sections, whose heading column sits beside the controls from md up
+ *   and still leaves a select or a text field its own width.
  */
 export const PAGE_TEMPLATES: Readonly<Record<PageKind, PageTemplate>> = {
   list: {column: 'max-w-[640px]'},
+  detail: {column: 'max-w-[720px]'},
+  form: {column: 'max-w-[640px]'},
+  settings: {column: 'max-w-[720px]'},
 };
 
 const HOST_CLASSES = 'block';
@@ -57,6 +67,19 @@ const COLUMN_FILL_CLASSES = 'min-h-0 flex-1';
  * Inside `cmn-app-layout` the title is the one the route declares (`data.title`): the page draws it
  * and the shell, which would otherwise draw it above the page, steps aside but still collapses it
  * into the top bar on scroll. `title` names a page whose route declares none.
+ *
+ * `kind` picks the template (`PAGE_TEMPLATES`), `list` by default:
+ *
+ * - `list`: rows grouped in `cmn-list-section`s under an add field or a filter (640px).
+ * - `detail`: one record: its status, its facts in a `cmn-description-list`, related rows, then its
+ *   own actions; Edit and the back chevron (the route's `parent`) live in the top bar (720px).
+ * - `form`: a new or edited record. Make the `<form>` `display: contents` (`class="contents"`) so
+ *   each field is a top-level block and the template sets the rhythm between them; fields run the
+ *   full width, one under another, and the actions close the column (640px).
+ * - `settings`: `cmn-settings-section`s in the standard order, then the danger zone and Sign out;
+ *   each section draws its divider a section gap below its content (720px).
+ *
+ * Each kind has golden screens in Storybook (Templates/List, Detail, Form and Settings).
  *
  * `fill` makes it a full-height column whose content can take the remaining height (a
  * `cmn-page-scroll` list), as `cmn-page-container fill` does.

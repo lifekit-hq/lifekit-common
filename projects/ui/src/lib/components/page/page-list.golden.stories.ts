@@ -1,33 +1,19 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  CUSTOM_ELEMENTS_SCHEMA,
-  inject,
-  input,
-  type OnInit,
-} from '@angular/core';
-import {provideRouter, Router, RouterOutlet, withHashLocation} from '@angular/router';
-import {LkUpdatePrompt} from '@lifekit-hq/elements';
+import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {applicationConfig, type Meta, type StoryObj} from '@storybook/angular';
 
-import {PREFERS_DARK} from '../../services/theme/theme.service';
-import {
-  accountMenu,
-  type AppLayoutAccount,
-  AppLayoutComponent,
-} from '../app-layout/app-layout.component';
 import {ButtonComponent} from '../button/button.component';
 import {CheckboxComponent} from '../checkbox/checkbox.component';
 import {InputComponent} from '../input/input.component';
 import {ListItemRowComponent} from '../list-item-row/list-item-row.component';
 import {ListSectionComponent} from '../list-section/list-section.component';
-import type {NavItem} from '../sidebar-nav/sidebar-nav.component';
+import {
+  GOLDEN_DESKTOP,
+  GOLDEN_PHONE,
+  GOLDEN_VIEWPORTS,
+  goldenProviders,
+  GoldenShellComponent,
+} from './golden-screen';
 import {PageComponent} from './page.component';
-
-// Imported by name so a bundler cannot tree-shake the customElements.define() call.
-if (!customElements.get('lk-update-prompt')) {
-  customElements.define('lk-update-prompt', LkUpdatePrompt);
-}
 
 interface Task {
   readonly id: number;
@@ -106,115 +92,37 @@ class TasksPageComponent {
   protected readonly done = DONE;
 }
 
-/** The other destinations: the golden screen is the Tasks tab, so these only need to exist. */
-@Component({
-  selector: 'cmn-golden-placeholder-page',
-  imports: [PageComponent],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <cmn-page><p class="text-cmn-sm text-text-secondary">Not part of this screen.</p></cmn-page>
-  `,
-})
-class PlaceholderPageComponent {}
-
-const NAV_ITEMS: NavItem[] = [
-  {label: 'Tasks', icon: 'ListChecks', route: '/tasks'},
-  {label: 'Calendar', icon: 'Calendar', route: '/calendar'},
-  {label: 'People', icon: 'Users', route: '/people'},
-  {label: 'Settings', icon: 'Settings', route: '/settings'},
-];
-
-const ACCOUNT: AppLayoutAccount = {
-  label: 'Alex Morgan',
-  name: 'Alex Morgan',
-  email: 'alex@example.com',
-  menuItems: accountMenu({settingsRoute: '/settings'}),
-};
-
-/** The app as a consumer writes it: the shell, its notices, and a router outlet. */
-@Component({
-  selector: 'cmn-golden-list-shell',
-  imports: [AppLayoutComponent, RouterOutlet],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  template: `
-    <cmn-app-layout [navItems]="navItems" [account]="account" [phoneOverlay]="true" brand="Tasks">
-      @if (notice()) {
-        <lk-update-prompt cmnAppLayoutNotice ready />
-      }
-      <router-outlet />
-    </cmn-app-layout>
-  `,
-})
-class GoldenListShellComponent implements OnInit {
-  private readonly router = inject(Router);
-  /** Shows the update prompt in the notices slot, inset to the page gutter above the title. */
-  public readonly notice = input(false);
-  protected readonly navItems = NAV_ITEMS;
-  protected readonly account = ACCOUNT;
-
-  public async ngOnInit(): Promise<void> {
-    await this.router.navigateByUrl('/tasks');
-  }
-}
-
-/** The sizes the golden screens are approved at: an iPhone's 390 and a 1280 laptop. */
-const GOLDEN_VIEWPORTS = {
-  phone390: {name: 'Phone 390', styles: {width: '390px', height: '844px'}, type: 'mobile'},
-  desktop1280: {name: 'Desktop 1280', styles: {width: '1280px', height: '800px'}, type: 'desktop'},
-};
-const PHONE = {viewport: {value: 'phone390', isRotated: false}};
-const DESKTOP = {viewport: {value: 'desktop1280', isRotated: false}};
-
 /**
  * Golden screens for the list template: the reference other lifekit apps copy and the owner
  * approves once. Each is the real shell and real components; run the screen check
  * (`lifekit-chrome-check screen`, docs/SCREEN-CHECK.md) against them at 390 and 1280.
  */
-const meta: Meta<GoldenListShellComponent> = {
+const meta: Meta<GoldenShellComponent> = {
   title: 'Templates/List',
-  component: GoldenListShellComponent,
+  component: GoldenShellComponent,
   parameters: {layout: 'fullscreen', viewport: {options: GOLDEN_VIEWPORTS}},
   decorators: [
     applicationConfig({
-      providers: [
-        // The shell's ThemeService follows the OS scheme; in the catalog the theme global (set on
-        // <html> before the story boots) stands in for it, so the dark screens render dark.
-        {
-          provide: PREFERS_DARK,
-          useFactory: () =>
-            matchMedia(
-              document.documentElement.getAttribute('data-theme') === 'dark' ? 'all' : 'not all'
-            ),
-        },
-        provideRouter(
-          [
-            {path: 'tasks', component: TasksPageComponent, data: {title: 'Tasks'}},
-            {path: 'calendar', component: PlaceholderPageComponent, data: {title: 'Calendar'}},
-            {path: 'people', component: PlaceholderPageComponent, data: {title: 'People'}},
-            {path: 'settings', component: PlaceholderPageComponent, data: {title: 'Settings'}},
-            {path: '**', redirectTo: 'tasks'},
-          ],
-          withHashLocation()
-        ),
-      ],
+      providers: goldenProviders([
+        {path: 'tasks', component: TasksPageComponent, data: {title: 'Tasks'}},
+      ]),
     }),
   ],
-  args: {notice: false},
+  args: {start: '/tasks', notice: false},
 };
 
 export default meta;
-type Story = StoryObj<GoldenListShellComponent>;
+type Story = StoryObj<GoldenShellComponent>;
 
-export const Phone: Story = {globals: PHONE};
+export const Phone: Story = {globals: GOLDEN_PHONE};
 
-export const PhoneDark: Story = {globals: {...PHONE, theme: 'dark'}};
+export const PhoneDark: Story = {globals: {...GOLDEN_PHONE, theme: 'dark'}};
 
-export const Desktop: Story = {globals: DESKTOP};
+export const Desktop: Story = {globals: GOLDEN_DESKTOP};
 
-export const DesktopDark: Story = {globals: {...DESKTOP, theme: 'dark'}};
+export const DesktopDark: Story = {globals: {...GOLDEN_DESKTOP, theme: 'dark'}};
 
 /** A notice in the shell's slot starts on the page's left edge and sits above the title. */
-export const PhoneWithNotice: Story = {globals: PHONE, args: {notice: true}};
+export const PhoneWithNotice: Story = {globals: GOLDEN_PHONE, args: {notice: true}};
 
-export const DesktopWithNotice: Story = {globals: DESKTOP, args: {notice: true}};
+export const DesktopWithNotice: Story = {globals: GOLDEN_DESKTOP, args: {notice: true}};

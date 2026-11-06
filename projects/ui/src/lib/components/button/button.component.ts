@@ -23,10 +23,12 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
 };
 
 // md is the control height (`--cmn-control-h`) shared with the md field beside it: drawn 44px tall
-// on a phone, 40px from md, so an input and its button line up.
+// on a phone, 40px from md, so an input and its button line up. Its block padding stays under the
+// height a one-line label needs, so the control height sets the box in every variant: the
+// secondary's 1px border no longer draws it 42px beside a 40px primary on the desktop.
 const SIZE_CLASSES: Record<ButtonSize, string> = {
   sm: 'px-cmn-2 py-cmn-1 text-cmn-sm',
-  md: 'min-h-cmn-control-h px-cmn-4 py-cmn-2 text-cmn-md',
+  md: 'min-h-cmn-control-h px-cmn-4 py-cmn-1 text-cmn-md',
   lg: 'px-cmn-6 py-cmn-3 text-cmn-lg',
 };
 

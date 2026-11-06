@@ -14,9 +14,20 @@ sentence in [DESIGN.md](../DESIGN.md) (Layout, "The screen check") or the HIG.
 
 A page built on `cmn-page` marks itself `data-cmn-page="<kind>"` and its content column
 `data-cmn-page-column`. The check reads those to know the columns content may start on, so "one
-left edge" (C1) is measured against the template rather than guessed from the title: a list page
-has one column, and a notice, the title or a top-level block that starts anywhere else fails. A
-route without a template fails C0 and is checked against its title's left edge instead.
+left edge" (C1) is measured against the template rather than guessed from the title, and a page
+is held to the number of columns its kind intends:
+
+| Kind       | Columns | Reading width | Golden screens       |
+| ---------- | ------- | ------------- | -------------------- |
+| `list`     | 1       | 640px         | `Templates/List`     |
+| `detail`   | 1       | 720px         | `Templates/Detail`   |
+| `form`     | 1       | 640px         | `Templates/Form`     |
+| `settings` | 1       | 720px         | `Templates/Settings` |
+
+A page that declares a different number of columns than its kind intends fails C1, as does a
+notice, the title or a top-level block that starts off a declared column. A kind the check does not
+know yet is still held to the columns its page declares, only without a count. A route without a
+template fails C0 and is checked against its title's left edge instead.
 
 ## Wiring it into an app's CI
 
@@ -139,18 +150,22 @@ keeps loading after its data lands.
 
 ## The golden screens
 
-`Templates/List` in Storybook is the list template at 390 and 1280, light and dark, built from
-real components with realistic content. It passes the check with no findings, and it is what the
-owner approves once per template. Check it against a built catalog with:
+Each kind has golden screens in Storybook (`Templates/List`, `Templates/Detail`, `Templates/Form`
+and `Templates/Settings`): the template at 390 and 1280, light and dark, in the real shell, built
+from real components with realistic content. Every golden passes the check with no findings, and
+they are what the owner approves once per template. Check them against a built catalog with:
 
 ```bash
 npx lifekit-chrome-check screen \
   "http://127.0.0.1:6006/iframe.html?id=templates-list--phone&viewMode=story" \
-  "http://127.0.0.1:6006/iframe.html?id=templates-list--desktop-dark&viewMode=story"
+  "http://127.0.0.1:6006/iframe.html?id=templates-detail--desktop-dark&viewMode=story" \
+  "http://127.0.0.1:6006/iframe.html?id=templates-form--phone-dark&viewMode=story" \
+  "http://127.0.0.1:6006/iframe.html?id=templates-settings--desktop&viewMode=story"
 ```
 
 The golden screens are also held pixel for pixel, so a change that moves one is visible on the
 pull request that makes it: [SCREEN-BASELINES.md](SCREEN-BASELINES.md).
+The story ids are `templates-<kind>--<phone|phone-dark|desktop|desktop-dark>`.
 
 ## What it caught first
 

@@ -6,9 +6,21 @@ import {ButtonComponent} from '../button/button.component';
 let sectionCounter = 0;
 
 /**
+ * The section's divider and the space around it. In a `cmn-page-container spacing="none"` the
+ * section sets both. In a `cmn-page` column the template's section gap already sits between
+ * blocks, so the section drops its margin and keeps the same gap above its divider: the divider
+ * sits a section gap from the content on either side.
+ */
+const HOST_CLASSES =
+  'block border-b border-border-default pb-cmn-8 mb-cmn-8 last:mb-0 last:border-b-0 last:pb-0 ' +
+  '[[data-cmn-page-column]>&]:mb-0 ' +
+  '[[data-cmn-page-column]>&:not(:last-child)]:pb-cmn-section-gap';
+
+/**
  * One titled block of a Settings page. The heading, description and caption sit in a left column
- * from md up and stack above the content on phones. The section owns its divider and the space
- * below it, so a page is just sections stacked in a `cmn-page-container spacing="none"`.
+ * from md up and stack above the content on phones. The section owns its divider, so a page is
+ * just sections stacked in a `cmn-page kind="settings"` (or a `cmn-page-container
+ * spacing="none"`).
  *
  * Save model: toggles and selects inside a section apply immediately and need nothing here. A
  * section holding a text form sets `saveLabel`, which adds the standard per-section Save button;
@@ -18,10 +30,7 @@ let sectionCounter = 0;
   selector: 'cmn-settings-section',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ButtonComponent],
-  host: {
-    class:
-      'block border-b border-border-default pb-cmn-8 mb-cmn-8 last:mb-0 last:border-b-0 last:pb-0',
-  },
+  host: {class: HOST_CLASSES},
   template: `
     <section
       [attr.aria-labelledby]="headingId"

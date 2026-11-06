@@ -56,6 +56,17 @@ describe('SettingsSectionComponent', () => {
     expect(texts).toEqual(['Display and regional settings', 'On this device']);
   });
 
+  it('leaves the space between sections to a cmn-page column, keeping a section gap above its divider', () => {
+    fixture.detectChanges();
+    const classes = el().classList;
+    // In a cmn-page-container it draws its own divider and the space around it
+    expect(classes).toContain('border-b');
+    expect(classes).toContain('mb-cmn-8');
+    // In a cmn-page column the template's section gap is the space below the divider
+    expect(classes).toContain('[[data-cmn-page-column]>&]:mb-0');
+    expect(classes).toContain('[[data-cmn-page-column]>&:not(:last-child)]:pb-cmn-section-gap');
+  });
+
   it('projects its content next to the heading column', () => {
     const host = TestBed.createComponent(HostComponent);
     host.detectChanges();
