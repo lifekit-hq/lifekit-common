@@ -2,8 +2,8 @@ name: Update screen baselines
 
 # The one step that rewrites the screen baselines (docs/SCREEN-BASELINES.md). Run it from the
 # Actions tab on a branch whose screens changed on purpose: it renders them on the CI runner, the
-# machine every later run compares on, commits the changed images to that branch and starts CI on
-# it and posts the before and after images on the branch's pull request (a push made with the workflow
+# machine every later run compares on, commits the changed images to that branch, starts CI on it
+# and posts the before and after images on the branch's pull request (a push made with the workflow
 # token does not start the pull request run, so this does it itself). It never runs on its own and
 # never on main.
 on:
