@@ -163,8 +163,9 @@ npx lifekit-chrome-check screen \
   "http://127.0.0.1:6006/iframe.html?id=templates-settings--desktop&viewMode=story"
 ```
 
-The golden screens are also held pixel for pixel, so a change that moves one is visible on the
-pull request that makes it: [SCREEN-BASELINES.md](SCREEN-BASELINES.md).
+`Templates/List` is also held pixel for pixel, so a change that moves it is visible on the pull
+request that makes it: [SCREEN-BASELINES.md](SCREEN-BASELINES.md). Detail, Form and Settings join
+it when their first baselines are added.
 The story ids are `templates-<kind>--<phone|phone-dark|desktop|desktop-dark>`.
 
 ## What it caught first
