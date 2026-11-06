@@ -197,6 +197,44 @@ describe('defineScreenBaselines', () => {
     assert.deepEqual(shot.options.mask, []);
   });
 
+  it('loosens only the screens a route keys, over the route ratio, and leaves the rest exact', async () => {
+    const fake = fakePlaywright();
+    defineScreenBaselines(fake, {
+      routes: [
+        {
+          name: 'overview',
+          url: PAGE,
+          screenMaxDiffPixelRatio: {'overview-desktop-dark': 0.00002},
+        },
+        {
+          name: 'detail',
+          url: PAGE,
+          maxDiffPixelRatio: 0.01,
+          screenMaxDiffPixelRatio: {'detail-desktop-dark': 0.00002},
+        },
+      ],
+    });
+    const ratios = {};
+    for (const [title, scope] of [
+      ['overview dark', 'screen baseline desktop'],
+      ['overview light', 'screen baseline desktop'],
+      ['overview dark', 'screen baseline phone'],
+      ['detail dark', 'screen baseline desktop'],
+      ['detail light', 'screen baseline desktop'],
+    ]) {
+      await run(fake, title, scope);
+      const shot = fake.screenshots.at(-1);
+      ratios[shot.file] = shot.options.maxDiffPixelRatio;
+    }
+    assert.deepEqual(ratios, {
+      'overview-desktop-dark.png': 0.00002,
+      'overview-desktop-light.png': 0,
+      'overview-phone-dark.png': 0,
+      'detail-desktop-dark.png': 0.00002,
+      'detail-desktop-light.png': 0.01,
+    });
+  });
+
   it('skips off Linux, saying why, and is live on Linux', async () => {
     const fake = fakePlaywright();
     defineScreenBaselines(fake, {routes: [{name: 'list', url: PAGE}]});

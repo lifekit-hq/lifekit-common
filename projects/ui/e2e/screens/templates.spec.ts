@@ -8,15 +8,18 @@ import {expect, test} from '@playwright/test';
 const STORYBOOK_THEME = {light: 'light', dark: 'dark'} as const;
 
 // docs/SCREEN-BASELINES.md: the smallest ratio that is stable, at most 20 pixels of the desktop screen.
-const OVERVIEW_TOLERANCE = 20 / (1280 * 800);
+const AVATAR_EDGE_TOLERANCE = 20 / (1280 * 800);
 
 /** One golden screen: the template's `Templates/<Kind>` story, opened at the size and scheme under test. */
 function goldenScreen(kind: string): BaselineRoute {
   return {
     name: `templates-${kind}`,
-    // Overview's header avatar edge rasterises 1-2 colour levels apart between runs on the CI runner
-    // (one pixel at desktop dark, around x=1235, y=12), so this screen alone is allowed a few pixels.
-    ...(kind === 'overview' ? {maxDiffPixelRatio: OVERVIEW_TOLERANCE} : {}),
+    // The anti-aliased edge of the header avatar initials 'AM' rasterises 1-2 colour levels apart
+    // between runs on the CI runner (one pixel at around x=1235, y=12), so overview desktop dark
+    // alone is allowed a few pixels; every other screen compares exactly.
+    ...(kind === 'overview'
+      ? {screenMaxDiffPixelRatio: {'templates-overview-desktop-dark': AVATAR_EDGE_TOLERANCE}}
+      : {}),
     url: ({scheme}) =>
       `/iframe.html?id=templates-${kind}--phone&viewMode=story&globals=theme:${STORYBOOK_THEME[scheme]}`,
     ready: async page => {

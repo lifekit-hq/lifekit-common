@@ -81,13 +81,21 @@ For each route it registers one test per size and scheme (`list light`, `list da
   DOM quiet) and compares it with `<name>-<size>-<scheme>-chromium-linux.png` beside the spec.
 
 Options per route: `fullPage` for a page that scrolls (default is the viewport, the screen as
-shown), `mask` for what legitimately changes, and `maxDiffPixelRatio` to loosen one screen. The fixture
-never loosens by default; a loosened ratio is an exception and needs a one-line reason next to it,
-like a screen-check exception. `sizes` and `schemes` on the call narrow the matrix.
+shown), `mask` for what legitimately changes, `maxDiffPixelRatio` to loosen every screen of the
+route, and `screenMaxDiffPixelRatio` to loosen single screens, keyed by baseline name without
+`.png` (`{'templates-overview-desktop-dark': ratio}`); a screen's own key wins over the route's
+ratio, and every unkeyed screen stays exact. The fixture never loosens by default; a loosened ratio
+is an exception and needs a one-line reason next to it, like a screen-check exception. `sizes` and `schemes` on the call narrow the matrix.
 
 If the `screens` job on the CI runner is flaky with no source change (regenerate and compare twice
 to tell), do not widen the default. Set the smallest ratio that is stable on that screen, at most 20
 pixels' worth (`20 / (width * height)`), on the route that needs it, with the reason beside it.
+
+Exceptions in use:
+
+- `templates-overview-desktop-dark` (`projects/ui/e2e/screens/templates.spec.ts`): 20 pixels' worth.
+  The anti-aliased edge of the header avatar initials 'AM' rasterises 1-2 colour levels apart
+  between runs on the CI runner (one pixel at around x=1235, y=12).
 
 Images are CSS pixels (`scale: 'css'`): 390 and 1280 wide whatever the device scale factor.
 

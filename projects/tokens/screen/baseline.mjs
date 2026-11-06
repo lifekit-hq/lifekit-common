@@ -30,7 +30,7 @@ export const BASELINE_SIZES = Object.freeze(['phone', 'desktop']);
  * not the machine's pixel density. The comparison is exact: no differing pixel and no per-pixel
  * colour slack, because a baseline is drawn and compared on the same CI runner image, so a change
  * of a word or a shade is never under the tolerance. A route may loosen its own
- * `maxDiffPixelRatio`, as an exception with a one-line reason (docs/SCREEN-BASELINES.md).
+ * `maxDiffPixelRatio`, or one of its screens through `screenMaxDiffPixelRatio`, as an exception with a one-line reason (docs/SCREEN-BASELINES.md).
  */
 export const SCREEN_BASELINE_OPTIONS = Object.freeze({
   animations: 'disabled',
@@ -112,18 +112,16 @@ export function defineScreenBaselines(
               typeof route.url === 'function' ? route.url({size, scheme}) : route.url
             );
             await route.ready?.(page, {size, scheme});
-            await captureScreenBaseline(
-              page,
-              expect(page),
-              screenBaselineName({name: route.name, size, scheme}),
-              {
-                fullPage: route.fullPage,
-                mask: route.mask?.(page) ?? [],
-                ...(route.maxDiffPixelRatio === undefined
-                  ? {}
-                  : {maxDiffPixelRatio: route.maxDiffPixelRatio}),
-              }
-            );
+            const file = screenBaselineName({name: route.name, size, scheme});
+            // The screen's own ratio (keyed by its baseline name, without `.png`) wins over the route's.
+            const maxDiffPixelRatio =
+              route.screenMaxDiffPixelRatio?.[file.replace(/\.png$/, '')] ??
+              route.maxDiffPixelRatio;
+            await captureScreenBaseline(page, expect(page), file, {
+              fullPage: route.fullPage,
+              mask: route.mask?.(page) ?? [],
+              ...(maxDiffPixelRatio === undefined ? {} : {maxDiffPixelRatio}),
+            });
           });
         }
       }
