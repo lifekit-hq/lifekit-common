@@ -12,8 +12,10 @@ interface PageStoryArgs {
 }
 
 /**
- * `cmn-page` on its own, outside the app shell: the frame, the title and the list column. The
- * golden screens (Templates/List) show it composed in the shell at the sizes the owner approves.
+ * `cmn-page` on its own, outside the app shell: the frame, the title and the kind's column (pick
+ * the kind to see its reading width). The golden screens (Templates/List, Templates/Detail,
+ * Templates/Form and Templates/Settings) show each kind composed in the shell at the sizes the
+ * owner approves.
  */
 const meta: Meta<PageStoryArgs> = {
   title: 'Components/Page',
@@ -21,7 +23,7 @@ const meta: Meta<PageStoryArgs> = {
   tags: ['autodocs'],
   parameters: {layout: 'fullscreen'},
   argTypes: {
-    kind: {control: 'select', options: ['list'] satisfies PageKind[]},
+    kind: {control: 'select', options: ['list', 'detail', 'form', 'settings'] satisfies PageKind[]},
     fill: {control: 'boolean'},
   },
   args: {kind: 'list', title: 'Reading list', fill: false},

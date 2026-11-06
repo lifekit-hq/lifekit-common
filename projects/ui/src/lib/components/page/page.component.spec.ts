@@ -5,20 +5,21 @@ import {beforeEach, describe, expect, it} from 'vitest';
 
 import {AppLayoutComponent} from '../app-layout/app-layout.component';
 import {PageFrameService} from '../app-layout/page-frame';
-import {PageComponent} from './page.component';
+import {PAGE_TEMPLATES, PageComponent, type PageKind} from './page.component';
 
 describe('PageComponent', () => {
   @Component({
     imports: [PageComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
     template: `
-      <cmn-page [title]="title()" [fill]="fill()">
+      <cmn-page [kind]="kind()" [title]="title()" [fill]="fill()">
         <p class="first">First block</p>
         <p class="second">Second block</p>
       </cmn-page>
     `,
   })
   class HostComponent {
+    public readonly kind = signal<PageKind>('list');
     public readonly title = signal('Tasks');
     public readonly fill = signal(false);
   }
@@ -67,6 +68,32 @@ describe('PageComponent', () => {
     expect(column().classList).toContain('flex-col');
     expect(column().querySelector('.first')).not.toBeNull();
     expect(column().querySelector('.second')).not.toBeNull();
+  });
+
+  it.each([
+    ['detail', 'max-w-[720px]'],
+    ['form', 'max-w-[640px]'],
+    ['settings', 'max-w-[720px]'],
+  ] as const)('marks a %s page and gives its one column the %s reading width', (kind, width) => {
+    fixture.componentInstance.kind.set(kind);
+    fixture.detectChanges();
+    expect(page().getAttribute('data-cmn-page')).toBe(kind);
+    expect(page().querySelectorAll('[data-cmn-page-column]')).toHaveLength(1);
+    expect(column().classList).toContain(width);
+    expect(column().classList).toContain('gap-cmn-section-gap');
+    for (const other of Object.values(PAGE_TEMPLATES)) {
+      if (other.column !== width) {
+        expect(column().classList).not.toContain(other.column);
+      }
+    }
+  });
+
+  it('keeps every kind inside the 640 to 720px reading band', () => {
+    for (const template of Object.values(PAGE_TEMPLATES)) {
+      const width = Number(/max-w-\[(\d+)px\]/.exec(template.column)?.[1]);
+      expect(width).toBeGreaterThanOrEqual(640);
+      expect(width).toBeLessThanOrEqual(720);
+    }
   });
 
   it('becomes a full-height column that the shell bounds when it fills', () => {

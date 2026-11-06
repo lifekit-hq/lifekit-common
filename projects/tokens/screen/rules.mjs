@@ -80,7 +80,7 @@ export const SCREEN_RULES = [
 export function inspectScreen(options = {}) {
   // Columns each template kind declares. A kind not listed here is still checked against the
   // columns its page declares, only without a count to hold it to.
-  const KIND_COLUMNS = {list: 1};
+  const KIND_COLUMNS = {list: 1, detail: 1, form: 1, settings: 1};
   const TITLE_GAP_MIN = 16;
   const SURFACE_GAP_MIN = 8;
   const HEIGHT_TOLERANCE = 1;

@@ -39,6 +39,7 @@ function byDocumentOrder(a: ErrorSummaryField, b: ErrorSummaryField): number {
 @Component({
   selector: 'cmn-error-summary',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {'[hidden]': '!shown()'},
   template: `
     @if (shown()) {
       <div

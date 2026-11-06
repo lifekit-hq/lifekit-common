@@ -99,7 +99,8 @@ and mask the rest. A baseline that depends on the day it was taken fails on the 
 
 ## The reference app: lifekit-common
 
-The golden screens of the page templates (`Templates/List` in Storybook) are the reference app. Their
+The golden screens of the page templates (today `Templates/List` in Storybook; Detail, Form and
+Settings follow once their baselines are added) are the reference app. Their
 spec is `projects/ui/e2e/screens/templates.spec.ts`, their config `projects/ui/playwright.screens.config.ts`,
 and their baselines sit in `projects/ui/e2e/screens/templates.spec.ts-snapshots/`.
 
@@ -153,3 +154,11 @@ Review of the images is the approval. `.github/CODEOWNERS` lists the baselines u
 GitHub requests their review whenever one changes. It becomes a requirement when the repository's
 branch protection turns on "Require review from Code Owners"; that setting is the repository's, not
 this change's.
+
+## Component VRT baselines (Windows)
+
+The component VRT baselines under `projects/ui/e2e/screenshots` are `*-win32.png` files captured on
+the owner's Windows machine. They cannot be regenerated on CI or Linux. The `md` button's block
+padding is now `py-cmn-1`, so a bordered secondary `md` button is 40px, not 42px, on the desktop:
+the `button-*-chromium-win32.png` baselines are stale and need regenerating on the owner's Windows
+machine.

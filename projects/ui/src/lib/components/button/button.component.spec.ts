@@ -47,6 +47,10 @@ describe('ButtonComponent', () => {
   it('gives the md button at least the control height the md field beside it has', () => {
     fixture.detectChanges();
     expect(button()?.className).toContain('min-h-cmn-control-h');
+    // A one-line label plus this padding stays under the control height, border included, so the
+    // bordered secondary is as tall as the primary beside it.
+    expect(button()?.className).toContain('py-cmn-1');
+    expect(button()?.className).not.toContain('py-cmn-2');
     fixture.componentRef.setInput('size', 'sm');
     fixture.detectChanges();
     expect(button()?.className).not.toContain('min-h-cmn-control-h');

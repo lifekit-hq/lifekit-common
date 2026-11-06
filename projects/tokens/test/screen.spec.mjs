@@ -161,6 +161,26 @@ describe('template-aware one left edge (C1)', () => {
     );
   });
 
+  for (const kind of ['detail', 'form', 'settings']) {
+    it(`holds a ${kind} page to its one column`, async () => {
+      const page = PASSING.replace('data-cmn-page="list"', `data-cmn-page="${kind}"`);
+      const clean = await inspect(page, 'desktop');
+      assert.equal(clean.kind, kind);
+      assert.deepEqual(clean.findings, [], formatScreen(clean));
+      const html = page.replace(
+        '</h1>',
+        '</h1><div data-cmn-page-column style="max-width: 200px"><p>A second column</p></div>'
+      );
+      const {findings} = await inspect(html, 'desktop');
+      assert.ok(
+        findings.some(finding =>
+          new RegExp(`a ${kind} page has 1 column\\(s\\); this one has 2`).test(finding.message)
+        ),
+        findings.map(finding => finding.message).join()
+      );
+    });
+  }
+
   it('accepts a declared second column for a kind that is not held to a count', async () => {
     const html = PASSING.replace('data-cmn-page="list"', 'data-cmn-page="overview"');
     const result = await inspect(html, 'desktop');
