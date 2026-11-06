@@ -116,14 +116,14 @@ components:
 
 **Creative North Star: "The Instrument"**
 
-lifekit's interface is a precision instrument for reading money: flat, quiet surfaces, one engineered sans family, a single petrol accent, and figures that line up. Nothing decorates; every pixel serves reading a balance, a transaction or a status correctly at a glance. Density serves daily checking on desktop and phone, in light and dark.
+lifekit's interface is a precision instrument for reading your own data: flat, quiet surfaces, one engineered sans family, a single petrol accent, and figures that line up. Nothing decorates; every pixel serves reading a value, a record or a status correctly at a glance. Density serves daily checking on desktop and phone, in light and dark.
 
-This page is the look. How the interface behaves (loading and empty states, feedback, form validation, tables, keyboard, charts and money) follows the published sources adopted in [docs/design/guardrails.md](docs/design/guardrails.md), which also names the check behind each rule.
+This page is the look, for every lifekit app: templates, rhythm tokens and components. How the interface behaves (loading and empty states, feedback, form validation, tables, keyboard, charts and number formatting) follows the published sources adopted in [docs/design/guardrails.md](docs/design/guardrails.md), which also names the check behind each rule. What a domain's figures mean and how they read belongs to that app's own pattern page, not here; money is Finance Sentry's, [docs/design/patterns.md](https://github.com/lifekit-hq/finance-sentry/blob/main/docs/design/patterns.md) in its repository.
 
 **Characteristics:**
 
-- One family: IBM Plex Sans (variable 100-700, self-hosted, Cyrillic) for every role; Plex Mono for code only. Money is set in the text face.
-- Tabular figures everywhere, so amount columns align even where a component forgets `tabular-nums`.
+- One family: IBM Plex Sans (variable 100-700, self-hosted, Cyrillic) for every role; Plex Mono for code only.
+- Tabular figures everywhere, so number columns align even where a component forgets `tabular-nums`.
 - Petrol accent (`#175a6d`, dark `#5aa9bb`) on cool graphite; status colours at text grade: blue `#2557b0`, green `#0e7446`, amber `#955400`, red `#bb2530`. Info has its own hue and never reads as a second accent.
 - Flat surfaces: a hairline border or a shadow, never both. Shadow is reserved for overlays (menu, tooltip, dialog, sheet); the menu, tooltip, dialog and command palette also carry a hairline border so they keep an edge on dark surfaces.
 - Tight radii: 3 / 6 / 8px.
@@ -235,9 +235,9 @@ The D16 decision: the tab bar and the top bar blur what scrolls under them (`bac
 - **Chips:** pill, `surface-raised` fill; selected fills with the accent.
 - **Cards:** hairline border, `surface-card`, 12/16/24px padding. Never nested.
 - **Inputs:** `border-strong` border (3:1), accent focus ring, red border plus helper text for errors. Errors show when the form is submitted and clear as soon as the field is fixed (GOV.UK); the text says what went wrong and how to fix it, with no "please", "sorry", "valid" or "invalid".
-- **Data table / list rows:** sentence-case headers, hairline dividers, right-aligned tabular amounts. A row's action is a quiet trailing icon (`cmn-list-item-row` `trailingIcon`), not a bordered text button repeated on three or more rows.
+- **Data table / list rows:** sentence-case headers, hairline dividers, right-aligned tabular numbers. A row's action is a quiet trailing icon (`cmn-list-item-row` `trailingIcon`), not a bordered text button repeated on three or more rows.
 - **List sections:** the heading is body size, semibold, in the secondary text colour, sentence case, with the group gap under it.
-- **Stat card:** the balance is the content. Value in the text face with tabular figures; no uppercase label, no decorative accent. The hero-metric layout is deliberately kept for this product.
+- **Stat card:** the value is the content. Value in the text face with tabular figures; no uppercase label, no decorative accent.
 - **Navigation:** sidebar rows with accent-subtle active fill; bottom tab bar on phones.
 
 ## Do's and Don'ts
@@ -246,11 +246,10 @@ The D16 decision: the tab bar and the top bar blur what scrolls under them (`bac
 
 - **Do** use only `--color-*`, `--font-*`, `--radius-*`, `--shadow-*` and `cmn-*` tokens.
 - **Do** check every story in light and dark.
-- **Do** keep money in the text face with tabular figures, formatted by `cmnMoney` / `formatMoney` (symbol first, a sign on deltas), never a local `Intl.NumberFormat`.
 
 ### Don't:
 
 - **Don't** change the root font size in a consumer.
 - **Don't** put white text on status or dark-accent fills.
 - **Don't** use a border and a shadow on the same container (menu, tooltip, dialog and command palette excepted), or nest cards.
-- **Don't** use monospace for money, or uppercase tracked labels.
+- **Don't** use monospace outside code, or uppercase tracked labels.
