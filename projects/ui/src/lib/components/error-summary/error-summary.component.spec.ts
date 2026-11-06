@@ -96,9 +96,21 @@ describe('ErrorSummaryComponent', () => {
     fixture.detectChanges();
   }
 
+  const summaryHost = (): HTMLElement => root().querySelector('cmn-error-summary') as HTMLElement;
+
   it('draws nothing before the form is submitted', () => {
     fixture.detectChanges();
     expect(summary()).toBeNull();
+  });
+
+  it('takes no space while nothing is shown, so a flex column adds no gap for it', async () => {
+    fixture.detectChanges();
+    expect(getComputedStyle(summaryHost()).display).toBe('none');
+    await submit();
+    expect(getComputedStyle(summaryHost()).display).not.toBe('none');
+    host.form.reset();
+    fixture.detectChanges();
+    expect(getComputedStyle(summaryHost()).display).toBe('none');
   });
 
   it('draws nothing on a submit without errors', async () => {
