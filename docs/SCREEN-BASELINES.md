@@ -97,6 +97,9 @@ Exceptions in use:
 - `templates-overview-desktop-dark` (`projects/ui/e2e/screens/templates.spec.ts`): 20 pixels' worth.
   The anti-aliased edge of the header avatar initials 'AM' rasterises 1-2 colour levels apart
   between runs on the CI runner (one pixel at around x=1235, y=12).
+- `templates-overview-phone-dark` (same spec): 20 pixels' worth. The anti-aliased rounded corners
+  of the stat cards (x=16-17, y=120-219) rasterise 1 colour level apart between runs on the CI
+  runner (2 pixels counted).
 
 Images are CSS pixels (`scale: 'css'`): 390 and 1280 wide whatever the device scale factor.
 
