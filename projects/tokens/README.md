@@ -6,7 +6,7 @@ Design tokens for the lifekit ecosystem, framework-agnostic.
   `[data-theme='light']`); the dark theme applies under `[data-theme='dark']`. The file has no
   `prefers-color-scheme` media query. To follow the OS, the app sets `data-theme` on `<html>`: the
   pre-paint script in `brand` does it before first paint, and `ThemeService` keeps it live. It also owns the font (`--font-sans`, `--font-mono`),
-  radius (`--radius-sm/md/lg` are `0`, square, and `--radius-full` is the pill), shadow (`--shadow-sm/md/lg`) and touch-target (`--size-touch`,
+  radius (`--radius-sm/md/lg` are `0px`, square, and `--radius-full` is the pill), shadow (`--shadow-sm/md/lg`) and touch-target (`--size-touch`,
   44px) tokens and
   `--color-surface-hover`, each light and dark where themed. It sets `color-scheme` per theme, and
   the `html` background and text colour, so the canvas follows the active theme. A
