@@ -76,6 +76,10 @@ permissions:
   pull-requests: write
   packages: read
 
+# @carbon/styles (a tokens devDependency) runs IBM's telemetry postinstall; keep it off in CI.
+env:
+  IBM_TELEMETRY_DISABLED: 'true'
+
 jobs:
   render:
     # A pull request run (the `labeled` event) is the caller's own branch; a fork's token cannot push.

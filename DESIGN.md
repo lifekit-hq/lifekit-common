@@ -132,6 +132,10 @@ This page is the look, for every lifekit app: templates, rhythm tokens and compo
 
 Cool graphite neutrals with a single petrol voice (restrained: accent only for the primary action, selection, focus and state). Dark graphite is `#0c1113` with cards at `#141b1e`; petrol stays legible without glow.
 
+### Carbon bridge
+
+The owner chose IBM Carbon as the design system (epic #279). Step 0 puts its colour layer in place without changing a pixel: `@lifekit-hq/tokens/carbon-bridge.css` points Carbon's semantic `--cds-*` names (layers, fields, borders, text, icons, links, focus, status, buttons, tags) at our `--color-*` roles. Carbon reads colour only as `var(--cds-NAME, fallback)`, so the bridge needs no Sass theme per app: a Carbon-specced value follows each app's seed palette, and `[data-theme]` flips light and dark because the roles already do. Our look is Carbon's g10 shape (grey ground, white layers and fields), so the mapping is near one-to-one. The file is generated from `theme.css` and `scripts/carbon-bridge-map.mjs`, never hand-edited, and its test covers light and dark for two seeds. `@carbon/styles` is a devDependency of the tokens package only, so no app ships Carbon. Carbon's cyan, teal, purple, cool-gray and warm-gray tags are not mapped (we have four status hues) and keep Carbon's colours until a decision is taken.
+
 ### Named Rules
 
 **The Token-Only Rule.** Components use only `--color-*` tokens; no colour literals in components.

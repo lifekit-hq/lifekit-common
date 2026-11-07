@@ -17,6 +17,10 @@ concurrency:
   group: pages
   cancel-in-progress: true
 
+# @carbon/styles (a tokens devDependency) runs IBM's telemetry postinstall; keep it off in CI.
+env:
+  IBM_TELEMETRY_DISABLED: 'true'
+
 jobs:
   build-deploy:
     runs-on: ubuntu-latest
