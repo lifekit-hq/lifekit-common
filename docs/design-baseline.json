@@ -52,6 +52,12 @@
       "reason": "These shell stories declare no page title, so the only h1 is the top bar's inline nav-bar title (16px) over body-size sentence-case day headings (h2, 14px); the templated large-title hierarchy is held by the Templates/List golden stories."
     },
     {
+      "rule": "first-viewport-column-overflow",
+      "stories": ["templates-overview--desktop-with-long-body"],
+      "match": "cmn-page-columns",
+      "reason": "The overview template's own 320px rail beside a body that runs on below the fold, shown on purpose by a three-screen body; the route scan takes the same row without an exception (docs/ROUTE-SCAN.md)."
+    },
+    {
       "rule": "text-overflow",
       "stories": ["directives-tooltip--truncated"],
       "match": "truncate",
