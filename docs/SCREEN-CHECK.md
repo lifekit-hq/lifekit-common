@@ -106,6 +106,18 @@ ramp's line-height is. A literal such as `height="1.875rem"` was right while the
 (`shape`) already follow the ramp, and `e2e/phone/skeleton-exact.spec.ts` holds each pair, and a
 hero card with a figure, to the same height to the sub-pixel at 390 and 1280.
 
+What an app sets so its skeleton matches its own content, since the library cannot know it:
+
+| Skeleton stands in for                            | Input the app sets                                        |
+| ------------------------------------------------- | --------------------------------------------------------- |
+| a line of text (a figure, a label, a heading)     | `text` with the step the loaded text uses (`"2xl"`)       |
+| a library component (stat card, chart card, rows) | `shape` (`stat`, `chart`, `row`, `section`), plus `count` |
+| a chart or image the app sizes itself             | `height` (or `aspect`) equal to the loaded box, measured  |
+| a block whose height the app fixes (a `h-5` slot) | the same fixed height on both sides                       |
+
+A measured `height` is the app's own content dimension and has to be re-measured when the loaded
+content's box changes (a type-ramp change moves a chart card's label line by a fraction of a pixel).
+
 For a route it visits the page with its data requests held, so the page stays in its skeleton
 state, and measures the page's top-level sections. It then releases the requests, waits for the
 page to settle (the same settling as `checkScreen`) and measures the sections again. A section
