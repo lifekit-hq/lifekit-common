@@ -25,6 +25,21 @@ describe('SkeletonComponent', () => {
     expect(bar()?.style.height).toBe('1.25rem');
   });
 
+  it('stands in for one line of a step of the type ramp, as tall as that line', () => {
+    fixture.componentRef.setInput('text', '2xl');
+    fixture.componentRef.setInput('width', '50%');
+    fixture.componentRef.setInput('height', '9rem');
+    fixture.detectChanges();
+    const host = fixture.nativeElement as HTMLElement;
+    const line = host.querySelector('div') as HTMLElement;
+    const sweep = line.querySelector('.cmn-skeleton-sweep') as HTMLElement;
+    expect(line.className).toContain('text-cmn-2xl');
+    expect(line.style.height).toBe('1lh');
+    expect(sweep.style.width).toBe('50%');
+    expect(sweep.style.height).toBe('0.75em');
+    expect(host.classList).toContain('block');
+  });
+
   it('honours explicit dimensions', () => {
     fixture.componentRef.setInput('width', '8rem');
     fixture.componentRef.setInput('height', '3rem');

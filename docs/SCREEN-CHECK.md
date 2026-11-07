@@ -99,6 +99,13 @@ page's skeleton must lay out like the page it stands in for, so nothing jumps wh
 The presets are held to this one at a time (`skeleton-conformance.stories.ts`, guardrail S1); this
 holds a whole route, which until now was only caught by eye.
 
+Size a skeleton for text from the type ramp, not from a rem you worked out once: `<cmn-skeleton
+text="2xl" />` is a bar on one line of `text-cmn-2xl`, as tall as that line is (`1lh`) whatever the
+ramp's line-height is. A literal such as `height="1.875rem"` was right while the ramp's 2xl line was
+1.25 and is 1.2px short since it became 1.3, so the card grew when its figure arrived. The presets
+(`shape`) already follow the ramp, and `e2e/phone/skeleton-exact.spec.ts` holds each pair, and a
+hero card with a figure, to the same height to the sub-pixel at 390 and 1280.
+
 For a route it visits the page with its data requests held, so the page stays in its skeleton
 state, and measures the page's top-level sections. It then releases the requests, waits for the
 page to settle (the same settling as `checkScreen`) and measures the sections again. A section
