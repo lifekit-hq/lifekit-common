@@ -3,20 +3,6 @@
   "accepted": [
     {
       "rule": "low-contrast",
-      "stories": [
-        "components-button--disabled",
-        "components-dangerzone--disabled",
-        "components-pageheader--action-disabled",
-        "components-settingssection--save-disabled-until-dirty",
-        "components-settingssection--saving",
-        "patterns-settings-page--*",
-        "templates-settings--*"
-      ],
-      "match": "opacity stack",
-      "reason": "A disabled control is dimmed on purpose; WCAG 1.4.3 exempts inactive components."
-    },
-    {
-      "rule": "low-contrast",
       "stories": ["components-topbar--overlay"],
       "match": "backdrop filter",
       "reason": "The frosted bar's median contrast is above 8:1; the low tail is content scrolling under the blur."
@@ -47,12 +33,6 @@
       "stories": ["components-app-layout--*"],
       "max": 4,
       "reason": "Detector false positive: the shell CSS-hides the nav it is not using (the sidebar on a phone, the tab bar elsewhere); a badge in that display:none subtree has no box, so its negative offsets read as escaping the clip."
-    },
-    {
-      "rule": "clipped-overflow-container",
-      "stories": ["templates-settings--*"],
-      "max": 4,
-      "reason": "Detector false positive: the toggles and the select below the fold sit in the shell's scrolling main, so they scroll into view; the detector reads a positioned control under the fold of the overflow-hidden shell as clipped."
     },
     {
       "rule": "nested-cards",
@@ -100,7 +80,7 @@
     "scans": 976,
     "total": 180,
     "groups": {
-      "low-contrast": 18,
+      "low-contrast": 2,
       "undersized-and-tiny-text": 0,
       "overused-font": 0,
       "layout-transition": 0,
@@ -112,7 +92,7 @@
       "flat-type-hierarchy": 2,
       "marquee": 38,
       "pulsing-dot": 10,
-      "low-contrast": 18,
+      "low-contrast": 2,
       "gpt-thin-border-wide-shadow": 8
     }
   }

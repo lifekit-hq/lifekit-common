@@ -1,7 +1,9 @@
 /**
  * The screen-composition check: run it from an app's Playwright e2e against each route, at the
  * phone and the desktop size, once the data has settled. See docs/SCREEN-CHECK.md in
- * lifekit-common for wiring it into CI; `lifekit-chrome-check screen <url>` runs it ad hoc.
+ * lifekit-common for wiring it into CI; `lifekit-chrome-check screen <url>` runs it ad hoc. The
+ * same settled page also goes through the design judge and axe-core: `defineRouteScans`
+ * (docs/ROUTE-SCAN.md).
  *
  *   import {checkScreen, formatScreen, SCREEN_VIEWPORTS} from '@lifekit-hq/tokens/screen';
  *
@@ -30,6 +32,29 @@ export {
   screenBaselineName,
 } from './baseline.mjs';
 export {settleScreen} from './settle.mjs';
+export {
+  IMPECCABLE_ENGINES,
+  IMPECCABLE_VERSION,
+  pinnedEnginePath,
+  resolveEngine,
+} from './engine.mjs';
+export {freezeScreen, serveFrozen} from './freeze.mjs';
+export {
+  assertScheme,
+  AXE_TAGS,
+  BLOCKING_IMPACTS,
+  blockingAxeViolations,
+  blockingDesignFindings,
+  defineRouteScans,
+  formatRouteScan,
+  ROUTE_SCAN_TIMEOUT_MS,
+  runAxe,
+  SCAN_SCHEMES,
+  SCAN_SIZES,
+  SCHEME_ATTRIBUTE,
+  scanRoute,
+  validateExceptions,
+} from './route-scan.mjs';
 export {SCREEN_VIEWPORTS} from './viewports.mjs';
 export {
   checkSkeleton,

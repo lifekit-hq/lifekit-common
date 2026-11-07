@@ -66,6 +66,9 @@ Design tokens for the lifekit ecosystem, framework-agnostic.
   1280, light and dark, against committed Linux baselines, with the before and after images
   attached to any pull request that changes one
   ([`docs/SCREEN-BASELINES.md`](../../docs/SCREEN-BASELINES.md)).
+  `defineRouteScans({test, expect}, {routes})` is the judge's sibling: every route at 390 and 1280,
+  light and dark, once settled, frozen and read by the impeccable design judge and by axe-core
+  ([`docs/ROUTE-SCAN.md`](../../docs/ROUTE-SCAN.md)).
 
 ```js
 // tailwind.config.js

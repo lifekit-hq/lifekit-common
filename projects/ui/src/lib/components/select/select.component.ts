@@ -251,7 +251,9 @@ const POSITIONS: ConnectedPosition[] = [
         </div>
       </ng-template>
     } @else {
-      <div class="cmn-select relative w-full">
+      <!-- The chevron shares the select's grid cell instead of floating over it: an absolutely
+           positioned child below the fold reads as clipped to the design judge's route scan. -->
+      <div class="cmn-select grid w-full grid-cols-1">
         <select
           #native
           [class]="selectClasses()"
@@ -277,7 +279,7 @@ const POSITIONS: ConnectedPosition[] = [
         <cmn-icon
           [size]="iconSize()"
           name="ChevronDown"
-          class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-text-secondary"
+          class="pointer-events-none col-start-1 row-start-1 mr-2 self-center justify-self-end text-text-secondary"
         />
       </div>
     }
@@ -330,7 +332,7 @@ export class SelectComponent implements ControlValueAccessor {
   public readonly iconSize = computed(() => ICON_SIZE[this.size()]);
   public readonly selectClasses = computed(() =>
     [
-      'block appearance-none pl-cmn-2 pr-8',
+      'col-start-1 row-start-1 block appearance-none pl-cmn-2 pr-8',
       FIELD_BASE,
       this.hasError() ? 'border-status-error' : 'border-border-strong',
       SIZE_CLASSES[this.size()],

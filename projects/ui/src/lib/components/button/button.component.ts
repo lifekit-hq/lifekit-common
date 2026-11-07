@@ -38,7 +38,15 @@ const ICON_SIZE: Record<ButtonSize, 'sm' | 'md'> = {
   lg: 'md',
 };
 
-const DISABLED_CLASSES = 'opacity-50 pointer-events-none cursor-not-allowed';
+// A disabled button is drawn in its own colours, not the variant's dimmed: opacity over an accent
+// fill leaves the label near 1:1 on its ground. The grey fill (or, for the secondary, the quiet
+// border) and the secondary text colour hold 4.5:1 on card, ground and raised surfaces in both themes.
+const DISABLED_VARIANT_CLASSES: Record<ButtonVariant, string> = {
+  primary: 'bg-surface-raised text-text-secondary',
+  secondary: 'bg-transparent border border-border-default text-text-secondary',
+  destructive: 'bg-surface-raised text-text-secondary',
+};
+const DISABLED_CLASSES = 'pointer-events-none cursor-not-allowed';
 /** A busy button is not dimmed: its label stays at full contrast while the spinner turns. */
 const BUSY_CLASSES = 'pointer-events-none';
 
@@ -85,8 +93,10 @@ export class ButtonComponent {
   public readonly clicked = output<MouseEvent>();
 
   public readonly classes = computed(() => {
-    const parts = [BASE_CLASSES, VARIANT_CLASSES[this.variant()], SIZE_CLASSES[this.size()]];
-    if (this.disabled()) {
+    const disabled = this.disabled();
+    const variant = disabled ? DISABLED_VARIANT_CLASSES : VARIANT_CLASSES;
+    const parts = [BASE_CLASSES, variant[this.variant()], SIZE_CLASSES[this.size()]];
+    if (disabled) {
       parts.push(DISABLED_CLASSES);
     } else if (this.loading()) {
       parts.push(BUSY_CLASSES);

@@ -102,10 +102,25 @@ describe('ButtonComponent', () => {
 
     expect(button()?.className).not.toContain('opacity-50');
     expect(button()?.className).toContain('pointer-events-none');
+  });
 
+  it('draws a disabled button in its own colours, never the variant dimmed', () => {
+    const drawn = {
+      primary: ['bg-surface-raised', 'text-text-secondary'],
+      secondary: ['bg-transparent', 'border-border-default', 'text-text-secondary'],
+      destructive: ['bg-surface-raised', 'text-text-secondary'],
+    } as const;
     fixture.componentRef.setInput('disabled', true);
-    fixture.detectChanges();
-    expect(button()?.className).toContain('opacity-50');
+    for (const [variant, classes] of Object.entries(drawn)) {
+      fixture.componentRef.setInput('variant', variant);
+      fixture.detectChanges();
+      const className = button()?.className ?? '';
+      for (const name of classes) {
+        expect(className).toContain(name);
+      }
+      expect(className).not.toMatch(/opacity-|bg-accent-default|bg-status-error/);
+      expect(className).toContain('pointer-events-none');
+    }
   });
 
   it('drops aria-busy when not loading', () => {
