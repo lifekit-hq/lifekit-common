@@ -70,6 +70,18 @@ describe('LkChipRow', () => {
     expect(counts).toEqual([null, '12', null, null]);
   });
 
+  it('shows no badge until the count has loaded: null and unset draw nothing, a loaded zero shows', async () => {
+    const el = await mount({
+      options: [
+        {value: 'open', label: 'Open'},
+        {value: 'blocked', label: 'Blocked', count: null},
+        {value: 'closed', label: 'Closed', count: 0},
+      ],
+    });
+    const counts = chips(el).map(c => c.querySelector('.count')?.textContent ?? null);
+    expect(counts).toEqual([null, null, '0']);
+  });
+
   it('moves the single selection to the pressed chip and reports it', async () => {
     const el = await mount({selected: ['week']});
     const seen = changes(el);

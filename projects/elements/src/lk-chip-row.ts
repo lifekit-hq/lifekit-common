@@ -14,8 +14,12 @@ export interface ChipRowOption {
   value: string;
   /** The chip's text, shown whole on one line: the row scrolls, a label never truncates. */
   label: string;
-  /** A count shown as a badge after the label, e.g. how many rows the filter matches. */
-  count?: number;
+  /**
+   * A count shown as a badge after the label, e.g. how many rows the filter matches. Leave it unset
+   * (or `null`) until the count has loaded: the chip then shows no badge at all instead of a "0"
+   * that is not true yet. A loaded zero is a real count and shows.
+   */
+  count?: number | null;
   /** Takes the chip out of the tab order; it cannot be pressed. */
   disabled?: boolean;
 }
@@ -320,7 +324,7 @@ export class LkChipRow extends LitElement {
               <span class="pill">
                 ${option.label}
                 ${
-                  option.count === undefined
+                  option.count === undefined || option.count === null
                     ? nothing
                     : html`<span class="count">${option.count}</span>`
                 }

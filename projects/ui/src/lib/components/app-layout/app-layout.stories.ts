@@ -927,6 +927,7 @@ const ACCOUNT_STANDARD_TEMPLATE = `
     [moreRoute]="moreRoute"
     [accountOnPhone]="accountOnPhone"
     [account]="account"
+    [accountPending]="accountPending"
     [showThemeToggle]="showThemeToggle"
   >${BODY}</cmn-app-layout>
 `;
@@ -968,5 +969,21 @@ export const AccountStandardPhone: Story = {
 export const AccountOnPhoneAvatar: Story = {
   render: args => ({props: args, template: ACCOUNT_STANDARD_TEMPLATE}),
   args: {...AccountStandardPhone.args, accountOnPhone: 'avatar'},
+  globals: PHONE,
+};
+
+/**
+ * The session call has not resolved: the shell is already drawn, and the account's place is held by
+ * a placeholder disc in the top bar. Only the page content waits (see Conformance/First Paint).
+ */
+export const AccountPending: Story = {
+  render: args => ({props: args, template: ACCOUNT_STANDARD_TEMPLATE}),
+  args: {...AccountStandard.args, account: undefined, accountPending: true},
+};
+
+/** On a phone with a More page there is no avatar to hold: the bar is the same before and after. */
+export const AccountPendingPhone: Story = {
+  render: args => ({props: args, template: ACCOUNT_STANDARD_TEMPLATE}),
+  args: {...AccountStandardPhone.args, account: undefined, accountPending: true},
   globals: PHONE,
 };

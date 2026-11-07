@@ -241,6 +241,7 @@ export const CMN_CONTENT_INSET_PROPERTIES = {
           [avatarMenuItems]="effectiveAvatarMenuItems()"
           [avatarIdentity]="account()"
           [showAvatar]="showAvatar()"
+          [avatarPending]="accountPending() && account() === undefined"
           (searchClick)="onSearchClick()"
           (themeToggle)="onThemeToggle()"
           (avatarMenuSelect)="onAvatarMenuSelect($event)"
@@ -381,6 +382,14 @@ export class AppLayoutComponent {
    * Outside the phone shell the avatar always shows.
    */
   public readonly accountOnPhone = input<AccountOnPhone | undefined>(undefined);
+  /**
+   * The session has not resolved yet, so `account` is not known. The shell still draws, in full,
+   * and the account's place is held: a placeholder disc in the top bar, and no avatar at all in the
+   * phone shell when the account lives on the More page, so nothing moves when `account` arrives.
+   * Gate the page content on the session, never this shell (`docs/PHONE-CONTRACT.md`, "First
+   * paint"). Left `false`, a missing `account` reads as "no account", as before.
+   */
+  public readonly accountPending = input<boolean>(false);
   /** @deprecated Goes once both apps pass `account`; `account` takes precedence. */
   public readonly avatarLabel = input<string>('');
   /** @deprecated Goes once both apps pass `account`; `account` takes precedence. */
@@ -550,7 +559,7 @@ export class AppLayoutComponent {
     const onMore =
       (this.accountOnPhone() ?? 'more') === 'more' &&
       this.moreRoute() !== '' &&
-      this.account() !== undefined;
+      (this.account() !== undefined || this.accountPending());
     return !(onMore && this.shellService.isPhone());
   });
 

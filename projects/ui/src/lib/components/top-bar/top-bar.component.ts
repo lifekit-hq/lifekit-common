@@ -203,7 +203,16 @@ const HEADER_FADE_CLASSES =
       }
 
       <!-- Avatar: left out where the account lives elsewhere (the phone's More page) -->
-      @if (showAvatar()) {
+      @if (showAvatar() && avatarPending()) {
+        <!-- The account has not resolved: the disc's box, not a "?" that turns into initials -->
+        <span
+          [class]="avatarTriggerClasses"
+          class="inline-flex items-center justify-center"
+          aria-hidden="true"
+        >
+          <span class="cmn-skeleton-sweep block h-8 w-8 rounded-cmn-full"></span>
+        </span>
+      } @else if (showAvatar()) {
         <cmn-menu
           [items]="avatarMenuItems()"
           [header]="menuHeader()"
@@ -241,6 +250,8 @@ export class TopBarComponent {
   public readonly avatarIdentity = input<AccountIdentity | undefined>(undefined);
   /** Renders the avatar and its menu; false drops it from the bar. */
   public readonly showAvatar = input<boolean>(true);
+  /** The account has not resolved yet: the avatar slot draws a placeholder disc, with no menu. */
+  public readonly avatarPending = input<boolean>(false);
   /**
    * Phone overlay styling: translucent, blurred, and padded by the top safe-area inset. The
    * bar applies it whenever set; `cmn-app-layout` sets it only in the phone shell.
