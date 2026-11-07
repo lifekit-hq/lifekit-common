@@ -280,7 +280,7 @@ It wraps the rows, owns no data, and a store drives it through the paging contra
 </lk-infinite-list>
 ```
 
-The first page is not the list's job: `cmn-async-state` draws the first load (a `list` skeleton) and
+The first page is not the list's job: `cmn-async-state` draws the first load (a skeleton shaped like the list) and
 the list appears once rows exist. Appending sets `loading` and keeps the rows on screen: the store appends the page, it does not replace the list. A short page that leaves the end in
 reach asks again until the screen is full.
 
