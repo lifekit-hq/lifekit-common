@@ -144,11 +144,11 @@ describe('StatCardComponent', () => {
     expect(deltaRow).toBeTruthy();
   });
 
-  it('should size the loading skeleton to the loaded value line height (cmn-2xl: 1.5rem font-size * 1.3 line-height)', () => {
+  it('should size the loading skeleton to the loaded value line height (cmn-2xl: 1.75rem font-size * 1.3 line-height)', () => {
     fixture.componentRef.setInput('loading', true);
     fixture.detectChanges();
     const skeleton: HTMLElement | null = fixture.nativeElement.querySelector('cmn-skeleton > div');
-    expect(skeleton?.style.height).toBe('1.95rem');
+    expect(skeleton?.style.height).toBe('2.275rem');
   });
 });
 
