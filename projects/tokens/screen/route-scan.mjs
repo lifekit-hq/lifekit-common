@@ -60,11 +60,33 @@ export function validateExceptions(exceptions = {}) {
   return entries;
 }
 
+/** The class `cmn-page` puts on the row that holds an overview's main column and its rail. */
+export const PAGE_COLUMNS_CLASS = 'cmn-page-columns';
+
+const COLUMN_OVERFLOW_RULE = 'first-viewport-column-overflow';
+
+/**
+ * Whether a finding is the judge reading an overview page's own main column and rail as an
+ * unbalanced opening row. The overview template is that pattern: the rail is the short column
+ * beside a body that runs on below the fold, and it is the library's, not the app's, to draw. The
+ * finding's snippet opens with the selector of the row it names (`div.flex.cmn-page-columns opens
+ * the page ...`), so only the template's own row is recognised; a column row anywhere else, on any
+ * kind of page, is still a finding.
+ *
+ * @param {{antipattern: string, snippet: string}} finding
+ */
+export function isTemplateColumnRow({antipattern, snippet}) {
+  if (antipattern !== COLUMN_OVERFLOW_RULE) return false;
+  const [selector = ''] = snippet.split(' ');
+  return selector.split('.').includes(PAGE_COLUMNS_CLASS);
+}
+
 const covers = (entry, route) => entry.routes.includes('*') || entry.routes.includes(route);
 
 /**
  * The design findings that fail the route: those no exception covers, and those beyond the `max`
- * (default 1) an exception allows per scan.
+ * (default 1) an exception allows per scan. The overview template's own rail is not a finding
+ * (`isTemplateColumnRow`).
  *
  * @param {{antipattern: string, snippet: string}[]} findings
  * @param {string} route
@@ -73,6 +95,7 @@ const covers = (entry, route) => entry.routes.includes('*') || entry.routes.incl
 export function blockingDesignFindings(findings, route, exceptions = []) {
   const used = new Map();
   return findings.filter(finding => {
+    if (isTemplateColumnRow(finding)) return false;
     const entry = exceptions.find(
       e =>
         e.rule === finding.antipattern &&

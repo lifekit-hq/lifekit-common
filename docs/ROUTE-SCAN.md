@@ -133,6 +133,20 @@ An exception is a decision about the app, not a fix: a finding in the library's 
 or page templates is fixed once in lifekit-common and never accepted app by app, so an exception
 that names a library component belongs in this repository's backlog instead.
 
+### The overview template's rail
+
+The judge's `first-viewport-column-overflow` rule reads a row of columns whose tallest runs past
+1.4 viewports while a sibling fits in one as an unbalanced opening row. The overview template
+(`cmn-page` `kind="overview"`) draws exactly that on purpose: a 320px rail of secondary blocks
+beside a main column that runs on below the fold, from 1280px. So the scan does not count the
+template's own row. `cmn-page` puts the class `cmn-page-columns` on the row that holds the main
+column and the rail, the finding's snippet names the row it reads, and a `first-viewport-column-overflow`
+finding on a row with that class is dropped before the exceptions are applied (`isTemplateColumnRow`,
+`PAGE_COLUMNS_CLASS`). The same two columns on any other row, and on any other kind of page, are
+still a finding, and the rule is the only one the class excuses. An app needs no exception for it.
+`Templates/Overview` has a state with a body of three screens (`desktop-with-long-body`) that the
+reference app scans.
+
 ## What it does not see
 
 The frozen document is the DOM, not the running page: scripts are gone, so a hover state, an open

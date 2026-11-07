@@ -367,6 +367,13 @@ export declare function serveFrozen(
 export declare function validateExceptions(
   exceptions?: RouteScanExceptions
 ): Required<RouteScanExceptions>;
+/** The class `cmn-page` puts on the row that holds an overview's main column and its rail. */
+export declare const PAGE_COLUMNS_CLASS: 'cmn-page-columns';
+/** Whether a finding is the judge reading an overview page's own main column and rail as unbalanced. */
+export declare function isTemplateColumnRow(finding: {
+  antipattern: string;
+  snippet: string;
+}): boolean;
 export declare function blockingDesignFindings(
   findings: {antipattern: string; snippet: string}[],
   route: string,

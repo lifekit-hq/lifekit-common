@@ -68,8 +68,13 @@ const TITLE_CLASSES =
 /** Top-level blocks stack a section apart; a tighter pair (a field and its chips) is one block. */
 const COLUMN_CLASSES = 'flex w-full flex-col gap-cmn-section-gap';
 const COLUMN_FILL_CLASSES = 'min-h-0 flex-1';
-/** The main column and the rail: stacked a section apart, side by side from xl up. */
-const COLUMNS_CLASSES = 'flex flex-col gap-cmn-section-gap xl:flex-row xl:items-start';
+/**
+ * The main column and the rail: stacked a section apart, side by side from xl up. `cmn-page-columns`
+ * names the row for the route scan (`PAGE_COLUMNS_CLASS` in `@lifekit-hq/tokens/screen`), which
+ * accepts the template's own rail beside a body that runs on below the fold.
+ */
+const COLUMNS_CLASSES =
+  'cmn-page-columns flex flex-col gap-cmn-section-gap xl:flex-row xl:items-start';
 /** A rail the page puts nothing in takes no room, so the main column runs the frame's width. */
 const RAIL_CLASSES = 'empty:hidden';
 

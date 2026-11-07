@@ -46,6 +46,24 @@ const LATER: readonly Row[] = [
   {id: 6, label: 'Order the birthday cake for Maya', note: 'Saturday · Sam'},
 ];
 
+const DONE: readonly Row[] = [
+  {id: 12, label: 'Send the school form back', note: 'Monday · Alex'},
+  {id: 13, label: 'Water the plants', note: 'Monday · Sam'},
+  {id: 14, label: 'Pick up the dry cleaning', note: 'Tuesday · Alex'},
+  {id: 15, label: 'Fix the bike light', note: 'Tuesday · Sam'},
+  {id: 16, label: 'Book the dentist for Maya', note: 'Wednesday · Alex'},
+  {id: 17, label: 'Take the bins out', note: 'Wednesday · Sam'},
+];
+
+const LAST_WEEK: readonly Row[] = [
+  {id: 18, label: 'Renew the passports', note: 'Last Monday · Alex'},
+  {id: 19, label: 'Clear the gutters', note: 'Last Tuesday · Sam'},
+  {id: 20, label: 'Post the parcel to Gran', note: 'Last Wednesday · Alex'},
+  {id: 21, label: 'Book the holiday cottage', note: 'Last Thursday · Sam'},
+  {id: 22, label: 'Defrost the freezer', note: 'Last Friday · Alex'},
+  {id: 23, label: 'Mend the garden gate', note: 'Last Saturday · Sam'},
+];
+
 const COMING_UP: readonly Row[] = [
   {id: 7, label: "Parents' evening", note: 'Thursday, 18:30'},
   {id: 8, label: 'Bin day: recycling', note: 'Friday morning'},
@@ -121,6 +139,67 @@ class WeekPageComponent {
 }
 
 /**
+ * The week with a body that runs three screens: the same overview, with the tasks done earlier in
+ * the week after those still to do. The rail stays the short column beside it (under it on a phone),
+ * which is the template working as drawn, not an unbalanced opening row.
+ */
+@Component({
+  selector: 'cmn-golden-long-week-page',
+  imports: [
+    CheckboxComponent,
+    ListItemRowComponent,
+    ListSectionComponent,
+    PageComponent,
+    StatCardComponent,
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <cmn-page kind="overview">
+      <div class="grid grid-cols-2 gap-cmn-group-gap md:grid-cols-4">
+        @for (stat of stats; track stat.label) {
+          <cmn-stat-card
+            [label]="stat.label"
+            [value]="stat.value"
+            [delta]="stat.delta"
+            [deltaLabel]="stat.deltaLabel"
+          />
+        }
+      </div>
+      @for (section of sections; track section.heading) {
+        <cmn-list-section [heading]="section.heading + ' · ' + section.rows.length">
+          @for (task of section.rows; track task.id) {
+            <cmn-list-item-row [label]="task.label" [sublabel]="task.note" trailingIcon="Ellipsis">
+              <cmn-checkbox [label]="'Done: ' + task.label" avatar />
+            </cmn-list-item-row>
+          }
+        </cmn-list-section>
+      }
+      <cmn-list-section cmnPageRail heading="Coming up">
+        @for (event of comingUp; track event.id) {
+          <cmn-list-item-row [label]="event.label" [sublabel]="event.note" />
+        }
+      </cmn-list-section>
+      <cmn-list-section cmnPageRail heading="Who is doing what">
+        @for (person of people; track person.id) {
+          <cmn-list-item-row [label]="person.label" [sublabel]="person.note" />
+        }
+      </cmn-list-section>
+    </cmn-page>
+  `,
+})
+class LongWeekPageComponent {
+  protected readonly stats = STATS;
+  protected readonly sections = [
+    {heading: 'Due today', rows: TODAY},
+    {heading: 'Later this week', rows: LATER},
+    {heading: 'Done this week', rows: DONE},
+    {heading: 'Done last week', rows: LAST_WEEK},
+  ];
+  protected readonly comingUp = COMING_UP;
+  protected readonly people = PEOPLE;
+}
+
+/**
  * Golden screens for the overview template: the reference other lifekit apps copy and the owner
  * approves once. Each is the real shell and real components; run the screen check
  * (`lifekit-chrome-check screen`, docs/SCREEN-CHECK.md) against them at 390 and 1280.
@@ -133,6 +212,7 @@ const meta: Meta<GoldenShellComponent> = {
     applicationConfig({
       providers: goldenProviders([
         {path: 'tasks', component: WeekPageComponent, data: {title: 'This week'}},
+        {path: 'busy-week', component: LongWeekPageComponent, data: {title: 'This week'}},
       ]),
     }),
   ],
@@ -149,3 +229,12 @@ export const PhoneDark: Story = {globals: {...GOLDEN_PHONE, theme: 'dark'}};
 export const Desktop: Story = {globals: GOLDEN_DESKTOP};
 
 export const DesktopDark: Story = {globals: {...GOLDEN_DESKTOP, theme: 'dark'}};
+
+/**
+ * A body that runs three screens beside a rail that fits in one, at 1280: the overview template
+ * working as drawn. The route scan takes it without an exception (docs/ROUTE-SCAN.md).
+ */
+export const DesktopWithLongBody: Story = {
+  args: {start: '/busy-week'},
+  globals: GOLDEN_DESKTOP,
+};

@@ -179,6 +179,7 @@ describe('PageComponent overview', () => {
   it('stacks the rail under the main column, a section apart, and puts it beside from xl', () => {
     const row = main().parentElement as HTMLElement;
     for (const cls of [
+      'cmn-page-columns',
       'flex',
       'flex-col',
       'gap-cmn-section-gap',
