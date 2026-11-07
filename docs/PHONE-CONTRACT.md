@@ -280,7 +280,7 @@ It wraps the rows, owns no data, and a store drives it through the paging contra
 </lk-infinite-list>
 ```
 
-The first page is not the list's job: `cmn-async-state` draws the first load (a `list` skeleton) and
+The first page is not the list's job: `cmn-async-state` draws the first load (a skeleton shaped like the list) and
 the list appears once rows exist. Appending sets `loading` and keeps the rows on screen: the store appends the page, it does not replace the list. A short page that leaves the end in
 reach asks again until the screen is full.
 
@@ -345,7 +345,7 @@ delay of `0`.
 | `showDelay`     | Milliseconds a load must last before any loading indicator shows; 200 by default (`ASYNC_STATE_SHOW_DELAY_MS`). Until then the content already on screen stays put, so a fast load shows no flash.  |
 | `minDisplay`    | Milliseconds an indicator that has shown stays up, so it never flashes away; 400 by default (`ASYNC_STATE_MIN_DISPLAY_MS`). Not applied to a kept (dimmed) body: fresh content replaces it at once. |
 | `crossfade`     | The content fades in (`--cmn-duration-short`) when it replaces the skeleton; content already there at first render paints at once; nothing under Reduce Motion.                                     |
-| `skeletonShape` | Draws the placeholder as a `cmn-skeleton` preset (`skeletonRows` rows) instead of the default bars; a projected `[skeleton]` still wins.                                                            |
+| `skeletonShape` | Draws the placeholder as a `cmn-skeleton` part preset (`row`, `section`, `stat`, `chart`; `skeletonRows` rows) instead of the default bars; a projected `[skeleton]` still wins.                    |
 
 A skeleton goes on a container, never inside the text it stands for. `cmn-skeleton` draws a bar by
 default; `shape` draws a component's whole silhouette from that component's own geometry, so the
@@ -357,6 +357,25 @@ page does not move when the content arrives:
 | `section` | `cmn-list-section`                             | The sticky-heading height, then a card of `count` rows (default 3).                                                      |
 | `stat`    | `cmn-stat-card`                                | Label, value and delta.                                                                                                  |
 | `chart`   | `cmn-line-chart` card                          | The plot keeps the chart's own height (`h-48`); `aspect` (`16 / 9`) reserves a ratio instead for a chart sized by ratio. |
+
+The page presets draw the body of a whole `cmn-page` of one kind, so a first load is the same
+blocks in the same order as the loaded page. The page draws its own title and gutter; the preset
+sits inside it and is `display: contents`, so the page column's section gap lies between its
+blocks as it does between the real ones only when the preset is a direct child of the `cmn-page`
+column: put `<cmn-skeleton shape="...">` straight in `cmn-page`. Inside `cmn-async-state` the
+column's section gap does not apply to a page preset's blocks (`cmn-async-state` has no display of
+its own), so they would stack flush; give `skeletonShape` a part preset (`row`, `section`, `stat`,
+`chart`) there, never a page preset.
+
+| `shape`    | Page kind       | Draws                                                                                                                                                                    | `count`              |
+| ---------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------- |
+| `list`     | `list`          | Two `section`s                                                                                                                                                           | Rows per section (3) |
+| `card`     | `list` or other | One card: a title line over lines of text                                                                                                                                | Lines of text (3)    |
+| `detail`   | `detail`        | An intro, a facts section (the `cmn-description-list` rows), then a section of two rows                                                                                  | Fact rows (4)        |
+| `overview` | `overview`      | A grid of four `stat` cards over two `section`s. The rail is not drawn: below xl it stacks under the main column, below the fold, so its arrival moves nothing on screen | Rows per section (3) |
+
+A region with no `skeletonShape` and no projected `[skeleton]` still falls back to three generic
+bars, which match nothing; name the shape of the content in every region.
 
 The sweep is one `--color-skeleton-sheen` band moving by `transform` over `--color-skeleton`, a
 token held apart from `surface-raised` so a skeleton reads as a placeholder in light and dark. It
@@ -370,6 +389,42 @@ the loaded component at 375, 390 and 402 (`Conformance/Skeleton Geometry`).
 | Empty   | Only after a successful load with no results. Explains the section and offers action.                                                                  |
 | Error   | In place of the skeleton on a first load, a banner over the last good data otherwise. Always with Retry. Never shown as empty.                         |
 | Offline | What still works, plus the time of the last sync. Never blocks content, never covers the chrome. A banner over content, or a panel when there is none. |
+
+### First paint
+
+A cold start draws something at once: the shell, then the page's own shape. The session call
+decides what is in the content, never whether the chrome shows. Sources: HIG Loading and Launching
+(show something right away; a launch screen that resembles the first screen); Carbon Loading
+pattern (a skeleton that matches the content); web.dev CLS.
+
+- **The shell does not wait for the session.** Render `cmn-app-layout` unconditionally and gate
+  only what goes inside it. The nav items are static and the title comes from route data, so the
+  top bar, the tab bar or sidebar and the large title are all there on the first frame. A route
+  guard that waits for the session holds the navigation, and with it the route data: give the boot
+  page a `title` (`<cmn-page kind="list" title="Goals">`), which the route's own title replaces.
+- **Hold the account's place.** Set `[accountPending]="true"` until the session resolves. The top bar
+  draws a placeholder disc where the avatar goes (nothing on a phone whose account lives on the More
+  page), never a "?" avatar, so nothing moves when `account` arrives.
+- **Put the page's shape under the title.** While the session resolves the content is a `cmn-page` of
+  the route's kind holding the matching skeleton preset (`list`, `detail`, `overview`, `card`), with
+  a `role="status"` "Loading" for assistive tech. The loaded page replaces it block for block.
+- **No count until it is loaded.** A filter's count (`lk-chip-row` `count`) stays unset or `null`
+  while its list loads, so the row never reads "Open 0 Blocked 0 Closed 0 All 0"; a loaded zero is
+  a real count and shows.
+
+```html
+<cmn-app-layout [account]="session.account()" [accountPending]="session.pending()" [navItems]="nav">
+  @if (session.pending()) {
+  <cmn-page kind="list"><cmn-skeleton shape="list" /></cmn-page>
+  } @else {
+  <router-outlet />
+  }
+</cmn-app-layout>
+```
+
+Check: the swap from `Conformance/First Paint` skeleton to the loaded page shifts the layout by at
+most 0.1 on a phone (390) and a laptop (1280) for each preset (`e2e/phone/first-paint-cls.spec.ts`);
+each preset's parts are held to the loaded component's box by `Conformance/Skeleton Geometry`.
 
 ## Forms and notifications
 
@@ -425,7 +480,8 @@ that holds each one. A rule marked "follow-up" is the target; its parts and chec
    indicator for loads under 200ms (`showDelay`, on by default) and a 400ms minimum display time
    once shown (`minDisplay`, on by default). The sweep stops under Reduce Motion. Sources: NN/g "Skeleton Screens 101"; M3
    Progress indicators; Atlassian and Carbon loading; web.dev CLS. Check: each preset's box is
-   within 8px of the loaded component's; the state pattern. To come: CLS at most 0.1 per route.
+   within 8px of the loaded component's; the state pattern; the layout shift of a first paint
+   (see "First paint").
 6. **Continuity.** Data on screen stays while it refreshes (`keepContent`, on by default); a tab return paints at
    once and revalidates; scroll restore waits for the data; tab destinations preload on idle, after
    first paint, except under Save-Data or on a metered connection (`TabPreloadStrategy`, `projects/core/README.md`),
@@ -491,5 +547,5 @@ exists.
 | Long lists (filter, chips, sections)    | Built: `cmn-filter-bar`, `lk-chip-row`, `cmn-list-section`; the suite checks labels and headers                                                                                                             |
 | Phone sizes and zoom                    | Built: edge-to-edge 49pt tab bar, 44pt scroll-edge top bar, viewport standard, `touch-action`; the suite sweeps seven widths at two heights                                                                 |
 | Text input (16px, 44px)                 | Built: every `cmn-*` field below md; `dvh` sheets and visual viewport are a follow-up                                                                                                                       |
-| Skeletons and motion                    | Built: `cmn-skeleton` presets, `cmn-async-state` calm loading, motion tokens; the suite checks preset geometry and Reduce Motion                                                                            |
+| Skeletons and motion                    | Built: `cmn-skeleton` presets (parts and pages), `cmn-async-state` calm loading, `accountPending` shell, motion tokens; the suite checks preset geometry, first-paint layout shift and Reduce Motion        |
 | Continuity and paging                   | Built: `lk-infinite-list`, `TabPreloadStrategy` (idle tab preload, skipped under Save-Data or metered), `keepContent`; the suite checks the end of a continuous list                                        |

@@ -137,3 +137,35 @@ export const PresetsDark: Story = {
   ...Presets,
   globals: {theme: 'dark'},
 };
+
+/**
+ * The page presets draw the body of a whole page of one kind, in the page's own column, so a first
+ * load is the same blocks in the same order as the loaded page. They sit inside a `cmn-page` of
+ * that kind (which draws the title and the gutter), as a direct child of the page column. Inside
+ * `cmn-async-state` the column's section gap does not apply to their blocks, so its `skeletonShape`
+ * takes the part presets only.
+ */
+export const PagePresets: Story = {
+  render: () => ({
+    template: `
+      <div class="flex flex-col gap-cmn-10 bg-surface-bg p-cmn-4">
+        <div class="flex max-w-[640px] flex-col gap-cmn-section-gap">
+          <p class="font-label text-cmn-xs font-semibold uppercase">list</p>
+          <cmn-skeleton shape="list" />
+        </div>
+        <div class="flex max-w-[640px] flex-col gap-cmn-section-gap">
+          <p class="font-label text-cmn-xs font-semibold uppercase">card</p>
+          <cmn-skeleton shape="card" />
+        </div>
+        <div class="flex max-w-[720px] flex-col gap-cmn-section-gap">
+          <p class="font-label text-cmn-xs font-semibold uppercase">detail</p>
+          <cmn-skeleton shape="detail" />
+        </div>
+        <div class="flex flex-col gap-cmn-section-gap">
+          <p class="font-label text-cmn-xs font-semibold uppercase">overview</p>
+          <cmn-skeleton shape="overview" />
+        </div>
+      </div>
+    `,
+  }),
+};

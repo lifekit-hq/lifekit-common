@@ -85,6 +85,37 @@ export const MultiWithCounts: Story = {
 };
 
 /**
+ * While the list loads the options carry no `count`, so the row never reads "Open 0 Blocked 0 Closed
+ * 0": a zero that is not true yet is worse than no number. Set the counts once they have loaded.
+ */
+export const CountsLoading: Story = {
+  args: {
+    options: [
+      {value: 'open', label: 'Open'},
+      {value: 'blocked', label: 'Blocked'},
+      {value: 'closed', label: 'Closed'},
+      {value: 'all', label: 'All'},
+    ],
+    selected: ['open'],
+    label: 'Goals',
+  },
+};
+
+/** The same row once the counts have loaded; a real zero shows. */
+export const CountsLoaded: Story = {
+  args: {
+    options: [
+      {value: 'open', label: 'Open', count: 4},
+      {value: 'blocked', label: 'Blocked', count: 0},
+      {value: 'closed', label: 'Closed', count: 11},
+      {value: 'all', label: 'All', count: 15},
+    ],
+    selected: ['open'],
+    label: 'Goals',
+  },
+};
+
+/**
  * Phone widths the conformance suite measures: 375, 390 and 402. Every label shows whole on one
  * line at each, and every chip presses as a 44px target.
  */

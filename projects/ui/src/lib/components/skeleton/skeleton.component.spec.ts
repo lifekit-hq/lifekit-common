@@ -115,6 +115,70 @@ describe('SkeletonComponent', () => {
       expect(plot().style.aspectRatio).toBe('16 / 9');
     });
 
+    describe('page presets', () => {
+      const dividers = (): number => root().querySelectorAll('.border-b').length;
+
+      it('lets the page column space the blocks: the host is display: contents', () => {
+        for (const shape of ['list', 'card', 'detail', 'overview']) {
+          fixture.componentRef.setInput('shape', shape);
+          fixture.detectChanges();
+          expect(root().classList, shape).toContain('contents');
+          expect(root().classList, shape).not.toContain('block');
+          expect(root().getAttribute('aria-hidden'), shape).toBe('true');
+        }
+      });
+
+      it('draws a list as two sections of three rows, or `count` rows each', () => {
+        fixture.componentRef.setInput('shape', 'list');
+        fixture.detectChanges();
+        expect(root().querySelectorAll('cmn-skeleton')).toHaveLength(2);
+        expect(dividers()).toBe(6);
+
+        fixture.componentRef.setInput('count', 5);
+        fixture.detectChanges();
+        expect(dividers()).toBe(10);
+      });
+
+      it('draws a card as a title over three lines, or `count` lines', () => {
+        fixture.componentRef.setInput('shape', 'card');
+        fixture.detectChanges();
+        expect(root().querySelectorAll('cmn-skeleton')).toHaveLength(3);
+        expect(root().querySelectorAll('.cmn-skeleton-sweep')).toHaveLength(4);
+
+        fixture.componentRef.setInput('count', 1);
+        fixture.detectChanges();
+        expect(root().querySelectorAll('cmn-skeleton')).toHaveLength(1);
+      });
+
+      it('draws a detail as an intro, a facts section and a related section', () => {
+        fixture.componentRef.setInput('shape', 'detail');
+        fixture.detectChanges();
+        // intro (2 lines) + the related section; the facts are drawn by the preset itself
+        expect(root().querySelectorAll('cmn-skeleton')).toHaveLength(3);
+        // 4 fact rows, then the related section's 2 rows
+        expect(dividers()).toBe(2);
+        expect(root().querySelectorAll('.divide-y > div')).toHaveLength(4);
+
+        fixture.componentRef.setInput('count', 6);
+        fixture.detectChanges();
+        expect(root().querySelectorAll('.divide-y > div')).toHaveLength(6);
+      });
+
+      it('draws an overview as four stat cards over two sections', () => {
+        fixture.componentRef.setInput('shape', 'overview');
+        fixture.detectChanges();
+        expect(root().querySelectorAll('.grid > cmn-skeleton')).toHaveLength(4);
+        expect(dividers()).toBe(6);
+      });
+
+      it('draws nothing for a page preset but its own blocks (no title, no gutter)', () => {
+        fixture.componentRef.setInput('shape', 'list');
+        fixture.detectChanges();
+        expect(root().querySelector('h1')).toBeNull();
+        expect(root().querySelector('.p-cmn-page-gutter')).toBeNull();
+      });
+    });
+
     it('leaves a plain bar visible to assistive tech', () => {
       fixture.detectChanges();
       expect(root().getAttribute('aria-hidden')).toBeNull();
