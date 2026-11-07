@@ -135,7 +135,7 @@ export class ChatComponent {
       container: {
         default: {
           backgroundColor: 'var(--color-accent-default)',
-          borderRadius: '8px',
+          borderRadius: 'var(--radius-md)',
         },
       },
       svg: {styles: {default: {filter: 'brightness(0) invert(1)'}}},

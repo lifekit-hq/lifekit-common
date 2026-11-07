@@ -118,14 +118,14 @@ class UnscrolledFillPageComponent {
 
 /**
  * A page that fits the slot with a viewport calculation instead of `fill`: from md it is exactly the
- * window less the top bar and the large title (8rem), and on a phone it takes the frame. It leaves
+ * window less the top bar and the large title (8.1rem: 3.5rem bar, 2rem title padding, one 2rem line at 1.3), and on a phone it takes the frame. It leaves
  * `main` no slack, so any height the shell spends above it (a notice column with nothing showing)
  * makes `main` scroll around the page.
  */
 @Component({
   selector: 'cmn-fill-fixed-height-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {class: 'block h-full overflow-hidden md:h-[calc(100dvh-8rem)]'},
+  host: {class: 'block h-full overflow-hidden md:h-[calc(100dvh-8.1rem)]'},
   template: `
     <div class="h-full rounded-cmn-lg border border-border-default bg-surface-card p-cmn-4">
       <p class="text-cmn-sm text-text-secondary">A page that takes the slot, nothing more</p>
@@ -221,7 +221,7 @@ export const FillWithoutListScroll = fillStory('reports', 'Reports');
 export const LongListWithAppChrome = fillStory('events', 'Events', true);
 
 /**
- * A page sized from the viewport (`calc(100dvh - 8rem)`) in the shell with its notices there and
+ * A page sized from the viewport (`calc(100dvh - 8.1rem)`) in the shell with its notices there and
  * none showing: `main` and the document still do not scroll.
  */
 export const FixedHeightWithAppChrome = fillStory('ledger', 'Ledger', true);
