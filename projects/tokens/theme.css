@@ -523,7 +523,7 @@ cmn-dialog-container.cmn-dialog--closing {
   transition: transform var(--cmn-duration-short) var(--cmn-ease-expressive-accelerate);
 }
 
-/* Sheet: rounded top, full width, never taller than the screen minus the status bar and a strip of
+/* Sheet: square (--radius-lg is 0), full width, never taller than the screen minus the status bar and a strip of
    the page behind it (the HIG sheet); the keyboard shortens it instead of covering its fields. */
 cmn-dialog-container[data-presentation='sheet'] .cmn-dialog-shell {
   border-top-left-radius: var(--radius-lg);

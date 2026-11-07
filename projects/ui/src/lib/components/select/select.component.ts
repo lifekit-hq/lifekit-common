@@ -41,7 +41,7 @@ type ActivePosition = 'selected' | 'first' | 'last';
 
 // Below md every size keeps 16px text (iOS zooms the page into a focused field set smaller) and
 // presses as at least --size-touch tall. md is at least the control height (`--cmn-control-h`) a
-// button beside it shares: 44px on a phone, 40px from md.
+// button beside it shares: Carbon's 48px at every width.
 const SIZE_CLASSES: Record<SelectSize, string> = {
   sm: 'py-1 text-cmn-md md:text-cmn-xs',
   md: 'min-h-cmn-control-h py-1.5 text-cmn-md md:text-cmn-sm',
