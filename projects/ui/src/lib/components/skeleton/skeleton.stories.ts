@@ -31,6 +31,20 @@ export const Sized: Story = {
   }),
 };
 
+/** A bar on one line of the type ramp: as tall as the text it stands in for, whatever the ramp is. */
+export const OneLineOfText: Story = {
+  render: () => ({
+    template: `
+      <div class="flex max-w-md flex-col gap-cmn-2">
+        <cmn-skeleton text="2xl" width="50%" />
+        <p class="text-cmn-2xl font-semibold tabular-nums text-text-primary">€12,480.00</p>
+        <cmn-skeleton text="sm" width="35%" />
+        <p class="text-cmn-sm text-text-secondary">Across 3 accounts</p>
+      </div>
+    `,
+  }),
+};
+
 export const Shapes: Story = {
   render: () => ({
     template: `

@@ -62,12 +62,13 @@ const GOLDEN_SCREENS = [
   'templates-detail',
   'templates-form',
   'templates-list',
+  'templates-list-with-app-chrome',
   'templates-list-with-notice',
   'templates-overview',
   'templates-settings',
 ];
 const GOLDEN_STORY =
-  /^templates-(detail|form|list|overview|settings)--(phone|desktop)(-dark)?$|^templates-list--(phone|desktop)-with-notice$/;
+  /^templates-(detail|form|list|overview|settings)--(phone|desktop)(-dark)?$|^templates-list--(phone|desktop)-with-(notice|app-chrome)$/;
 
 test('the scan covers every golden story', () => {
   expect(stories.filter(id => !GOLDEN_STORY.test(id))).toEqual([]);

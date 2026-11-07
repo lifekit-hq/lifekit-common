@@ -1,0 +1,165 @@
+name: Render screen baselines
+
+# Reusable (docs/SCREEN-BASELINES.md, "Rendering baselines in an app"). Any lifekit repository calls it
+# to render its screen baselines on the CI runner, the machine every later comparison runs on:
+# it runs the app's own Playwright command in update mode, commits the changed `*-linux.png` images
+# to the branch, starts CI on it and posts the before and after images on the branch's pull request.
+# It never runs on main, and never on a fork's branch.
+#
+#   jobs:
+#     render:
+#       permissions: {contents: write, actions: write, pull-requests: write}
+#       uses: lifekit-hq/lifekit-common/.github/workflows/screen-baselines.yml@v4.5.0
+#       with:
+#         command: npx playwright test e2e/screens --update-snapshots=changed
+#         baselines: e2e/screens/baselines
+on:
+  workflow_call:
+    inputs:
+      command:
+        description: >-
+          The app's Playwright command in update mode, run from `working-directory`
+          (for example `npx playwright test e2e/screens --update-snapshots=changed`)
+        type: string
+        required: true
+      baselines:
+        description: >-
+          The directory that holds the app's baseline images, relative to the repository root; every
+          `*-linux.png` under it is committed
+        type: string
+        required: true
+      working-directory:
+        description: Where the app's package.json and Playwright config live
+        type: string
+        default: .
+      node-version:
+        type: string
+        default: '22'
+      install-command:
+        type: string
+        default: npm ci
+      build-command:
+        description: Builds what the Playwright command serves (blank when it needs no build)
+        type: string
+        default: ''
+      playwright-install:
+        type: string
+        default: npx playwright install --with-deps chromium
+      ci-workflow:
+        description: >-
+          The workflow file to start on the branch after the commit (it needs a `workflow_dispatch`
+          trigger), since a push made with the workflow token does not start the pull request run.
+          Blank to start nothing, for an app that passes `secrets.token`.
+        type: string
+        default: ci.yml
+      commit-message:
+        type: string
+        default: 'test: update screen baselines'
+      lifekit-common-ref:
+        description: >-
+          The lifekit-common tag (or branch) to take the report action from; use the tag this workflow
+          is called at
+        type: string
+        default: main
+    secrets:
+      token:
+        description: >-
+          A token whose push starts the pull request's own CI run (a personal access token or a GitHub
+          App token). Optional: without it the workflow token pushes and `ci-workflow` is dispatched.
+        required: false
+
+permissions:
+  contents: write
+  actions: write
+  pull-requests: write
+
+jobs:
+  render:
+    # A pull request run (the `labeled` event) is the caller's own branch; a fork's token cannot push.
+    if: >-
+      github.ref != 'refs/heads/main' &&
+      (github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    env:
+      BRANCH: ${{ github.head_ref || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The branch itself, not the pull request's merge commit: the baselines are committed to it.
+          ref: ${{ env.BRANCH }}
+          fetch-depth: 0
+          token: ${{ secrets.token || github.token }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+      - name: Install
+        working-directory: ${{ inputs.working-directory }}
+        run: ${{ inputs.install-command }}
+      - name: Install the browser
+        working-directory: ${{ inputs.working-directory }}
+        run: ${{ inputs.playwright-install }}
+      - name: Build
+        if: inputs.build-command != ''
+        working-directory: ${{ inputs.working-directory }}
+        run: ${{ inputs.build-command }}
+      - name: Render the baselines
+        working-directory: ${{ inputs.working-directory }}
+        run: ${{ inputs.command }}
+      - name: Commit the changed baselines
+        id: commit
+        env:
+          GH_TOKEN: ${{ secrets.token || github.token }}
+          BASELINES: ${{ inputs.baselines }}
+          CI_WORKFLOW: ${{ inputs.ci-workflow }}
+          MESSAGE: ${{ inputs.commit-message }}
+          STARTS_CI: ${{ secrets.token != '' }}
+        run: |
+          set -euo pipefail
+          git add -A -- ":(glob)${BASELINES%/}/**/*-linux.png"
+          if git diff --cached --quiet; then
+            echo "No baseline changed." >> "$GITHUB_STEP_SUMMARY"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "$MESSAGE"
+          git push origin "HEAD:$BRANCH"
+          if [ "$STARTS_CI" != "true" ] && [ -n "$CI_WORKFLOW" ]; then
+            gh workflow run "$CI_WORKFLOW" --ref "$BRANCH" \
+              || echo "::warning::Could not start $CI_WORKFLOW on $BRANCH; push again or start it by hand."
+          fi
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+          echo "head=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - name: Find the pull request
+        id: pr
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.token || github.token }}
+        run: |
+          set -euo pipefail
+          pr="$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$BRANCH" --state open \
+            --json number,baseRefOid --jq '.[0] // empty')"
+          if [ -z "$pr" ]; then
+            echo "No open pull request for $BRANCH; the report is posted when one is opened." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          echo "number=$(jq -r .number <<<"$pr")" >> "$GITHUB_OUTPUT"
+          echo "base=$(jq -r .baseRefOid <<<"$pr")" >> "$GITHUB_OUTPUT"
+      - name: Take the report action
+        if: steps.pr.outputs.number != ''
+        uses: actions/checkout@v4
+        with:
+          repository: lifekit-hq/lifekit-common
+          ref: ${{ inputs.lifekit-common-ref }}
+          path: .lifekit-common
+          sparse-checkout: .github/actions/baseline-report
+      - uses: ./.lifekit-common/.github/actions/baseline-report
+        if: steps.pr.outputs.number != ''
+        with:
+          token: ${{ secrets.token || github.token }}
+          repo: ${{ github.repository }}
+          pr: ${{ steps.pr.outputs.number }}
+          base: ${{ steps.pr.outputs.base }}
+          head: ${{ steps.commit.outputs.head }}

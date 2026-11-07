@@ -2,6 +2,7 @@ import {ChangeDetectionStrategy, Component} from '@angular/core';
 import type {Meta, StoryObj} from '@storybook/angular';
 
 import {AccountAvatarComponent} from '../account-avatar/account-avatar.component';
+import {CardComponent} from '../card/card.component';
 import {type ChartPoint, LineChartComponent} from '../line-chart/line-chart.component';
 import {ListItemRowComponent} from '../list-item-row/list-item-row.component';
 import {ListSectionComponent} from '../list-section/list-section.component';
@@ -18,13 +19,16 @@ const ROWS = [1, 2, 3];
 /**
  * Each skeleton preset beside the component it stands in for, in the same column. The phone
  * conformance suite measures every pair and holds the preset to within 8px of the real thing
- * (`[data-pair]`, `[data-skeleton]`, `[data-loaded]`).
+ * (`[data-pair]`, `[data-skeleton]`, `[data-loaded]`); `skeleton-exact.spec.ts` holds every pair,
+ * and the `hero` card (a figure on `text`, a change line, a note) in particular, to the same height
+ * to the sub-pixel, so a card does not shift when its data lands.
  */
 @Component({
   selector: 'cmn-skeleton-geometry',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     AccountAvatarComponent,
+    CardComponent,
     LineChartComponent,
     ListItemRowComponent,
     ListSectionComponent,
@@ -43,6 +47,30 @@ const ROWS = [1, 2, 3];
             label="Net worth"
             value="€12,480.00"
           />
+        </div>
+      </div>
+      <div data-pair="hero" class="flex flex-col gap-cmn-2">
+        <div data-skeleton>
+          <cmn-card>
+            <div class="space-y-cmn-2">
+              <p class="font-label text-cmn-xs font-semibold uppercase tracking-wide">Net worth</p>
+              <cmn-skeleton text="2xl" width="50%" />
+              <div class="h-5 leading-5"><cmn-skeleton height="1rem" width="40%" /></div>
+              <cmn-skeleton text="sm" width="35%" />
+            </div>
+          </cmn-card>
+        </div>
+        <div data-loaded>
+          <cmn-card>
+            <div class="space-y-cmn-2">
+              <p class="font-label text-cmn-xs font-semibold uppercase tracking-wide">Net worth</p>
+              <p class="text-cmn-2xl font-semibold tabular-nums text-text-primary">€12,480.00</p>
+              <div class="h-5 leading-5">
+                <p class="font-label text-cmn-sm font-medium leading-5">Change +€210.00 · 1W</p>
+              </div>
+              <p class="text-cmn-sm text-text-secondary">Across 3 accounts</p>
+            </div>
+          </cmn-card>
         </div>
       </div>
       <div data-pair="chart" class="flex flex-col gap-cmn-2">

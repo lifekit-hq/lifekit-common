@@ -108,7 +108,7 @@ const meta: Meta<GoldenShellComponent> = {
       ]),
     }),
   ],
-  args: {start: '/tasks', notice: false},
+  args: {start: '/tasks', notice: false, appChrome: false},
 };
 
 export default meta;
@@ -126,3 +126,12 @@ export const DesktopDark: Story = {globals: {...GOLDEN_DESKTOP, theme: 'dark'}};
 export const PhoneWithNotice: Story = {globals: GOLDEN_PHONE, args: {notice: true}};
 
 export const DesktopWithNotice: Story = {globals: GOLDEN_DESKTOP, args: {notice: true}};
+
+/**
+ * The shell as an app wires it: a badge on a nav item and the three notices (offline banner, update
+ * prompt, install hint) in the slot with none showing. The page must look exactly as on `Phone`:
+ * the idle notices cost it nothing, and the nav the shell hides at this size leaves no finding.
+ */
+export const PhoneWithAppChrome: Story = {globals: GOLDEN_PHONE, args: {appChrome: true}};
+
+export const DesktopWithAppChrome: Story = {globals: GOLDEN_DESKTOP, args: {appChrome: true}};

@@ -79,6 +79,11 @@ For each route it registers one test per size and scheme (`list light`, `list da
   when the URL carries the scheme), then runs `ready(page, {size, scheme})`;
 - settles the screen exactly as `checkScreen` does (fonts loaded, no skeleton or busy region, the
   DOM quiet) and compares it with `<name>-<size>-<scheme>-chromium-linux.png` beside the spec.
+  The images land beside the spec that calls `defineScreenBaselines`
+  (`<spec>-snapshots/`), even though the fixture registers its tests from the installed package:
+  Playwright takes the folder from the spec file it loaded, not from `node_modules`. An app that wants
+  them in another folder sets Playwright's `snapshotPathTemplate` and names that folder as
+  `baselines` when it calls the update workflow.
 
 Options per route: `fullPage` for a page that scrolls (default is the viewport, the screen as
 shown), `mask` for what legitimately changes, `maxDiffPixelRatio` to loosen every screen of the
@@ -162,7 +167,8 @@ A baseline changes only when you run the update step on the branch that changes 
 - **On the CI renderer (preferred).** Run the **Update screen baselines** workflow from the Actions
   tab on the branch. It renders the screens on the runner every later comparison runs on, commits
   the changed `*-linux.png` files to the branch, starts CI on it and posts the before and after
-  comment on the branch's pull request (see below). It refuses to run on `main`.
+  comment on the branch's pull request (see below). It refuses to run on `main`. It is the
+  reusable workflow below with this repository's commands; an app calls the same one.
 - **On a Linux machine.** `npm run build-storybook && npm run test:screens:update` rewrites the
   baselines that differ and writes the ones that are missing. A different CPU or distribution may
   anti-alias text a little differently from CI; if the `screens` job then disagrees with your
@@ -171,11 +177,100 @@ A baseline changes only when you run the update step on the branch that changes 
 Review the images before you commit them: an update is a decision that the screen should look like
 this from now on.
 
+## Rendering baselines in an app
+
+An app cannot draw its own baselines on a laptop: they are the Linux x64 renders of the CI runner (an
+arm64 or macOS machine anti-aliases differently), so an app without a way to run Playwright on that
+runner cannot produce them at all. lifekit-common publishes that step as a reusable workflow,
+`.github/workflows/screen-baselines.yml`, and the pull request comment as a composite action,
+`.github/actions/baseline-report`. Both take the app's own commands; nothing in them knows about
+Storybook or about this repository's layout.
+
+The app adds one workflow file. Call it at the lifekit-common tag the app's `@lifekit-hq/*`
+packages are on, and pass the same tag as `lifekit-common-ref` (that is where it takes the report
+action from; it defaults to `main`):
+
+```yaml
+# .github/workflows/update-screen-baselines.yml
+name: Update screen baselines
+on:
+  workflow_dispatch: # from the Actions tab, once this file is on the default branch
+  pull_request:
+    types: [labeled] # from the branch itself, before this file is on the default branch
+jobs:
+  render:
+    if: github.event_name == 'workflow_dispatch' || github.event.label.name == 'update-baselines'
+    permissions: {contents: write, actions: write, pull-requests: write}
+    uses: lifekit-hq/lifekit-common/.github/workflows/screen-baselines.yml@v4.5.0
+    with:
+      lifekit-common-ref: v4.5.0
+      working-directory: frontend # where package.json and the Playwright config live
+      build-command: npm run build # what the Playwright webServer serves; blank when nothing
+      command: npx playwright test e2e/screens --update-snapshots=changed
+      baselines: frontend/e2e/screens # the folder the images are in, from the repository root
+```
+
+| Input                  | Default                                       | What                                                                                               |
+| ---------------------- | --------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `command` (required)   |                                               | The app's Playwright command in update mode, run from `working-directory`                          |
+| `baselines` (required) |                                               | The folder holding the images, from the repository root; every `*-linux.png` under it is committed |
+| `working-directory`    | `.`                                           | Where `package.json` and the Playwright config live                                                |
+| `install-command`      | `npm ci`                                      | Installs the app                                                                                   |
+| `build-command`        | none                                          | Builds what the Playwright command serves                                                          |
+| `playwright-install`   | `npx playwright install --with-deps chromium` | Installs the browser                                                                               |
+| `ci-workflow`          | `ci.yml`                                      | The workflow started on the branch afterwards (it needs a `workflow_dispatch`)                     |
+| `node-version`         | `22`                                          | Node on the runner                                                                                 |
+| `commit-message`       | `test: update screen baselines`               | The commit the images land in                                                                      |
+| `lifekit-common-ref`   | `main`                                        | The lifekit-common tag to take the report action from                                              |
+| secret `token`         | the workflow token                            | A token whose push starts the pull request's own CI run, instead of `ci-workflow`                  |
+
+The job renders on `ubuntu-latest`, commits the changed images to the branch, starts CI on it and
+posts (or edits) the before and after comment on the branch's pull request. It does nothing on
+`main` or on a fork's branch. The calling job grants the three permissions above; the workflow cannot
+raise them. A repository can call the workflow without further setup because lifekit-common is
+public.
+
+### Landing the first baselines
+
+A `workflow_dispatch` workflow appears in the Actions tab only once its file is on the default
+branch, so an app adopting the fixture cannot press the button on the branch that adds the workflow.
+A `pull_request` workflow does run from the branch it is on, so the file above also listens for the
+`update-baselines` label:
+
+1. In the pull request that adopts the fixture (the Playwright config, the spec that lists the
+   routes, this workflow), open the pull request, then add the label `update-baselines`.
+2. The workflow renders every screen, commits the images to the branch as
+   `test: update screen baselines`, starts CI and posts the screens as "new screen" rows.
+3. Review the images (they are the owner's to approve) and merge. From then on the button works, and
+   so does the label, for any pull request that changes a screen on purpose.
+
+A label added again re-renders; remove it and add it, or use the button. If the app's CI has no
+`workflow_dispatch` trigger, give the workflow a `token` secret (a personal access token or a
+GitHub App token) and set `ci-workflow: ''`: a push made with that token starts the pull request's
+own checks.
+
+To keep the before and after comment up to date on every push, not only on the update, the app's CI
+calls the action itself, as this repository's does:
+
+```yaml
+- uses: actions/checkout@v4
+  with: {ref: '${{ github.event.pull_request.head.sha }}', fetch-depth: 0}
+- uses: lifekit-hq/lifekit-common/.github/actions/baseline-report@v4.5.0
+  with:
+    token: ${{ github.token }}
+    repo: ${{ github.repository }}
+    pr: ${{ github.event.pull_request.number }}
+    base: ${{ github.event.pull_request.base.sha }}
+    head: ${{ github.event.pull_request.head.sha }}
+```
+
+The report reads every `*-linux.png` the two commits differ by, wherever the app keeps them.
+
 ## Before and after on the pull request
 
 The `baseline-report` job in CI (and the **Update screen baselines** workflow, through the same
 `.github/actions/baseline-report` action, because a push made with the workflow token does not start
-the pull request run) compares the baselines on the branch with those at the point it
+the pull request run; an app uses the action the same way, see above) compares the baselines on the branch with those at the point it
 left the base branch. When any `*-linux.png` was added, changed or removed, it posts (and on every
 push edits, and when the difference goes away deletes) one comment on the pull request:
 

@@ -11,7 +11,7 @@ import {IconComponent} from '../icon/icon.component';
 import {ListItemRowComponent} from '../list-item-row/list-item-row.component';
 import {type MenuItem} from '../menu/menu.component';
 import {isRouteMenuItem} from '../menu/route-menu-item';
-import {PageContainerComponent} from '../page-container/page-container.component';
+import {PageComponent} from '../page/page.component';
 import {type NavItem} from '../sidebar-nav/sidebar-nav.component';
 
 /** A link or a button in a More-page card: an inset focus ring, so the card's clip keeps it. */
@@ -22,8 +22,11 @@ const ROW_CLASSES =
 
 /**
  * The phone's More tab: the nav items that did not fit the tab bar, then the account (identity,
- * the account menu's items, Sign out) and the app version. The app declares it as the `moreRoute`
- * page and binds the same `account` and `navItems` it gives `cmn-app-layout`:
+ * the account menu's items, Sign out) and the app version. It is a routed page template like
+ * `cmn-page`: it roots on `<cmn-page kind="list">`, so the large title (the route's `data.title`),
+ * the gutter and the section rhythm come from the template, and the app puts it on the route (or
+ * roots a wrapper component on it) with no wrapper of its own. The app declares it as the
+ * `moreRoute` page and binds the same `account` and `navItems` it gives `cmn-app-layout`:
  *
  * ```html
  * <cmn-more-page [items]="navItems" [account]="account()" [versionLabel]="version" (itemSelect)="onAccountItem($event)" />
@@ -40,91 +43,89 @@ const ROW_CLASSES =
     CardComponent,
     IconComponent,
     ListItemRowComponent,
-    PageContainerComponent,
+    PageComponent,
     RouterLink,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {style: 'display: block'},
   template: `
-    <cmn-page-container spacing="none">
-      <div class="space-y-cmn-4">
-        @if (overflow().length > 0) {
-          <cmn-card class="block" padding="none" data-more-section="nav">
-            @for (item of overflow(); track item.route) {
-              <a [routerLink]="item.route" [class]="rowClasses">
-                <cmn-list-item-row [label]="item.label">
-                  <cmn-badge [count]="item.badge?.() ?? null" avatar status="error">
-                    <cmn-icon [name]="item.icon" />
-                  </cmn-badge>
-                  <cmn-icon meta name="ChevronRight" size="sm" />
-                </cmn-list-item-row>
-              </a>
+    <cmn-page kind="list">
+      @if (overflow().length > 0) {
+        <cmn-card class="block" padding="none" data-more-section="nav">
+          @for (item of overflow(); track item.route) {
+            <a [routerLink]="item.route" [class]="rowClasses">
+              <cmn-list-item-row [label]="item.label">
+                <cmn-badge [count]="item.badge?.() ?? null" avatar status="error">
+                  <cmn-icon [name]="item.icon" />
+                </cmn-badge>
+                <cmn-icon meta name="ChevronRight" size="sm" />
+              </cmn-list-item-row>
+            </a>
+          }
+        </cmn-card>
+      }
+
+      @if (account(); as signedIn) {
+        @for (group of groups(); track $index; let first = $first) {
+          <cmn-card class="block" padding="none" data-more-section="account">
+            @if (first && identity(); as who) {
+              <div
+                class="flex items-center gap-cmn-3 border-b border-border-default px-cmn-4 py-cmn-3"
+                data-more-identity
+              >
+                <cmn-account-avatar
+                  [label]="who.avatarLabel ?? who.title"
+                  [pictureUrl]="who.pictureUrl"
+                />
+                <div class="min-w-0">
+                  <p class="truncate text-cmn-sm font-medium text-text-primary">
+                    {{ who.title }}
+                  </p>
+                  @if (who.subtitle) {
+                    <p class="truncate text-cmn-xs text-text-secondary">{{ who.subtitle }}</p>
+                  }
+                </div>
+              </div>
+            }
+            @for (item of group; track item.id) {
+              @if (isRoute(item) && !item.disabled) {
+                <a [routerLink]="item.id" [class]="rowClasses" (click)="itemSelect.emit(item)">
+                  <cmn-list-item-row [label]="item.label">
+                    @if (item.icon) {
+                      <cmn-icon [name]="item.icon" avatar />
+                    }
+                    <cmn-icon meta name="ChevronRight" size="sm" />
+                  </cmn-list-item-row>
+                </a>
+              } @else {
+                <button
+                  [class]="rowClasses"
+                  [disabled]="item.disabled"
+                  (click)="itemSelect.emit(item)"
+                  type="button"
+                >
+                  <cmn-list-item-row [label]="item.label">
+                    @if (item.icon) {
+                      <cmn-icon
+                        [name]="item.icon"
+                        [class.text-status-error]="item.destructive"
+                        avatar
+                      />
+                    }
+                  </cmn-list-item-row>
+                </button>
+              }
             }
           </cmn-card>
         }
+      }
 
-        @if (account(); as signedIn) {
-          @for (group of groups(); track $index; let first = $first) {
-            <cmn-card class="block" padding="none" data-more-section="account">
-              @if (first && identity(); as who) {
-                <div
-                  class="flex items-center gap-cmn-3 border-b border-border-default px-cmn-4 py-cmn-3"
-                  data-more-identity
-                >
-                  <cmn-account-avatar
-                    [label]="who.avatarLabel ?? who.title"
-                    [pictureUrl]="who.pictureUrl"
-                  />
-                  <div class="min-w-0">
-                    <p class="truncate text-cmn-sm font-medium text-text-primary">
-                      {{ who.title }}
-                    </p>
-                    @if (who.subtitle) {
-                      <p class="truncate text-cmn-xs text-text-secondary">{{ who.subtitle }}</p>
-                    }
-                  </div>
-                </div>
-              }
-              @for (item of group; track item.id) {
-                @if (isRoute(item) && !item.disabled) {
-                  <a [routerLink]="item.id" [class]="rowClasses" (click)="itemSelect.emit(item)">
-                    <cmn-list-item-row [label]="item.label">
-                      @if (item.icon) {
-                        <cmn-icon [name]="item.icon" avatar />
-                      }
-                      <cmn-icon meta name="ChevronRight" size="sm" />
-                    </cmn-list-item-row>
-                  </a>
-                } @else {
-                  <button
-                    [class]="rowClasses"
-                    [disabled]="item.disabled"
-                    (click)="itemSelect.emit(item)"
-                    type="button"
-                  >
-                    <cmn-list-item-row [label]="item.label">
-                      @if (item.icon) {
-                        <cmn-icon
-                          [name]="item.icon"
-                          [class.text-status-error]="item.destructive"
-                          avatar
-                        />
-                      }
-                    </cmn-list-item-row>
-                  </button>
-                }
-              }
-            </cmn-card>
-          }
-        }
-
-        @if (versionLabel()) {
-          <p class="text-center text-cmn-xs text-text-secondary" data-more-version>
-            {{ versionLabel() }}
-          </p>
-        }
-      </div>
-    </cmn-page-container>
+      @if (versionLabel()) {
+        <p class="text-center text-cmn-xs text-text-secondary" data-more-version>
+          {{ versionLabel() }}
+        </p>
+      }
+    </cmn-page>
   `,
 })
 export class MorePageComponent {

@@ -163,6 +163,11 @@ test('page-root requires a routed page to be rooted on cmn-page (template)', () 
         filename: 'a.html',
       },
       {code: '<cmn-page class="block" style="display: block"></cmn-page>', filename: 'a.html'},
+      {
+        // A library page built on the template is a page root: an app's wrapper component roots on it.
+        code: '<cmn-more-page [items]="items" [account]="account()" (itemSelect)="onSelect($event)" />',
+        filename: 'a.html',
+      },
     ],
     invalid: [
       {code: '<div></div>', filename: 'a.html', errors: [{messageId: 'missing'}]},
@@ -170,6 +175,16 @@ test('page-root requires a routed page to be rooted on cmn-page (template)', () 
         code: '<div class="p-4"><cmn-page /></div>',
         filename: 'a.html',
         errors: [{messageId: 'missing'}],
+      },
+      {
+        code: '<div class="p-4"><cmn-more-page /></div>',
+        filename: 'a.html',
+        errors: [{messageId: 'missing'}],
+      },
+      {
+        code: '<cmn-more-page /><cmn-alert />',
+        filename: 'a.html',
+        errors: [{messageId: 'outside', data: {found: '<cmn-alert>'}}],
       },
       {code: '', filename: 'a.html', errors: [{messageId: 'missing'}]},
       {code: 'Hello {{ name }}', filename: 'a.html', errors: [{messageId: 'missing'}]},
@@ -202,6 +217,11 @@ test('page-root flags spacing the page sets on cmn-page (template)', () => {
     valid: [],
     invalid: [
       spacing('<cmn-page class="p-4"></cmn-page>', 'p-4'),
+      {
+        code: '<cmn-more-page class="px-4" />',
+        filename: 'a.html',
+        errors: [{messageId: 'spacing', data: {owner: '<cmn-more-page>', found: 'px-4'}}],
+      },
       spacing('<cmn-page class="block px-cmn-page-gutter"></cmn-page>', 'px-cmn-page-gutter'),
       spacing('<cmn-page class="md:pt-6 -mt-2"></cmn-page>', 'md:pt-6', '-mt-2'),
       spacing('<cmn-page class="!mx-auto max-w-[640px]"></cmn-page>', '!mx-auto', 'max-w-[640px]'),

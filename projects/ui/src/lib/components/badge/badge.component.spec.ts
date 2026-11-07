@@ -82,4 +82,16 @@ describe('BadgeComponent', () => {
     fixture.detectChanges();
     expect(indicator()?.className).toContain('absolute');
   });
+
+  it('hangs off the corner with a transform, never with negative insets', () => {
+    // The design judge reads negative insets on a positioned child in a `display: none` subtree (the
+    // nav the shell hides) as escaping the shell's clip, on every route of an app with a nav badge.
+    fixture.componentRef.setInput('count', 3);
+    fixture.detectChanges();
+    const classes = (indicator()?.className ?? '').split(/\s+/);
+    expect(classes).toEqual(
+      expect.arrayContaining(['right-0', 'top-0', 'translate-x-1.5', '-translate-y-1.5'])
+    );
+    expect(classes.filter(cls => /^-(?:top|right|bottom|left|inset)-/.test(cls))).toEqual([]);
+  });
 });

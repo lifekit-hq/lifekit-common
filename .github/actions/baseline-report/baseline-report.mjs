@@ -5,7 +5,7 @@
  * Markdown comment with each changed screen's image on the base and on the head, so a change to
  * the look is never silent. Prints nothing when no baseline changed.
  *
- *   node scripts/baseline-report.mjs --repo lifekit-hq/lifekit-common --base <sha> --head <sha>
+ *   node baseline-report.mjs --repo lifekit-hq/lifekit-common --base <sha> --head <sha>
  *
  * Images are linked, not uploaded: `github.com/<repo>/blob/<sha>/<path>?raw=true` resolves for
  * anyone who can read the repository, from the commit that holds the image.
@@ -16,8 +16,11 @@ import {fileURLToPath} from 'node:url';
 /** Identifies the comment, so a later push edits it instead of adding another. */
 export const MARKER = '<!-- screen-baseline-report -->';
 
-/** A Linux baseline: Playwright writes `<spec>-snapshots/<name>-<project>-linux.png`. */
-const BASELINE = /-snapshots\/[^/]+-linux\.png$/;
+/**
+ * A Linux baseline: Playwright writes `<name>-<project>-linux.png` (`screenBaselineConfig` puts them
+ * in one `baselines` folder under the app's test directory, wherever that is).
+ */
+const BASELINE = /(?:^|\/)[^/]+-linux\.png$/;
 const PHONE_WIDTH = 195;
 const DESKTOP_WIDTH = 400;
 /** A comment holds 65,536 characters; a row is a few hundred, so this keeps well inside it. */

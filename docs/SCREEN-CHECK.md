@@ -99,6 +99,25 @@ page's skeleton must lay out like the page it stands in for, so nothing jumps wh
 The presets are held to this one at a time (`skeleton-conformance.stories.ts`, guardrail S1); this
 holds a whole route, which until now was only caught by eye.
 
+Size a skeleton for text from the type ramp, not from a rem you worked out once: `<cmn-skeleton
+text="2xl" />` is a bar on one line of `text-cmn-2xl`, as tall as that line is (`1lh`) whatever the
+ramp's line-height is. A literal such as `height="1.875rem"` was right while the ramp's 2xl line was
+1.25 and is 1.2px short since it became 1.3, so the card grew when its figure arrived. The presets
+(`shape`) already follow the ramp, and `e2e/phone/skeleton-exact.spec.ts` holds each pair, and a
+hero card with a figure, to the same height to the sub-pixel at 390 and 1280.
+
+What an app sets so its skeleton matches its own content, since the library cannot know it:
+
+| Skeleton stands in for                            | Input the app sets                                        |
+| ------------------------------------------------- | --------------------------------------------------------- |
+| a line of text (a figure, a label, a heading)     | `text` with the step the loaded text uses (`"2xl"`)       |
+| a library component (stat card, chart card, rows) | `shape` (`stat`, `chart`, `row`, `section`), plus `count` |
+| a chart or image the app sizes itself             | `height` (or `aspect`) equal to the loaded box, measured  |
+| a block whose height the app fixes (a `h-5` slot) | the same fixed height on both sides                       |
+
+A measured `height` is the app's own content dimension and has to be re-measured when the loaded
+content's box changes (a type-ramp change moves a chart card's label line by a fraction of a pixel).
+
 For a route it visits the page with its data requests held, so the page stays in its skeleton
 state, and measures the page's top-level sections. It then releases the requests, waits for the
 page to settle (the same settling as `checkScreen`) and measures the sections again. A section
@@ -177,6 +196,21 @@ the design judge and axe-core at both sizes and both schemes, with no exceptions
 [ROUTE-SCAN.md](ROUTE-SCAN.md). Detail, Form, Settings and Overview join it when their first
 baselines are added.
 The story ids are `templates-<kind>--<phone|phone-dark|desktop|desktop-dark>`.
+
+## Two rules that read structure
+
+- **C8 heading rhythm** measures the space under a heading to the content it heads: the first
+  element below it in its own section (`section`, `fieldset`, `[role=group]`, `[role=region]`,
+  `cmn-settings-section`, `cmn-list-section`), never to whatever sits under it on the page. The
+  `settings` template puts each heading in a column beside its controls from md up; the next thing
+  under it in that column is the next section's heading, which is not its content, so a section
+  taller than its heading column is not a finding. A heading outside any such section is measured
+  against the next element under it on the page, as before.
+- **C9 row-action noise** counts rows, not ancestors: a row is a list item, a table row, a
+  `role=listitem` / `role=row` or a `cmn-list-item-row`, and the rule fires when three or more
+  rows of one list each hold a bordered text button. One card with several actions (a decision's
+  option group, then Decide and Cancel) is one row's actions, or no row's, and is not a finding. If
+  a card should hold fewer bordered buttons, that is a different rule and DESIGN.md says so.
 
 ## What it caught first
 

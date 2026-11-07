@@ -321,9 +321,9 @@ entry whose story lands fails the check until it is removed.
   no component yet (`file`, `date`, `range` and the like) pass.
 - `lifekit/no-local-currency-format` flags `Intl.NumberFormat` and `toLocaleString` with
   `style: 'currency'`, and the Angular `currency` pipe.
-- `lifekit/page-root` holds a routed page to its template: the template root is `<cmn-page>`
-  (whitespace, comments, `@let` and `<ng-template>` aside), and the page sets no padding, margin
-  or width of its own. The page template owns them, so a spacing finding is fixed in
+- `lifekit/page-root` holds a routed page to its template: the template root is `<cmn-page>` or
+  `<cmn-more-page>`, the library's ready-made More tab, which is built on it (whitespace, comments,
+  `@let` and `<ng-template>` aside), and the page sets no padding, margin or width of its own. The page template owns them, so a spacing finding is fixed in
   `@lifekit-hq/ui` once, not per page. It flags a root that is anything else, content outside the
   `<cmn-page>`, and spacing on the `<cmn-page>` element (`class`, `style`, `[class.x]`,
   `[style.x]`) or on the page host: `host` metadata, `@HostBinding`, `styles`, and a `styleUrl`

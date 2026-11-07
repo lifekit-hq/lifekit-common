@@ -3,6 +3,21 @@ import {ChangeDetectionStrategy, Component, computed, input} from '@angular/core
 
 export type SkeletonShape = 'bar' | 'row' | 'stat' | 'chart' | 'section';
 
+/** A step of the type ramp (`text-cmn-*`): the line a `text` skeleton stands in for. */
+export type SkeletonText = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl';
+
+// Spelled out in full: Tailwind finds classes by scanning for whole class names.
+const TEXT_LINE_CLASSES: Record<SkeletonText, string> = {
+  xs: 'flex items-center text-cmn-xs',
+  sm: 'flex items-center text-cmn-sm',
+  md: 'flex items-center text-cmn-md',
+  lg: 'flex items-center text-cmn-lg',
+  xl: 'flex items-center text-cmn-xl',
+  '2xl': 'flex items-center text-cmn-2xl',
+  '3xl': 'flex items-center text-cmn-3xl',
+  '4xl': 'flex items-center text-cmn-4xl',
+};
+
 const BAR = 'cmn-skeleton-sweep block rounded-cmn-sm';
 const DISC = 'cmn-skeleton-sweep block shrink-0 rounded-cmn-full';
 const ROW_CLASSES =
@@ -14,7 +29,10 @@ const DEFAULT_ROWS = 1;
 const DEFAULT_SECTION_ROWS = 3;
 
 /**
- * A loading placeholder. With no `shape` it is one bar sized by `width` and `height`. A `shape`
+ * A loading placeholder. With no `shape` it is one bar sized by `width` and `height`; with `text` it
+ * is one bar on a line of that step of the type ramp, as tall as the line of text it stands in for
+ * whatever the ramp's line-height is (`1lh`), so a figure or a label never moves the page when it
+ * arrives. A `shape`
  * draws the whole silhouette of a component instead, copying that component's box so the page
  * does not move when the content replaces it:
  *
@@ -31,7 +49,7 @@ const DEFAULT_SECTION_ROWS = 3;
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgTemplateOutlet],
   host: {
-    '[class.block]': "shape() !== 'bar'",
+    '[class.block]': "shape() !== 'bar' || text() !== null",
     '[attr.aria-hidden]': "shape() === 'bar' ? null : 'true'",
   },
   template: `
@@ -78,7 +96,14 @@ const DEFAULT_SECTION_ROWS = 3;
         </div>
       }
       @default {
-        <div [class]="classes()" [style.width]="width()" [style.height]="height()"></div>
+        @if (textLine(); as line) {
+          <!-- One line of the step's text: 1lh is its line box, so the ramp owns the height -->
+          <div [class]="line" style="height: 1lh">
+            <div [class]="classes()" [style.width]="width()" style="height: 0.75em"></div>
+          </div>
+        } @else {
+          <div [class]="classes()" [style.width]="width()" [style.height]="height()"></div>
+        }
       }
     }
     <ng-template #rows>
@@ -105,6 +130,8 @@ export class SkeletonComponent {
   public readonly width = input<string>('100%');
   /** `bar` only: the bar's height. */
   public readonly height = input<string>('1.25rem');
+  /** `bar` only: stand in for one line of this step of the type ramp; `height` is then ignored. */
+  public readonly text = input<SkeletonText | null>(null);
   /** `bar` only: classes added to the bar. */
   public readonly className = input<string>('');
   /** `row` and `section`: how many rows to draw (default 1, and 3 for a section). */
@@ -115,6 +142,11 @@ export class SkeletonComponent {
   public readonly classes = computed(() => {
     const extra = this.className();
     return extra ? `${BAR} ${extra}` : BAR;
+  });
+
+  protected readonly textLine = computed<string | null>(() => {
+    const step = this.text();
+    return step ? TEXT_LINE_CLASSES[step] : null;
   });
 
   protected readonly bar = BAR;
