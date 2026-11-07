@@ -200,7 +200,7 @@ on:
 jobs:
   render:
     if: github.event_name == 'workflow_dispatch' || github.event.label.name == 'update-baselines'
-    permissions: {contents: write, actions: write, pull-requests: write}
+    permissions: {contents: write, actions: write, pull-requests: write, packages: read}
     uses: lifekit-hq/lifekit-common/.github/workflows/screen-baselines.yml@v4.5.0
     with:
       lifekit-common-ref: v4.5.0
@@ -226,9 +226,13 @@ jobs:
 
 The job renders on `ubuntu-latest`, commits the changed images to the branch, starts CI on it and
 posts (or edits) the before and after comment on the branch's pull request. It does nothing on
-`main` or on a fork's branch. The calling job grants the three permissions above; the workflow cannot
-raise them. A repository can call the workflow without further setup because lifekit-common is
-public.
+`main` or on a fork's branch. The calling job grants the four permissions above; the workflow cannot
+raise them, and `packages: read` is the one that lets the install step read the app's private
+`@lifekit-hq/*` packages (without it `npm ci` fails with E403). The workflow hands its own token to
+npm as `NODE_AUTH_TOKEN`, which is what the app's `.npmrc` reads
+(`//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}`), so the caller needs no secret and its
+`install-command` stays plain `npm ci`. A repository can call the workflow without further setup
+because lifekit-common is public.
 
 ### Landing the first baselines
 
