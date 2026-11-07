@@ -10,9 +10,9 @@ import {
   type Provider,
 } from '@angular/core';
 import {provideRouter, Router, RouterOutlet, type Routes, withHashLocation} from '@angular/router';
-import {LkInstallHint, LkOfflineBanner, LkUpdatePrompt} from '@lifekit-hq/elements';
 
 import {PREFERS_DARK} from '../../services/theme/theme.service';
+import {defineAppChromeElements} from '../app-layout/app-chrome-elements';
 import {
   accountMenu,
   type AppLayoutAccount,
@@ -26,16 +26,7 @@ import {PageComponent} from './page.component';
  * so the templates are approved side by side in the same chrome. Only the golden stories import it.
  */
 
-// Imported by name so a bundler cannot tree-shake the customElements.define() call.
-for (const [tag, element] of [
-  ['lk-update-prompt', LkUpdatePrompt],
-  ['lk-offline-banner', LkOfflineBanner],
-  ['lk-install-hint', LkInstallHint],
-] as const) {
-  if (!customElements.get(tag)) {
-    customElements.define(tag, element);
-  }
-}
+defineAppChromeElements();
 
 /** A destination a golden screen does not show: it only needs to exist for the tabs. */
 @Component({

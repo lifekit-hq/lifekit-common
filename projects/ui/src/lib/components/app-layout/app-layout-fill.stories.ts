@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component} from '@angular/core';
+import {ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA, input} from '@angular/core';
 import {provideRouter, RouterOutlet, withHashLocation} from '@angular/router';
 import {applicationConfig, type Meta, type StoryObj} from '@storybook/angular';
 
@@ -8,7 +8,10 @@ import {ListSectionComponent} from '../list-section/list-section.component';
 import {PageContainerComponent} from '../page-container/page-container.component';
 import {PageScrollComponent} from '../page-scroll/page-scroll.component';
 import type {NavItem} from '../sidebar-nav/sidebar-nav.component';
+import {defineAppChromeElements} from './app-chrome-elements';
 import {AppLayoutComponent} from './app-layout.component';
+
+defineAppChromeElements();
 
 const ROWS = 60;
 const GROUPS = ['Today', 'Yesterday', 'Mon 12 Oct', 'Sun 11 Oct', 'Sat 10 Oct'];
@@ -113,17 +116,49 @@ class UnscrolledFillPageComponent {
   protected readonly rows = Array.from({length: ROWS}, (_, i) => i + 1);
 }
 
+/**
+ * A page that fits the slot with a viewport calculation instead of `fill`: from md it is exactly the
+ * window less the top bar and the large title (8rem), and on a phone it takes the frame. It leaves
+ * `main` no slack, so any height the shell spends above it (a notice column with nothing showing)
+ * makes `main` scroll around the page.
+ */
+@Component({
+  selector: 'cmn-fill-fixed-height-page',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {class: 'block h-full overflow-hidden md:h-[calc(100dvh-8rem)]'},
+  template: `
+    <div class="h-full rounded-cmn-lg border border-border-default bg-surface-card p-cmn-4">
+      <p class="text-cmn-sm text-text-secondary">A page that takes the slot, nothing more</p>
+    </div>
+  `,
+})
+class FixedHeightPageComponent {}
+
 @Component({
   selector: 'cmn-fill-shell',
   imports: [AppLayoutComponent, RouterOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: `
     <cmn-app-layout [navItems]="navItems" [phoneOverlay]="true">
+      <!-- As an app wires them: each notice its own child, none of them showing. One element per
+           block, so each is projected into the notices slot by its attribute. -->
+      @if (appChrome()) {
+        <lk-offline-banner cmnAppLayoutNotice />
+      }
+      @if (appChrome()) {
+        <lk-update-prompt cmnAppLayoutNotice />
+      }
+      @if (appChrome()) {
+        <lk-install-hint cmnAppLayoutNotice />
+      }
       <router-outlet />
     </cmn-app-layout>
   `,
 })
 class FillShellComponent {
+  /** The app's PWA notices are in the shell, none of them showing. */
+  public readonly appChrome = input(false);
   protected readonly navItems = NAV_ITEMS;
 }
 
@@ -142,7 +177,12 @@ const meta: Meta<FillShellComponent> = {
 
 export default meta;
 
-const fillStory = (path: string, title: string): StoryObj<FillShellComponent> => ({
+const fillStory = (
+  path: string,
+  title: string,
+  appChrome = false
+): StoryObj<FillShellComponent> => ({
+  args: {appChrome},
   decorators: [
     applicationConfig({
       providers: [
@@ -153,6 +193,7 @@ const fillStory = (path: string, title: string): StoryObj<FillShellComponent> =>
             {path: 'alerts', component: EmptyListPageComponent, data: {title}},
             {path: 'transactions', component: GroupedListPageComponent, data: {title}},
             {path: 'reports', component: UnscrolledFillPageComponent, data: {title}},
+            {path: 'ledger', component: FixedHeightPageComponent, data: {title}},
           ],
           withHashLocation()
         ),
@@ -172,3 +213,15 @@ export const GroupedList = fillStory('transactions', 'Transactions');
 
 /** A `fill` page without a `cmn-page-scroll`: on a phone main scrolls it, bottom padding included. */
 export const FillWithoutListScroll = fillStory('reports', 'Reports');
+
+/**
+ * The same list page in a shell whose three notices are there and none is showing, as an app wires
+ * it: the notices cost the page nothing, so `main` still has nothing to scroll.
+ */
+export const LongListWithAppChrome = fillStory('events', 'Events', true);
+
+/**
+ * A page sized from the viewport (`calc(100dvh - 8rem)`) in the shell with its notices there and
+ * none showing: `main` and the document still do not scroll.
+ */
+export const FixedHeightWithAppChrome = fillStory('ledger', 'Ledger', true);

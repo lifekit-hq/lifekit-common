@@ -1,6 +1,6 @@
 import {expect, type Page, test} from '@playwright/test';
 
-import {openStory} from './phone-helpers';
+import {openStory, settleFrames} from './phone-helpers';
 
 // A fill page scrolls only its list. `cmn-page-container fill` holding a `cmn-page-scroll` is the
 // whole contract: the shell bounds the page to what is left of `main` below the large title, so
@@ -14,6 +14,8 @@ const STORIES = {
   empty: 'conformance-fill-app-layout--empty-list',
   grouped: 'conformance-fill-app-layout--grouped-list',
   unscrolled: 'conformance-fill-app-layout--fill-without-list-scroll',
+  chrome: 'conformance-fill-app-layout--long-list-with-app-chrome',
+  fixed: 'conformance-fill-app-layout--fixed-height-with-app-chrome',
 } as const;
 
 interface Scroll {
@@ -79,6 +81,25 @@ for (const viewport of [DESKTOP, PHONE]) {
       expect(geometry.listTop).toBeGreaterThanOrEqual(geometry.aboveBottom);
       expect(Math.abs(geometry.listBottom - geometry.mainBottom)).toBeLessThanOrEqual(1);
     });
+
+    for (const story of ['chrome', 'fixed'] as const) {
+      test(`${story} | notices that are not showing leave main and the document nothing to scroll`, async ({
+        page,
+      }) => {
+        await openStory(page, STORIES[story], 'light', 'main');
+        await settleFrames(page);
+        const scroll = await page.evaluate(() => {
+          const main = document.querySelector('main') as HTMLElement;
+          const root = document.documentElement;
+          return {
+            main: main.scrollHeight - main.clientHeight,
+            document: root.scrollHeight - root.clientHeight,
+          };
+        });
+        expect(scroll.main).toBeLessThanOrEqual(0);
+        expect(scroll.document).toBeLessThanOrEqual(0);
+      });
+    }
 
     test('an empty list leaves nothing to scroll anywhere', async ({page}) => {
       await openStory(page, STORIES.empty, 'light', READY);
