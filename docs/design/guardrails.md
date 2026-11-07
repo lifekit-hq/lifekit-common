@@ -27,20 +27,20 @@ dropped quietly: a rule with no check yet stays here, marked **planned** with th
 
 ## Adopted sources
 
-| Area                   | Adopt (as published)                                            | Deviations                                                                                              |
-| ---------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| States                 | Carbon loading, empty and disabled patterns                     | Continuity timings (200 / 400ms) and cached data kept on refresh                                        |
-| Feedback               | Carbon notification pattern                                     | Toasts sit bottom-centre above the tab bar                                                              |
-| Forms and validation   | GOV.UK Design System (validation, error message, error summary) | Short sheet forms focus the first invalid field; a shown error clears as soon as it is fixed            |
-| Tables and lists       | Ant Design Table behaviour (not its look)                       | On a phone, tables become HIG lists with continuous paging                                              |
-| Navigation and shell   | Apple HIG, through APP-SHELL-STANDARD.md                        | Breakpoints from the M3 window size classes                                                             |
-| Responsive and phone   | Material 3 window size classes and canonical layouts            | Compact-width structure and targets follow HIG                                                          |
-| Keyboard and focus     | WCAG 2.2 AA plus the W3C ARIA APG patterns                      | Cmd/Ctrl+K opens the command palette in every app                                                       |
-| Motion                 | Material 3 easing and duration tokens                           | Capped at 400ms; only transform and opacity animate                                                     |
-| Typography and spacing | Carbon typography and spacing                                   | The five Instrument sizes; phone floors of 12px text and 16px inputs                                    |
-| Colour and theming     | Material 3 dynamic colour (seed to roles)                       | OKLCH contrast solving instead of HCT; fixed-meaning colours never seed-derived                         |
-| Charts                 | Carbon data visualization                                       | Scrub-to-read on touch; fixed asset and category colours                                                |
-| Money and numbers      | Unicode CLDR through ECMA-402 `Intl`                            | Symbol first, ISO code when two same-symbol currencies share a screen; sign, arrow and colour on deltas |
+| Area                   | Adopt (as published)                                              | Deviations                                                                                              |
+| ---------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| States                 | Carbon loading, empty and disabled patterns                       | Continuity timings (200 / 400ms) and cached data kept on refresh                                        |
+| Feedback               | Carbon notification pattern                                       | Toasts sit bottom-centre above the tab bar                                                              |
+| Forms and validation   | GOV.UK Design System (validation, error message, error summary)   | Short sheet forms focus the first invalid field; a shown error clears as soon as it is fixed            |
+| Tables and lists       | Ant Design Table behaviour (not its look)                         | On a phone, tables become HIG lists with continuous paging                                              |
+| Navigation and shell   | Apple HIG, through APP-SHELL-STANDARD.md                          | Breakpoints from the M3 window size classes                                                             |
+| Responsive and phone   | Material 3 window size classes and canonical layouts              | Compact-width structure and targets follow HIG                                                          |
+| Keyboard and focus     | WCAG 2.2 AA plus the W3C ARIA APG patterns                        | Cmd/Ctrl+K opens the command palette in every app                                                       |
+| Motion                 | Carbon motion tokens (durations and productive/expressive curves) | Capped at 400ms; only transform and opacity animate                                                     |
+| Typography and spacing | Carbon typography and spacing                                     | Carbon's scale cut to five roles and a 14/21 body; phone floors of 12px text and 16px inputs            |
+| Colour and theming     | Material 3 dynamic colour (seed to roles)                         | OKLCH contrast solving instead of HCT; fixed-meaning colours never seed-derived                         |
+| Charts                 | Carbon data visualization                                         | Scrub-to-read on touch; fixed asset and category colours                                                |
+| Money and numbers      | Unicode CLDR through ECMA-402 `Intl`                              | Symbol first, ISO code when two same-symbol currencies share a screen; sign, arrow and colour on deltas |
 
 ### 1. States
 
@@ -139,10 +139,12 @@ each composite widget: tabs, menu button, listbox, radio group and dialog.
 
 ### 8. Motion
 
-**Adopt** [Material 3 easing and duration](https://m3.material.io/styles/motion/easing-and-duration);
-the `--cmn-ease-*` tokens are the M3 curves.
+**Adopt** [Carbon motion](https://carbondesignsystem.com/elements/motion/overview/) (`@carbon/motion`);
+the `--cmn-ease-*` tokens are Carbon's productive and expressive curves and the durations are its
+moderate-01, moderate-02 and slow-01 steps.
 
-- **Deviation:** the longest duration is `--cmn-duration-long`, 400ms; M3 goes to 1000ms. **Why:**
+- **Deviation:** the longest duration is `--cmn-duration-long`, 400ms; Carbon's slower steps go
+  further. **Why:**
   the [Doherty threshold](https://lawsofux.com/doherty-threshold/), and a data-first app has no hero
   transitions to justify more.
 - **Deviation:** only `transform` and `opacity` animate, and under Reduce Motion movement becomes
@@ -155,9 +157,10 @@ the `--cmn-ease-*` tokens are the M3 curves.
 written for IBM Plex, our face: productive (dense, task-focused) type for product UI, and an 8px
 base with 2px and 4px mini-units. The `cmn-*` spacing steps are a subset of Carbon's scale.
 
-- **Deviation:** keep the five Instrument sizes (DESIGN.md: display, headline, title, body 14px,
-  label 12px) instead of Carbon's dozen productive tokens. **Why:** fewer sizes hold "one clear
-  number per screen", and body and label already match Carbon's.
+- **Deviation:** the sizes are Carbon's, but the ramp keeps five roles (DESIGN.md: display, headline,
+  title, body 14px, label 12px) instead of Carbon's dozen productive tokens, a 12px floor, and a
+  14/21 body line height (Carbon's compact body is 14/18). **Why:** fewer roles hold "one clear
+  number per screen", and the floor and line height are what the design judge holds text to.
 - **Deviation:** phone floors of 12px for any text and 16px for input text. **Why:**
   PHONE-CONTRACT.md rules 9 and 10. HIG's 17pt body is not adopted, because HIG governs structure
   and not look; 200% text resize ([WCAG 1.4.4](https://www.w3.org/TR/WCAG22/#resize-text)) stays.
