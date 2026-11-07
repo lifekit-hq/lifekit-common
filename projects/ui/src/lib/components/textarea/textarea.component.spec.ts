@@ -108,6 +108,7 @@ describe('TextareaComponent', () => {
     component.setDisabledState(true);
     fixture.detectChanges();
     expect(textarea().disabled).toBe(true);
+    expect(textarea().className).toContain('disabled:bg-cmn-field');
   });
 
   it('marks the field invalid and swaps the border when hasError is set', () => {

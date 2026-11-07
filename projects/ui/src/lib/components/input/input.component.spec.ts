@@ -98,6 +98,7 @@ describe('InputComponent', () => {
     component.setDisabledState(true);
     fixture.detectChanges();
     expect(input().disabled).toBe(true);
+    expect(input().className).toContain('disabled:bg-cmn-field');
   });
 
   it('marks the field invalid and swaps the border when hasError is set', () => {
