@@ -9,6 +9,11 @@ on:
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+# @carbon/styles (a tokens devDependency) runs IBM's telemetry postinstall; keep it off in CI.
+env:
+  IBM_TELEMETRY_DISABLED: 'true'
+
 jobs:
   ci:
     runs-on: ubuntu-latest

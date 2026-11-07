@@ -14,6 +14,10 @@ permissions:
   pull-requests: write
   packages: write
 
+# @carbon/styles (a tokens devDependency) runs IBM's telemetry postinstall; keep it off in CI.
+env:
+  IBM_TELEMETRY_DISABLED: 'true'
+
 jobs:
   release-please:
     permissions:
