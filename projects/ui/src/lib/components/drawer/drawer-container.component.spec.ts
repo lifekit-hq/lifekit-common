@@ -201,6 +201,12 @@ describe('CmnDrawerContainerComponent as a bottom sheet', () => {
     expect(spy).toHaveBeenCalledTimes(1);
   });
 
+  it('grows the close button to a touch-sized target below md', () => {
+    const button = host.querySelector('button[aria-label="Close drawer"]') as HTMLElement;
+    expect(button.classList).toContain('max-md:after:h-cmn-touch');
+    expect(button.classList).toContain('h-8');
+  });
+
   it('does not start a drag from the close button', () => {
     const button = host.querySelector('button[aria-label="Close drawer"]') as HTMLElement;
     pointer('pointerdown', 0, button);

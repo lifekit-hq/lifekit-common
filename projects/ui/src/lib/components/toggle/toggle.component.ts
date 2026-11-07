@@ -9,6 +9,8 @@ import {
 } from '@angular/core';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 
+import {PHONE_HIT_AREA_CLASSES} from '../../tokens/hit-area';
+
 /**
  * An on/off switch.
  *
@@ -69,10 +71,11 @@ export class ToggleComponent implements ControlValueAccessor {
   public readonly isDisabled = computed(() => this.disabled() || this.formDisabled());
 
   public readonly trackClass = computed(() => {
+    // 24px drawn, at least --size-touch pressed on a phone.
     const base =
       'relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full ' +
       'border-2 border-transparent transition-colors duration-cmn-short ease-cmn-standard ' +
-      'focus:outline-none focus:ring-2 focus:ring-border-focus focus:ring-offset-1';
+      `focus:outline-none focus:ring-2 focus:ring-border-focus focus:ring-offset-1 ${PHONE_HIT_AREA_CLASSES}`;
     const color = this.isChecked() ? 'bg-accent-default' : 'bg-border-strong';
     const state = this.isDisabled()
       ? 'opacity-50 pointer-events-none'

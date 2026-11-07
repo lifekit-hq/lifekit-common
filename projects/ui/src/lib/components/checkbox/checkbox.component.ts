@@ -9,12 +9,14 @@ import {
 } from '@angular/core';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 
+import {PHONE_HIT_AREA_CLASSES} from '../../tokens/hit-area';
 import {IconComponent} from '../icon/icon.component';
 
+// 20px drawn, at least --size-touch pressed on a phone.
 const BOX_BASE =
   'inline-flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded-cmn-sm border ' +
   'transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-border-focus ' +
-  'focus-visible:ring-offset-1';
+  `focus-visible:ring-offset-1 ${PHONE_HIT_AREA_CLASSES}`;
 
 /**
  * Boxed on/off control with an optional inline label; `indeterminate` shows a dash.

@@ -52,6 +52,13 @@ describe('ToggleComponent', () => {
     expect(button()?.getAttribute('aria-checked')).toBe('false');
   });
 
+  it('grows the track to a touch-sized target below md', () => {
+    fixture.detectChanges();
+
+    expect(button()?.classList).toContain('max-md:after:h-cmn-touch');
+    expect(button()?.classList).toContain('max-md:after:w-cmn-touch');
+  });
+
   it('exposes the checked state through aria-checked and the accent track', () => {
     fixture.componentRef.setInput('checked', true);
     fixture.detectChanges();

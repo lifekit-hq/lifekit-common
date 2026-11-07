@@ -64,6 +64,13 @@ describe('CheckboxComponent', () => {
     expect(box().getAttribute('aria-checked')).toBe('mixed');
   });
 
+  it('grows the box to a touch-sized target below md', () => {
+    fixture.detectChanges();
+
+    expect(box().classList).toContain('max-md:after:h-cmn-touch');
+    expect(box().classList).toContain('max-md:after:w-cmn-touch');
+  });
+
   it('shows a check mark only when checked', () => {
     fixture.detectChanges();
     expect(box().querySelector('cmn-icon')).toBeNull();
