@@ -41,6 +41,18 @@ export const SCREEN_BASELINE_OPTIONS = Object.freeze({
 });
 
 /**
+ * The Chromium switches a baseline is rendered with. `--disable-partial-raster` makes every frame
+ * rasterise each tile whole. Left on, Chromium paints only the damaged part of a tile over what the
+ * tile already holds, and whether a tile was painted whole or in parts depends on when the page's
+ * last invalidation landed relative to the frame, which is a matter of timing. The edges that were
+ * painted twice come out a colour level or three off from the ones painted once: anti-aliased
+ * rounded corners, circles and text edges. So one machine, under load, drew the same page as
+ * several different images, and a baseline flaked by a few pixels from run to run. Rasterising
+ * whole tiles draws one image every time (docs/SCREEN-BASELINES.md, "Why the raster is pinned").
+ */
+export const SCREEN_BROWSER_ARGS = Object.freeze(['--disable-partial-raster']);
+
+/**
  * The part of a Playwright config the fixture owns, to spread into `defineConfig`. Playwright's
  * default for a missing baseline is to write it and carry on; `'none'` writes nothing, so a
  * missing or changed baseline fails the run until someone updates it on purpose
@@ -93,6 +105,11 @@ export function defineScreenBaselines(
   if (duplicate) throw new Error(`screen baselines: two routes are named "${duplicate}"`);
   const unknown = sizes.find(size => !(size in SCREEN_VIEWPORTS));
   if (unknown) throw new Error(`screen baselines: unknown size "${unknown}"`);
+
+  // The browser is launched once per worker, so Playwright only takes launch options for a whole
+  // spec file (a describe group may not set them unless every test runs in parallel). The switches
+  // replace any `launchOptions` the project sets, for the spec file that defines the baselines.
+  test.use({launchOptions: {args: [...SCREEN_BROWSER_ARGS]}});
 
   for (const size of sizes) {
     test.describe(`screen baseline ${size}`, () => {

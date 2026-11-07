@@ -13,6 +13,7 @@ import {
   BASELINE_PLATFORM,
   defineScreenBaselines,
   SCREEN_BASELINE_OPTIONS,
+  SCREEN_BROWSER_ARGS,
   SCREEN_VIEWPORTS,
   screenBaselineConfig,
   screenBaselineName,
@@ -38,6 +39,7 @@ function fakePlaywright() {
   const registered = [];
   const describes = [];
   const skips = [];
+  const fileUse = {};
   let scope = null;
   const test = (title, body) => registered.push({title, body, scope});
   test.describe = (title, define) => {
@@ -46,13 +48,13 @@ function fakePlaywright() {
     define();
     scope = null;
   };
-  test.use = options => Object.assign(scope.use, options);
+  test.use = options => Object.assign(scope ? scope.use : fileUse, options);
   test.skip = (condition, reason) => skips.push({condition, reason});
   const screenshots = [];
   const expect = page => ({
     toHaveScreenshot: async (file, options) => screenshots.push({file, options, url: page.url()}),
   });
-  return {test, expect, registered, describes, skips, screenshots};
+  return {test, expect, registered, describes, fileUse, skips, screenshots};
 }
 
 /** Runs one registered test body in a browser configured the way its describe asked for. */
@@ -124,6 +126,15 @@ describe('defineScreenBaselines', () => {
       assert.equal(use.timezoneId, 'UTC');
       assert.equal(use.locale, 'en-US');
     }
+  });
+
+  it('launches the browser rasterising whole tiles, so one page is one image', () => {
+    const fake = fakePlaywright();
+    defineScreenBaselines(fake, {routes: [{name: 'list', url: PAGE}]});
+    assert.deepEqual(SCREEN_BROWSER_ARGS, ['--disable-partial-raster']);
+    // Launch options are worker-wide: set for the spec file, never inside a describe group.
+    assert.deepEqual(fake.fileUse.launchOptions, {args: ['--disable-partial-raster']});
+    for (const {use} of fake.describes) assert.equal(use.launchOptions, undefined);
   });
 
   it('can be narrowed to one size or scheme', () => {

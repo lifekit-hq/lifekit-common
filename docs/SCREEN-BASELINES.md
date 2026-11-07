@@ -87,19 +87,50 @@ route, and `screenMaxDiffPixelRatio` to loosen single screens, keyed by baseline
 ratio, and every unkeyed screen stays exact. The fixture never loosens by default; a loosened ratio
 is an exception and needs a one-line reason next to it, like a screen-check exception. `sizes` and `schemes` on the call narrow the matrix.
 
-If the `screens` job on the CI runner is flaky with no source change (regenerate and compare twice
-to tell), do not widen the default. Set the smallest ratio that is stable on that screen, at most 20
-pixels' worth (`20 / (width * height)`), on the screen that needs it (`screenMaxDiffPixelRatio`),
-with the reason beside it.
+No screen is loosened today. If a screen is flaky with no source change, find what differs between
+two renders (the actual and expected images of a failed run, diffed pixel by pixel) before reaching
+for a ratio: the raster is already pinned (below), so what is left is something on the page that
+moves, a clock, an animation or a late image, and that is fixed in the page or masked.
 
-Exceptions in use:
+### Why the raster is pinned
 
-- `templates-overview-desktop-dark` (`projects/ui/e2e/screens/templates.spec.ts`): 20 pixels' worth.
-  The anti-aliased edge of the header avatar initials 'AM' rasterises 1-2 colour levels apart
-  between runs on the CI runner (one pixel at around x=1235, y=12).
-- `templates-overview-phone-dark` (same spec): 20 pixels' worth. The anti-aliased rounded corners
-  of the stat cards (x=16-17, y=120-219) rasterise 1 colour level apart between runs on the CI
-  runner (2 pixels counted).
+A baseline used to flake by 1 to 33 pixels between two renders of the same build: on one machine
+(6 to 8 of 44 screens between two runs in devclaw), and between the **Update screen baselines**
+workflow and the next CI run (2 of 36 screens in basket, 2 of 20 here, which carried a 20-pixel
+tolerance, [#247](https://github.com/lifekit-hq/lifekit-common/issues/247)). The differing pixels
+were always anti-aliased edges (rounded card corners, circular swatches, the avatar initials), 1 to
+a few colour levels apart, never a fill.
+
+The cause is Chromium's partial raster. A tile that already holds a rendering and then has part of
+it invalidated is not painted again whole: only the damaged rectangle is painted over what is
+there. An anti-aliased edge painted twice comes out a little different from one painted once.
+Whether a tile was painted whole or in parts depends on when the page's last invalidation landed
+relative to the frame the screenshot reads, which is timing, so a busy machine draws the same page
+as several images. It needs no particular hardware (one aarch64 machine reproduces it, and it shows
+at device scale factor 1 and 2), no GPU (compositing and raster are software, `chrome://gpu` says
+`disabled_software`) and no component: the same page, rendered 50 times in separate browsers while
+ten other processes kept the cores busy, gave:
+
+| Screen (rendered 50 times) | Chromium as launched | `--disable-partial-raster` |
+| -------------------------- | -------------------- | -------------------------- |
+| `settings` desktop dark    | 4 different images   | 1 (100 renders: still 1)   |
+| `overview` phone dark      | 3 different images   | 1                          |
+| `overview` desktop dark    | 5 different images   | 1                          |
+| `list` desktop light       | not rendered         | 1                          |
+| `detail` phone dark        | not rendered         | 1                          |
+| `form` desktop dark        | not rendered         | 1                          |
+
+`--num-raster-threads=1`, `--disable-gpu --disable-software-rasterizer`,
+`--disable-threaded-animation --disable-threaded-scrolling` and `--disable-skia-runtime-opts` each
+still drew more than one image (`--disable-threaded-compositing` hangs the screenshot). So the fixture
+launches the baseline browser with `SCREEN_BROWSER_ARGS` (`--disable-partial-raster`), through
+`test.use({launchOptions})` in the spec file that calls `defineScreenBaselines`. It replaces any
+`launchOptions` the app sets for the project, for that file only, so keep the baselines in a spec
+file of their own (as `e2e/screens/screens.spec.ts` above); the rest of the app's e2e runs as before.
+
+Because the switch changes how the edges are painted, baselines drawn before it carry the old,
+partly painted edges: regenerate them once with the **Update screen baselines** workflow when an
+app takes this version, and review the images (expect differences at anti-aliased edges).
 
 Images are CSS pixels (`scale: 'css'`): 390 and 1280 wide whatever the device scale factor.
 
