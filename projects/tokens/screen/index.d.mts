@@ -237,3 +237,153 @@ export declare function checkSkeleton(
   options: CheckSkeletonOptions
 ): Promise<SkeletonResult>;
 export declare function formatSkeleton(result: SkeletonResult): string;
+
+export type ScanSize = BaselineSize;
+export type ScanScheme = BaselineScheme;
+
+/** One route of an app. `page` is Playwright's `Page`. */
+export interface RouteScanRoute {
+  /** Names the route in the test title and in the exceptions; unique within the call. */
+  name: string;
+  /** The route to open, or a function of the scan when the URL carries the scheme. */
+  url: string | ((variant: BaselineVariant) => string);
+  /** Runs before navigation: register the route's mocks, pin the clock. */
+  prepare?: (page: any, variant: BaselineVariant) => Promise<void> | void;
+  /** Runs after navigation: wait for what proves the route's data has rendered. */
+  ready?: (page: any, variant: BaselineVariant) => Promise<void> | void;
+}
+
+/**
+ * A finding the app accepts, with the reason. The design judge's findings are matched on their
+ * rule (`antipattern`) and, with `match`, on a substring of the finding's snippet; axe's on the rule
+ * id and, with `match`, on a substring of the failing node's HTML.
+ */
+export interface RouteScanException {
+  /** The design rule (`low-contrast`) or the axe rule id (`color-contrast`). */
+  rule: string;
+  /** Route names the exception covers, or `*` for every route. */
+  routes: string[];
+  /** Narrows the exception to findings whose snippet (design) or node HTML (axe) contains this. */
+  match?: string;
+  /** How many design findings the exception covers per scan (default 1). Axe nodes are not counted. */
+  max?: number;
+  /** One line: why this is not a defect. An exception without one is refused. */
+  reason: string;
+}
+
+export interface RouteScanExceptions {
+  impeccable?: RouteScanException[];
+  axe?: RouteScanException[];
+}
+
+export interface DefineRouteScansOptions {
+  routes: RouteScanRoute[];
+  /** Default both schemes. */
+  schemes?: readonly ScanScheme[];
+  /** Default both sizes. */
+  sizes?: readonly ScanSize[];
+  exceptions?: RouteScanExceptions;
+  /** The impeccable engine to run; default `$IMPECCABLE_BIN`, else the pinned release (downloaded and verified). */
+  engine?: string;
+  /** How long settling and freezing may take, in ms (default 30000). */
+  timeout?: number;
+}
+
+/** A Playwright `Page`: the scan also reads which Chromium it runs in, for the design judge to use. */
+export interface RouteScanPage extends ScreenPage {
+  context(): {browser(): {browserType(): {executablePath(): string}} | null};
+}
+
+export interface ScanRouteOptions {
+  /** The route's name, which exceptions refer to. */
+  route: string;
+  size: ScanSize;
+  exceptions?: RouteScanExceptions;
+  engine?: string;
+  timeout?: number;
+}
+
+export interface AxeScanViolation {
+  rule: string;
+  impact?: string | null;
+  help: string;
+  /** Selectors of the nodes no exception covers. */
+  nodes: string[];
+}
+
+export interface RouteScanResult {
+  url: string;
+  route: string;
+  /** `<rule>: <snippet>` of each design finding no exception covers. */
+  design: string[];
+  /** Serious and critical axe violations with at least one node no exception covers. */
+  axe: AxeScanViolation[];
+}
+
+export declare const SCAN_SCHEMES: readonly ScanScheme[];
+export declare const SCAN_SIZES: readonly ScanSize[];
+export declare const AXE_TAGS: readonly string[];
+export declare const BLOCKING_IMPACTS: readonly string[];
+export declare const ROUTE_SCAN_TIMEOUT_MS: number;
+export declare const IMPECCABLE_VERSION: string;
+export declare const IMPECCABLE_ENGINES: Readonly<Record<string, {asset: string; sha256: string}>>;
+
+export declare function pinnedEnginePath(options?: {
+  env?: Record<string, string | undefined>;
+}): string;
+export interface ResolveEngineOptions {
+  /** A path to run as is. */
+  engine?: string;
+  env?: Record<string, string | undefined>;
+  /** Fetches a release asset (default: `fetch`). */
+  fetchBinary?: (url: string) => Promise<Buffer>;
+  /** The pinned binaries (default `IMPECCABLE_ENGINES`). */
+  pins?: Readonly<Record<string, {asset: string; sha256: string}>>;
+  /** Which pin to take, `<platform>-<arch>` (default this machine's). */
+  platform?: string;
+}
+export declare function resolveEngine(options?: ResolveEngineOptions): Promise<string>;
+export declare function freezeScreen(
+  page: ScreenPage,
+  options?: {timeout?: number; retryMs?: number; now?: () => number}
+): Promise<string>;
+export declare function serveFrozen(
+  html: string,
+  pageUrl: string,
+  options?: {fetchImpl?: typeof fetch}
+): Promise<{url: string; close: () => Promise<void>}>;
+export declare function validateExceptions(
+  exceptions?: RouteScanExceptions
+): Required<RouteScanExceptions>;
+export declare function blockingDesignFindings(
+  findings: {antipattern: string; snippet: string}[],
+  route: string,
+  exceptions?: RouteScanException[]
+): {antipattern: string; snippet: string}[];
+export declare function blockingAxeViolations(
+  violations: {
+    id: string;
+    impact?: string | null;
+    help: string;
+    nodes: {html: string; target: unknown[]}[];
+  }[],
+  route: string,
+  exceptions?: RouteScanException[]
+): AxeScanViolation[];
+export declare function runAxe(page: ScreenPage): Promise<
+  {
+    id: string;
+    impact?: string | null;
+    help: string;
+    nodes: {html: string; target: unknown[]}[];
+  }[]
+>;
+export declare function scanRoute(
+  page: RouteScanPage,
+  options: ScanRouteOptions
+): Promise<RouteScanResult>;
+export declare function formatRouteScan(result: RouteScanResult): string;
+export declare function defineRouteScans(
+  playwright: {test: any; expect: any},
+  options: DefineRouteScansOptions
+): void;

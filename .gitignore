@@ -26,4 +26,5 @@ projects/ui/e2e/phone/results.json
 projects/ui/e2e/phone/.output
 projects/ui/e2e/a11y/.output
 projects/ui/e2e/screens/.output
+projects/ui/e2e/routes/.output
 projects/ui/playwright-report

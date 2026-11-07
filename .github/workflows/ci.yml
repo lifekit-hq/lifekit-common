@@ -120,6 +120,27 @@ jobs:
             projects/ui/playwright-report
           if-no-files-found: ignore
 
+  # Gate: route scan (docs/ROUTE-SCAN.md). The design judge and axe-core over the golden screens of
+  # the page templates, at 390 and 1280, light and dark, with no exceptions. The pinned impeccable
+  # engine is downloaded once and cached.
+  routes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - uses: actions/cache@v4
+        with:
+          path: ~/.impeccable
+          key: impeccable-${{ hashFiles('.claude/skills/impeccable/scripts/VERSION') }}
+      - run: npm run build-storybook
+      - name: Route scan
+        run: npm run test:routes
+
   # A pull request that changes a baseline gets the screen before (base) and after (this branch)
   # attached as one comment, edited in place on every push and removed when the baselines no longer
   # differ. Same-repository branches only: a fork's token cannot comment.

@@ -20,6 +20,7 @@
     "check-strategy": "node scripts/check-strategy-coverage.mjs && node --test \"scripts/test/*.spec.mjs\"",
     "test:phone": "playwright test -c projects/ui/playwright.phone.config.ts",
     "test:a11y": "playwright test -c projects/ui/playwright.a11y.config.ts",
+    "test:routes": "playwright test -c projects/ui/playwright.routes.config.ts",
     "test:screens": "playwright test -c projects/ui/playwright.screens.config.ts",
     "test:screens:update": "playwright test -c projects/ui/playwright.screens.config.ts --update-snapshots=changed",
     "smoke:tokens": "node -e \"const p=require('./projects/tokens/tailwind/preset.cjs'); if(!p.theme) throw new Error('preset has no theme'); require('fs').accessSync('./projects/tokens/theme.css'); console.log('tokens ok')\"",
