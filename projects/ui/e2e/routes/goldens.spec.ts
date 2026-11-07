@@ -9,10 +9,10 @@ import {expect, test} from '@playwright/test';
 // no exceptions: a finding on a golden is fixed in the library (a component, a token or a template),
 // not accepted here.
 //
-// The golden stories are read from the built catalog. A story's name (`phone`, `phone-dark`, `desktop`, `desktop-dark`) only
-// says which size and scheme the owner looks at it in; the scan runs every screen at both sizes and
-// both schemes itself, so the variants of one screen are one route here. A named state
-// (`phone-with-notice`) is a screen of its own.
+// The golden stories are read from the built catalog. A story's name (`phone`, `phone-dark`, `desktop`,
+// `desktop-dark`) only says which size and scheme the owner looks at it in; the scan runs every
+// screen at both sizes and both schemes itself, so the variants of one
+// screen are one route here. A named state (`phone-with-notice`) is a screen of its own.
 
 interface IndexEntry {
   id: string;

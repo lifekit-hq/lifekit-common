@@ -156,10 +156,7 @@ export async function judgeUrl({engine, url, viewport, browser, env = process.en
  * @param {import('./index.d.mts').ScreenPage} page
  */
 export async function assertScheme(page, {route, scheme, attribute = SCHEME_ATTRIBUTE}) {
-  const found = await page.evaluate(
-    name => document.documentElement.getAttribute(name),
-    attribute
-  );
+  const found = await page.evaluate(name => document.documentElement.getAttribute(name), attribute);
   if (found !== scheme) {
     const seen = found === null ? 'no such attribute' : `"${found}"`;
     throw new Error(
