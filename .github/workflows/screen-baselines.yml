@@ -8,7 +8,7 @@ name: Render screen baselines
 #
 #   jobs:
 #     render:
-#       permissions: {contents: write, actions: write, pull-requests: write}
+#       permissions: {contents: write, actions: write, pull-requests: write, packages: read}
 #       uses: lifekit-hq/lifekit-common/.github/workflows/screen-baselines.yml@v4.5.0
 #       with:
 #         command: npx playwright test e2e/screens --update-snapshots=changed
@@ -68,10 +68,13 @@ on:
           App token). Optional: without it the workflow token pushes and `ci-workflow` is dispatched.
         required: false
 
+# A called workflow cannot be granted more than it declares, so `packages: read` is declared here for
+# the install step (the app's @lifekit-hq/* packages come from GitHub Packages); the caller grants it too.
 permissions:
   contents: write
   actions: write
   pull-requests: write
+  packages: read
 
 jobs:
   render:
@@ -83,6 +86,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       BRANCH: ${{ github.head_ref || github.ref_name }}
+      # What the app's `.npmrc` reads (`//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}`). Always the
+      # workflow token, never `secrets.token`: that one only has to push, and a caller needs no extra secret.
+      NODE_AUTH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
         with:
