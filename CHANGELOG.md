@@ -1,5 +1,28 @@
 # Changelog
 
+## [4.4.0](https://github.com/lifekit-hq/lifekit-common/compare/v4.3.0...v4.4.0) (2026-11-07)
+
+
+### Features
+
+* **config:** add lifekit/page-root lint rule ([#240](https://github.com/lifekit-hq/lifekit-common/issues/240)) ([46e833c](https://github.com/lifekit-hq/lifekit-common/commit/46e833c6c1ac272400a1755930b4b18dc7c652aa)), closes [#235](https://github.com/lifekit-hq/lifekit-common/issues/235)
+* **tokens:** add checkSkeleton page-level skeleton conformance helper ([#228](https://github.com/lifekit-hq/lifekit-common/issues/228)) ([5c0b9d0](https://github.com/lifekit-hq/lifekit-common/commit/5c0b9d0b30ae10663c540e7ef51e794bd5ad2d3d))
+* **tokens:** add route scan fixture and fix the findings it raised on the goldens ([#248](https://github.com/lifekit-hq/lifekit-common/issues/248)) ([be41340](https://github.com/lifekit-hq/lifekit-common/commit/be41340556af4250b3b3d02f52a103ffe719adf8))
+* **tokens:** add shared screenshot-baseline fixture with Linux baselines and PR before/after report ([#241](https://github.com/lifekit-hq/lifekit-common/issues/241)) ([a72fd3b](https://github.com/lifekit-hq/lifekit-common/commit/a72fd3b9bad78b18c82599f6c93c1dce3e55acce))
+* **ui:** add detail, form and settings page templates ([#242](https://github.com/lifekit-hq/lifekit-common/issues/242)) ([6b511db](https://github.com/lifekit-hq/lifekit-common/commit/6b511db2e7ed3c1cd90c380e9495e184cf7c8645))
+* **ui:** add the overview page template with a rail the screen check reads ([#245](https://github.com/lifekit-hq/lifekit-common/issues/245)) ([b574fea](https://github.com/lifekit-hq/lifekit-common/commit/b574feaab63f0491e97e142a089d51905bf19290)), closes [#233](https://github.com/lifekit-hq/lifekit-common/issues/233)
+
+
+### Bug Fixes
+
+* **tokens:** raise multi-line line-height from 1.25 to 1.3 to match the design judge ([#244](https://github.com/lifekit-hq/lifekit-common/issues/244)) ([9482adb](https://github.com/lifekit-hq/lifekit-common/commit/9482adb8161cfeb6e48322b1ebe9163dd617cfa0))
+
+
+### Documentation
+
+* correct consumer tables and stale React claim in AGENTS, README and PRODUCT ([#231](https://github.com/lifekit-hq/lifekit-common/issues/231)) ([0be60ed](https://github.com/lifekit-hq/lifekit-common/commit/0be60ed03b9950a8200ce31b97dfd79023b6b934))
+* **design:** make DESIGN.md lifekit-wide and point money rules to finance-sentry ([#243](https://github.com/lifekit-hq/lifekit-common/issues/243)) ([1e57c3b](https://github.com/lifekit-hq/lifekit-common/commit/1e57c3bff2e9b594791ce18c6e30d50340a11e20)), closes [#238](https://github.com/lifekit-hq/lifekit-common/issues/238)
+
 ## [4.3.0](https://github.com/lifekit-hq/lifekit-common/compare/v4.2.2...v4.3.0) (2026-11-04)
 
 
