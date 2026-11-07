@@ -70,9 +70,9 @@
     "byRule": {}
   },
   "storybook": {
-    "stories": 491,
-    "scans": 982,
-    "total": 84,
+    "stories": 579,
+    "scans": 1158,
+    "total": 86,
     "groups": {
       "low-contrast": 2,
       "undersized-and-tiny-text": 0,
@@ -82,10 +82,12 @@
     },
     "byRule": {
       "cramped-padding": 8,
-      "flat-type-hierarchy": 2,
-      "marquee": 38,
+      "marquee": 42,
+      "flat-type-hierarchy": 6,
       "pulsing-dot": 10,
+      "nested-cards": 8,
       "low-contrast": 2,
+      "text-overflow": 2,
       "gpt-thin-border-wide-shadow": 8
     }
   }
