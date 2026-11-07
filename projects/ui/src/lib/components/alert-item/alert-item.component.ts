@@ -11,7 +11,7 @@ export type AlertItemDensity = 'card' | 'flat';
 
 /** 24px drawn, at least --size-touch pressed on a phone. */
 const DISMISS_CLASSES =
-  'relative z-10 flex shrink-0 rounded p-1 text-text-disabled transition-colors hover:bg-surface-raised ' +
+  'relative z-10 flex shrink-0 rounded-cmn-sm p-1 text-text-disabled transition-colors hover:bg-surface-raised ' +
   `hover:text-text-primary ${PHONE_HIT_AREA_CLASSES}`;
 
 const SEVERITY_COLOR: Record<AlertItemSeverity, string> = {
@@ -74,9 +74,10 @@ const SEVERITY_ICON: Record<AlertItemSeverity, LucideIconName> = {
             <cmn-tag [variant]="severity()">{{ badgeLabel() }}</cmn-tag>
           }
           @if (referenceLabel()) {
-            <span class="rounded bg-surface-raised px-1.5 py-0.5 text-cmn-xs text-text-secondary">{{
-              referenceLabel()
-            }}</span>
+            <span
+              class="rounded-cmn-sm bg-surface-raised px-1.5 py-0.5 text-cmn-xs text-text-secondary"
+              >{{ referenceLabel() }}</span
+            >
           }
         </div>
         @if (description()) {

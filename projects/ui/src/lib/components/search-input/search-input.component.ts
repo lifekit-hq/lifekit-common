@@ -22,7 +22,7 @@ const BASE_CLASSES =
 
 // Below md every size keeps 16px text (iOS zooms the page into a focused field set smaller) and
 // presses as at least --size-touch tall. md is the control height (`--cmn-control-h`) that a button
-// beside it shares: 44px on a phone, 40px from md.
+// beside it shares: Carbon's 48px at every width.
 const SIZE_CLASSES: Record<SearchInputSize, string> = {
   sm: 'py-cmn-1 text-cmn-md md:text-cmn-sm',
   md: 'h-cmn-control-h text-cmn-md',

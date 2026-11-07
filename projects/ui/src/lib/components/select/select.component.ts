@@ -41,7 +41,7 @@ type ActivePosition = 'selected' | 'first' | 'last';
 
 // Below md every size keeps 16px text (iOS zooms the page into a focused field set smaller) and
 // presses as at least --size-touch tall. md is at least the control height (`--cmn-control-h`) a
-// button beside it shares: 44px on a phone, 40px from md.
+// button beside it shares: Carbon's 48px at every width.
 const SIZE_CLASSES: Record<SelectSize, string> = {
   sm: 'py-1 text-cmn-md md:text-cmn-xs',
   md: 'min-h-cmn-control-h py-1.5 text-cmn-md md:text-cmn-sm',
@@ -55,14 +55,14 @@ const ICON_SIZE: Record<SelectSize, 'sm' | 'md' | 'lg'> = {
 };
 
 const FIELD_BASE =
-  'w-full rounded border bg-surface-bg text-text-primary outline-none transition-colors ' +
+  'w-full rounded-cmn-md border bg-surface-bg text-text-primary outline-none transition-colors ' +
   'max-md:min-h-cmn-touch focus:border-accent-default focus-visible:ring-2 ' +
   'focus-visible:ring-border-focus disabled:cursor-not-allowed disabled:opacity-60';
 
 // The combobox field is a wrapper around the focusable element, so it takes the focus styles from
 // whatever inside it holds focus, and the ring from the combobox's keyboard focus alone.
 const COMBOBOX_FIELD_BASE =
-  'flex w-full items-center gap-cmn-2 rounded border bg-surface-bg px-cmn-2 text-text-primary ' +
+  'flex w-full items-center gap-cmn-2 rounded-cmn-md border bg-surface-bg px-cmn-2 text-text-primary ' +
   'transition-colors max-md:min-h-cmn-touch focus-within:border-accent-default ' +
   'has-[[role=combobox]:focus-visible]:ring-2 has-[[role=combobox]:focus-visible]:ring-border-focus';
 

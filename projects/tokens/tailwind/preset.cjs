@@ -62,6 +62,10 @@ module.exports = {
         'border-default': 'var(--color-border-default)',
         'border-strong': 'var(--color-border-strong)',
         'border-focus': 'var(--color-border-focus)',
+
+        // Carbon's filled field (theme.css --cmn-field-*): the fill; the bottom border and the focus
+        // ring are the --cmn-field-border-bottom and --cmn-field-focus values.
+        'cmn-field': 'var(--cmn-field-bg)',
       },
 
       ringOffsetColor: {
@@ -76,15 +80,21 @@ module.exports = {
         mono: ['var(--font-mono)'],
       },
 
+      // The type ramp is Carbon's productive scale (@carbon/type), kept to the sizes Carbon has and the
+      // 12px floor. xs label-01, sm the compact body (14px, held at our 1.5 line, so 21px), md body-02,
+      // lg heading-03, 2xl heading-04, 3xl heading-05, 4xl heading-06. Carbon sets heading-04 and -05
+      // under 1.3 leading; they take 1.3, the floor the design judge holds multi-line text to.
+      // xl was a second 20px step beside the old 18px lg; Carbon has none between 20 and 28, so xl
+      // is now an alias of lg, deprecated, and goes in the next major.
       fontSize: {
-        'cmn-xs': ['0.75rem', {lineHeight: '1.3'}],
+        'cmn-xs': ['0.75rem', {lineHeight: '1.33333'}],
         'cmn-sm': ['0.875rem', {lineHeight: '1.5'}],
         'cmn-md': ['1rem', {lineHeight: '1.5'}],
-        'cmn-lg': ['1.125rem', {lineHeight: '1.5'}],
-        'cmn-xl': ['1.25rem', {lineHeight: '1.3'}],
-        'cmn-2xl': ['1.5rem', {lineHeight: '1.3'}],
-        'cmn-3xl': ['1.875rem', {lineHeight: '1.3'}],
-        'cmn-4xl': ['2.25rem', {lineHeight: '1.1'}],
+        'cmn-lg': ['1.25rem', {lineHeight: '1.4'}],
+        'cmn-xl': ['1.25rem', {lineHeight: '1.4'}],
+        'cmn-2xl': ['1.75rem', {lineHeight: '1.3'}],
+        'cmn-3xl': ['2rem', {lineHeight: '1.3'}],
+        'cmn-4xl': ['2.625rem', {lineHeight: '1.2'}],
       },
 
       // Tailwind's `leading-tight` is 1.25, under the 1.3 floor the design judge holds multi-line
@@ -130,10 +140,9 @@ module.exports = {
         'cmn-spin': 'cmn-spin 1s linear infinite',
         'cmn-pulse': 'cmn-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'cmn-fade-in': 'cmn-fade-in var(--cmn-duration-short) var(--cmn-ease-standard)',
-        'cmn-slide-in':
-          'cmn-slide-in var(--cmn-duration-medium) var(--cmn-ease-emphasized-decelerate)',
+        'cmn-slide-in': 'cmn-slide-in var(--cmn-duration-medium) var(--cmn-ease-decelerate)',
         'cmn-slide-in-right':
-          'cmn-slide-in-right var(--cmn-duration-medium) var(--cmn-ease-emphasized-decelerate)',
+          'cmn-slide-in-right var(--cmn-duration-medium) var(--cmn-ease-decelerate)',
       },
 
       transitionDuration: {
@@ -144,8 +153,11 @@ module.exports = {
 
       transitionTimingFunction: {
         'cmn-standard': 'var(--cmn-ease-standard)',
-        'cmn-decelerate': 'var(--cmn-ease-emphasized-decelerate)',
-        'cmn-accelerate': 'var(--cmn-ease-emphasized-accelerate)',
+        'cmn-decelerate': 'var(--cmn-ease-decelerate)',
+        'cmn-accelerate': 'var(--cmn-ease-accelerate)',
+        'cmn-expressive': 'var(--cmn-ease-expressive-standard)',
+        'cmn-expressive-decelerate': 'var(--cmn-ease-expressive-decelerate)',
+        'cmn-expressive-accelerate': 'var(--cmn-ease-expressive-accelerate)',
       },
 
       spacing: {
@@ -160,6 +172,11 @@ module.exports = {
         'cmn-10': '40px',
         'cmn-touch': 'var(--size-touch)',
         'cmn-12': '48px',
+        // Carbon layout sizes (theme.css): 24 / 32 / 40 / 48, the control heights.
+        'cmn-size-xs': 'var(--cmn-size-xs)',
+        'cmn-size-sm': 'var(--cmn-size-sm)',
+        'cmn-size-md': 'var(--cmn-size-md)',
+        'cmn-size-lg': 'var(--cmn-size-lg)',
         'cmn-16': '64px',
         // Page rhythm (theme.css): semantic steps the page template owns. `px-cmn-page-gutter`,
         // `mt-cmn-title-gap`, `gap-cmn-section-gap`, `gap-cmn-group-gap`, `h-cmn-control-h`.

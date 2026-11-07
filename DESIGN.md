@@ -1,6 +1,6 @@
 ---
 name: lifekit
-description: Shared design system for lifekit frontends (tokens, Angular cmn-*, Lit lk-*); direction A - Instrument (IBM Plex Sans, petrol accent, cool graphite)
+description: Shared design system for lifekit frontends (tokens, Angular cmn-*, Lit lk-*); direction A - Instrument (IBM Plex Sans, petrol accent, cool graphite) on IBM Carbon's geometry, type scale and motion
 colors:
   accent: '#175a6d'
   accent-hover: '#134858'
@@ -43,19 +43,19 @@ colors:
 typography:
   display:
     fontFamily: "'IBM Plex Sans Variable', 'IBM Plex Sans', system-ui, sans-serif"
-    fontSize: '2.25rem'
+    fontSize: '2.625rem'
     fontWeight: 700
-    lineHeight: 1.1
+    lineHeight: 1.2
   headline:
     fontFamily: "'IBM Plex Sans Variable', 'IBM Plex Sans', system-ui, sans-serif"
-    fontSize: '1.5rem'
+    fontSize: '1.75rem'
     fontWeight: 600
     lineHeight: 1.3
   title:
     fontFamily: "'IBM Plex Sans Variable', 'IBM Plex Sans', system-ui, sans-serif"
-    fontSize: '1.125rem'
+    fontSize: '1.25rem'
     fontWeight: 600
-    lineHeight: 1.5
+    lineHeight: 1.4
   body:
     fontFamily: "'IBM Plex Sans Variable', 'IBM Plex Sans', system-ui, sans-serif"
     fontSize: '0.875rem'
@@ -65,14 +65,14 @@ typography:
     fontFamily: "'IBM Plex Sans Variable', 'IBM Plex Sans', system-ui, sans-serif"
     fontSize: '0.75rem'
     fontWeight: 600
-    lineHeight: 1.3
+    lineHeight: 1.33333
   mono:
     fontFamily: "'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace"
     fontSize: '0.875rem'
 rounded:
-  sm: '3px'
-  md: '6px'
-  lg: '8px'
+  sm: '0px'
+  md: '0px'
+  lg: '0px'
   full: '9999px'
 spacing:
   '1': '4px'
@@ -126,7 +126,7 @@ This page is the look, for every lifekit app: templates, rhythm tokens and compo
 - Tabular figures everywhere, so number columns align even where a component forgets `tabular-nums`.
 - Petrol accent (`#175a6d`, dark `#5aa9bb`) on cool graphite; status colours at text grade: blue `#2557b0`, green `#0e7446`, amber `#955400`, red `#bb2530`. Info has its own hue and never reads as a second accent.
 - Flat surfaces: a hairline border or a shadow, never both. Shadow is reserved for overlays (menu, tooltip, dialog, sheet); the menu, tooltip, dialog and command palette also carry a hairline border so they keep an edge on dark surfaces.
-- Tight radii: 3 / 6 / 8px.
+- Square corners: controls, cards, menus and sheets have no radius (Carbon's geometry); only the pill (chips, tags, badges, avatars) is round.
 
 ## Colors
 
@@ -134,7 +134,7 @@ Cool graphite neutrals with a single petrol voice (restrained: accent only for t
 
 ### Carbon bridge
 
-The owner chose IBM Carbon as the design system (epic #279). Step 0 puts its colour layer in place without changing a pixel: `@lifekit-hq/tokens/carbon-bridge.css` points Carbon's semantic `--cds-*` names (layers, fields, borders, text, icons, links, focus, status, buttons, tags) at our `--color-*` roles. Carbon reads colour only as `var(--cds-NAME, fallback)`, so the bridge needs no Sass theme per app: a Carbon-specced value follows each app's seed palette, and `[data-theme]` flips light and dark because the roles already do. Our look is Carbon's g10 shape (grey ground, white layers and fields), so the mapping is near one-to-one. The file is generated from `theme.css` and `scripts/carbon-bridge-map.mjs`, never hand-edited, and its test covers light and dark for two seeds. `@carbon/styles` is a devDependency of the tokens package only, so no app ships Carbon. Carbon's cyan, teal, purple, cool-gray and warm-gray tags are not mapped (we have four status hues) and keep Carbon's colours until a decision is taken.
+The owner chose IBM Carbon as the design system (epic #279): "true Carbon, align first, keep Lucide." Step 1 (this page's type, size, shape and motion values) aligns our tokens to Carbon's; the colour layer came first, in step 0, without changing a pixel: `@lifekit-hq/tokens/carbon-bridge.css` points Carbon's semantic `--cds-*` names (layers, fields, borders, text, icons, links, focus, status, buttons, tags) at our `--color-*` roles. Carbon reads colour only as `var(--cds-NAME, fallback)`, so the bridge needs no Sass theme per app: a Carbon-specced value follows each app's seed palette, and `[data-theme]` flips light and dark because the roles already do. Our look is Carbon's g10 shape (grey ground, white layers and fields), so the mapping is near one-to-one. The file is generated from `theme.css` and `scripts/carbon-bridge-map.mjs`, never hand-edited, and its test covers light and dark for two seeds. `@carbon/styles` is a devDependency of the tokens package only, so no app ships Carbon. Carbon's cyan, teal, purple, cool-gray and warm-gray tags are not mapped (we have four status hues) and keep Carbon's colours until a decision is taken.
 
 ### Named Rules
 
@@ -146,11 +146,15 @@ The owner chose IBM Carbon as the design system (epic #279). Step 0 puts its col
 
 **Family:** IBM Plex Sans for display, headline, title, body and label. Hierarchy is carried by size and weight.
 
-- **Display** (700, 2.25rem, 1.1): page titles in large layouts.
-- **Headline** (600, 1.5rem, 1.3): stat values and section titles.
-- **Title** (600, 1.125rem, 1.5): card titles.
-- **Body** (400, 0.875rem, 1.5): default UI text.
-- **Label** (600, 0.75rem, 1.3): sentence case, 12px minimum. No uppercase or tracked micro-labels.
+The sizes are Carbon's productive type scale (`@carbon/type`), the only sizes the ramp has, with two things kept as ours: the 12px floor and the 14/21 body line height (Carbon's compact body is 14/18). A heading takes Carbon's line height where it clears 1.3 and 1.3 where Carbon's is tighter, the floor the design judge holds multi-line text to.
+
+- **Display** (700, 2.625rem, 1.2; Carbon heading-06, 42px): page titles in large layouts. `text-cmn-4xl`.
+- **Headline** (600, 1.75rem, 1.3; heading-04, 28px): stat values and section titles. `text-cmn-2xl`. Page titles use `text-cmn-3xl` (heading-05, 32px).
+- **Title** (600, 1.25rem, 1.4; heading-03, 20px): card titles. `text-cmn-lg`. `text-cmn-xl` is the same size, kept as a deprecated alias for the old second 20px step and removed in the next major.
+- **Body** (400, 0.875rem, 1.5; body-compact-01 size, 14/21): default UI text. `text-cmn-sm`; `text-cmn-md` is 1rem / 1.5 (body-02).
+- **Label** (600, 0.75rem, 1.33333; label-01, 12/16): sentence case, 12px minimum. No uppercase or tracked micro-labels. `text-cmn-xs`.
+
+The old 18, 24, 30 and 36px steps are gone because Carbon has no such sizes: 18 becomes 20, 24 becomes 28, 30 becomes 32 and 36 becomes 42. Weights stay ours; Carbon sets its large headings light (300), and that is a later call.
 
 ### Named Rules
 
@@ -159,7 +163,7 @@ The owner chose IBM Carbon as the design system (epic #279). Step 0 puts its col
 
 ## Layout
 
-A 4px spacing base (`cmn-1` to `cmn-16`), a subset of Carbon's 8px scale with its 2px and 4px mini-units; an arbitrary length off that scale fails the drift check. App chrome comes from `cmn-app-layout`: a collapsible sidebar with a top bar on desktop, and a bottom tab bar on phones whose last tab, More, is a page the app builds. The shell owns the bars; the page template owns the screen between them. Data tables become list rows on phones. More space above a heading than below it.
+A 4px spacing base (`cmn-1` to `cmn-16`), a subset of Carbon's 8px scale with its 2px and 4px mini-units; an arbitrary length off that scale fails the drift check. Control heights are Carbon's layout sizes, `--cmn-size-xs/sm/md/lg` = 24 / 32 / 40 / 48px (`h-cmn-size-*`), and the default is 48px. App chrome comes from `cmn-app-layout`: a collapsible sidebar with a top bar on desktop, and a bottom tab bar on phones whose last tab, More, is a page the app builds. The shell owns the bars; the page template owns the screen between them. Data tables become list rows on phones. More space above a heading than below it.
 
 ### Page templates
 
@@ -169,7 +173,7 @@ Every routed page sits in a page template, `cmn-page`. Its `kind` names the arch
 - **Reading width.** Each kind sets its column's width: a list and a form read at 640px, a detail and a settings page at 720px (a key-value list's values, and a settings section's heading column beside its controls, need the room). An overview runs the page's 1200px: its main column takes the frame's width less a 320px rail, which sits beside it from 1280px and under it below that. A text field keeps a reading width (at most 640px), never a phone layout stretched to the desktop.
 - **The title.** The large title the route declares is drawn inside the page frame, and the title gap (at least 16px) sits under the large title. The shell still collapses it into the top bar on scroll.
 - **Rhythm.** Top-level blocks sit a section gap apart; inside a group (a heading and its rows, a field and its button) the gap is the group gap. Stacked surfaces keep at least the group gap (8px) apart.
-- **Controls side by side share one height** (`--cmn-control-h`): the md input, button, select and search field.
+- **Controls side by side share one height** (`--cmn-control-h`): the md input, button, select and search field. It is Carbon's 48px default on the phone and the desktop alike, so it is also above the 44px touch target (`--size-touch`) a phone control must keep; a smaller control (a 24 or 32px icon button, a 32px chip) keeps its drawn size and gets a 44px hit area below md.
 
 A page sets no padding, margin or width of its own; it projects its blocks. `cmn-page-container` is deprecated for `cmn-page` and keeps working for the pages that still use it.
 
@@ -181,7 +185,7 @@ The rhythm is five tokens in `theme.css`, read through the preset's `cmn-*` spac
 | `--cmn-title-gap`   | 16px  | 24px       | `mb-cmn-title-gap`    |
 | `--cmn-section-gap` | 24px  | 24px       | `gap-cmn-section-gap` |
 | `--cmn-group-gap`   | 8px   | 8px        | `gap-cmn-group-gap`   |
-| `--cmn-control-h`   | 44px  | 40px       | `h-cmn-control-h`     |
+| `--cmn-control-h`   | 48px  | 48px       | `h-cmn-control-h`     |
 
 Each template has golden screens in Storybook (`Templates/List`, `Templates/Detail`, `Templates/Form`, `Templates/Settings`, `Templates/Overview`), at 390 and 1280, light and dark, built from real components with realistic content. The owner approves them once per template; they are the reference an app copies, and the screen check holds every app to them.
 
@@ -211,13 +215,15 @@ Flat by default: hairline border on `surface-card`. Shadows are for overlays onl
 
 ## Shapes
 
-Radius 3 / 6 / 8px by role (`--radius-sm/md/lg`); full pills for chips, tags and badges. No off-scale literals.
+Square. `--radius-sm`, `--radius-md` and `--radius-lg` are all `0px`; the only round shape is the full pill (`--radius-full`) for chips, tags, badges and avatars, which is where Carbon rounds too (its tag). No off-scale literals: a radius is `0`, the pill, a circle (`50%`) or a `--radius-*` token.
+
+**Why the radii changed.** They were 3 / 6 / 8px, Instrument's own softening. The owner chose IBM Carbon as the design system and asked for it true ("true Carbon, align first"), and square corners on controls, cards, menus and sheets are the part of Carbon you see first. Keeping the old radii over Carbon's colour and type would have been a lookalike, not an alignment. The three token names stay, set to `0px`, so every `rounded-cmn-*` and `var(--radius-*)` in the library and in the apps follows from one edit and no template changes; a bottom sheet is square-cornered too (the phone pieces take Carbon's geometry, not only the desktop).
 
 ## Motion
 
 Animate transform and opacity only, never layout properties (no `transition` on width or height). Every animation has a `prefers-reduced-motion` path: movement becomes a fade or nothing, and only a spinner keeps turning.
 
-Durations and easings are tokens (M3 values), never literals: `--cmn-duration-short` (150ms: a toggle, a fade, a small state change), `--cmn-duration-medium` (250ms: a surface entering or leaving, a crossfade) and `--cmn-duration-long` (400ms: a large or full-screen move); `--cmn-ease-standard` for anything that stays on screen, `--cmn-ease-emphasized-decelerate` for what arrives, `--cmn-ease-emphasized-accelerate` for what leaves. Tailwind reads them as `duration-cmn-*` and `ease-cmn-*`. A leaving surface is faster than an arriving one. A skeleton's sheen is the one decorative loop: it sweeps by transform, in `--color-skeleton-sheen` over `--color-skeleton`, and stops under Reduce Motion.
+Durations and easings are tokens (Carbon's values, `@carbon/motion`), never literals: `--cmn-duration-short` (150ms, moderate-01: a toggle, a fade, a small state change), `--cmn-duration-medium` (240ms, moderate-02: a surface entering or leaving, a crossfade) and `--cmn-duration-long` (400ms, slow-01: a large or full-screen move). Two curve families: the productive ones for the everyday, `--cmn-ease-standard` for anything that stays on screen, `--cmn-ease-decelerate` for what arrives, `--cmn-ease-accelerate` for what leaves; and the expressive ones, `--cmn-ease-expressive-standard`, `-decelerate` and `-accelerate`, for the larger surfaces that carry the screen (the bottom sheet, the drawer). Tailwind reads them as `duration-cmn-*` and `ease-cmn-*` (`ease-cmn-expressive*`). The old `--cmn-ease-emphasized-*` names are deprecated aliases of the productive curves, removed in the next major. A leaving surface is faster than an arriving one. A skeleton's sheen is the one decorative loop: it sweeps by transform, in `--color-skeleton-sheen` over `--color-skeleton`, and stops under Reduce Motion.
 
 ### View transitions
 
@@ -238,6 +244,7 @@ The D16 decision: the tab bar and the top bar blur what scrolls under them (`bac
 - **Buttons:** accent fill with `text-inverse` label; secondary bordered; destructive uses the error colour; ghost text-only. Focus is a 2px ring in `border-focus`.
 - **Chips:** pill, `surface-raised` fill; selected fills with the accent.
 - **Cards:** hairline border, `surface-card`, 12/16/24px padding. Never nested.
+- **Field geometry (token):** Carbon's filled field is three tokens, `--cmn-field-bg` (the `surface-raised` fill, `bg-cmn-field`), `--cmn-field-border-bottom` (1px `border-strong` on the bottom edge only) and `--cmn-field-focus` (a 2px `border-focus` ring). The tokens land first; the input, select, textarea and search move onto them with the control anatomy in the next step of epic #279.
 - **Inputs:** `border-strong` border (3:1), accent focus ring, red border plus helper text for errors. Errors show when the form is submitted and clear as soon as the field is fixed (GOV.UK); the text says what went wrong and how to fix it, with no "please", "sorry", "valid" or "invalid".
 - **Data table / list rows:** sentence-case headers, hairline dividers, right-aligned tabular numbers. A row's action is a quiet trailing icon (`cmn-list-item-row` `trailingIcon`), not a bordered text button repeated on three or more rows.
 - **List sections:** the heading is body size, semibold, in the secondary text colour, sentence case, with the group gap under it.

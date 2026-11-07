@@ -154,7 +154,7 @@ const FACTS_ROW_CLASSES = 'py-cmn-3 sm:grid sm:grid-cols-3 sm:gap-cmn-4';
             <div [class]="bar" style="width: 40%; height: 0.75rem"></div>
             <div [class]="bar" style="width: 1rem; height: 1rem"></div>
           </div>
-          <div [class]="bar" style="width: 75%; height: 1.95rem"></div>
+          <div [class]="bar" style="width: 75%; height: 2.275rem"></div>
           <div class="flex items-center" style="height: 1rem">
             <div [class]="bar" style="width: 50%; height: 0.75rem"></div>
           </div>
@@ -164,7 +164,7 @@ const FACTS_ROW_CLASSES = 'py-cmn-3 sm:grid sm:grid-cols-3 sm:gap-cmn-4';
         <div
           class="flex w-full flex-col gap-cmn-3 rounded-cmn-lg border border-border-default bg-surface-card p-cmn-4"
         >
-          <div class="flex items-center" style="height: 0.975rem">
+          <div class="flex items-center text-cmn-xs" style="height: 1lh">
             <div [class]="bar" style="width: 35%; height: 0.75rem"></div>
           </div>
           <div
@@ -202,7 +202,7 @@ const FACTS_ROW_CLASSES = 'py-cmn-3 sm:grid sm:grid-cols-3 sm:gap-cmn-4';
             <div class="flex items-center" style="height: 1.3125rem">
               <div [class]="bar" style="width: 55%; height: 0.875rem"></div>
             </div>
-            <div class="flex items-center" style="height: 0.975rem">
+            <div class="flex items-center text-cmn-xs" style="height: 1lh">
               <div [class]="bar" style="width: 35%; height: 0.75rem"></div>
             </div>
           </div>

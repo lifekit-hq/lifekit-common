@@ -47,7 +47,7 @@ interface PaletteGroup {
         animation: cmn-fade-in var(--cmn-duration-short) var(--cmn-ease-standard) both;
       }
       .cmn-palette-panel {
-        animation: cmn-slide-in var(--cmn-duration-short) var(--cmn-ease-emphasized-decelerate) both;
+        animation: cmn-slide-in var(--cmn-duration-short) var(--cmn-ease-decelerate) both;
       }
     `,
   ],
@@ -61,7 +61,7 @@ interface PaletteGroup {
       ></div>
 
       <div
-        class="cmn-palette-panel relative z-10 w-full max-w-[560px] overflow-hidden rounded-2xl border border-border-default bg-surface-card shadow-cmn-md"
+        class="cmn-palette-panel relative z-10 w-full max-w-[560px] overflow-hidden rounded-cmn-lg border border-border-default bg-surface-card shadow-cmn-md"
       >
         <!-- Search row -->
         <div class="flex items-center gap-cmn-3 border-b border-border-default px-cmn-4 py-3.5">
@@ -161,7 +161,7 @@ export class CommandPaletteComponent {
 
   /** Keyboard hints mean nothing without a keyboard: hidden wherever hover is unavailable. */
   protected readonly KEY_CLASSES =
-    'rounded border border-border-default py-0.5 font-mono text-cmn-xs text-text-disabled ' +
+    'rounded-cmn-sm border border-border-default py-0.5 font-mono text-cmn-xs text-text-disabled ' +
     '[@media(hover:none)]:hidden';
 
   protected readonly KEY_HINTS: [string, string][] = [
