@@ -411,8 +411,10 @@ that holds each one. A rule marked "follow-up" is the target; its parts and chec
 3. **Touch targets.** Every interactive element on a phone has a hit area of at least 44x44 CSS
    px. A smaller visual (a 32px chip, a `sm` button) keeps its look and gets a 44px hit area
    (`PHONE_HIT_AREA_CLASSES`, `.cmn-hit-slop`). Inline text links follow WCAG 2.5.8. Sources: HIG
-   Buttons and Accessibility (44pt, 28pt minimum); WCAG 2.5.8 and 2.5.5; M3 48dp. Check: targets
-   are at least 44 in the phone chrome and on the list page.
+   Buttons and Accessibility (44pt, 28pt minimum); WCAG 2.5.8 and 2.5.5; M3 48dp. A checkbox in a
+   row's avatar slot, a switch, an icon-only button and a chip's × are drawn small and press at 44.
+   Check: targets are at least 44 in the phone chrome, on the list page and on every golden screen
+   at 390 (`e2e/phone/golden-targets.spec.ts`).
 4. **Overflow rows.** A control row never overlaps or clips a label. Segmented controls keep to
    five segments or fewer with equal cells at least as wide as the widest label. A filter with
    counts, more than five options or two dimensions uses `lk-chip-row`; a rarely changed setting
@@ -474,20 +476,20 @@ phone conformance suite (`npm run test:phone`). CI runs it with `PHONE_CONFORMAN
 check fails the build except the advisory ones; a guarantee above is only gating once its check
 exists.
 
-| Guarantee                               | Status                                                                                                                                                                                        |
-| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Tab bar, sheets, safe areas             | Built: `cmn-drawer` sheets and phone `cmn-dialog` presentations, More is a page; the dialog stories carry VRT and behaviour specs                                                             |
-| Account on a phone                      | Built: `accountOnPhone`, `accountMenu()`, `cmn-more-page`; no suite check yet                                                                                                                 |
-| Top bar title, back, actions            | Built: route data `title`, `parent`, `actions`; the suite checks the title at 320                                                                                                             |
-| Shell-owned scroll and tab state        | Built: checked by the suite's "back restores scroll"; see "Scroll and tab state"                                                                                                              |
-| One state pattern                       | Built: `cmn-async-state`; the suite checks the offline and error states at 320 and 390                                                                                                        |
-| Touch size (44pt chrome, labels, hints) | Built: `--size-touch`, `.cmn-hit-slop`, `PHONE_HIT_AREA_CLASSES`; the suite enforces 44x44 at 390x844 and on the list page, labels at 320, hints; landscape and tablet are advisory           |
-| Layout by size                          | Built: `CmnShellService` picks tab bar, rail or sidebar; the suite checks each width and device                                                                                               |
-| Appearance                              | Built: `cmn-appearance-settings` in Settings, palette entries, synced through `AppearanceService`                                                                                             |
-| Overlays                                | Built: the notice slot, the toast stack over `--cmn-overlay-inset-bottom`; the suite checks notices sit between the top bar and the tab bar, and toasts above the tab bar and floating action |
-| Content insets                          | Built: measured `--cmn-content-inset-*`; the suite checks the last content clears the tab bar, whatever the page composition                                                                  |
-| Long lists (filter, chips, sections)    | Built: `cmn-filter-bar`, `lk-chip-row`, `cmn-list-section`; the suite checks labels and headers                                                                                               |
-| Phone sizes and zoom                    | Built: edge-to-edge 49pt tab bar, 44pt scroll-edge top bar, viewport standard, `touch-action`; the suite sweeps seven widths at two heights                                                   |
-| Text input (16px, 44px)                 | Built: every `cmn-*` field below md; `dvh` sheets and visual viewport are a follow-up                                                                                                         |
-| Skeletons and motion                    | Built: `cmn-skeleton` presets, `cmn-async-state` calm loading, motion tokens; the suite checks preset geometry and Reduce Motion                                                              |
-| Continuity and paging                   | Built: `lk-infinite-list`, `TabPreloadStrategy` (idle tab preload, skipped under Save-Data or metered), `keepContent`; the suite checks the end of a continuous list                          |
+| Guarantee                               | Status                                                                                                                                                                                                      |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tab bar, sheets, safe areas             | Built: `cmn-drawer` sheets and phone `cmn-dialog` presentations, More is a page; the dialog stories carry VRT and behaviour specs                                                                           |
+| Account on a phone                      | Built: `accountOnPhone`, `accountMenu()`, `cmn-more-page`; no suite check yet                                                                                                                               |
+| Top bar title, back, actions            | Built: route data `title`, `parent`, `actions`; the suite checks the title at 320                                                                                                                           |
+| Shell-owned scroll and tab state        | Built: checked by the suite's "back restores scroll"; see "Scroll and tab state"                                                                                                                            |
+| One state pattern                       | Built: `cmn-async-state`; the suite checks the offline and error states at 320 and 390                                                                                                                      |
+| Touch size (44pt chrome, labels, hints) | Built: `--size-touch`, `.cmn-hit-slop`, `PHONE_HIT_AREA_CLASSES`; the suite enforces 44x44 at 390x844, on the list page and on every golden screen, labels at 320, hints; landscape and tablet are advisory |
+| Layout by size                          | Built: `CmnShellService` picks tab bar, rail or sidebar; the suite checks each width and device                                                                                                             |
+| Appearance                              | Built: `cmn-appearance-settings` in Settings, palette entries, synced through `AppearanceService`                                                                                                           |
+| Overlays                                | Built: the notice slot, the toast stack over `--cmn-overlay-inset-bottom`; the suite checks notices sit between the top bar and the tab bar, and toasts above the tab bar and floating action               |
+| Content insets                          | Built: measured `--cmn-content-inset-*`; the suite checks the last content clears the tab bar, whatever the page composition                                                                                |
+| Long lists (filter, chips, sections)    | Built: `cmn-filter-bar`, `lk-chip-row`, `cmn-list-section`; the suite checks labels and headers                                                                                                             |
+| Phone sizes and zoom                    | Built: edge-to-edge 49pt tab bar, 44pt scroll-edge top bar, viewport standard, `touch-action`; the suite sweeps seven widths at two heights                                                                 |
+| Text input (16px, 44px)                 | Built: every `cmn-*` field below md; `dvh` sheets and visual viewport are a follow-up                                                                                                                       |
+| Skeletons and motion                    | Built: `cmn-skeleton` presets, `cmn-async-state` calm loading, motion tokens; the suite checks preset geometry and Reduce Motion                                                                            |
+| Continuity and paging                   | Built: `lk-infinite-list`, `TabPreloadStrategy` (idle tab preload, skipped under Save-Data or metered), `keepContent`; the suite checks the end of a continuous list                                        |

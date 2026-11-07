@@ -12,8 +12,14 @@ import {
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
 import {CmnSheetDrag} from '../../sheet-drag/sheet-drag';
+import {PHONE_HIT_AREA_CLASSES} from '../../tokens/hit-area';
 import {IconComponent} from '../icon/icon.component';
 import {CmnDrawerRef} from './drawer-ref';
+
+// 32px drawn, at least --size-touch pressed on a phone.
+const CLOSE_CLASSES =
+  'flex h-8 w-8 items-center justify-center rounded-cmn-md text-text-secondary transition-colors ' +
+  `hover:bg-surface-raised hover:text-text-primary ${PHONE_HIT_AREA_CLASSES}`;
 
 type DrawerState = 'entering' | 'open' | 'closing';
 
@@ -62,11 +68,7 @@ export type CmnSheetStop = 'half' | 'full';
           <h2 class="text-cmn-md font-semibold text-text-primary">
             {{ title() }}
           </h2>
-          <button
-            (click)="drawerRef.close()"
-            class="flex h-8 w-8 items-center justify-center rounded-cmn-md text-text-secondary transition-colors hover:bg-surface-raised hover:text-text-primary"
-            aria-label="Close drawer"
-          >
+          <button [class]="closeClasses" (click)="drawerRef.close()" aria-label="Close drawer">
             <cmn-icon name="X" size="sm" />
           </button>
         </div>
@@ -103,6 +105,8 @@ export class CmnDrawerContainerComponent implements AfterViewInit {
   public readonly dragTransform = this.sheetDrag.transform;
   public readonly drawerRef = inject(CmnDrawerRef);
   public readonly portalOutlet = viewChild.required(CdkPortalOutlet);
+
+  protected readonly closeClasses = CLOSE_CLASSES;
 
   public get isOpen(): boolean {
     return this.state === 'open';
