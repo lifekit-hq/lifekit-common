@@ -6,19 +6,22 @@ Design tokens for the lifekit ecosystem, framework-agnostic.
   `[data-theme='light']`); the dark theme applies under `[data-theme='dark']`. The file has no
   `prefers-color-scheme` media query. To follow the OS, the app sets `data-theme` on `<html>`: the
   pre-paint script in `brand` does it before first paint, and `ThemeService` keeps it live. It also owns the font (`--font-sans`, `--font-mono`),
-  radius (`--radius-sm/md/lg/full`), shadow (`--shadow-sm/md/lg`) and touch-target (`--size-touch`,
+  radius (`--radius-sm/md/lg` are `0`, square, and `--radius-full` is the pill), shadow (`--shadow-sm/md/lg`) and touch-target (`--size-touch`,
   44px) tokens and
   `--color-surface-hover`, each light and dark where themed. It sets `color-scheme` per theme, and
   the `html` background and text colour, so the canvas follows the active theme. A
   `prefers-reduced-motion` block suppresses transitions and decorative animation. Looping loading
   spinners (`animate-spin`, `animate-cmn-spin`) are exempt; pulses settle. It also owns the motion
-  tokens (`--cmn-duration-short|medium|long`, 150/250/400ms; `--cmn-ease-standard`,
-  `--cmn-ease-emphasized-decelerate`, `--cmn-ease-emphasized-accelerate`) and the skeleton
+  tokens (`--cmn-duration-short|medium|long`, Carbon's 150/240/400ms; `--cmn-ease-standard|decelerate|accelerate`
+  are Carbon's productive curves and `--cmn-ease-expressive-standard|decelerate|accelerate` its expressive
+  ones; the old `--cmn-ease-emphasized-*` names are deprecated aliases), the Carbon layout sizes
+  (`--cmn-size-xs|sm|md|lg`, 24/32/40/48px), the filled-field geometry (`--cmn-field-bg`,
+  `--cmn-field-border-bottom`, `--cmn-field-focus`) and the skeleton
   colours (`--color-skeleton`, `--color-skeleton-sheen`, derived from the surface tokens so a seed
   carries through) with the `.cmn-skeleton-sweep` block `cmn-skeleton` draws. The page rhythm
   tokens (`--cmn-page-gutter`, `--cmn-title-gap`, `--cmn-section-gap`, `--cmn-group-gap`,
-  `--cmn-control-h`) set the composed page: 16/16/24/8/44px on a phone, the gutter 32px, the
-  title gap 24px and the control height 40px from 768px. `cmn-page` reads them; values and
+  `--cmn-control-h`) set the composed page: 16/16/24/8/48px on a phone, the gutter 32px and the
+  title gap 24px from 768px; the control height is Carbon's 48px at every width. `cmn-page` reads them; values and
   rules: the Layout section of [`DESIGN.md`](../../DESIGN.md#layout).
 - `tailwind`: a Tailwind preset mapping the tokens onto the `cmn-*` scale (`duration-cmn-short|medium|long`,
   `ease-cmn-standard|decelerate|accelerate`, `bg-skeleton`). Its fonts, radii,

@@ -55,14 +55,14 @@ const ICON_SIZE: Record<SelectSize, 'sm' | 'md' | 'lg'> = {
 };
 
 const FIELD_BASE =
-  'w-full rounded border bg-surface-bg text-text-primary outline-none transition-colors ' +
+  'w-full rounded-cmn-md border bg-surface-bg text-text-primary outline-none transition-colors ' +
   'max-md:min-h-cmn-touch focus:border-accent-default focus-visible:ring-2 ' +
   'focus-visible:ring-border-focus disabled:cursor-not-allowed disabled:opacity-60';
 
 // The combobox field is a wrapper around the focusable element, so it takes the focus styles from
 // whatever inside it holds focus, and the ring from the combobox's keyboard focus alone.
 const COMBOBOX_FIELD_BASE =
-  'flex w-full items-center gap-cmn-2 rounded border bg-surface-bg px-cmn-2 text-text-primary ' +
+  'flex w-full items-center gap-cmn-2 rounded-cmn-md border bg-surface-bg px-cmn-2 text-text-primary ' +
   'transition-colors max-md:min-h-cmn-touch focus-within:border-accent-default ' +
   'has-[[role=combobox]:focus-visible]:ring-2 has-[[role=combobox]:focus-visible]:ring-border-focus';
 

@@ -11,7 +11,7 @@ export type AlertItemDensity = 'card' | 'flat';
 
 /** 24px drawn, at least --size-touch pressed on a phone. */
 const DISMISS_CLASSES =
-  'relative z-10 flex shrink-0 rounded p-1 text-text-disabled transition-colors hover:bg-surface-raised ' +
+  'relative z-10 flex shrink-0 rounded-cmn-sm p-1 text-text-disabled transition-colors hover:bg-surface-raised ' +
   `hover:text-text-primary ${PHONE_HIT_AREA_CLASSES}`;
 
 const SEVERITY_COLOR: Record<AlertItemSeverity, string> = {

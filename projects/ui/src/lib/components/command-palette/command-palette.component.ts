@@ -47,7 +47,7 @@ interface PaletteGroup {
         animation: cmn-fade-in var(--cmn-duration-short) var(--cmn-ease-standard) both;
       }
       .cmn-palette-panel {
-        animation: cmn-slide-in var(--cmn-duration-short) var(--cmn-ease-emphasized-decelerate) both;
+        animation: cmn-slide-in var(--cmn-duration-short) var(--cmn-ease-decelerate) both;
       }
     `,
   ],

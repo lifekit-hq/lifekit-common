@@ -410,7 +410,9 @@ that holds each one. A rule marked "follow-up" is the target; its parts and chec
    toasts sit above the tab bar and the floating action; with three idle notices the slot is 0px.
 3. **Touch targets.** Every interactive element on a phone has a hit area of at least 44x44 CSS
    px. A smaller visual (a 32px chip, a `sm` button) keeps its look and gets a 44px hit area
-   (`PHONE_HIT_AREA_CLASSES`, `.cmn-hit-slop`). Inline text links follow WCAG 2.5.8. Sources: HIG
+   (`PHONE_HIT_AREA_CLASSES`, `.cmn-hit-slop`). Phone controls take the same Carbon geometry as the
+   desktop (square corners, a 48px `--cmn-control-h`), which is already above the 44px minimum; the
+   44px stays the floor for anything drawn smaller. Inline text links follow WCAG 2.5.8. Sources: HIG
    Buttons and Accessibility (44pt, 28pt minimum); WCAG 2.5.8 and 2.5.5; M3 48dp. Check: targets
    are at least 44 in the phone chrome and on the list page.
 4. **Overflow rows.** A control row never overlaps or clips a label. Segmented controls keep to
@@ -431,10 +433,11 @@ that holds each one. A rule marked "follow-up" is the target; its parts and chec
    RFC 5861; angular.dev service worker `dataGroups`, route preloading, `@defer`, View Transitions;
    HIG Loading. Check today: back restores scroll.
 7. **Motion.** Durations and easings come from tokens (`--cmn-duration-short|medium|long`: 150,
-   250 and 400ms; `--cmn-ease-standard|emphasized-decelerate|emphasized-accelerate`, the M3
-   curves, with Tailwind `duration-cmn-*` and `ease-cmn-*`); only transform and opacity animate;
+   240 and 400ms; `--cmn-ease-standard|decelerate|accelerate`, Carbon's productive curves, and
+   `--cmn-ease-expressive-*` for the sheet and the drawer, with Tailwind `duration-cmn-*` and
+   `ease-cmn-*`); only transform and opacity animate;
    under Reduce Motion, movement becomes a fade or nothing (the global block in `theme.css`; a
-   spinner is the one thing that keeps turning). Sources: HIG Motion; M3 easing and duration
+   spinner is the one thing that keeps turning). Sources: HIG Motion; Carbon motion (`@carbon/motion`)
    tokens; WCAG 2.3.3. Check: no transform animation runs under Reduce Motion, on the skeleton
    and on a sheet.
 8. **Lists and pagination.** Phone lists load continuously: an `lk-infinite-list` asks for the
@@ -451,7 +454,8 @@ that holds each one. A rule marked "follow-up" is the target; its parts and chec
      any pinned notices. Source: UIKit `UITableView.Style.plain`. Check: the header pins flush
      under the top bar, never overlapping it, at 375, 390 and 402.
 9. **Text input.** Inputs, selects and textareas are 16px below `md` (iOS zooms into a focused
-   field set smaller) and at least 44px tall, and carry `inputmode`, `enterkeyhint` and
+   field set smaller) and 48px tall (Carbon's default control height, above the 44px touch
+   target), and carry `inputmode`, `enterkeyhint` and
    `autocomplete`. Sheets size with `dvh` and keep the focused field in the visual viewport
    (follow-up). Sources: WebKit `WKWebViewIOS.mm`; MDN `inputmode`, `enterkeyhint`.
 10. **Phone sizes.** The shell holds at 320, 360, 375, 390, 393, 412 and 430 wide, at 667 and 932
@@ -488,6 +492,6 @@ exists.
 | Content insets                          | Built: measured `--cmn-content-inset-*`; the suite checks the last content clears the tab bar, whatever the page composition                                                                  |
 | Long lists (filter, chips, sections)    | Built: `cmn-filter-bar`, `lk-chip-row`, `cmn-list-section`; the suite checks labels and headers                                                                                               |
 | Phone sizes and zoom                    | Built: edge-to-edge 49pt tab bar, 44pt scroll-edge top bar, viewport standard, `touch-action`; the suite sweeps seven widths at two heights                                                   |
-| Text input (16px, 44px)                 | Built: every `cmn-*` field below md; `dvh` sheets and visual viewport are a follow-up                                                                                                         |
+| Text input (16px, 48px)                 | Built: every `cmn-*` field below md; `dvh` sheets and visual viewport are a follow-up                                                                                                         |
 | Skeletons and motion                    | Built: `cmn-skeleton` presets, `cmn-async-state` calm loading, motion tokens; the suite checks preset geometry and Reduce Motion                                                              |
 | Continuity and paging                   | Built: `lk-infinite-list`, `TabPreloadStrategy` (idle tab preload, skipped under Save-Data or metered), `keepContent`; the suite checks the end of a continuous list                          |

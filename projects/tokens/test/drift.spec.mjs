@@ -22,8 +22,8 @@ const clean = (file, text) => assert.deepEqual(scanSource(file, text), []);
 
 describe('contract', () => {
   it('reads the ramp and the radius scale from the package', () => {
-    assert.deepEqual(TEXT_RAMP_PX, [12, 14, 16, 18, 20, 24, 30, 36]);
-    assert.deepEqual(RADIUS_SCALE_PX, [3, 6, 8, 9999]);
+    assert.deepEqual(TEXT_RAMP_PX, [12, 14, 16, 20, 20, 28, 32, 42]);
+    assert.deepEqual(RADIUS_SCALE_PX, [0, 9999]);
     assert.deepEqual(SPACING_SCALE_PX, [0, 1, 2, 4, 8, 12, 16, 20, 24, 28, 32, 40, 48, 64]);
   });
 });
@@ -187,7 +187,7 @@ describe('text-size', () => {
   });
 
   it('accepts ramp sizes, tokens and relative resets', () => {
-    clean('a.css', 'a { font-size: 12px; } b { font-size: 0.875rem; } c { font-size: 1.125rem; }');
+    clean('a.css', 'a { font-size: 12px; } b { font-size: 0.875rem; } c { font-size: 1.25rem; }');
     clean(
       'a.css',
       'a { font-size: var(--text-sm); } b { font-size: inherit; } c { font-size: 100%; }'
@@ -214,24 +214,26 @@ describe('radius', () => {
     assert.deepEqual(scan('a.ts', "const o = {borderRadius: '10px'};"), ['radius:1']);
   });
 
+  it('flags the old 3, 6 and 8px radii: the controls are square', () => {
+    assert.deepEqual(scan('a.css', 'a { border-radius: 3px; } b { border-radius: 6px 8px; }'), [
+      'radius:1',
+      'radius:1',
+    ]);
+    assert.deepEqual(scan('a.html', '<i class="rounded-[8px]"></i>'), ['radius:1']);
+  });
+
   it('accepts the scale, pills, circles, none and tokens', () => {
-    clean(
-      'a.css',
-      'a { border-radius: 3px; } b { border-radius: 6px 0 8px 0.5rem; } c { border-radius: 9999px; }'
-    );
-    clean(
-      'a.css',
-      'a { border-radius: 0.375rem; } b { border-radius: 50%; } c { border-radius: 0; }'
-    );
+    clean('a.css', 'a { border-radius: 0 0px 0 0; } c { border-radius: 9999px; }');
+    clean('a.css', 'a { border-radius: 50%; } b { border-radius: 100%; } c { border-radius: 0; }');
     clean(
       'a.css',
       'a { border-radius: var(--radius-md); } b { border-radius: calc(var(--radius-lg) - 2px); }'
     );
     clean(
       'a.html',
-      '<i class="rounded-cmn-md rounded-full rounded-[var(--radius-lg)] rounded-[8px]"></i>'
+      '<i class="rounded-cmn-md rounded-full rounded-[var(--radius-lg)] rounded-[0]"></i>'
     );
-    clean('a.ts', "const o = {borderRadius: 'var(--radius-lg)', other: {borderRadius: '8px'}};");
+    clean('a.ts', "const o = {borderRadius: 'var(--radius-lg)', other: {borderRadius: '0'}};");
   });
 });
 

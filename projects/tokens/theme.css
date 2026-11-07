@@ -13,40 +13,66 @@
   --font-sans: 'IBM Plex Sans Variable', 'IBM Plex Sans', system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
 
-  /* Radius */
-  --radius-sm: 3px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
+  /* Radius — Carbon geometry: controls, cards, menus and sheets are square. sm, md and lg stay as
+     names so every `rounded-cmn-*` and `var(--radius-*)` keeps resolving, and all three are 0; the
+     pill (tags, chips, badges, avatars) is the one rounded shape, as in Carbon's tag. */
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
   --radius-full: 9999px;
 
   /* Touch target — the smallest pressable area of any chrome control (44pt, px so a host's
      root font size cannot shrink it) */
   --size-touch: 44px;
 
+  /* Layout sizes — Carbon's control heights (xs 24, sm 32, md 40, lg 48; @carbon/layout). Px for the
+     same reason as --size-touch. Each is a step on the spacing scale (`cmn-6/8/10/12`). */
+  --cmn-size-xs: 24px;
+  --cmn-size-sm: 32px;
+  --cmn-size-md: 40px;
+  --cmn-size-lg: 48px;
+
   /* Page rhythm — the composed screen's spacing, owned by the page template (`cmn-page`) rather
-     than chosen per call site. Values are steps already on the spacing scale; the gutter, the
-     title gap and the control height step up from 768px (Tailwind's md). Px for the same reason
-     as --size-touch.
+     than chosen per call site. Values are steps already on the spacing scale; the gutter and the
+     title gap step up from 768px (Tailwind's md). Px for the same reason as --size-touch.
      page-gutter: the inset from main's edge to the page's one left edge (title, notices, content).
      title-gap: from the large page title to the first block under it.
      section-gap: between top-level sections of a page.
      group-gap: inside a group (a section heading and its rows, a field and its button).
-     control-h: the one height of controls that sit side by side (input, button, select). */
+     control-h: the one height of controls that sit side by side (input, button, select): Carbon's
+     48px default, on the phone and the desktop alike, so it also clears the 44px touch target. */
   --cmn-page-gutter: 16px;
   --cmn-title-gap: 16px;
   --cmn-section-gap: 24px;
   --cmn-group-gap: 8px;
-  --cmn-control-h: var(--size-touch);
+  --cmn-control-h: var(--cmn-size-lg);
 
-  /* Motion — durations and easings (M3). Short: small state changes (a toggle, a fade). Medium:
-     a surface entering or leaving (sheet, drawer, crossfade). Long: a large or full-screen move.
-     Decelerate what arrives, accelerate what leaves, standard for everything that stays on screen. */
+  /* Field — Carbon's filled text field: a tinted fill with a bottom border only, a 2px ring on focus,
+     square corners. The fill is surface-raised, the one grey that reads on both a card and the page
+     ground. A control takes its geometry from these three tokens (`bg-cmn-field`); the rest of a
+     field (padding, label, helper text, error) is the component's own. */
+  --cmn-field-bg: var(--color-surface-raised);
+  --cmn-field-border-bottom: 1px solid var(--color-border-strong);
+  --cmn-field-focus: 2px solid var(--color-border-focus);
+
+  /* Motion — Carbon's durations and curves (@carbon/motion). Short (moderate-01): small state changes
+     (a toggle, a fade). Medium (moderate-02): a surface entering or leaving (sheet, drawer,
+     crossfade). Long (slow-01): a large or full-screen move. Decelerate what arrives, accelerate
+     what leaves, standard for everything that stays on screen. Productive curves are for the
+     everyday, expressive for the larger surfaces that carry the screen (sheet, drawer). */
   --cmn-duration-short: 150ms;
-  --cmn-duration-medium: 250ms;
+  --cmn-duration-medium: 240ms;
   --cmn-duration-long: 400ms;
-  --cmn-ease-standard: cubic-bezier(0.2, 0, 0, 1);
-  --cmn-ease-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
-  --cmn-ease-emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
+  --cmn-ease-standard: cubic-bezier(0.2, 0, 0.38, 0.9);
+  --cmn-ease-decelerate: cubic-bezier(0, 0, 0.38, 0.9);
+  --cmn-ease-accelerate: cubic-bezier(0.2, 0, 1, 0.9);
+  --cmn-ease-expressive-standard: cubic-bezier(0.4, 0.14, 0.3, 1);
+  --cmn-ease-expressive-decelerate: cubic-bezier(0, 0, 0.3, 1);
+  --cmn-ease-expressive-accelerate: cubic-bezier(0.4, 0.14, 1, 1);
+  /* Deprecated: the M3 names these replaced, now aliases of the productive curves so nothing that
+     reads them breaks; use decelerate and accelerate. The aliases go in the next major. */
+  --cmn-ease-emphasized-decelerate: var(--cmn-ease-decelerate);
+  --cmn-ease-emphasized-accelerate: var(--cmn-ease-accelerate);
 
   color-scheme: light;
 
@@ -308,7 +334,6 @@
   [data-theme='light'] {
     --cmn-page-gutter: 32px;
     --cmn-title-gap: 24px;
-    --cmn-control-h: 40px;
   }
 }
 
@@ -485,8 +510,8 @@ cmn-dialog-container:is(
   display: block;
   width: 100%;
   margin-bottom: var(--cmn-keyboard-inset, 0px);
-  animation: cmn-dialog-sheet-in var(--cmn-duration-medium) var(--cmn-ease-emphasized-decelerate);
-  transition: transform var(--cmn-duration-medium) var(--cmn-ease-emphasized-decelerate);
+  animation: cmn-dialog-sheet-in var(--cmn-duration-medium) var(--cmn-ease-expressive-decelerate);
+  transition: transform var(--cmn-duration-medium) var(--cmn-ease-expressive-decelerate);
 }
 
 cmn-dialog-container.cmn-dialog--dragging {
@@ -495,7 +520,7 @@ cmn-dialog-container.cmn-dialog--dragging {
 
 cmn-dialog-container.cmn-dialog--closing {
   transform: translateY(100%);
-  transition: transform var(--cmn-duration-short) var(--cmn-ease-emphasized-accelerate);
+  transition: transform var(--cmn-duration-short) var(--cmn-ease-expressive-accelerate);
 }
 
 /* Sheet: rounded top, full width, never taller than the screen minus the status bar and a strip of
@@ -550,7 +575,7 @@ cmn-drawer-container {
   flex-direction: column;
   height: 100%;
   transform: translateX(100%);
-  transition: transform var(--cmn-duration-medium) var(--cmn-ease-emphasized-decelerate);
+  transition: transform var(--cmn-duration-medium) var(--cmn-ease-expressive-decelerate);
 }
 
 cmn-drawer-container.cmn-drawer--open {
@@ -560,7 +585,7 @@ cmn-drawer-container.cmn-drawer--open {
 
 cmn-drawer-container.cmn-drawer--closing {
   transform: translateX(100%);
-  transition: transform var(--cmn-duration-short) var(--cmn-ease-emphasized-accelerate);
+  transition: transform var(--cmn-duration-short) var(--cmn-ease-expressive-accelerate);
 }
 
 /* Bottom sheet: the drawer's phone presentation (below md, or mode: 'sheet').

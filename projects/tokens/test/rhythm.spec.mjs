@@ -34,9 +34,14 @@ function declarations(css, marker) {
   );
 }
 
-/** A value in px: a px literal, or `var(--size-touch)`. */
+/** Carbon's layout sizes (@carbon/layout), px: the control heights `--cmn-size-*` carry. */
+const CARBON_SIZES_PX = {xs: 24, sm: 32, md: 40, lg: 48};
+
+/** A value in px: a px literal, `var(--size-touch)` or a `var(--cmn-size-*)` layout size. */
 function px(value) {
   if (value === 'var(--size-touch)') return TOUCH_PX;
+  const size = value.match(/^var\(--cmn-size-(\w+)\)$/)?.[1];
+  if (size) return CARBON_SIZES_PX[size];
   const match = value.match(/^(\d+(?:\.\d+)?)px$/);
   assert.ok(match, `${value} is not a px length`);
   return Number(match[1]);
@@ -66,20 +71,24 @@ describe('page rhythm tokens', () => {
     assert.equal(px(desktop.get('--cmn-page-gutter')), 32);
   });
 
-  it('gives a control the touch height on a phone and the md button’s 40px from md', () => {
-    assert.equal(px(phone.get('--cmn-control-h')), TOUCH_PX);
-    assert.equal(px(desktop.get('--cmn-control-h')), 40);
+  it('gives a control Carbon’s 48px default on the phone and the desktop, above the touch target', () => {
+    assert.equal(px(phone.get('--cmn-control-h')), 48);
+    assert.equal(desktop.has('--cmn-control-h'), false, 'the control height does not step');
+    assert.ok(px(phone.get('--cmn-control-h')) >= TOUCH_PX);
+  });
+
+  it('defines the four Carbon layout sizes, 24/32/40/48, on the root', () => {
+    for (const [name, size] of Object.entries(CARBON_SIZES_PX)) {
+      assert.equal(px(phone.get(`--cmn-size-${name}`)), size, name);
+      assert.ok(SPACING_SCALE_PX.includes(size), `${size}px is on the spacing scale`);
+    }
   });
 
   it('puts more space above a section than inside a group', () => {
     assert.ok(px(phone.get('--cmn-section-gap')) > px(phone.get('--cmn-group-gap')));
   });
 
-  it('steps up only the gutter, the title gap and the control height from md', () => {
-    assert.deepEqual([...desktop.keys()].sort(), [
-      '--cmn-control-h',
-      '--cmn-page-gutter',
-      '--cmn-title-gap',
-    ]);
+  it('steps up only the gutter and the title gap from md', () => {
+    assert.deepEqual([...desktop.keys()].sort(), ['--cmn-page-gutter', '--cmn-title-gap']);
   });
 });

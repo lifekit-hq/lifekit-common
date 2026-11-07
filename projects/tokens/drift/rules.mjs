@@ -38,12 +38,16 @@ export const TEXT_RAMP_PX = Object.values(
 
 /** The radius scale (px): every `--radius-*` in theme.css. The pill is any radius from 99px up. */
 export const RADIUS_SCALE_PX = [
-  ...readFileSync(new URL('../theme.css', import.meta.url), 'utf8').matchAll(
-    /--radius-[\w-]+:\s*([^;]+);/g
+  ...new Set(
+    [
+      ...readFileSync(new URL('../theme.css', import.meta.url), 'utf8').matchAll(
+        /--radius-[\w-]+:\s*([^;]+);/g
+      ),
+    ]
+      .map(([, value]) => toPx(value))
+      .filter(px => px !== null)
   ),
-]
-  .map(([, value]) => toPx(value))
-  .filter(px => px !== null);
+];
 const PILL_PX = 99;
 
 const CSS_WIDE = /^(inherit|initial|unset|revert|revert-layer)$/i;
