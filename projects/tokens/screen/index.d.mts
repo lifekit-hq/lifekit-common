@@ -133,6 +133,8 @@ export declare const SCREEN_BASELINE_OPTIONS: Readonly<{
   maxDiffPixelRatio: 0;
   threshold: 0;
 }>;
+/** The Chromium switches a baseline is rendered with (`--disable-partial-raster`: whole tiles only). */
+export declare const SCREEN_BROWSER_ARGS: readonly string[];
 
 /** The Playwright config the fixture owns (`updateSnapshots: 'none'` and the capture options). */
 export declare function screenBaselineConfig(): {

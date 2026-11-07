@@ -28,6 +28,7 @@ export {
   captureScreenBaseline,
   defineScreenBaselines,
   SCREEN_BASELINE_OPTIONS,
+  SCREEN_BROWSER_ARGS,
   screenBaselineConfig,
   screenBaselineName,
 } from './baseline.mjs';
