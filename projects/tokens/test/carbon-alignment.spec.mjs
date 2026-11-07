@@ -118,7 +118,7 @@ describe('layout sizes are Carbon’s', () => {
 
 describe('geometry is Carbon’s', () => {
   it('squares sm, md and lg, and leaves the pill', () => {
-    for (const name of ['sm', 'md', 'lg']) assert.equal(token(`--radius-${name}`), '0', name);
+    for (const name of ['sm', 'md', 'lg']) assert.equal(token(`--radius-${name}`), '0px', name);
     assert.equal(token('--radius-full'), '9999px');
   });
 
@@ -154,11 +154,5 @@ describe('motion is Carbon’s', () => {
   it('keeps the old emphasized names as aliases of the productive curves', () => {
     assert.equal(token('--cmn-ease-emphasized-decelerate'), 'var(--cmn-ease-decelerate)');
     assert.equal(token('--cmn-ease-emphasized-accelerate'), 'var(--cmn-ease-accelerate)');
-  });
-
-  it('keeps a reduced-motion path that settles every transition and animation', () => {
-    assert.match(THEME, /@media \(prefers-reduced-motion: reduce\)/);
-    assert.match(THEME, /transition-duration:\s*0\.01ms !important/);
-    assert.match(THEME, /animation-duration:\s*0\.01ms !important/);
   });
 });

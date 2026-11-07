@@ -14,11 +14,11 @@
   --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
 
   /* Radius — Carbon geometry: controls, cards, menus and sheets are square. sm, md and lg stay as
-     names so every `rounded-cmn-*` and `var(--radius-*)` keeps resolving, and all three are 0; the
+     names so every `rounded-cmn-*` and `var(--radius-*)` keeps resolving, and all three are 0px; the
      pill (tags, chips, badges, avatars) is the one rounded shape, as in Carbon's tag. */
-  --radius-sm: 0;
-  --radius-md: 0;
-  --radius-lg: 0;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
   --radius-full: 9999px;
 
   /* Touch target — the smallest pressable area of any chrome control (44pt, px so a host's

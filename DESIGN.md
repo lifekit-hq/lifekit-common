@@ -215,7 +215,7 @@ Flat by default: hairline border on `surface-card`. Shadows are for overlays onl
 
 ## Shapes
 
-Square. `--radius-sm`, `--radius-md` and `--radius-lg` are all `0`; the only round shape is the full pill (`--radius-full`) for chips, tags, badges and avatars, which is where Carbon rounds too (its tag). No off-scale literals: a radius is `0`, the pill, a circle (`50%`) or a `--radius-*` token.
+Square. `--radius-sm`, `--radius-md` and `--radius-lg` are all `0px`; the only round shape is the full pill (`--radius-full`) for chips, tags, badges and avatars, which is where Carbon rounds too (its tag). No off-scale literals: a radius is `0`, the pill, a circle (`50%`) or a `--radius-*` token.
 
 **Why the radii changed.** They were 3 / 6 / 8px, Instrument's own softening. The owner chose IBM Carbon as the design system and asked for it true ("true Carbon, align first"), and square corners on controls, cards, menus and sheets are the part of Carbon you see first. Keeping the old radii over Carbon's colour and type would have been a lookalike, not an alignment. The three token names stay, set to `0`, so every `rounded-cmn-*` and `var(--radius-*)` in the library and in the apps follows from one edit and no template changes; a bottom sheet is square-cornered too (the phone pieces take Carbon's geometry, not only the desktop).
 
