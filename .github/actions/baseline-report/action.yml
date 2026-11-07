@@ -1,8 +1,10 @@
 name: Attach the screen baseline before and after
 description: >-
   Posts (or edits in place, or removes when nothing differs) the pull request comment that shows each
-  changed screen baseline on the base and on the head (docs/SCREEN-BASELINES.md). Needs a checkout
-  with full history and a token that may write pull requests.
+  changed screen baseline on the base and on the head (docs/SCREEN-BASELINES.md). Any repository can
+  use it (`uses: lifekit-hq/lifekit-common/.github/actions/baseline-report@<tag>`): it reads every
+  `*-linux.png` the two commits differ by, wherever the app keeps them. Needs a checkout with full
+  history, Node 20 or later and a token that may write pull requests.
 inputs:
   pr:
     description: Pull request number
@@ -34,7 +36,7 @@ runs:
         set -euo pipefail
         base="$(git merge-base "$BASE_SHA" "$HEAD_SHA")"
         report="$(mktemp)"
-        node scripts/baseline-report.mjs --repo "$REPO" --base "$base" --head "$HEAD_SHA" > "$report"
+        node "${{ github.action_path }}/baseline-report.mjs" --repo "$REPO" --base "$base" --head "$HEAD_SHA" > "$report"
         existing="$(gh api "repos/$REPO/issues/$PR/comments" --paginate \
           --jq '.[] | select(.body | contains("<!-- screen-baseline-report -->")) | .id' | head -n 1)"
         if [ -s "$report" ]; then

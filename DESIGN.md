@@ -195,8 +195,8 @@ Each template has golden screens in Storybook (`Templates/List`, `Templates/Deta
 | C5   | stretched-input   | a text field is wider than 640px                                           |
 | C6   | nested-surface    | a bordered surface sits inside another                                     |
 | C7   | uppercase-label   | a label is set in uppercase                                                |
-| C8   | heading-rhythm    | a heading has less space above it than below                               |
-| C9   | row-action-noise  | a bordered text button repeats on three or more rows                       |
+| C8   | heading-rhythm    | a heading has less space above it than below the content it heads          |
+| C9   | row-action-noise  | a bordered text button repeats on three or more rows of a list             |
 | C10  | text-escapes      | text runs past its surface                                                 |
 
 Every app runs it on every route at 390 and 1280, once the data has settled, from its own Playwright e2e ([docs/SCREEN-CHECK.md](docs/SCREEN-CHECK.md)). Enforcement lands per app: an app adopts `cmn-page` and turns the check on in the same pull request. Once every app has adopted, a major release removes Tailwind's off-scale default spacing and type steps from the preset, so page spacing stops being a call-site choice.

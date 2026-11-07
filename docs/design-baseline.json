@@ -29,12 +29,6 @@
       "reason": "DESIGN.md gives every overlay (dialog, open menu) a hairline plus shadow so it separates in both themes."
     },
     {
-      "rule": "clipped-overflow-container",
-      "stories": ["components-app-layout--*"],
-      "max": 4,
-      "reason": "Detector false positive: the shell CSS-hides the nav it is not using (the sidebar on a phone, the tab bar elsewhere); a badge in that display:none subtree has no box, so its negative offsets read as escaping the clip."
-    },
-    {
       "rule": "nested-cards",
       "stories": ["patterns-period-hero--*"],
       "reason": "The hero story frames the chart's own card inside the hero section on purpose; the detector reads it as nested only since the chart carries its visually hidden data table."
@@ -76,9 +70,9 @@
     "byRule": {}
   },
   "storybook": {
-    "stories": 488,
-    "scans": 976,
-    "total": 180,
+    "stories": 491,
+    "scans": 982,
+    "total": 84,
     "groups": {
       "low-contrast": 2,
       "undersized-and-tiny-text": 0,
@@ -88,7 +82,6 @@
     },
     "byRule": {
       "cramped-padding": 8,
-      "clipped-overflow-container": 96,
       "flat-type-hierarchy": 2,
       "marquee": 38,
       "pulsing-dot": 10,

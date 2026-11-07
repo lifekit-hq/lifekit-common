@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   CUSTOM_ELEMENTS_SCHEMA,
   type EnvironmentProviders,
   inject,
@@ -9,7 +10,7 @@ import {
   type Provider,
 } from '@angular/core';
 import {provideRouter, Router, RouterOutlet, type Routes, withHashLocation} from '@angular/router';
-import {LkUpdatePrompt} from '@lifekit-hq/elements';
+import {LkInstallHint, LkOfflineBanner, LkUpdatePrompt} from '@lifekit-hq/elements';
 
 import {PREFERS_DARK} from '../../services/theme/theme.service';
 import {
@@ -26,8 +27,14 @@ import {PageComponent} from './page.component';
  */
 
 // Imported by name so a bundler cannot tree-shake the customElements.define() call.
-if (!customElements.get('lk-update-prompt')) {
-  customElements.define('lk-update-prompt', LkUpdatePrompt);
+for (const [tag, element] of [
+  ['lk-update-prompt', LkUpdatePrompt],
+  ['lk-offline-banner', LkOfflineBanner],
+  ['lk-install-hint', LkInstallHint],
+] as const) {
+  if (!customElements.get(tag)) {
+    customElements.define(tag, element);
+  }
 }
 
 /** A destination a golden screen does not show: it only needs to exist for the tabs. */
@@ -40,6 +47,8 @@ if (!customElements.get('lk-update-prompt')) {
   `,
 })
 class PlaceholderPageComponent {}
+
+const PEOPLE_BADGE = 3;
 
 const NAV_ITEMS: NavItem[] = [
   {label: 'Tasks', icon: 'ListChecks', route: '/tasks'},
@@ -62,9 +71,20 @@ const ACCOUNT: AppLayoutAccount = {
   changeDetection: ChangeDetectionStrategy.OnPush,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: `
-    <cmn-app-layout [navItems]="navItems" [account]="account" [phoneOverlay]="true" brand="Tasks">
+    <cmn-app-layout [navItems]="navItems()" [account]="account" [phoneOverlay]="true" brand="Tasks">
       @if (notice()) {
         <lk-update-prompt cmnAppLayoutNotice ready />
+      }
+      <!-- As an app wires them: each notice its own child, none of them showing. One element per
+           block, so each is projected into the notices slot by its attribute. -->
+      @if (appChrome()) {
+        <lk-offline-banner cmnAppLayoutNotice />
+      }
+      @if (appChrome()) {
+        <lk-update-prompt cmnAppLayoutNotice />
+      }
+      @if (appChrome()) {
+        <lk-install-hint cmnAppLayoutNotice />
       }
       <router-outlet />
     </cmn-app-layout>
@@ -76,7 +96,18 @@ export class GoldenShellComponent implements OnInit {
   public readonly start = input('/tasks');
   /** Shows the update prompt in the notices slot, inset to the page gutter above the title. */
   public readonly notice = input(false);
-  protected readonly navItems = NAV_ITEMS;
+  /**
+   * The shell as an app wires it: a nav item that carries a badge, and the offline banner, update
+   * prompt and install hint in the notices slot with none of them showing.
+   */
+  public readonly appChrome = input(false);
+  protected readonly navItems = computed(() =>
+    this.appChrome()
+      ? NAV_ITEMS.map(item =>
+          item.route === '/people' ? {...item, badge: () => PEOPLE_BADGE} : item
+        )
+      : NAV_ITEMS
+  );
   protected readonly account = ACCOUNT;
 
   public ngOnInit(): void {

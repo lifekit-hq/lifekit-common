@@ -150,7 +150,11 @@ const noLocalCurrencyFormat = {
   },
 };
 
-const PAGE_TAG = 'cmn-page';
+/**
+ * The elements a routed page may be rooted on: the page template, and the library's ready-made
+ * routed pages (`cmn-more-page`), which are built on it.
+ */
+const PAGE_ROOT_TAGS = new Set(['cmn-page', 'cmn-more-page']);
 
 /** Tailwind utilities that give an element padding, margin or width. */
 const SPACING_UTILITY = /^(?:p[xytrblse]?|m[xytrblse]?|w|min-w|max-w|size)-/;
@@ -293,7 +297,7 @@ const pageRoot = {
     schema: [],
     messages: {
       missing:
-        'A routed page is rooted on <cmn-page>: this template has no <cmn-page> root. Wrap its content in <cmn-page> from @lifekit-hq/ui. If this component is not a routed page, disable the rule for it with a reason after "--".',
+        'A routed page is rooted on <cmn-page>: this template has no <cmn-page> root (or a ready-made page such as <cmn-more-page>). Wrap its content in <cmn-page> from @lifekit-hq/ui. If this component is not a routed page, disable the rule for it with a reason after "--".',
       outside:
         'A routed page is rooted on <cmn-page>: {{found}} sits outside it. Move it inside <cmn-page>.',
       spacing:
@@ -316,7 +320,9 @@ const pageRoot = {
             node.type !== 'LetDeclaration' &&
             !(node.type === 'Template' && node.tagName === 'ng-template')
         );
-        const root = significant.find(node => node.type === 'Element' && node.name === PAGE_TAG);
+        const root = significant.find(
+          node => node.type === 'Element' && PAGE_ROOT_TAGS.has(node.name)
+        );
         if (!root) {
           const target = significant[0];
           context.report({
@@ -333,7 +339,7 @@ const pageRoot = {
           });
         }
         const loc = templateLoc(context, root);
-        const owner = `<${PAGE_TAG}>`;
+        const owner = `<${root.name}>`;
         const classes = staticAttribute(root, 'class');
         for (const token of classes ? spacingClasses(classes) : []) {
           reportSpacing(undefined, owner, token, loc);

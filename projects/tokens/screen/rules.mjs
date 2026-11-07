@@ -96,6 +96,12 @@ export function inspectScreen(options = {}) {
   const EDGE_TOLERANCE = 1;
   const INPUT_MAX = 640;
   const ROW_ACTION_REPEAT = 3;
+  // C8: a heading's own section. C9: a row, and the list of rows it repeats in.
+  const SECTION_SELECTOR =
+    'section, fieldset, [role=group], [role=region], cmn-settings-section, cmn-list-section';
+  const ROW_SELECTOR = 'li, tr, [role=listitem], [role=row], cmn-list-item-row';
+  const ROW_LIST_SELECTOR =
+    'cmn-list-section, ul, ol, table, [role=list], [role=table], [role=grid], [role=rowgroup]';
   const ROW_CENTRE_TOLERANCE = 6;
   const ROW_NEIGHBOUR_GAP = 24;
   const CONTROL_MIN_HEIGHT = 28;
@@ -351,8 +357,12 @@ export function inspectScreen(options = {}) {
     const above = near
       .filter(el => R(el).bottom <= h.top + 1)
       .sort((a, b) => R(b).bottom - R(a).bottom)[0];
+    // Below a heading is the content it heads, so only its own section counts: in a template that
+    // puts the heading in a column beside its controls (settings), whatever lies under it in that
+    // column is the next section's heading, not the content.
+    const own = heading.closest(SECTION_SELECTOR) || main;
     const below = near
-      .filter(el => R(el).top >= h.bottom - 1)
+      .filter(el => own.contains(el) && R(el).top >= h.bottom - 1)
       .sort((a, b) => R(a).top - R(b).top)[0];
     if (above && below) {
       const up = Math.round(h.top - R(above).bottom);
@@ -362,15 +372,20 @@ export function inspectScreen(options = {}) {
   }
 
   // C9 a bordered text button repeated per row
+  // The unit is the row (a list item, a table row, a `cmn-list-item-row`), not the list or section
+  // around it: one card's several actions are one row's, not an action repeated per row.
   const groups = new Map();
   for (const button of [...main.querySelectorAll('button')].filter(vis)) {
     if (parseFloat(getComputedStyle(button).borderTopWidth) < 1 || !text(button)) continue;
-    const list = button.closest('cmn-list-section, ul, ol, [role=list], section');
-    if (list) groups.set(list, (groups.get(list) || 0) + 1);
+    const row = button.closest(ROW_SELECTOR);
+    const list = row && row.parentElement && row.parentElement.closest(ROW_LIST_SELECTOR);
+    if (!list) continue;
+    if (!groups.has(list)) groups.set(list, new Set());
+    groups.get(list).add(row);
   }
-  for (const [list, count] of groups) {
-    if (count >= ROW_ACTION_REPEAT)
-      add('C9', `${count} bordered text buttons repeated in ${name(list)}`);
+  for (const [list, rows] of groups) {
+    if (rows.size >= ROW_ACTION_REPEAT)
+      add('C9', `${rows.size} bordered text buttons repeated in ${name(list)}`);
   }
 
   // C10 text escaping its surface

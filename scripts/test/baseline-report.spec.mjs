@@ -6,10 +6,18 @@ import {join} from 'node:path';
 import {describe, it} from 'node:test';
 import {fileURLToPath} from 'node:url';
 
-import {MARKER, MAX_ROWS, parseChanges, renderReport, screenName} from '../baseline-report.mjs';
+import {
+  MARKER,
+  MAX_ROWS,
+  parseChanges,
+  renderReport,
+  screenName,
+} from '../../.github/actions/baseline-report/baseline-report.mjs';
 
-const SCRIPT = fileURLToPath(new URL('../baseline-report.mjs', import.meta.url));
-const SNAP = 'projects/ui/e2e/screens/templates.spec.ts-snapshots';
+const SCRIPT = fileURLToPath(
+  new URL('../../.github/actions/baseline-report/baseline-report.mjs', import.meta.url)
+);
+const SNAP = 'projects/ui/e2e/screens/baselines';
 const file = (name, project = 'chromium') => `${SNAP}/${name}-${project}-linux.png`;
 const REPO = 'lifekit-hq/lifekit-common';
 
@@ -22,13 +30,16 @@ describe('parseChanges', () => {
         `D\t${file('c-phone-light')}`,
         `M\t${SNAP}/a-phone-light-chromium-win32.png`,
         'M\tprojects/ui/src/foo.ts',
-        `M\tprojects/ui/e2e/screens/${'x'}-chromium-linux.png`,
+        // Wherever an app keeps them: beside the spec, in Playwright's default `-snapshots` folder.
+        'A\te2e/specs/screens.spec.ts-snapshots/d-phone-light-chromium-linux.png',
+        'M\tapp-chromium-linux.txt',
         '',
       ].join('\n')
     );
     assert.deepEqual(
       changes.map(({status, path}) => [status, screenName(path)]),
       [
+        ['added', 'd-phone-light'],
         ['added', 'a-phone-dark'],
         ['changed', 'b-desktop-light'],
         ['removed', 'c-phone-light'],

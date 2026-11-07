@@ -178,6 +178,21 @@ the design judge and axe-core at both sizes and both schemes, with no exceptions
 baselines are added.
 The story ids are `templates-<kind>--<phone|phone-dark|desktop|desktop-dark>`.
 
+## Two rules that read structure
+
+- **C8 heading rhythm** measures the space under a heading to the content it heads: the first
+  element below it in its own section (`section`, `fieldset`, `[role=group]`, `[role=region]`,
+  `cmn-settings-section`, `cmn-list-section`), never to whatever sits under it on the page. The
+  `settings` template puts each heading in a column beside its controls from md up; the next thing
+  under it in that column is the next section's heading, which is not its content, so a section
+  taller than its heading column is not a finding. A heading outside any such section is measured
+  against the next element under it on the page, as before.
+- **C9 row-action noise** counts rows, not ancestors: a row is a list item, a table row, a
+  `role=listitem` / `role=row` or a `cmn-list-item-row`, and the rule fires when three or more
+  rows of one list each hold a bordered text button. One card with several actions (a decision's
+  option group, then Decide and Cancel) is one row's actions, or no row's, and is not a finding. If
+  a card should hold fewer bordered buttons, that is a different rule and DESIGN.md says so.
+
 ## What it caught first
 
 Against basket's list route before it adopted the template, the check reported the defects the

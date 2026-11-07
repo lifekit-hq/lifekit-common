@@ -38,6 +38,7 @@ import {type MenuItem} from '../menu/menu.component';
 import {isRouteMenuItem} from '../menu/route-menu-item';
 import {type NavItem, SidebarNavComponent} from '../sidebar-nav/sidebar-nav.component';
 import {TopBarComponent, type TopBarLargeTitle} from '../top-bar/top-bar.component';
+import {stackNotices} from './notice-stack';
 import {
   type BackTarget,
   leafRoute,
@@ -130,12 +131,15 @@ const OVERLAY_TAB_BAR_CLASSES = 'absolute inset-x-0 bottom-0 z-30';
  *
  * They sit in the page frame's box (the 1200px cap, inset by the page gutter), so a notice starts
  * on the page's one left edge rather than running edge to edge; they stay flush under the bar
- * (PHONE-CONTRACT.md) and a group gap separates stacked notices. The page background fills the
+ * (PHONE-CONTRACT.md) and a group gap separates notices that are showing. The page background fills the
  * inset so a page scrolling under a pinned notice never shows through beside it.
  */
 const NOTICES_BASE_CLASSES =
-  'sticky top-0 z-20 mx-auto flex w-full max-w-[1200px] shrink-0 flex-col gap-cmn-group-gap ' +
-  'bg-surface-bg px-cmn-page-gutter empty:hidden';
+  'sticky top-0 z-20 mx-auto flex w-full max-w-[1200px] shrink-0 flex-col ' +
+  'bg-surface-bg px-cmn-page-gutter empty:hidden ' +
+  // The gap sits on a notice that has another showing above it (see `stackNotices`), not on the
+  // column: a notice that is not showing is a box with no height and must cost the page nothing.
+  '[&>[data-cmn-notice-stacked]]:mt-cmn-group-gap';
 /**
  * Overscroll stops at main: it never chains to the browser (pull-to-refresh, page bounce). Main
  * takes keyboard focus so a page with nothing focusable in it still scrolls from the keyboard.
@@ -585,6 +589,7 @@ export class AppLayoutComponent {
       activeTab: () => this.effectiveActiveRoute(),
     });
     this.publishContentInsets();
+    effect(onCleanup => onCleanup(stackNotices(this.noticesRef().nativeElement)));
     // Phone shell only: a standalone iOS app's first keyboard leaves the frame status-bar-height short.
     effect(onCleanup => {
       const view = this.document.defaultView;

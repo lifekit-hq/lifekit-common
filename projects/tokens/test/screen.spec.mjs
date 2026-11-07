@@ -208,6 +208,110 @@ describe('template-aware one left edge (C1)', () => {
   });
 });
 
+describe('heading rhythm (C8) on a side-by-side heading column', () => {
+  // The settings template: from md up the heading sits in a 280px left column beside its controls.
+  const section = (heading, controls) => `
+    <section class="setting" aria-label="${heading}">
+      <div class="heading-column"><h2>${heading}</h2></div>
+      <div class="controls">${controls}</div>
+    </section>`;
+  const TALL = Array.from({length: 6}, (_, i) => `<div class="control">Control ${i}</div>`).join(
+    ''
+  );
+  const SHORT = '<div class="control">One control</div>';
+  const STYLE = `<style>
+    .setting { display: grid; grid-template-columns: 280px 1fr; gap: 40px; padding-bottom: 24px; }
+    .control { height: 48px; border-bottom: 1px solid #7d8c93; }
+  </style>`;
+  const settings = (...sections) =>
+    PASSING.replace('data-cmn-page="list"', 'data-cmn-page="settings"')
+      .replace(
+        /<form>[\s\S]*<\/section>\s*(?=<\/div>\s*<\/div>\s*<\/div>\s*<\/main>)/,
+        sections.join('')
+      )
+      .replace('</head>', `${STYLE}</head>`);
+
+  it('reads a settings page whose controls are taller than their heading column as composed', async () => {
+    const html = settings(section('Appearance', TALL), section('About', SHORT));
+    const result = await inspect(html, 'desktop');
+    assert.deepEqual(result.findings, [], formatScreen(result));
+  });
+
+  it('still holds a heading to the content it heads', async () => {
+    // The same heading with its content stacked right under it: 24px above, 40px below.
+    const html = settings(section('Appearance', TALL))
+      .replace('.setting { display: grid;', '.setting { display: block;')
+      .replace('.control {', 'h2 { margin-bottom: 40px; } .control {');
+    const result = await inspect(html, 'desktop');
+    assert.ok(
+      result.findings.some(finding => finding.rule === 'C8'),
+      formatScreen(result)
+    );
+  });
+});
+
+describe('row actions (C9) count rows, not ancestors', () => {
+  const card = buttons =>
+    PASSING.replace(
+      /<section>\s*<h2>Ticked[\s\S]*?<\/section>/,
+      `<section><h2>Needs you</h2><div class="card"><div class="row"><span>Pick one</span></div>
+        <div class="row">${buttons}</div></div></section>`
+    );
+  const BORDERED = ['Decide', 'Skip', 'Cancel goal']
+    .map(
+      label =>
+        `<button style="border: 1px solid #7d8c93; padding: 8px 12px" type="button">${label}</button>`
+    )
+    .join('');
+
+  it('does not read the actions of one card as an action repeated per row', async () => {
+    const result = await inspect(card(BORDERED), 'desktop');
+    assert.ok(!rulesOf(result).includes('C9'), formatScreen(result));
+  });
+
+  it('does not read three actions in one list item as three rows', async () => {
+    const html = PASSING.replace(
+      /<section>\s*<h2>Ticked[\s\S]*?<\/section>/,
+      `<section><h2>Needs you</h2><ul style="margin: 0; padding: 0; list-style: none"><li>${BORDERED}</li></ul></section>`
+    );
+    const result = await inspect(html, 'desktop');
+    assert.ok(!rulesOf(result).includes('C9'), formatScreen(result));
+  });
+
+  it('still reads a bordered text button on three list rows', async () => {
+    const rows = Array.from(
+      {length: 3},
+      (_, i) =>
+        `<li>Row ${i} <button style="border: 1px solid #7d8c93; padding: 8px 12px" type="button">Open</button></li>`
+    ).join('');
+    const html = PASSING.replace(
+      /<section>\s*<h2>Ticked[\s\S]*?<\/section>/,
+      `<section><h2>Rows</h2><ul style="margin: 0; padding: 0; list-style: none">${rows}</ul></section>`
+    );
+    const result = await inspect(html, 'desktop');
+    assert.ok(
+      result.findings.some(
+        finding => finding.rule === 'C9' && finding.message.startsWith('3 bordered text buttons')
+      ),
+      formatScreen(result)
+    );
+  });
+
+  it('counts a cmn-list-item-row as a row', async () => {
+    const rows = Array.from(
+      {length: 3},
+      (_, i) =>
+        `<cmn-list-item-row style="display: block">Row ${i} <button style="border: 1px solid #7d8c93; padding: 8px 12px" type="button">Open</button></cmn-list-item-row>`
+    ).join('');
+    const html = PASSING.replace(
+      /<section>\s*<h2>Ticked[\s\S]*?<\/section>/,
+      `<section><h2>Rows</h2><cmn-list-section>${rows}</cmn-list-section></section>`
+    );
+    const result = await inspect(html, 'desktop');
+    assert.ok(rulesOf(result).includes('C9'), formatScreen(result));
+  });
+});
+
 describe('the overview kind and its rail (C1)', () => {
   const messages = result => result.findings.map(finding => `${finding.rule} ${finding.message}`);
 

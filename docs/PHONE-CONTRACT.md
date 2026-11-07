@@ -131,7 +131,12 @@ protected readonly account: AppLayoutAccount = {
   account that passes only `label` and `menuItems` keeps the menu it had.
 - **`cmn-more-page`** is the page to declare for `moreRoute`: the overflow nav (`items`, with
   `tabRoutes`), an account card with the identity, Settings and the extras, Sign out in a card of
-  its own, and `versionLabel`. It owns no sign-in.
+  its own, and `versionLabel`. It owns no sign-in. It is a routed page template like `cmn-page`:
+  it roots on `<cmn-page kind="list">`, so the large title (the route's `data.title`), the gutter and
+  the section rhythm come from the template, the screen check finds its `data-cmn-page` (C0 passes),
+  and `lifekit/page-root` accepts a component whose template root is `<cmn-more-page>`. The app puts
+  it on the route, or wraps it in a component whose template is just `<cmn-more-page …/>`; it adds no
+  `cmn-page` or `cmn-page-container` around it.
 
 ### Content clears the chrome
 
@@ -398,8 +403,11 @@ that holds each one. A rule marked "follow-up" is the target; its parts and chec
    page clears the tab bar and the floating action at 375, 390 and 402.
 2. **Overlays sit in flow.** Install, offline and update notices render in the notice slot below
    the top bar; a toast sits above the bottom inset, the tab bar and the floating action. Nothing
-   covers the chrome. Check: notices sit below the top bar and above the tab bar; toasts sit above
-   the tab bar and the floating action.
+   covers the chrome. A notice that is not showing costs the page nothing: each notice is its own
+   child of the slot (offline banner, update prompt, install hint), an idle one is a box with no
+   height, and the group gap sits only between notices that show, so with none showing the slot is
+   0px high and `--cmn-sticky-top` is 0. Check: notices sit below the top bar and above the tab bar;
+   toasts sit above the tab bar and the floating action; with three idle notices the slot is 0px.
 3. **Touch targets.** Every interactive element on a phone has a hit area of at least 44x44 CSS
    px. A smaller visual (a 32px chip, a `sm` button) keeps its look and gets a 44px hit area
    (`PHONE_HIT_AREA_CLASSES`, `.cmn-hit-slop`). Inline text links follow WCAG 2.5.8. Sources: HIG

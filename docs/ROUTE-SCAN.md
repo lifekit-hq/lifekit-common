@@ -159,6 +159,15 @@ The phone, desktop and dark variants of one story are one screen here, since the
 both sizes and both schemes itself; a named state (`Templates/List` with a notice) is a screen of
 its own. Its config is `projects/ui/playwright.routes.config.ts`.
 
+The shell is also scanned the way an app wires it: `Templates/List` has an `AppChrome` state, a
+nav item that carries a badge and the offline banner, update prompt and install hint in the notices
+slot with none of them showing. The phone shell hides the sidebar and the desktop shell hides the
+tab bar with `display: none`, and the judge reads a positioned child with negative insets inside a
+hidden subtree as escaping the shell's clip (`clipped-overflow-container`). The badge therefore
+hangs off its corner with a transform (`right-0 top-0 translate-x-1.5 -translate-y-1.5`, the same 6px),
+not with negative `right` and `top`, so a nav badge is never a finding and no app takes an exception
+for it.
+
 It takes **no exceptions**: a finding on a golden is a defect of a component, a token or a template,
 and is fixed there. The first run found two on `Templates/Settings`, both fixed in the library:
 
