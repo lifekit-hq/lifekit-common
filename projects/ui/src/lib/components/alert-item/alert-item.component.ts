@@ -74,7 +74,7 @@ const SEVERITY_ICON: Record<AlertItemSeverity, LucideIconName> = {
             <cmn-tag [variant]="severity()">{{ badgeLabel() }}</cmn-tag>
           }
           @if (referenceLabel()) {
-            <span class="rounded bg-surface-raised px-1.5 py-0.5 text-cmn-xs text-text-secondary">{{
+            <span class="rounded-cmn-sm bg-surface-raised px-1.5 py-0.5 text-cmn-xs text-text-secondary">{{
               referenceLabel()
             }}</span>
           }
