@@ -18,7 +18,15 @@ const meta: Meta<ButtonStoryArgs> = {
   argTypes: {
     variant: {
       control: 'select',
-      options: ['primary', 'secondary', 'destructive'],
+      options: [
+        'primary',
+        'secondary',
+        'tertiary',
+        'ghost',
+        'destructive',
+        'danger-tertiary',
+        'danger-ghost',
+      ],
     },
     size: {control: 'select', options: ['sm', 'md', 'lg']},
     type: {control: 'select', options: ['button', 'submit', 'reset']},
@@ -44,6 +52,41 @@ export const Secondary: Story = {
     props: args,
     template:
       '<cmn-button variant="secondary" [size]="size" [disabled]="disabled">Secondary</cmn-button>',
+  }),
+  args: {size: 'md', disabled: false},
+};
+
+export const Tertiary: Story = {
+  render: args => ({
+    props: args,
+    template:
+      '<cmn-button variant="tertiary" [size]="size" [disabled]="disabled">Tertiary</cmn-button>',
+  }),
+  args: {size: 'md', disabled: false},
+};
+
+export const Ghost: Story = {
+  render: args => ({
+    props: args,
+    template: '<cmn-button variant="ghost" [size]="size" [disabled]="disabled">Ghost</cmn-button>',
+  }),
+  args: {size: 'md', disabled: false},
+};
+
+export const DangerTertiary: Story = {
+  render: args => ({
+    props: args,
+    template:
+      '<cmn-button variant="danger-tertiary" [size]="size" [disabled]="disabled">Remove</cmn-button>',
+  }),
+  args: {size: 'md', disabled: false},
+};
+
+export const DangerGhost: Story = {
+  render: args => ({
+    props: args,
+    template:
+      '<cmn-button variant="danger-ghost" [size]="size" [disabled]="disabled">Remove</cmn-button>',
   }),
   args: {size: 'md', disabled: false},
 };
@@ -81,13 +124,29 @@ export const Disabled: Story = {
   args: {disabled: true},
 };
 
+export const AllKinds: Story = {
+  render: () => ({
+    template: `
+      <div class="flex items-center gap-cmn-2 flex-wrap">
+        <cmn-button variant="primary">Primary</cmn-button>
+        <cmn-button variant="secondary">Secondary</cmn-button>
+        <cmn-button variant="tertiary">Tertiary</cmn-button>
+        <cmn-button variant="ghost">Ghost</cmn-button>
+        <cmn-button variant="destructive">Danger</cmn-button>
+        <cmn-button variant="danger-tertiary">Danger tertiary</cmn-button>
+        <cmn-button variant="danger-ghost">Danger ghost</cmn-button>
+      </div>
+    `,
+  }),
+};
+
 export const AllSizes: Story = {
   render: () => ({
     template: `
       <div class="flex items-center gap-cmn-4 flex-wrap">
-        <cmn-button variant="primary" size="sm">Small</cmn-button>
-        <cmn-button variant="primary" size="md">Medium</cmn-button>
-        <cmn-button variant="primary" size="lg">Large</cmn-button>
+        <cmn-button variant="primary" size="sm">Small, 32px</cmn-button>
+        <cmn-button variant="primary" size="md">Default, 48px</cmn-button>
+        <cmn-button variant="primary" size="lg">Large, 64px</cmn-button>
       </div>
     `,
   }),

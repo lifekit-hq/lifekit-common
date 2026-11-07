@@ -10,23 +10,26 @@ import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 
 import type {InputSize} from '../input/input.component';
 
+// The same filled field as `cmn-input` (see there): fill, bottom border only, inset outline on focus.
 const BASE_CLASSES =
-  'block w-full resize-y rounded-cmn-md border font-base bg-surface-card text-text-primary ' +
-  'placeholder:text-text-placeholder ' +
-  'focus:outline-none focus:ring-2 focus:ring-border-focus focus:border-border-focus ' +
-  'disabled:opacity-50 disabled:cursor-not-allowed disabled:resize-none ' +
-  'read-only:bg-surface-raised read-only:cursor-default read-only:resize-none ' +
-  'transition-colors duration-150';
+  'block w-full resize-y rounded-cmn-md border-0 border-b font-base bg-cmn-field text-text-primary ' +
+  'placeholder:text-text-placeholder [&:read-write]:hover:bg-surface-hover ' +
+  'focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-border-focus ' +
+  'disabled:cursor-not-allowed disabled:resize-none disabled:border-border-default ' +
+  'disabled:text-text-disabled disabled:placeholder:text-text-disabled ' +
+  'read-only:cursor-default read-only:resize-none read-only:border-border-default ' +
+  'read-only:bg-transparent transition-colors duration-cmn-short ease-cmn-standard';
 
 // Below md every size keeps 16px text: iOS zooms the page into a focused field set smaller.
 const SIZE_CLASSES: Record<InputSize, string> = {
-  sm: 'px-cmn-2 py-cmn-1 text-cmn-md md:text-cmn-sm',
-  md: 'px-cmn-3 py-cmn-2 text-cmn-md',
-  lg: 'px-cmn-4 py-cmn-3 text-cmn-lg',
+  sm: 'px-cmn-4 py-cmn-1 text-cmn-md md:text-cmn-sm',
+  md: 'px-cmn-4 py-cmn-3 text-cmn-md',
+  lg: 'px-cmn-4 py-cmn-4 text-cmn-lg',
 };
 
 const DEFAULT_BORDER = 'border-border-strong';
-const ERROR_BORDER = 'border-status-error';
+const ERROR_BORDER =
+  'border-border-strong outline outline-2 -outline-offset-2 outline-status-error';
 
 const DEFAULT_ROWS = 3;
 

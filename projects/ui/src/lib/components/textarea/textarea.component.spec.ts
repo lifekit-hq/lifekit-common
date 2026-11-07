@@ -113,12 +113,12 @@ describe('TextareaComponent', () => {
   it('marks the field invalid and swaps the border when hasError is set', () => {
     fixture.detectChanges();
     expect(textarea().getAttribute('aria-invalid')).toBeNull();
-    expect(textarea().className).toContain('border-border-strong');
+    expect(textarea().className).not.toContain('outline-status-error');
 
     fixture.componentRef.setInput('hasError', true);
     fixture.detectChanges();
     expect(textarea().getAttribute('aria-invalid')).toBe('true');
-    expect(textarea().className).toContain('border-status-error');
+    expect(textarea().className).toContain('outline-status-error');
   });
 
   it('renders readonly, placeholder and autocomplete only when asked', () => {
