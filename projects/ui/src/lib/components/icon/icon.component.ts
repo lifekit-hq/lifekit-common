@@ -1,4 +1,12 @@
-import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  isDevMode,
+} from '@angular/core';
 import {takeUntilDestroyed, toObservable, toSignal} from '@angular/core/rxjs-interop';
 import {type SafeHtml} from '@angular/platform-browser';
 import {
@@ -28,6 +36,18 @@ function cmnLucideIconProviders(): LucideIconProviderInterface[] {
   const inherited = inject(LUCIDE_ICONS, {skipSelf: true, optional: true}) as
     LucideIconProviderInterface | LucideIconProviderInterface[] | null;
   return [new LucideIconProvider(CMN_LUCIDE_ICONS), ...(inherited ? [inherited].flat() : [])];
+}
+
+const warnedUnregisteredIcons = new Set<string>();
+
+function warnUnregisteredIcon(name: string): void {
+  if (!isDevMode() || warnedUnregisteredIcons.has(name)) {
+    return;
+  }
+  warnedUnregisteredIcons.add(name);
+  console.warn(
+    `<cmn-icon> has no icon named "${name}": it is outside the library's generated Lucide subset and the icons the app registered, so it renders empty. Register it with provideLucideIcons or add it to scripts/icon-set/consumers.json.`
+  );
 }
 
 const SIZE_PX: Record<IconSize, number> = {
@@ -106,4 +126,13 @@ export class IconComponent {
     ),
     {initialValue: null}
   );
+
+  public constructor() {
+    effect(() => {
+      const name = this.name();
+      if (!this.isLucide() && !this.registry.has(name)) {
+        warnUnregisteredIcon(name);
+      }
+    });
+  }
 }

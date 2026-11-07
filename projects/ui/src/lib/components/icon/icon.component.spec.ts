@@ -2,7 +2,7 @@ import {provideHttpClient, withXhr} from '@angular/common/http';
 import {provideHttpClientTesting} from '@angular/common/http/testing';
 import {type ComponentFixture, TestBed} from '@angular/core/testing';
 import {icons, type LucideIcons} from 'lucide-angular';
-import {beforeEach, describe, expect, it} from 'vitest';
+import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
 import {provideLucideIcons} from '../../providers/provide-lucide-icons';
 import {CmnIconRegistry} from '../../services/icon-registry/icon-registry.service';
@@ -134,6 +134,52 @@ describe('IconComponent', () => {
     fixture.detectChanges();
     expect(fixture.componentInstance.isLucide()).toBe(false);
     expect((fixture.nativeElement as HTMLElement).querySelector('lucide-icon')).toBeNull();
+  });
+});
+
+describe('IconComponent unregistered-icon warning', () => {
+  let fixture: ComponentFixture<IconComponent>;
+  let warn: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(async () => {
+    warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    await TestBed.configureTestingModule({
+      imports: [IconComponent],
+      providers: [provideHttpClient(withXhr()), provideHttpClientTesting()],
+    }).compileComponents();
+    fixture = TestBed.createComponent(IconComponent);
+  });
+
+  afterEach(() => {
+    warn.mockRestore();
+  });
+
+  it('warns once per name, naming the icon, when it is outside the subset and the extras', () => {
+    fixture.componentRef.setInput('name', 'Hammer');
+    fixture.detectChanges();
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn.mock.calls[0][0]).toContain('"Hammer"');
+    expect(warn.mock.calls[0][0]).toContain('provideLucideIcons');
+    expect(warn.mock.calls[0][0]).toContain('consumers.json');
+
+    const second = TestBed.createComponent(IconComponent);
+    second.componentRef.setInput('name', 'Hammer');
+    second.detectChanges();
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect((fixture.nativeElement as HTMLElement).querySelector('span')).not.toBeNull();
+  });
+
+  it('does not warn for a subset icon', () => {
+    fixture.componentRef.setInput('name', 'Bell');
+    fixture.detectChanges();
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  it('does not warn for a name with a registered custom svg', () => {
+    TestBed.inject(CmnIconRegistry).registerInline('warn-free-mark', CUSTOM_SVG);
+    fixture.componentRef.setInput('name', 'warn-free-mark');
+    fixture.detectChanges();
+    expect(warn).not.toHaveBeenCalled();
   });
 });
 
