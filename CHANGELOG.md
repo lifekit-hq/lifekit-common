@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.4.2](https://github.com/lifekit-hq/lifekit-common/compare/v4.4.1...v4.4.2) (2026-11-07)
+
+
+### Bug Fixes
+
+* **ci:** let the reusable screen-baselines workflow install private packages ([#267](https://github.com/lifekit-hq/lifekit-common/issues/267)) ([22eff2c](https://github.com/lifekit-hq/lifekit-common/commit/22eff2c2043d631a082eb5ff20b8d10955c22e12))
+
 ## [4.4.1](https://github.com/lifekit-hq/lifekit-common/compare/v4.4.0...v4.4.1) (2026-11-07)
 
 
