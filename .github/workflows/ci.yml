@@ -25,6 +25,8 @@ jobs:
       - run: npm run lint
       - name: Design drift (zero tolerance)
         run: npm run check:drift
+      - name: Icon set is current (the generated Lucide subset behind cmn-icon)
+        run: npm run check:icons
       - name: Story states (justified gaps in docs/story-states-baseline.json)
         run: npm run check:story-states
       - run: npm run format:check

@@ -1,0 +1,25 @@
+{
+  "_": "Lucide icon names the apps pass to <cmn-icon> or to icon inputs (cmn-button icon, cmn-empty-state icon, nav items, ...), found by scanning each app's frontend/src for quoted names that are Lucide icons (2026-11-07). The library's own usage is scanned from source by the generator. Add a name here when an app starts using an icon the library does not, then run `npm run generate:icons`.",
+  "finance-sentry": [
+    "Activity", "ArrowLeft", "ArrowLeftRight", "ArrowRight", "ArrowUpRight", "Bell", "BellOff", "Building2",
+    "Calendar", "CalendarClock", "CalendarDays", "CalendarRange", "ChartColumn", "ChartLine",
+    "ChartNoAxesColumn", "Check", "CheckCheck", "ChevronDown", "ChevronRight", "CircleAlert", "CircleCheck",
+    "ClipboardCheck", "ClipboardX", "Clock", "Copy", "Currency", "Delete", "Ellipsis", "Eye", "FileText",
+    "Flame", "Gauge", "HeartCrack", "History", "Inbox", "Info", "Landmark", "LayoutDashboard", "Lightbulb",
+    "Link", "ListChecks", "LogOut", "Megaphone", "MessageSquareWarning", "Newspaper", "Pencil", "Phone",
+    "PiggyBank", "Plus", "Radar", "Receipt", "RefreshCw", "Repeat", "Scale", "Search", "Settings", "Settings2",
+    "ShieldAlert", "ShieldCheck", "Sparkles", "Trash2", "TrendingDown", "TrendingUp", "TriangleAlert", "Type",
+    "Unplug", "UserPlus", "Users", "Wallet", "Weight", "Wrench", "X", "Zap"
+  ],
+  "lifekit-dashboard": ["Activity", "Copy", "Inbox", "Link", "LogOut", "Plus", "Settings", "TrendingUp", "Users"],
+  "devclaw": ["CircleAlert", "CircleCheck", "FolderGit2", "Goal", "LogOut", "Scale", "Settings", "Target"],
+  "backstage": [
+    "ArrowDown", "ArrowUp", "Calculator", "CalendarDays", "Check", "ChevronRight", "Clock", "Copy", "Currency",
+    "Delete", "Handshake", "KeyRound", "LogOut", "Pencil", "PiggyBank", "Plus", "ReceiptText", "Save",
+    "Scissors", "Settings", "Settings2", "Trash2", "UserPlus", "Users", "Wallet"
+  ],
+  "basket": [
+    "Copy", "Ellipsis", "FingerprintPattern", "KeyRound", "Link", "List", "Plus", "RefreshCw", "Settings",
+    "Share", "ShoppingBasket", "Tag", "Trash2", "Unlink", "UserPlus", "Users", "X"
+  ]
+}

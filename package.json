@@ -29,7 +29,9 @@
     "prepare": "husky",
     "design:scan": "node scripts/design-scan.mjs",
     "check:drift": "node projects/tokens/bin/lifekit-chrome-check.mjs drift projects",
-    "check:story-states": "node scripts/check-story-states.mjs"
+    "check:story-states": "node scripts/check-story-states.mjs",
+    "generate:icons": "node scripts/generate-icon-set.mjs",
+    "check:icons": "node scripts/generate-icon-set.mjs --check"
   },
   "workspaces": [
     "projects/*"
