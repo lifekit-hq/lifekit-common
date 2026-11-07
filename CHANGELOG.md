@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.4.1](https://github.com/lifekit-hq/lifekit-common/compare/v4.4.0...v4.4.1) (2026-11-07)
+
+
+### Bug Fixes
+
+* **tokens:** rasterise whole tiles so screen baselines compare exactly ([#258](https://github.com/lifekit-hq/lifekit-common/issues/258)) ([b3e470a](https://github.com/lifekit-hq/lifekit-common/commit/b3e470ab9bad2ed06135a2d95bc38c66560d0f49))
+* **ui:** resolve the six 4.4.0 adoption findings so apps adopt without local exceptions ([#261](https://github.com/lifekit-hq/lifekit-common/issues/261)) ([1d4633f](https://github.com/lifekit-hq/lifekit-common/commit/1d4633f4646ee842fec9ad9fdcf2a58177d5affc))
+
 ## [4.4.0](https://github.com/lifekit-hq/lifekit-common/compare/v4.3.0...v4.4.0) (2026-11-07)
 
 
