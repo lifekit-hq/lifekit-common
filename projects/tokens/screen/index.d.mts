@@ -251,6 +251,11 @@ export interface RouteScanRoute {
   prepare?: (page: any, variant: BaselineVariant) => Promise<void> | void;
   /** Runs after navigation: wait for what proves the route's data has rendered. */
   ready?: (page: any, variant: BaselineVariant) => Promise<void> | void;
+  /**
+   * The attribute on `<html>` the app writes its scheme (`light` or `dark`) into (default
+   * `data-theme`). The scan fails the route when it does not hold the scheme being scanned.
+   */
+  schemeAttribute?: string;
 }
 
 /**
@@ -298,6 +303,10 @@ export interface ScanRouteOptions {
   /** The route's name, which exceptions refer to. */
   route: string;
   size: ScanSize;
+  /** The scheme the page was opened in: `<html>` must carry it in `schemeAttribute`. */
+  scheme: ScanScheme;
+  /** The attribute on `<html>` holding the scheme (default `data-theme`). */
+  schemeAttribute?: string;
   exceptions?: RouteScanExceptions;
   engine?: string;
   timeout?: number;
@@ -322,6 +331,7 @@ export interface RouteScanResult {
 
 export declare const SCAN_SCHEMES: readonly ScanScheme[];
 export declare const SCAN_SIZES: readonly ScanSize[];
+export declare const SCHEME_ATTRIBUTE: 'data-theme';
 export declare const AXE_TAGS: readonly string[];
 export declare const BLOCKING_IMPACTS: readonly string[];
 export declare const ROUTE_SCAN_TIMEOUT_MS: number;
@@ -370,6 +380,10 @@ export declare function blockingAxeViolations(
   route: string,
   exceptions?: RouteScanException[]
 ): AxeScanViolation[];
+export declare function assertScheme(
+  page: ScreenPage,
+  options: {route: string; scheme: ScanScheme; attribute?: string}
+): Promise<void>;
 export declare function runAxe(page: ScreenPage): Promise<
   {
     id: string;

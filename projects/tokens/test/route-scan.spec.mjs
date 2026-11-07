@@ -15,6 +15,7 @@ import {join} from 'node:path';
 import {after, before, describe, it} from 'node:test';
 
 import {
+  assertScheme,
   AXE_TAGS,
   blockingAxeViolations,
   blockingDesignFindings,
@@ -442,7 +443,7 @@ describe('freezing a screen', () => {
 
 describe('scanRoute', () => {
   const PAGE =
-    '<!doctype html><html lang="en"><head><title>t</title></head><body><main><h1>Tasks</h1><button>Go</button><img src="/x.png"></main></body></html>';
+    '<!doctype html><html lang="en" data-theme="light"><head><title>t</title></head><body><main><h1>Tasks</h1><button>Go</button><img src="/x.png"></main></body></html>';
 
   async function scan(engineFindings, code, options = {}) {
     const {page, context} = await open(PAGE, {url: 'http://127.0.0.1/page'});
@@ -450,6 +451,7 @@ describe('scanRoute', () => {
       return await scanRoute(page, {
         route: 'tasks',
         size: 'phone',
+        scheme: 'light',
         engine: fakeEngine(`scan-${Math.random()}`, engineFindings, code),
         ...options,
       });
@@ -482,6 +484,60 @@ describe('scanRoute', () => {
     });
     assert.deepEqual(result.design, []);
     assert.deepEqual(result.axe, []);
+  });
+});
+
+describe('the scheme the judge reads', () => {
+  const themed = attribute =>
+    `<!doctype html><html ${attribute}><title>t</title><main><h1>x</h1></main></html>`;
+
+  async function check(html, options) {
+    const {page, context} = await open(html);
+    try {
+      await assertScheme(page, {route: 'tasks', ...options});
+    } finally {
+      await context.close();
+    }
+  }
+
+  it('passes when <html data-theme> holds the scheme asked for', async () => {
+    await check(themed('data-theme="dark"'), {scheme: 'dark'});
+  });
+
+  it('fails a mismatch, naming the route, the scheme, the attribute and what it found', async () => {
+    await assert.rejects(
+      check(themed('data-theme="light"'), {scheme: 'dark'}),
+      /tasks was scanned in the dark scheme, but <html data-theme> is "light"/
+    );
+  });
+
+  it('fails a page that writes no scheme at all', async () => {
+    await assert.rejects(
+      check(themed(''), {scheme: 'dark'}),
+      /tasks was scanned in the dark scheme, but <html data-theme> is no such attribute/
+    );
+  });
+
+  it('reads the attribute the route names instead', async () => {
+    await check(themed('data-mode="dark"'), {scheme: 'dark', attribute: 'data-mode'});
+    await assert.rejects(
+      check(themed('data-theme="dark"'), {scheme: 'dark', attribute: 'data-mode'}),
+      /<html data-mode> is no such attribute/
+    );
+  });
+
+  it('stops scanRoute before the judge runs', async () => {
+    const {page, context} = await open(themed('data-theme="light"'));
+    const engine = fakeEngine('never-run', [], 0);
+    try {
+      await assert.rejects(
+        scanRoute(page, {route: 'tasks', size: 'phone', scheme: 'dark', engine}),
+        /tasks was scanned in the dark scheme/
+      );
+      assert.throws(() => readFileSync(`${engine}.args`), /ENOENT/, 'the judge was not asked');
+    } finally {
+      await context.close();
+    }
   });
 });
 
@@ -574,13 +630,15 @@ describe('defineRouteScans', () => {
     fake.expect = (value, message) => ({
       toEqual: expected => verdicts.push({value, message, expected}),
     });
-    const {page, context} = await open('<!doctype html><title>t</title><main><h1>x</h1></main>', {
-      url: 'http://127.0.0.1/list',
-    });
+    const {page, context} = await open(
+      '<!doctype html><html data-mode="dark"><title>t</title><main><h1>x</h1></main></html>',
+      {url: 'http://127.0.0.1/list'}
+    );
     const engine = fakeEngine('define', [], 0);
     defineRouteScans(fake, {
       routes: [
         route('list', {
+          schemeAttribute: 'data-mode',
           url: ({scheme}) => `http://127.0.0.1/list?scheme=${scheme}`,
           prepare: (_page, variant) => calls.push(`prepare ${variant.size} ${variant.scheme}`),
           ready: (_page, variant) => calls.push(`ready ${variant.size} ${variant.scheme}`),
@@ -594,7 +652,7 @@ describe('defineRouteScans', () => {
       await page.route('http://127.0.0.1/list?scheme=dark', r =>
         r.fulfill({
           contentType: 'text/html',
-          body: '<!doctype html><title>t</title><main><h1>x</h1></main>',
+          body: '<!doctype html><html data-mode="dark"><title>t</title><main><h1>x</h1></main></html>',
         })
       );
       await fake.registered[0].body({page});

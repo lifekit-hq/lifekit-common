@@ -74,8 +74,14 @@ scan phone` and `route scan desktop`), sets the viewport from `SCREEN_VIEWPORTS`
 `prepare` and `ready`. `sizes` and `schemes` on the call narrow the matrix; `timeout` bounds the
 settle (default 30s); one route, size and scheme may take two minutes in all.
 
-The scheme reaches the app through `colorScheme`, so an app that follows the OS needs nothing more.
-An app that stores its theme sets it in `prepare`.
+The scheme is emulated with `colorScheme`, which the live page and axe see. The design judge does
+not: it reads the frozen DOM in a Chromium of its own, with no colour-scheme preference. So an app
+must write its scheme into the DOM, `<html data-theme="light">` or `"dark"` by default (name another
+attribute with the route's `schemeAttribute`), and the fixture checks it after the screen has
+settled, before the judge runs: a missing or different value fails the route, naming the route, the
+scheme asked for, the attribute and what it held. An app whose dark styles live only in a
+`prefers-color-scheme` media query cannot be judged in dark until it writes the attribute too. An
+app that stores its theme sets it in `prepare`.
 
 ### The judge
 
@@ -146,7 +152,9 @@ npm run test:routes   # the reference app below; this is what CI runs (the `rout
 
 The golden screens of the page templates ([SCREEN-CHECK.md](SCREEN-CHECK.md#the-golden-screens))
 are the reference app. `projects/ui/e2e/routes/goldens.spec.ts` reads the built catalog and scans
-every `Templates/*` story, so a template's first golden joins the scan without anyone listing it.
+every `Templates/*` story, and checks them against the spec's own list of golden screens, so a
+story that is merged into another screen, or that no one meant to scan, fails instead of passing
+quietly.
 The phone, desktop and dark variants of one story are one screen here, since the scan runs each at
 both sizes and both schemes itself; a named state (`Templates/List` with a notice) is a screen of
 its own. Its config is `projects/ui/playwright.routes.config.ts`.

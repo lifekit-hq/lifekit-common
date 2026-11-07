@@ -25,6 +25,9 @@ export const SCAN_SCHEMES = Object.freeze(['light', 'dark']);
 /** The sizes every route is scanned at (the keys of `SCREEN_VIEWPORTS`). */
 export const SCAN_SIZES = Object.freeze(['phone', 'desktop']);
 
+/** The attribute on the document element an app writes its scheme into. */
+export const SCHEME_ATTRIBUTE = 'data-theme';
+
 /** The WCAG 2.2 AA rule sets axe-core checks. */
 export const AXE_TAGS = Object.freeze(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']);
 
@@ -145,6 +148,28 @@ export async function judgeUrl({engine, url, viewport, browser, env = process.en
   }
 }
 
+/**
+ * Proves the scheme a route was asked for reached the document the judge reads. The engine renders
+ * in a Chromium of its own with no colour-scheme preference, so a scheme the app only follows from
+ * `prefers-color-scheme` is invisible to it; the app must write it into the DOM.
+ *
+ * @param {import('./index.d.mts').ScreenPage} page
+ */
+export async function assertScheme(page, {route, scheme, attribute = SCHEME_ATTRIBUTE}) {
+  const found = await page.evaluate(
+    name => document.documentElement.getAttribute(name),
+    attribute
+  );
+  if (found !== scheme) {
+    const seen = found === null ? 'no such attribute' : `"${found}"`;
+    throw new Error(
+      `route scan: ${route} was scanned in the ${scheme} scheme, but <html ${attribute}> is ${seen}. ` +
+        `The design judge reads the DOM, not the OS preference: the app must write its scheme into ` +
+        `<html ${attribute}="${scheme}">, or name the attribute it uses with the route's schemeAttribute.`
+    );
+  }
+}
+
 let axeSource;
 /**
  * axe-core's script, read once. It is a dependency of this package, so it resolves from here. A
@@ -182,13 +207,21 @@ export async function runAxe(page) {
  * @returns {Promise<import('./index.d.mts').RouteScanResult>}
  */
 export async function scanRoute(page, options) {
-  const {route, size, exceptions = {}, timeout = SETTLE_TIMEOUT_MS} = options;
+  const {
+    route,
+    size,
+    scheme,
+    schemeAttribute,
+    exceptions = {},
+    timeout = SETTLE_TIMEOUT_MS,
+  } = options;
   const viewport = SCREEN_VIEWPORTS[size].viewport;
   const accepted = validateExceptions(exceptions);
   const engine = await resolveEngine({engine: options.engine});
   const browser = page.context().browser()?.browserType().executablePath();
 
   const html = await freezeScreen(page, {timeout});
+  await assertScheme(page, {route, scheme, attribute: schemeAttribute});
   const frozen = await serveFrozen(html, page.url());
   let found;
   try {
@@ -262,6 +295,8 @@ export function defineRouteScans(
             const result = await scanRoute(page, {
               route: route.name,
               size,
+              scheme,
+              schemeAttribute: route.schemeAttribute,
               exceptions,
               engine,
               timeout,

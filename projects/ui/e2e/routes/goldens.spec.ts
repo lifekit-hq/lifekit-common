@@ -9,8 +9,7 @@ import {expect, test} from '@playwright/test';
 // no exceptions: a finding on a golden is fixed in the library (a component, a token or a template),
 // not accepted here.
 //
-// The golden stories are read from the built catalog, so a template's first golden joins the scan
-// without anyone listing it. A story's name (`phone`, `phone-dark`, `desktop`, `desktop-dark`) only
+// The golden stories are read from the built catalog. A story's name (`phone`, `phone-dark`, `desktop`, `desktop-dark`) only
 // says which size and scheme the owner looks at it in; the scan runs every screen at both sizes and
 // both schemes itself, so the variants of one screen are one route here. A named state
 // (`phone-with-notice`) is a screen of its own.
@@ -55,13 +54,24 @@ const routes: RouteScanRoute[] = [...firstStoryOf].map(([name, id]) => ({
   },
 }));
 
+// The screens the page templates have a golden for, written out by hand: the oracle the catalog is
+// checked against, independent of how `screenOf` reads a story id. A new template or state is added
+// here on purpose, so a story that would be merged into another screen, or that no one meant to
+// scan, fails instead of passing quietly.
+const GOLDEN_SCREENS = [
+  'templates-detail',
+  'templates-form',
+  'templates-list',
+  'templates-list-with-notice',
+  'templates-overview',
+  'templates-settings',
+];
+const GOLDEN_STORY =
+  /^templates-(detail|form|list|overview|settings)--(phone|desktop)(-dark)?$|^templates-list--(phone|desktop)-with-notice$/;
+
 test('the scan covers every golden story', () => {
-  expect(stories.length).toBeGreaterThan(0);
-  expect(routes.map(route => route.name)).toEqual(
-    expect.arrayContaining(['templates-list', 'templates-detail', 'templates-form'])
-  );
-  const covered = new Set(routes.map(route => route.name));
-  expect(stories.filter(id => !covered.has(screenOf(id)))).toEqual([]);
+  expect(stories.filter(id => !GOLDEN_STORY.test(id))).toEqual([]);
+  expect(routes.map(route => route.name).sort()).toEqual(GOLDEN_SCREENS);
 });
 
 defineRouteScans({test, expect}, {routes});

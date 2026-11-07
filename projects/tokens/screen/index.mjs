@@ -40,6 +40,7 @@ export {
 } from './engine.mjs';
 export {freezeScreen, serveFrozen} from './freeze.mjs';
 export {
+  assertScheme,
   AXE_TAGS,
   BLOCKING_IMPACTS,
   blockingAxeViolations,
@@ -50,6 +51,7 @@ export {
   runAxe,
   SCAN_SCHEMES,
   SCAN_SIZES,
+  SCHEME_ATTRIBUTE,
   scanRoute,
   validateExceptions,
 } from './route-scan.mjs';
