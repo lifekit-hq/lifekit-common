@@ -345,7 +345,7 @@ delay of `0`.
 | `showDelay`     | Milliseconds a load must last before any loading indicator shows; 200 by default (`ASYNC_STATE_SHOW_DELAY_MS`). Until then the content already on screen stays put, so a fast load shows no flash.  |
 | `minDisplay`    | Milliseconds an indicator that has shown stays up, so it never flashes away; 400 by default (`ASYNC_STATE_MIN_DISPLAY_MS`). Not applied to a kept (dimmed) body: fresh content replaces it at once. |
 | `crossfade`     | The content fades in (`--cmn-duration-short`) when it replaces the skeleton; content already there at first render paints at once; nothing under Reduce Motion.                                     |
-| `skeletonShape` | Draws the placeholder as a `cmn-skeleton` preset (`skeletonRows` rows) instead of the default bars; a projected `[skeleton]` still wins.                                                            |
+| `skeletonShape` | Draws the placeholder as a `cmn-skeleton` part preset (`row`, `section`, `stat`, `chart`; `skeletonRows` rows) instead of the default bars; a projected `[skeleton]` still wins.                    |
 
 A skeleton goes on a container, never inside the text it stands for. `cmn-skeleton` draws a bar by
 default; `shape` draws a component's whole silhouette from that component's own geometry, so the
@@ -361,8 +361,11 @@ page does not move when the content arrives:
 The page presets draw the body of a whole `cmn-page` of one kind, so a first load is the same
 blocks in the same order as the loaded page. The page draws its own title and gutter; the preset
 sits inside it and is `display: contents`, so the page column's section gap lies between its
-blocks as it does between the real ones. Pass one as `skeletonShape` to `cmn-async-state`, or put
-`<cmn-skeleton shape="...">` straight in the page.
+blocks as it does between the real ones only when the preset is a direct child of the `cmn-page`
+column: put `<cmn-skeleton shape="...">` straight in `cmn-page`. Inside `cmn-async-state` the
+column's section gap does not apply to a page preset's blocks (`cmn-async-state` has no display of
+its own), so they would stack flush; give `skeletonShape` a part preset (`row`, `section`, `stat`,
+`chart`) there, never a page preset.
 
 | `shape`    | Page kind       | Draws                                                                                                                                                                    | `count`              |
 | ---------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------- |

@@ -7,7 +7,10 @@ export type SkeletonShape =
 /**
  * The page presets: the body of a `cmn-page` of that kind, drawn from the parts above. Their host
  * is `display: contents`, so each block they draw is a top-level block of the page column and the
- * column's own section gap sits between them, as it does between the real blocks.
+ * column's own section gap sits between them, as it does between the real blocks, only when the
+ * preset is a direct child of the `cmn-page` column. Put them straight in `cmn-page`: inside
+ * `cmn-async-state` (no display of its own) that gap does not apply, so use the part presets
+ * (`row`, `section`, `stat`, `chart`) with its `skeletonShape`.
  */
 const PAGE_SHAPES: readonly SkeletonShape[] = ['list', 'card', 'detail', 'overview'];
 
@@ -62,7 +65,8 @@ const FACTS_ROW_CLASSES = 'py-cmn-3 sm:grid sm:grid-cols-3 sm:gap-cmn-4';
  * - `section`: a `cmn-list-section` (sticky-heading height) over a card of `count` rows
  *
  * The page presets draw the body of a whole page of one kind (the title is the page's own), so a
- * first load and the loaded page are the same blocks in the same order:
+ * first load and the loaded page are the same blocks in the same order. Place them directly in the
+ * `cmn-page` column, not inside `cmn-async-state`:
  *
  * - `list`: two `section`s of `count` rows (default 3), as a `cmn-page kind="list"`
  * - `card`: one card, a title line over `count` lines of text (default 3)

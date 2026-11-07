@@ -237,7 +237,12 @@ export class AsyncStateComponent {
   public readonly minDisplay = input<number>(ASYNC_STATE_MIN_DISPLAY_MS);
   /** Fades the content in when it replaces the skeleton; content there at first render does not fade. */
   public readonly crossfade = input(false, {transform: booleanAttribute});
-  /** Draws the loading placeholder as a `cmn-skeleton` preset (`skeletonRows` rows) instead of bars. */
+  /**
+   * Draws the loading placeholder as a `cmn-skeleton` part preset (`row`, `section`, `stat`, `chart`;
+   * `skeletonRows` rows) instead of bars. Not a page preset (`list`, `card`, `detail`, `overview`):
+   * `cmn-async-state` has no display of its own, so the page column's section gap does not apply to
+   * a page preset's blocks inside it; put those straight in `cmn-page`.
+   */
   public readonly skeletonShape = input<SkeletonShape | null>(null);
 
   public readonly retry = output<void>();

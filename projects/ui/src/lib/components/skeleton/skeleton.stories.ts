@@ -141,7 +141,9 @@ export const PresetsDark: Story = {
 /**
  * The page presets draw the body of a whole page of one kind, in the page's own column, so a first
  * load is the same blocks in the same order as the loaded page. They sit inside a `cmn-page` of
- * that kind (which draws the title and the gutter); `cmn-async-state` takes one as `skeletonShape`.
+ * that kind (which draws the title and the gutter), as a direct child of the page column. Inside
+ * `cmn-async-state` the column's section gap does not apply to their blocks, so its `skeletonShape`
+ * takes the part presets only.
  */
 export const PagePresets: Story = {
   render: () => ({
