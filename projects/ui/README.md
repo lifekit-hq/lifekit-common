@@ -8,7 +8,7 @@ Consumers must install these alongside `@lifekit-hq/ui`: `@angular/cdk`, `chart.
 
 ## Icons
 
-`<cmn-icon>` renders a generated subset of Lucide (`src/lib/components/icon/lucide-icon-set.ts`), not the whole map, so a consumer bundle carries only those icons. The subset is every icon the library uses plus the ones the apps use (`scripts/icon-set/consumers.json`); run `npm run generate:icons` after adding one, and CI's `check:icons` fails when the file is stale. An app that needs an icon outside the subset registers it with `provideLucideIcons({Anvil})`; the name then works in every `<cmn-icon>`.
+`<cmn-icon>` renders a generated subset of Lucide (`src/lib/components/icon/lucide-icon-set.ts`), not the whole map, so a consumer bundle carries only those icons. The subset is every icon the library uses plus the ones the apps use (`scripts/icon-set/consumers.json`); run `npm run generate:icons` after adding one, and CI's `check:icons` fails when the file is stale. An app that needs an icon outside the subset registers it with `provideLucideIcons({Anvil})`; the name then works in every `<cmn-icon>`. A name outside both renders an empty box, and dev mode logs a one-time console warning naming it.
 
 ## Code scaffolding
 

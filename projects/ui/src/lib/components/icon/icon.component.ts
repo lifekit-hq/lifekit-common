@@ -127,7 +127,7 @@ export class IconComponent {
     {initialValue: null}
   );
 
-  public constructor() {
+  constructor() {
     effect(() => {
       const name = this.name();
       if (!this.isLucide() && !this.registry.has(name)) {
