@@ -88,7 +88,8 @@ components:
     backgroundColor: '{colors.accent}'
     textColor: '{colors.text-inverse}'
     rounded: '{rounded.md}'
-    padding: '8px 16px'
+    height: '48px'
+    padding: '0 16px'
   button-primary-hover:
     backgroundColor: '{colors.accent-hover}'
   card:
@@ -96,10 +97,11 @@ components:
     rounded: '{rounded.md}'
     padding: '16px'
   input:
-    backgroundColor: '{colors.surface-card}'
+    backgroundColor: '{colors.surface-raised}'
     textColor: '{colors.text-primary}'
     rounded: '{rounded.md}'
-    padding: '8px 12px'
+    height: '48px'
+    padding: '0 16px'
   chip:
     backgroundColor: '{colors.surface-raised}'
     textColor: '{colors.text-secondary}'
