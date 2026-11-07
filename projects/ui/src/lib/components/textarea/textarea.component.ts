@@ -16,7 +16,7 @@ const BASE_CLASSES =
   'placeholder:text-text-placeholder [&:read-write]:hover:bg-surface-hover ' +
   'focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-border-focus ' +
   'disabled:cursor-not-allowed disabled:resize-none disabled:border-border-default ' +
-  'disabled:text-text-disabled disabled:placeholder:text-text-disabled ' +
+  'disabled:text-text-disabled disabled:placeholder:text-text-disabled disabled:bg-cmn-field ' +
   'read-only:cursor-default read-only:resize-none read-only:border-border-default ' +
   'read-only:bg-transparent transition-colors duration-cmn-short ease-cmn-standard';
 

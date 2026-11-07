@@ -89,7 +89,7 @@ const ACTIONS_CLASSES =
         }
         <ng-content select="[cta]" />
         @if (secondaryLabel()) {
-          <cmn-button (clicked)="secondaryAction.emit()" variant="secondary">{{
+          <cmn-button (clicked)="secondaryAction.emit()" variant="tertiary">{{
             secondaryLabel()
           }}</cmn-button>
         }

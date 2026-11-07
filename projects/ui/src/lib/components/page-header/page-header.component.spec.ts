@@ -113,7 +113,7 @@ describe('PageHeaderComponent', () => {
     fixture.detectChanges();
     const buttons = fixture.debugElement.queryAll(By.css('cmn-button'));
     expect(buttons.length).toBe(2);
-    expect(buttons[0].componentInstance.variant()).toBe('secondary');
+    expect(buttons[0].componentInstance.variant()).toBe('tertiary');
     expect(buttons[1].componentInstance.variant()).toBe('primary');
   });
 
