@@ -1,10 +1,17 @@
 import {provideHttpClient, withXhr} from '@angular/common/http';
 import {provideHttpClientTesting} from '@angular/common/http/testing';
 import {type ComponentFixture, TestBed} from '@angular/core/testing';
+import {icons, type LucideIcons} from 'lucide-angular';
 import {beforeEach, describe, expect, it} from 'vitest';
 
+import {provideLucideIcons} from '../../providers/provide-lucide-icons';
 import {CmnIconRegistry} from '../../services/icon-registry/icon-registry.service';
 import {IconComponent, type IconSize} from './icon.component';
+import {CMN_LUCIDE_ICONS} from './lucide-icon-set';
+
+/** An icon the app registers itself; deliberately outside the generated subset. */
+const APP_ICONS: LucideIcons = {};
+APP_ICONS['Anvil'] = icons.Anvil;
 
 const CUSTOM_SVG = '<svg viewBox="0 0 16 16"><rect width="16" height="16" /></svg>';
 
@@ -107,5 +114,60 @@ describe('IconComponent', () => {
     fixture.componentRef.setInput('ariaLabel', 'Notifications');
     fixture.detectChanges();
     expect(el.querySelector('[role="img"][aria-label="Notifications"]')).not.toBeNull();
+  });
+
+  it('ships a subset of the Lucide map, not the whole of it', () => {
+    expect(Object.keys(CMN_LUCIDE_ICONS).length).toBeLessThan(Object.keys(icons).length / 4);
+    expect(CMN_LUCIDE_ICONS['Bell']).toBe(icons.Bell);
+  });
+
+  it('renders the svg of a subset icon', () => {
+    fixture.componentRef.setInput('name', 'Bell');
+    fixture.detectChanges();
+    expect((fixture.nativeElement as HTMLElement).querySelector('lucide-icon svg')).not.toBeNull();
+  });
+
+  it('leaves a real Lucide icon outside the subset unrendered instead of throwing', () => {
+    expect('Anvil' in CMN_LUCIDE_ICONS).toBe(false);
+    expect('Anvil' in icons).toBe(true);
+    fixture.componentRef.setInput('name', 'Anvil');
+    fixture.detectChanges();
+    expect(fixture.componentInstance.isLucide()).toBe(false);
+    expect((fixture.nativeElement as HTMLElement).querySelector('lucide-icon')).toBeNull();
+  });
+});
+
+describe('IconComponent with an app-registered icon', () => {
+  it('renders an icon the app added through provideLucideIcons', async () => {
+    await TestBed.configureTestingModule({
+      imports: [IconComponent],
+      providers: [
+        provideHttpClient(withXhr()),
+        provideHttpClientTesting(),
+        provideLucideIcons(APP_ICONS),
+      ],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(IconComponent);
+    fixture.componentRef.setInput('name', 'Anvil');
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.isLucide()).toBe(true);
+    expect((fixture.nativeElement as HTMLElement).querySelector('lucide-icon svg')).not.toBeNull();
+  });
+
+  it('keeps the library subset when the app registers extras', async () => {
+    await TestBed.configureTestingModule({
+      imports: [IconComponent],
+      providers: [
+        provideHttpClient(withXhr()),
+        provideHttpClientTesting(),
+        provideLucideIcons(APP_ICONS),
+      ],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(IconComponent);
+    fixture.componentRef.setInput('name', 'Bell');
+    fixture.detectChanges();
+
+    expect((fixture.nativeElement as HTMLElement).querySelector('lucide-icon svg')).not.toBeNull();
   });
 });
