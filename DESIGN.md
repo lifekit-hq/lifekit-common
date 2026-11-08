@@ -252,6 +252,10 @@ All on the same tokens, none longer than `--cmn-duration-medium`, none with a lo
 - **Expand and collapse** (`cmn-disclosure-row`; Carbon animates the height, this system never does, see the rule above): the content fades in while rising `--cmn-motion-distance-sm` over `--cmn-duration-medium` on the decelerate curve, and fades out over `--cmn-duration-short` on the accelerate curve before it leaves the layout, inert while it does. The chevron turn is the row's own cue. Under Reduce Motion the content opens and closes at once.
 - **Route** (Material 3's fade-through for a change of destination; Carbon has no page transition): `cmn-app-layout` fades the page region in over `--cmn-duration-medium` on the standard curve when the matched page changes. It is the shell's own motion, so it is on in every app that uses the shell with no router feature to add. It stands down for the first navigation, for a navigation that changes only params, query params or the fragment, under Reduce Motion, and when a view transition is already crossfading the page.
 
+### Pull to refresh
+
+A tab root pulled down from the top reloads (Apple HIG, Refreshing content; docs/PHONE-CONTRACT.md, Pull to refresh). The content follows the finger at half its travel by transform, up to 96px, and rests one control height (`--cmn-size-lg`, 48px) down under a round indicator while the reload runs. It settles back on `--cmn-duration-medium` with `--cmn-ease-expressive-decelerate`, as a sheet does; the indicator fades on `--cmn-duration-short` with `--cmn-ease-standard`, and a finger moving either is never animated. Under Reduce Motion the content does not move at all: the indicator fades in a `--cmn-motion-distance-sm` step below the bar, and its arc is the one thing that keeps turning. No token is added.
+
 ### View transitions
 
 The shell already fades the page in on a route change (above). An app that wants the true crossfade, where the old page fades out as the new one fades in, enables a View Transition once in its app config, and the shell stands down for it:

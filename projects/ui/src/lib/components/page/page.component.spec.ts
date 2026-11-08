@@ -1,8 +1,10 @@
 import {ChangeDetectionStrategy, Component, signal} from '@angular/core';
 import {type ComponentFixture, TestBed} from '@angular/core/testing';
 import {provideRouter, Router, RouterOutlet, type Routes} from '@angular/router';
-import {beforeEach, describe, expect, it} from 'vitest';
+import {beforeEach, describe, expect, it, vi} from 'vitest';
 
+import {CmnPullRefreshService} from '../../services/pull-refresh/pull-refresh.service';
+import {motionDurationMs} from '../../tokens/motion';
 import {AppLayoutComponent} from '../app-layout/app-layout.component';
 import {PageFrameService} from '../app-layout/page-frame';
 import {PAGE_TEMPLATES, PageComponent, type PageKind} from './page.component';
@@ -385,5 +387,79 @@ describe('PageFrameService', () => {
     expect(frame.routeTitle()).toBe('Tasks');
     route.set('People');
     expect(frame.routeTitle()).toBe('People');
+  });
+});
+
+describe('PageComponent reload (pull to refresh)', () => {
+  @Component({
+    imports: [PageComponent],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    template: `
+      <cmn-page [reload]="reload()" [reloading]="reloading()" title="Tasks">
+        <p>Block</p>
+      </cmn-page>
+    `,
+  })
+  class ReloadHostComponent {
+    public readonly reload = signal<(() => void) | undefined>(undefined);
+    public readonly reloading = signal(false);
+  }
+
+  let fixture: ComponentFixture<ReloadHostComponent>;
+  let service: CmnPullRefreshService;
+
+  beforeEach(() => {
+    service = TestBed.inject(CmnPullRefreshService);
+    fixture = TestBed.createComponent(ReloadHostComponent);
+    fixture.detectChanges();
+  });
+
+  it('registers no reload when the page gives none', () => {
+    expect(service.available()).toBe(false);
+  });
+
+  it('registers its reload with the shell while the page is on screen', async () => {
+    const reload = vi.fn<() => void>();
+    fixture.componentInstance.reload.set(reload);
+    fixture.detectChanges();
+    expect(service.available()).toBe(true);
+
+    await service.refresh();
+    expect(reload).toHaveBeenCalledOnce();
+
+    fixture.destroy();
+    expect(service.available()).toBe(false);
+  });
+
+  it('follows a reload that changes, and withdraws it when it goes', async () => {
+    const first = vi.fn<() => void>();
+    const second = vi.fn<() => void>();
+    fixture.componentInstance.reload.set(first);
+    fixture.detectChanges();
+    fixture.componentInstance.reload.set(second);
+    fixture.detectChanges();
+    await service.refresh();
+    expect(first).not.toHaveBeenCalled();
+    expect(second).toHaveBeenCalledOnce();
+
+    fixture.componentInstance.reload.set(undefined);
+    fixture.detectChanges();
+    expect(service.available()).toBe(false);
+  });
+
+  it('holds the refresh while the page says it is reloading', async () => {
+    fixture.componentInstance.reload.set(() => undefined);
+    fixture.componentInstance.reloading.set(true);
+    fixture.detectChanges();
+
+    let settled = false;
+    const done = service.refresh().then(() => (settled = true));
+    await new Promise(resolve => setTimeout(resolve, motionDurationMs('long') + 20));
+    expect(settled).toBe(false);
+
+    fixture.componentInstance.reloading.set(false);
+    fixture.detectChanges();
+    await done;
+    expect(settled).toBe(true);
   });
 });

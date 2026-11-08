@@ -31,7 +31,7 @@ A page gets all of this without writing any code for it.
 | Tab state      | Each tab remembers its last screen. Launch restores the last tab. Re-tapping the active tab scrolls to top, then pops to the tab root.                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | Top bar        | Owns the title, the back chevron (no "Back" text) and a trailing actions slot. A 44pt bar below `md` (the safe area on top of that); from `md` Carbon's 48px header. While the page's large title is showing and the page is at the top, the bar is transparent with no hairline (the iOS scroll-edge appearance), so it never reads as an empty band; any scroll gives it its material back, and the large title shrinks into it. No page renders its own back button or title; a `cmn-page` draws the route's large title in its frame, handed over by the shell. |
 | Back           | Back goes to the route's `parent`, or to history when there is none. A deep link to a detail still has a way up. The system swipe back works and is never overridden.                                                                                                                                                                                                                                                                                                                                                                                               |
-| Scroll         | The shell owns the scroller. Back restores the scroll position. Overscroll does not chain to the browser (`overscroll-behavior-y: contain`).                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| Scroll         | The shell owns the scroller. Back restores the scroll position. Overscroll does not chain to the browser (`overscroll-behavior-y: contain`); a tab root that registers a reload gets pull to refresh in its place (see "Pull to refresh").                                                                                                                                                                                                                                                                                                                          |
 | Sheets         | `cmn-drawer` (half and full stops, grabber, drag to dismiss) and `cmn-dialog` (below `md`, see "Dialogs on a phone") share one drag controller. Do not open two at once.                                                                                                                                                                                                                                                                                                                                                                                            |
 | Content insets | The shell measures its pinned chrome and publishes it as insets, so content never sits under the top bar, and the last row of a page scrolls clear of the tab bar and the floating action. See "Content clears the chrome".                                                                                                                                                                                                                                                                                                                                         |
 | Overlays       | Install hint, offline banner and update prompt sit in the content area, below the top bar. They never cover the top bar or the tab bar. The floating action hides while a sheet is open.                                                                                                                                                                                                                                                                                                                                                                            |
@@ -67,12 +67,58 @@ The shell does this itself, in `cmn-app-layout`, with no page code and no router
 - **Launch restores the last tab.** The last tab is kept in `localStorage` (`cmn-last-tab`, ignored
   when storage is blocked) and reopened when the app starts at `/`. A deep link is never
   redirected.
-- `<main>` sets `overscroll-behavior-y: contain`, and the top bar, tab bar and sidebar are not
-  text-selectable.
+- `<main>` sets `overscroll-behavior-y: contain`, so the browser's own pull-to-refresh and page
+  bounce are off. The shell replaces the first with its own on a tab root (below). The top bar, tab
+  bar and sidebar are not text-selectable.
 
 On the phone tab bar `navClick` is a notification: the shell does the navigating. An app that also
 navigates on that event fights the shell (a re-tap would pop to the root before it can scroll to the
 top), so it should drop that handler. The sidebar still leaves navigating to the app.
+
+### Pull to refresh
+
+A tab root reloads its data when it is pulled down from the top (Apple HIG, Refreshing content: the
+refresh control). The gesture and its indicator are the shell's, so no app draws its own; the reload
+is the page's. `overscroll-behavior-y: contain` keeps the browser from running its own refresh on
+top of it, and a tab root that registers nothing has no pull, as before.
+
+```html
+<cmn-page [reload]="store.load" [reloading]="store.isLoading()">...</cmn-page>
+```
+
+```ts
+// or, from a store or a component that is not a `cmn-page`:
+registerPullRefresh(() => store.load(), {busy: store.isLoading});
+```
+
+- **A tab root only.** The page on show is a destination of the shell (a tab or the More page). A
+  pushed screen does not pull, and neither does anything while a sheet is open.
+- **The reload is a hook the page's store provides.** `[reload]` on `cmn-page` or
+  `registerPullRefresh()` (both register with `CmnPullRefreshService`; the latest registration
+  wins). A hook may return nothing, a promise or an observable. The indicator stays until a returned
+  promise or observable settles and `busy` (the store's `isLoading`) is false, and for at least a
+  long motion duration so an instant reload still reads as one. A reload that throws ends the
+  refresh; the store shows its own error.
+- **It starts only at the top.** The touch must begin with nothing scrolled between the touched
+  element and `<main>`, so a `cmn-page-scroll` list pulls from its own top and scrolls otherwise.
+  Upward and sideways touches (a row swipe, a chip row) are left to the page, and a second finger
+  or a cancelled touch drops the pull. Once a pull starts the browser's own handling of the touch is
+  cancelled, so it is not also a scroll.
+- **It feels like the iOS control.** The content follows the finger at half its travel, up to
+  96px; past 64px of movement letting go refreshes, short of it the content settles back. While the
+  reload runs the content rests 48px down (one control height) under a round indicator, and the
+  arc spins. The settle uses `--cmn-duration-medium` on `--cmn-ease-expressive-decelerate`, and the
+  indicator fades on `--cmn-duration-short` (see DESIGN.md, Motion).
+- **Reduce Motion.** The content never moves. The indicator fades in under the top bar as the pull
+  grows, at the same distance, and spins while the reload runs (a spinner keeps turning). Releasing
+  past the threshold still refreshes.
+- **Offline and last synced.** A failed or offline reload is shown by the state pattern, not by
+  the gesture: the store sets its status and `cmn-async-state` shows the offline banner or panel
+  with "Last synced". A page that offers the pull shows that state like any other.
+- **The visible control stays.** A pull is a gesture for a touch reader. An app also gives a
+  keyboard, a screen reader and a switch reader a way to reload (Retry in `cmn-async-state`, a menu
+  item, a command palette entry) that calls `CmnPullRefreshService.refresh()` or the store directly.
+  The shell announces "Refreshing" in a live region while the gesture's reload runs.
 
 ### The More tab
 
@@ -581,6 +627,7 @@ exists.
 | Account on a phone                      | Built: `accountOnPhone`, `accountMenu()`, `cmn-more-page`; no suite check yet                                                                                                                               |
 | Top bar title, back, actions            | Built: route data `title`, `parent`, `actions`; the suite checks the title at 320                                                                                                                           |
 | Shell-owned scroll and tab state        | Built: checked by the suite's "back restores scroll"; see "Scroll and tab state"                                                                                                                            |
+| Pull to refresh                         | Built: `CmnPullRefreshService`, `registerPullRefresh()`, `cmn-page` `[reload]`, the shell's gesture and indicator; unit specs and `e2e/phone/pull-refresh.spec.ts` on a real touch; no suite sweep yet      |
 | One state pattern                       | Built: `cmn-async-state`; the suite checks the offline and error states at 320 and 390                                                                                                                      |
 | Touch size (44pt chrome, labels, hints) | Built: `--size-touch`, `.cmn-hit-slop`, `PHONE_HIT_AREA_CLASSES`; the suite enforces 44x44 at 390x844, on the list page and on every golden screen, labels at 320, hints; landscape and tablet are advisory |
 | Layout by size                          | Built: `CmnShellService` picks tab bar, rail or sidebar; the suite checks each width and device                                                                                                             |

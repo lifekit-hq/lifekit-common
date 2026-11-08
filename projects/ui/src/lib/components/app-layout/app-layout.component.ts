@@ -23,8 +23,10 @@ import {AppearanceService} from '../../services/appearance/appearance.service';
 import {CmnDialogService} from '../../services/dialog/dialog.service';
 import {CmnDrawerService} from '../../services/drawer/drawer.service';
 import {CmnPageActionsService} from '../../services/page-actions/page-actions.service';
+import {CmnPullRefreshService} from '../../services/pull-refresh/pull-refresh.service';
 import {CmnShellService} from '../../services/shell/shell.service';
 import {ThemeService} from '../../services/theme/theme.service';
+import {prefersReducedMotion} from '../../tokens/motion';
 import {CMN_OVERLAY_INSET_BOTTOM} from '../../tokens/overlay-inset';
 import {type AccountIdentity} from '../account-avatar/account-avatar.component';
 import {BottomTabBarComponent} from '../bottom-tab-bar/bottom-tab-bar.component';
@@ -50,6 +52,8 @@ import {
 import {PageFrameService} from './page-frame';
 import {overflowNavItems, phoneTabItems} from './phone-tabs';
 import {fadeRouteChanges} from './route-fade';
+import {PullRefresh} from './pull-refresh';
+import {PullRefreshIndicatorComponent} from './pull-refresh-indicator.component';
 import {matchTab, ShellNavigationService} from './shell-navigation.service';
 import {healViewportOnBlur} from './viewport-heal';
 
@@ -142,12 +146,20 @@ const NOTICES_BASE_CLASSES =
   // column: a notice that is not showing is a box with no height and must cost the page nothing.
   '[&>[data-cmn-notice-stacked]]:mt-cmn-group-gap';
 /**
- * Overscroll stops at main: it never chains to the browser (pull-to-refresh, page bounce). Main
- * takes keyboard focus so a page with nothing focusable in it still scrolls from the keyboard.
+ * Overscroll stops at main: it never chains to the browser (its own pull-to-refresh, page bounce).
+ * A tab root that registers a reload gets the shell's pull to refresh in its place
+ * (`CmnPullRefreshService`). Main takes keyboard focus so a page with nothing focusable in it still
+ * scrolls from the keyboard.
  */
 const MAIN_BASE_CLASSES =
   'flex-1 overflow-y-auto overscroll-y-contain ' +
   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-border-focus';
+/**
+ * Main follows a pull with no transition and settles back or holds on the expressive curve, as a
+ * sheet does; Reduce Motion never moves it at all (see `PullRefresh`).
+ */
+const MAIN_PULL_SETTLE_CLASSES =
+  ' transition-transform duration-cmn-medium ease-cmn-expressive-decelerate motion-reduce:transition-none';
 /**
  * Clears the top bar by its measured cover (`--cmn-content-inset-top`). Scrolling an element into
  * view also clears the pinned notices (`--cmn-sticky-top`).
@@ -203,7 +215,12 @@ export const CMN_CONTENT_INSET_PROPERTIES = {
 
 @Component({
   selector: 'cmn-app-layout',
-  imports: [BottomTabBarComponent, SidebarNavComponent, TopBarComponent],
+  imports: [
+    BottomTabBarComponent,
+    PullRefreshIndicatorComponent,
+    SidebarNavComponent,
+    TopBarComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [ShellNavigationService, PageFrameService],
   host: {'(window:keydown)': 'onWindowKeydown($event)'},
@@ -249,10 +266,24 @@ export const CMN_CONTENT_INSET_PROPERTIES = {
           (backClick)="onBack()"
           (actionClick)="onPageAction($event)"
         />
+        <!-- Pull to refresh: the chip sits under the bar in the gap the pulled main opens -->
+        <cmn-pull-refresh-indicator
+          [style.top.px]="pullTop()"
+          [progress]="pull.progress()"
+          [refreshing]="pull.phase() === 'refreshing'"
+          [offset]="pull.offset()"
+          [dragging]="pull.dragging()"
+          [hidden]="pull.phase() === 'idle'"
+          class="absolute inset-x-0 z-20"
+        />
+        <span class="sr-only" role="status">{{
+          pull.phase() === 'refreshing' ? 'Refreshing' : ''
+        }}</span>
         <!-- In the phone overlay main carries the measured content insets as custom properties -->
         <main
           #main
           [class]="mainClass()"
+          [style.transform]="pull.transform()"
           [style.--cmn-fab-clearance.px]="fabClearance()"
           tabindex="0"
         >
@@ -302,6 +333,8 @@ export class AppLayoutComponent {
   private readonly shell = inject(ShellNavigationService);
   private readonly shellService = inject(CmnShellService);
   private readonly pageFrame = inject(PageFrameService);
+  private readonly pullRefresh = inject(CmnPullRefreshService);
+  private readonly sheets = inject(CmnDrawerService);
 
   /** The account is set to live on the More page (the phone shell's default) and there is one to show. */
   private readonly accountOnMore = computed<boolean>(
@@ -348,6 +381,12 @@ export class AppLayoutComponent {
   private readonly overflowItems = computed<NavItem[]>(() =>
     overflowNavItems(this.navItems(), this.tabRoutes())
   );
+
+  /** The screen on show is a destination itself (a tab or the More page), not something opened from one. */
+  private readonly tabRoot = computed<boolean>(() => {
+    const path = this.routerUrl().split(/[?#]/, 1)[0];
+    return path === this.moreRoute() || this.navItems().some(item => item.route === path);
+  });
 
   private readonly hasTabBar = computed<boolean>(
     () => this.navItems().length > 0 || this.moreRoute() !== ''
@@ -491,11 +530,12 @@ export class AppLayoutComponent {
     };
   });
 
-  public readonly mainClass = computed<string>(() =>
-    this.overlay()
+  public readonly mainClass = computed<string>(() => {
+    const base = this.overlay()
       ? `${MAIN_BASE_CLASSES} ${MAIN_OVERLAY_TOP_CLASSES} ${MAIN_OVERLAY_BOTTOM_CLASSES}`
-      : `${MAIN_BASE_CLASSES} ${MAIN_FILL_CLASSES}`
-  );
+      : `${MAIN_BASE_CLASSES} ${MAIN_FILL_CLASSES}`;
+    return this.pull.dragging() ? base : base + MAIN_PULL_SETTLE_CLASSES;
+  });
 
   /** The shell this window and device call for: tab bar, rail or sidebar. */
   protected readonly shellMode = this.shellService.mode;
@@ -514,13 +554,12 @@ export class AppLayoutComponent {
     readPageChrome(this.page().data)
   );
 
-  protected readonly back = computed<BackTarget>(() => {
-    const path = this.routerUrl().split(/[?#]/, 1)[0];
-    return resolveBack(this.chrome(), {
-      isTabRoot: path === this.moreRoute() || this.navItems().some(item => item.route === path),
+  protected readonly back = computed<BackTarget>(() =>
+    resolveBack(this.chrome(), {
+      isTabRoot: this.tabRoot(),
       hasHistory: !!this.router.lastSuccessfulNavigation()?.previousNavigation,
-    });
-  });
+    })
+  );
 
   /** The page's large title: the one its route declares, else the one its `cmn-page` declares. */
   protected readonly largeTitle = computed<string>(
@@ -594,7 +633,30 @@ export class AppLayoutComponent {
   /** Content has scrolled under the top bar (main is off its top edge). */
   protected readonly scrolled = signal(false);
 
-  protected readonly sheetOpen = inject(CmnDrawerService).sheetOpen;
+  /** Where (px, from the top of the shell column) the bar ends and the pull's indicator starts. */
+  protected readonly pullTop = signal(0);
+
+  /**
+   * Pull to refresh runs on a tab root that has registered a reload (`CmnPullRefreshService`) and
+   * has no sheet over it. The gesture listens only then, so every other screen keeps a plain,
+   * passive scroller.
+   */
+  protected readonly pullEnabled = computed<boolean>(
+    () => this.tabRoot() && this.pullRefresh.available() && !this.sheetOpen()
+  );
+
+  /** The gesture and its indicator are the shell's; the reload is the page's. */
+  protected readonly pull = new PullRefresh({
+    enabled: () => this.pullEnabled(),
+    refresh: () => this.pullRefresh.refresh(),
+    reduceMotion: () => prefersReducedMotion(this.document.defaultView),
+    engaged: () => {
+      const bar = this.topBarRef().nativeElement as HTMLElement;
+      this.pullTop.set(bar.offsetTop + bar.offsetHeight);
+    },
+  });
+
+  protected readonly sheetOpen = this.sheets.sheetOpen;
 
   protected readonly largeTitleBoxClasses = LARGE_TITLE_BOX_CLASSES;
   protected readonly overlayTopBarClasses = OVERLAY_TOP_BAR_CLASSES;
@@ -617,6 +679,11 @@ export class AppLayoutComponent {
         return;
       }
       onCleanup(healViewportOnBlur(view, () => this.frame().nativeElement));
+    });
+    effect(onCleanup => {
+      if (this.pullEnabled()) {
+        onCleanup(this.pull.attach(this.main().nativeElement));
+      }
     });
     effect(onCleanup => {
       const main = this.main().nativeElement;
