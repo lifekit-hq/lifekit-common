@@ -17,6 +17,12 @@ interface RowBox {
   readonly width: number;
 }
 
+/** Where a removed row sat: its parent, and the sibling it preceded. */
+interface Exit {
+  readonly parent: Node;
+  readonly next: Node | null;
+}
+
 const GHOST_ATTRIBUTE = 'data-cmn-list-leaving';
 
 /**
@@ -85,23 +91,25 @@ export class CmnListMotionDirective {
   }
 
   private onChanges(records: MutationRecord[]): void {
-    const added = new Set<HTMLElement>();
-    const removed: {row: HTMLElement; parent: Node}[] = [];
+    const before = this.boxes;
+    const addedNodes = new Set<HTMLElement>();
+    const removedNodes = new Map<HTMLElement, Exit>();
     for (const record of records) {
       record.addedNodes.forEach(node => {
         if (this.isRow(node) && !node.hasAttribute(GHOST_ATTRIBUTE)) {
-          added.add(node);
+          addedNodes.add(node);
         }
       });
       record.removedNodes.forEach(node => {
         if (this.isRow(node) && !node.hasAttribute(GHOST_ATTRIBUTE)) {
-          removed.push({row: node, parent: record.target});
+          removedNodes.set(node, {parent: record.target, next: record.nextSibling});
         }
       });
     }
-    // A row added and removed in one batch never reached the screen.
-    const gone = removed.filter(({row}) => !added.delete(row) && this.boxes.has(row));
-    const before = this.boxes;
+    // A row that is connected again was moved, however often; one that is new and gone again
+    // never reached the screen.
+    const added = new Set([...addedNodes].filter(row => row.isConnected && !before.has(row)));
+    const gone = [...removedNodes].filter(([row]) => !row.isConnected && before.has(row));
     this.measure();
     if (added.size === 0 && gone.length === 0 && this.boxes.size === 0) {
       return;
@@ -113,7 +121,7 @@ export class CmnListMotionDirective {
     ) {
       return;
     }
-    gone.forEach(({row, parent}) => this.leave(row, parent, before.get(row)));
+    gone.forEach(([row, exit]) => this.leave(row, exit, before.get(row)));
     this.boxes.forEach((box, row) => {
       if (added.has(row)) {
         this.enter(row);
@@ -138,18 +146,18 @@ export class CmnListMotionDirective {
   }
 
   private move(row: HTMLElement, from: RowBox | undefined, to: RowBox): void {
-    const delta = from ? from.top - to.top : 0;
-    if (delta === 0) {
+    if (!from || (from.left === to.left && from.top === to.top)) {
       return;
     }
-    row.animate([{transform: `translateY(${delta}px)`}, {transform: 'none'}], {
+    const shift = `translate(${from.left - to.left}px, ${from.top - to.top}px)`;
+    row.animate([{transform: shift}, {transform: 'none'}], {
       duration: motionDurationMs('medium'),
       easing: motionEasing('standard'),
     });
   }
 
   /** Puts the removed row back where it was, inert, for the length of its exit. */
-  private leave(row: HTMLElement, parent: Node, box: RowBox | undefined): void {
+  private leave(row: HTMLElement, {parent, next}: Exit, box: RowBox | undefined): void {
     if (!box || !parent.isConnected || !(parent instanceof HTMLElement)) {
       return;
     }
@@ -163,7 +171,7 @@ export class CmnListMotionDirective {
       width: `${box.width}px`,
       pointerEvents: 'none',
     });
-    parent.appendChild(row);
+    parent.insertBefore(row, next?.parentNode === parent ? next : null);
     const exit = row.animate([{opacity: 1}, {opacity: 0}], {
       duration: motionDurationMs('short'),
       easing: motionEasing('accelerate'),

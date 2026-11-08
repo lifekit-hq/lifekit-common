@@ -97,11 +97,11 @@ describe('ListItemRowComponent', () => {
     expect(row.classList).toContain('py-cmn-3');
   });
 
-  it('should draw the hairline divider on the host, where last: sees the sibling rows', () => {
+  it('should draw the hairline divider on the host, where the last-row rule sees the sibling rows', () => {
     const host = fixture.nativeElement as HTMLElement;
     expect(host.classList).toContain('border-b');
     expect(host.classList).toContain('border-border-default');
-    expect(host.className).toContain('last:border-b-0');
+    expect(host.className).toContain('border-b-0');
     expect(rowEl().className).not.toContain('border-b');
   });
 

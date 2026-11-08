@@ -19,6 +19,21 @@ class HostComponent {
   public readonly ids = signal<number[]>([1, 2, 3]);
 }
 
+@Component({
+  selector: 'cmn-list-motion-chips-host',
+  imports: [CmnListMotionDirective],
+  template: `
+    <div cmnListMotion="span.chip" style="position: relative; display: flex; flex-wrap: wrap">
+      @for (id of ids(); track id) {
+        <span class="chip" style="display: block; width: 30px; height: 20px">{{ id }}</span>
+      }
+    </div>
+  `,
+})
+class ChipsHostComponent {
+  public readonly ids = signal<number[]>([1, 2, 3]);
+}
+
 describe('CmnListMotionDirective', () => {
   let fixture: ComponentFixture<HostComponent>;
 
@@ -95,7 +110,7 @@ describe('CmnListMotionDirective', () => {
 
     const moved = live()[1];
     expect(text()).toEqual(['1', '3']);
-    expect(keyframes(moved)[0]).toMatchObject({transform: 'translateY(20px)'});
+    expect(keyframes(moved)[0]).toMatchObject({transform: 'translate(0px, 20px)'});
     expect(keyframes(moved)[1]).toMatchObject({transform: 'none'});
     expect(live()[0].getAnimations()).toHaveLength(0);
   });
@@ -105,9 +120,36 @@ describe('CmnListMotionDirective', () => {
 
     const [first, middle, last] = live();
     expect(text()).toEqual(['3', '2', '1']);
-    expect(keyframes(first)[0]).toMatchObject({transform: 'translateY(40px)'});
+    expect(keyframes(first)[0]).toMatchObject({transform: 'translate(0px, 40px)'});
     expect(middle.getAnimations()).toHaveLength(0);
-    expect(keyframes(last)[0]).toMatchObject({transform: 'translateY(-40px)'});
+    expect(keyframes(last)[0]).toMatchObject({transform: 'translate(0px, -40px)'});
+  });
+
+  it('keeps the exit where the row was, between its neighbours', async () => {
+    await change([1, 3]);
+
+    expect(rows().map(row => row.textContent?.trim())).toEqual(['1', '2', '3']);
+    expect(rows()[1].hasAttribute('inert')).toBe(true);
+  });
+
+  it('keeps the exit of the last row after the rows that stay', async () => {
+    await change([1, 2]);
+
+    expect(rows().map(row => row.textContent?.trim())).toEqual(['1', '2', '3']);
+    expect(rows()[2].hasAttribute('inert')).toBe(true);
+  });
+
+  it('never removes a row that was moved more than once in one batch', async () => {
+    const first = rows()[0];
+    const list = first.parentElement as HTMLElement;
+    list.append(first);
+    list.prepend(first);
+    await Promise.resolve();
+
+    expect(first.isConnected).toBe(true);
+    expect(first.hasAttribute('inert')).toBe(false);
+    expect(rows().some(row => row.hasAttribute('inert'))).toBe(false);
+    expect(rows().flatMap(row => row.getAnimations())).toHaveLength(0);
   });
 
   it('moves nothing under Reduce Motion', async () => {
@@ -134,5 +176,32 @@ describe('CmnListMotionDirective', () => {
     await Promise.resolve();
 
     expect(rows().flatMap(row => row.getAnimations())).toHaveLength(0);
+  });
+
+  describe('rows that wrap in a line', () => {
+    let chips: ComponentFixture<ChipsHostComponent>;
+
+    const chipRows = (): HTMLElement[] =>
+      Array.from<HTMLElement>(chips.nativeElement.querySelectorAll('span.chip'));
+
+    beforeEach(async () => {
+      chips = TestBed.createComponent(ChipsHostComponent);
+      chips.detectChanges();
+      await chips.whenStable();
+    });
+
+    it('slides the rows after a removed one sideways, from where they were', async () => {
+      chips.componentInstance.ids.set([2, 3]);
+      chips.detectChanges();
+      await Promise.resolve();
+
+      const [ghost, second, third] = chipRows();
+      expect(ghost.hasAttribute('inert')).toBe(true);
+      const frames = (chip: HTMLElement): Keyframe[] =>
+        (chip.getAnimations()[0]?.effect as KeyframeEffect).getKeyframes();
+      expect(frames(second)[0]).toMatchObject({transform: 'translate(30px, 0px)'});
+      expect(frames(third)[0]).toMatchObject({transform: 'translate(30px, 0px)'});
+      expect(frames(second)[1]).toMatchObject({transform: 'none'});
+    });
   });
 });

@@ -30,10 +30,14 @@ export interface CmnRowSwipeAction {
 }
 
 /**
- * The hairline divider sits on the host, so `last:` matches the last row among its siblings. On the
- * row element inside, which is always its host's only child, it never drew.
+ * The hairline divider sits on the host, so the last-row rule matches the last row among its
+ * siblings. On the row element inside, which is always its host's only child, it never drew. A row
+ * leaving (`CmnListMotionDirective`) is not a sibling for this: it is still drawn, but is not the
+ * list's last row.
  */
-const HOST_CLASSES = 'block border-b border-border-default last:border-b-0';
+const HOST_CLASSES =
+  'block border-b border-border-default ' +
+  '[&:nth-last-child(1_of_:not([data-cmn-list-leaving]))]:border-b-0';
 
 /**
  * Carbon's contained-list item: at least the 48px layout step tall, hairline dividers, and a
