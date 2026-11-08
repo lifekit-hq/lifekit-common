@@ -1,5 +1,26 @@
 # Changelog
 
+## [4.5.0](https://github.com/lifekit-hq/lifekit-common/compare/v4.4.2...v4.5.0) (2026-11-08)
+
+
+### Features
+
+* **tokens:** add the Carbon --cds-* seed bridge, generated from theme.css ([#286](https://github.com/lifekit-hq/lifekit-common/issues/286)) ([b6dac5e](https://github.com/lifekit-hq/lifekit-common/commit/b6dac5eed72629f327a8f6d21d366cf24c82e334))
+* **tokens:** align theme.css to Carbon type, layout sizes, square geometry and motion ([#291](https://github.com/lifekit-hq/lifekit-common/issues/291)) ([46b5acf](https://github.com/lifekit-hq/lifekit-common/commit/46b5acfbd4d7a7bfc6748c23c29dca3ec5952341))
+* **ui:** align controls with Carbon geometry and tokens ([#294](https://github.com/lifekit-hq/lifekit-common/issues/294)) ([3a4f483](https://github.com/lifekit-hq/lifekit-common/commit/3a4f483a93e37e9fd90eca6c6453effe52d40ea5))
+* **ui:** draw the first second with page skeleton presets and a pending-account shell ([#290](https://github.com/lifekit-hq/lifekit-common/issues/290)) ([683a759](https://github.com/lifekit-hq/lifekit-common/commit/683a759e6b969f23ed6093d0450346af56499762))
+
+
+### Bug Fixes
+
+* **tokens:** accept the overview template's own rail in the route scan ([#293](https://github.com/lifekit-hq/lifekit-common/issues/293)) ([8d1ae55](https://github.com/lifekit-hq/lifekit-common/commit/8d1ae552bea568518814dfe4f2622fe00eb2bc72))
+* **ui:** give checkbox, toggle and drawer close a 44px phone hit area ([#289](https://github.com/lifekit-hq/lifekit-common/issues/289)) ([e732600](https://github.com/lifekit-hq/lifekit-common/commit/e732600b186c4577f630a0a83db1c8a77282999c))
+
+
+### Performance
+
+* **ui:** register a generated Lucide subset in cmn-icon instead of the whole icon map ([#285](https://github.com/lifekit-hq/lifekit-common/issues/285)) ([0f8dff4](https://github.com/lifekit-hq/lifekit-common/commit/0f8dff473ff150a1e188b5d2ff686838dc6c7702))
+
 ## [4.4.2](https://github.com/lifekit-hq/lifekit-common/compare/v4.4.1...v4.4.2) (2026-11-07)
 
 
