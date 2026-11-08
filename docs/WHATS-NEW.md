@@ -24,7 +24,9 @@ can now do or no longer run into, no library or module names, no issue numbers.
 
 - `(owner)` at either end of a bullet marks a line only the owner should read. The app decides who
   that is (`includeOwnerNotes`, below); without it every owner line is left out.
-- Anything that is not a `## x.y.z` heading or a `- ` bullet (the comment, prose) is ignored.
+- Anything that is not a `## x.y.z` heading or a `- ` bullet (the comment, prose) is ignored. Any
+  other `##` heading (`## Unreleased`, `## 1.3.0 - beta`) closes the release above it, so the bullets
+  under it are left out rather than added to the wrong version.
 - A release with no notes shows its change list instead, and raises no dot: a badge means there is
   something to read.
 - Only the newest six releases are listed.

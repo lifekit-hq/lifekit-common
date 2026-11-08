@@ -153,7 +153,7 @@ describe('parseNotes', () => {
 
   it('drops bullets under a heading that is not a bare version', () => {
     const notes = parseNotes(
-      '## 1.2.0\n- You can export.\n\n## 1.3.0 (2026-11-01)\n- You can share.\n\n## Unreleased\n- Soon.\n',
+      '## 1.2.0\n- You can export.\n\n## 1.3.0 (2026-11-01)\n- You can share.\n\n## Unreleased\n- Soon.\n'
     );
 
     assert.deepEqual([...notes.keys()], ['1.2.0']);
