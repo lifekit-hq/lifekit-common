@@ -15,6 +15,7 @@ import {
 import {FormsModule} from '@angular/forms';
 import {LkDismissibleChip} from '@lifekit-hq/elements';
 
+import {CmnListMotionDirective} from '../../directives/list-motion/list-motion.directive';
 import {CmnDrawerService} from '../../services/drawer/drawer.service';
 import {BadgeComponent} from '../badge/badge.component';
 import {ButtonComponent} from '../button/button.component';
@@ -87,7 +88,13 @@ class FilterBarSheetHostComponent {
 @Component({
   selector: 'cmn-filter-bar',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, SearchInputComponent, BadgeComponent, ButtonComponent],
+  imports: [
+    FormsModule,
+    SearchInputComponent,
+    BadgeComponent,
+    ButtonComponent,
+    CmnListMotionDirective,
+  ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   host: {class: 'flex flex-col gap-cmn-3'},
   template: `
@@ -107,7 +114,10 @@ class FilterBarSheetHostComponent {
     </div>
     <ng-content select="[cmnFilterBarQuick]" />
     @if (applied().length > 0) {
-      <div class="flex flex-wrap items-center gap-x-cmn-2 gap-y-cmn-3">
+      <div
+        class="flex flex-wrap items-center gap-x-cmn-2 gap-y-cmn-3"
+        cmnListMotion="lk-dismissible-chip"
+      >
         @for (chip of applied(); track chip.id) {
           <lk-dismissible-chip
             [label]="chip.label"

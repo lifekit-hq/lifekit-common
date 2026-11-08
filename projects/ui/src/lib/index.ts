@@ -94,6 +94,7 @@ export * from './components/whats-new/whats-new.service';
 export * from './components/whats-new/whats-new-menu-item';
 
 // Directives
+export * from './directives/list-motion/list-motion.directive';
 export * from './directives/skeleton/skeleton.directive';
 export * from './directives/tooltip/tooltip.directive';
 export * from './directives/typography/typography.directive';

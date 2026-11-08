@@ -47,6 +47,47 @@ export const WithAside: Story = {
   }),
 };
 
+/**
+ * Rows move when the list changes: a new row fades in while rising, a removed one fades out where
+ * it stood, and the rows below close up or open out by sliding. Add, remove and reverse to see each;
+ * the timings are the motion tokens, and Reduce Motion (an OS setting) turns every one off.
+ */
+export const RowMotion: Story = {
+  render: args => ({
+    props: {
+      ...args,
+      rows: [...ROWS],
+      count: ROWS.length,
+      add(this: {rows: string[]; count: number}): void {
+        this.count += 1;
+        this.rows = [`New payment ${this.count}`, ...this.rows];
+      },
+      remove(this: {rows: string[]}): void {
+        this.rows = this.rows.slice(1);
+      },
+      reverse(this: {rows: string[]}): void {
+        this.rows = [...this.rows].reverse();
+      },
+    },
+    template: `
+      <div class="flex max-w-md flex-col gap-cmn-4">
+        <div class="flex gap-cmn-2">
+          <button (click)="add()" class="rounded-cmn-md border border-border-default px-cmn-3 py-cmn-2 text-cmn-sm" type="button">Add a row</button>
+          <button (click)="remove()" class="rounded-cmn-md border border-border-default px-cmn-3 py-cmn-2 text-cmn-sm" type="button">Remove the first</button>
+          <button (click)="reverse()" class="rounded-cmn-md border border-border-default px-cmn-3 py-cmn-2 text-cmn-sm" type="button">Reverse</button>
+        </div>
+        <cmn-list-section [heading]="heading" [card]="card">
+          @for (row of rows; track row) {
+            <cmn-list-item-row [label]="row" sublabel="Card payment">
+              <span amount class="text-cmn-sm tabular-nums text-text-primary">-€8.90</span>
+            </cmn-list-item-row>
+          }
+        </cmn-list-section>
+      </div>
+    `,
+  }),
+};
+
 /** `card` false: the rows bring their own container. */
 export const Bare: Story = {
   args: {card: false},

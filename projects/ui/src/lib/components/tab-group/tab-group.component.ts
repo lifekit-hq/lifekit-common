@@ -6,6 +6,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   type ElementRef,
   inject,
   Injector,
@@ -16,6 +17,8 @@ import {
   viewChildren,
 } from '@angular/core';
 import {RouterLink, RouterLinkActive} from '@angular/router';
+
+import {motionDurationMs, motionEasing, prefersReducedMotion} from '../../tokens/motion';
 
 export interface CmnTab {
   id: string;
@@ -150,6 +153,7 @@ export class TabGroupComponent {
 
   constructor() {
     afterNextRender(() => this.syncPanelContent());
+    this.fadePanelOnSwitch();
   }
 
   protected tabId(index: number): string {
@@ -173,6 +177,35 @@ export class TabGroupComponent {
     if (next !== null && next !== focused) {
       this.selectTab(this.tabs()[next].id);
     }
+  }
+
+  /**
+   * A tab switch swaps the panel's content; the new content fades in over `--cmn-duration-short`
+   * on the standard curve (Material 3's fade-through, since Carbon's tabs move nothing but the
+   * selected line). Opacity only, and not on the first render or under Reduce Motion.
+   */
+  private fadePanelOnSwitch(): void {
+    let previous: string | undefined;
+    effect(() => {
+      const active = this.activeTab();
+      const first = previous === undefined;
+      previous = active;
+      if (first || this.routed()) {
+        return;
+      }
+      afterNextRender(
+        () => {
+          const panel = this.panel().nativeElement;
+          if (!prefersReducedMotion(panel.ownerDocument.defaultView)) {
+            panel.animate([{opacity: 0}, {opacity: 1}], {
+              duration: motionDurationMs('short'),
+              easing: motionEasing('standard'),
+            });
+          }
+        },
+        {injector: this.injector}
+      );
+    });
   }
 
   protected syncPanelContent(): void {

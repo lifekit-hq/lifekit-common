@@ -156,13 +156,18 @@ module.exports = {
           'cmn-slide-in-right var(--cmn-duration-medium) var(--cmn-ease-decelerate)',
       },
 
+      // A bare `transition`, `transition-colors` or `transition-opacity` takes the motion tokens
+      // too, not Tailwind's 150ms and its own curve, so nothing in a component or an app carries a
+      // duration the tokens do not own (and a design preset can retime them all).
       transitionDuration: {
+        DEFAULT: 'var(--cmn-duration-short)',
         'cmn-short': 'var(--cmn-duration-short)',
         'cmn-medium': 'var(--cmn-duration-medium)',
         'cmn-long': 'var(--cmn-duration-long)',
       },
 
       transitionTimingFunction: {
+        DEFAULT: 'var(--cmn-ease-standard)',
         'cmn-standard': 'var(--cmn-ease-standard)',
         'cmn-decelerate': 'var(--cmn-ease-decelerate)',
         'cmn-accelerate': 'var(--cmn-ease-accelerate)',

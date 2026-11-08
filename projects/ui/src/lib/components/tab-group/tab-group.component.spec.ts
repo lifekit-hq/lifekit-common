@@ -12,7 +12,7 @@ import {ChangeDetectionStrategy, Component, signal} from '@angular/core';
 import {type ComponentFixture, TestBed} from '@angular/core/testing';
 import {provideRouter, Router} from '@angular/router';
 import {RouterTestingHarness} from '@angular/router/testing';
-import {beforeEach, describe, expect, it} from 'vitest';
+import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
 import {type CmnTab, TabGroupComponent} from './tab-group.component';
 
@@ -436,5 +436,53 @@ describe('TabGroupComponent — without projected content', () => {
     const el: HTMLElement = fixture.nativeElement;
     expect(el.querySelector('[role="tabpanel"]')).toBeNull();
     expect(el.querySelector('[role="tab"]')?.hasAttribute('aria-controls')).toBe(false);
+  });
+});
+
+describe('TabGroupComponent — panel motion', () => {
+  let fixture: ComponentFixture<TabGroupComponent>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({imports: [TabGroupComponent]}).compileComponents();
+    fixture = TestBed.createComponent(TabGroupComponent);
+    fixture.componentRef.setInput('tabs', SAMPLE_TABS);
+    fixture.componentRef.setInput('activeTab', 'overview');
+    fixture.detectChanges();
+  });
+
+  const panel = (): HTMLElement =>
+    (fixture.nativeElement as HTMLElement).querySelector('[id$="-panel"]') as HTMLElement;
+
+  afterEach(() => {
+    document.documentElement.style.removeProperty('--cmn-duration-short');
+    vi.restoreAllMocks();
+  });
+
+  async function switchTo(id: string): Promise<void> {
+    fixture.componentRef.setInput('activeTab', id);
+    fixture.detectChanges();
+    await fixture.whenStable();
+  }
+
+  it('does not fade the panel on the first render', () => {
+    expect(panel().getAnimations()).toHaveLength(0);
+  });
+
+  it('fades the panel in on a tab switch, on the short duration from the token', async () => {
+    document.documentElement.style.setProperty('--cmn-duration-short', '66ms');
+    await switchTo('details');
+
+    const [fade] = panel().getAnimations();
+    expect(fade.effect?.getTiming().duration).toBe(66);
+    expect((fade.effect as KeyframeEffect).getKeyframes().map(frame => frame['opacity'])).toEqual([
+      '0',
+      '1',
+    ]);
+  });
+
+  it('does not fade the panel under Reduce Motion', async () => {
+    vi.spyOn(window, 'matchMedia').mockReturnValue({matches: true} as MediaQueryList);
+    await switchTo('details');
+    expect(panel().getAnimations()).toHaveLength(0);
   });
 });

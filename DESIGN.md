@@ -237,6 +237,15 @@ Each follows the Carbon pattern for its kind, on the tokens above and nothing el
 
 Under Reduce Motion the exits are skipped as well as the movement: the surface, its scrim and the toast go at once.
 
+### Lists, chips, toggles and tabs
+
+All on the same tokens, none longer than `--cmn-duration-medium`, none with a loop, and every one off under Reduce Motion.
+
+- **Colour and fill changes** (a chip selecting, a tab's line, a row's hover fill, a toggle's track, a checkbox): Carbon's state change, `--cmn-duration-short` on the standard curve. Tailwind's bare `transition`, `transition-colors` and `transition-opacity` take that duration and curve as their defaults, so a control that only says `transition-colors` follows the tokens too.
+- **Toggle thumb**: slides its own width on the same short, standard transition (Carbon's toggle).
+- **Tab switch**: Carbon's line tabs move only the selected line. The panel's new content fades in over `--cmn-duration-short` (Material 3's fade-through), opacity only; a routed tab group leaves the page crossfade to the router.
+- **List rows** (Carbon's contained list, `cmnListMotion`, on `cmn-list-section` and on the filter bar's applied chips): a row added fades in while rising `--cmn-motion-distance-sm` over `--cmn-duration-medium` (entrance, decelerate). A row removed stays where it stood, inert, and fades out over `--cmn-duration-short` (accelerate), faster than it came. The rows that shift (below an add or a remove, or a reorder) slide from their old place over `--cmn-duration-medium` on the standard curve, by transform. The rows a list starts with are drawn as they are, and a page of more than twelve rows changing at once (a new screen's worth) is not animated.
+
 ### View transitions
 
 A route change that moves between tab destinations or into a detail page is a View Transition, enabled once in the app config:
