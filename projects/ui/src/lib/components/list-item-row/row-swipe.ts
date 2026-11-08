@@ -28,6 +28,7 @@ export class RowSwipe {
   private base = 0;
   private axis: 'x' | 'y' | null = null;
   private limits = {leading: 0, trailing: 0};
+  private shutByTap = false;
 
   /** Which tray the row rests open on, or null when it rests shut. */
   public readonly open = signal<RowSwipeSide | null>(null);
@@ -42,6 +43,7 @@ export class RowSwipe {
   constructor(private readonly hooks: RowSwipeHooks) {}
 
   public start(event: PointerEvent): void {
+    this.shutByTap = false;
     if (event.pointerType === 'mouse') {
       return;
     }
@@ -86,6 +88,7 @@ export class RowSwipe {
     if (!dragged) {
       if (tapped) {
         // A tap on the row while a tray is open puts the row back, as it does in a native list.
+        this.shutByTap = this.open() !== null;
         this.close();
       }
       return;
@@ -105,6 +108,13 @@ export class RowSwipe {
   public reveal(side: RowSwipeSide, width: number): void {
     this.open.set(side);
     this.offset.set(side === 'leading' ? width : -width);
+  }
+
+  /** True once for the click that follows a tap which shut an open row: that tap only shuts it. */
+  public takeShutTap(): boolean {
+    const shut = this.shutByTap;
+    this.shutByTap = false;
+    return shut;
   }
 
   public close(): void {

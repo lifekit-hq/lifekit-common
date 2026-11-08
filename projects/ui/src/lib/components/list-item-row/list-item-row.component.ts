@@ -87,7 +87,7 @@ const SWIPE_TONE_CLASSES: Record<CmnRowSwipeTone, string> = {
   selector: 'cmn-list-item-row',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [IconComponent, NgTemplateOutlet],
-  host: {class: HOST_CLASSES, '(keydown.escape)': 'swipe.close()'},
+  host: {class: HOST_CLASSES, '(keydown.escape)': 'shut()'},
   template: `
     <!-- The content is written once and stamped into whichever row element the mode needs, so
          both modes share one layout. -->
@@ -111,7 +111,7 @@ const SWIPE_TONE_CLASSES: Record<CmnRowSwipeTone, string> = {
       <button
         [class]="trailingClasses + extra"
         [attr.aria-label]="trailingName()"
-        (click)="trailingAction.emit()"
+        (click)="pressTrailing()"
         type="button"
       >
         <cmn-icon [name]="trailingIcon()!" size="md" aria-hidden="true" />
@@ -121,7 +121,7 @@ const SWIPE_TONE_CLASSES: Record<CmnRowSwipeTone, string> = {
       @if (action()) {
         @if (trailingIcon()) {
           <div [class]="actionWrapperClasses">
-            <button [class]="rowClasses()" (click)="activated.emit()" type="button">
+            <button [class]="rowClasses()" (click)="press()" type="button">
               <ng-container [ngTemplateOutlet]="content" />
             </button>
             <ng-container
@@ -130,7 +130,7 @@ const SWIPE_TONE_CLASSES: Record<CmnRowSwipeTone, string> = {
             />
           </div>
         } @else {
-          <button [class]="rowClasses()" (click)="activated.emit()" type="button">
+          <button [class]="rowClasses()" (click)="press()" type="button">
             <ng-container [ngTemplateOutlet]="content" />
           </button>
         }
@@ -186,6 +186,7 @@ const SWIPE_TONE_CLASSES: Record<CmnRowSwipeTone, string> = {
         }
         <div
           [class]="surfaceClasses()"
+          #surface
           [style.transform]="swipe.transform()"
           (pointerdown)="swipe.start($event)"
           (pointermove)="swipe.move($event)"
@@ -205,6 +206,7 @@ export class ListItemRowComponent {
   private readonly document = inject(DOCUMENT);
   private readonly leadingTray = viewChild<ElementRef<HTMLElement>>('leadingTray');
   private readonly trailingTray = viewChild<ElementRef<HTMLElement>>('trailingTray');
+  private readonly surface = viewChild<ElementRef<HTMLElement>>('surface');
 
   public readonly label = input.required<string>();
   public readonly sublabel = input<string | null>(null);
@@ -314,8 +316,39 @@ export class ListItemRowComponent {
     }
   }
 
-  protected activate(side: RowSwipeSide): void {
+  protected press(): void {
+    if (!this.swipe.takeShutTap()) {
+      this.activated.emit();
+    }
+  }
+
+  protected pressTrailing(): void {
+    if (!this.swipe.takeShutTap()) {
+      this.trailingAction.emit();
+    }
+  }
+
+  /** Shuts the row without leaving focus on a tray button the surface now covers. */
+  protected shut(): void {
+    const active = this.document.activeElement as HTMLElement | null;
+    const inTray = [this.leadingTray(), this.trailingTray()].some(tray =>
+      tray?.nativeElement.contains(active)
+    );
     this.swipe.close();
+    if (inTray) {
+      const visible = this.surface()?.nativeElement.querySelector<HTMLElement>(
+        'button, a[href], input, select, textarea, [tabindex]'
+      );
+      if (visible) {
+        visible.focus();
+      } else {
+        active?.blur();
+      }
+    }
+  }
+
+  protected activate(side: RowSwipeSide): void {
+    this.shut();
     if (side === 'leading') {
       this.swipeLeadingAction.emit();
     } else {

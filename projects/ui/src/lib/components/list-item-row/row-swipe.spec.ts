@@ -123,6 +123,18 @@ describe('RowSwipe', () => {
     expect(swipe.offset()).toBe(0);
   });
 
+  it('reports the click after a tap that shut an open row once, and not after a tap on a shut one', () => {
+    swipe.reveal('trailing', TRAY_PX);
+    swipe.start(touch('pointerdown', 0));
+    swipe.end();
+    expect(swipe.takeShutTap()).toBe(true);
+    expect(swipe.takeShutTap()).toBe(false);
+
+    swipe.start(touch('pointerdown', 0));
+    swipe.end();
+    expect(swipe.takeShutTap()).toBe(false);
+  });
+
   it('reveals a tray at its width for focus to arrive on', () => {
     swipe.reveal('leading', TRAY_PX);
     expect(swipe.offset()).toBe(TRAY_PX);

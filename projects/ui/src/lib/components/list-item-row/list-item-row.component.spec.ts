@@ -465,6 +465,43 @@ describe('ListItemRowComponent — swipe actions', () => {
     expect(surface().style.transform).toBe('');
   });
 
+  it('moves focus to the row\'s visible control when Escape shuts a row focus is open on', () => {
+    create();
+    trayButton('Done').focus();
+    fixture.detectChanges();
+    trayButton('Done').dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}));
+    fixture.detectChanges();
+    expect(document.activeElement).toBe(surface().querySelector('button'));
+  });
+
+  it('moves focus to the visible control after a tray action, so it never rests on a covered button', () => {
+    create();
+    trayButton('Remove').focus();
+    fixture.detectChanges();
+    trayButton('Remove').click();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.log).toEqual(['trailing']);
+    expect(surface().style.transform).toBe('');
+    expect(document.activeElement).toBe(surface().querySelector('button'));
+  });
+
+  it('shuts an open row on a tap without activating it, and activates once it is shut', () => {
+    create();
+    swipeBy(-TRAY_PX);
+    const rowButton = surface().querySelector('button') as HTMLButtonElement;
+    touch('pointerdown', 0);
+    touch('pointerup', 0);
+    rowButton.click();
+    fixture.detectChanges();
+    expect(surface().style.transform).toBe('');
+    expect(fixture.componentInstance.log).toEqual([]);
+
+    touch('pointerdown', 0);
+    touch('pointerup', 0);
+    rowButton.click();
+    expect(fixture.componentInstance.log).toEqual(['activated']);
+  });
+
   it('keeps the row pressable: a plain tap activates it', async () => {
     create();
     await userEvent.click(surface().querySelector('button') as HTMLButtonElement);
