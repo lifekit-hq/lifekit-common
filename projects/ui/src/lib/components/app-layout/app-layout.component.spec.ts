@@ -246,13 +246,13 @@ describe('AppLayoutComponent', () => {
       const host = fixture.nativeElement as HTMLElement;
       expect(host.querySelector('cmn-bottom-tab-bar')?.classList).toContain('hidden');
       expect(host.querySelector('cmn-sidebar-nav')?.classList).not.toContain('hidden');
-      expect(host.querySelector('cmn-sidebar-nav aside')?.classList).toContain('w-16');
+      expect(host.querySelector('cmn-sidebar-nav aside')?.classList).toContain('w-cmn-nav-rail');
       expect(host.querySelector('cmn-sidebar-nav button[aria-label$="sidebar"]')).toBeNull();
     });
 
     it('should open the full sidebar in the expanded window class', () => {
       const host = fixture.nativeElement as HTMLElement;
-      expect(host.querySelector('cmn-sidebar-nav aside')?.classList).toContain('w-60');
+      expect(host.querySelector('cmn-sidebar-nav aside')?.classList).toContain('w-cmn-nav');
       expect(
         host.querySelector('cmn-sidebar-nav button[aria-label="Collapse sidebar"]')
       ).toBeTruthy();

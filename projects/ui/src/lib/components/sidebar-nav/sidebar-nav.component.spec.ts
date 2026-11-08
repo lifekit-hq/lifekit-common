@@ -74,12 +74,38 @@ describe('SidebarNavComponent', () => {
 
   it('should switch width on collapse without tweening it', () => {
     const aside = (fixture.nativeElement as HTMLElement).querySelector('aside');
-    expect(aside?.classList).toContain('w-60');
+    expect(aside?.classList).toContain('w-cmn-nav');
     expect(aside?.className).not.toContain('transition-[width]');
     fixture.componentInstance.toggleCollapsed();
     fixture.detectChanges();
-    expect(aside?.classList).toContain('w-16');
+    expect(aside?.classList).toContain('w-cmn-nav-rail');
     expect(aside?.className).not.toContain('transition-[width]');
+  });
+
+  it("should make the header band the top bar's 48px, square, with a 48px toggle", () => {
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('aside > div')?.classList).toContain('h-cmn-size-lg');
+    const toggle = el.querySelector('button[title="Collapse sidebar"]');
+    expect(toggle?.classList).toContain('h-cmn-size-lg');
+    expect(toggle?.classList).toContain('w-cmn-size-lg');
+    expect(el.querySelector('aside')?.innerHTML).not.toContain('rounded-');
+  });
+
+  it("should mark the active link with Carbon's selected state and the others with a hover fill", () => {
+    fixture.componentRef.setInput('activeRoute', ITEMS[0].route);
+    fixture.detectChanges();
+    const links = [...(fixture.nativeElement as HTMLElement).querySelectorAll('nav button')];
+    const active = links.find(link => link.getAttribute('aria-current') === 'page');
+    expect(active).toBeDefined();
+    expect(active?.classList).toContain('shadow-cmn-nav-active');
+    expect(active?.classList).toContain('font-semibold');
+    const others = links.filter(link => link !== active);
+    expect(others.length).toBeGreaterThan(0);
+    for (const other of others) {
+      expect(other.classList).not.toContain('shadow-cmn-nav-active');
+      expect(other.getAttribute('aria-current')).toBeNull();
+      expect(other.classList).toContain('hover:bg-surface-hover');
+    }
   });
 
   it('should collapse when toggle is clicked', () => {
@@ -120,7 +146,7 @@ describe('SidebarNavComponent', () => {
 
     it('should collapse to icons, titled by label, with no brand text', () => {
       const host = fixture.nativeElement as HTMLElement;
-      expect(host.querySelector('aside')?.classList).toContain('w-16');
+      expect(host.querySelector('aside')?.classList).toContain('w-cmn-nav-rail');
       expect(host.textContent).not.toContain('Dashboard');
       expect(host.textContent).not.toContain('Lifekit');
       expect(host.querySelector('nav button')?.getAttribute('title')).toBe('Dashboard');
@@ -133,12 +159,12 @@ describe('SidebarNavComponent', () => {
     it('should give the reader their own collapsed choice back once it is no longer a rail', () => {
       fixture.componentRef.setInput('rail', false);
       fixture.detectChanges();
-      expect(fixture.nativeElement.querySelector('aside')?.classList).toContain('w-60');
+      expect(fixture.nativeElement.querySelector('aside')?.classList).toContain('w-cmn-nav');
       fixture.componentInstance.toggleCollapsed();
       fixture.componentRef.setInput('rail', true);
       fixture.componentRef.setInput('rail', false);
       fixture.detectChanges();
-      expect(fixture.nativeElement.querySelector('aside')?.classList).toContain('w-16');
+      expect(fixture.nativeElement.querySelector('aside')?.classList).toContain('w-cmn-nav-rail');
     });
   });
   describe('version footer', () => {

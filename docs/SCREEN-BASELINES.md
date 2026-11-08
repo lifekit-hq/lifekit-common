@@ -167,6 +167,10 @@ segmented switcher, search, contained-list rows, the structured list, expandable
 table (a skeleton is left out: the screen is judged once nothing is loading). Its first baselines come from the update dispatch, not from a
 local run.
 
+`projects/ui/e2e/screens/shell.spec.ts` does the same for the shell (`Shell/Golden`): the 48px header over
+the 256px side nav, the 48px rail, and the phone tab bar docked and floating, with a hovered and a focused
+side-nav link and a hovered and a focused header button forced through the DevTools protocol.
+
 ## Updating a baseline
 
 A baseline changes only when you run the update step on the branch that changes the screen.

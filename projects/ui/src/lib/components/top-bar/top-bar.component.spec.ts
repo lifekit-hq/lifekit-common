@@ -185,6 +185,21 @@ describe('TopBarComponent', () => {
     expect(header.className).not.toContain('backdrop-blur');
   });
 
+  it("should be Carbon's 48px header from md, with 48px square buttons that abut the right edge", () => {
+    const header = fixture.nativeElement.querySelector('header') as HTMLElement;
+    expect(header.classList).toContain('md:h-cmn-size-lg');
+    expect(header.classList).toContain('md:pr-0');
+    const search = fixture.nativeElement.querySelector(
+      'button[aria-label="Search"]'
+    ) as HTMLElement;
+    const theme = fixture.nativeElement.querySelector(
+      'button[aria-label="Toggle theme"]'
+    ) as HTMLElement;
+    expect(theme.classList).toContain('md:h-cmn-size-lg');
+    expect(theme.classList).toContain('md:w-cmn-size-lg');
+    expect(search.classList).toContain('md:h-cmn-size-sm');
+  });
+
   describe('scroll edge', () => {
     const header = (): HTMLElement => fixture.nativeElement.querySelector('header') as HTMLElement;
 
@@ -276,8 +291,8 @@ describe('TopBarComponent', () => {
         expect(button?.classList).toContain('h-cmn-touch');
         expect(button?.classList).toContain('w-cmn-touch');
       }
-      expect(trigger?.classList).toContain('md:h-8');
-      expect(trigger?.classList).toContain('md:w-8');
+      expect(trigger?.classList).toContain('md:h-cmn-size-sm');
+      expect(trigger?.classList).toContain('md:w-cmn-size-sm');
       const disc = trigger?.querySelector('span');
       expect(disc?.classList).toContain('h-8');
       expect(disc?.classList).toContain('w-8');
