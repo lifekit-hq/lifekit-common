@@ -15,7 +15,10 @@ import {
   DescriptionListComponent,
 } from '../components/description-list/description-list.component';
 import {DisclosureRowComponent} from '../components/disclosure-row/disclosure-row.component';
-import {ListItemRowComponent} from '../components/list-item-row/list-item-row.component';
+import {
+  type CmnRowSwipeAction,
+  ListItemRowComponent,
+} from '../components/list-item-row/list-item-row.component';
 import {ListSectionComponent} from '../components/list-section/list-section.component';
 import {SearchInputComponent} from '../components/search-input/search-input.component';
 import {
@@ -56,7 +59,9 @@ const RANGES: readonly SegmentedOption[] = [
  * a change to a token or a component moves a pixel here. It is not an app screen, so it is not on
  * the page template; it lists the pieces the way Carbon's own pages do. Hover and focus cannot be
  * reached by a still page, so a wrapper marked `data-force` names the state it holds;
- * `e2e/screens/lists.spec.ts` forces that pseudo-class on the control inside it. Only fake data.
+ * `e2e/screens/lists.spec.ts` forces that pseudo-class on the control inside it. The row marked
+ * `data-swipe` is swiped open by a real touch in the same spec (one row only: a second touch
+ * elsewhere shuts the first). Only fake data.
  */
 @Component({
   selector: 'cmn-lists-golden',
@@ -127,6 +132,34 @@ const RANGES: readonly SegmentedOption[] = [
         </cmn-list-section>
       </section>
 
+      <section class="flex flex-col gap-cmn-3" aria-labelledby="g-swipe">
+        <h2 id="g-swipe" class="text-cmn-lg font-semibold text-text-primary">Swipe actions</h2>
+        <cmn-list-section heading="Shopping list">
+          <cmn-list-item-row
+            [swipeLeading]="done"
+            [swipeTrailing]="remove"
+            label="Oat milk"
+            sublabel="Added by Ann"
+            trailingIcon="Ellipsis"
+          />
+          <cmn-list-item-row
+            [swipeLeading]="done"
+            [swipeTrailing]="remove"
+            data-swipe
+            label="Bananas"
+            sublabel="Added by Bo"
+            trailingIcon="Ellipsis"
+          />
+          <cmn-list-item-row
+            [swipeLeading]="done"
+            [swipeTrailing]="remove"
+            label="Sourdough loaf"
+            sublabel="Added by Ann"
+            trailingIcon="Ellipsis"
+          />
+        </cmn-list-section>
+      </section>
+
       <section class="flex flex-col gap-cmn-3" aria-labelledby="g-structured">
         <h2 id="g-structured" class="text-cmn-lg font-semibold text-text-primary">
           Structured list
@@ -190,6 +223,8 @@ class ListsGoldenComponent {
   protected readonly tabs = TABS;
   protected readonly ranges = RANGES;
   protected readonly payments = PAYMENTS;
+  protected readonly done: CmnRowSwipeAction = {label: 'Done', icon: 'Check', tone: 'positive'};
+  protected readonly remove: CmnRowSwipeAction = {label: 'Remove', icon: 'Trash2', tone: 'danger'};
   protected readonly tab = signal('payments');
   protected readonly range = signal('3M');
 }

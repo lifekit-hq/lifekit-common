@@ -253,6 +253,41 @@ filters, so no page needs its own height or overflow classes.
 | `cmn-page-scroll`                | The one scroller of a list page: takes the height `cmn-page-container fill` has left and scrolls its rows inside it, keyboard reachable, with sticky headings stuck to its top edge. `label` names it as a region. Needs a `fill` container; an empty list or an empty state fills the same space.                                                                                                                                                                                   |
 | `cmn-list-section`               | One group of rows under a heading: a day of transactions, a severity of alerts. The heading is an `h2` that names the section, with a `cmnListSectionAside` slot for a total or count; the rows sit in an unpadded `cmn-card` (`card` false leaves them bare). On a phone the heading sticks flush under the top bar while its rows scroll past, and the next heading pushes it out.                                                                                                 |
 
+#### Swipe actions on a row
+
+A row that has a quick action on a phone takes it as a swipe (Apple HIG, Lists and tables): the
+leading edge holds the affirmative action (tick, mark read), the trailing edge the destructive one
+(delete, dismiss). `cmn-list-item-row` carries it, so no app builds its own gesture:
+
+```html
+<cmn-list-item-row
+  label="Oat milk"
+  trailingIcon="Ellipsis"
+  [swipeLeading]="{label: 'Done', icon: 'Check', tone: 'positive'}"
+  [swipeTrailing]="{label: 'Remove', icon: 'Trash2', tone: 'danger'}"
+  (swipeLeadingAction)="store.tick(item)"
+  (swipeTrailingAction)="store.remove(item)"
+/>
+```
+
+- **The visible control stays.** A swipe is a shortcut for a touch reader, never the only way: the row
+  keeps its quiet trailing icon, its menu or its button for the same action, so a reader who never
+  finds the gesture, or cannot make it, loses nothing. A page that swipes and has no visible control
+  for the action fails this contract.
+- **A keyboard and a screen reader reach the same actions.** Each action is a real button inside the
+  row, named `<action> <row label>` ("Remove Oat milk"). Focus on one slides the row open to show it;
+  Escape or moving focus away puts it back, and pressing an action closes the row and moves focus to
+  the row's visible control, so focus never sits on a button the row now covers.
+- **Reduce Motion.** The row slides on the medium duration step and snaps open or shut for a reader
+  who asked for reduced motion. The row still follows the finger while it is held, because that is the
+  reader's own movement.
+- **Touch only, and it leaves the scroll alone.** A mouse never swipes. A touch that goes more up or
+  down than sideways is the page's scroll and the row does not move. One row is open at a time:
+  touching anywhere else, or tapping the row, shuts it, and that tap only shuts it: the row's own
+  action does not also run.
+- **A swipe reveals, it does not commit.** The action runs when its button is pressed, so a slip of
+  the thumb never deletes anything; there is no full-swipe-to-act.
+
 #### Paging a long list
 
 A list longer than one page of rows ends in `lk-infinite-list`, not a Load More button or a pager.
