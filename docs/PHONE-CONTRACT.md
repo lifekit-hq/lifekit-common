@@ -276,13 +276,15 @@ leading edge holds the affirmative action (tick, mark read), the trailing edge t
   for the action fails this contract.
 - **A keyboard and a screen reader reach the same actions.** Each action is a real button inside the
   row, named `<action> <row label>` ("Remove Oat milk"). Focus on one slides the row open to show it;
-  Escape or moving focus away puts it back.
+  Escape or moving focus away puts it back, and pressing an action closes the row and moves focus to
+  the row's visible control, so focus never sits on a button the row now covers.
 - **Reduce Motion.** The row slides on the medium duration step and snaps open or shut for a reader
   who asked for reduced motion. The row still follows the finger while it is held, because that is the
   reader's own movement.
 - **Touch only, and it leaves the scroll alone.** A mouse never swipes. A touch that goes more up or
   down than sideways is the page's scroll and the row does not move. One row is open at a time:
-  touching anywhere else, or tapping the row, shuts it.
+  touching anywhere else, or tapping the row, shuts it, and that tap only shuts it: the row's own
+  action does not also run.
 - **A swipe reveals, it does not commit.** The action runs when its button is pressed, so a slip of
   the thumb never deletes anything; there is no full-swipe-to-act.
 
