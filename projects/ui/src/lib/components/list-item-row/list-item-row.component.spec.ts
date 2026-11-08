@@ -1,8 +1,9 @@
-import {ChangeDetectionStrategy, Component} from '@angular/core';
+import {ChangeDetectionStrategy, Component, signal} from '@angular/core';
 import {type ComponentFixture, TestBed} from '@angular/core/testing';
-import {beforeEach, describe, expect, it, type Mock, vi} from 'vitest';
+import {afterEach, beforeEach, describe, expect, it, type Mock, vi} from 'vitest';
 import {userEvent} from 'vitest/browser';
 
+import {CmnListMotionDirective} from '../../directives/list-motion/list-motion.directive';
 import {type CmnRowSwipeAction, ListItemRowComponent} from './list-item-row.component';
 
 describe('ListItemRowComponent', () => {
@@ -97,11 +98,11 @@ describe('ListItemRowComponent', () => {
     expect(row.classList).toContain('py-cmn-3');
   });
 
-  it('should draw the hairline divider on the host, where last: sees the sibling rows', () => {
+  it('should draw the hairline divider on the host, where the last-row rule sees the sibling rows', () => {
     const host = fixture.nativeElement as HTMLElement;
     expect(host.classList).toContain('border-b');
     expect(host.classList).toContain('border-border-default');
-    expect(host.className).toContain('last:border-b-0');
+    expect(host.className).toContain('border-b-0');
     expect(rowEl().className).not.toContain('border-b');
   });
 
@@ -562,5 +563,90 @@ describe('ListItemRowComponent — swipe actions', () => {
     create();
     await userEvent.click(surface().querySelector('button') as HTMLButtonElement);
     expect(fixture.componentInstance.log).toEqual(['activated']);
+  });
+});
+
+@Component({
+  imports: [ListItemRowComponent, CmnListMotionDirective],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <div cmnListMotion="cmn-list-item-row" style="position: relative">
+      @for (id of ids(); track id) {
+        <cmn-list-item-row [label]="'Row ' + id" />
+      }
+    </div>
+  `,
+})
+class MotionListHostComponent {
+  public readonly ids = signal<number[]>([1, 2, 3, 4, 5]);
+}
+
+describe('ListItemRowComponent — divider while a row leaves', () => {
+  let fixture: ComponentFixture<MotionListHostComponent>;
+  let style: HTMLStyleElement;
+
+  /**
+   * Tailwind is not compiled in the unit run, so the divider rules are rebuilt from the classes
+   * the row really carries: the `border-b` hairline, and the arbitrary-variant class that clears
+   * it, whose selector is read off the class and applied in the browser's own selector engine.
+   */
+  function dividerRules(): string {
+    const probe = TestBed.createComponent(ListItemRowComponent);
+    probe.componentRef.setInput('label', 'probe');
+    probe.detectChanges();
+    const variant = (probe.nativeElement as HTMLElement).className
+      .split(' ')
+      .find(cls => cls.startsWith('[&:'));
+    expect(variant).toBeTruthy();
+    const selector = (variant ?? '')
+      .replace(/^\[/, '')
+      .replace(/\]:border-b-0$/, '')
+      .replaceAll('_', ' ')
+      .replace('&', 'cmn-list-item-row');
+    return `cmn-list-item-row { border-bottom: 1px solid red; } ${selector} { border-bottom-width: 0; }`;
+  }
+
+  const rows = (): HTMLElement[] =>
+    Array.from(fixture.nativeElement.querySelectorAll('cmn-list-item-row'));
+  const live = (): HTMLElement[] => rows().filter(row => !row.hasAttribute('inert'));
+  const ghosts = (): HTMLElement[] => rows().filter(row => row.hasAttribute('inert'));
+  const border = (row: HTMLElement): string => getComputedStyle(row).borderBottomWidth;
+
+  async function change(ids: number[]): Promise<void> {
+    fixture.componentInstance.ids.set(ids);
+    fixture.detectChanges();
+    await Promise.resolve();
+  }
+
+  beforeEach(async () => {
+    TestBed.configureTestingModule({imports: [MotionListHostComponent]});
+    style = document.createElement('style');
+    style.textContent = dividerRules();
+    document.head.appendChild(style);
+    fixture = TestBed.createComponent(MotionListHostComponent);
+    document.body.appendChild(fixture.nativeElement);
+    fixture.detectChanges();
+    await fixture.whenStable();
+  });
+
+  afterEach(() => {
+    style.remove();
+    fixture.nativeElement.remove();
+  });
+
+  it('draws a hairline under every row but the last at rest', () => {
+    expect(live().map(border)).toEqual(['1px', '1px', '1px', '1px', '0px']);
+  });
+
+  it('gives the last row no hairline while a middle row fades out after it', async () => {
+    await change([1, 3, 4, 5]);
+    expect(ghosts()).toHaveLength(1);
+    expect(live().map(border)).toEqual(['1px', '1px', '1px', '0px']);
+  });
+
+  it('gives the new last row no hairline while the last row fades out', async () => {
+    await change([1, 2, 3, 4]);
+    expect(ghosts()).toHaveLength(1);
+    expect(live().map(border)).toEqual(['1px', '1px', '1px', '0px']);
   });
 });

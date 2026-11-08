@@ -2,6 +2,7 @@ import {_IdGenerator} from '@angular/cdk/a11y';
 import {NgTemplateOutlet} from '@angular/common';
 import {booleanAttribute, ChangeDetectionStrategy, Component, inject, input} from '@angular/core';
 
+import {CmnListMotionDirective} from '../../directives/list-motion/list-motion.directive';
 import {CardComponent} from '../card/card.component';
 
 /**
@@ -29,12 +30,16 @@ const HEADING_CLASSES =
  *
  * Project a trailing summary (a day's total, a count) with the `cmnListSectionAside` attribute;
  * it sits at the heading's end. Set `card` to false when the rows bring their own container.
+ *
+ * Rows added, removed or reordered move (`CmnListMotionDirective`: Carbon's entrance, a faster exit
+ * and a slide for the rows that shift), on the motion tokens and not at all under Reduce Motion.
  */
 @Component({
   selector: 'cmn-list-section',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CardComponent, NgTemplateOutlet],
   host: {class: 'block'},
+  hostDirectives: [CmnListMotionDirective],
   template: `
     <section [attr.aria-labelledby]="headingId">
       <h2 [class]="headingClasses">

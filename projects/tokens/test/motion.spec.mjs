@@ -163,4 +163,10 @@ describe('motion in theme.css', () => {
     });
     assert.ok(frames > 0, 'no keyframe declarations found');
   });
+
+  it("points Tailwind's default transition at the motion tokens", () => {
+    const {theme} = require('../tailwind/preset.cjs');
+    assert.equal(theme.extend.transitionDuration.DEFAULT, 'var(--cmn-duration-short)');
+    assert.equal(theme.extend.transitionTimingFunction.DEFAULT, 'var(--cmn-ease-standard)');
+  });
 });

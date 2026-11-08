@@ -100,12 +100,12 @@ interface PaletteGroup {
                     (keydown.enter)="activate(entry.item)"
                     (mouseenter)="selectedIndex.set(entry.idx)"
                     tabindex="-1"
-                    class="flex cursor-pointer items-center gap-cmn-3 border-l-2 px-cmn-4 py-2.5 transition-colors duration-75"
+                    class="flex cursor-pointer items-center gap-cmn-3 border-l-2 px-cmn-4 py-2.5 transition-colors duration-cmn-short ease-cmn-standard"
                   >
                     <div
                       [class.bg-accent-default]="entry.idx === selectedIndex()"
                       [class.bg-surface-raised]="entry.idx !== selectedIndex()"
-                      class="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-cmn-md transition-colors duration-75"
+                      class="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-cmn-md transition-colors duration-cmn-short ease-cmn-standard"
                     >
                       <cmn-icon
                         [color]="
@@ -119,7 +119,7 @@ interface PaletteGroup {
                       [class.font-medium]="entry.idx === selectedIndex()"
                       [class.text-accent-default]="entry.idx === selectedIndex()"
                       [class.text-text-primary]="entry.idx !== selectedIndex()"
-                      class="text-[14px] transition-colors duration-75"
+                      class="text-[14px] transition-colors duration-cmn-short ease-cmn-standard"
                       >{{ entry.item.label }}</span
                     >
                     @if (entry.idx === selectedIndex()) {
