@@ -89,6 +89,7 @@ export * from './components/toast/toast.component';
 export * from './components/toast/toast.service';
 export * from './components/toggle/toggle.component';
 export * from './components/top-bar/top-bar.component';
+export * from './components/verdict-header/verdict-header.component';
 export * from './components/whats-new/whats-new.component';
 export * from './components/whats-new/whats-new.config';
 export type * from './components/whats-new/whats-new.model';
