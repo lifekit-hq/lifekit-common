@@ -22,7 +22,6 @@ import {
   SegmentedComponent,
   type SegmentedOption,
 } from '../components/segmented/segmented.component';
-import {SkeletonComponent} from '../components/skeleton/skeleton.component';
 import {type CmnTab, TabGroupComponent} from '../components/tab-group/tab-group.component';
 
 interface Payment {
@@ -76,7 +75,6 @@ const RANGES: readonly SegmentedOption[] = [
     ListSectionComponent,
     SearchInputComponent,
     SegmentedComponent,
-    SkeletonComponent,
     TabGroupComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -185,11 +183,6 @@ const RANGES: readonly SegmentedOption[] = [
           </cmn-column>
         </cmn-data-table>
       </section>
-
-      <section class="flex flex-col gap-cmn-3" aria-labelledby="g-loading">
-        <h2 id="g-loading" class="text-cmn-lg font-semibold text-text-primary">Loading</h2>
-        <cmn-skeleton [count]="2" shape="list" />
-      </section>
     </div>
   `,
 })
@@ -210,5 +203,5 @@ const meta: Meta<ListsGoldenComponent> = {
 export default meta;
 type Story = StoryObj<ListsGoldenComponent>;
 
-/** Every Carbon-step-3 list and table piece, once: tabs, switcher, search, rows, table, loading. */
+/** Every Carbon-step-3 list and table piece, once: tabs, switcher, search, rows, table. */
 export const Matrix: Story = {};

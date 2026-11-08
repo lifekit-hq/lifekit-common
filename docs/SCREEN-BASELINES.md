@@ -164,7 +164,7 @@ pull request, for the owner to approve.
 every re-specced control in its default, hover, focus, disabled and error states, and
 `projects/ui/e2e/screens/lists.spec.ts` for the list and table family (`Lists/Golden`): tabs, the
 segmented switcher, search, contained-list rows, the structured list, expandable rows, the data
-table and the loading skeleton. Its first baselines come from the update dispatch, not from a
+table (a skeleton is left out: the screen is judged once nothing is loading). Its first baselines come from the update dispatch, not from a
 local run.
 
 ## Updating a baseline
