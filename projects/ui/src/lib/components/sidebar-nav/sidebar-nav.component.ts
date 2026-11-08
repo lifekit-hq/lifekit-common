@@ -62,7 +62,7 @@ const NAV_LINK_CLASSES =
             (click)="navClick.emit(item)"
             type="button"
           >
-            <cmn-badge [count]="item.badge ? item.badge() : 0" status="error">
+            <cmn-badge class="flex" [count]="item.badge ? item.badge() : 0" status="error">
               <cmn-icon [name]="item.icon" size="sm" />
             </cmn-badge>
             @if (!isCollapsed()) {
