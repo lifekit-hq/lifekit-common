@@ -12,6 +12,10 @@ import {
   viewChild,
 } from '@angular/core';
 
+import {
+  CmnPullRefreshService,
+  type CmnReloadHook,
+} from '../../services/pull-refresh/pull-refresh.service';
 import {PageFrameService} from '../app-layout/page-frame';
 
 /**
@@ -103,6 +107,13 @@ const RAIL_CLASSES = 'empty:hidden';
  *   top-level block) in a 320px rail beside it from xl up, under it below xl. Only a kind with a
  *   rail draws `cmnPageRail` blocks.
  *
+ * `reload` makes a tab root pull to refresh (Apple HIG, Refreshing content): hand it the function
+ * that fetches the page's data again, usually a store method (`[reload]="store.load"`), and the
+ * shell's pull gesture calls it and keeps its indicator up while it runs. `reloading` is the
+ * store's busy flag (`store.isLoading()`): the indicator then stays until it clears, which a
+ * method that returns nothing cannot say itself. Only a tab root pulls; the page on a pushed
+ * screen has no gesture to wire.
+ *
  * Each kind has golden screens in Storybook (Templates/List, Detail, Form, Settings and Overview).
  *
  * `fill` makes it a full-height column whose content can take the remaining height (a
@@ -154,6 +165,10 @@ export class PageComponent {
   /** The large title when the route declares none in its data (or outside `cmn-app-layout`). */
   public readonly title = input<string>('');
   public readonly fill = input(false, {transform: booleanAttribute});
+  /** Reloads the page's data when a tab root is pulled down (see above). */
+  public readonly reload = input<CmnReloadHook | undefined>(undefined);
+  /** The reload is still running; the pull's indicator stays up while it is. */
+  public readonly reloading = input(false, {transform: booleanAttribute});
 
   protected readonly titleClasses = TITLE_CLASSES;
 
@@ -183,6 +198,13 @@ export class PageComponent {
   );
 
   constructor() {
+    const pullRefresh = inject(CmnPullRefreshService);
+    effect(onCleanup => {
+      const reload = this.reload();
+      if (reload) {
+        onCleanup(pullRefresh.register(reload, {busy: this.reloading}));
+      }
+    });
     const frame = this.frame;
     if (!frame) {
       return;

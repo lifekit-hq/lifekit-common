@@ -15,6 +15,9 @@ import {
 } from './golden-screen';
 import {PageComponent} from './page.component';
 
+/** How long the fake reload takes, long enough to see the indicator. */
+const SIMULATED_RELOAD_MS = 1200;
+
 interface Task {
   readonly id: number;
   readonly title: string;
@@ -55,7 +58,7 @@ const DONE: readonly Task[] = [
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <cmn-page>
+    <cmn-page [reload]="reload">
       <form (submit)="$event.preventDefault()" class="flex gap-cmn-group-gap">
         <cmn-input
           class="min-w-0 flex-1"
@@ -90,6 +93,12 @@ const DONE: readonly Task[] = [
 class TasksPageComponent {
   protected readonly open = OPEN;
   protected readonly done = DONE;
+  /**
+   * A tab root reloads its data on a pull (Apple HIG, Refreshing content): the page hands its
+   * store's load to `reload` and the shell draws the gesture. Fake here, as the data is.
+   */
+  protected readonly reload = (): Promise<void> =>
+    new Promise(resolve => setTimeout(resolve, SIMULATED_RELOAD_MS));
 }
 
 /**
