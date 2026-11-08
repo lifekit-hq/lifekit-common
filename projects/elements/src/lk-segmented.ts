@@ -68,8 +68,9 @@ function keyStep(key: string): 1 | -1 | 'first' | 'last' | undefined {
  * Semantics: `role="radiogroup"` of `role="radio"` cells with a roving tabindex - Tab lands on the
  * chosen cell (or the first enabled one), the arrow keys move and choose, Home/End jump to the
  * ends, and disabled cells are skipped. Cells share the row equally, never wrap, are at least
- * 44px wide and, below 768px, 44px tall (40px from 768px up) so a phone thumb can hit them, and are never narrower than their label: the row fills
- * its container, and scrolls sideways inside it rather than cut a label or widen the page.
+ * 44px wide and, below 768px, 44px tall (40px from 768px up) so a phone thumb can hit them, and are
+ * never narrower than their label: the row fills its container, and scrolls sideways inside it
+ * rather than cut a label or widen the page.
  *
  * Use it for five segments or fewer, with short labels. More choices, or longer labels, belong in a
  * menu or an `lk-chip-row`. In development a row that has to scroll logs a console warning.
