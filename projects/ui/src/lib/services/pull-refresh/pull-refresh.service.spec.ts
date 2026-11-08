@@ -109,6 +109,14 @@ describe('CmnPullRefreshService', () => {
     expect(settled).toBe(true);
   });
 
+  it('should end the refresh when the registration is withdrawn while busy stays true', async () => {
+    const withdraw = service.register(() => undefined, {busy: signal(true)});
+    const done = service.refresh();
+    withdraw();
+    await done;
+    expect(service.refreshing()).toBe(false);
+  });
+
   it('should not wait for a busy signal that is already clear', async () => {
     service.register(() => undefined, {busy: signal(false)});
     await service.refresh();

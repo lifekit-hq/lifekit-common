@@ -462,4 +462,30 @@ describe('PageComponent reload (pull to refresh)', () => {
     await done;
     expect(settled).toBe(true);
   });
+
+  it('ends the refresh when the page is destroyed while still reloading', async () => {
+    fixture.componentInstance.reload.set(() => undefined);
+    fixture.componentInstance.reloading.set(true);
+    fixture.detectChanges();
+
+    const done = service.refresh();
+    fixture.destroy();
+    await done;
+    expect(service.refreshing()).toBe(false);
+  });
+
+  it('keeps holding when the reload starts loading after the page last rendered', async () => {
+    fixture.componentInstance.reload.set(() => fixture.componentInstance.reloading.set(true));
+    fixture.autoDetectChanges();
+
+    let settled = false;
+    const done = service.refresh().then(() => (settled = true));
+    await new Promise(resolve => setTimeout(resolve, motionDurationMs('long') + 20));
+    expect(settled).toBe(false);
+
+    fixture.componentInstance.reloading.set(false);
+    fixture.detectChanges();
+    await done;
+    expect(settled).toBe(true);
+  });
 });

@@ -1,4 +1,5 @@
 import {
+  afterNextRender,
   computed,
   DestroyRef,
   effect,
@@ -91,9 +92,9 @@ export class CmnPullRefreshService {
     }
   }
 
-  private async settle({reload, busy}: Registration): Promise<void> {
+  private async settle(entry: Registration): Promise<void> {
     try {
-      const result = reload();
+      const result = entry.reload();
       if (isObservable(result)) {
         await lastValueFrom(result, {defaultValue: undefined});
       } else {
@@ -103,16 +104,22 @@ export class CmnPullRefreshService {
       // The page's own store reports the failure; the refresh just ends.
       return;
     }
-    if (busy) {
-      await this.whenIdle(busy);
+    if (entry.busy) {
+      await this.whenIdle(entry, entry.busy);
     }
   }
 
-  private whenIdle(busy: Signal<boolean>): Promise<void> {
-    return new Promise(resolve => {
+  /**
+   * Resolves when `busy` clears or the registration is withdrawn (its page is gone, so nothing
+   * will ever update `busy` again). The first look waits for the next render, because a page's
+   * `busy` is an input that only catches up with the store on the parent's next change detection.
+   */
+  private async whenIdle(entry: Registration, busy: Signal<boolean>): Promise<void> {
+    await new Promise<void>(resolve => afterNextRender(() => resolve(), {injector: this.injector}));
+    await new Promise<void>(resolve => {
       const watcher = effect(
         () => {
-          if (!busy()) {
+          if (!busy() || !this.registrations().includes(entry)) {
             untracked(() => {
               watcher.destroy();
               resolve();
