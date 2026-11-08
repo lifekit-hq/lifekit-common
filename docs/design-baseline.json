@@ -91,12 +91,6 @@
       "reason": "The frame holds the phone tab bar, which is docked flush to the bottom edge by design (iOS tab bar, no inset)."
     },
     {
-      "rule": "text-occlusion",
-      "stories": ["components-listitemrow--swipe-*"],
-      "max": 6,
-      "reason": "A swipe tray sits behind the opaque row surface until the row slides open; its buttons stay in the DOM so Tab reveals them and a screen reader can reach them, so the label under the row text is the resting state, not a collision."
-    },
-    {
       "rule": "text-overflow",
       "stories": ["directives-tooltip--truncated"],
       "match": "truncate",

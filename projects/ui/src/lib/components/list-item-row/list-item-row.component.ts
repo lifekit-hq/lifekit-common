@@ -72,7 +72,15 @@ const SWIPE_FRAME_CLASSES = 'relative overflow-hidden';
 const SWIPE_SURFACE_CLASSES = 'relative touch-pan-y bg-surface-card';
 const SWIPE_SLIDE_CLASSES =
   ' transition-transform duration-cmn-medium ease-cmn-standard motion-reduce:transition-none';
+/**
+ * A tray paints only while the surface uncovers it: a closed tray under the opaque surface would
+ * otherwise draw its label beneath the row's text. It goes transparent, never `hidden`, `invisible`
+ * or `inert`, so its button stays focusable and in the accessibility tree; focus then slides the
+ * row open. It fades with the slide and snaps with it.
+ */
 const SWIPE_TRAY_CLASSES = 'absolute inset-y-0 flex';
+const SWIPE_TRAY_FADE_CLASSES =
+  ' transition-opacity duration-cmn-medium ease-cmn-standard motion-reduce:transition-none';
 const SWIPE_ACTION_CLASSES =
   'flex min-w-cmn-size-lg flex-col items-center justify-center gap-cmn-1 px-cmn-4 ' +
   'text-text-inverse focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset ' +
@@ -151,7 +159,7 @@ const SWIPE_TONE_CLASSES: Record<CmnRowSwipeTone, string> = {
         @if (swipeLeading(); as leading) {
           <div
             #leadingTray
-            [class]="trayClasses + ' left-0'"
+            [class]="leadingTrayClasses()"
             (focusin)="revealFrom('leading', leadingTray)"
             (focusout)="closeOnFocusLeave($event, leadingTray)"
           >
@@ -169,7 +177,7 @@ const SWIPE_TONE_CLASSES: Record<CmnRowSwipeTone, string> = {
         @if (swipeTrailing(); as trailingSwipe) {
           <div
             #trailingTray
-            [class]="trayClasses + ' right-0'"
+            [class]="trailingTrayClasses()"
             (focusin)="revealFrom('trailing', trailingTray)"
             (focusout)="closeOnFocusLeave($event, trailingTray)"
           >
@@ -248,7 +256,6 @@ export class ListItemRowComponent {
   protected readonly actionWrapperClasses = ACTION_WRAPPER_CLASSES;
 
   protected readonly frameClasses = SWIPE_FRAME_CLASSES;
-  protected readonly trayClasses = SWIPE_TRAY_CLASSES;
 
   protected readonly swipeable = computed(() => !!this.swipeLeading() || !!this.swipeTrailing());
   protected readonly swipe = new RowSwipe({
@@ -259,6 +266,13 @@ export class ListItemRowComponent {
   });
   protected readonly surfaceClasses = computed(
     () => SWIPE_SURFACE_CLASSES + (this.swipe.dragging() ? '' : SWIPE_SLIDE_CLASSES)
+  );
+
+  protected readonly leadingTrayClasses = computed(() =>
+    this.trayClasses('left-0', this.swipe.offset() > 0)
+  );
+  protected readonly trailingTrayClasses = computed(() =>
+    this.trayClasses('right-0', this.swipe.offset() < 0)
   );
 
   protected readonly trailingName = computed(
@@ -294,6 +308,11 @@ export class ListItemRowComponent {
       this.document.addEventListener('pointerdown', shut, true);
       onCleanup(() => this.document.removeEventListener('pointerdown', shut, true));
     });
+  }
+
+  private trayClasses(edge: string, uncovered: boolean): string {
+    const fade = this.swipe.dragging() ? '' : SWIPE_TRAY_FADE_CLASSES;
+    return `${SWIPE_TRAY_CLASSES} ${edge} ${uncovered ? 'opacity-100' : 'opacity-0'}${fade}`;
   }
 
   protected actionClasses(action: CmnRowSwipeAction): string {

@@ -39,7 +39,10 @@ const SWIPE_STEPS = 6;
 async function swipeRow(page: Page): Promise<void> {
   const session = await page.context().newCDPSession(page);
   await session.send('Emulation.setTouchEmulationEnabled', {enabled: true, maxTouchPoints: 1});
-  const box = await page.locator('[data-swipe] .touch-pan-y').boundingBox();
+  const surface = page.locator('[data-swipe] .touch-pan-y');
+  // A touch outside the viewport lands on nothing, so bring the row on screen first.
+  await surface.scrollIntoViewIfNeeded();
+  const box = await surface.boundingBox();
   if (!box) {
     throw new Error('the swipe row is not on screen');
   }
@@ -52,6 +55,8 @@ async function swipeRow(page: Page): Promise<void> {
     await session.send('Input.dispatchTouchEvent', {type: 'touchMove', touchPoints: at(i)});
   }
   await session.send('Input.dispatchTouchEvent', {type: 'touchEnd', touchPoints: []});
+  // Puts the sticky section headings back where the still page draws them.
+  await page.evaluate(() => window.scrollTo(0, 0));
 }
 
 const lists: BaselineRoute = {

@@ -393,6 +393,51 @@ describe('ListItemRowComponent — swipe actions', () => {
     expect(trayButton('Done').className).toContain('bg-status-success');
   });
 
+  it('paints a tray only on the side the surface uncovers, keeping its button in the tab order', () => {
+    create();
+    const tray = (name: string): HTMLElement => trayButton(name).parentElement as HTMLElement;
+    const painted = (name: string): boolean => tray(name).classList.contains('opacity-100');
+    expect([painted('Done'), painted('Remove')]).toEqual([false, false]);
+    expect(tray('Done').classList.contains('opacity-0')).toBe(true);
+
+    swipeBy(TRAY_PX);
+    expect([painted('Done'), painted('Remove')]).toEqual([true, false]);
+    expect(surface().style.transform).toBe(`translateX(${TRAY_PX}px)`);
+
+    trayButton('Done').click();
+    fixture.detectChanges();
+    swipeBy(-TRAY_PX);
+    expect([painted('Done'), painted('Remove')]).toEqual([false, true]);
+
+    // Transparent, never removed from focus or the accessibility tree.
+    for (const name of ['Done', 'Remove']) {
+      expect(tray(name).className).not.toMatch(/\b(hidden|invisible)\b/);
+      expect(tray(name).hasAttribute('inert')).toBe(false);
+      expect(trayButton(name).tabIndex).toBe(0);
+    }
+  });
+
+  it('fades a tray with the slide, but not while a finger drags or for reduced motion', () => {
+    create();
+    const tray = trayButton('Done').parentElement as HTMLElement;
+    expect(tray.className).toContain('transition-opacity');
+    expect(tray.className).toContain('motion-reduce:transition-none');
+    touch('pointerdown', 0);
+    touch('pointermove', TRAY_PX / 4);
+    expect(tray.className).not.toContain('transition-opacity');
+    expect(tray.className).toContain('opacity-100');
+    touch('pointerup', TRAY_PX / 4);
+    expect(tray.className).toContain('transition-opacity');
+    expect(tray.className).toContain('opacity-0');
+  });
+
+  it('paints the tray a focused button sits in, since focus slides the row open', () => {
+    create();
+    trayButton('Remove').focus();
+    fixture.detectChanges();
+    expect((trayButton('Remove').parentElement as HTMLElement).className).toContain('opacity-100');
+  });
+
   it('draws a neutral action in the accent when it names no tone', () => {
     create({leading: {label: 'Read', icon: 'Check'}, trailing: null});
     expect(trayButton('Read').className).toContain('bg-accent-default');
