@@ -7,6 +7,7 @@ import {runInNewContext} from 'node:vm';
 import {after, before, describe, it} from 'node:test';
 
 import {
+  PRESET_STORAGE_KEY,
   THEME_SCRIPT,
   THEME_STORAGE_KEY,
   themeScriptCspHash,
@@ -16,10 +17,21 @@ import {SEED_STORAGE_KEY, storeSeed} from '../engine/index.mjs';
 import {buildBrand} from '../scripts/build-brand.mjs';
 
 /** Runs the script against a fake page and returns the `data-theme` and inline properties it set. */
-function runPage({stored, seed, osDark = false, moreContrast = false, storageThrows = false}) {
+function runPage({
+  stored,
+  preset,
+  seed,
+  osDark = false,
+  moreContrast = false,
+  storageThrows = false,
+}) {
   const attrs = {};
   const style = {};
-  const items = {[THEME_STORAGE_KEY]: stored, [SEED_STORAGE_KEY]: seed};
+  const items = {
+    [THEME_STORAGE_KEY]: stored,
+    [PRESET_STORAGE_KEY]: preset,
+    [SEED_STORAGE_KEY]: seed,
+  };
   const sandbox = {
     localStorage: {
       getItem(key) {
@@ -42,7 +54,7 @@ function runPage({stored, seed, osDark = false, moreContrast = false, storageThr
     },
   };
   runInNewContext(THEME_SCRIPT, sandbox);
-  return {theme: attrs['data-theme'], style};
+  return {theme: attrs['data-theme'], preset: attrs['data-preset'], style};
 }
 
 /** Runs the script against a fake page and returns the `data-theme` it set. */
@@ -73,6 +85,42 @@ describe('theme script', () => {
 
   it('reads the key ThemeService writes', () => {
     assert.equal(THEME_STORAGE_KEY, 'cmn-theme');
+  });
+});
+
+describe('theme script design preset', () => {
+  it('sets data-preset from the stored id', () => {
+    assert.equal(runPage({preset: 'lifekit'}).preset, 'lifekit');
+    assert.equal(runPage({preset: 'soft-2'}).preset, 'soft-2');
+  });
+
+  it('leaves the attribute off for no choice and for carbon, the default look', () => {
+    assert.equal(runPage({}).preset, undefined);
+    assert.equal(runPage({preset: 'carbon'}).preset, undefined);
+  });
+
+  it('ignores a value that is not a plain id, so nothing hostile reaches the selector', () => {
+    for (const preset of ['', 'Lifekit', '1soft', "x'] { }", 'a b', 'a/b']) {
+      assert.equal(runPage({preset}).preset, undefined, preset);
+    }
+  });
+
+  it('survives blocked storage and still applies the theme', () => {
+    const page = runPage({preset: 'lifekit', storageThrows: true, osDark: true});
+    assert.equal(page.preset, undefined);
+    assert.equal(page.theme, 'light');
+  });
+
+  it('is independent of the theme and of the seed colour', () => {
+    const seed = storedSeed({seed: '#4f46e5', intensity: 0.45});
+    const page = runPage({preset: 'lifekit', stored: 'dark', seed});
+    assert.equal(page.preset, 'lifekit');
+    assert.equal(page.theme, 'dark');
+    assert.ok(Object.keys(page.style).length > 0);
+  });
+
+  it('reads the key PresetService writes', () => {
+    assert.equal(PRESET_STORAGE_KEY, 'cmn-preset');
   });
 });
 
@@ -118,7 +166,7 @@ describe('theme script CSP hash', () => {
   // A script edit changes the hash every app pins in its CSP. Update this value
   // deliberately, in the same change, and say so in the release notes.
   it('is pinned', () => {
-    assert.equal(themeScriptCspHash(), "'sha256-1CdonPxh0ooZS+15UPGry+te8K78Ih2R0PkG9xcbnyU='");
+    assert.equal(themeScriptCspHash(), "'sha256-XLcDH9EabaP4jL2nLTj6/11XVBY0EZPUT0250YykyFQ='");
   });
 });
 

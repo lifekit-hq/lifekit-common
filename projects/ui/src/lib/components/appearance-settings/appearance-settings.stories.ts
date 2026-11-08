@@ -3,6 +3,7 @@ import {APP_SEEDS} from '@lifekit-hq/tokens/engine';
 import {applicationConfig, type Meta, moduleMetadata, type StoryObj} from '@storybook/angular';
 
 import {APPEARANCE_STORE, type AppearanceStore} from '../../services/appearance/appearance.service';
+import {provideDesignPresets} from '../../services/preset/preset.service';
 import {SettingsSectionComponent} from '../settings-section/settings-section.component';
 import {AppearanceSettingsComponent} from './appearance-settings.component';
 
@@ -39,6 +40,19 @@ export const SyncedToAccount: Story = {
 
 /** No preferences endpoint: the choice is kept in this browser only, and the caption says so. */
 export const DeviceOnly: Story = {};
+
+/**
+ * An app that offers more than one design preset gets a Design control above the colour. The choice
+ * is kept on this device whatever the caption below says about the rest: it is not part of the
+ * account appearance. `Demo` has no stylesheet here; real presets ship in `@lifekit-hq/tokens`.
+ */
+export const WithDesignPresets: Story = {
+  decorators: [
+    applicationConfig({
+      providers: [provideDesignPresets({id: 'demo', label: 'Demo'})],
+    }),
+  ],
+};
 
 /** The way an app places it: the body of the standard Appearance section. */
 export const InASettingsSection: Story = {

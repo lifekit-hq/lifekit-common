@@ -23,6 +23,13 @@ Design tokens for the lifekit ecosystem, framework-agnostic.
   `--cmn-control-h`) set the composed page: 16/16/24/8/48px on a phone, the gutter 32px and the
   title gap 24px from 768px; the control height is Carbon's 48px at every width. `cmn-page` reads them; values and
   rules: the Layout section of [`DESIGN.md`](../../DESIGN.md#layout).
+- `presets/<id>.css`: design presets, a look the whole library can wear, chosen by `data-preset` on
+  `<html>` next to `data-theme`. Carbon is the unscoped default in `theme.css`, so no attribute means
+  Carbon. A preset overrides token names under `:root[data-preset='<id>']`, never `--color-*`, and
+  loads its own font; an app imports only the presets it offers. The contract and the per-preset
+  test are in [`presets/README.md`](presets/README.md); `DESIGN.md` has the Presets section. The
+  Lit elements' spacing (`--space-1..4`, 4/8/12/16px) is defined in `theme.css` so a preset can
+  reset it. The pre-paint script sets `data-preset` from `cmn-preset`.
 - `tailwind`: a Tailwind preset mapping the tokens onto the `cmn-*` scale (`duration-cmn-short|medium|long`,
   `ease-cmn-standard|decelerate|accelerate`, `bg-skeleton`). Its fonts, radii,
   shadows and `cmn-touch` size read the `theme.css` custom properties, so a value change lands in `theme.css` only.

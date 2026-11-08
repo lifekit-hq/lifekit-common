@@ -7,6 +7,11 @@
  * The stored choice is the `cmn-theme` key `ThemeService` writes (`light` | `dark`). No
  * stored choice means "follow the OS", so a stored value other than those two is ignored.
  *
+ * The stored design preset is the `cmn-preset` key `PresetService` writes (a lowercase id such as
+ * `lifekit`). It is set as `data-preset` on `<html>`. No stored choice, `carbon` or anything that is
+ * not a plain id means the default look, which is the absence of the attribute. An id whose
+ * stylesheet the app does not load changes nothing, so a stale choice is harmless.
+ *
  * A user's own colour (`cmn-theme-seed`, written by `ThemeService.setSeed` or the engine's
  * `storeSeed`) carries its palette already derived for each theme and contrast level, so the
  * script only picks the variant and sets it inline on `<html>` (CSSOM, so no `style-src` change).
@@ -22,11 +27,14 @@ import {SEED_CACHE_VERSION, SEED_STORAGE_KEY} from '../engine/runtime.mjs';
 /** localStorage key shared with `ThemeService`. */
 export const THEME_STORAGE_KEY = 'cmn-theme';
 
+/** localStorage key shared with `PresetService`. */
+export const PRESET_STORAGE_KEY = 'cmn-preset';
+
 /**
  * Exact text between `<script>` and `</script>`, and byte for byte the shipped
  * `theme-init.js`, so the file inlined verbatim matches {@link themeScriptCspHash}.
  */
-export const THEME_SCRIPT = `// Apply the stored/OS theme and the stored seed colour before first paint so pages never flash.
+export const THEME_SCRIPT = `// Apply the stored/OS theme, the stored design preset and the stored seed colour before first paint so pages never flash.
 (function () {
   var root = document.documentElement;
   var theme = 'light';
@@ -36,6 +44,11 @@ export const THEME_SCRIPT = `// Apply the stored/OS theme and the stored seed co
     else if (window.matchMedia('(prefers-color-scheme: dark)').matches) theme = 'dark';
   } catch (e) {}
   root.setAttribute('data-theme', theme);
+  try {
+    var preset = localStorage.getItem('${PRESET_STORAGE_KEY}');
+    if (preset && preset !== 'carbon' && /^[a-z][a-z0-9-]*$/.test(preset))
+      root.setAttribute('data-preset', preset);
+  } catch (e) {}
   try {
     var seed = JSON.parse(localStorage.getItem('${SEED_STORAGE_KEY}'));
     if (!seed || seed.v !== ${SEED_CACHE_VERSION} || !seed.css) return;

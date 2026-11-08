@@ -25,6 +25,7 @@
       "types": "./screen/index.d.mts",
       "default": "./screen/index.mjs"
     },
+    "./presets/*": "./presets/*",
     "./seeds/*": "./seeds/*",
     "./brand": "./brand/index.mjs",
     "./brand/vite": "./brand/vite.mjs",
@@ -48,6 +49,7 @@
     "carbon-bridge.css",
     "tailwind/",
     "engine/",
+    "presets/",
     "seeds/",
     "brand/",
     "drift/",

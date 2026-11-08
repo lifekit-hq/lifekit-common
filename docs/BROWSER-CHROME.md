@@ -178,7 +178,9 @@ copy it by hand: `@lifekit-hq/tokens` ships it, along with the hash your CSP nee
   keeps the page and the pinned value in step with the package (next section).
 - **What it does.** It reads the `cmn-theme` key `ThemeService` writes (`light` | `dark`), falls
   back to the OS `prefers-color-scheme`, and sets `data-theme` on `<html>`. No stored choice means
-  the `system` preference, which `ThemeService` then follows live. When the user picked their own
+  the `system` preference, which `ThemeService` then follows live. When the user picked a design
+  preset on this device (`cmn-preset`, written by `PresetService`), it sets `data-preset` on
+  `<html>` too; no stored preset, or `carbon`, leaves the attribute off. When the user picked their own
   colour on this device (`cmn-theme-seed`), it also sets that palette inline on `<html>`, the
   variant for the active theme and `prefers-contrast`, so a custom colour never flashes the app's
   default first. The palette is set through the CSSOM, so `style-src` needs nothing new.

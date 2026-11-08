@@ -28,6 +28,7 @@ export {
 } from './sync.mjs';
 export {brandColors} from './tokens.mjs';
 export {
+  PRESET_STORAGE_KEY,
   THEME_SCRIPT,
   THEME_STORAGE_KEY,
   themeScriptCspHash,
