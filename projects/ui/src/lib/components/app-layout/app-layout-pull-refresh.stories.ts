@@ -56,7 +56,7 @@ class FakeShoppingStore {
     <cmn-page [reload]="store.load" [reloading]="store.isLoading()">
       <p class="text-cmn-sm text-text-secondary">Last synced {{ store.syncedAt() }}</p>
       <cmn-list-section heading="This week">
-        @for (item of items; track item.name) {
+        @for (item of items; track $index) {
           <cmn-list-item-row [label]="item.name" [sublabel]="item.note" />
         }
       </cmn-list-section>
@@ -65,7 +65,8 @@ class FakeShoppingStore {
 })
 class ShoppingPageComponent {
   protected readonly store = new FakeShoppingStore();
-  protected readonly items = ITEMS;
+  /** Long enough that the page scrolls in `main`. */
+  protected readonly items = [...ITEMS, ...ITEMS];
 }
 
 @Component({
@@ -77,7 +78,7 @@ class ShoppingPageComponent {
       <p class="text-cmn-sm text-text-secondary">Last synced {{ store.syncedAt() }}</p>
       <cmn-page-scroll label="Shopping list">
         <cmn-list-section heading="This week">
-          @for (item of items; track item.name) {
+          @for (item of items; track $index) {
             <cmn-list-item-row [label]="item.name" [sublabel]="item.note" />
           }
         </cmn-list-section>
@@ -98,7 +99,7 @@ class ShoppingFillPageComponent {
   template: `
     <cmn-page>
       <cmn-list-section heading="Pantry">
-        @for (item of items; track item.name) {
+        @for (item of items; track $index) {
           <cmn-list-item-row [label]="item.name" [sublabel]="item.note" />
         }
       </cmn-list-section>

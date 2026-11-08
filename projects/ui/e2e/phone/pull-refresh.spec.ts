@@ -110,7 +110,8 @@ test.describe(`pull to refresh ${PHONE.width}x${PHONE.height}`, () => {
     await page.locator('main').evaluate(el => el.scrollTo(0, 120));
     await (await Finger.on(page)).pull(PULL_PX);
     await expect(page.getByRole('status')).toHaveText('');
-    await expect(page.getByText(FIRST_SYNC)).toBeVisible();
+    // Scrolled out of view, but still the first sync: nothing reloaded.
+    await expect(page.getByText(FIRST_SYNC)).toBeAttached();
     expect(await pulled(page)).toBe(0);
   });
 
