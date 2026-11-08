@@ -8,6 +8,20 @@ import {
 
 let rowCounter = 0;
 
+/**
+ * Carbon's expandable row: at least the 48px layout step tall, a hover fill, a chevron that turns
+ * a quarter turn from pointing right to pointing down, and the expanded content on the page
+ * ground under the row. From `md` the chevron leads the row, as in Carbon's table; on a phone it
+ * trails, where iOS draws a disclosure indicator. The turn is a transform, held still under
+ * Reduce Motion.
+ */
+const ROW_CLASSES =
+  'relative flex min-h-cmn-size-lg items-center justify-between gap-cmn-4 px-cmn-4 py-cmn-3 ' +
+  'transition-colors duration-cmn-short ease-cmn-standard hover:bg-surface-hover';
+const CHEVRON_CLASSES =
+  'size-4 shrink-0 text-text-secondary transition-transform duration-cmn-short ' +
+  'ease-cmn-standard motion-reduce:transition-none md:order-first';
+
 @Component({
   selector: 'cmn-disclosure-row',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -17,9 +31,7 @@ let rowCounter = 0;
     <div class="border-b border-border-default last:border-0">
       <!-- The row is one press target (the button's ::after covers it); actions sit above it, so
            their controls are never nested inside the toggle. -->
-      <div
-        class="relative flex items-center justify-between gap-cmn-4 px-cmn-4 py-cmn-4 hover:bg-surface-bg transition-colors"
-      >
+      <div [class]="rowClasses">
         <button
           [attr.aria-expanded]="expanded()"
           [attr.aria-controls]="bodyId"
@@ -53,22 +65,17 @@ let rowCounter = 0;
         }
         <div class="relative z-10 empty:hidden"><ng-content select="[actions]" /></div>
         <svg
-          [class.rotate-180]="expanded()"
-          class="w-4 h-4 text-text-secondary transition-transform shrink-0"
+          [class.rotate-90]="expanded()"
+          [class]="chevronClasses"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
           aria-hidden="true"
         >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M19 9l-7 7-7-7"
-          />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
         </svg>
       </div>
-      <div [id]="bodyId" [hidden]="!expanded()">
+      <div [id]="bodyId" [hidden]="!expanded()" class="bg-surface-bg">
         <ng-content />
       </div>
     </div>
@@ -89,6 +96,8 @@ export class DisclosureRowComponent {
   /** Whether the row starts expanded; a later change to it re-applies. */
   public readonly open = input<boolean>(true);
 
+  protected readonly rowClasses = ROW_CLASSES;
+  protected readonly chevronClasses = CHEVRON_CLASSES;
   protected readonly bodyId = `cmn-disclosure-row-${++rowCounter}`;
   protected readonly expanded = linkedSignal(() => this.open());
 

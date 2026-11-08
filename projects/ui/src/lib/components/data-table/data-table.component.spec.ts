@@ -136,7 +136,7 @@ describe('DataTableComponent', () => {
     fixture.detectChanges();
     const row = fixture.nativeElement.querySelector('tr[cdk-row]') as HTMLElement;
     expect(row.getAttribute('tabindex')).toBe('0');
-    expect(row.className).toContain('hover:bg-surface-raised');
+    expect(row.className).toContain('hover:bg-surface-hover');
     expect(row.className).toContain('cursor-pointer');
   });
 
@@ -191,6 +191,17 @@ describe('DataTableComponent', () => {
     const table = fixture.debugElement.children[0].componentInstance as DataTableComponent;
     expect(table.headerCellClass(align)).toContain(expected);
     expect(table.dataCellClass(align)).toContain(expected);
+  });
+
+  it("draws Carbon's table: a 48px header on the raised fill in primary semibold, 48px cells", () => {
+    const table = fixture.debugElement.children[0].componentInstance as DataTableComponent;
+    const header = table.headerCellClass('left');
+    for (const cls of ['h-cmn-size-lg', 'bg-surface-raised', 'text-cmn-sm', 'font-semibold']) {
+      expect(header).toContain(cls);
+    }
+    expect(header).toContain('text-text-primary');
+    expect(header).not.toContain('text-text-secondary');
+    expect(table.dataCellClass('left')).toContain('h-cmn-size-lg');
   });
 });
 
@@ -351,7 +362,7 @@ describe('DataTableComponent list-row mode', () => {
   it('makes table rows focusable and actionable when rowsActionable is set', () => {
     const row = el.querySelector('tr[cdk-row]') as HTMLElement;
     expect(row.getAttribute('tabindex')).toBe('0');
-    expect(row.className).toContain('hover:bg-surface-raised');
+    expect(row.className).toContain('hover:bg-surface-hover');
     expect(row.className).toContain('cursor-pointer');
   });
 
@@ -396,7 +407,7 @@ describe('DataTableComponent list-row mode', () => {
     fixture.detectChanges();
     const [first] = listRows();
     expect(first.getAttribute('tabindex')).toBe('0');
-    expect(first.className).toContain('hover:bg-surface-raised');
+    expect(first.className).toContain('hover:bg-surface-hover');
     first.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter', bubbles: true}));
     expect(fixture.componentInstance.clicked?.merchant).toBe('Whole Foods');
   });

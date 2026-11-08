@@ -53,16 +53,16 @@ describe('LkSegmented', () => {
     );
   });
 
-  it('marks the chosen cell with the accent tint and a strong edge, not the card surface', async () => {
+  it("marks the chosen cell with the ink fill, square, as Carbon's content switcher does", async () => {
     const el = await mount();
-    el.style.setProperty('--color-accent-subtle', 'rgb(1, 2, 3)');
-    el.style.setProperty('--color-accent-default', 'rgb(4, 5, 6)');
-    el.style.setProperty('--color-border-strong', 'rgb(7, 8, 9)');
+    el.style.setProperty('--color-text-primary', 'rgb(1, 2, 3)');
+    el.style.setProperty('--color-text-inverse', 'rgb(4, 5, 6)');
     const chosen = getComputedStyle(cells(el)[2]);
     expect(chosen.backgroundColor).toBe('rgb(1, 2, 3)');
     expect(chosen.color).toBe('rgb(4, 5, 6)');
-    expect(chosen.boxShadow).toContain('rgb(7, 8, 9)');
-    expect(chosen.boxShadow).toContain('inset');
+    expect(chosen.borderRadius).toBe('0px');
+    const group = getComputedStyle(el.shadowRoot?.querySelector('.group') as HTMLElement);
+    expect(group.outlineColor).toBe('rgb(1, 2, 3)');
   });
 
   it('leaves the group unnamed when there is no label', async () => {

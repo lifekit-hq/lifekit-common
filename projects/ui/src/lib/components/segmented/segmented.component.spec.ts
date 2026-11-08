@@ -157,17 +157,25 @@ describe('SegmentedComponent', () => {
     expect(emitted).toEqual([]);
   });
 
-  it('moves a disabled choice off the accent tint, so its disabled text is never gray on colour', () => {
+  it('draws the chosen cell as the ink fill, square, and a disabled one off it', () => {
     const chosen = (): HTMLButtonElement =>
       cells().find(c => c.getAttribute('aria-checked') === 'true') as HTMLButtonElement;
-    expect(chosen().classList).toContain('bg-accent-subtle');
+    expect(chosen().classList).toContain('bg-text-primary');
+    expect(chosen().classList).toContain('text-text-inverse');
+    expect(chosen().className).not.toMatch(/(^|\s)rounded/);
+    expect(group().className).toContain('outline-text-primary');
 
     fixture.componentRef.setInput('disabled', true);
     fixture.detectChanges();
 
-    expect(chosen().classList).not.toContain('bg-accent-subtle');
-    expect(chosen().classList).toContain('bg-surface-card');
-    expect(chosen().classList).toContain('ring-border-strong');
+    // Disabled text on the ink fill would be gray on dark, so a disabled choice moves to a neutral surface.
+    expect(chosen().classList).not.toContain('bg-text-primary');
+    expect(chosen().classList).toContain('bg-surface-raised');
+  });
+
+  it('sizes a cell to the 40px layout step, and to the touch size on a phone', () => {
+    expect(cells()[0].classList).toContain('h-cmn-size-md');
+    expect(cells()[0].classList).toContain('max-md:min-h-cmn-touch');
   });
 
   it('drops aria-label when no label is given', () => {

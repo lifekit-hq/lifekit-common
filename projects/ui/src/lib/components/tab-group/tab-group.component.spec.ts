@@ -75,14 +75,15 @@ describe('TabGroupComponent', () => {
       fixture.nativeElement.querySelectorAll('[role="tab"]');
     expect(buttons[0].classList).toContain('border-accent-default');
     expect(buttons[0].classList).toContain('text-text-primary');
+    expect(buttons[0].classList).toContain('font-semibold');
   });
 
   it('should apply inactive classes to non-selected tabs', () => {
     const buttons: NodeListOf<HTMLButtonElement> =
       fixture.nativeElement.querySelectorAll('[role="tab"]');
-    expect(buttons[1].classList).toContain('border-transparent');
+    expect(buttons[1].classList).toContain('border-border-default');
     expect(buttons[1].classList).toContain('text-text-secondary');
-    expect(buttons[2].classList).toContain('border-transparent');
+    expect(buttons[2].classList).toContain('border-border-default');
     expect(buttons[2].classList).toContain('text-text-secondary');
   });
 
@@ -113,7 +114,7 @@ describe('TabGroupComponent', () => {
     buttons[1].click();
     fixture.detectChanges();
     expect(buttons[1].classList).toContain('border-accent-default');
-    expect(buttons[0].classList).toContain('border-transparent');
+    expect(buttons[0].classList).toContain('border-border-default');
   });
 
   it('should not apply active class to any tab when activeTab is empty', () => {
@@ -131,9 +132,8 @@ describe('TabGroupComponent', () => {
       fixture.nativeElement.querySelectorAll('[role="tab"]');
     buttons.forEach(btn => {
       expect(btn.classList).toContain('px-cmn-4');
-      expect(btn.classList).toContain('py-cmn-2');
+      expect(btn.classList).toContain('h-cmn-size-md');
       expect(btn.classList).toContain('text-cmn-sm');
-      expect(btn.classList).toContain('font-medium');
       expect(btn.classList).toContain('border-b-2');
     });
   });
@@ -185,7 +185,7 @@ describe('TabGroupComponent — two-way model binding', () => {
     const buttons: NodeListOf<HTMLButtonElement> =
       fixture.nativeElement.querySelectorAll('[role="tab"]');
     expect(buttons[1].classList).toContain('border-accent-default');
-    expect(buttons[0].classList).toContain('border-transparent');
+    expect(buttons[0].classList).toContain('border-border-default');
   });
 });
 
@@ -284,7 +284,7 @@ describe('TabGroupComponent — routed mode', () => {
     expect(links[0].getAttribute('aria-current')).toBe('page');
     expect(links[0].classList).toContain('border-accent-default');
     expect(links[1].getAttribute('aria-current')).toBeNull();
-    expect(links[1].classList).toContain('border-transparent');
+    expect(links[1].classList).toContain('border-border-default');
   });
 
   it('should move the active state when the route changes', async () => {

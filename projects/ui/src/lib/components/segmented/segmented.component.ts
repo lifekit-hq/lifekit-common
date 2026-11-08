@@ -30,24 +30,26 @@ const HOST_CLASSES =
   'block max-w-full overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden';
 
 /**
- * Equal columns as wide as the widest label (at least `--size-touch`): the row fills its container
- * when that is wider, and scrolls inside it rather than squeeze a label.
+ * Carbon's content switcher: equal columns as wide as the widest label (at least `--size-touch`)
+ * in one square box with a 1px ink outline. The row fills its container when that is wider, and
+ * scrolls inside it rather than squeeze a label.
  */
 const GROUP_CLASSES =
-  'grid w-max min-w-full grid-flow-col auto-cols-[minmax(var(--size-touch),1fr)] gap-0.5 ' +
-  'rounded-cmn-lg bg-surface-raised p-0.5 aria-disabled:opacity-60';
+  'grid w-max min-w-full grid-flow-col auto-cols-[minmax(var(--size-touch),1fr)] ' +
+  'outline outline-1 -outline-offset-1 outline-text-primary aria-disabled:outline-border-default';
 
-/** Cells at least `--size-touch` tall, never narrower than their label, never wrapping. */
+/**
+ * Cells are the 40px layout step tall (at least `--size-touch` on a phone), never narrower than
+ * their label, never wrapping. Focus is the 2px inset outline, drawn above the chosen fill.
+ */
 const CELL_BASE_CLASSES =
-  'min-h-cmn-touch min-w-max cursor-pointer select-none whitespace-nowrap ' +
-  'rounded-cmn-md px-cmn-1 text-cmn-sm font-medium transition-colors touch-manipulation ' +
-  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset ' +
-  'focus-visible:ring-border-focus disabled:cursor-not-allowed disabled:text-text-disabled';
-const CELL_CHECKED_CLASSES =
-  'bg-accent-subtle font-semibold text-accent-default ring-1 ring-inset ring-border-strong';
-/** Disabled text on the accent tint is gray on colour; a disabled choice sits on a neutral surface. */
-const CELL_CHECKED_DISABLED_CLASSES =
-  'bg-surface-card font-semibold ring-1 ring-inset ring-border-strong';
+  'h-cmn-size-md max-md:min-h-cmn-touch min-w-max cursor-pointer select-none whitespace-nowrap ' +
+  'px-cmn-1 text-cmn-sm transition-colors duration-cmn-short ease-cmn-standard ' +
+  'touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 ' +
+  'focus-visible:outline-border-focus disabled:cursor-not-allowed disabled:text-text-disabled';
+const CELL_CHECKED_CLASSES = 'bg-text-primary font-semibold text-text-inverse';
+/** Disabled text on the ink fill is unreadable; a disabled choice sits on a neutral surface. */
+const CELL_CHECKED_DISABLED_CLASSES = 'bg-surface-raised font-semibold';
 const CELL_UNCHECKED_CLASSES =
   'text-text-secondary enabled:hover:bg-surface-hover enabled:hover:text-text-primary';
 
@@ -86,9 +88,9 @@ function keyStep(key: string): 1 | -1 | 'first' | 'last' | undefined {
  *
  * Semantics: `role="radiogroup"` of `role="radio"` cells with a roving tabindex. Tab lands on the
  * chosen cell (or the first enabled one), the arrow keys move and choose, Home and End jump to the
- * ends, and disabled cells are skipped. Cells share the row equally, never wrap, are at least
- * 44px square so a thumb can hit them, and are never narrower than their label; a row that needs
- * more than its container scrolls inside it. Use it for five segments or fewer with short labels;
+ * ends, and disabled cells are skipped. Cells share the row equally, never wrap, are the 40px
+ * layout step tall (at least 44px on a phone, so a thumb can hit them), and are never narrower
+ * than their label; a row that needs more than its container scrolls inside it. Use it for five segments or fewer with short labels;
  * more belong in a menu or a chip row.
  *
  * `value` is a two-way model: `[(value)]="mode"`, or `[value]` with `(valueChange)`. Name the

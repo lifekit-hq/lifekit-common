@@ -511,7 +511,10 @@ that holds each one. A rule marked "follow-up" is the target; its parts and chec
      and the next header pushes it out, as an iOS plain list does. Use `cmn-list-section`. The
      header sticks at `--cmn-sticky-top` with an opaque surface fill, flush under the top bar and
      any pinned notices. Source: UIKit `UITableView.Style.plain`. Check: the header pins flush
-     under the top bar, never overlapping it, at 375, 390 and 402.
+     under the top bar, never overlapping it, at 375, 390 and 402. The rows take Carbon's
+     contained-list geometry (at least 48px, a hairline between them, a hover fill only on a
+     pressable row) and the header is 14px semibold, at least 40px tall; a disclosure row keeps its
+     chevron trailing on the phone, where iOS draws it, and leads with it only from `md`.
 9. **Text input.** Inputs, selects and textareas are 16px below `md` (iOS zooms into a focused
    field set smaller) and 48px tall (Carbon's default control height, above the 44px touch
    target), and carry `inputmode`, `enterkeyhint` and
