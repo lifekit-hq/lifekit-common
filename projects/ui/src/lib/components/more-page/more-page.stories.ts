@@ -3,6 +3,7 @@ import {applicationConfig, type Meta, type StoryObj} from '@storybook/angular';
 
 import {accountMenu, type AppLayoutAccount} from '../app-layout/app-layout.component';
 import type {NavItem} from '../sidebar-nav/sidebar-nav.component';
+import {whatsNewMenuItem} from '../whats-new/whats-new-menu-item';
 import {MorePageComponent} from './more-page.component';
 
 interface MorePageStoryArgs {
@@ -74,6 +75,28 @@ type Story = StoryObj<MorePageStoryArgs>;
 export const Default: Story = {};
 
 export const Dark: Story = {globals: {...PHONE, theme: 'dark'}};
+
+/**
+ * What's new with a release this device has not opened: the account's What's new item wears the
+ * dot (`MenuItem.dot`, from `whatsNewMenuItem(unread)`), and the shell puts the same dot on the
+ * More tab. Opening the sheet clears it.
+ */
+export const WhatsNewUnread: Story = {
+  args: {
+    account: {
+      ...ACCOUNT,
+      menuItems: accountMenu({
+        settingsRoute: '/settings',
+        extras: [whatsNewMenuItem(true), {id: 'report', label: 'Report a problem', icon: 'Flag'}],
+      }),
+    },
+  },
+};
+
+export const WhatsNewUnreadDark: Story = {
+  ...WhatsNewUnread,
+  globals: {...PHONE, theme: 'dark'},
+};
 
 /** An account that is only a label and items has no identity row. */
 export const NoIdentity: Story = {

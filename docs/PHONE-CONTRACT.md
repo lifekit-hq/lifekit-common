@@ -117,7 +117,7 @@ and its menu.
 ```ts
 protected readonly account: AppLayoutAccount = {
   label: user.name, name: user.name, email: user.email, pictureUrl: user.picture,
-  menuItems: accountMenu({settingsRoute: '/settings', extras: [{id: 'whatsNew', label: "What's new", icon: 'Sparkles'}]}),
+  menuItems: accountMenu({settingsRoute: '/settings', extras: [whatsNewMenuItem(whatsNew.hasUnread())]}),
 };
 ```
 
