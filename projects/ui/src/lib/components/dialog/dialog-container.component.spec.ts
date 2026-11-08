@@ -14,6 +14,8 @@ function makeConfig(overrides: Partial<CmnDialogConfig> = {}): CmnDialogConfig {
   return config;
 }
 
+const SHORT_DURATION_MS = 150;
+
 describe('CmnDialogContainerComponent', () => {
   let fixture: ComponentFixture<CmnDialogContainerComponent>;
   let close: ReturnType<typeof vi.fn>;
@@ -59,6 +61,8 @@ describe('CmnDialogContainerComponent', () => {
   });
 
   afterEach(() => {
+    vi.useRealTimers();
+    document.documentElement.style.removeProperty('--cmn-duration-short');
     hosts.splice(0).forEach(host => host.remove());
   });
 
@@ -113,9 +117,11 @@ describe('CmnDialogContainerComponent', () => {
 
   it('closes when the header close button is pressed', () => {
     setup(makeConfig({title: 'Settings'}));
+    vi.useFakeTimers();
     (fixture.nativeElement as HTMLElement)
       .querySelector<HTMLButtonElement>('button[aria-label="Close dialog"]')
       ?.click();
+    vi.runAllTimers();
     expect(close).toHaveBeenCalledTimes(1);
   });
 
@@ -299,10 +305,45 @@ describe('CmnDialogContainerComponent', () => {
       expect(close).toHaveBeenCalledTimes(1);
     });
 
-    it('closes at once on desktop', () => {
+    it('fades the centred dialog out before closing it, like a sheet slides out', () => {
       setup(makeConfig({title: 'Settings'}));
+      vi.useFakeTimers();
       TestBed.inject(DialogRef).close();
+      fixture.detectChanges();
+      expect(close).not.toHaveBeenCalled();
+      expect((fixture.nativeElement as HTMLElement).classList).toContain('cmn-dialog--closing');
+
+      vi.advanceTimersByTime(SHORT_DURATION_MS);
       expect(close).toHaveBeenCalledTimes(1);
+    });
+
+    it('waits for the length of --cmn-duration-short, not a copy of it', () => {
+      setup(makeConfig({title: 'Settings'}));
+      vi.useFakeTimers();
+      document.documentElement.style.setProperty('--cmn-duration-short', '90ms');
+      TestBed.inject(DialogRef).close();
+      vi.advanceTimersByTime(89);
+      expect(close).not.toHaveBeenCalled();
+      vi.advanceTimersByTime(1);
+      expect(close).toHaveBeenCalledTimes(1);
+    });
+
+    it('fades the scrim out with the leaving dialog, and back in if the close is vetoed', () => {
+      const backdrop = document.createElement('div');
+      backdrop.classList.add('cdk-overlay-backdrop-showing');
+      setup(makeConfig({title: 'Settings'}));
+      (TestBed.inject(DialogRef) as unknown as {overlayRef: unknown}).overlayRef = {
+        ...overlayRef,
+        backdropElement: backdrop,
+      };
+      vi.useFakeTimers();
+      const ref = TestBed.inject(DialogRef);
+      (ref as {containerInstance: unknown}).containerInstance = {};
+      ref.close();
+      expect(backdrop.classList.contains('cdk-overlay-backdrop-showing')).toBe(false);
+
+      vi.runAllTimers();
+      expect(backdrop.classList.contains('cdk-overlay-backdrop-showing')).toBe(true);
     });
 
     it('draws an action sheet as a card above a separate Cancel button', () => {

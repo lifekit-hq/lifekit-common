@@ -75,6 +75,10 @@
   --cmn-ease-expressive-standard: cubic-bezier(0.4, 0.14, 0.3, 1);
   --cmn-ease-expressive-decelerate: cubic-bezier(0, 0, 0.3, 1);
   --cmn-ease-expressive-accelerate: cubic-bezier(0.4, 0.14, 1, 1);
+  /* How far a small surface travels while it fades in or out: a toast (distance-sm), the centred
+     dialog (distance-md, Carbon's modal offset). A sheet or drawer moves its whole height instead. */
+  --cmn-motion-distance-sm: 8px;
+  --cmn-motion-distance-md: 24px;
   /* Deprecated: the M3 names these replaced, now aliases of the productive curves so nothing that
      reads them breaks; use decelerate and accelerate. The aliases go in the next major. */
   --cmn-ease-emphasized-decelerate: var(--cmn-ease-decelerate);
@@ -421,6 +425,34 @@ html {
   }
 }
 
+/* ─── Toast (cmn-toast-stack) ───────────────────────────────────────────── */
+/* A toast rises into the stack and leaves the way it came, fading as it moves a short distance
+   (M3 snackbar; Carbon's notifications are static). In is a surface entering (medium, decelerate),
+   out is faster (short, accelerate). Scoped to the stack so a toast drawn alone (a story, a
+   host's own layout) stays still. Opacity and transform only; Reduce Motion (above) drops both. */
+@keyframes cmn-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--cmn-motion-distance-sm));
+  }
+}
+
+@keyframes cmn-toast-out {
+  to {
+    opacity: 0;
+    transform: translateY(var(--cmn-motion-distance-sm));
+  }
+}
+
+cmn-toast-stack > cmn-toast {
+  animation: cmn-toast-in var(--cmn-duration-medium) var(--cmn-ease-decelerate);
+}
+
+cmn-toast-stack > cmn-toast.cmn-toast--leaving {
+  animation: cmn-toast-out var(--cmn-duration-short) var(--cmn-ease-accelerate) forwards;
+  pointer-events: none;
+}
+
 /* ─── Skeleton (cmn-skeleton) ───────────────────────────────────────────── */
 /* A placeholder block with a sheen that sweeps across it. Only the sheen moves, and only by
    transform, so it stays on the compositor; Reduce Motion (above) leaves the still block. */
@@ -483,6 +515,44 @@ html {
 
 .cmn-dialog-backdrop {
   background-color: var(--color-scrim-dialog);
+}
+
+/* Scrims (dialog and drawer). CDK fades a backdrop on its own 400ms curve; here it follows the
+   tokens instead: in over the surface's own entrance (medium, decelerate), out with the surface
+   leaving (short, accelerate). Taking `cdk-overlay-backdrop-showing` off starts the fade-out. */
+.cdk-overlay-backdrop.cmn-dialog-backdrop,
+.cdk-overlay-backdrop.cmn-drawer-backdrop {
+  transition: opacity var(--cmn-duration-short) var(--cmn-ease-accelerate);
+}
+
+.cdk-overlay-backdrop.cdk-overlay-backdrop-showing.cmn-dialog-backdrop,
+.cdk-overlay-backdrop.cdk-overlay-backdrop-showing.cmn-drawer-backdrop {
+  transition: opacity var(--cmn-duration-medium) var(--cmn-ease-decelerate);
+}
+
+/* Centred dialog (md and up): fades in while settling down by Carbon's modal offset, and fades out
+   faster than it arrived. Opacity and transform only. Reduce Motion (above) shortens both to
+   nothing, and the container closes at once. */
+@keyframes cmn-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(calc(-1 * var(--cmn-motion-distance-md)));
+  }
+}
+
+cmn-dialog-container[data-presentation='dialog'] {
+  animation: cmn-dialog-in var(--cmn-duration-medium) var(--cmn-ease-decelerate);
+  transition:
+    opacity var(--cmn-duration-short) var(--cmn-ease-accelerate),
+    transform var(--cmn-duration-short) var(--cmn-ease-accelerate);
+}
+
+cmn-dialog-container[data-presentation='dialog'].cmn-dialog--closing {
+  opacity: 0;
+  transform: translateY(calc(-1 * var(--cmn-motion-distance-md)));
+  transition:
+    opacity var(--cmn-duration-short) var(--cmn-ease-accelerate),
+    transform var(--cmn-duration-short) var(--cmn-ease-accelerate);
 }
 
 /* Phone presentations (cmn-dialog below md). The container sets data-presentation on its host and

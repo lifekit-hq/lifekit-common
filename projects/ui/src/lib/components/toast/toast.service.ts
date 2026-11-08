@@ -123,10 +123,16 @@ export class ToastService {
   /** Renders the visible toasts and runs a clock only for those in view while not paused. */
   private sync(): void {
     if (this.entries.length === 0) {
-      this.overlayRef?.dispose();
-      this.overlayRef = null;
-      this.stackRef = null;
       this.paused = false;
+      if (this.stackRef) {
+        // The last toast plays its exit before the overlay goes (`drained`); with nothing left to
+        // play, as under Reduce Motion, it goes at once.
+        this.stackRef.setInput('toasts', []);
+        this.stackRef.changeDetectorRef.detectChanges();
+        if (this.stackRef.instance.isEmpty()) {
+          this.disposeStack();
+        }
+      }
       return;
     }
     const visible = this.entries.slice(-MAX_VISIBLE_TOASTS);
@@ -150,6 +156,12 @@ export class ToastService {
     stack.changeDetectorRef.detectChanges();
   }
 
+  private disposeStack(): void {
+    this.overlayRef?.dispose();
+    this.overlayRef = null;
+    this.stackRef = null;
+  }
+
   private attachStack(): ComponentRef<ToastStackComponent> {
     if (this.overlayRef && this.stackRef) {
       return this.stackRef;
@@ -166,6 +178,12 @@ export class ToastService {
     ref.instance.dismissed.subscribe(id => this.dismiss(id));
     ref.instance.actioned.subscribe(id => this.runAction(id));
     ref.instance.pausedChange.subscribe(paused => this.setPaused(paused));
+    ref.instance.drained.subscribe(() => {
+      // A toast shown while the last one was leaving keeps the stack.
+      if (this.entries.length === 0) {
+        this.disposeStack();
+      }
+    });
     this.stackRef = ref;
     return ref;
   }

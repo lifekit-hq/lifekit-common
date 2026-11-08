@@ -26,11 +26,14 @@ describe('ToastService', () => {
   }
 
   afterEach(() => {
+    // Let every toast finish leaving, so no overlay outlives its spec.
+    vi.runAllTimers();
     vi.useRealTimers();
   });
 
+  /** The toasts that are staying; one on its way out (`cmn-toast--leaving`) is already gone. */
   function toasts(): NodeListOf<Element> {
-    return document.querySelectorAll('cmn-toast');
+    return document.querySelectorAll('cmn-toast:not(.cmn-toast--leaving)');
   }
 
   it('attaches a toast to the overlay and renders its message', () => {
@@ -107,9 +110,11 @@ describe('ToastService', () => {
 
   function button(name: string): HTMLButtonElement | null {
     return (
-      [...document.querySelectorAll<HTMLButtonElement>('cmn-toast button')].find(
-        el => (el.getAttribute('aria-label') ?? el.textContent?.trim()) === name
-      ) ?? null
+      [
+        ...document.querySelectorAll<HTMLButtonElement>(
+          'cmn-toast:not(.cmn-toast--leaving) button'
+        ),
+      ].find(el => (el.getAttribute('aria-label') ?? el.textContent?.trim()) === name) ?? null
     );
   }
 
@@ -329,6 +334,75 @@ describe('ToastService', () => {
 
       document.documentElement.style.setProperty(CMN_OVERLAY_INSET_BOTTOM, '120px');
       expect(gapBelow()).toBeCloseTo(144, 0);
+    });
+  });
+
+  describe('motion', () => {
+    const SHORT_DURATION_MS = 150;
+
+    function leaving(): NodeListOf<Element> {
+      return document.querySelectorAll('cmn-toast.cmn-toast--leaving');
+    }
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('keeps a dismissed toast drawn, inert, for the length of its exit', () => {
+      service.error('Could not save that change.');
+      button('Dismiss')?.click();
+      expect(toasts()).toHaveLength(0);
+      expect(leaving()).toHaveLength(1);
+      expect(leaving()[0].hasAttribute('inert')).toBe(true);
+
+      vi.advanceTimersByTime(SHORT_DURATION_MS - 1);
+      expect(leaving()).toHaveLength(1);
+      vi.advanceTimersByTime(1);
+      expect(leaving()).toHaveLength(0);
+    });
+
+    it('takes the overlay down only after the last toast has left', () => {
+      service.success('Saved', 1000);
+      vi.advanceTimersByTime(1000);
+      expect(document.querySelectorAll('cmn-toast-stack')).toHaveLength(1);
+
+      vi.advanceTimersByTime(SHORT_DURATION_MS);
+      expect(document.querySelectorAll('cmn-toast-stack')).toHaveLength(0);
+    });
+
+    it('keeps the overlay when a new toast arrives while the last one leaves', () => {
+      service.success('Saved', 1000);
+      vi.advanceTimersByTime(1000);
+      service.info('Next', 5000);
+      vi.advanceTimersByTime(SHORT_DURATION_MS);
+      render();
+
+      expect(document.querySelectorAll('cmn-toast-stack')).toHaveLength(1);
+      expect(messages()).toEqual(['Next']);
+      expect(leaving()).toHaveLength(0);
+    });
+
+    it('does not let a toast that is leaving be dismissed or acted on again', () => {
+      const run = vi.fn();
+      service.info('Archived', {action: {label: 'Undo', run}});
+      const undo = [...document.querySelectorAll<HTMLButtonElement>('cmn-toast button')].find(
+        el => el.textContent?.trim() === 'Undo'
+      );
+      undo?.click();
+      expect(leaving()).toHaveLength(1);
+      expect(leaving()[0].matches(':is([inert], [inert] *)')).toBe(true);
+    });
+
+    it('removes a toast at once under Reduce Motion', () => {
+      const matchMedia = window.matchMedia.bind(window);
+      const reduce: Pick<MediaQueryList, 'matches'> = {matches: true};
+      vi.spyOn(window, 'matchMedia').mockImplementation(query =>
+        query.includes('prefers-reduced-motion') ? (reduce as MediaQueryList) : matchMedia(query)
+      );
+      service.error('Could not save that change.');
+      button('Dismiss')?.click();
+      expect(leaving()).toHaveLength(0);
+      expect(document.querySelectorAll('cmn-toast-stack')).toHaveLength(0);
     });
   });
 });
