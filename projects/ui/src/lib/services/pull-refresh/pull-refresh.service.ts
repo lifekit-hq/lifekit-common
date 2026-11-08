@@ -24,8 +24,9 @@ export type CmnReloadHook = () => unknown;
 export interface CmnPullRefreshOptions {
   /**
    * A signal that is true while the reload is still running (a store's `isLoading`). For a hook that
-   * returns nothing it is how the indicator knows when to leave. It must already be true when the
-   * hook returns, which a store method that sets its status before the request starts satisfies.
+   * returns nothing it is how the indicator knows when to leave. It is first read after the next
+   * render, so it must be true by then, which a store method that sets its status before the
+   * request starts satisfies. The wait also ends if the registration is withdrawn.
    */
   busy?: Signal<boolean>;
 }
