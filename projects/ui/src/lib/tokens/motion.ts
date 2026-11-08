@@ -18,6 +18,17 @@ export function prefersReducedMotion(view: Window | null = globalThis.window ?? 
 }
 
 /**
+ * Whether a script may animate this element: not under Reduce Motion, and only where the host
+ * implements `Element.animate` (jsdom and happy-dom, which a consumer's unit tests may run in, do not).
+ */
+export function canAnimate(element: Element): boolean {
+  return (
+    typeof element.animate === 'function' &&
+    !prefersReducedMotion(element.ownerDocument.defaultView)
+  );
+}
+
+/**
  * How long a motion token runs, in ms, read live from `--cmn-duration-<name>` so a script that
  * waits for a CSS transition to end (an overlay that must outlive its exit) never carries its own
  * copy of the number. Falls back to Carbon's value where the token is not defined.

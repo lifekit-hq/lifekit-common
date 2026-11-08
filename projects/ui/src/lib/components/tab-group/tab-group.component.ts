@@ -18,7 +18,7 @@ import {
 } from '@angular/core';
 import {RouterLink, RouterLinkActive} from '@angular/router';
 
-import {motionDurationMs, motionEasing, prefersReducedMotion} from '../../tokens/motion';
+import {canAnimate, motionDurationMs, motionEasing} from '../../tokens/motion';
 
 export interface CmnTab {
   id: string;
@@ -196,7 +196,7 @@ export class TabGroupComponent {
       afterNextRender(
         () => {
           const panel = this.panel().nativeElement;
-          if (!prefersReducedMotion(panel.ownerDocument.defaultView)) {
+          if (canAnimate(panel)) {
             panel.animate([{opacity: 0}, {opacity: 1}], {
               duration: motionDurationMs('short'),
               easing: motionEasing('standard'),

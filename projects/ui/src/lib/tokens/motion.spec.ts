@@ -1,6 +1,6 @@
 import {afterEach, describe, expect, it, vi} from 'vitest';
 
-import {motionDurationMs, prefersReducedMotion} from './motion';
+import {canAnimate, motionDurationMs, prefersReducedMotion} from './motion';
 
 describe('motion helpers', () => {
   afterEach(() => {
@@ -41,6 +41,29 @@ describe('motion helpers', () => {
       vi.spyOn(window, 'matchMedia').mockReturnValue({matches: false} as MediaQueryList);
       expect(prefersReducedMotion()).toBe(false);
       expect(prefersReducedMotion(null)).toBe(false);
+    });
+  });
+
+  describe('canAnimate', () => {
+    const original = Object.getOwnPropertyDescriptor(Element.prototype, 'animate');
+
+    afterEach(() => {
+      Object.defineProperty(Element.prototype, 'animate', original as PropertyDescriptor);
+    });
+
+    it('is true where Element.animate exists and the system allows motion', () => {
+      vi.spyOn(window, 'matchMedia').mockReturnValue({matches: false} as MediaQueryList);
+      expect(canAnimate(document.createElement('div'))).toBe(true);
+    });
+
+    it('is false under Reduce Motion', () => {
+      vi.spyOn(window, 'matchMedia').mockReturnValue({matches: true} as MediaQueryList);
+      expect(canAnimate(document.createElement('div'))).toBe(false);
+    });
+
+    it('is false where the host has no Element.animate (jsdom, happy-dom)', () => {
+      Object.defineProperty(Element.prototype, 'animate', {value: undefined, configurable: true});
+      expect(canAnimate(document.createElement('div'))).toBe(false);
     });
   });
 });

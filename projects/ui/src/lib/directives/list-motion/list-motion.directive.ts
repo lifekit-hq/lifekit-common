@@ -1,11 +1,6 @@
 import {afterNextRender, DestroyRef, Directive, ElementRef, inject, input} from '@angular/core';
 
-import {
-  motionDistance,
-  motionDurationMs,
-  motionEasing,
-  prefersReducedMotion,
-} from '../../tokens/motion';
+import {canAnimate, motionDistance, motionDurationMs, motionEasing} from '../../tokens/motion';
 
 /** A page of rows arriving or leaving at once is a screen change, not a row; it is not animated. */
 export const LIST_MOTION_MAX_ROWS = 12;
@@ -118,7 +113,7 @@ export class CmnListMotionDirective {
       return;
     }
     if (
-      prefersReducedMotion(this.host.ownerDocument.defaultView) ||
+      !canAnimate(this.host) ||
       added.size > LIST_MOTION_MAX_ROWS ||
       gone.length > LIST_MOTION_MAX_ROWS
     ) {

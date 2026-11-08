@@ -187,6 +187,18 @@ describe('CmnListMotionDirective', () => {
     expect(text()).toEqual(['1', '4']);
   });
 
+  it('adds and removes rows without throwing where Element.animate does not exist', async () => {
+    const original = Object.getOwnPropertyDescriptor(Element.prototype, 'animate');
+    Object.defineProperty(Element.prototype, 'animate', {value: undefined, configurable: true});
+    try {
+      await change([1, 4, 5]);
+      expect(text()).toEqual(['1', '4', '5']);
+      expect(rows().some(row => row.hasAttribute('inert'))).toBe(false);
+    } finally {
+      Object.defineProperty(Element.prototype, 'animate', original as PropertyDescriptor);
+    }
+  });
+
   it('does not animate a page of rows arriving at once', async () => {
     const page = Array.from({length: LIST_MOTION_MAX_ROWS + 1}, (_, index) => index + 10);
     await change(page);

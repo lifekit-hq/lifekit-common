@@ -485,4 +485,15 @@ describe('TabGroupComponent — panel motion', () => {
     await switchTo('details');
     expect(panel().getAnimations()).toHaveLength(0);
   });
+
+  it('switches tabs without throwing where Element.animate does not exist', async () => {
+    const original = Object.getOwnPropertyDescriptor(Element.prototype, 'animate');
+    Object.defineProperty(Element.prototype, 'animate', {value: undefined, configurable: true});
+    try {
+      await switchTo('details');
+      expect(panel().getAnimations()).toHaveLength(0);
+    } finally {
+      Object.defineProperty(Element.prototype, 'animate', original as PropertyDescriptor);
+    }
+  });
 });
