@@ -48,6 +48,8 @@ export {
   blockingDesignFindings,
   defineRouteScans,
   formatRouteScan,
+  isTemplateColumnRow,
+  PAGE_COLUMNS_CLASS,
   ROUTE_SCAN_TIMEOUT_MS,
   runAxe,
   SCAN_SCHEMES,

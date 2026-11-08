@@ -7,7 +7,15 @@
  */
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
-import {chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync} from 'node:fs';
+import {
+  chmodSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import {createServer} from 'node:http';
 import {createRequire} from 'node:module';
 import {tmpdir} from 'node:os';
@@ -24,6 +32,8 @@ import {
   freezeScreen,
   IMPECCABLE_ENGINES,
   IMPECCABLE_VERSION,
+  isTemplateColumnRow,
+  PAGE_COLUMNS_CLASS,
   pinnedEnginePath,
   resolveEngine,
   SCREEN_VIEWPORTS,
@@ -83,6 +93,128 @@ describe('the design gate', () => {
     );
   });
 });
+
+describe('the overview template’s rail', () => {
+  const OVERFLOW = 'first-viewport-column-overflow';
+  const tail =
+    ' opens the page with one column running 186% of the viewport tall while a sibling fits in 73% — the fold falls deep inside the section';
+  const row = selector => ({antipattern: OVERFLOW, snippet: `${selector}${tail}`});
+  const templateRow = row(
+    'div.cmn-page-columns.flex.flex-col.gap-cmn-section-gap.xl:flex-row.xl:items-start'
+  );
+
+  it('is not a finding when the judge names the template’s own row of columns', () => {
+    assert.equal(PAGE_COLUMNS_CLASS, 'cmn-page-columns');
+    assert.equal(isTemplateColumnRow(templateRow), true);
+    assert.deepEqual(blockingDesignFindings([templateRow], 'week', []), []);
+  });
+
+  it('is found by the class, wherever it stands among the row’s classes', () => {
+    assert.equal(isTemplateColumnRow(row('div.flex.cmn-page-columns')), true);
+    assert.equal(isTemplateColumnRow(row('div.cmn-page-columns')), true);
+  });
+
+  it('still fails a row of columns that is not the template’s', () => {
+    for (const selector of [
+      'div.grid.grid-cols-2',
+      'section',
+      'div.cmn-page-columns-extra',
+      'div.not-cmn-page-columns',
+    ]) {
+      const finding = row(selector);
+      assert.equal(isTemplateColumnRow(finding), false, selector);
+      assert.deepEqual(blockingDesignFindings([finding], 'week', []), [finding]);
+    }
+  });
+
+  it('exempts only the one rule', () => {
+    const other = {antipattern: 'line-length', snippet: templateRow.snippet};
+    assert.equal(isTemplateColumnRow(other), false);
+    assert.deepEqual(blockingDesignFindings([other], 'week', []), [other]);
+  });
+
+  it('does not use up an exception that covers the same rule elsewhere', () => {
+    const elsewhere = row('div.grid');
+    const covered = blockingDesignFindings([templateRow, elsewhere], 'week', [accept(OVERFLOW)]);
+    assert.deepEqual(covered, []);
+  });
+});
+
+// The judge itself, on the template's markup: an overview page with a 320px rail beside a body
+// that runs to three screens, and the same two columns on a row that is not the template's. Needs
+// the pinned engine; where it has not been downloaded the gate above stands in for it, and the
+// golden overview with a long body (`routes` job) runs it on the built catalog.
+describe(
+  'the overview template’s rail, judged by the engine',
+  {skip: !existsSync(pinnedEnginePath())},
+  () => {
+    const OVERFLOW = 'first-viewport-column-overflow';
+    const BLOCK = '<div class="blk">block</div>';
+    const page = (
+      columnsClass,
+      body = BLOCK.repeat(5)
+    ) => `<!doctype html><html lang="en" data-theme="light"><head><meta charset="utf-8"><title>t</title><style>
+body{margin:0;font:16px/1.5 sans-serif}.frame{max-width:1200px;margin:0 auto;padding:32px}
+.cols{display:flex;flex-direction:column;gap:24px}.main,.rail{display:flex;flex-direction:column;gap:24px}
+@media(min-width:1280px){.cols{flex-direction:row;align-items:flex-start}.main{flex:1;min-width:0}.rail{width:320px;flex-shrink:0}}
+.blk{border:1px solid #888;height:260px;padding:8px}</style></head><body><main><div class="frame"><h1>This week</h1>
+<div class="${columnsClass}"><div class="main" data-cmn-page-column>${body}</div>
+<div class="rail" data-cmn-page-column="rail">${BLOCK.repeat(2)}</div></div></div></main></body></html>`;
+
+    let server;
+    let pages;
+    let origin;
+    before(async () => {
+      pages = new Map([
+        ['/overview', page('cols cmn-page-columns')],
+        ['/other', page('cols')],
+        ['/short', page('cols', BLOCK.repeat(2))],
+      ]);
+      server = createServer((req, res) => {
+        const html = pages.get(req.url);
+        res.writeHead(html ? 200 : 404, {'content-type': 'text/html'}).end(html ?? '');
+      });
+      await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+      origin = `http://127.0.0.1:${server.address().port}`;
+    });
+    after(() => server?.close());
+
+    const judge = (path, size) =>
+      judgeUrl({
+        engine: pinnedEnginePath(),
+        url: `${origin}${path}`,
+        viewport: SCREEN_VIEWPORTS[size].viewport,
+        browser: chromium.executablePath(),
+      });
+
+    it('reads the template’s rail beside a long body as unbalanced at 1280, and the gate accepts it', async () => {
+      const found = await judge('/overview', 'desktop');
+      assert.deepEqual(
+        found.map(f => f.antipattern),
+        [OVERFLOW]
+      );
+      assert.match(found[0].snippet, /^div\.cols\.cmn-page-columns opens the page/);
+      assert.deepEqual(blockingDesignFindings(found, 'week', []), []);
+    });
+
+    it('has nothing to read at 390, where the rail stacks under the body', async () => {
+      assert.deepEqual(await judge('/overview', 'phone'), []);
+    });
+
+    it('still fails the same two columns on a row that is not the template’s', async () => {
+      const found = await judge('/other', 'desktop');
+      assert.deepEqual(
+        found.map(f => f.antipattern),
+        [OVERFLOW]
+      );
+      assert.deepEqual(blockingDesignFindings(found, 'week', []), found);
+    });
+
+    it('has nothing to read when the body is not taller than a screen', async () => {
+      assert.deepEqual(await judge('/short', 'desktop'), []);
+    });
+  }
+);
 
 describe('the axe gate', () => {
   const violation = (id, impact, ...html) => ({

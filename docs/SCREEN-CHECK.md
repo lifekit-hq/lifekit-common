@@ -193,7 +193,8 @@ npx lifekit-chrome-check screen \
 `Templates/List` is also held pixel for pixel, so a change that moves it is visible on the pull
 request that makes it: [SCREEN-BASELINES.md](SCREEN-BASELINES.md). Every golden also goes through
 the design judge and axe-core at both sizes and both schemes, with no exceptions:
-[ROUTE-SCAN.md](ROUTE-SCAN.md). Detail, Form, Settings and Overview join it when their first
+[ROUTE-SCAN.md](ROUTE-SCAN.md) (`Templates/Overview` also has a state with a body of three screens
+beside its rail). Detail, Form, Settings and Overview join it when their first
 baselines are added.
 The story ids are `templates-<kind>--<phone|phone-dark|desktop|desktop-dark>`.
 
