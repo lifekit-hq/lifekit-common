@@ -19,17 +19,21 @@ import {MenuComponent, type MenuHeader, type MenuItem} from '../menu/menu.compon
  */
 export type TopBarLargeTitle = 'none' | 'visible' | 'collapsed';
 
-/** 44pt below md, the height of an iOS navigation bar; desktop keeps 56px. */
+/**
+ * 44pt below md, the height of an iOS navigation bar; from md Carbon's UI Shell header, 48px, whose
+ * buttons are 48px squares that abut each other and the right edge.
+ */
 const HEADER_BASE_CLASSES =
-  'flex h-11 items-center border-b border-border-default px-cmn-4 md:h-14 md:gap-cmn-4 md:px-cmn-6';
+  'flex h-11 items-center border-b border-border-default px-cmn-4 md:h-cmn-size-lg md:pr-0';
 /**
  * Every chrome control meets the touch target (`--size-touch`) below md, desktop density from md.
  * The targets abut below md, so the bar has no gap there: the glyphs still sit a target apart.
  */
 const CHROME_BUTTON_CLASSES =
-  'flex h-cmn-touch w-cmn-touch shrink-0 items-center justify-center rounded-cmn-md ' +
-  'text-text-secondary transition-colors hover:bg-surface-raised hover:text-text-primary ' +
-  'disabled:opacity-50 md:h-8 md:w-8';
+  'flex h-cmn-touch w-cmn-touch shrink-0 items-center justify-center ' +
+  'text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary ' +
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-border-focus ' +
+  'disabled:opacity-50 md:h-cmn-size-lg md:w-cmn-size-lg';
 /**
  * On a 320px phone the fullest bar (back, two actions, search, theme toggle, avatar) leaves the
  * title ~32px, so the theme toggle yields below 360px once a page declares more than one action
@@ -55,9 +59,9 @@ const OVERFLOW_ITEM_CLASSES =
   'transition-colors hover:bg-surface-raised focus:bg-surface-raised focus:outline-none ' +
   'focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-border-focus ' +
   'min-h-cmn-touch disabled:opacity-50 aria-disabled:opacity-50';
-/** The avatar's disc stays 32px inside its touch-sized, invisible button. */
+/** The avatar's disc stays 32px inside its touch-sized, invisible button; from md it sits in a 48px header cell. */
 const AVATAR_TRIGGER_CLASSES =
-  'group h-cmn-touch w-cmn-touch shrink-0 rounded-cmn-full md:h-8 md:w-8';
+  'group h-cmn-touch w-cmn-touch shrink-0 rounded-cmn-full md:mx-cmn-2 md:h-cmn-size-sm md:w-cmn-size-sm';
 /** Keyboard hints mean nothing without a keyboard: hidden wherever hover is unavailable. */
 const KEY_HINT_CLASSES =
   'ml-cmn-2 hidden rounded-cmn-sm border border-border-default px-1 py-0.5 font-mono text-cmn-xs ' +
@@ -75,7 +79,7 @@ const HEADER_SOLID_CLASSES = 'bg-surface-card';
  */
 const HEADER_OVERLAY_CLASSES =
   'h-[calc(2.75rem+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] ' +
-  'md:h-[calc(3.5rem+env(safe-area-inset-top))] ' +
+  'md:h-[calc(var(--cmn-size-lg)+env(safe-area-inset-top))] ' +
   'bg-[color-mix(in_srgb,var(--color-surface-card)_80%,transparent)] backdrop-blur-md';
 /**
  * A large title on a phone: at the scroll edge the bar is an iOS scroll-edge bar, with no fill,
@@ -182,7 +186,7 @@ const HEADER_FADE_CLASSES =
       <!-- Search trigger: icon-only below md -->
       <button
         (click)="searchClick.emit()"
-        class="flex h-cmn-touch w-cmn-touch shrink-0 items-center justify-center gap-cmn-2 rounded-cmn-md text-cmn-sm text-text-secondary transition-colors hover:bg-surface-raised hover:text-text-primary md:h-auto md:w-auto md:border md:border-border-strong md:bg-surface-bg md:px-cmn-3 md:py-1.5 md:hover:bg-surface-bg"
+        class="flex h-cmn-touch w-cmn-touch shrink-0 items-center justify-center gap-cmn-2 text-cmn-sm text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary md:mr-cmn-2 md:h-cmn-size-sm md:w-auto md:border md:border-border-strong md:bg-surface-bg md:px-cmn-3 md:hover:bg-surface-hover"
         type="button"
         aria-label="Search"
       >

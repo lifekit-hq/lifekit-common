@@ -118,6 +118,9 @@ module.exports = {
         // the 1px inside it and a 1px ground-coloured line inside that.
         'cmn-focus-inset':
           'inset 0 0 0 1px var(--color-border-focus), inset 0 0 0 2px var(--color-surface-card)',
+        // Carbon's selected side-nav link: a 3px bar on the leading edge, drawn inside the box so the
+        // label does not move when a link is chosen.
+        'cmn-nav-active': 'inset 3px 0 0 var(--color-accent-default)',
       },
       // Carbon's notification stripe (3px), the one border width off Tailwind's 0/1/2/4/8 steps.
       borderWidth: {
@@ -185,6 +188,9 @@ module.exports = {
         'cmn-size-sm': 'var(--cmn-size-sm)',
         'cmn-size-md': 'var(--cmn-size-md)',
         'cmn-size-lg': 'var(--cmn-size-lg)',
+        // Desktop shell (theme.css): the side nav's two widths, Carbon's 256 and 48.
+        'cmn-nav': 'var(--cmn-nav-width)',
+        'cmn-nav-rail': 'var(--cmn-nav-rail-width)',
         'cmn-16': '64px',
         // Page rhythm (theme.css): semantic steps the page template owns. `px-cmn-page-gutter`,
         // `mt-cmn-title-gap`, `gap-cmn-section-gap`, `gap-cmn-group-gap`, `h-cmn-control-h`.

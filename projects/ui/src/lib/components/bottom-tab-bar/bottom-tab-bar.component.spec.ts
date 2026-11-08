@@ -168,14 +168,14 @@ describe('BottomTabBarComponent', () => {
       expect(nav().className).not.toMatch(/(^|\s)(m[bxy]?|rounded)-/);
     });
 
-    it('highlights only the active tab with a pill when floating', () => {
+    it('highlights only the active tab, with a square fill, when floating', () => {
       fixture.componentRef.setInput('floating', true);
       fixture.detectChanges();
       const [active, inactive] = tabButtons();
       expect(active?.classList).toContain('bg-accent-subtle');
-      expect(active?.classList).toContain('rounded-cmn-full');
       expect(inactive?.classList).not.toContain('bg-accent-subtle');
-      expect(inactive?.classList).toContain('rounded-cmn-full');
+      expect(active?.className).not.toContain('rounded-');
+      expect(inactive?.className).not.toContain('rounded-');
     });
   });
 });

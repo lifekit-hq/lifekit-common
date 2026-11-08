@@ -32,6 +32,12 @@
   --cmn-size-md: 40px;
   --cmn-size-lg: 48px;
 
+  /* Desktop shell — Carbon's UI Shell (@carbon/styles ui-shell): the header is 48px (`--cmn-size-lg`),
+     the side nav 256px (mini-units 32) and collapses to a 48px rail (mini-units 6). The phone shell
+     takes none of these: it has a tab bar, not a side nav. */
+  --cmn-nav-width: 256px;
+  --cmn-nav-rail-width: var(--cmn-size-lg);
+
   /* Page rhythm — the composed screen's spacing, owned by the page template (`cmn-page`) rather
      than chosen per call site. Values are steps already on the spacing scale; the gutter and the
      title gap step up from 768px (Tailwind's md). Px for the same reason as --size-touch.

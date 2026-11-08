@@ -17,7 +17,7 @@ const TAB_BASE_CLASSES =
   'focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-border-focus';
 const TAB_DOCKED_CLASSES = 'pb-cmn-1 pt-cmn-2';
 const TAB_LABEL_CLASSES = 'whitespace-nowrap font-label text-cmn-xs font-medium leading-tight';
-const TAB_FLOATING_CLASSES = 'my-0.5 rounded-cmn-full py-1';
+const TAB_FLOATING_CLASSES = 'my-0.5 py-1';
 const TAB_ACTIVE_CLASSES = 'text-accent-default';
 const TAB_FLOATING_ACTIVE_CLASSES = 'bg-accent-subtle';
 const TAB_INACTIVE_CLASSES = 'text-text-secondary hover:text-text-primary';
@@ -27,7 +27,7 @@ const NAV_DOCKED_CLASSES =
 /**
  * The iOS tab bar: edge to edge on the bottom edge, 49pt of items and only the bottom safe-area
  * inset below them, no margin. Translucent and blurred so content scrolling under it shows
- * through; the active tab keeps its pill. Keep the 49px (px, so the host root font size cannot
+ * through; the active tab keeps its fill, square as every Carbon surface is. Keep the 49px (px, so the host root font size cannot
  * shrink it) in step with the shell's measured inset, which pads main to clear the bar.
  */
 const NAV_FLOATING_CLASSES =

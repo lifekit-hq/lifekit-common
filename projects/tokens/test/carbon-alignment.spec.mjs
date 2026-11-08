@@ -116,6 +116,20 @@ describe('layout sizes are Carbon’s', () => {
   });
 });
 
+describe('desktop shell is Carbon’s UI Shell', () => {
+  it('sizes the side nav 256px (mini-units 32) and its rail 48px (mini-units 6)', () => {
+    assert.equal(token('--cmn-nav-width'), `${px(carbonLayout.miniUnits(32))}px`);
+    assert.equal(token('--cmn-nav-rail-width'), 'var(--cmn-size-lg)');
+    assert.equal(px(carbonLayout.miniUnits(6)), 48);
+    assert.equal(token('--cmn-size-lg'), `${px(carbonLayout.miniUnits(6))}px`);
+  });
+
+  it('exposes the widths as spacing steps', () => {
+    assert.equal(preset.theme.extend.spacing['cmn-nav'], 'var(--cmn-nav-width)');
+    assert.equal(preset.theme.extend.spacing['cmn-nav-rail'], 'var(--cmn-nav-rail-width)');
+  });
+});
+
 describe('geometry is Carbon’s', () => {
   it('squares sm, md and lg, and leaves the pill', () => {
     for (const name of ['sm', 'md', 'lg']) assert.equal(token(`--radius-${name}`), '0px', name);
