@@ -8,6 +8,7 @@ import {map} from 'rxjs';
 import {CmnSheetDrag} from '../../sheet-drag/sheet-drag';
 import {CMN_MEDIA_MD} from '../../tokens/breakpoints';
 import {PHONE_HIT_AREA_CLASSES} from '../../tokens/hit-area';
+import {motionDurationMs, prefersReducedMotion} from '../../tokens/motion';
 import {
   type CmnDialogConfig,
   type CmnDialogPhoneMode,
@@ -15,8 +16,8 @@ import {
   type CmnDialogSize,
 } from './dialog-config';
 
-/** How long the slide-out runs before the dialog is really closed; matches `--cmn-duration-short`. */
-const CLOSE_ANIMATION_MS = 150;
+/** The class CDK puts on a backdrop while it is shown; taking it off starts the scrim's fade-out. */
+const BACKDROP_SHOWING_CLASS = 'cdk-overlay-backdrop-showing';
 
 /** A visual viewport shorter than the layout viewport by less than this is browser chrome, not a keyboard. */
 const KEYBOARD_MIN_INSET_PX = 100;
@@ -210,9 +211,11 @@ export class CmnDialogContainerComponent extends CdkDialogContainer<CmnDialogCon
   }
 
   /**
-   * CDK removes the overlay the instant a dialog closes. A phone presentation slides out first, so
-   * a swipe, Cancel, Escape and the backdrop all leave the way the sheet arrived. The ref is
-   * shared with the content, so wrapping its `close` covers every caller.
+   * CDK removes the overlay the instant a dialog closes. The dialog leaves first (Carbon's exit:
+   * `--cmn-duration-short` on the accelerate curve, faster than it arrived), a sheet sliding down
+   * and the centred dialog fading, with the scrim fading beside it. A swipe, Cancel, Escape and the
+   * backdrop all leave the way the dialog arrived. The ref is shared with the content, so wrapping
+   * its `close` covers every caller. Reduce Motion closes at once.
    */
   private animateDismissal(): void {
     const ref = this.dialogRef;
@@ -221,7 +224,7 @@ export class CmnDialogContainerComponent extends CdkDialogContainer<CmnDialogCon
     }
     const close = ref.close.bind(ref);
     ref.close = (result, options) => {
-      if (this.presentation() === 'dialog' || this.prefersReducedMotion()) {
+      if (prefersReducedMotion(this._document.defaultView)) {
         close(result, options);
         return;
       }
@@ -233,13 +236,20 @@ export class CmnDialogContainerComponent extends CdkDialogContainer<CmnDialogCon
         return;
       }
       this.closing.set(true);
+      this.showBackdrop(false);
       setTimeout(() => {
         close(result, options);
         if (ref.containerInstance) {
           this.closing.set(false);
+          this.showBackdrop(true);
         }
-      }, CLOSE_ANIMATION_MS);
+      }, motionDurationMs('short'));
     };
+  }
+
+  /** Fades the scrim out with the leaving dialog, or back in when the close did not go through. */
+  private showBackdrop(shown: boolean): void {
+    this.dialogRef?.overlayRef?.backdropElement?.classList.toggle(BACKDROP_SHOWING_CLASS, shown);
   }
 
   /** Anchors the overlay pane to the bottom edge (or the whole viewport) for the phone modes. */
@@ -287,9 +297,5 @@ export class CmnDialogContainerComponent extends CdkDialogContainer<CmnDialogCon
         viewport.removeEventListener('scroll', update);
       });
     });
-  }
-
-  private prefersReducedMotion(): boolean {
-    return !!this._document.defaultView?.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
 }

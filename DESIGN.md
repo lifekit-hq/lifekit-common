@@ -227,6 +227,16 @@ Animate transform and opacity only, never layout properties (no `transition` on 
 
 Durations and easings are tokens (Carbon's values, `@carbon/motion`), never literals: `--cmn-duration-short` (150ms, moderate-01: a toggle, a fade, a small state change), `--cmn-duration-medium` (240ms, moderate-02: a surface entering or leaving, a crossfade) and `--cmn-duration-long` (400ms, slow-01: a large or full-screen move). Two curve families: the productive ones for the everyday, `--cmn-ease-standard` for anything that stays on screen, `--cmn-ease-decelerate` for what arrives, `--cmn-ease-accelerate` for what leaves; and the expressive ones, `--cmn-ease-expressive-standard`, `-decelerate` and `-accelerate`, for the larger surfaces that carry the screen (the bottom sheet, the drawer). Tailwind reads them as `duration-cmn-*` and `ease-cmn-*` (`ease-cmn-expressive*`). The old `--cmn-ease-emphasized-*` names are deprecated aliases of the productive curves, removed in the next major. A leaving surface is faster than an arriving one. A skeleton's sheen is the one decorative loop: it sweeps by transform, in `--color-skeleton-sheen` over `--color-skeleton`, and stops under Reduce Motion.
 
+### Overlays and toasts
+
+Each follows the Carbon pattern for its kind, on the tokens above and nothing else. A surface arrives on `--cmn-duration-medium` with a decelerate curve and leaves on `--cmn-duration-short` with an accelerate one, faster than it came; the scrim fades on the same two timings, so it never lingers after its surface (CDK's own 400ms backdrop fade is overridden).
+
+- **Bottom sheet, action sheet, full-screen sheet and side drawer** (Carbon's side panel and iOS sheet): slide their own height or width on the expressive curves, as before. The scrim now fades with them, and the drawer waits `--cmn-duration-short` before it is taken down, the length of its own exit.
+- **Centred dialog** (Carbon's modal): fades in while settling down `--cmn-motion-distance-md` (24px, Carbon's modal offset), and fades out the same way on close. A close predicate that vetoes the close brings it back.
+- **Toast** (Material 3's snackbar, since Carbon's notifications are static): rises `--cmn-motion-distance-sm` (8px) while it fades in, and fades out the same way. The stack keeps a removed toast drawn, inert, for the length of its exit, then takes the overlay down; its timer and pause rules are unchanged. A toast drawn alone, outside the stack, does not move.
+
+Under Reduce Motion the exits are skipped as well as the movement: the surface, its scrim and the toast go at once.
+
 ### View transitions
 
 A route change that moves between tab destinations or into a detail page is a View Transition, enabled once in the app config:

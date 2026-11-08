@@ -3,7 +3,8 @@ import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
 import {CmnDrawerRef} from './drawer-ref';
 
-const CLOSE_ANIMATION_MS = 220;
+/** `--cmn-duration-short`: the panel's exit, which the ref waits out before disposing. */
+const CLOSE_ANIMATION_MS = 150;
 
 function makeRef(): {ref: CmnDrawerRef<string>; dispose: ReturnType<typeof vi.fn>} {
   const ref = new CmnDrawerRef<string>();
@@ -83,5 +84,24 @@ describe('CmnDrawerRef', () => {
     ref.close();
     vi.runAllTimers();
     expect(completed).toBe(true);
+  });
+
+  it('starts the scrim fading as the panel leaves, not after it', () => {
+    const backdrop = document.createElement('div');
+    backdrop.classList.add('cdk-overlay-backdrop-showing');
+    const ref = new CmnDrawerRef<string>();
+    ref.overlayRef = {dispose: vi.fn(), backdropElement: backdrop} as unknown as OverlayRef;
+
+    ref.close();
+    expect(backdrop.classList.contains('cdk-overlay-backdrop-showing')).toBe(false);
+  });
+
+  it('disposes at once under Reduce Motion', () => {
+    vi.spyOn(window, 'matchMedia').mockReturnValue({matches: true} as MediaQueryList);
+    const {ref, dispose} = makeRef();
+    ref.close();
+    vi.advanceTimersByTime(0);
+    expect(dispose).toHaveBeenCalledTimes(1);
+    vi.restoreAllMocks();
   });
 });
