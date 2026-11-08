@@ -130,13 +130,26 @@ This page is the look, for every lifekit app: templates, rhythm tokens and compo
 - Flat surfaces: a hairline border or a shadow, never both. Shadow is reserved for overlays (menu, tooltip, dialog, sheet); the menu, tooltip, dialog and command palette also carry a hairline border so they keep an edge on dark surfaces.
 - Square corners: controls, cards, menus and sheets have no radius (Carbon's geometry); only the pill (chips, tags, badges, avatars) is round.
 
+This page describes **Carbon, the default preset**: the values in `theme.css`. Where it says "square", "48px" or "Plex", read "in the default preset"; the next section is how another look replaces them.
+
+## Presets
+
+A preset is a look the whole library can wear, chosen like a theme. `data-preset="<id>"` on `<html>` sits next to `data-theme` (light or dark), and the seed colour is a third axis, so the result is **theme x seed x preset**: any preset in light or dark under any seed colour, with no cross-wiring. **No attribute means Carbon**, the unscoped values in `theme.css`; nothing about Carbon changes when a preset is added.
+
+A preset is one CSS file, `@lifekit-hq/tokens/presets/<id>.css`, that overrides token names under `:root[data-preset='<id>']` and loads its own font if it needs one (so the font is fetched only when the preset is active). It sets values, not structure: components keep their DOM, inputs and behaviour, and take only paint from tokens. **A preset never sets `--color-*`**: colour belongs to the seed palette, which is set inline on `<html>` and beats any stylesheet anyway.
+
+- **Selecting one.** `PresetService` (`@lifekit-hq/ui`) reads, sets and persists the choice (`cmn-preset`, per device), `provideDesignPresets` lists what an app offers, and `cmn-appearance-settings` shows a Design control when there is more than one. The pre-paint theme script restores it before first paint, so the page never flashes Carbon first.
+- **Previewing one.** The Storybook toolbar's Design global renders every story in a preset.
+- **Checked per preset.** `npm run test:tokens` runs the rules over every file in `presets/`: only its own selector, only tokens `theme.css` declares, no `--color-*`, dark and per-width values restated, field borders 3:1 on the surfaces in light and dark, `-bg`/`-fg` pairs 4.5:1, and the 44px phone floor on `--size-touch` and `--cmn-control-h`. The contract, with an example file, is `projects/tokens/presets/README.md`.
+- **Presets in this repo.** Carbon is the only one so far. Its values are this page. Each preset added gets a short section here.
+
 ## Colors
 
 Cool graphite neutrals with a single petrol voice (restrained: accent only for the primary action, selection, focus and state). Dark graphite is `#0c1113` with cards at `#141b1e`; petrol stays legible without glow.
 
 ### Carbon bridge
 
-The owner chose IBM Carbon as the design system (epic #279): "true Carbon, align first, keep Lucide." Step 1 (this page's type, size, shape and motion values) aligns our tokens to Carbon's; the colour layer came first, in step 0, without changing a pixel: `@lifekit-hq/tokens/carbon-bridge.css` points Carbon's semantic `--cds-*` names (layers, fields, borders, text, icons, links, focus, status, buttons, tags) at our `--color-*` roles. Carbon reads colour only as `var(--cds-NAME, fallback)`, so the bridge needs no Sass theme per app: a Carbon-specced value follows each app's seed palette, and `[data-theme]` flips light and dark because the roles already do. Our look is Carbon's g10 shape (grey ground, white layers and fields), so the mapping is near one-to-one. The file is generated from `theme.css` and `scripts/carbon-bridge-map.mjs`, never hand-edited, and its test covers light and dark for two seeds. `@carbon/styles` is a devDependency of the tokens package only, so no app ships Carbon. Carbon's cyan, teal, purple, cool-gray and warm-gray tags are not mapped (we have four status hues) and keep Carbon's colours until a decision is taken.
+The owner chose IBM Carbon as the default design system, the first preset (epic #279): "true Carbon, align first, keep Lucide." Step 1 (this page's type, size, shape and motion values) aligns our tokens to Carbon's; the colour layer came first, in step 0, without changing a pixel: `@lifekit-hq/tokens/carbon-bridge.css` points Carbon's semantic `--cds-*` names (layers, fields, borders, text, icons, links, focus, status, buttons, tags) at our `--color-*` roles. Carbon reads colour only as `var(--cds-NAME, fallback)`, so the bridge needs no Sass theme per app: a Carbon-specced value follows each app's seed palette, and `[data-theme]` flips light and dark because the roles already do. Our look is Carbon's g10 shape (grey ground, white layers and fields), so the mapping is near one-to-one. The file is generated from `theme.css` and `scripts/carbon-bridge-map.mjs`, never hand-edited, and its test covers light and dark for two seeds. `@carbon/styles` is a devDependency of the tokens package only, so no app ships Carbon. Carbon's cyan, teal, purple, cool-gray and warm-gray tags are not mapped (we have four status hues) and keep Carbon's colours until a decision is taken.
 
 ### Named Rules
 

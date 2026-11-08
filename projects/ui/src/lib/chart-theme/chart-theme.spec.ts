@@ -7,6 +7,7 @@ import {AreaChartComponent} from '../components/area-chart/area-chart.component'
 import {BarChartComponent} from '../components/bar-chart/bar-chart.component';
 import {DonutChartComponent} from '../components/donut-chart/donut-chart.component';
 import {LineChartComponent} from '../components/line-chart/line-chart.component';
+import {PresetService, provideDesignPresets} from '../services/preset/preset.service';
 import {ThemeService} from '../services/theme/theme.service';
 
 const TEXT_TOKEN = '--color-text-secondary';
@@ -69,6 +70,9 @@ describe('charts follow a live theme change', () => {
   beforeEach(() => {
     localStorage.clear();
     root.style.setProperty(TEXT_TOKEN, LIGHT_TEXT);
+    TestBed.configureTestingModule({
+      providers: [provideDesignPresets({id: 'lifekit', label: 'Lifekit'})],
+    });
     theme = TestBed.inject(ThemeService);
     theme.setTheme('light');
   });
@@ -78,6 +82,7 @@ describe('charts follow a live theme change', () => {
     localStorage.clear();
     root.style.removeProperty(TEXT_TOKEN);
     root.removeAttribute('data-theme');
+    root.removeAttribute('data-preset');
   });
 
   function mount(testCase: ChartCase): ComponentFixture<unknown> {
@@ -119,6 +124,21 @@ describe('charts follow a live theme change', () => {
       fixture.detectChanges();
 
       expect(chartOf(fixture)).not.toBe(before);
+    });
+
+    it('rebuilds when the design preset changes, and again when it goes back to Carbon', () => {
+      const presets = TestBed.inject(PresetService);
+      const fixture = mount(testCase);
+      const before = chartOf(fixture);
+
+      presets.setPreset('lifekit');
+      fixture.detectChanges();
+      const during = chartOf(fixture);
+      expect(during).not.toBe(before);
+
+      presets.setPreset('carbon');
+      fixture.detectChanges();
+      expect(chartOf(fixture)).not.toBe(during);
     });
 
     it('keeps the same chart when nothing about the theme changed', () => {

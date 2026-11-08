@@ -21,6 +21,15 @@
   --radius-lg: 0px;
   --radius-full: 9999px;
 
+  /* Space — the four steps the Lit elements (`lk-*`) space themselves with, 4/8/12/16px as rem to
+     match the values they fell back to before these were defined. A custom property, so a preset can
+     reset them (docs: presets/README.md) and the elements follow it. The Angular components use the
+     `cmn-*` spacing scale instead. */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+
   /* Touch target — the smallest pressable area of any chrome control (44pt, px so a host's
      root font size cannot shrink it) */
   --size-touch: 44px;

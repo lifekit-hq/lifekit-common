@@ -110,6 +110,7 @@ export * from './services/dialog/dialog.service';
 export * from './services/drawer/drawer.service';
 export * from './services/icon-registry/icon-registry.service';
 export * from './services/page-actions/page-actions.service';
+export * from './services/preset/preset.service';
 export * from './services/pull-refresh/pull-refresh.service';
 export * from './services/shell/shell.service';
 export * from './services/theme/theme.service';

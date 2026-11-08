@@ -4,6 +4,7 @@ import {type AccountPreferences, type AppearancePreference} from '@lifekit-hq/co
 import {afterEach, beforeEach, describe, expect, it} from 'vitest';
 
 import {provideAppearanceSync} from '../../services/appearance/appearance.service';
+import {PresetService, provideDesignPresets} from '../../services/preset/preset.service';
 import {
   LOCAL_STORAGE,
   PREFERS_DARK,
@@ -57,13 +58,14 @@ class FakeStore {
   }
 }
 
-function setup(synced: boolean): ComponentFixture<AppearanceSettingsComponent> {
+function setup(synced: boolean, presets = false): ComponentFixture<AppearanceSettingsComponent> {
   TestBed.configureTestingModule({
     providers: [
       {provide: LOCAL_STORAGE, useValue: new MemoryStorage()},
       {provide: PREFERS_DARK, useValue: null},
       {provide: PREFERS_MORE_CONTRAST, useValue: null},
       ...(synced ? [provideAppearanceSync(FakeStore)] : []),
+      ...(presets ? [provideDesignPresets({id: 'lifekit', label: 'Lifekit'})] : []),
     ],
   });
   const fixture = TestBed.createComponent(AppearanceSettingsComponent);
@@ -94,6 +96,7 @@ function emitFromPicker(
 }
 
 afterEach(() => {
+  document.documentElement.removeAttribute('data-preset');
   document.documentElement.removeAttribute('data-theme');
   document.documentElement.removeAttribute('style');
 });
@@ -193,6 +196,46 @@ describe('AppearanceSettingsComponent', () => {
 
       expect(TestBed.inject(ThemeService).getPreference()).toBe('light');
       expect(document.documentElement.getAttribute('data-theme')).toBe('light');
+    });
+  });
+
+  describe('design presets', () => {
+    function designRadios(fixture: ComponentFixture<unknown>): HTMLButtonElement[] {
+      return Array.from(
+        el(fixture).querySelectorAll<HTMLButtonElement>('[aria-label="Design"] [role="radio"]')
+      );
+    }
+
+    it('shows no Design control while the app offers only Carbon', () => {
+      const fixture = setup(false);
+      expect(el(fixture).textContent).not.toContain('Design');
+      expect(radios(fixture)).toHaveLength(3);
+    });
+
+    it('lists the offered presets, Carbon first and selected', () => {
+      const fixture = setup(false, true);
+      expect(designRadios(fixture).map(r => r.textContent?.trim())).toEqual(['Carbon', 'Lifekit']);
+      expect(designRadios(fixture)[0].getAttribute('aria-checked')).toBe('true');
+    });
+
+    it('applies a chosen preset to the page and keeps it on this device, even with an account store', () => {
+      const fixture = setup(true, true);
+      designRadios(fixture)[1].click();
+      fixture.detectChanges();
+
+      expect(TestBed.inject(PresetService).getPreset()).toBe('lifekit');
+      expect(document.documentElement.getAttribute('data-preset')).toBe('lifekit');
+      expect(TestBed.inject(FakeStore).patched).toEqual([]);
+      expect(designRadios(fixture)[1].getAttribute('aria-checked')).toBe('true');
+    });
+
+    it('goes back to Carbon', () => {
+      const fixture = setup(false, true);
+      designRadios(fixture)[1].click();
+      designRadios(fixture)[0].click();
+      fixture.detectChanges();
+
+      expect(document.documentElement.hasAttribute('data-preset')).toBe(false);
     });
   });
 

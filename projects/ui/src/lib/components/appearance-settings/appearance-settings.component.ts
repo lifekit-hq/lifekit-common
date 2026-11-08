@@ -12,6 +12,7 @@ import {type LkThemeChoice, LkThemePicker} from '@lifekit-hq/elements';
 import {DEFAULT_INTENSITY} from '@lifekit-hq/tokens/engine';
 
 import {AppearanceService, THEME_MODES} from '../../services/appearance/appearance.service';
+import {PresetService} from '../../services/preset/preset.service';
 import {type ThemePreference} from '../../services/theme/theme.service';
 import {SegmentedComponent, type SegmentedOption} from '../segmented/segmented.component';
 
@@ -28,6 +29,7 @@ const MODE_HELP: Record<ThemePreference, string> = {
   dark: 'Always dark.',
 };
 
+const PRESET_HELP = 'The look of the whole app. Kept on this device.';
 const SYNCED_CAPTION = 'Synced to your account';
 const DEVICE_CAPTION = 'On this device';
 
@@ -41,6 +43,10 @@ const DEVICE_CAPTION = 'On this device';
  * changes now) and the account (`PATCH /api/me/preferences`) together, and applies the server's value
  * when the account loads. The caption says where the choice lives: "Synced to your account" when the
  * app has called `provideAppearanceSync`, "On this device" when it has not.
+ *
+ * When the app offers more than one design preset (`provideDesignPresets`), a Design control lists
+ * them above the colour. The choice goes through `PresetService` and stays on this device: it is not
+ * part of the account appearance.
  *
  * `appSeed` is the app's own colour (an `APP_SEEDS` entry): the picker's first swatch, and what a
  * reset goes back to. Without it the picker offers only the presets and a custom colour.
@@ -66,6 +72,21 @@ const DEVICE_CAPTION = 'On this device';
         <p class="mt-cmn-2 text-cmn-xs leading-relaxed text-text-secondary">{{ modeHelp() }}</p>
       </div>
 
+      @if (presetOptions.length > 1) {
+        <div>
+          <div class="font-label text-cmn-sm font-medium text-text-primary">Design</div>
+          <div class="mt-cmn-2">
+            <cmn-segmented
+              [options]="presetOptions"
+              [value]="preset()"
+              (valueChange)="onPreset($event)"
+              label="Design"
+            />
+          </div>
+          <p class="mt-cmn-2 text-cmn-xs leading-relaxed text-text-secondary">{{ presetHelp }}</p>
+        </div>
+      }
+
       <lk-theme-picker
         [attr.app-seed]="appSeed() || null"
         [seed]="seed()?.seed ?? ''"
@@ -79,6 +100,7 @@ const DEVICE_CAPTION = 'On this device';
 })
 export class AppearanceSettingsComponent {
   private readonly appearance = inject(AppearanceService);
+  private readonly presets = inject(PresetService);
 
   /** The app's own colour as `#rrggbb` (an `APP_SEEDS` entry). */
   public readonly appSeed = input<string>('');
@@ -88,6 +110,11 @@ export class AppearanceSettingsComponent {
 
   protected readonly mode: Signal<ThemeMode> = this.appearance.mode;
   protected readonly seed = this.appearance.seed;
+  protected readonly preset = this.presets.preset;
+  protected readonly presetHelp = PRESET_HELP;
+  protected readonly presetOptions: readonly SegmentedOption[] = this.presets.available.map(
+    ({id, label}) => ({value: id, label})
+  );
   protected readonly modeHelp = computed(() => MODE_HELP[this.mode()]);
   protected readonly caption = computed(() =>
     this.appearance.synced ? SYNCED_CAPTION : DEVICE_CAPTION
@@ -102,6 +129,10 @@ export class AppearanceSettingsComponent {
 
   protected onMode(value: string): void {
     this.appearance.setMode(value as ThemePreference);
+  }
+
+  protected onPreset(value: string): void {
+    this.presets.setPreset(value);
   }
 
   protected onSeed(event: Event): void {
