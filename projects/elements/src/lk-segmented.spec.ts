@@ -53,16 +53,16 @@ describe('LkSegmented', () => {
     );
   });
 
-  it('marks the chosen cell with the accent tint and a strong edge, not the card surface', async () => {
+  it("marks the chosen cell with the ink fill, square, as Carbon's content switcher does", async () => {
     const el = await mount();
-    el.style.setProperty('--color-accent-subtle', 'rgb(1, 2, 3)');
-    el.style.setProperty('--color-accent-default', 'rgb(4, 5, 6)');
-    el.style.setProperty('--color-border-strong', 'rgb(7, 8, 9)');
+    el.style.setProperty('--color-text-primary', 'rgb(1, 2, 3)');
+    el.style.setProperty('--color-text-inverse', 'rgb(4, 5, 6)');
     const chosen = getComputedStyle(cells(el)[2]);
     expect(chosen.backgroundColor).toBe('rgb(1, 2, 3)');
     expect(chosen.color).toBe('rgb(4, 5, 6)');
-    expect(chosen.boxShadow).toContain('rgb(7, 8, 9)');
-    expect(chosen.boxShadow).toContain('inset');
+    expect(chosen.borderRadius).toBe('0px');
+    const group = getComputedStyle(el.shadowRoot?.querySelector('.group') as HTMLElement);
+    expect(group.outlineColor).toBe('rgb(1, 2, 3)');
   });
 
   it('leaves the group unnamed when there is no label', async () => {
@@ -70,16 +70,30 @@ describe('LkSegmented', () => {
     expect(el.shadowRoot?.querySelector('.group')?.hasAttribute('aria-label')).toBe(false);
   });
 
-  it('renders one row of cells that are at least 44px square', async () => {
+  it('renders one row of cells at least 44px wide, 40px tall from 768px up and 44px below', async () => {
     const el = await mount();
     el.style.width = '326px';
     const rects = cells(el).map(c => c.getBoundingClientRect());
+    const expectedHeight = window.matchMedia('(min-width: 768px)').matches ? 40 : 44;
     expect(rects).toHaveLength(7);
     expect(new Set(rects.map(r => Math.round(r.top))).size).toBe(1);
     rects.forEach(r => {
       expect(r.width).toBeGreaterThanOrEqual(44);
-      expect(r.height).toBeGreaterThanOrEqual(44);
+      expect(r.height).toBe(expectedHeight);
     });
+  });
+
+  it('greys the group outline when the whole control is disabled', async () => {
+    const el = await mount({disabled: true});
+    el.style.setProperty('--color-text-primary', 'rgb(1, 2, 3)');
+    el.style.setProperty('--color-border-default', 'rgb(7, 8, 9)');
+    const group = getComputedStyle(el.shadowRoot?.querySelector('.group') as HTMLElement);
+    expect(group.outlineColor).toBe('rgb(7, 8, 9)');
+    el.disabled = false;
+    await el.updateComplete;
+    expect(
+      getComputedStyle(el.shadowRoot?.querySelector('.group') as HTMLElement).outlineColor
+    ).toBe('rgb(1, 2, 3)');
   });
 
   it('keeps a row of seven inside a 390px phone card (326px)', async () => {

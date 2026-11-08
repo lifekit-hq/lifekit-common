@@ -11,13 +11,14 @@ import {CardComponent} from '../card/card.component';
  * notices' height (`--cmn-sticky-top`, 0px anywhere else). The surface fill hides the rows that
  * scroll under it.
  *
- * Sentence case at body size and semibold, in the secondary text colour: DESIGN.md allows no
- * uppercase or tracked micro-labels. The group gap sits under it; the page's section gap above it
- * is larger, so the heading reads as belonging to its rows.
+ * Carbon's contained-list header (heading-compact-01): sentence case at body size and semibold,
+ * in the primary text colour, at least a 40px layout step tall. DESIGN.md allows no uppercase or
+ * tracked micro-labels. The group gap sits under it; the page's section gap above it is larger,
+ * so the heading reads as belonging to its rows.
  */
 const HEADING_CLASSES =
-  'flex items-baseline justify-between gap-cmn-2 bg-surface-bg px-cmn-1 py-cmn-group-gap ' +
-  'text-cmn-sm font-semibold text-text-secondary ' +
+  'flex min-h-cmn-size-md items-center justify-between gap-cmn-2 bg-surface-bg px-cmn-1 ' +
+  'py-cmn-group-gap text-cmn-sm font-semibold text-text-primary ' +
   'max-md:sticky max-md:top-[var(--cmn-sticky-top,0px)] max-md:z-10';
 
 /**

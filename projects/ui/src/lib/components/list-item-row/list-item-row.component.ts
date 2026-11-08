@@ -10,12 +10,19 @@ import {IconComponent, type LucideIconName} from '../icon/icon.component';
  */
 const HOST_CLASSES = 'block border-b border-border-default last:border-b-0';
 
+/**
+ * Carbon's contained-list item: at least the 48px layout step tall, hairline dividers, and a
+ * hover or press fill only when the row is pressable (`ACTION_ROW_CLASSES`): a row that only
+ * shows data does not answer the pointer.
+ */
 const ROW_CLASSES =
-  'flex items-center gap-cmn-3 px-cmn-4 py-cmn-3 hover:bg-surface-bg transition-colors';
+  'flex min-h-cmn-size-lg items-center gap-cmn-3 px-cmn-4 py-cmn-3 transition-colors ' +
+  'duration-cmn-short ease-cmn-standard';
 
 const ACTION_ROW_CLASSES =
-  'w-full cursor-pointer text-left active:bg-surface-raised focus-visible:outline-none ' +
-  'focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-border-focus';
+  'w-full cursor-pointer text-left hover:bg-surface-hover active:bg-surface-raised ' +
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset ' +
+  'focus-visible:ring-border-focus';
 
 /**
  * The quiet trailing action: an icon-only, borderless button at the touch size, in the secondary
@@ -24,7 +31,7 @@ const ACTION_ROW_CLASSES =
  */
 const TRAILING_CLASSES =
   '-my-cmn-2 inline-flex size-cmn-touch shrink-0 items-center justify-center rounded-cmn-md ' +
-  'text-text-secondary transition-colors hover:bg-surface-raised hover:text-text-primary ' +
+  'text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary ' +
   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus';
 /** In a plain row the action's glyph lines up with the row's end padding, not the hit area's. */
 const TRAILING_IN_ROW_CLASSES = '-mr-cmn-2';

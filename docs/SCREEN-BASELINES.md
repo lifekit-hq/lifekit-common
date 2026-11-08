@@ -161,7 +161,11 @@ Each new template adds its golden story to `templates.spec.ts` and its first bas
 pull request, for the owner to approve.
 
 `projects/ui/e2e/screens/controls.spec.ts` does the same for the controls matrix (`Controls/Golden`):
-every re-specced control in its default, hover, focus, disabled and error states.
+every re-specced control in its default, hover, focus, disabled and error states, and
+`projects/ui/e2e/screens/lists.spec.ts` for the list and table family (`Lists/Golden`): tabs, the
+segmented switcher, search, contained-list rows, the structured list, expandable rows, the data
+table (a skeleton is left out: the screen is judged once nothing is loading). Its first baselines come from the update dispatch, not from a
+local run.
 
 ## Updating a baseline
 

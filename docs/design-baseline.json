@@ -35,7 +35,11 @@
     },
     {
       "rule": "cramped-padding",
-      "stories": ["primitives-code-block--capped-height", "components-drawer--bottom-sheet-*"],
+      "stories": [
+        "primitives-code-block--capped-height",
+        "components-datatable--many-rows-scrolling",
+        "components-drawer--bottom-sheet-*"
+      ],
       "reason": "Detector false positive: text clipped at the edge of a scroll box is read as missing padding."
     },
     {
@@ -62,6 +66,12 @@
       "stories": ["controls-golden--matrix"],
       "match": "border-left: 3px",
       "reason": "Carbon's inline notification carries a 3px severity bar on its left edge (cmn-alert, square corners); it is the status signal, not decoration."
+    },
+    {
+      "rule": "low-contrast",
+      "stories": ["components-segmented--disabled", "lists-golden--matrix"],
+      "match": "text #66757c on #e8edef",
+      "reason": "Disabled text is exempt from WCAG 1.4.3 and is Carbon's disabled grey (text-disabled on the neutral fill); DESIGN.md keeps a disabled chosen cell and a disabled search legible, not at full contrast."
     },
     {
       "rule": "text-overflow",

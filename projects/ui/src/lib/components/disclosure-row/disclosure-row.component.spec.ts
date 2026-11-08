@@ -118,6 +118,24 @@ describe('DisclosureRowComponent', () => {
     expect(svg).toBeTruthy();
   });
 
+  it('turns the chevron a quarter turn when expanded, and leads the row from md', () => {
+    const svg = fixture.nativeElement.querySelector('svg') as SVGElement;
+    expect(svg.classList).toContain('rotate-90');
+    expect(svg.classList).toContain('md:order-first');
+    expect(svg.classList).toContain('motion-reduce:transition-none');
+
+    fixture.componentRef.setInput('open', false);
+    fixture.detectChanges();
+    expect(svg.classList).not.toContain('rotate-90');
+  });
+
+  it('draws the row at the 48px layout step and the open content on the page ground', () => {
+    const row = toggleButton().parentElement as HTMLElement;
+    expect(row.className).toContain('min-h-cmn-size-lg');
+    expect(row.className).toContain('hover:bg-surface-hover');
+    expect(bodyEl().classList).toContain('bg-surface-bg');
+  });
+
   it('should be open by default', () => {
     expect(toggleButton().getAttribute('aria-expanded')).toBe('true');
     expect(bodyEl().hidden).toBe(false);

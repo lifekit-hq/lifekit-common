@@ -99,5 +99,25 @@ describe('SearchInputComponent', () => {
     fixture.detectChanges();
 
     expect(input().className).toContain('text-cmn-lg');
+    expect(input().className).toContain('h-cmn-16');
+  });
+
+  it('is the filled bottom-border field, square, with the glyph inside the padding', () => {
+    const classes = input().className;
+    expect(classes).toContain('bg-cmn-field');
+    expect(classes).toContain('border-b');
+    expect(classes).toContain('border-0');
+    expect(classes).toContain('pl-cmn-12');
+    expect(classes).toContain('focus:outline-2');
+    expect(classes).not.toMatch(/(^|\s)border(\s|$)/);
+  });
+
+  it('greys a disabled field without dimming it', () => {
+    fixture.componentInstance.setDisabledState(true);
+    fixture.detectChanges();
+
+    expect(input().disabled).toBe(true);
+    expect(input().className).toContain('disabled:text-text-disabled');
+    expect(input().className).not.toContain('opacity');
   });
 });

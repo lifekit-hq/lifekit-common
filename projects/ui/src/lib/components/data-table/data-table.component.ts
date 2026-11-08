@@ -88,9 +88,9 @@ const ARIA_SORT: Record<'asc' | 'desc' | 'none', string> = {
   none: 'none',
 };
 
-const ROW_BASE_CLASS = 'transition-colors';
+const ROW_BASE_CLASS = 'transition-colors duration-cmn-short ease-cmn-standard';
 const ROW_ACTIONABLE_CLASS =
-  'cursor-pointer hover:bg-surface-raised focus:outline-none focus-visible:bg-surface-raised ' +
+  'cursor-pointer hover:bg-surface-hover focus:outline-none focus-visible:bg-surface-hover ' +
   'focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-border-focus';
 
 /**
@@ -613,12 +613,12 @@ export class DataTableComponent<T = Record<string, unknown>> {
   );
 
   public headerCellClass(align: CmnColumnAlign): string {
-    return `sticky top-0 z-10 bg-surface-card shadow-[inset_0_-1px_0_var(--color-border-default)] px-cmn-4 py-cmn-3 font-label text-cmn-xs font-semibold text-text-secondary ${this.alignClass(align)}`;
+    return `sticky top-0 z-10 h-cmn-size-lg bg-surface-raised shadow-[inset_0_-1px_0_var(--color-border-default)] px-cmn-4 font-label text-cmn-sm font-semibold text-text-primary ${this.alignClass(align)}`;
   }
 
   /** A truncated cell gets no min-content width of its own, so its text cuts off instead of widening the table. */
   public dataCellClass(align: CmnColumnAlign, truncate = false): string {
-    return `px-cmn-4 py-cmn-3 text-text-primary ${this.alignClass(align)}${truncate ? ' max-w-0' : ''}`;
+    return `h-cmn-size-lg px-cmn-4 py-cmn-3 text-text-primary ${this.alignClass(align)}${truncate ? ' max-w-0' : ''}`;
   }
 
   public summaryCellClass(align: CmnColumnAlign): string {

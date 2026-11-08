@@ -26,13 +26,19 @@ export interface CmnTab {
   exact?: boolean;
 }
 
-// On a phone a tab is --size-touch tall and keeps its label on one line; the row scrolls sideways.
+// Carbon's line tabs: 40px tall tabs side by side with no gap, each drawing its own 2px bottom
+// border (subtle grey; the accent when selected; the strong grey on hover), the selected label
+// semibold. Focus is the 2px inset outline. On a phone a tab is --size-touch tall and keeps its
+// label on one line; the row scrolls sideways.
 const TAB_BASE =
-  'inline-flex shrink-0 items-center whitespace-nowrap max-md:min-h-cmn-touch px-cmn-4 py-cmn-2 ' +
-  'text-cmn-sm font-medium transition-colors border-b-2';
-const ROW_CLASSES = 'flex gap-cmn-2 overflow-x-auto border-b border-border-default';
-const TAB_ACTIVE = 'text-text-primary border-accent-default';
-const TAB_INACTIVE = 'text-text-secondary border-transparent hover:text-text-primary';
+  'inline-flex h-cmn-size-md shrink-0 items-center whitespace-nowrap max-md:min-h-cmn-touch ' +
+  'px-cmn-4 text-cmn-sm transition-colors duration-cmn-short ease-cmn-standard border-b-2 ' +
+  'focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 ' +
+  'focus-visible:outline-border-focus';
+const ROW_CLASSES = 'flex overflow-x-auto';
+const TAB_ACTIVE = 'border-accent-default font-semibold text-text-primary';
+const TAB_INACTIVE =
+  'border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary';
 
 /** A tab button as the key manager sees it: something to focus. */
 class TabFocusTarget implements FocusableOption {

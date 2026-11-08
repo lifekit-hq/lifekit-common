@@ -68,8 +68,9 @@ function keyStep(key: string): 1 | -1 | 'first' | 'last' | undefined {
  * Semantics: `role="radiogroup"` of `role="radio"` cells with a roving tabindex - Tab lands on the
  * chosen cell (or the first enabled one), the arrow keys move and choose, Home/End jump to the
  * ends, and disabled cells are skipped. Cells share the row equally, never wrap, are at least
- * 44px square so a phone thumb can hit them, and are never narrower than their label: the row fills
- * its container, and scrolls sideways inside it rather than cut a label or widen the page.
+ * 44px wide and, below 768px, 44px tall (40px from 768px up) so a phone thumb can hit them, and are
+ * never narrower than their label: the row fills its container, and scrolls sideways inside it
+ * rather than cut a label or widen the page.
  *
  * Use it for five segments or fewer, with short labels. More choices, or longer labels, belong in a
  * menu or an `lk-chip-row`. In development a row that has to scroll logs a console warning.
@@ -110,8 +111,10 @@ export class LkSegmented extends LitElement {
       display: none;
     }
 
-    /* Equal columns as wide as the widest label (at least 44px); fills the container when that is
-       wider, and scrolls inside it rather than squeeze a label. */
+    /* Carbon's content switcher: equal columns as wide as the widest label (at least 44px) in one
+       square box with a 1px ink outline (grey when disabled); cells 40px tall from 768px up, 44px
+       below; fills the container when that is wider, and scrolls inside it rather than squeeze a
+       label. */
     .group {
       box-sizing: border-box;
       display: grid;
@@ -119,10 +122,12 @@ export class LkSegmented extends LitElement {
       grid-auto-columns: minmax(2.75rem, 1fr);
       width: max-content;
       min-width: 100%;
-      gap: 2px;
-      padding: 2px;
-      border-radius: var(--radius-lg);
-      background: var(--color-surface-raised, #e8edef);
+      outline: 1px solid var(--color-text-primary, #0f1a1f);
+      outline-offset: -1px;
+    }
+
+    .group[aria-disabled='true'] {
+      outline-color: var(--color-border-default, #d9e0e3);
     }
 
     .cell {
@@ -130,7 +135,7 @@ export class LkSegmented extends LitElement {
       min-height: 2.75rem;
       padding: 0 var(--space-1, 0.25rem);
       border: 0;
-      border-radius: var(--radius-md);
+      border-radius: 0;
       background: transparent;
       color: var(--color-text-secondary, #46565e);
       font: inherit;
@@ -142,16 +147,25 @@ export class LkSegmented extends LitElement {
       -webkit-tap-highlight-color: transparent;
     }
 
+    @media (min-width: 768px) {
+      .cell {
+        min-height: 2.5rem;
+      }
+    }
+
     .cell:hover:not(:disabled):not([aria-checked='true']) {
       background: var(--color-surface-hover, #dce3e6);
       color: var(--color-text-primary, #0f1a1f);
     }
 
     .cell[aria-checked='true'] {
-      background: var(--color-accent-subtle, #e3f1f4);
-      color: var(--color-accent-default, #175a6d);
+      background: var(--color-text-primary, #0f1a1f);
+      color: var(--color-text-inverse, #ffffff);
       font-weight: 600;
-      box-shadow: inset 0 0 0 1px var(--color-border-strong, #7d8c93);
+    }
+
+    .cell[aria-checked='true']:disabled {
+      background: var(--color-surface-raised, #e8edef);
     }
 
     .cell:disabled {

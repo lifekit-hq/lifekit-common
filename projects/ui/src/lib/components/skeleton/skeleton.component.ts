@@ -32,7 +32,7 @@ const TEXT_LINE_CLASSES: Record<SkeletonText, string> = {
 const BAR = 'cmn-skeleton-sweep block rounded-cmn-sm';
 const DISC = 'cmn-skeleton-sweep block shrink-0 rounded-cmn-full';
 const ROW_CLASSES =
-  'flex items-center gap-cmn-3 border-b border-border-default px-cmn-4 py-cmn-3 last:border-b-0';
+  'flex min-h-cmn-size-lg items-center gap-cmn-3 border-b border-border-default px-cmn-4 py-cmn-3 last:border-b-0';
 const CARD_CLASSES = 'rounded-cmn-md border border-border-default bg-surface-card';
 
 /** Rows a `row` preset draws unless `count` says otherwise: one. A `section` draws three. */
@@ -186,10 +186,11 @@ const FACTS_ROW_CLASSES = 'py-cmn-3 sm:grid sm:grid-cols-3 sm:gap-cmn-4';
         }
       }
     }
-    <!-- The heading's box: the group gap around one line of text-cmn-sm (1.3125rem) -->
+    <!-- The heading's box: the group gap around one line of text-cmn-sm (1.3125rem), at least the 40px
+         layout step, as the list section's heading is -->
     <ng-template #heading>
-      <div class="px-cmn-1 py-cmn-group-gap">
-        <div class="flex items-center" style="height: 1.3125rem">
+      <div class="flex min-h-cmn-size-md items-center px-cmn-1 py-cmn-group-gap">
+        <div class="flex w-full items-center" style="height: 1.3125rem">
           <div [class]="bar" style="width: 30%; height: 0.875rem"></div>
         </div>
       </div>
