@@ -49,6 +49,7 @@ import {
 } from './page-chrome';
 import {PageFrameService} from './page-frame';
 import {overflowNavItems, phoneTabItems} from './phone-tabs';
+import {fadeRouteChanges} from './route-fade';
 import {matchTab, ShellNavigationService} from './shell-navigation.service';
 import {healViewportOnBlur} from './viewport-heal';
 
@@ -607,6 +608,7 @@ export class AppLayoutComponent {
       activeTab: () => this.effectiveActiveRoute(),
     });
     this.publishContentInsets();
+    fadeRouteChanges(this.router, () => this.main().nativeElement, this.destroyRef);
     effect(onCleanup => onCleanup(stackNotices(this.noticesRef().nativeElement)));
     // Phone shell only: a standalone iOS app's first keyboard leaves the frame status-bar-height short.
     effect(onCleanup => {

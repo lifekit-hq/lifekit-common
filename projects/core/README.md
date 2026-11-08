@@ -101,6 +101,10 @@ run installed) the tabs always preload: nothing can be known, and the chunks are
 
 ## `withLkViewTransitions()`
 
+Optional. `cmn-app-layout` already fades the page in on a route change, in every app, with no router
+feature; add this one for the old page to fade out as the new one fades in, and the shell stands down
+for it.
+
 The router's view-transition feature for lifekit apps. It is Angular's `withViewTransitions()`, with
 the page crossfade kept to navigations that change the matched route: a tab switch, opening a detail
 page. Use it in place of the bare `withViewTransitions()`, which crossfades every navigation, including
