@@ -30,7 +30,7 @@ export interface VerdictPill {
   readonly tone?: VerdictTone;
 }
 
-/** How the price moved over the day. A zero amount reads as no change. */
+/** How the price moved over the day. A move that rounds to zero in both figures reads as no change. */
 export interface VerdictChange {
   /** A ratio (0.018 is shown as +1.80%), the library's convention for a percent. */
   readonly percent: number;
@@ -138,8 +138,38 @@ export class VerdictHeaderComponent {
     return formatted || EMPTY_VALUE;
   });
 
+  /** What the pill shows and the direction it shows: both come from the rounded, formatted values. */
+  private readonly changeView = computed(() => {
+    const change = this.change();
+    if (!change) {
+      return {text: '', direction: 0};
+    }
+    const currency = this.currency();
+    const formatPercent = (value: number) =>
+      formatNumber(value, {
+        locale: this.locale,
+        percent: true,
+        delta: true,
+        fractionDigits: PERCENT_FRACTION_DIGITS,
+      });
+    const formatAmount = (value: number) =>
+      currency
+        ? formatMoney(value, currency, {locale: this.locale, delta: true})
+        : formatNumber(value, {locale: this.locale, delta: true});
+    const percent = formatPercent(change.percent);
+    const amount = formatAmount(change.amount);
+    if (!percent || !amount) {
+      return {text: '', direction: 0};
+    }
+    const amountDirection = amount === formatAmount(0) ? 0 : Math.sign(change.amount);
+    const percentDirection = percent === formatPercent(0) ? 0 : Math.sign(change.percent);
+    return {text: `${percent} · ${amount}`, direction: amountDirection || percentDirection};
+  });
+
+  protected readonly changeText = computed(() => this.changeView().text);
+
   protected readonly changeTone = computed<TagVariant>(() => {
-    const direction = Math.sign(this.change()?.amount ?? 0);
+    const direction = this.changeView().direction;
     if (direction === 0) {
       return 'neutral';
     }
@@ -147,29 +177,10 @@ export class VerdictHeaderComponent {
   });
 
   protected readonly changeIcon = computed<LucideIconName>(() => {
-    const direction = Math.sign(this.change()?.amount ?? 0);
+    const direction = this.changeView().direction;
     if (direction === 0) {
       return 'Minus';
     }
     return direction > 0 ? 'TrendingUp' : 'TrendingDown';
-  });
-
-  /** The percent and the amount, both signed: the sign and the arrow carry the direction, not the hue. */
-  protected readonly changeText = computed(() => {
-    const change = this.change();
-    if (!change) {
-      return '';
-    }
-    const percent = formatNumber(change.percent, {
-      locale: this.locale,
-      percent: true,
-      delta: true,
-      fractionDigits: PERCENT_FRACTION_DIGITS,
-    });
-    const currency = this.currency();
-    const amount = currency
-      ? formatMoney(change.amount, currency, {locale: this.locale, delta: true})
-      : formatNumber(change.amount, {locale: this.locale, delta: true});
-    return percent && amount ? `${percent} · ${amount}` : '';
   });
 }

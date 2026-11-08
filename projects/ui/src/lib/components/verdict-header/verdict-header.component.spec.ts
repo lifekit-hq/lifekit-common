@@ -133,6 +133,23 @@ describe('VerdictHeaderComponent', () => {
       expect(pill?.querySelector('span')?.classList).toContain('bg-surface-raised');
     });
 
+    it('reads a move that rounds to zero as neutral, not as a gain', () => {
+      set('change', {percent: 0.00004, amount: 0.003});
+      const pill = element('cmn-tag');
+      expect(pill?.textContent).toContain('0.00% · €0.00');
+      expect(pill?.querySelector('span')?.classList).toContain('bg-surface-raised');
+      const rounded = pill?.querySelector('cmn-icon')?.innerHTML;
+      set('change', {percent: 0, amount: 0});
+      expect(element('cmn-tag cmn-icon')?.innerHTML).toBe(rounded);
+    });
+
+    it('follows the signed percent when only the amount rounds to zero', () => {
+      set('change', {percent: 0.01, amount: 0});
+      const pill = element('cmn-tag');
+      expect(pill?.textContent).toContain('+1.00% · €0.00');
+      expect(pill?.querySelector('span')?.classList).toContain('bg-status-success-subtle');
+    });
+
     it('formats the amount as a plain number when the price has no currency', () => {
       set('currency', null);
       set('change', {percent: 0.01, amount: 2});
