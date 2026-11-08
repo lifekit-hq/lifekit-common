@@ -53,6 +53,17 @@ for (const theme of THEMES) {
         });
         await expect(page.locator('.sb-show-errordisplay')).toBeHidden();
         await page.evaluate(() => document.fonts.ready);
+        // Axe reads computed colours, so a surface still entering (a dialog, its scrim, a toast) is
+        // measured at a blend of its first frame. Wait until every finite animation and transition
+        // has finished; a spinner that loops by design is not waited on.
+        await page.waitForFunction(() =>
+          document
+            .getAnimations()
+            .every(
+              a =>
+                a.playState !== 'running' || a.effect?.getComputedTiming().iterations === Infinity
+            )
+        );
 
         const {violations} = await new AxeBuilder({page}).withTags(AXE_TAGS).analyze();
         const blocking = violations.filter(
