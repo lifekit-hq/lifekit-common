@@ -2,15 +2,15 @@ import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {FormControl, ReactiveFormsModule} from '@angular/forms';
 import type {Meta, StoryObj} from '@storybook/angular';
 
-import {AlertComponent} from '../alert/alert.component';
-import {ButtonComponent, type ButtonVariant} from '../button/button.component';
-import {CardComponent} from '../card/card.component';
-import {CheckboxComponent} from '../checkbox/checkbox.component';
-import {FormFieldComponent} from '../form-field/form-field.component';
-import {InputComponent} from '../input/input.component';
-import {TagComponent} from '../tag/tag.component';
-import {TextareaComponent} from '../textarea/textarea.component';
-import {ToggleComponent} from '../toggle/toggle.component';
+import {AlertComponent} from '../components/alert/alert.component';
+import {ButtonComponent, type ButtonVariant} from '../components/button/button.component';
+import {CardComponent} from '../components/card/card.component';
+import {CheckboxComponent} from '../components/checkbox/checkbox.component';
+import {FormFieldComponent} from '../components/form-field/form-field.component';
+import {InputComponent} from '../components/input/input.component';
+import {TagComponent} from '../components/tag/tag.component';
+import {TextareaComponent} from '../components/textarea/textarea.component';
+import {ToggleComponent} from '../components/toggle/toggle.component';
 
 const KINDS: readonly ButtonVariant[] = [
   'primary',
