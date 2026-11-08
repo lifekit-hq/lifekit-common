@@ -160,6 +160,9 @@ npm run test:screens          # compares; this is what CI runs (the `screens` jo
 Each new template adds its golden story to `templates.spec.ts` and its first baselines to the same
 pull request, for the owner to approve.
 
+`projects/ui/e2e/screens/controls.spec.ts` does the same for the controls matrix (`Controls/Golden`):
+every re-specced control in its default, hover, focus, disabled and error states.
+
 ## Updating a baseline
 
 A baseline changes only when you run the update step on the branch that changes the screen.
@@ -300,7 +303,7 @@ this change's.
 ## Component VRT baselines (Windows)
 
 The component VRT baselines under `projects/ui/e2e/screenshots` are `*-win32.png` files captured on
-the owner's Windows machine. They cannot be regenerated on CI or Linux. The `md` button's block
-padding is now `py-cmn-1`, so a bordered secondary `md` button is 40px, not 42px, on the desktop:
-the `button-*-chromium-win32.png` baselines are stale and need regenerating on the owner's Windows
+the owner's Windows machine. They cannot be regenerated on CI or Linux. Carbon step 2 re-specced the
+button (48px `md`, square, secondary now the ink fill, the outline now `tertiary`), so the
+`button-*-chromium-win32.png` baselines are stale and need regenerating on the owner's Windows
 machine.
