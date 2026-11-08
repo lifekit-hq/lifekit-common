@@ -68,7 +68,7 @@ function keyStep(key: string): 1 | -1 | 'first' | 'last' | undefined {
  * Semantics: `role="radiogroup"` of `role="radio"` cells with a roving tabindex - Tab lands on the
  * chosen cell (or the first enabled one), the arrow keys move and choose, Home/End jump to the
  * ends, and disabled cells are skipped. Cells share the row equally, never wrap, are at least
- * 44px square so a phone thumb can hit them, and are never narrower than their label: the row fills
+ * 44px wide and, below 768px, 44px tall (40px from 768px up) so a phone thumb can hit them, and are never narrower than their label: the row fills
  * its container, and scrolls sideways inside it rather than cut a label or widen the page.
  *
  * Use it for five segments or fewer, with short labels. More choices, or longer labels, belong in a
@@ -111,8 +111,9 @@ export class LkSegmented extends LitElement {
     }
 
     /* Carbon's content switcher: equal columns as wide as the widest label (at least 44px) in one
-       square box with a 1px ink outline; fills the container when that is wider, and scrolls inside
-       it rather than squeeze a label. */
+       square box with a 1px ink outline (grey when disabled); cells 40px tall from 768px up, 44px
+       below; fills the container when that is wider, and scrolls inside it rather than squeeze a
+       label. */
     .group {
       box-sizing: border-box;
       display: grid;
@@ -122,6 +123,10 @@ export class LkSegmented extends LitElement {
       min-width: 100%;
       outline: 1px solid var(--color-text-primary, #0f1a1f);
       outline-offset: -1px;
+    }
+
+    .group[aria-disabled='true'] {
+      outline-color: var(--color-border-default, #d9e0e3);
     }
 
     .cell {
@@ -139,6 +144,12 @@ export class LkSegmented extends LitElement {
       touch-action: manipulation;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
+    }
+
+    @media (min-width: 768px) {
+      .cell {
+        min-height: 2.5rem;
+      }
     }
 
     .cell:hover:not(:disabled):not([aria-checked='true']) {
