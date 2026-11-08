@@ -125,6 +125,32 @@ describe('CmnListMotionDirective', () => {
     expect(keyframes(last)[0]).toMatchObject({transform: 'translate(0px, -40px)'});
   });
 
+  it('holds on to no exit once it has finished', async () => {
+    await change([1, 3]);
+    const ghost = rows().find(row => row.hasAttribute('inert')) as HTMLElement;
+    const list = ghost.parentElement as HTMLElement;
+    const exits = ghost.getAnimations();
+    exits.forEach(animation => animation.finish());
+    await Promise.all(exits.map(animation => animation.finished));
+    await new Promise(resolve => setTimeout(resolve));
+    expect(ghost.parentElement).toBeNull();
+
+    list.append(ghost);
+    fixture.destroy();
+
+    expect(ghost.parentElement).toBe(list);
+  });
+
+  it('takes the exits still running off the screen when the list goes', async () => {
+    await change([1, 3]);
+    const ghost = rows().find(row => row.hasAttribute('inert')) as HTMLElement;
+    expect(ghost.parentElement).not.toBeNull();
+
+    fixture.destroy();
+
+    expect(ghost.parentElement).toBeNull();
+  });
+
   it('keeps the exit where the row was, between its neighbours', async () => {
     await change([1, 3]);
 

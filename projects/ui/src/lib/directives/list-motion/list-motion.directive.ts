@@ -49,6 +49,7 @@ export class CmnListMotionDirective {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private readonly destroyRef = inject(DestroyRef);
   private boxes = new Map<HTMLElement, RowBox>();
+  private readonly ghosts = new Set<HTMLElement>();
 
   /** The rows' selector. */
   public readonly cmnListMotion = input<string>('');
@@ -73,6 +74,8 @@ export class CmnListMotionDirective {
     this.destroyRef.onDestroy(() => {
       changes.disconnect();
       sizes?.disconnect();
+      this.ghosts.forEach(ghost => ghost.remove());
+      this.ghosts.clear();
     });
   }
 
@@ -172,14 +175,17 @@ export class CmnListMotionDirective {
       pointerEvents: 'none',
     });
     parent.insertBefore(row, next?.parentNode === parent ? next : null);
+    this.ghosts.add(row);
     const exit = row.animate([{opacity: 1}, {opacity: 0}], {
       duration: motionDurationMs('short'),
       easing: motionEasing('accelerate'),
       fill: 'forwards',
     });
-    const remove = (): void => row.remove();
+    const remove = (): void => {
+      this.ghosts.delete(row);
+      row.remove();
+    };
     exit.addEventListener('finish', remove);
     exit.addEventListener('cancel', remove);
-    this.destroyRef.onDestroy(remove);
   }
 }
