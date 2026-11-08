@@ -187,6 +187,27 @@ describe('MorePageComponent', () => {
     expect(text('[data-more-version]')).toEqual(['v3.2.0']);
   });
 
+  it('should dot an account item that has something new behind it, and say so to a screen reader', () => {
+    const withDot = (dot: boolean): AppLayoutAccount => ({
+      ...ACCOUNT,
+      menuItems: accountMenu({
+        settingsRoute: '/settings',
+        extras: [{id: 'whatsNew', label: "What's new", icon: 'Megaphone', dot}],
+      }),
+    });
+    fixture.componentRef.setInput('account', withDot(true));
+    fixture.detectChanges();
+
+    const row = section('account')?.querySelector('button');
+    expect(row?.textContent).toContain("What's new");
+    expect(row?.querySelector('.cmn-badge-indicator')).toBeTruthy();
+    expect(row?.querySelector('.sr-only')?.textContent).toBe('New');
+
+    fixture.componentRef.setInput('account', withDot(false));
+    fixture.detectChanges();
+    expect(section('account')?.querySelector('.cmn-badge-indicator')).toBeNull();
+  });
+
   it('should show only the nav items without an account', () => {
     fixture.componentRef.setInput('account', undefined);
     fixture.detectChanges();

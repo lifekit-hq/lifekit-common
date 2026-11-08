@@ -105,6 +105,23 @@ describe('MenuComponent', () => {
     expect(overlayContainer.getContainerElement().textContent).toBe('');
   });
 
+  it('should dot an item that has something new behind it, and say so to a screen reader', () => {
+    fixture.componentRef.setInput('items', [
+      {id: 'whatsNew', label: "What's new", icon: 'Megaphone', dot: true},
+      ...MENU_ITEMS,
+    ]);
+    fixture.detectChanges();
+    fixture.debugElement
+      .query(By.css('button'))
+      .triggerEventHandler('click', new MouseEvent('click'));
+    fixture.detectChanges();
+
+    const items = overlayContainer.getContainerElement().querySelectorAll('[role="menuitem"]');
+    expect(items[0].querySelector('.sr-only')?.textContent).toBe('New');
+    expect(items[0].querySelector('[aria-hidden="true"].bg-status-error')).toBeTruthy();
+    expect(items[1].querySelector('.sr-only')).toBeNull();
+  });
+
   it('should close on Escape', () => {
     fixture.debugElement
       .query(By.css('button'))

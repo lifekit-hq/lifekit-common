@@ -67,9 +67,11 @@ const GOLDEN_SCREENS = [
   'templates-overview',
   'templates-overview-with-long-body',
   'templates-settings',
+  'templates-whats-new',
+  'templates-whats-new-with-badge',
 ];
 const GOLDEN_STORY =
-  /^templates-(detail|form|list|overview|settings)--(phone|desktop)(-dark)?$|^templates-list--(phone|desktop)-with-(notice|app-chrome)$|^templates-overview--desktop-with-long-body$/;
+  /^templates-(detail|form|list|overview|settings)--(phone|desktop)(-dark)?$|^templates-list--(phone|desktop)-with-(notice|app-chrome)$|^templates-overview--desktop-with-long-body$|^templates-whats-new--(phone|desktop)(-with-badge)?(-dark)?$/;
 
 test('the scan covers every golden story', () => {
   expect(stories.filter(id => !GOLDEN_STORY.test(id))).toEqual([]);

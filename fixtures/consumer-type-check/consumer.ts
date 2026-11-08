@@ -20,6 +20,8 @@ import type {
   ButtonComponent,
   Maybe,
   Nullable,
+  WhatsNewConfig,
+  WhatsNewData,
 } from '@lifekit-hq/ui';
 
 // Nullable<T> must be T | null
@@ -48,5 +50,16 @@ const badgeLabel: Nullable<string> = alertItem.badgeLabel();
 declare const areaChart: AreaChartComponent;
 const stacked: boolean = areaChart.stacked();
 
+// What's new (#268): the config, the data shape, the menu item and the service reach consumers typed.
+const whatsNewConfig: WhatsNewConfig = {version: '1.0.0', includeOwnerNotes: () => true};
+const whatsNewData: WhatsNewData = {
+  versions: [{version: '1.0.0', date: null, notes: [], changes: []}],
+};
+const whatsNewItem: boolean | undefined = api.whatsNewMenuItem(true).dot;
+declare const whatsNew: api.CmnWhatsNewService;
+const unread: boolean = whatsNew.hasUnread();
+const whatsNewStatus: api.AsyncStateStatus = whatsNew.status();
+
 // Silence "unused variable" without removing the checks
 void [api, a, b, c, d, e, f, g, icon, badgeLabel, stacked];
+void [whatsNewConfig, whatsNewData, whatsNewItem, unread, whatsNewStatus];

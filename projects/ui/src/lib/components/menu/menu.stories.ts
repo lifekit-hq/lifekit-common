@@ -1,5 +1,6 @@
 import type {Meta, StoryObj} from '@storybook/angular';
 
+import {whatsNewMenuItem} from '../whats-new/whats-new-menu-item';
 import {MenuComponent, type MenuHeader, type MenuItem} from './menu.component';
 
 interface MenuStoryArgs {
@@ -65,6 +66,19 @@ export const AccountWithIdentity: Story = {
     items: [
       {id: '/settings', label: 'Settings', icon: 'Settings2'},
       {id: 'whatsNew', label: "What's new", icon: 'Sparkles'},
+      {id: '_signOut', label: 'Sign out', icon: 'LogOut', destructive: true, separatorBefore: true},
+    ],
+  },
+};
+
+/** An item with something new behind it wears a dot, and a screen reader hears "New" after its label. */
+export const WithDot: Story = {
+  ...AccountWithIdentity,
+  args: {
+    ...AccountWithIdentity.args,
+    items: [
+      {id: '/settings', label: 'Settings', icon: 'Settings2'},
+      whatsNewMenuItem(true),
       {id: '_signOut', label: 'Sign out', icon: 'LogOut', destructive: true, separatorBefore: true},
     ],
   },

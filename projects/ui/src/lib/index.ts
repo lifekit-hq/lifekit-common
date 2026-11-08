@@ -87,6 +87,11 @@ export * from './components/toast/toast.component';
 export * from './components/toast/toast.service';
 export * from './components/toggle/toggle.component';
 export * from './components/top-bar/top-bar.component';
+export * from './components/whats-new/whats-new.component';
+export * from './components/whats-new/whats-new.config';
+export type * from './components/whats-new/whats-new.model';
+export * from './components/whats-new/whats-new.service';
+export * from './components/whats-new/whats-new-menu-item';
 
 // Directives
 export * from './directives/skeleton/skeleton.directive';

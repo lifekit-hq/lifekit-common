@@ -301,6 +301,14 @@ export class AppLayoutComponent {
   private readonly shell = inject(ShellNavigationService);
   private readonly shellService = inject(CmnShellService);
   private readonly pageFrame = inject(PageFrameService);
+
+  /** The account is set to live on the More page (the phone shell's default) and there is one to show. */
+  private readonly accountOnMore = computed<boolean>(
+    () =>
+      (this.accountOnPhone() ?? 'more') === 'more' &&
+      this.moreRoute() !== '' &&
+      (this.account() !== undefined || this.accountPending())
+  );
   private paletteOpen = false;
 
   private readonly frame = viewChild.required<ElementRef<HTMLElement>>('frame');
@@ -469,11 +477,16 @@ export class AppLayoutComponent {
       return undefined;
     }
     const overflow = this.overflowItems();
+    // The account lives on the More page, so an account item that wears a dot (What's new, unread)
+    // puts one on the tab: it is the only door to it.
+    const accountDot =
+      this.accountOnMore() && this.effectiveAvatarMenuItems().some(item => item.dot);
     return {
       label: 'More',
       icon: 'Ellipsis',
       route,
-      badge: () => overflow.reduce((total, item) => total + (item.badge?.() ?? 0), 0),
+      badge: () =>
+        overflow.reduce((total, item) => total + (item.badge?.() ?? 0), 0) + (accountDot ? 1 : 0),
     };
   });
 
@@ -555,13 +568,9 @@ export class AppLayoutComponent {
   );
 
   /** The phone shell shows the account on the More page, so the top bar leaves its avatar out. */
-  protected readonly showAvatar = computed<boolean>(() => {
-    const onMore =
-      (this.accountOnPhone() ?? 'more') === 'more' &&
-      this.moreRoute() !== '' &&
-      (this.account() !== undefined || this.accountPending());
-    return !(onMore && this.shellService.isPhone());
-  });
+  protected readonly showAvatar = computed<boolean>(
+    () => !(this.accountOnMore() && this.shellService.isPhone())
+  );
 
   protected readonly fabClearance = computed<number | null>(() => {
     const clearance = this.floatingActionClearance();
