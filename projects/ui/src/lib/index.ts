@@ -82,6 +82,8 @@ export * from './components/status-indicator/status-indicator.component';
 export * from './components/tab-group/tab-group.component';
 export * from './components/tag/tag.component';
 export * from './components/textarea/textarea.component';
+export * from './components/tile-grid/tile-grid.component';
+export * from './components/tile-grid/tile-panel.directive';
 export * from './components/toast/provide-toast-preference-errors';
 export * from './components/toast/toast.component';
 export * from './components/toast/toast.service';
