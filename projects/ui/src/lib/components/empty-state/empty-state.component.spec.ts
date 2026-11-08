@@ -104,6 +104,8 @@ describe('EmptyStateComponent — inputs', () => {
     ]);
     buttons[1].click();
     expect(emitted).toBe(1);
+    expect(buttons[1].className).toContain('border-accent-default');
+    expect(buttons[1].className).not.toContain('bg-text-primary');
   });
 
   it('should keep a long unbroken title inside the column', () => {

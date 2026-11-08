@@ -59,11 +59,11 @@ describe('ToggleComponent', () => {
     expect(button()?.classList).toContain('max-md:after:w-cmn-touch');
   });
 
-  it('exposes the checked state through aria-checked and the accent track', () => {
+  it('exposes the checked state through aria-checked and the success track', () => {
     fixture.componentRef.setInput('checked', true);
     fixture.detectChanges();
     expect(button()?.getAttribute('aria-checked')).toBe('true');
-    expect(button()?.className).toContain('bg-accent-default');
+    expect(button()?.className).toContain('bg-status-success');
   });
 
   it('slides the thumb across when checked', () => {
@@ -72,7 +72,7 @@ describe('ToggleComponent', () => {
 
     fixture.componentRef.setInput('checked', true);
     fixture.detectChanges();
-    expect(thumb()?.className).toContain('translate-x-5');
+    expect(thumb()?.className).toContain('translate-x-6');
   });
 
   it('emits the negated value on click', () => {
@@ -103,7 +103,8 @@ describe('ToggleComponent', () => {
 
     expect(button()?.disabled).toBe(true);
     expect(button()?.getAttribute('aria-disabled')).toBe('true');
-    expect(button()?.className).toContain('opacity-50');
+    expect(button()?.className).toContain('cursor-not-allowed');
+    expect(button()?.className).not.toContain('opacity-');
 
     button()?.click();
     expect(emitted).toEqual([]);

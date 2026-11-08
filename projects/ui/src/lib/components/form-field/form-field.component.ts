@@ -28,6 +28,7 @@ import {EMPTY, filter, map, merge, switchMap} from 'rxjs';
 
 import {VALIDATION_MESSAGES} from '../../tokens/validation-messages.token';
 import {ErrorSummaryRegistry} from '../error-summary/error-summary-registry';
+import {IconComponent} from '../icon/icon.component';
 import {InputComponent} from '../input/input.component';
 import {TextareaComponent} from '../textarea/textarea.component';
 
@@ -54,7 +55,7 @@ let fieldCounter = 0;
 @Component({
   selector: 'cmn-form-field',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [],
+  imports: [IconComponent],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -65,7 +66,10 @@ let fieldCounter = 0;
   template: `
     <div class="flex flex-col gap-cmn-1">
       @if (label()) {
-        <label [for]="fieldId" class="font-label text-cmn-sm font-medium text-text-primary">
+        <label
+          [for]="fieldId"
+          class="mb-cmn-1 font-label text-cmn-xs font-normal text-text-secondary"
+        >
           {{ label() }}
           @if (required()) {
             <span class="text-status-error ml-0.5" aria-hidden="true">*</span>
@@ -76,16 +80,18 @@ let fieldCounter = 0;
       <ng-content />
 
       @if (hint() && !resolvedError()) {
-        <span class="text-cmn-xs leading-relaxed text-text-secondary">{{ hint() }}</span>
+        <span class="text-cmn-xs text-text-secondary">{{ hint() }}</span>
       }
 
       @if (resolvedError()) {
         <span
           role="alert"
           aria-live="polite"
-          class="text-cmn-xs leading-relaxed text-status-error"
-          >{{ resolvedError() }}</span
+          class="flex items-start gap-cmn-1 text-cmn-xs text-status-error"
         >
+          <cmn-icon class="mt-px shrink-0" name="CircleAlert" size="sm" aria-hidden="true" />
+          <span>{{ resolvedError() }}</span>
+        </span>
       }
     </div>
   `,

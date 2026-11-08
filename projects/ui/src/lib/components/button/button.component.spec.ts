@@ -25,8 +25,12 @@ describe('ButtonComponent', () => {
 
   it.each<[ButtonVariant, string]>([
     ['primary', 'bg-accent-default'],
-    ['secondary', 'border-border-strong'],
+    ['secondary', 'bg-text-primary'],
+    ['tertiary', 'border-accent-default'],
+    ['ghost', 'text-accent-default'],
     ['destructive', 'bg-status-error'],
+    ['danger-tertiary', 'border-status-error'],
+    ['danger-ghost', 'text-status-error'],
   ])('applies the "%s" variant classes', (variant, expected) => {
     fixture.componentRef.setInput('variant', variant);
     fixture.detectChanges();
@@ -34,23 +38,34 @@ describe('ButtonComponent', () => {
   });
 
   it.each<[ButtonSize, string, 'sm' | 'md']>([
-    ['sm', 'text-cmn-sm', 'sm'],
-    ['md', 'text-cmn-md', 'sm'],
-    ['lg', 'text-cmn-lg', 'md'],
-  ])('sizes the button and its icon for "%s"', (size, textClass, iconSize) => {
+    ['sm', 'min-h-cmn-size-sm', 'sm'],
+    ['md', 'min-h-cmn-control-h', 'sm'],
+    ['lg', 'min-h-cmn-16', 'md'],
+  ])('sizes the button and its icon for "%s"', (size, heightClass, iconSize) => {
     fixture.componentRef.setInput('size', size);
     fixture.detectChanges();
-    expect(button()?.className).toContain(textClass);
+    // Carbon's 32 / 48 / 64px, with its 14px label at every size.
+    expect(button()?.className).toContain(heightClass);
+    expect(button()?.className).toContain('text-cmn-sm');
     expect(fixture.componentInstance.iconSize()).toBe(iconSize);
+  });
+
+  it("is square, with Carbon's inset focus ring and a border on every kind", () => {
+    fixture.detectChanges();
+    const className = button()?.className ?? '';
+    expect(className).toContain('rounded-cmn-md');
+    expect(className).toMatch(/(^| )border( |$)/);
+    expect(className).toContain('border-transparent');
+    expect(className).toContain('focus:border-border-focus');
+    expect(className).toContain('focus:shadow-cmn-focus-inset');
   });
 
   it('gives the md button at least the control height the md field beside it has', () => {
     fixture.detectChanges();
     expect(button()?.className).toContain('min-h-cmn-control-h');
     // A one-line label plus this padding stays under the control height, border included, so the
-    // bordered secondary is as tall as the primary beside it.
-    expect(button()?.className).toContain('py-cmn-1');
-    expect(button()?.className).not.toContain('py-cmn-2');
+    // outlined tertiary is as tall as the primary beside it.
+    expect(button()?.className).toContain('py-cmn-2');
     fixture.componentRef.setInput('size', 'sm');
     fixture.detectChanges();
     expect(button()?.className).not.toContain('min-h-cmn-control-h');
@@ -107,8 +122,12 @@ describe('ButtonComponent', () => {
   it('draws a disabled button in its own colours, never the variant dimmed', () => {
     const drawn = {
       primary: ['bg-surface-raised', 'text-text-secondary'],
-      secondary: ['bg-transparent', 'border-border-default', 'text-text-secondary'],
+      secondary: ['bg-surface-raised', 'text-text-secondary'],
+      tertiary: ['bg-transparent', 'border-border-default', 'text-text-secondary'],
+      ghost: ['bg-transparent', 'text-text-secondary'],
       destructive: ['bg-surface-raised', 'text-text-secondary'],
+      'danger-tertiary': ['bg-transparent', 'border-border-default', 'text-text-secondary'],
+      'danger-ghost': ['bg-transparent', 'text-text-secondary'],
     } as const;
     fixture.componentRef.setInput('disabled', true);
     for (const [variant, classes] of Object.entries(drawn)) {

@@ -126,6 +126,18 @@ describe('FilterBarComponent', () => {
     expect(host.cleared).toBe(1);
   });
 
+  it('draws Filters and Clear as outlined tertiary buttons, never the filled secondary', async () => {
+    host.applied.set([{id: 'cat', label: 'Category: Groceries'}]);
+    await settle();
+    const clear = Array.from(el.querySelectorAll('button')).find(
+      b => b.textContent?.trim() === 'Clear'
+    ) as HTMLButtonElement;
+    for (const button of [filtersButton(), clear]) {
+      expect(button.className).toContain('border-accent-default');
+      expect(button.className).not.toContain('bg-text-primary');
+    }
+  });
+
   it('opens the sheet template in a drawer, and closes it from the template', async () => {
     filtersButton().click();
     await settle();

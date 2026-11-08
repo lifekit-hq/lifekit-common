@@ -1,16 +1,21 @@
 import {ChangeDetectionStrategy, Component, computed, input, output} from '@angular/core';
 
+import {PHONE_HIT_AREA_CLASSES} from '../../tokens/hit-area';
 import {type Nullable} from '../../types';
 import {IconComponent, type LucideIconName} from '../icon/icon.component';
 
 export type AlertVariant = 'info' | 'success' | 'warning' | 'error' | 'accent';
 
+// Carbon's inline notification: the kind's tinted background, a 3px stripe in the kind's colour on
+// the leading edge and a 1px hairline of it on the others. Colour from the status roles.
 const VARIANT_CONTAINER_CLASSES: Record<AlertVariant, string> = {
-  info: 'bg-status-info/10    border border-status-info    text-text-primary',
-  success: 'bg-status-success/10 border border-status-success text-text-primary',
-  warning: 'bg-status-warning/10 border border-status-warning text-text-primary',
-  error: 'bg-status-error/10   border border-status-error   text-text-primary',
-  accent: 'bg-accent-subtle    border border-accent-default/20 text-accent-default',
+  info: 'bg-status-info-subtle border-status-info/40 border-l-status-info text-text-primary',
+  success:
+    'bg-status-success-subtle border-status-success/40 border-l-status-success text-text-primary',
+  warning:
+    'bg-status-warning-subtle border-status-warning/40 border-l-status-warning text-text-primary',
+  error: 'bg-status-error-subtle border-status-error/40 border-l-status-error text-text-primary',
+  accent: 'bg-accent-subtle border-accent-default/40 border-l-accent-default text-accent-default',
 };
 
 const VARIANT_ICON_COLOR: Record<
@@ -40,6 +45,11 @@ const VARIANT_ROLE: Record<AlertVariant, string> = {
   accent: 'note',
 };
 
+const DISMISS_CLASSES =
+  '-my-cmn-1 -mr-cmn-2 inline-flex h-cmn-size-sm w-cmn-size-sm shrink-0 items-center justify-center ' +
+  'rounded-cmn-sm transition-colors duration-cmn-short ease-cmn-standard hover:bg-surface-hover ' +
+  `focus:outline-none focus:ring-2 focus:ring-border-focus ${PHONE_HIT_AREA_CLASSES}`;
+
 @Component({
   selector: 'cmn-alert',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -59,9 +69,9 @@ const VARIANT_ROLE: Record<AlertVariant, string> = {
 
       @if (dismissible()) {
         <button
+          [class]="dismissClasses"
           (click)="dismissed.emit()"
           type="button"
-          class="ml-cmn-2 -mt-0.5 -mr-0.5 inline-flex items-center justify-center rounded-cmn-sm p-0.5 hover:bg-black/10 focus:outline-none focus:ring-2 focus:ring-border-focus"
           aria-label="Dismiss"
         >
           <cmn-icon name="X" size="sm" aria-hidden="true" />
@@ -78,6 +88,9 @@ export class AlertComponent {
 
   public readonly dismissed = output<void>();
 
+  /** A 32px square that presses as the 44px a phone needs; it sits flush to the notification's edge. */
+  public readonly dismissClasses = DISMISS_CLASSES;
+
   public readonly role = computed(() => VARIANT_ROLE[this.variant()]);
   public readonly resolvedIcon = computed<LucideIconName>(
     () => this.icon() ?? VARIANT_ICON_NAME[this.variant()]
@@ -86,7 +99,7 @@ export class AlertComponent {
 
   public readonly containerClasses = computed(() =>
     [
-      'flex items-start gap-cmn-2 rounded-cmn-md p-cmn-3',
+      'flex min-h-cmn-control-h items-start gap-cmn-3 rounded-cmn-md border border-l-cmn-bar px-cmn-4 py-cmn-3',
       VARIANT_CONTAINER_CLASSES[this.variant()],
     ].join(' ')
   );

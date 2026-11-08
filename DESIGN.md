@@ -88,7 +88,8 @@ components:
     backgroundColor: '{colors.accent}'
     textColor: '{colors.text-inverse}'
     rounded: '{rounded.md}'
-    padding: '8px 16px'
+    height: '48px'
+    padding: '0 16px'
   button-primary-hover:
     backgroundColor: '{colors.accent-hover}'
   card:
@@ -96,10 +97,11 @@ components:
     rounded: '{rounded.md}'
     padding: '16px'
   input:
-    backgroundColor: '{colors.surface-card}'
+    backgroundColor: '{colors.surface-raised}'
     textColor: '{colors.text-primary}'
     rounded: '{rounded.md}'
-    padding: '8px 12px'
+    height: '48px'
+    padding: '0 16px'
   chip:
     backgroundColor: '{colors.surface-raised}'
     textColor: '{colors.text-secondary}'
@@ -241,11 +243,14 @@ The D16 decision: the tab bar and the top bar blur what scrolls under them (`bac
 
 ## Components
 
-- **Buttons:** accent fill with `text-inverse` label; secondary bordered; destructive uses the error colour; ghost text-only. Focus is a 2px ring in `border-focus`.
+- **Buttons:** Carbon's kinds. `primary` is the accent fill with a `text-inverse` label; `secondary` is the ink fill (`text-primary`, so it flips in dark); `tertiary` is outlined in the accent; `ghost` is accent text with no box; `destructive` is the error fill (Carbon's danger), with `danger-tertiary` and `danger-ghost` beside it. Sizes are Carbon's layout sizes, `sm` 32px, `md` 48px (the default, `--cmn-control-h`) and `lg` 64px, always square, with a 14px label and 16px side padding. Every kind has a 1px border (transparent unless the kind draws one), so kinds never change the box. Focus is Carbon's inset ring (`shadow-cmn-focus-inset`: the border turns to `border-focus`, then a 1px ground-coloured line inside it). A disabled button is drawn in its own greys, never dimmed. The outlined button earlier versions called `secondary` is now `tertiary`; a call site that meant the outline moves to `tertiary`.
 - **Chips:** pill, `surface-raised` fill; selected fills with the accent.
-- **Cards:** hairline border, `surface-card`, 12/16/24px padding. Never nested.
-- **Field geometry (token):** Carbon's filled field is three tokens, `--cmn-field-bg` (the `surface-raised` fill, `bg-cmn-field`), `--cmn-field-border-bottom` (1px `border-strong` on the bottom edge only) and `--cmn-field-focus` (a 2px `border-focus` ring). The tokens land first; the input, select, textarea and search move onto them with the control anatomy in the next step of epic #279.
-- **Inputs:** `border-strong` border (3:1), accent focus ring, red border plus helper text for errors. Errors show when the form is submitted and clear as soon as the field is fixed (GOV.UK); the text says what went wrong and how to fix it, with no "please", "sorry", "valid" or "invalid".
+- **Tags:** Carbon's read-only tag, a pill in label-01 (12px, regular), 24px tall (`size="lg"` 32px). The four status hues plus neutral: a `status-*-subtle` fill with text in the hue (blue info, green success, amber warning, red error), `surface-raised` and `text-secondary` for neutral. Carbon's other tag colours are not used.
+- **Cards:** hairline border, `surface-card`, 12/16/24px padding, square (Carbon's tile, whose 16px default padding is the `md` step). Never nested.
+- **Checkbox and toggle:** Carbon's. The checkbox is a 16px square with a 1px ink border, filled with the ink (`text-primary`) and a check when on; its focus is a 2px outline offset by 1px. The toggle is a 48 x 24px pill track: `border-strong` grey off, the success hue (`status-success`, Carbon's support-success) on, with a 16px white thumb; the thumb's position, not only the colour, says which. Both press at 44px on a phone. A disabled one greys out instead of dimming.
+- **Alerts:** Carbon's inline notification: the kind's `status-*-subtle` fill, a 3px stripe in the kind's colour on the leading edge (`border-l-cmn-bar`) and a 1px hairline of it on the other edges, at least 48px tall, with a 16px icon in the kind's colour and a 32px dismiss button that presses at 44px on a phone.
+- **Field geometry (token):** Carbon's filled field is three tokens, `--cmn-field-bg` (the `surface-raised` fill, `bg-cmn-field`), `--cmn-field-border-bottom` (1px `border-strong` on the bottom edge only) and `--cmn-field-focus` (a 2px `border-focus` ring). `cmn-input` and `cmn-textarea` are on them (step 2 of epic #279); the select and search field follow with the list and table family.
+- **Inputs:** Carbon's filled field: the `bg-cmn-field` fill, a 1px `border-strong` bottom border only (3:1), 48px tall by default (32 and 64 for `sm` and `lg`), 16px side padding. Hover moves the fill to `surface-hover`; focus draws a 2px `border-focus` outline inset in the box; an error draws the same outline in the error colour, with the message below it. A disabled field greys its text and border and keeps its fill (never dimmed); a read-only one drops the fill, so it reads as text. The label above is label-01 (12px, regular, `text-secondary`), the hint and the error below are 12px, and the error carries an icon so colour is not its only signal. Errors show when the form is submitted and clear as soon as the field is fixed (GOV.UK); the text says what went wrong and how to fix it, with no "please", "sorry", "valid" or "invalid".
 - **Data table / list rows:** sentence-case headers, hairline dividers, right-aligned tabular numbers. A row's action is a quiet trailing icon (`cmn-list-item-row` `trailingIcon`), not a bordered text button repeated on three or more rows.
 - **List sections:** the heading is body size, semibold, in the secondary text colour, sentence case, with the group gap under it.
 - **Stat card:** the value is the content. Value in the text face with tabular figures; no uppercase label, no decorative accent.

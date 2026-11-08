@@ -197,16 +197,25 @@ describe('FormFieldComponent', () => {
     expect(error()).toBeNull();
   });
 
-  it('opens the leading of hint and error text, which wrap under a narrow field', () => {
+  it("sets hint and error text in Carbon's label-01 (12px) with a line height clear of 1.3", () => {
     host.hint = 'We never share it.';
     fixture.detectChanges();
-    expect(hint()?.classList).toContain('leading-relaxed');
+    expect(hint()?.classList).toContain('text-cmn-xs');
+    expect(hint()?.classList).not.toContain('leading-none');
 
     host.hint = '';
     host.errorMessage = 'Something went wrong';
     fixture.detectChanges();
     submit();
-    expect(error()?.classList).toContain('leading-relaxed');
+    expect(error()?.classList).toContain('text-cmn-xs');
+    expect(error()?.classList).not.toContain('leading-none');
+  });
+
+  it('marks the error with an icon, so colour is not the only signal', () => {
+    host.errorMessage = 'Something went wrong';
+    fixture.detectChanges();
+    submit();
+    expect(error()?.querySelector('cmn-icon')).not.toBeNull();
   });
 
   it('keeps a static error hidden until the form is submitted', () => {

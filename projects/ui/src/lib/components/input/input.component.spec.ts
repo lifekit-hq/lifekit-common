@@ -37,9 +37,9 @@ describe('InputComponent', () => {
   );
 
   it.each<[InputSize, string]>([
-    ['sm', 'text-cmn-sm'],
-    ['md', 'text-cmn-md'],
-    ['lg', 'text-cmn-lg'],
+    ['sm', 'h-cmn-size-sm'],
+    ['md', 'h-cmn-control-h'],
+    ['lg', 'h-cmn-16'],
   ])('applies the "%s" size classes', (size, expected) => {
     fixture.componentRef.setInput('size', size);
     fixture.detectChanges();
@@ -98,17 +98,20 @@ describe('InputComponent', () => {
     component.setDisabledState(true);
     fixture.detectChanges();
     expect(input().disabled).toBe(true);
+    expect(input().className).toContain('disabled:bg-cmn-field');
   });
 
   it('marks the field invalid and swaps the border when hasError is set', () => {
     fixture.detectChanges();
     expect(input().getAttribute('aria-invalid')).toBeNull();
-    expect(input().className).toContain('border-border-strong');
+    expect(input().className).not.toContain('outline-status-error');
 
     fixture.componentRef.setInput('hasError', true);
     fixture.detectChanges();
     expect(input().getAttribute('aria-invalid')).toBe('true');
-    expect(input().className).toContain('border-status-error');
+    // Carbon's invalid field: the filled box keeps its bottom border and gains a 2px error outline.
+    expect(input().className).toContain('outline-status-error');
+    expect(input().className).toContain('border-border-strong');
   });
 
   it('adopts the id handed down by a form field', () => {

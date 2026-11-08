@@ -12,11 +12,14 @@ import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {PHONE_HIT_AREA_CLASSES} from '../../tokens/hit-area';
 import {IconComponent} from '../icon/icon.component';
 
-// 20px drawn, at least --size-touch pressed on a phone.
+// Carbon's checkbox: a 16px square (radius 0 with the rest of the library), a 1px ink border, no fill
+// until checked, Carbon's 2px focus outline offset by 1px. 16px drawn, at least --size-touch pressed
+// on a phone.
 const BOX_BASE =
-  'inline-flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded-cmn-sm border ' +
-  'transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-border-focus ' +
-  `focus-visible:ring-offset-1 ${PHONE_HIT_AREA_CLASSES}`;
+  'inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-cmn-sm border ' +
+  'transition-colors duration-cmn-short ease-cmn-standard focus:outline-none ' +
+  'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 ' +
+  `focus-visible:outline-border-focus ${PHONE_HIT_AREA_CLASSES}`;
 
 /**
  * Boxed on/off control with an optional inline label; `indeterminate` shows a dash.
@@ -78,11 +81,22 @@ export class CheckboxComponent implements ControlValueAccessor {
 
   public readonly boxClass = computed(() => {
     const filled = this.isChecked() || this.indeterminate();
-    const color = filled
-      ? 'bg-accent-default border-accent-default text-text-inverse'
-      : 'bg-surface-card border-border-strong';
-    const disabled = this.isDisabled() ? 'opacity-50 pointer-events-none' : '';
-    return [BOX_BASE, color, disabled].filter(Boolean).join(' ');
+    const disabled = this.isDisabled();
+    let color: string;
+    if (disabled) {
+      color = filled
+        ? 'bg-text-disabled border-text-disabled text-surface-card'
+        : 'bg-transparent border-border-default';
+    } else {
+      color = filled
+        ? 'bg-text-primary border-text-primary text-surface-card'
+        : 'bg-transparent border-text-primary';
+    }
+    return [
+      BOX_BASE,
+      color,
+      disabled ? 'pointer-events-none cursor-not-allowed' : 'cursor-pointer',
+    ].join(' ');
   });
 
   // Function-type properties are methods to member-ordering, so they follow every field.

@@ -877,6 +877,15 @@ describe('DataTableComponent pager', () => {
     ]);
   });
 
+  it('draws Previous and Next as outlined tertiary buttons, never the filled secondary', () => {
+    show(90);
+    for (const label of ['Previous page', 'Next page']) {
+      const button = el.querySelector(`button[aria-label="${label}"]`) as HTMLButtonElement;
+      expect(button.className).toContain('border-accent-default');
+      expect(button.className).not.toContain('bg-text-primary');
+    }
+  });
+
   it('shows only the page count by default, with no page numbers', () => {
     const plain = TestBed.createComponent(DataTableComponent);
     plain.componentRef.setInput('pagination', {

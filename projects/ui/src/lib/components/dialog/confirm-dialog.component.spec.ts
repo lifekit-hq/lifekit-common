@@ -82,6 +82,11 @@ describe('ConfirmDialogComponent', () => {
     expect(close).toHaveBeenCalledWith(false);
   });
 
+  it('draws Cancel as an outlined tertiary button beside the filled confirm', () => {
+    expect(buttons()[0].className).toContain('border-accent-default');
+    expect(buttons()[0].className).not.toContain('bg-text-primary');
+  });
+
   it('honours a destructive confirm variant', () => {
     setup({message: 'Delete forever?', confirmVariant: 'destructive'});
     expect(buttons()[1].className).toContain('bg-status-error');

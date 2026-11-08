@@ -29,7 +29,7 @@ export interface ConfirmDialogData {
     </p>
     <cmn-dialog-actions>
       @if (!actionSheet()) {
-        <cmn-button (clicked)="cancel()" variant="secondary">
+        <cmn-button (clicked)="cancel()" variant="tertiary">
           {{ data.cancelLabel ?? 'Cancel' }}
         </cmn-button>
       }

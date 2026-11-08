@@ -418,7 +418,7 @@ function compareValues(a: unknown, b: unknown): number {
             <cmn-button
               [disabled]="p.offset <= 0"
               (clicked)="onPreviousPage(p)"
-              variant="secondary"
+              variant="tertiary"
               size="sm"
               aria-label="Previous page"
             >
@@ -457,7 +457,7 @@ function compareValues(a: unknown, b: unknown): number {
             <cmn-button
               [disabled]="!p.hasMore"
               (clicked)="onNextPage(p)"
-              variant="secondary"
+              variant="tertiary"
               size="sm"
               aria-label="Next page"
             >

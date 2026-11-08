@@ -27,7 +27,7 @@ import {type LucideIconName} from '../icon/icon.component';
               [icon]="secondaryActionIcon()"
               [disabled]="secondaryActionDisabled()"
               (clicked)="secondaryClick.emit()"
-              variant="secondary"
+              variant="tertiary"
             >
               {{ secondaryActionLabel() }}
             </cmn-button>

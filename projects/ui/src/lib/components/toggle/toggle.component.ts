@@ -71,26 +71,32 @@ export class ToggleComponent implements ControlValueAccessor {
   public readonly isDisabled = computed(() => this.disabled() || this.formDisabled());
 
   public readonly trackClass = computed(() => {
-    // 24px drawn, at least --size-touch pressed on a phone.
+    // Carbon's 48 x 24 track, 24px drawn, at least --size-touch pressed on a phone. Off is the
+    // strong-border grey and on is the success hue (Carbon's support-success); a disabled switch
+    // greys out instead of dimming.
     const base =
-      'relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full ' +
-      'border-2 border-transparent transition-colors duration-cmn-short ease-cmn-standard ' +
-      `focus:outline-none focus:ring-2 focus:ring-border-focus focus:ring-offset-1 ${PHONE_HIT_AREA_CLASSES}`;
-    const color = this.isChecked() ? 'bg-accent-default' : 'bg-border-strong';
+      'relative inline-flex h-6 w-12 shrink-0 items-center rounded-full ' +
+      'transition-colors duration-cmn-short ease-cmn-standard focus:outline-none ' +
+      `focus:ring-2 focus:ring-border-focus focus:ring-offset-1 ${PHONE_HIT_AREA_CLASSES}`;
+    let color = this.isChecked() ? 'bg-status-success' : 'bg-border-strong';
+    if (this.isDisabled()) {
+      color = 'bg-surface-hover';
+    }
     const state = this.isDisabled()
-      ? 'opacity-50 pointer-events-none'
+      ? 'pointer-events-none cursor-not-allowed'
       : this.loading()
         ? 'cursor-progress'
-        : '';
+        : 'cursor-pointer';
     return [base, color, state].filter(Boolean).join(' ');
   });
 
   public readonly thumbClass = computed(() => {
     const base =
-      'pointer-events-none inline-flex h-4 w-4 items-center justify-center rounded-full ' +
-      'bg-white shadow-sm transition-transform duration-cmn-short ease-cmn-standard';
-    const translate = this.isChecked() ? 'translate-x-5' : 'translate-x-0';
-    return `${base} ${translate}`;
+      'pointer-events-none ml-cmn-1 inline-flex h-4 w-4 items-center justify-center rounded-full ' +
+      'transition-transform duration-cmn-short ease-cmn-standard';
+    const color = this.isDisabled() ? 'bg-surface-card' : 'bg-white';
+    const translate = this.isChecked() ? 'translate-x-6' : 'translate-x-0';
+    return `${base} ${color} ${translate}`;
   });
 
   // Function-type properties are methods to member-ordering, so they follow every field.

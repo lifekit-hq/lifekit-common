@@ -58,6 +58,12 @@
       "reason": "The overview template's own 320px rail beside a body that runs on below the fold, shown on purpose by a three-screen body; the route scan takes the same row without an exception (docs/ROUTE-SCAN.md)."
     },
     {
+      "rule": "side-tab",
+      "stories": ["controls-golden--matrix"],
+      "match": "border-left: 3px",
+      "reason": "Carbon's inline notification carries a 3px severity bar on its left edge (cmn-alert, square corners); it is the status signal, not decoration."
+    },
+    {
       "rule": "text-overflow",
       "stories": ["directives-tooltip--truncated"],
       "match": "truncate",

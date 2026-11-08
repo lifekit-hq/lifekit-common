@@ -100,7 +100,7 @@ class FilterBarSheetHostComponent {
         class="min-w-0 flex-1"
       />
       <cmn-badge [count]="activeCount()">
-        <cmn-button (clicked)="openFilters()" variant="secondary" icon="SlidersHorizontal">
+        <cmn-button (clicked)="openFilters()" variant="tertiary" icon="SlidersHorizontal">
           <span class="sr-only">{{ filtersLabel() }}</span>
         </cmn-button>
       </cmn-badge>
@@ -114,7 +114,7 @@ class FilterBarSheetHostComponent {
             (lk-dismissible-chip-remove)="remove.emit(chip.id)"
           />
         }
-        <cmn-button (clicked)="clear.emit()" variant="secondary" size="sm">
+        <cmn-button (clicked)="clear.emit()" variant="tertiary" size="sm">
           {{ clearLabel() }}
         </cmn-button>
       </div>

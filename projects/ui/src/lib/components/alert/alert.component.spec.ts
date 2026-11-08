@@ -91,4 +91,23 @@ describe('AlertComponent', () => {
     fixture.detectChanges();
     expect(fixture.componentInstance.containerClasses()).toContain('border-status-success');
   });
+
+  it("draws Carbon's inline notification: tinted fill, 3px stripe on the leading edge, 1px hairline", () => {
+    fixture.componentRef.setInput('variant', 'error');
+    fixture.detectChanges();
+    const classes = fixture.componentInstance.containerClasses();
+    expect(classes).toContain('bg-status-error-subtle');
+    expect(classes).toContain('border-l-cmn-bar');
+    expect(classes).toContain('border-l-status-error');
+    expect(classes).toContain('border-status-error/40');
+    expect(classes).toContain('min-h-cmn-control-h');
+  });
+
+  it('gives the dismiss button a 32px drawn size that presses as the phone touch target', () => {
+    fixture.componentRef.setInput('dismissible', true);
+    fixture.detectChanges();
+    const dismiss = (fixture.nativeElement as HTMLElement).querySelector('button');
+    expect(dismiss?.className).toContain('h-cmn-size-sm');
+    expect(dismiss?.className).toContain('max-md:after:h-cmn-touch');
+  });
 });

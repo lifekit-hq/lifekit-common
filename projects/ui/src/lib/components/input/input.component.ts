@@ -16,25 +16,32 @@ export type InputMode =
 /** The label on a phone keyboard's enter key (the HTML `enterkeyhint` attribute). */
 export type EnterKeyHint = 'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send';
 
+// Carbon's filled field (theme.css --cmn-field-*): a tinted fill, a 1px bottom border only, a 2px
+// inset outline on focus, and in error a 2px inset outline in the error colour that focus replaces.
+// A disabled field keeps its fill and greys text and border (no dimming); a read-only one drops the
+// fill, so it reads as text rather than as an input.
 const BASE_CLASSES =
-  'block w-full rounded-cmn-md border font-base bg-surface-card text-text-primary ' +
-  'placeholder:text-text-placeholder ' +
-  'focus:outline-none focus:ring-2 focus:ring-border-focus focus:border-border-focus ' +
-  'disabled:opacity-50 disabled:cursor-not-allowed ' +
-  'read-only:bg-surface-raised read-only:cursor-default ' +
-  'transition-colors duration-150 max-md:min-h-cmn-touch';
+  'block w-full rounded-cmn-md border-0 border-b font-base bg-cmn-field text-text-primary ' +
+  'placeholder:text-text-placeholder [&:read-write]:hover:bg-surface-hover ' +
+  'focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-border-focus ' +
+  'disabled:cursor-not-allowed disabled:border-border-default disabled:text-text-disabled ' +
+  'disabled:placeholder:text-text-disabled disabled:bg-cmn-field ' +
+  'read-only:cursor-default read-only:border-border-default read-only:bg-transparent ' +
+  'transition-colors duration-cmn-short ease-cmn-standard max-md:min-h-cmn-touch';
 
 // Below md every size keeps 16px text (iOS zooms the page into a focused field set smaller) and
 // presses as at least --size-touch tall. md is the control height (`--cmn-control-h`) that a button
-// beside it shares: Carbon's 48px at every width.
+// beside it shares: Carbon's 48px at every width. sm and lg are Carbon's 32 and 64px, with the
+// field's 16px side padding.
 const SIZE_CLASSES: Record<InputSize, string> = {
-  sm: 'px-cmn-2 py-cmn-1 text-cmn-md md:text-cmn-sm',
-  md: 'h-cmn-control-h px-cmn-3 text-cmn-md',
-  lg: 'px-cmn-4 py-cmn-3 text-cmn-lg',
+  sm: 'h-cmn-size-sm px-cmn-4 text-cmn-md md:text-cmn-sm',
+  md: 'h-cmn-control-h px-cmn-4 text-cmn-md',
+  lg: 'h-cmn-16 px-cmn-4 text-cmn-lg',
 };
 
 const DEFAULT_BORDER = 'border-border-strong';
-const ERROR_BORDER = 'border-status-error';
+const ERROR_BORDER =
+  'border-border-strong outline outline-2 -outline-offset-2 outline-status-error';
 
 @Component({
   selector: 'cmn-input',

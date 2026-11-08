@@ -114,6 +114,14 @@ module.exports = {
         'cmn-sm': 'var(--shadow-sm)',
         'cmn-md': 'var(--shadow-md)',
         'cmn-lg': 'var(--shadow-lg)',
+        // Carbon's inset focus ring (a button, a tile): the border takes the focus colour, this adds
+        // the 1px inside it and a 1px ground-coloured line inside that.
+        'cmn-focus-inset':
+          'inset 0 0 0 1px var(--color-border-focus), inset 0 0 0 2px var(--color-surface-card)',
+      },
+      // Carbon's notification stripe (3px), the one border width off Tailwind's 0/1/2/4/8 steps.
+      borderWidth: {
+        'cmn-bar': '3px',
       },
 
       keyframes: {
