@@ -247,7 +247,9 @@ export class TileGridComponent {
     this.interacted = true;
     this.focusPanelOnOpen = false;
     this.commit(null);
-    this.host.nativeElement.querySelector<HTMLElement>(`#${this.tileDomId(id)}`)?.focus();
+    this.host.nativeElement
+      .querySelector<HTMLElement>(`#${CSS.escape(this.tileDomId(id))}`)
+      ?.focus();
   }
 
   protected onEscape(event: Event): void {

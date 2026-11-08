@@ -30,7 +30,12 @@ const TILES: readonly CmnTile[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <button id="outside" type="button">Outside</button>
-    <cmn-tile-grid [tiles]="tiles" [linkable]="linkable()" [(open)]="open" ariaLabel="Policy facts">
+    <cmn-tile-grid
+      [tiles]="tiles()"
+      [linkable]="linkable()"
+      [(open)]="open"
+      ariaLabel="Policy facts"
+    >
       <ng-template let-tile cmnTilePanel="premium">
         <p class="premium-body">Summary for {{ tile.label }}</p>
         <button class="premium-action" type="button">Evidence</button>
@@ -40,7 +45,7 @@ const TILES: readonly CmnTile[] = [
   `,
 })
 class HostComponent {
-  public readonly tiles = TILES;
+  public readonly tiles = signal<readonly CmnTile[]>(TILES);
   public readonly open = signal<string | null>(null);
   public readonly linkable = signal(false);
 }
@@ -272,6 +277,21 @@ describe('TileGridComponent', () => {
       root().remove();
     });
 
+    it.each(['net.worth', 'a:b', 'x y'])(
+      'returns focus to the tile when its id is %j, without throwing',
+      async id => {
+        fixture.componentInstance.tiles.set([{id, label: 'Special', headline: '1'}, ...TILES]);
+        fixture.detectChanges();
+        document.body.append(root());
+        await press('Special');
+        expect(tile('Special').getAttribute('aria-expanded')).toBe('true');
+        await pressEscape(found(panel(), 'panel'));
+        expect(tile('Special').getAttribute('aria-expanded')).toBe('false');
+        expect(document.activeElement).toBe(tile('Special'));
+        root().remove();
+      }
+    );
+
     it('lets the tiles be reached in order with Tab (each is a native button)', () => {
       expect(tileButtons().every(b => b.type === 'button' && b.tabIndex === 0)).toBe(true);
     });
@@ -293,10 +313,10 @@ describe('TileGridComponent linkable', () => {
   @Component({
     imports: [TileGridComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    template: '<cmn-tile-grid [tiles]="tiles" [linkable]="true" />',
+    template: '<cmn-tile-grid [tiles]="tiles()" [linkable]="true" />',
   })
   class LinkableHostComponent {
-    public readonly tiles = TILES;
+    public readonly tiles = signal<readonly CmnTile[]>(TILES);
   }
 
   beforeEach(async () => {
