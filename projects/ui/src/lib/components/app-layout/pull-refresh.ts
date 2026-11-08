@@ -112,8 +112,7 @@ export class PullRefresh {
   }
 
   private start(event: TouchEvent, scroller: HTMLElement): void {
-    this.tracking = false;
-    this.engaged = false;
+    this.release(false);
     if (
       event.touches.length !== 1 ||
       this.phase() === 'refreshing' ||

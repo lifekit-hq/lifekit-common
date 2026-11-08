@@ -189,6 +189,18 @@ describe('PullRefresh', () => {
     expect(pull.phase()).toBe('idle');
   });
 
+  it('should drop the pull when a second finger touches down mid-pull', () => {
+    drag(THRESHOLD_TRAVEL_PX);
+    fire(row, 'touchstart', 100, 400, [touchOf(row, 200, 400)]);
+    expect(pull.phase()).toBe('idle');
+    expect(pull.dragging()).toBe(false);
+    expect(pull.offset()).toBe(0);
+    fire(row, 'touchend');
+    expect(hooks.refresh).not.toHaveBeenCalled();
+    expect(pull.phase()).toBe('idle');
+    expect(pull.offset()).toBe(0);
+  });
+
   it('should drop the pull when the browser cancels the touch', () => {
     drag(THRESHOLD_TRAVEL_PX);
     fire(row, 'touchcancel');
