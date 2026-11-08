@@ -64,6 +64,11 @@
       "reason": "Carbon's inline notification carries a 3px severity bar on its left edge (cmn-alert, square corners); it is the status signal, not decoration."
     },
     {
+      "rule": "skipped-heading",
+      "stories": ["components-whatsnew--*"],
+      "reason": "The list is a section body: its release headings (h3) sit under the host's own h2 (the sheet title, the Settings About section), which the standalone component story does not render; the Templates/Whats new golden stories hold the full hierarchy."
+    },
+    {
       "rule": "text-overflow",
       "stories": ["directives-tooltip--truncated"],
       "match": "truncate",

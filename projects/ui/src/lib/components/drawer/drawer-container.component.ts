@@ -21,6 +21,9 @@ const CLOSE_CLASSES =
   'flex h-8 w-8 items-center justify-center rounded-cmn-md text-text-secondary transition-colors ' +
   `hover:bg-surface-raised hover:text-text-primary ${PHONE_HIT_AREA_CLASSES}`;
 
+// The grabber is 32px drawn and presses as at least --size-touch tall on a phone.
+const GRABBER_CLASSES = `cmn-drawer-grabber flex h-cmn-8 w-full items-center justify-center ${PHONE_HIT_AREA_CLASSES}`;
+
 type DrawerState = 'entering' | 'open' | 'closing';
 
 /** The heights a bottom sheet rests at: up to half the viewport, or nearly all of it. */
@@ -53,8 +56,8 @@ export type CmnSheetStop = 'half' | 'full';
           <div class="flex justify-center" data-testid="drawer-handle">
             <button
               [attr.aria-label]="stop() === 'half' ? 'Expand sheet' : 'Collapse sheet'"
+              [class]="grabberClasses"
               (click)="onGrabberClick($event)"
-              class="cmn-drawer-grabber flex h-cmn-8 w-full items-center justify-center"
               type="button"
             >
               <span class="h-1 w-10 rounded-full bg-border-strong" aria-hidden="true"></span>
@@ -107,6 +110,7 @@ export class CmnDrawerContainerComponent implements AfterViewInit {
   public readonly portalOutlet = viewChild.required(CdkPortalOutlet);
 
   protected readonly closeClasses = CLOSE_CLASSES;
+  protected readonly grabberClasses = GRABBER_CLASSES;
 
   public get isOpen(): boolean {
     return this.state === 'open';
