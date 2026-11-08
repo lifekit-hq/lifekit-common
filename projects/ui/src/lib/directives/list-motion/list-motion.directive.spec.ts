@@ -20,6 +20,22 @@ class HostComponent {
 }
 
 @Component({
+  selector: 'cmn-list-motion-below-host',
+  imports: [CmnListMotionDirective],
+  template: `
+    <div class="above" style="height: 10px"></div>
+    <div cmnListMotion="p.row">
+      @for (id of ids(); track id) {
+        <p class="row" style="margin: 0; height: 20px">{{ id }}</p>
+      }
+    </div>
+  `,
+})
+class BelowHostComponent {
+  public readonly ids = signal<number[]>([]);
+}
+
+@Component({
   selector: 'cmn-list-motion-chips-host',
   imports: [CmnListMotionDirective],
   template: `
@@ -240,6 +256,68 @@ describe('CmnListMotionDirective', () => {
       expect(frames(second)[0]).toMatchObject({transform: 'translate(30px, 0px)'});
       expect(frames(third)[0]).toMatchObject({transform: 'translate(30px, 0px)'});
       expect(frames(second)[1]).toMatchObject({transform: 'none'});
+    });
+  });
+
+  describe('a list that moves without changing', () => {
+    let below: ComponentFixture<BelowHostComponent>;
+
+    const belowRows = (): HTMLElement[] =>
+      Array.from(below.nativeElement.querySelectorAll('p.row'));
+
+    async function setBelow(ids: number[]): Promise<void> {
+      below.componentInstance.ids.set(ids);
+      below.detectChanges();
+      await Promise.resolve();
+    }
+
+    beforeEach(async () => {
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({imports: [BelowHostComponent]});
+      below = TestBed.createComponent(BelowHostComponent);
+      below.detectChanges();
+      await below.whenStable();
+    });
+
+    it('does not fade in the rows that arrive in a list that had none', async () => {
+      await setBelow([1, 2, 3]);
+      expect(belowRows()).toHaveLength(3);
+      expect(belowRows().flatMap(row => row.getAnimations())).toHaveLength(0);
+    });
+
+    it('fades a row in once the list has rows', async () => {
+      await setBelow([1, 2]);
+      await setBelow([1, 2, 3]);
+      expect(belowRows()[2].getAnimations()).toHaveLength(1);
+      expect(belowRows()[0].getAnimations()).toHaveLength(0);
+    });
+
+    it('puts the exit where the row stood after content above the list changed height', async () => {
+      await setBelow([1, 2, 3]);
+      await setBelow([1, 2, 3, 4]);
+      belowRows().forEach(row => row.getAnimations().forEach(animation => animation.finish()));
+      const above = below.nativeElement.querySelector('.above') as HTMLElement;
+      above.style.height = '60px';
+      const stood = belowRows()[1].getBoundingClientRect().top;
+      expect(stood).toBeGreaterThan(70);
+
+      await setBelow([1, 3, 4]);
+
+      const ghost = belowRows().find(row => row.hasAttribute('inert')) as HTMLElement;
+      expect(ghost.textContent?.trim()).toBe('2');
+      expect(ghost.getBoundingClientRect().top).toBeCloseTo(stood, 0);
+    });
+
+    it('slides the rows below a removed row by their own shift, not the shift of the list', async () => {
+      await setBelow([1, 2, 3, 4]);
+      belowRows().forEach(row => row.getAnimations().forEach(animation => animation.finish()));
+      (below.nativeElement.querySelector('.above') as HTMLElement).style.height = '60px';
+
+      await setBelow([1, 3, 4]);
+
+      const moved = belowRows().filter(row => !row.hasAttribute('inert'))[1];
+      const [from] = (moved.getAnimations()[0].effect as KeyframeEffect).getKeyframes();
+      expect(from['transform']).toBe('translate(0px, 20px)');
     });
   });
 });
