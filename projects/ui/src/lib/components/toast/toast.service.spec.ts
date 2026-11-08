@@ -393,6 +393,24 @@ describe('ToastService', () => {
       expect(leaving()[0].matches(':is([inert], [inert] *)')).toBe(true);
     });
 
+    it('keeps a toast that was pushed out of view and listed again before its exit ended', () => {
+      for (const message of ['One', 'Two', 'Three', 'Four']) {
+        service.error(message);
+      }
+      expect(leaving()).toHaveLength(1);
+
+      const dismissals = document.querySelectorAll<HTMLButtonElement>(
+        'cmn-toast:not(.cmn-toast--leaving) button[aria-label="Dismiss"]'
+      );
+      dismissals[dismissals.length - 1].click();
+      render();
+      vi.advanceTimersByTime(SHORT_DURATION_MS);
+      render();
+
+      expect(messages()).toEqual(['One', 'Two', 'Three']);
+      expect(leaving()).toHaveLength(0);
+    });
+
     it('removes a toast at once under Reduce Motion', () => {
       const matchMedia = window.matchMedia.bind(window);
       const reduce: Pick<MediaQueryList, 'matches'> = {matches: true};

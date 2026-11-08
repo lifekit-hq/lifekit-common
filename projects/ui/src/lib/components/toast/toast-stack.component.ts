@@ -108,11 +108,15 @@ export class ToastStackComponent {
   constructor() {
     effect(() => {
       for (const toast of this.shown()) {
-        if (toast.leaving && !this.exits.has(toast.id)) {
+        const pending = this.exits.get(toast.id);
+        if (toast.leaving && pending === undefined) {
           this.exits.set(
             toast.id,
             setTimeout(() => this.finishExit(toast.id), motionDurationMs('short'))
           );
+        } else if (!toast.leaving && pending !== undefined) {
+          clearTimeout(pending);
+          this.exits.delete(toast.id);
         }
       }
     });
@@ -156,7 +160,7 @@ export class ToastStackComponent {
 
   private finishExit(id: number): void {
     this.exits.delete(id);
-    this.shown.update(list => list.filter(toast => toast.id !== id));
+    this.shown.update(list => list.filter(toast => toast.id !== id || !toast.leaving));
     if (this.isEmpty()) {
       this.drained.emit();
     }
