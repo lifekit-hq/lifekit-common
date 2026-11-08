@@ -97,7 +97,9 @@ registerPullRefresh(() => store.load(), {busy: store.isLoading});
   `registerPullRefresh()` (both register with `CmnPullRefreshService`; the latest registration
   wins). A hook may return nothing, a promise or an observable. The indicator stays until a returned
   promise or observable settles and `busy` (the store's `isLoading`) is false, and for at least a
-  long motion duration so an instant reload still reads as one. A reload that throws ends the
+  long motion duration so an instant reload still reads as one. `busy` is first read after the next
+  render, since a `cmn-page` `[reloading]` input trails the store, and the wait ends if the page is
+  destroyed (its registration withdrawn) first. A reload that throws ends the
   refresh; the store shows its own error.
 - **It starts only at the top.** The touch must begin with nothing scrolled between the touched
   element and `<main>`, so a `cmn-page-scroll` list pulls from its own top and scrolls otherwise.
