@@ -71,8 +71,9 @@ const DATE_AND_TIME: Intl.DateTimeFormatOptions = {dateStyle: 'medium', timeStyl
  * - `[empty]` — a rich empty state (icon, sub-message, call to action), shown on an empty success.
  * - `[error-action]` — an action rendered next to the error or offline message.
  *
- * Calm loading, on by default (`keepContent`, `showDelay` 200 and `minDisplay` 400, the
- * guardrails' S3 and S4); set `[keepContent]="false"` or a 0 delay to opt out:
+ * Calm loading, on by default (`keepContent`, `showDelay` 200, `minDisplay` 400 and `crossfade`,
+ * the guardrails' S3 and S4); set `[keepContent]="false"`, `[crossfade]="false"` or a 0 delay to
+ * opt out:
  *
  * - `keepContent` keeps the content on screen, dimmed, while a refresh loads (only once there
  *   is content to keep; a first load still shows the skeleton).
@@ -235,8 +236,12 @@ export class AsyncStateComponent {
   public readonly showDelay = input<number>(ASYNC_STATE_SHOW_DELAY_MS);
   /** Milliseconds a shown loading indicator stays up, so it never flashes. 0 hides it at once. */
   public readonly minDisplay = input<number>(ASYNC_STATE_MIN_DISPLAY_MS);
-  /** Fades the content in when it replaces the skeleton; content there at first render does not fade. */
-  public readonly crossfade = input(false, {transform: booleanAttribute});
+  /**
+   * Fades the content in when it replaces the skeleton, over `--cmn-duration-short`; content there
+   * at first render does not fade, and nothing fades under Reduce Motion. On by default; set
+   * `[crossfade]="false"` to opt out.
+   */
+  public readonly crossfade = input(true, {transform: booleanAttribute});
   /**
    * Draws the loading placeholder as a `cmn-skeleton` part preset (`row`, `section`, `stat`, `chart`;
    * `skeletonRows` rows) instead of bars. Not a page preset (`list`, `card`, `detail`, `overview`):

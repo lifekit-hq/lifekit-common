@@ -246,9 +246,15 @@ All on the same tokens, none longer than `--cmn-duration-medium`, none with a lo
 - **Tab switch**: Carbon's line tabs move only the selected line. The panel's new content fades in over `--cmn-duration-short` (Material 3's fade-through), opacity only; a routed tab group leaves the page crossfade to the router.
 - **List rows** (Carbon's contained list, `cmnListMotion`, on `cmn-list-section` and on the filter bar's applied chips): a row added fades in while rising `--cmn-motion-distance-sm` over `--cmn-duration-medium` (entrance, decelerate). A row removed stays where it stood, inert, and fades out over `--cmn-duration-short` (accelerate), faster than it came. The rows that shift (below an add or a remove, or a reorder) slide from their old place over `--cmn-duration-medium` on the standard curve, by transform. The rows a list starts with are drawn as they are, and so are rows that arrive in a list that had none (data filling an empty list is the usual way a list starts), so only a genuine add or remove on a list with rows fades; and a page of more than twelve rows changing at once (a new screen's worth) is not animated.
 
+### Skeleton to content, expand and collapse, and the route
+
+- **Skeleton to content** (Carbon's loading pattern, `cmn-async-state`): content that replaces a skeleton, an empty state or an alert fades in over `--cmn-duration-short` on the standard curve. On by default (`crossfade`; `[crossfade]="false"` opts out). Content already there at the first render, and content kept on screen through a refresh, is not faded. The skeleton itself leaves at once: it is a placeholder, not a surface.
+- **Expand and collapse** (`cmn-disclosure-row`; Carbon animates the height, this system never does, see the rule above): the content fades in while rising `--cmn-motion-distance-sm` over `--cmn-duration-medium` on the decelerate curve, and fades out over `--cmn-duration-short` on the accelerate curve before it leaves the layout, inert while it does. The chevron turn is the row's own cue. Under Reduce Motion the content opens and closes at once.
+- **Route** (Material 3's fade-through for a change of destination; Carbon has no page transition): `cmn-app-layout` fades the page region in over `--cmn-duration-medium` on the standard curve when the matched page changes. It is the shell's own motion, so it is on in every app that uses the shell with no router feature to add. It stands down for the first navigation, for a navigation that changes only params, query params or the fragment, under Reduce Motion, and when a view transition is already crossfading the page.
+
 ### View transitions
 
-A route change that moves between tab destinations or into a detail page is a View Transition, enabled once in the app config:
+The shell already fades the page in on a route change (above). An app that wants the true crossfade, where the old page fades out as the new one fades in, enables a View Transition once in its app config, and the shell stands down for it:
 
 ```ts
 provideRouter(APP_ROUTES, withPreloading(TabPreloadStrategy), withLkViewTransitions());

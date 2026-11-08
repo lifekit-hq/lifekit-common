@@ -579,6 +579,39 @@ class CalmHostComponent {
   public readonly crossfade = signal(false);
 }
 
+@Component({
+  imports: [AsyncStateComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <cmn-async-state
+      [status]="status()"
+      [showDelay]="0"
+      [minDisplay]="0"
+      emptySubMessage="Nothing here yet."
+    >
+      <p class="projected">Loaded content</p>
+    </cmn-async-state>
+  `,
+})
+class CrossfadeDefaultHostComponent {
+  public readonly status = signal<AsyncStateStatus>('loading');
+}
+
+describe('AsyncStateComponent crossfade by default', () => {
+  it('fades the content in when it replaces the skeleton, with no input set', async () => {
+    const fixture = TestBed.createComponent(CrossfadeDefaultHostComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(fixture.nativeElement.querySelector('.projected')).toBeNull();
+
+    fixture.componentInstance.status.set('success');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const body = fixture.nativeElement.querySelector('.projected').parentElement as HTMLElement;
+    expect(body.classList.contains('animate-cmn-fade-in')).toBe(true);
+  });
+});
+
 describe('AsyncStateComponent calm loading', () => {
   const DELAY = 200;
   const MINIMUM = 400;

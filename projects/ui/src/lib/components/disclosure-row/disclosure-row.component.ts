@@ -1,6 +1,19 @@
 import {DecimalPipe} from '@angular/common';
-import {ChangeDetectionStrategy, Component, input, linkedSignal} from '@angular/core';
+import {
+  afterNextRender,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  ElementRef,
+  inject,
+  Injector,
+  input,
+  linkedSignal,
+  signal,
+  viewChild,
+} from '@angular/core';
 
+import {canAnimate, motionDistance, motionDurationMs, motionEasing} from '../../tokens/motion';
 import {
   InstitutionAvatarComponent,
   type InstitutionAvatarStatus,
@@ -14,6 +27,11 @@ let rowCounter = 0;
  * ground under the row. From `md` the chevron leads the row, as in Carbon's table; on a phone it
  * trails, where iOS draws a disclosure indicator. The turn is a transform, held still under
  * Reduce Motion.
+ *
+ * The content opens by fading in while it rises `--cmn-motion-distance-sm`
+ * (`--cmn-duration-medium`, decelerate) and closes by fading out (`--cmn-duration-short`,
+ * accelerate) before it leaves the layout: opacity and transform only, never the height, so the
+ * rows below move once, not every frame. It opens and closes at once under Reduce Motion.
  */
 const ROW_CLASSES =
   'relative flex min-h-cmn-size-lg items-center justify-between gap-cmn-4 px-cmn-4 py-cmn-3 ' +
@@ -75,13 +93,25 @@ const CHEVRON_CLASSES =
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
         </svg>
       </div>
-      <div [id]="bodyId" [hidden]="!expanded()" class="bg-surface-bg">
+      <div
+        #body
+        [id]="bodyId"
+        [hidden]="bodyHidden()"
+        [attr.inert]="expanded() ? null : ''"
+        class="bg-surface-bg"
+      >
         <ng-content />
       </div>
     </div>
   `,
 })
 export class DisclosureRowComponent {
+  private readonly body = viewChild.required<ElementRef<HTMLElement>>('body');
+  private readonly injector = inject(Injector);
+  /** Closed, but still drawn for the length of its fade-out. */
+  private readonly closing = signal(false);
+  private running: Animation | null = null;
+
   public readonly label = input.required<string>();
   public readonly sublabel = input<string | null>(null);
   public readonly amount = input<number | null>(null);
@@ -100,8 +130,47 @@ export class DisclosureRowComponent {
   protected readonly chevronClasses = CHEVRON_CLASSES;
   protected readonly bodyId = `cmn-disclosure-row-${++rowCounter}`;
   protected readonly expanded = linkedSignal(() => this.open());
+  protected readonly bodyHidden = computed(() => !this.expanded() && !this.closing());
 
   protected toggle(): void {
-    this.expanded.update(open => !open);
+    const opening = !this.expanded();
+    this.running?.cancel();
+    this.running = null;
+    this.expanded.set(opening);
+    this.closing.set(false);
+    const body = this.body().nativeElement;
+    if (!canAnimate(body)) {
+      return;
+    }
+    if (opening) {
+      // The body is hidden until this render; animating it before then would run unseen.
+      afterNextRender(() => this.fadeIn(body), {injector: this.injector});
+    } else {
+      this.fadeOut(body);
+    }
+  }
+
+  private fadeIn(body: HTMLElement): void {
+    this.running = body.animate(
+      [
+        {opacity: 0, transform: `translateY(${motionDistance('sm')})`},
+        {opacity: 1, transform: 'none'},
+      ],
+      {duration: motionDurationMs('medium'), easing: motionEasing('decelerate')}
+    );
+  }
+
+  private fadeOut(body: HTMLElement): void {
+    this.closing.set(true);
+    const exit = body.animate([{opacity: 1}, {opacity: 0}], {
+      duration: motionDurationMs('short'),
+      easing: motionEasing('accelerate'),
+    });
+    this.running = exit;
+    // A cancel (a newer toggle taking over) rejects, and that toggle has set `closing` itself.
+    exit.finished.then(
+      () => this.closing.set(false),
+      () => undefined
+    );
   }
 }

@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {type ComponentFixture, TestBed} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
-import {beforeEach, describe, expect, it} from 'vitest';
+import {beforeEach, describe, expect, it, vi} from 'vitest';
 
 import {InstitutionAvatarComponent} from '../institution-avatar/institution-avatar.component';
 import {DisclosureRowComponent} from './disclosure-row.component';
@@ -14,6 +14,15 @@ describe('DisclosureRowComponent', () => {
     const id = toggleButton().getAttribute('aria-controls');
     return fixture.nativeElement.querySelector(`#${id}`);
   };
+
+  async function finishAnimations(): Promise<void> {
+    await Promise.all(
+      bodyEl()
+        .getAnimations()
+        .map(animation => animation.finished)
+    );
+    fixture.detectChanges();
+  }
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -156,14 +165,69 @@ describe('DisclosureRowComponent', () => {
     expect(bodyEl().hidden).toBe(false);
   });
 
-  it('should toggle the body when the button is pressed', () => {
+  it('should toggle the body when the button is pressed', async () => {
     toggleButton().click();
     fixture.detectChanges();
     expect(toggleButton().getAttribute('aria-expanded')).toBe('false');
+    await finishAnimations();
     expect(bodyEl().hidden).toBe(true);
     toggleButton().click();
     fixture.detectChanges();
     expect(bodyEl().hidden).toBe(false);
+  });
+
+  describe('motion', () => {
+    it('keeps the content drawn, inert, while it fades out, then takes it out of the layout', async () => {
+      toggleButton().click();
+      fixture.detectChanges();
+      expect(bodyEl().hidden).toBe(false);
+      expect(bodyEl().hasAttribute('inert')).toBe(true);
+      const [exit] = bodyEl().getAnimations();
+      expect(exit.effect?.getTiming().duration).toBe(150);
+      expect(exit.effect?.getComputedTiming().easing).not.toBe('linear');
+      await finishAnimations();
+      expect(bodyEl().hidden).toBe(true);
+    });
+
+    it('fades the content in, rising from the small distance, when it opens', async () => {
+      fixture.componentRef.setInput('open', false);
+      fixture.detectChanges();
+      toggleButton().click();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      const [entrance] = bodyEl().getAnimations();
+      const keyframes = (entrance.effect as KeyframeEffect).getKeyframes();
+      expect(keyframes[0]['opacity']).toBe('0');
+      expect(keyframes[0]['transform']).toBe('translateY(8px)');
+      expect(entrance.effect?.getTiming().duration).toBe(240);
+      expect(bodyEl().hasAttribute('inert')).toBe(false);
+    });
+
+    it('shows the content again at once when it is reopened during its fade-out', async () => {
+      toggleButton().click();
+      fixture.detectChanges();
+      toggleButton().click();
+      fixture.detectChanges();
+      await finishAnimations();
+      expect(bodyEl().hidden).toBe(false);
+      expect(toggleButton().getAttribute('aria-expanded')).toBe('true');
+    });
+
+    it('opens and closes at once under Reduce Motion', async () => {
+      const query = vi
+        .spyOn(window, 'matchMedia')
+        .mockReturnValue({matches: true} as MediaQueryList);
+      toggleButton().click();
+      fixture.detectChanges();
+      expect(bodyEl().hidden).toBe(true);
+      expect(bodyEl().getAnimations()).toHaveLength(0);
+      toggleButton().click();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(bodyEl().hidden).toBe(false);
+      expect(bodyEl().getAnimations()).toHaveLength(0);
+      query.mockRestore();
+    });
   });
 
   it('should point the button at the body it controls', () => {
