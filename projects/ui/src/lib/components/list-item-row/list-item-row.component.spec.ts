@@ -3,7 +3,7 @@ import {type ComponentFixture, TestBed} from '@angular/core/testing';
 import {beforeEach, describe, expect, it, type Mock, vi} from 'vitest';
 import {userEvent} from 'vitest/browser';
 
-import {ListItemRowComponent} from './list-item-row.component';
+import {type CmnRowSwipeAction, ListItemRowComponent} from './list-item-row.component';
 
 describe('ListItemRowComponent', () => {
   let fixture: ComponentFixture<ListItemRowComponent>;
@@ -316,5 +316,158 @@ describe('ListItemRowComponent — trailing action', () => {
     expect(fixture.componentInstance.activated).toBe(0);
     await userEvent.click(rowButton);
     expect(fixture.componentInstance.activated).toBe(1);
+  });
+});
+
+@Component({
+  imports: [ListItemRowComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <cmn-list-item-row
+      [swipeLeading]="leading"
+      [swipeTrailing]="trailing"
+      [action]="true"
+      (swipeLeadingAction)="log.push('leading')"
+      (swipeTrailingAction)="log.push('trailing')"
+      (activated)="log.push('activated')"
+      label="Oat milk"
+    />
+    <button id="elsewhere" type="button">Elsewhere</button>
+  `,
+})
+class SwipeHostComponent {
+  public leading: CmnRowSwipeAction | null = {label: 'Done', icon: 'Check', tone: 'positive'};
+  public trailing: CmnRowSwipeAction | null = {label: 'Remove', icon: 'Trash2', tone: 'danger'};
+  public log: string[] = [];
+}
+
+describe('ListItemRowComponent — swipe actions', () => {
+  const TRAY_PX = 80;
+  let fixture: ComponentFixture<SwipeHostComponent>;
+
+  function create(host: Partial<SwipeHostComponent> = {}): void {
+    fixture = TestBed.createComponent(SwipeHostComponent);
+    Object.assign(fixture.componentInstance, host);
+    fixture.detectChanges();
+    // The unit run loads no Tailwind: give each tray the width its classes would.
+    fixture.nativeElement
+      .querySelectorAll('[class*="absolute"]')
+      .forEach((tray: HTMLElement) => (tray.style.width = `${TRAY_PX}px`));
+  }
+
+  function surface(): HTMLElement {
+    return fixture.nativeElement.querySelector('.touch-pan-y');
+  }
+
+  function trayButton(name: string): HTMLButtonElement {
+    return fixture.nativeElement.querySelector(`button[aria-label^="${name}"]`);
+  }
+
+  function touch(type: string, x: number, y = 0): void {
+    surface().dispatchEvent(
+      new PointerEvent(type, {clientX: x, clientY: y, pointerType: 'touch', bubbles: true})
+    );
+    fixture.detectChanges();
+  }
+
+  function swipeBy(x: number): void {
+    touch('pointerdown', 0);
+    touch('pointermove', x);
+    touch('pointerup', x);
+  }
+
+  it('draws a row with no swipe action exactly as before', () => {
+    const plain = TestBed.createComponent(ListItemRowComponent);
+    plain.componentRef.setInput('label', 'Oat milk');
+    plain.detectChanges();
+    expect(plain.nativeElement.querySelector('.touch-pan-y')).toBeNull();
+    expect(plain.nativeElement.querySelectorAll('button').length).toBe(0);
+  });
+
+  it('keeps a tray button for each action, named by the row, with the visible word first', () => {
+    create();
+    expect(trayButton('Done').getAttribute('aria-label')).toBe('Done Oat milk');
+    expect(trayButton('Done').textContent).toContain('Done');
+    expect(trayButton('Remove').getAttribute('aria-label')).toBe('Remove Oat milk');
+    expect(trayButton('Remove').className).toContain('bg-status-error');
+    expect(trayButton('Done').className).toContain('bg-status-success');
+  });
+
+  it('draws a neutral action in the accent when it names no tone', () => {
+    create({leading: {label: 'Read', icon: 'Check'}, trailing: null});
+    expect(trayButton('Read').className).toContain('bg-accent-default');
+    expect(fixture.nativeElement.querySelectorAll('[class*="absolute"]').length).toBe(1);
+  });
+
+  it('slides open on a swipe toward the end and emits the leading action from its button', () => {
+    create();
+    swipeBy(TRAY_PX);
+    expect(surface().style.transform).toBe(`translateX(${TRAY_PX}px)`);
+    trayButton('Done').click();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.log).toEqual(['leading']);
+    expect(surface().style.transform).toBe('');
+  });
+
+  it('slides open on a swipe toward the start and emits the trailing action from its button', () => {
+    create();
+    swipeBy(-TRAY_PX);
+    expect(surface().style.transform).toBe(`translateX(-${TRAY_PX}px)`);
+    trayButton('Remove').click();
+    expect(fixture.componentInstance.log).toEqual(['trailing']);
+  });
+
+  it('stays shut when a swipe is short, and moves with the finger meanwhile', () => {
+    create();
+    touch('pointerdown', 0);
+    touch('pointermove', TRAY_PX / 4);
+    expect(surface().className).not.toContain('transition-transform');
+    touch('pointerup', TRAY_PX / 4);
+    expect(surface().style.transform).toBe('');
+    expect(surface().className).toContain('transition-transform');
+  });
+
+  it('snaps instead of sliding for a reader who asked for reduced motion', () => {
+    create();
+    expect(surface().className).toContain('motion-reduce:transition-none');
+  });
+
+  it('does not open toward a side with no action', () => {
+    create({trailing: null});
+    swipeBy(-TRAY_PX);
+    expect(surface().style.transform).toBe('');
+  });
+
+  it('opens when focus reaches a tray button, and shuts when focus leaves it', () => {
+    create();
+    trayButton('Remove').focus();
+    fixture.detectChanges();
+    expect(surface().style.transform).toBe(`translateX(-${TRAY_PX}px)`);
+    fixture.nativeElement.querySelector('#elsewhere').focus();
+    fixture.detectChanges();
+    expect(surface().style.transform).toBe('');
+  });
+
+  it('shuts on Escape', () => {
+    create();
+    trayButton('Done').focus();
+    fixture.detectChanges();
+    trayButton('Done').dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}));
+    fixture.detectChanges();
+    expect(surface().style.transform).toBe('');
+  });
+
+  it('shuts when the reader touches anywhere else, but not on the row itself', () => {
+    create();
+    swipeBy(TRAY_PX);
+    document.body.dispatchEvent(new PointerEvent('pointerdown', {pointerType: 'touch'}));
+    fixture.detectChanges();
+    expect(surface().style.transform).toBe('');
+  });
+
+  it('keeps the row pressable: a plain tap activates it', async () => {
+    create();
+    await userEvent.click(surface().querySelector('button') as HTMLButtonElement);
+    expect(fixture.componentInstance.log).toEqual(['activated']);
   });
 });

@@ -15,6 +15,8 @@ const meta: Meta<ListItemRowComponent> = {
     action: {control: 'boolean'},
     activated: {action: 'activated'},
     trailingAction: {action: 'trailingAction'},
+    swipeLeadingAction: {action: 'swipeLeadingAction'},
+    swipeTrailingAction: {action: 'swipeTrailingAction'},
   },
 };
 
@@ -80,6 +82,82 @@ export const ActionWithTrailingAction: Story = {
       </div>
     `,
   }),
+};
+
+/**
+ * Swipe actions (Apple HIG, Lists and tables): the leading edge holds the affirmative action
+ * (tick, mark read), the trailing edge the destructive one (delete, dismiss). A swipe is a shortcut,
+ * so each row keeps its visible control (the Ellipsis menu here) and the same actions are also
+ * buttons a keyboard or screen reader reaches, which slide the row open when focused. On a
+ * desktop browser turn on touch emulation to swipe; a mouse never does.
+ */
+export const SwipeActions: Story = {
+  render: args => ({
+    props: args,
+    template: `
+      <div class="border border-border-default rounded-cmn-md overflow-hidden">
+        <cmn-list-item-row label="Oat milk" sublabel="Added by Ann" trailingIcon="Ellipsis"
+          [swipeLeading]="{label: 'Done', icon: 'Check', tone: 'positive'}"
+          [swipeTrailing]="{label: 'Remove', icon: 'Trash2', tone: 'danger'}"
+          (trailingAction)="trailingAction($event)"
+          (swipeLeadingAction)="swipeLeadingAction($event)"
+          (swipeTrailingAction)="swipeTrailingAction($event)" />
+        <cmn-list-item-row label="Bananas" sublabel="Added by Bo" trailingIcon="Ellipsis"
+          [swipeLeading]="{label: 'Done', icon: 'Check', tone: 'positive'}"
+          [swipeTrailing]="{label: 'Remove', icon: 'Trash2', tone: 'danger'}"
+          (trailingAction)="trailingAction($event)"
+          (swipeLeadingAction)="swipeLeadingAction($event)"
+          (swipeTrailingAction)="swipeTrailingAction($event)" />
+        <cmn-list-item-row label="Sourdough loaf" sublabel="Added by Ann" trailingIcon="Ellipsis"
+          [swipeLeading]="{label: 'Done', icon: 'Check', tone: 'positive'}"
+          [swipeTrailing]="{label: 'Remove', icon: 'Trash2', tone: 'danger'}"
+          (trailingAction)="trailingAction($event)"
+          (swipeLeadingAction)="swipeLeadingAction($event)"
+          (swipeTrailingAction)="swipeTrailingAction($event)" />
+      </div>
+    `,
+  }),
+};
+
+/** One side only: a row with just a trailing action does not open toward the leading edge. */
+export const SwipeTrailingOnly: Story = {
+  render: args => ({
+    props: args,
+    template: `
+      <div class="border border-border-default rounded-cmn-md overflow-hidden">
+        <cmn-list-item-row label="Price drop on Cedar ETF" sublabel="2 hours ago" [action]="true"
+          [swipeTrailing]="{label: 'Dismiss', icon: 'X'}"
+          (activated)="activated($event)"
+          (swipeTrailingAction)="swipeTrailingAction($event)" />
+        <cmn-list-item-row label="Statement ready" sublabel="Yesterday" [action]="true"
+          [swipeTrailing]="{label: 'Dismiss', icon: 'X'}"
+          (activated)="activated($event)"
+          (swipeTrailingAction)="swipeTrailingAction($event)" />
+      </div>
+    `,
+  }),
+};
+
+/**
+ * The keyboard and screen-reader path: focus on a revealed action slides the row open to show it,
+ * Escape or moving focus away puts it back. Here focus is placed on the trailing action.
+ */
+export const SwipeRevealedByFocus: Story = {
+  render: args => ({
+    props: args,
+    template: `
+      <div class="border border-border-default rounded-cmn-md overflow-hidden">
+        <cmn-list-item-row label="Oat milk" sublabel="Added by Ann" trailingIcon="Ellipsis"
+          [swipeLeading]="{label: 'Done', icon: 'Check', tone: 'positive'}"
+          [swipeTrailing]="{label: 'Remove', icon: 'Trash2', tone: 'danger'}"
+          (swipeLeadingAction)="swipeLeadingAction($event)"
+          (swipeTrailingAction)="swipeTrailingAction($event)" />
+      </div>
+    `,
+  }),
+  play: ({canvasElement}) => {
+    canvasElement.querySelector<HTMLButtonElement>('button[aria-label^="Remove"]')?.focus();
+  },
 };
 
 export const WithAvatar: Story = {
