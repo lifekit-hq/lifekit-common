@@ -195,7 +195,7 @@ Sections, in this order. An app includes only the ones that apply.
 4. **App-specific sections**: finance-sentry Preferences and Financial independence, backstage
    Agency and Extension tokens, devclaw Dispatch.
 5. **Security, People, admin** links.
-6. **About**: version, What's new, links.
+6. **About**: version, What's new (`cmn-whats-new`, [WHATS-NEW.md](WHATS-NEW.md)), links.
 7. **Danger zone**, then **Sign out**.
 
 Personal sections (Account tier) come before Workspace sections.
@@ -213,7 +213,7 @@ On desktop and tablet the avatar opens a menu with:
 
 1. an **identity header**: name and email, not interactive
 2. **Settings**
-3. app extras (finance-sentry's What's new)
+3. app extras (What's new, from `whatsNewMenuItem()`, wears a dot until the running version is opened)
 4. a separator
 5. **Sign out**, destructive
 

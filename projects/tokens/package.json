@@ -30,11 +30,16 @@
     "./brand/vite": "./brand/vite.mjs",
     "./brand/theme-script": "./brand/theme-script.mjs",
     "./brand/*": "./brand/dist/*",
+    "./whats-new": {
+      "types": "./whats-new/parse.d.mts",
+      "default": "./whats-new/parse.mjs"
+    },
     "./package.json": "./package.json"
   },
   "bin": {
     "lifekit-chrome-check": "./bin/lifekit-chrome-check.mjs",
-    "lifekit-theme-sync": "./bin/lifekit-theme-sync.mjs"
+    "lifekit-theme-sync": "./bin/lifekit-theme-sync.mjs",
+    "lifekit-whats-new": "./bin/lifekit-whats-new.mjs"
   },
   "files": [
     "theme.css",
@@ -47,6 +52,7 @@
     "brand/",
     "drift/",
     "screen/",
+    "whats-new/",
     "bin/",
     "LICENSES/",
     "NOTICE.md"

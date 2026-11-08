@@ -106,6 +106,21 @@ describe('TopBarComponent', () => {
     expect(overlayContainer.getContainerElement().textContent).toContain('Log out');
   });
 
+  it('should dot the avatar while a menu item has something new behind it', () => {
+    fixture.componentRef.setInput('avatarLabel', 'Denys');
+    fixture.detectChanges();
+    const trigger = (): Element | null =>
+      fixture.nativeElement.querySelector('button[aria-label="Account menu"]');
+    expect(trigger()?.querySelector('.cmn-badge-indicator')).toBeNull();
+
+    fixture.componentRef.setInput('avatarMenuItems', [
+      {id: 'whatsNew', label: "What's new", dot: true},
+    ]);
+    fixture.detectChanges();
+
+    expect(trigger()?.querySelector('.cmn-badge-indicator')).toBeTruthy();
+  });
+
   describe('account identity', () => {
     const IDENTITY = {name: 'Ada Lovelace', email: 'ada@example.com'};
 

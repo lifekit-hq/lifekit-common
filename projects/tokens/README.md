@@ -66,6 +66,10 @@ Design tokens for the lifekit ecosystem, framework-agnostic.
   finding. Rules and options: the last section of
   [`docs/BROWSER-CHROME.md`](../../docs/BROWSER-CHROME.md). Rule logic adapted from impeccable
   (Apache-2.0), see [`NOTICE.md`](NOTICE.md).
+- `whats-new`: `lifekit-whats-new`, the bin that turns an app's `src/whats-new/notes.md` (and,
+  optionally, its release-please `CHANGELOG.md`) into the `whats-new.json` that `cmn-whats-new` in
+  `@lifekit-hq/ui` fetches, with `--check` for CI. The parser and the `WhatsNewData` types are
+  `@lifekit-hq/tokens/whats-new`. Notes format and wiring: [`docs/WHATS-NEW.md`](../../docs/WHATS-NEW.md).
 - `screen`: the screen-composition check (`@lifekit-hq/tokens/screen`), rules C0 to C10 over a
   rendered route: page template, one left edge, title clearance, control heights, stretched
   fields, uppercase labels, row-action noise and the rest. `checkScreen(page)` runs it from an

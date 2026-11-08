@@ -94,6 +94,12 @@ const ROW_CLASSES =
                     @if (item.icon) {
                       <cmn-icon [name]="item.icon" avatar />
                     }
+                    @if (item.dot) {
+                      <span class="inline-flex items-center" meta>
+                        <cmn-badge [dot]="true" [standalone]="true" status="error" />
+                        <span class="sr-only">New</span>
+                      </span>
+                    }
                     <cmn-icon meta name="ChevronRight" size="sm" />
                   </cmn-list-item-row>
                 </a>
@@ -111,6 +117,12 @@ const ROW_CLASSES =
                         [class.text-status-error]="item.destructive"
                         avatar
                       />
+                    }
+                    @if (item.dot) {
+                      <span class="inline-flex items-center" meta>
+                        <cmn-badge [dot]="true" [standalone]="true" status="error" />
+                        <span class="sr-only">New</span>
+                      </span>
                     }
                   </cmn-list-item-row>
                 </button>

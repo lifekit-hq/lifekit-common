@@ -8,6 +8,7 @@ import {
 import {accountHeader} from '../account-avatar/account-header';
 import {avatarInitials} from '../account-avatar/avatar-initials';
 import {type PageAction} from '../app-layout/page-chrome';
+import {BadgeComponent} from '../badge/badge.component';
 import {IconComponent} from '../icon/icon.component';
 import {MenuComponent, type MenuHeader, type MenuItem} from '../menu/menu.component';
 
@@ -90,6 +91,7 @@ const HEADER_FADE_CLASSES =
   selector: 'cmn-top-bar',
   imports: [
     AccountAvatarComponent,
+    BadgeComponent,
     CdkMenu,
     CdkMenuItem,
     CdkMenuTrigger,
@@ -220,11 +222,21 @@ const HEADER_FADE_CLASSES =
           (itemSelect)="avatarMenuSelect.emit($event)"
           ariaLabel="Account menu"
         >
-          <cmn-account-avatar
-            [label]="avatarText()"
-            [pictureUrl]="avatarIdentity()?.pictureUrl"
-            size="sm"
-          />
+          @if (avatarMenuDot()) {
+            <cmn-badge [dot]="true" status="error">
+              <cmn-account-avatar
+                [label]="avatarText()"
+                [pictureUrl]="avatarIdentity()?.pictureUrl"
+                size="sm"
+              />
+            </cmn-badge>
+          } @else {
+            <cmn-account-avatar
+              [label]="avatarText()"
+              [pictureUrl]="avatarIdentity()?.pictureUrl"
+              size="sm"
+            />
+          }
         </cmn-menu>
       }
     </header>
@@ -287,6 +299,11 @@ export class TopBarComponent {
   });
 
   /** The menu's identity header, or undefined when the identity has neither a name nor an email. */
+  /** An item in the menu carries a dot (What's new, unread): the avatar wears one too, so it is seen before the menu opens. */
+  protected readonly avatarMenuDot = computed<boolean>(() =>
+    this.avatarMenuItems().some(item => item.dot)
+  );
+
   protected readonly menuHeader = computed<MenuHeader | undefined>(() =>
     accountHeader(this.avatarIdentity(), this.avatarLabel())
   );

@@ -36,6 +36,12 @@ export interface MenuItem {
   disabled?: boolean;
   /** Draws a divider above the item, to set it apart from the group before it. */
   separatorBefore?: boolean;
+  /**
+   * Marks the item with a dot while there is something new behind it (What's new, until it is
+   * opened). The menu, the More page and the shell's More tab all show it; it is never the only
+   * signal, because a screen reader hears "New" after the label.
+   */
+  dot?: boolean;
 }
 
 /** A non-interactive header above a menu's items, e.g. the signed-in identity. */
@@ -183,6 +189,13 @@ const MENU_POSITIONS: ConnectedPosition[] = [
               <cmn-icon [name]="item.icon" size="sm" aria-hidden="true" />
             }
             <span>{{ item.label }}</span>
+            @if (item.dot) {
+              <span
+                class="ml-auto h-2 w-2 rounded-cmn-full bg-status-error"
+                aria-hidden="true"
+              ></span>
+              <span class="sr-only">New</span>
+            }
           </button>
         }
       </div>
