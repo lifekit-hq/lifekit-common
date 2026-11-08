@@ -458,7 +458,7 @@ export const PresetSkeleton: Story = {
 };
 
 /**
- * The defaults (`keepContent`, `showDelay` 200, `minDisplay` 400) with `crossfade`: the 120ms
+ * The defaults (`keepContent`, `showDelay` 200, `minDisplay` 400, `crossfade`): the 120ms
  * refresh shows no indicator at all, and a long one keeps the content on screen, dimmed once the
  * delay passes. Nothing flashes.
  */

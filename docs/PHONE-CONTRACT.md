@@ -370,16 +370,16 @@ empty, keep cached data, errors keep context). A page binds `status`, `isEmpty`,
 
 Offline beats error, and error beats empty, so a failed or offline load never reads as "no data".
 
-Calm loading is the default (guardrails S3, S4): `keepContent` is on, `showDelay` is 200ms and
-`minDisplay` is 400ms. A region that needs the old behaviour sets `[keepContent]="false"` or a
-delay of `0`.
+Calm loading is the default (guardrails S3, S4): `keepContent` is on, `showDelay` is 200ms,
+`minDisplay` is 400ms and `crossfade` is on. A region that needs the old behaviour sets
+`[keepContent]="false"`, `[crossfade]="false"` or a delay of `0`.
 
 | Input           | Does                                                                                                                                                                                                |
 | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `keepContent`   | On by default. A refresh keeps the loaded content on screen, dimmed, instead of swapping it for the skeleton. A first load (nothing to keep) still shows the skeleton. The dim follows `showDelay`. |
 | `showDelay`     | Milliseconds a load must last before any loading indicator shows; 200 by default (`ASYNC_STATE_SHOW_DELAY_MS`). Until then the content already on screen stays put, so a fast load shows no flash.  |
 | `minDisplay`    | Milliseconds an indicator that has shown stays up, so it never flashes away; 400 by default (`ASYNC_STATE_MIN_DISPLAY_MS`). Not applied to a kept (dimmed) body: fresh content replaces it at once. |
-| `crossfade`     | The content fades in (`--cmn-duration-short`) when it replaces the skeleton; content already there at first render paints at once; nothing under Reduce Motion.                                     |
+| `crossfade`     | On by default. The content fades in (`--cmn-duration-short`) when it replaces the skeleton; content already there at first render paints at once; nothing under Reduce Motion.                      |
 | `skeletonShape` | Draws the placeholder as a `cmn-skeleton` part preset (`row`, `section`, `stat`, `chart`; `skeletonRows` rows) instead of the default bars; a projected `[skeleton]` still wins.                    |
 
 A skeleton goes on a container, never inside the text it stands for. `cmn-skeleton` draws a bar by
