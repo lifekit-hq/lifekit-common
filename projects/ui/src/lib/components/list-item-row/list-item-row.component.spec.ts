@@ -465,7 +465,7 @@ describe('ListItemRowComponent — swipe actions', () => {
     expect(surface().style.transform).toBe('');
   });
 
-  it('moves focus to the row\'s visible control when Escape shuts a row focus is open on', () => {
+  it("moves focus to the row's visible control when Escape shuts a row focus is open on", () => {
     create();
     trayButton('Done').focus();
     fixture.detectChanges();
@@ -489,15 +489,26 @@ describe('ListItemRowComponent — swipe actions', () => {
     create();
     swipeBy(-TRAY_PX);
     const rowButton = surface().querySelector('button') as HTMLButtonElement;
-    touch('pointerdown', 0);
-    touch('pointerup', 0);
-    rowButton.click();
+    const tap = (): void => {
+      touch('pointerdown', 0);
+      touch('pointerup', 0);
+      rowButton.dispatchEvent(new MouseEvent('click', {detail: 1, bubbles: true}));
+    };
+    tap();
     fixture.detectChanges();
     expect(surface().style.transform).toBe('');
     expect(fixture.componentInstance.log).toEqual([]);
 
+    tap();
+    expect(fixture.componentInstance.log).toEqual(['activated']);
+  });
+
+  it('still activates from the keyboard after a touch that was taken over closed the row', () => {
+    create();
+    swipeBy(-TRAY_PX);
+    const rowButton = surface().querySelector('button') as HTMLButtonElement;
     touch('pointerdown', 0);
-    touch('pointerup', 0);
+    touch('pointercancel', 0);
     rowButton.click();
     expect(fixture.componentInstance.log).toEqual(['activated']);
   });

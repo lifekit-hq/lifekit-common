@@ -111,7 +111,7 @@ const SWIPE_TONE_CLASSES: Record<CmnRowSwipeTone, string> = {
       <button
         [class]="trailingClasses + extra"
         [attr.aria-label]="trailingName()"
-        (click)="pressTrailing()"
+        (click)="pressTrailing($event)"
         type="button"
       >
         <cmn-icon [name]="trailingIcon()!" size="md" aria-hidden="true" />
@@ -121,7 +121,7 @@ const SWIPE_TONE_CLASSES: Record<CmnRowSwipeTone, string> = {
       @if (action()) {
         @if (trailingIcon()) {
           <div [class]="actionWrapperClasses">
-            <button [class]="rowClasses()" (click)="press()" type="button">
+            <button [class]="rowClasses()" (click)="press($event)" type="button">
               <ng-container [ngTemplateOutlet]="content" />
             </button>
             <ng-container
@@ -130,7 +130,7 @@ const SWIPE_TONE_CLASSES: Record<CmnRowSwipeTone, string> = {
             />
           </div>
         } @else {
-          <button [class]="rowClasses()" (click)="press()" type="button">
+          <button [class]="rowClasses()" (click)="press($event)" type="button">
             <ng-container [ngTemplateOutlet]="content" />
           </button>
         }
@@ -185,13 +185,13 @@ const SWIPE_TONE_CLASSES: Record<CmnRowSwipeTone, string> = {
           </div>
         }
         <div
-          [class]="surfaceClasses()"
           #surface
+          [class]="surfaceClasses()"
           [style.transform]="swipe.transform()"
           (pointerdown)="swipe.start($event)"
           (pointermove)="swipe.move($event)"
           (pointerup)="swipe.end()"
-          (pointercancel)="swipe.end()"
+          (pointercancel)="swipe.end(true)"
         >
           <ng-container [ngTemplateOutlet]="row" />
         </div>
@@ -316,14 +316,14 @@ export class ListItemRowComponent {
     }
   }
 
-  protected press(): void {
-    if (!this.swipe.takeShutTap()) {
+  protected press(event: MouseEvent): void {
+    if (!this.swipe.takeShutTap(event)) {
       this.activated.emit();
     }
   }
 
-  protected pressTrailing(): void {
-    if (!this.swipe.takeShutTap()) {
+  protected pressTrailing(event: MouseEvent): void {
+    if (!this.swipe.takeShutTap(event)) {
       this.trailingAction.emit();
     }
   }

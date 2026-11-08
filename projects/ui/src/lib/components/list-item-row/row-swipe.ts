@@ -79,8 +79,11 @@ export class RowSwipe {
     this.offset.set(Math.min(this.limits.leading, Math.max(-this.limits.trailing, this.base + dx)));
   }
 
-  /** Release, or the browser taking the touch over: settle open or shut, whichever is nearer. */
-  public end(): void {
+  /**
+   * Release, or the browser taking the touch over (`cancelled`): settle open or shut, whichever is
+   * nearer. Only a release is a tap that a click follows.
+   */
+  public end(cancelled = false): void {
     const dragged = this.axis === 'x';
     const tapped = this.startX !== null && this.axis === null;
     this.startX = null;
@@ -88,7 +91,7 @@ export class RowSwipe {
     if (!dragged) {
       if (tapped) {
         // A tap on the row while a tray is open puts the row back, as it does in a native list.
-        this.shutByTap = this.open() !== null;
+        this.shutByTap = !cancelled && this.open() !== null;
         this.close();
       }
       return;
@@ -110,8 +113,14 @@ export class RowSwipe {
     this.offset.set(side === 'leading' ? width : -width);
   }
 
-  /** True once for the click that follows a tap which shut an open row: that tap only shuts it. */
-  public takeShutTap(): boolean {
+  /**
+   * True once for the click that follows a tap which shut an open row: that tap only shuts it.
+   * A click with no detail came from the keyboard or a screen reader, not from that tap.
+   */
+  public takeShutTap(click: MouseEvent): boolean {
+    if (click.detail === 0) {
+      return false;
+    }
     const shut = this.shutByTap;
     this.shutByTap = false;
     return shut;

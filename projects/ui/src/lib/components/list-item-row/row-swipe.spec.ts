@@ -8,6 +8,10 @@ function touch(type: string, clientX: number, clientY = 0, pointerType = 'touch'
   return new PointerEvent(type, {clientX, clientY, pointerType, pointerId: 1, bubbles: true});
 }
 
+function click(detail: number): MouseEvent {
+  return new MouseEvent('click', {detail, bubbles: true});
+}
+
 describe('RowSwipe', () => {
   let trays: {leading: number; trailing: number};
   let swipe: RowSwipe;
@@ -127,12 +131,26 @@ describe('RowSwipe', () => {
     swipe.reveal('trailing', TRAY_PX);
     swipe.start(touch('pointerdown', 0));
     swipe.end();
-    expect(swipe.takeShutTap()).toBe(true);
-    expect(swipe.takeShutTap()).toBe(false);
+    expect(swipe.takeShutTap(click(1))).toBe(true);
+    expect(swipe.takeShutTap(click(1))).toBe(false);
 
     swipe.start(touch('pointerdown', 0));
     swipe.end();
-    expect(swipe.takeShutTap()).toBe(false);
+    expect(swipe.takeShutTap(click(1))).toBe(false);
+  });
+
+  it('does not let a tap that no click followed swallow a later keyboard or screen reader press', () => {
+    swipe.reveal('trailing', TRAY_PX);
+    swipe.start(touch('pointerdown', 0));
+    swipe.end(true);
+    expect(swipe.open()).toBeNull();
+    expect(swipe.takeShutTap(click(0))).toBe(false);
+
+    swipe.reveal('trailing', TRAY_PX);
+    swipe.start(touch('pointerdown', 0));
+    swipe.end();
+    expect(swipe.takeShutTap(click(0))).toBe(false);
+    expect(swipe.takeShutTap(click(1))).toBe(true);
   });
 
   it('reveals a tray at its width for focus to arrive on', () => {
