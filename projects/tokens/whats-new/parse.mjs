@@ -126,6 +126,8 @@ export function parseNotes(text) {
     if (heading) {
       lines = [];
       notes.set(heading[1], lines);
+    } else if (raw.startsWith('## ')) {
+      lines = null;
     } else if (lines !== null && raw.startsWith('- ')) {
       const body = raw.slice(2).trim();
       const owner = OWNER_TAG.test(body);

@@ -151,6 +151,15 @@ describe('parseNotes', () => {
     assert.deepEqual(notes.get('1.1.0'), [{text: 'Older line.', owner: false}]);
   });
 
+  it('drops bullets under a heading that is not a bare version', () => {
+    const notes = parseNotes(
+      '## 1.2.0\n- You can export.\n\n## 1.3.0 (2026-11-01)\n- You can share.\n\n## Unreleased\n- Soon.\n',
+    );
+
+    assert.deepEqual([...notes.keys()], ['1.2.0']);
+    assert.deepEqual(notes.get('1.2.0'), [{text: 'You can export.', owner: false}]);
+  });
+
   it('is empty for an empty file', () => {
     assert.equal(parseNotes('').size, 0);
   });
