@@ -51,9 +51,9 @@ import {
 } from './page-chrome';
 import {PageFrameService} from './page-frame';
 import {overflowNavItems, phoneTabItems} from './phone-tabs';
-import {fadeRouteChanges} from './route-fade';
 import {PullRefresh} from './pull-refresh';
 import {PullRefreshIndicatorComponent} from './pull-refresh-indicator.component';
+import {fadeRouteChanges} from './route-fade';
 import {matchTab, ShellNavigationService} from './shell-navigation.service';
 import {healViewportOnBlur} from './viewport-heal';
 
