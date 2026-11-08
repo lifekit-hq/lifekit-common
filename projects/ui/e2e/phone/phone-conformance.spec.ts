@@ -369,9 +369,10 @@ test.describe(`phone ${NARROW_PHONE.width}x${NARROW_PHONE.height}`, () => {
 });
 
 // The shell follows the device: the tab bar for a phone (landscape too), the sidebar as a rail from
-// 600px, the full sidebar from 840px. `isMobile` + `hasTouch` make Chromium report a coarse pointer.
-const RAIL_WIDTH = 64;
-const SIDEBAR_WIDTH = 240;
+// 600px (Carbon's 48px rail), the full 256px sidebar from 840px. `isMobile` + `hasTouch` make
+// Chromium report a coarse pointer.
+const RAIL_WIDTH = 48;
+const SIDEBAR_WIDTH = 256;
 const SHELLS = [
   {name: 'phone 390x844', width: 390, height: 844, touch: true, shell: 'tabs'},
   {name: 'phone 599x900', width: 599, height: 900, touch: true, shell: 'tabs'},

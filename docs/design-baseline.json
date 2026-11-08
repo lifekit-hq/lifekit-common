@@ -79,6 +79,18 @@
       "reason": "The list is a section body: its release headings (h3) sit under the host's own h2 (the sheet title, the Settings About section), which the standalone component story does not render; the Templates/Whats new golden stories hold the full hierarchy."
     },
     {
+      "rule": "nested-cards",
+      "stories": ["shell-golden--matrix"],
+      "max": 6,
+      "reason": "The golden lays the shell pieces side by side in bordered frames, as Carbon's UI Shell page does; the side nav and the header carry their own hairlines inside the frame, which the detector reads as nested cards."
+    },
+    {
+      "rule": "cramped-padding",
+      "stories": ["shell-golden--matrix"],
+      "match": "max-w-[24rem]",
+      "reason": "The frame holds the phone tab bar, which is docked flush to the bottom edge by design (iOS tab bar, no inset)."
+    },
+    {
       "rule": "text-overflow",
       "stories": ["directives-tooltip--truncated"],
       "match": "truncate",
