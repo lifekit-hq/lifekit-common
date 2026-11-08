@@ -12,7 +12,6 @@
 // `types: []`, so the repo's devDependency @types (node, vitest, …)
 // are invisible here and any ambient namespace the rollup leans on without
 // declaring fails with TS2503 (issue #15).
-import * as api from '@lifekit-hq/ui';
 import type {
   AlertItemComponent,
   AreaChartComponent,
@@ -23,6 +22,7 @@ import type {
   WhatsNewConfig,
   WhatsNewData,
 } from '@lifekit-hq/ui';
+import * as api from '@lifekit-hq/ui';
 
 // Nullable<T> must be T | null
 const a: Nullable<string> = null;
