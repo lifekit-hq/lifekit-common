@@ -5,7 +5,7 @@ import {expect, test} from '@playwright/test';
 // template's story is the app (real shell, real components, realistic content), so a change to the
 // template, a component or a token that moves a pixel on any of them shows up here.
 // Each template holds its golden story in this list: List, Detail, Form, Settings and Overview,
-// and Detail holds a second one, the tile grid.
+// and Detail holds two more, the tile grid and the verdict header.
 const STORYBOOK_THEME = {light: 'light', dark: 'dark'} as const;
 
 /**
@@ -30,6 +30,8 @@ defineScreenBaselines(
     routes: [
       ...['list', 'detail', 'form', 'settings', 'overview'].map(kind => goldenScreen(kind)),
       goldenScreen('detail', 'with-tiles'),
+      // The detail template led by its verdict header (`cmn-verdict-header`).
+      goldenScreen('detail', 'with-verdict'),
     ],
   }
 );

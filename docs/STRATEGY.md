@@ -155,9 +155,10 @@ Counts are a point-in-time measurement; re-measure before relying on them for a 
 | toast               | fs 5 · dash 0                                                                   | interactive | keep-own        | Dismiss event + aria role + `toast.service.ts` service layer; keep Angular until service strategy is decided                                                                                                                                          |
 | toggle              | fs 2 · dash 1                                                                   | interactive | element-rewrite | Switch button + thumb animation + `aria-checked`; `role="switch"` + boolean attribute = clean Lit mapping                                                                                                                                             |
 | top-bar             | fs 0 · dash 0 (composed by `app-layout`)                                        | interactive | keep-own        | Uses `MenuComponent`; event orchestration (back/page actions/search/theme/avatar); app-shell concern                                                                                                                                                  |
+| verdict-header      | new (added for the verdict-first detail header, #263); fs 0 · dash 0            | templated   | keep-own        | Status word, up to two `cmn-tag` pills, a caveat and a price with a day-change pill; stacked-to-opposite layout and signed percent-plus-amount formatting; composes `cmn-tag` and `cmn-icon`, so it stays Angular                                     |
 | whats-new           | new (added for What's new as a library feature, #268); fs 0 · dash 0            | interactive | keep-own        | Release list over `cmn-async-state` plus `CmnWhatsNewService` (seen marker, notes fetch, the sheet through `CmnDrawerService`); drawer, shell and `MenuItem.dot` are Angular, so it stays Angular                                                     |
 
-**Summary:** 41 keep-own · 18 element-rewrite · 1 wrap-base · 0 delete
+**Summary:** 42 keep-own · 18 element-rewrite · 1 wrap-base · 0 delete
 
 ---
 

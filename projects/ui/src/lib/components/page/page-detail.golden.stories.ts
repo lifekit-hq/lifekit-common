@@ -15,6 +15,7 @@ import {ListItemRowComponent} from '../list-item-row/list-item-row.component';
 import {ListSectionComponent} from '../list-section/list-section.component';
 import {type CmnTile, TileGridComponent} from '../tile-grid/tile-grid.component';
 import {TilePanelDirective} from '../tile-grid/tile-panel.directive';
+import {VerdictHeaderComponent} from '../verdict-header/verdict-header.component';
 import {
   GOLDEN_DESKTOP,
   GOLDEN_PHONE,
@@ -164,6 +165,63 @@ class TaskDetailTilesPageComponent {
   protected readonly split = PREMIUM_SPLIT;
 }
 
+const REASONS: readonly Entry[] = [
+  {id: 1, label: 'Revenue grew 18% a year for three years', note: 'Filings · FY2023 to FY2025'},
+  {id: 2, label: 'Net cash covers two years of spending', note: 'Balance sheet · Q3 2026'},
+  {id: 3, label: 'Trades at 31 times earnings, above its peers', note: 'Valuation · 6 Nov'},
+];
+
+/**
+ * The golden detail screen led by its verdict: the same template, with the state of the thing as
+ * the first read (the status word, two pills, the caveat, the price and the day's move), then the
+ * facts and the reasons under it.
+ */
+@Component({
+  selector: 'cmn-golden-verdict-detail-page',
+  imports: [
+    DescriptionItemComponent,
+    DescriptionListComponent,
+    ListItemRowComponent,
+    ListSectionComponent,
+    PageComponent,
+    VerdictHeaderComponent,
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <cmn-page kind="detail">
+      <cmn-verdict-header
+        [status]="{tone: 'success', label: 'Strong buy'}"
+        [pills]="[{label: 'High conviction', tone: 'info'}, {label: '12 months'}]"
+        [price]="182.4"
+        [change]="{percent: 0.018, amount: 3.2}"
+        caveat="Priced for perfection; wait for a pullback before adding."
+        currency="EUR"
+      />
+      <cmn-list-section heading="Position">
+        <cmn-description-list class="px-cmn-4">
+          <cmn-description-item label="Shares" value="42" />
+          <cmn-description-item label="Average cost" value="€141.10" />
+          <cmn-description-item label="Market value" value="€7,660.80" />
+          <cmn-description-item label="Weight" value="4.2% of the portfolio" />
+        </cmn-description-list>
+      </cmn-list-section>
+      <cmn-list-section heading="Why">
+        @for (reason of reasons; track reason.id) {
+          <cmn-list-item-row [label]="reason.label" [sublabel]="reason.note" />
+        }
+      </cmn-list-section>
+    </cmn-page>
+  `,
+})
+class VerdictDetailPageComponent {
+  protected readonly reasons = REASONS;
+}
+
+const VERDICT_DATA: PageChromeData = {
+  title: 'Northwind Holdings',
+  parent: '/tasks',
+};
+
 const DETAIL_DATA: PageChromeData = {
   title: 'Car insurance',
   parent: '/tasks',
@@ -188,6 +246,7 @@ const meta: Meta<GoldenShellComponent> = {
           component: TaskDetailTilesPageComponent,
           data: DETAIL_DATA,
         },
+        {path: 'tasks/northwind', component: VerdictDetailPageComponent, data: VERDICT_DATA},
       ]),
     }),
   ],
@@ -223,4 +282,25 @@ export const DesktopWithTiles: Story = {args: TILES_START, globals: GOLDEN_DESKT
 export const DesktopWithTilesDark: Story = {
   args: TILES_START,
   globals: {...GOLDEN_DESKTOP, theme: 'dark'},
+};
+
+/**
+ * The detail template led by a verdict header (`cmn-verdict-header`): the state of the thing is the
+ * first read, stacked on a phone with the price under it and opposite it from 768px.
+ */
+export const PhoneWithVerdict: Story = {globals: GOLDEN_PHONE, args: {start: '/tasks/northwind'}};
+
+export const PhoneWithVerdictDark: Story = {
+  globals: {...GOLDEN_PHONE, theme: 'dark'},
+  args: {start: '/tasks/northwind'},
+};
+
+export const DesktopWithVerdict: Story = {
+  globals: GOLDEN_DESKTOP,
+  args: {start: '/tasks/northwind'},
+};
+
+export const DesktopWithVerdictDark: Story = {
+  globals: {...GOLDEN_DESKTOP, theme: 'dark'},
+  args: {start: '/tasks/northwind'},
 };
