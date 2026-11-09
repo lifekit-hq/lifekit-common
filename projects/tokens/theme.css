@@ -667,11 +667,11 @@ cmn-dialog-container.cmn-dialog--closing {
   transition: transform var(--cmn-duration-short) var(--cmn-ease-expressive-accelerate);
 }
 
-/* Sheet: square (--radius-lg is 0), full width, never taller than the screen minus the status bar and a strip of
+/* Sheet: square (--cmn-radius-surface is 0 in Carbon), full width, never taller than the screen minus the status bar and a strip of
    the page behind it (the HIG sheet); the keyboard shortens it instead of covering its fields. */
 cmn-dialog-container[data-presentation='sheet'] .cmn-dialog-shell {
-  border-top-left-radius: var(--radius-lg);
-  border-top-right-radius: var(--radius-lg);
+  border-top-left-radius: var(--cmn-radius-surface);
+  border-top-right-radius: var(--cmn-radius-surface);
   max-height: calc(100vh - env(safe-area-inset-top, 0px) - var(--cmn-keyboard-inset, 0px) - 1.5rem);
   max-height: calc(
     100dvh - env(safe-area-inset-top, 0px) - var(--cmn-keyboard-inset, 0px) - 1.5rem
@@ -744,8 +744,8 @@ cmn-drawer-container.cmn-drawer--sheet {
   max-height: 50vh;
   max-height: 50dvh;
   overflow: hidden;
-  border-top-left-radius: var(--radius-lg);
-  border-top-right-radius: var(--radius-lg);
+  border-top-left-radius: var(--cmn-radius-surface);
+  border-top-right-radius: var(--cmn-radius-surface);
   background-color: var(--color-surface-card);
   padding-bottom: env(safe-area-inset-bottom, 0px);
   transform: translateY(100%);

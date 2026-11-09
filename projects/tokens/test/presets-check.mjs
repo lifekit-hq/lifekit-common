@@ -29,7 +29,8 @@ const PHONE_WIDTH = 390;
  *    can fail contrast or the touch floor, and the paint tests on the stories catch the rest.
  *  - `field-border`: a colour that identifies a field, 3:1 on the card and the page ground.
  *  - `pair`: one half of a `-bg`/`-fg` pair, 4.5:1 together.
- *  - `text-on`: a fill that primary text sits on, 4.5:1 (a `transparent` fill is skipped).
+ *  - `text-on`: a fill that text sits on, 4.5:1; checked when the preset sets the fill or its text
+ *    colour (a `transparent` fill is skipped, any other fill must resolve to a #hex colour).
  *  - `on-state`: the colour of a control that is on, 3:1 on the card and the page ground.
  *  - `toggle`: the toggle's four lengths, checked as geometry (the thumb fits the track).
  *  - `edge`: a hairline between surfaces; decorative, so free of a ratio.
@@ -41,7 +42,7 @@ export const HOOK_RULES = {
   '--cmn-radius-inset': 'shape',
   '--cmn-field-border-width': 'shape',
   '--cmn-field-border-color': 'field-border',
-  '--cmn-select-bg': 'shape',
+  '--cmn-select-bg': 'text-on',
   '--cmn-select-border-width': 'shape',
   '--cmn-card-border-color': 'edge',
   '--cmn-card-shadow': 'shape',
@@ -306,9 +307,17 @@ export function checkPreset({id, css, themeCss}) {
     };
     const surfaces = SURFACES.map(name => [name, readable(name)]);
 
-    for (const name of names.filter(n => HOOK_RULES[n] === 'text-on')) {
-      const fill = readable(name);
-      if (!fill) continue; // `transparent`: the text sits on the surface the page already tests
+    const textOn = Object.keys(HOOK_RULES).filter(
+      n => HOOK_RULES[n] === 'text-on' && (names.includes(n) || names.includes(TEXT_ON_FILL[n]))
+    );
+    for (const name of textOn) {
+      const value = resolve(name, ctx)?.trim();
+      if (value === 'transparent') continue; // the text sits on the surface the page already tests
+      const fill = value ? toRgb(value) : null;
+      if (!fill) {
+        fail(`${name} does not resolve to a #hex colour in the ${theme} theme`);
+        continue;
+      }
       const textName = TEXT_ON_FILL[name] ?? '--color-text-primary';
       const text = readable(textName);
       if (text && ratio(fill, text) < TEXT_MIN) {

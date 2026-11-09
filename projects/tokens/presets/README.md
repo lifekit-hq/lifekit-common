@@ -63,7 +63,7 @@ a preset sets values, the component owns structure.
 
 | Hook family                                                                               | What it decides                                                                                | Components                                                                                                  |
 | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `--cmn-radius-control\|field\|surface\|inset`                                             | which size step a kind of thing takes: a button, a field, a card or panel, a small inner shape | every component (none names `--radius-sm\|md\|lg` directly; a test holds that)                              |
+| `--cmn-radius-control\|field\|surface\|inset`                                             | which size step a kind of thing takes: a button, a field, a card or panel, a small inner shape | every Angular component and the dialog and drawer sheets                                                    |
 | `--cmn-field-border-width\|color`, `--cmn-select-bg\|border-width`                        | field frame: bottom rule (Carbon) or full outline                                              | input, textarea, search-input, select, date-range, chat input, top-bar search                               |
 | `--cmn-card-border-color\|shadow`, `--cmn-float-border-color`, `--cmn-shell-border-color` | edge of a resting card, a floating panel and the app shell: hairline (Carbon) or shadow        | card, stat-card, charts, data-table, skeleton, dialog, menu, palette, tooltip, nav, top-bar, bottom-tab-bar |
 | `--cmn-nav-*`                                                                             | side nav item inset, gap, height, radius, selected fill and mark (3px bar in Carbon)           | sidebar-nav                                                                                                 |
@@ -74,8 +74,7 @@ a preset sets values, the component owns structure.
 | `--cmn-alert-stripe`, `--cmn-table-head-bg`                                               | alert stripe width, data-table header fill                                                     | alert, data-table                                                                                           |
 
 Row separators inside a list, a disclosure row or a dialog stay on `border-default`: they read the
-same in every look. `test/hooks.spec.mjs` fails on a hook with no Carbon default, a hook nothing
-uses, or a hook the per-preset test has no rule for (`HOOK_RULES` in `test/presets-check.mjs`).
+same in every look. `test/hooks.spec.mjs` fails on a hook with no Carbon default or a hook the per-preset test has no rule for (`HOOK_RULES` in `test/presets-check.mjs`).
 
 ## Adding a preset
 

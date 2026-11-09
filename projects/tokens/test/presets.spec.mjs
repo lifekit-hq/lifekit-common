@@ -270,6 +270,26 @@ describe('hook rules (the real theme.css)', () => {
     assert.match(hover.join('\n'), /--cmn-btn-secondary-fg on --cmn-btn-secondary-hover/);
   });
 
+  it('check the secondary hover fill against a text colour the preset changed, hover left at Carbon', () => {
+    const problems = real(
+      '--cmn-btn-secondary-bg: var(--color-accent-subtle); --cmn-btn-secondary-fg: var(--color-text-primary);'
+    );
+    assert.match(
+      problems.join('\n'),
+      /--cmn-btn-secondary-fg on --cmn-btn-secondary-hover is 2\.\d\d:1 in the light theme/
+    );
+  });
+
+  it('check the select fill text sits on, and reject a fill the test cannot read', () => {
+    const dark = real('--cmn-select-bg: #111111;');
+    assert.match(
+      dark.join('\n'),
+      /--color-text-primary on --cmn-select-bg is 1\.\d\d:1 in the light theme/
+    );
+    const mixed = real('--cmn-nav-active-bg: color-mix(in srgb, red 10%, white);');
+    assert.match(mixed.join('\n'), /--cmn-nav-active-bg does not resolve to a #hex colour/);
+  });
+
   it('reject a toggle on colour under 3:1 on the surface, in either theme', () => {
     const problems = real('--cmn-toggle-on: var(--color-border-default);');
     assert.match(problems.join('\n'), /--cmn-toggle-on is 1\.\d\d:1 on --color-surface-card/);
