@@ -1,5 +1,30 @@
 # Changelog
 
+## [4.6.0](https://github.com/lifekit-hq/lifekit-common/compare/v4.5.0...v4.6.0) (2026-11-09)
+
+
+### Features
+
+* **tokens,ui:** add the design preset mechanism ([#320](https://github.com/lifekit-hq/lifekit-common/issues/320)) ([2786b07](https://github.com/lifekit-hq/lifekit-common/commit/2786b0794bf548548f53a8f6cca1860b7c1d4591))
+* **ui:** add cmn-tile-grid, one shared exclusive panel for detail views ([#321](https://github.com/lifekit-hq/lifekit-common/issues/321)) ([afa47b3](https://github.com/lifekit-hq/lifekit-common/commit/afa47b30917aef9e3d07e528e269051392993fd3))
+* **ui:** add cmn-verdict-header for verdict-first detail views ([#322](https://github.com/lifekit-hq/lifekit-common/issues/322)) ([4560af1](https://github.com/lifekit-hq/lifekit-common/commit/4560af15f53a3198185bc9eb6171f999997288a9))
+* **ui:** add enter and leave motion to dialogs, drawers and toasts ([#312](https://github.com/lifekit-hq/lifekit-common/issues/312)) ([f34f331](https://github.com/lifekit-hq/lifekit-common/commit/f34f331556af6cd31a39e6305d06b9c799ce5965))
+* **ui:** add motion to lists, chips, toggles and tabs ([#314](https://github.com/lifekit-hq/lifekit-common/issues/314)) ([0ec5fd4](https://github.com/lifekit-hq/lifekit-common/commit/0ec5fd4a989d1310225d3b648136086246f8dbf5))
+* **ui:** add motion to skeleton-to-content, disclosure rows and route changes ([#319](https://github.com/lifekit-hq/lifekit-common/issues/319)) ([79fe23b](https://github.com/lifekit-hq/lifekit-common/commit/79fe23bfc27d29289cad0f43d40ae61c15459928))
+* **ui:** add preset hook tokens and use them across components ([#323](https://github.com/lifekit-hq/lifekit-common/issues/323)) ([baf8aa2](https://github.com/lifekit-hq/lifekit-common/commit/baf8aa2e97e60829057e24721e0dbdad9a2dec21))
+* **ui:** add pull to refresh on tab roots ([#315](https://github.com/lifekit-hq/lifekit-common/issues/315)) ([1c1eecd](https://github.com/lifekit-hq/lifekit-common/commit/1c1eecd694b770b08ffd8a5917e78bedd8ef1dff))
+* **ui:** add swipe actions to cmn-list-item-row ([#313](https://github.com/lifekit-hq/lifekit-common/issues/313)) ([c8f63d0](https://github.com/lifekit-hq/lifekit-common/commit/c8f63d01471cd163aba26f6cc7b2b8fd5483cde5))
+* **ui:** add the Lifekit design preset ([#331](https://github.com/lifekit-hq/lifekit-common/issues/331)) ([32a0d06](https://github.com/lifekit-hq/lifekit-common/commit/32a0d06433c104618cebaac02ce939a15adfc2be))
+* **ui:** add What's new as a library feature ([#296](https://github.com/lifekit-hq/lifekit-common/issues/296)) ([76b6854](https://github.com/lifekit-hq/lifekit-common/commit/76b6854a945e2b9240a1c8d44543ddf3be032c45))
+* **ui:** align lists and tables with Carbon geometry and tokens ([#295](https://github.com/lifekit-hq/lifekit-common/issues/295)) ([ca31d3d](https://github.com/lifekit-hq/lifekit-common/commit/ca31d3de47d590e753a127c95fdd7ec8ea58445c))
+* **ui:** align the desktop shell with Carbon UI Shell ([#298](https://github.com/lifekit-hq/lifekit-common/issues/298)) ([03604da](https://github.com/lifekit-hq/lifekit-common/commit/03604da177608810606f4acfad7e465e3661852c))
+
+
+### Bug Fixes
+
+* **ui:** keep tab-bar labels from clipping at 200 percent text ([#324](https://github.com/lifekit-hq/lifekit-common/issues/324)) ([725ba59](https://github.com/lifekit-hq/lifekit-common/commit/725ba59f99b7bace1b133c08c7b51bccfa8bb1d7))
+* **ui:** keep the overview fill page scroll container bounded at xl ([#326](https://github.com/lifekit-hq/lifekit-common/issues/326)) ([abd3106](https://github.com/lifekit-hq/lifekit-common/commit/abd3106638861fdd76f0e2b28e823cd093a5785b)), closes [#325](https://github.com/lifekit-hq/lifekit-common/issues/325)
+
 ## [4.5.0](https://github.com/lifekit-hq/lifekit-common/compare/v4.4.2...v4.5.0) (2026-11-08)
 
 
