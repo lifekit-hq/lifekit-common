@@ -348,6 +348,7 @@ export const PhoneWithFeed: Story = {globals: GOLDEN_PHONE, args: {start: '/aler
 
 export const DesktopWithFeed: Story = {globals: GOLDEN_DESKTOP, args: {start: '/alerts'}};
 
+/**
  * A list page led by body copy: a long paragraph above the rows reads inside the line-length
  * limit because `cmn-prose` caps its measure, at 390 and at 1280. Its own screen for the route
  * scan (the `line-length` rule) and the baselines.
