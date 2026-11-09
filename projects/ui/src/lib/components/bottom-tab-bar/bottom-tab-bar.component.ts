@@ -9,29 +9,44 @@ export const MAX_BOTTOM_TABS = 4;
 
 /**
  * Tabs share the bar equally, but never below their label (`min-w-fit`): a long label widens its
- * tab and the others give way, so no label is ever cut. `min-h` keeps the touch target.
+ * tab and the others give way, so no label is cut. `min-h` keeps the touch target.
+ *
+ * Once the bar is narrower than 17rem (the root font size is large for its width: 200
+ * percent text on a phone), a widened tab would push the bar past the screen. There tabs share the
+ * bar strictly (`min-w-0`), a label wraps within its tab, hyphenated where it can be, and the bar
+ * grows taller with it, so no label is cut or scrolled off. The query is in `rem`, so it follows
+ * the root text size; at default text size it never matches and the bar is unchanged.
  */
 const TAB_BASE_CLASSES =
-  'flex min-h-cmn-touch min-w-fit flex-1 flex-col items-center justify-center gap-0.5 px-0.5 ' +
+  'flex min-h-cmn-touch min-w-fit flex-1 flex-col items-center justify-start gap-0.5 px-0.5 ' +
+  '[@container(max-width:17rem)]:min-w-0 ' +
   'transition-colors focus:outline-none focus-visible:bg-surface-raised ' +
   'focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-border-focus';
 const TAB_DOCKED_CLASSES = 'pb-cmn-1 pt-cmn-2';
-const TAB_LABEL_CLASSES = 'whitespace-nowrap font-label text-cmn-xs font-medium leading-tight';
-const TAB_FLOATING_CLASSES = 'my-0.5 py-1';
+const TAB_LABEL_CLASSES =
+  'whitespace-nowrap text-center font-label text-cmn-xs font-medium leading-tight ' +
+  '[@container(max-width:17rem)]:min-w-0 [@container(max-width:17rem)]:whitespace-normal ' +
+  '[@container(max-width:17rem)]:[hyphens:auto] [@container(max-width:17rem)]:[overflow-wrap:anywhere]';
+/**
+ * A floating tab is exactly the 44px touch target, its icon and label filling it with no padding
+ * (the bar's 49px is the 1px border plus the tab and its 2px margins). Text large enough to wrap
+ * the labels grows the tab, which then takes the padding back so a label never sits on its edge.
+ */
+const TAB_FLOATING_CLASSES = 'my-0.5 py-0 [@container(max-width:17rem)]:py-1';
 const TAB_ACTIVE_CLASSES = 'text-accent-default';
 const TAB_FLOATING_ACTIVE_CLASSES = 'bg-accent-subtle';
 const TAB_INACTIVE_CLASSES = 'text-text-secondary hover:text-text-primary';
 
 const NAV_DOCKED_CLASSES =
-  'flex border-t border-border-default bg-surface-card pb-[env(safe-area-inset-bottom)]';
+  '[container-type:inline-size] flex border-t border-border-default bg-surface-card pb-[env(safe-area-inset-bottom)]';
 /**
  * The iOS tab bar: edge to edge on the bottom edge, 49pt of items and only the bottom safe-area
  * inset below them, no margin. Translucent and blurred so content scrolling under it shows
  * through; the active tab keeps its fill, square as every Carbon surface is. Keep the 49px (px, so the host root font size cannot
- * shrink it) in step with the shell's measured inset, which pads main to clear the bar.
+ * shrink it) in step with the shell's measured inset, which pads main to clear the bar. It is a minimum: large text grows the bar.
  */
 const NAV_FLOATING_CLASSES =
-  'flex h-[calc(49px+env(safe-area-inset-bottom))] border-t border-border-default px-cmn-1 ' +
+  '[container-type:inline-size] flex min-h-[calc(49px+env(safe-area-inset-bottom))] border-t border-border-default px-cmn-1 ' +
   'pb-[env(safe-area-inset-bottom)] ' +
   'bg-[color-mix(in_srgb,var(--color-surface-card)_80%,transparent)] backdrop-blur-md';
 
