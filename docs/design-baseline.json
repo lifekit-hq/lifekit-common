@@ -34,6 +34,11 @@
       "reason": "The hero story frames the chart's own card inside the hero section on purpose; the detector reads it as nested only since the chart carries its visually hidden data table."
     },
     {
+      "rule": "nested-cards",
+      "stories": ["services-preset--playground"],
+      "reason": "The playground shows one card holding a sample of every control; the segmented control's outlined frame inside that card is read as a nested card, in Carbon as much as in the demo preset."
+    },
+    {
       "rule": "cramped-padding",
       "stories": [
         "primitives-code-block--capped-height",
