@@ -157,7 +157,7 @@ Counts are a point-in-time measurement; re-measure before relying on them for a 
 | top-bar             | fs 0 · dash 0 (composed by `app-layout`)                                        | interactive | keep-own        | Uses `MenuComponent`; event orchestration (back/page actions/search/theme/avatar); app-shell concern                                                                                                                                                  |
 | whats-new           | new (added for What's new as a library feature, #268); fs 0 · dash 0            | interactive | keep-own        | Release list over `cmn-async-state` plus `CmnWhatsNewService` (seen marker, notes fetch, the sheet through `CmnDrawerService`); drawer, shell and `MenuItem.dot` are Angular, so it stays Angular                                                     |
 
-**Summary:** 40 keep-own · 18 element-rewrite · 1 wrap-base · 0 delete
+**Summary:** 41 keep-own · 18 element-rewrite · 1 wrap-base · 0 delete
 
 ---
 
