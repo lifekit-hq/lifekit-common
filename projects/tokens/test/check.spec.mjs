@@ -12,6 +12,7 @@ import {
   checkBrowserChrome,
   checkHead,
   checkManifest,
+  checkStartupImages,
   headMarkup,
   MANIFEST_ICONS,
   manifestFragment,
@@ -23,7 +24,17 @@ import {packagedAssets} from './packaged.mjs';
 const BIN = fileURLToPath(new URL('../bin/lifekit-chrome-check.mjs', import.meta.url));
 const APP_NAME = 'Finance Sentry';
 
-function indexHtml(head = headMarkup({title: APP_NAME})) {
+/** One startup image per scheme, the way an app declares them for a device size. */
+const STARTUP_IMAGES = ['light', 'dark']
+  .map(
+    scheme =>
+      `<link rel="apple-touch-startup-image" href="/startup-${scheme}.png" ` +
+      `media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) ` +
+      `and (orientation: portrait) and (prefers-color-scheme: ${scheme})" />`
+  )
+  .join('\n');
+
+function indexHtml(head = `${headMarkup({title: APP_NAME})}\n${STARTUP_IMAGES}`) {
   return `<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8" />\n${head}\n</head>\n<body></body>\n</html>\n`;
 }
 
@@ -152,6 +163,53 @@ describe('checkHead', () => {
 
   it('reports a document without a head', () => {
     assert.deepEqual(rules(checkHead('<html></html>')), ['head']);
+  });
+});
+
+describe('checkStartupImages', () => {
+  const withImages = images => indexHtml(`${headMarkup({title: APP_NAME})}\n${images}`);
+  const [light, dark] = STARTUP_IMAGES.split('\n');
+
+  it('accepts a startup image for each scheme', () => {
+    assert.deepEqual(checkStartupImages(indexHtml()), []);
+  });
+
+  it('flags a head with no startup image, once per scheme, naming the fix', () => {
+    const problems = checkStartupImages(withImages(''));
+    assert.deepEqual(rules(problems), ['startup-image', 'startup-image']);
+    assert.match(problems[0].message, /light scheme/);
+    assert.match(problems[1].message, /dark scheme/);
+    assert.match(problems[0].message, /add one per device size/);
+    assert.match(problems[0].message, /BROWSER-CHROME\.md/);
+  });
+
+  it('flags only the scheme that has none', () => {
+    const problems = checkStartupImages(withImages(light));
+    assert.equal(problems.length, 1, JSON.stringify(problems));
+    assert.match(problems[0].message, /dark scheme/);
+    assert.equal(checkStartupImages(withImages(dark)).length, 1);
+  });
+
+  it('does not count an image without a scheme media query or without an href', () => {
+    const noScheme = '<link rel="apple-touch-startup-image" href="/s.png" />';
+    const noHref = light.replace(/href="[^"]*"/, '') + dark.replace(/href="[^"]*"/, 'href=""');
+    assert.equal(checkStartupImages(withImages(noScheme)).length, 2);
+    assert.equal(checkStartupImages(withImages(noHref)).length, 2);
+  });
+
+  it('accepts reordered attributes and spacing in the media query', () => {
+    const link =
+      "<link media='( prefers-color-scheme : LIGHT )' href=s.png rel='apple-touch-startup-image'>";
+    assert.deepEqual(checkStartupImages(withImages(`${link}\n${dark}`)), []);
+  });
+
+  it('reports nothing for a document without a head (checkHead owns that)', () => {
+    assert.deepEqual(checkStartupImages('<html></html>'), []);
+  });
+
+  it('is part of the head template check only through checkBrowserChrome', () => {
+    assert.deepEqual(checkHead(indexHtml(), {appName: APP_NAME}), []);
+    assert.deepEqual(checkHead(withImages(''), {appName: APP_NAME}), []);
   });
 });
 
@@ -334,6 +392,11 @@ describe('checkBrowserChrome (built output)', () => {
     assert.deepEqual(rules(check()), ['manifest']);
   });
 
+  it('flags missing startup images', () => {
+    writeFileSync(join(dist, 'index.html'), indexHtml(headMarkup({title: APP_NAME})));
+    assert.deepEqual(rules(check()), ['startup-image', 'startup-image']);
+  });
+
   it('flags a missing index.html', () => {
     rmSync(join(dist, 'index.html'));
     assert.deepEqual(rules(check()), ['head']);
@@ -348,6 +411,16 @@ describe('checkBrowserChrome (built output)', () => {
       }
       const result = run('--app', app, '--name', APP_NAME, dist);
       assert.equal(result.status, 0, result.stderr);
+    });
+
+    it('exits 1 and names the missing startup images', () => {
+      for (const file of BRAND_FILES) {
+        copyFileSync(join(packagedAssets(app), file), join(dist, file));
+      }
+      writeFileSync(join(dist, 'index.html'), indexHtml(headMarkup({title: APP_NAME})));
+      const result = run('--app', app, '--name', APP_NAME, dist);
+      assert.equal(result.status, 1);
+      assert.match(result.stderr, /\[startup-image\] no <link rel="apple-touch-startup-image">/);
     });
 
     it('exits 1 and lists every deviation', () => {
@@ -373,7 +446,7 @@ describe('checkBrowserChrome (built output)', () => {
       );
       writeFileSync(
         join(dist, 'index.html'),
-        indexHtml(headMarkup({title: APP_NAME, basePath: 'console'}))
+        indexHtml(`${headMarkup({title: APP_NAME, basePath: 'console'})}\n${STARTUP_IMAGES}`)
       );
       const ok = run('--app', app, '--name', APP_NAME, '--base-path', '/console', dist);
       assert.equal(ok.status, 0, ok.stderr);
@@ -397,7 +470,7 @@ describe('checkBrowserChrome (built output)', () => {
 
       writeFileSync(
         join(dist, 'index.html'),
-        indexHtml(headMarkup({title: APP_NAME, basePath: '/console/'}))
+        indexHtml(`${headMarkup({title: APP_NAME, basePath: '/console/'})}\n${STARTUP_IMAGES}`)
       );
       const ok = run('--app', app, '--name', APP_NAME, '--base-path', '/console/', dist);
       assert.equal(ok.status, 0, ok.stderr);

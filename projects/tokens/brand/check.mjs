@@ -170,6 +170,38 @@ export function checkHead(html, {appName, colors = brandColors(), basePath} = {}
 }
 
 /**
+ * Checks that the head declares an `apple-touch-startup-image` for each colour scheme (Apple
+ * HIG, Launching: the launch screen matches the first screen). Without one, iOS paints a blank
+ * screen on a standalone launch, and a dark-mode launch needs its own image to avoid a white flash.
+ * Generating the images is the app's job; this only reports that they are missing.
+ * @param {string} html
+ * @returns {{rule: string, message: string}[]}
+ */
+export function checkStartupImages(html) {
+  const head = /<head\b[^>]*>([\s\S]*?)<\/head>/i.exec(html)?.[1];
+  if (head === undefined) return [];
+  const images = tags(head, 'link').filter(
+    l => relList(l).includes('apple-touch-startup-image') && (l.href ?? '').trim()
+  );
+  const problems = [];
+  for (const scheme of ['light', 'dark']) {
+    const media = new RegExp(`\\(\\s*prefers-color-scheme\\s*:\\s*${scheme}\\s*\\)`, 'i');
+    if (!images.some(l => media.test(l.media ?? ''))) {
+      problems.push({
+        rule: 'startup-image',
+        message:
+          `no <link rel="apple-touch-startup-image"> for the ${scheme} scheme; add one per device ` +
+          `size with media="(device-width: …px) and (device-height: …px) and ` +
+          `(-webkit-device-pixel-ratio: …) and (orientation: portrait) and ` +
+          `(prefers-color-scheme: ${scheme})" so the launch screen matches the first screen ` +
+          '(docs/BROWSER-CHROME.md, Startup images)',
+      });
+    }
+  }
+  return problems;
+}
+
+/**
  * Checks a parsed web manifest against the standard.
  * @param {object} manifest
  * @param {{appName?: string, colors?: object, basePath?: string}} [options] `basePath`: where
@@ -264,7 +296,8 @@ export function checkBrowserChrome({
   if (!existsSync(indexPath)) {
     return [{rule: 'head', message: `${indexPath} does not exist`}];
   }
-  const problems = checkHead(readFileSync(indexPath, 'utf8'), {appName, colors, basePath});
+  const html = readFileSync(indexPath, 'utf8');
+  const problems = [...checkHead(html, {appName, colors, basePath}), ...checkStartupImages(html)];
 
   const manifestPath = join(distDir, 'manifest.webmanifest');
   if (!existsSync(manifestPath)) {
