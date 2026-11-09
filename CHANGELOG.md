@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.7.0](https://github.com/lifekit-hq/lifekit-common/compare/v4.6.0...v4.7.0) (2026-11-09)
+
+
+### Features
+
+* **tokens:** flag a missing apple-touch-startup-image in lifekit-chrome-check ([#335](https://github.com/lifekit-hq/lifekit-common/issues/335)) ([975e9fe](https://github.com/lifekit-hq/lifekit-common/commit/975e9fe73368e6ecfed46eb44589de14b929acc3))
+* **ui:** add cmn-prose, the text measure for body copy in a page ([#332](https://github.com/lifekit-hq/lifekit-common/issues/332)) ([d9049f1](https://github.com/lifekit-hq/lifekit-common/commit/d9049f190127edcd875accb46fe4c5b9aad4a529))
+* **ui:** let cmn-alert-item open itself so the alerts screen can sit on cmn-page ([#334](https://github.com/lifekit-hq/lifekit-common/issues/334)) ([1f22c28](https://github.com/lifekit-hq/lifekit-common/commit/1f22c285b86b8df22a0908a6c5d28d74c7089fe2))
+
 ## [4.6.0](https://github.com/lifekit-hq/lifekit-common/compare/v4.5.0...v4.6.0) (2026-11-09)
 
 
