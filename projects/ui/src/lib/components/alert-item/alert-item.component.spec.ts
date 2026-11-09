@@ -172,4 +172,85 @@ describe('AlertItemComponent', () => {
     fixture.detectChanges();
     expect(unreadDot()).toBeNull();
   });
+
+  describe('openable', () => {
+    beforeEach(() => {
+      fixture.componentRef.setInput('density', 'flat');
+      fixture.componentRef.setInput('openable', true);
+    });
+
+    it('makes a read item a real button stretched over the item, as an unread one is', () => {
+      fixture.componentRef.setInput('isRead', true);
+      fixture.detectChanges();
+
+      const button = titleButton();
+      expect(button?.type).toBe('button');
+      expect(button?.textContent?.trim()).toBe('Sync failed');
+      expect(button?.className).toContain('after:inset-0');
+      expect(button?.classList).toContain('text-text-primary');
+      expect(button?.style.color).toBe('');
+      expect(row().classList).toContain('relative');
+      expect(row().classList).toContain('cursor-pointer');
+    });
+
+    it('draws the focus ring on the whole item, not on the title alone', () => {
+      fixture.detectChanges();
+      expect(titleButton()?.className).toContain('focus-visible:after:ring-2');
+    });
+
+    it('emits opened for a read item and never read', () => {
+      let reads = 0;
+      let opens = 0;
+      fixture.componentInstance.read.subscribe(() => reads++);
+      fixture.componentInstance.opened.subscribe(() => opens++);
+      fixture.componentRef.setInput('isRead', true);
+      fixture.detectChanges();
+
+      titleButton()?.click();
+      expect(opens).toBe(1);
+      expect(reads).toBe(0);
+    });
+
+    it('reports read and opened for an unread item', () => {
+      const events: string[] = [];
+      fixture.componentInstance.read.subscribe(() => events.push('read'));
+      fixture.componentInstance.opened.subscribe(() => events.push('opened'));
+      fixture.detectChanges();
+
+      titleButton()?.click();
+      expect(events).toEqual(['read', 'opened']);
+    });
+
+    it('keeps the dismiss control above the stretch and out of opened', () => {
+      let opens = 0;
+      fixture.componentInstance.opened.subscribe(() => opens++);
+      fixture.detectChanges();
+
+      dismissButton()?.click();
+      expect(opens).toBe(0);
+      expect(dismissButton()?.classList).toContain('z-10');
+    });
+
+    it('lays no absolutely positioned element in the item, read or unread', () => {
+      // The design judge reads an `absolute` element in a row below the fold as clipped by the app
+      // shell (`clipped-overflow-container`); only the title's ::after, which it does not see, is
+      // absolute. The unit run has no stylesheet, so the classes are what can be checked here; the
+      // route scan over Templates/List "with feed" checks the computed result.
+      for (const isRead of [false, true]) {
+        fixture.componentRef.setInput('isRead', isRead);
+        fixture.detectChanges();
+        const absolute = [...(fixture.nativeElement as HTMLElement).querySelectorAll('*')].filter(
+          element => element.classList.contains('absolute')
+        );
+        expect(absolute).toEqual([]);
+      }
+    });
+  });
+
+  it('leaves a read item a plain title unless it is openable', () => {
+    fixture.componentRef.setInput('isRead', true);
+    fixture.detectChanges();
+    expect(titleButton()).toBeNull();
+    expect(row().classList).not.toContain('cursor-pointer');
+  });
 });

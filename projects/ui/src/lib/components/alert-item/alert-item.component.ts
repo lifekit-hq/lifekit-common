@@ -1,4 +1,11 @@
-import {ChangeDetectionStrategy, Component, computed, input, output} from '@angular/core';
+import {
+  booleanAttribute,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  input,
+  output,
+} from '@angular/core';
 import {formatRelativeTime} from '@lifekit-hq/core/format';
 
 import {PHONE_HIT_AREA_CLASSES} from '../../tokens/hit-area';
@@ -13,6 +20,19 @@ export type AlertItemDensity = 'card' | 'flat';
 const DISMISS_CLASSES =
   'relative z-10 flex shrink-0 rounded-cmn-role-inset p-1 text-text-disabled transition-colors hover:bg-surface-raised ' +
   `hover:text-text-primary ${PHONE_HIT_AREA_CLASSES}`;
+
+/**
+ * The title's `::after` stretches over the whole item; the item is `relative`, so the stretch is
+ * the item's own box. A feed row opens through this, never through a button the host lays over the
+ * row with `absolute inset-0`: the design judge reads such an element, in a row below the fold, as
+ * clipped by the app shell (`clipped-overflow-container`), and axe counts the overlay as a target
+ * lying on top of the title. The ring is drawn on the stretch so a keyboard sees the whole row.
+ */
+const TITLE_CLASSES =
+  "text-left font-label text-cmn-sm font-semibold after:absolute after:inset-0 after:content-['']";
+const OPEN_FOCUS_CLASSES =
+  'after:rounded-cmn-role-inset focus-visible:outline-none focus-visible:after:ring-2 ' +
+  'focus-visible:after:ring-inset focus-visible:after:ring-border-focus';
 
 const SEVERITY_COLOR: Record<AlertItemSeverity, string> = {
   error: 'var(--color-status-error)',
@@ -42,7 +62,7 @@ const SEVERITY_ICON: Record<AlertItemSeverity, LucideIconName> = {
       [class.py-cmn-3]="flat()"
       [style.border-color]="!flat() && !isRead() ? color() + '30' : ''"
       [style.background]="!flat() && !isRead() ? color() + '08' : ''"
-      [class.cursor-pointer]="!isRead()"
+      [class.cursor-pointer]="!isRead() || openable()"
       class="relative flex items-start gap-cmn-3 transition-colors"
     >
       <div
@@ -54,17 +74,18 @@ const SEVERITY_ICON: Record<AlertItemSeverity, LucideIconName> = {
 
       <div class="flex-1 min-w-0">
         <div class="mb-cmn-1 flex flex-wrap items-center gap-cmn-2">
-          @if (isRead()) {
+          @if (isRead() && !openable()) {
             <span class="font-label text-cmn-sm font-semibold text-text-primary">{{
               title()
             }}</span>
           } @else {
             <!-- The title is the card's one control: its ::after stretches over the whole card, so a
-                 tap anywhere marks the item read and a keyboard reaches it as a real button. -->
+                 tap anywhere marks the item read (or opens it) and a keyboard reaches it as a real
+                 button. -->
             <button
-              [style.color]="color()"
+              [class]="titleClasses()"
+              [style.color]="isRead() ? '' : color()"
               (click)="onContainerClick()"
-              class="text-left font-label text-cmn-sm font-semibold after:absolute after:inset-0 after:content-['']"
               type="button"
             >
               {{ title() }}
@@ -131,8 +152,16 @@ export class AlertItemComponent {
   public readonly dismissible = input<boolean>(true);
   /** `card` (default) is a bordered tile; `flat` is a hairline-separated feed row. */
   public readonly density = input<AlertItemDensity>('card');
+  /**
+   * Makes the whole item, read or unread, open on a press: the title becomes the item's one
+   * control (as it is for an unread item) and `opened` reports the press. A feed whose rows open a
+   * detail sets it instead of laying its own button over the row.
+   */
+  public readonly openable = input(false, {transform: booleanAttribute});
 
   public readonly read = output<void>();
+  /** The item was pressed and `openable` is on; an unread item reports `read` first. */
+  public readonly opened = output<void>();
   public readonly dismissed = output<void>();
 
   public readonly color = computed(() => SEVERITY_COLOR[this.severity()]);
@@ -141,12 +170,24 @@ export class AlertItemComponent {
   );
   public readonly relativeTime = computed(() => formatRelativeTime(this.timestamp()));
   public readonly flat = computed(() => this.density() === 'flat');
+  protected readonly titleClasses = computed(() =>
+    [
+      TITLE_CLASSES,
+      this.openable() ? OPEN_FOCUS_CLASSES : '',
+      this.isRead() ? 'text-text-primary' : '',
+    ]
+      .filter(Boolean)
+      .join(' ')
+  );
 
   protected readonly dismissClasses = DISMISS_CLASSES;
 
   public onContainerClick(): void {
     if (!this.isRead()) {
       this.read.emit();
+    }
+    if (this.openable()) {
+      this.opened.emit();
     }
   }
 
