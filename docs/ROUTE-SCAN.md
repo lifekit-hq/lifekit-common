@@ -182,6 +182,14 @@ hangs off its corner with a transform (`right-0 top-0 translate-x-1.5 -translate
 not with negative `right` and `top`, so a nav badge is never a finding and no app takes an exception
 for it.
 
+A long feed is scanned too: `Templates/List` has a `WithFeed` state, `cmn-page` `fill` holding a
+filter bar and a `cmn-page-scroll` of day-grouped, flat, `openable` `cmn-alert-item`s. The judge
+reads an `absolute` element in a row that lies below the fold as clipped by the shell, whatever
+scroller sits between them, so a feed row opens through the item's own stretched title (`openable`
+and `(opened)`), never through a button the page lays over the row with `absolute inset-0`. That
+overlay was `clipped-overflow-container` on the shell's two wrappers, and axe's `target-size` on the
+title it covered.
+
 It takes **no exceptions**: a finding on a golden is a defect of a component, a token or a template,
 and is fixed there. The first run found two on `Templates/Settings`, both fixed in the library:
 

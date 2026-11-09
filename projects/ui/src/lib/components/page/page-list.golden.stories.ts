@@ -1,11 +1,15 @@
-import {ChangeDetectionStrategy, Component} from '@angular/core';
+import {ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA, signal} from '@angular/core';
+import {LkInfiniteList} from '@lifekit-hq/elements';
 import {applicationConfig, type Meta, type StoryObj} from '@storybook/angular';
 
+import {AlertItemComponent, type AlertItemSeverity} from '../alert-item/alert-item.component';
 import {ButtonComponent} from '../button/button.component';
 import {CheckboxComponent} from '../checkbox/checkbox.component';
+import {FilterBarComponent} from '../filter-bar/filter-bar.component';
 import {InputComponent} from '../input/input.component';
 import {ListItemRowComponent} from '../list-item-row/list-item-row.component';
 import {ListSectionComponent} from '../list-section/list-section.component';
+import {PageScrollComponent} from '../page-scroll/page-scroll.component';
 import {ProseComponent} from '../prose/prose.component';
 import {
   GOLDEN_DESKTOP,
@@ -15,6 +19,11 @@ import {
   GoldenShellComponent,
 } from './golden-screen';
 import {PageComponent} from './page.component';
+
+// Imported by name so a bundler cannot tree-shake the customElements.define() call.
+if (!customElements.get('lk-infinite-list')) {
+  customElements.define('lk-infinite-list', LkInfiniteList);
+}
 
 /** How long the fake reload takes, long enough to see the indicator. */
 const SIMULATED_RELOAD_MS = 1200;
@@ -158,6 +167,132 @@ class DecisionsPageComponent {
   protected readonly decided = DECIDED;
 }
 
+interface FeedAlert {
+  readonly id: number;
+  readonly title: string;
+  readonly message: string;
+  readonly severity: AlertItemSeverity;
+  readonly read: boolean;
+}
+
+interface FeedDay {
+  readonly label: string;
+  readonly alerts: readonly FeedAlert[];
+}
+
+const FEED_DAYS: readonly FeedDay[] = [
+  {
+    label: 'Today',
+    alerts: [
+      {
+        id: 1,
+        title: 'Boiler service is overdue',
+        message: 'The yearly service was due on 1 Nov.',
+        severity: 'warning',
+        read: false,
+      },
+      {
+        id: 2,
+        title: 'Car insurance renews in 5 days',
+        message: 'The premium is €412, up from €388.',
+        severity: 'info',
+        read: false,
+      },
+      {
+        id: 3,
+        title: 'Water bill is unpaid',
+        message: 'It was due yesterday and is now 1 day late.',
+        severity: 'error',
+        read: true,
+      },
+    ],
+  },
+  {
+    label: 'Yesterday',
+    alerts: [
+      {
+        id: 4,
+        title: 'Library books are due back',
+        message: 'Three books are due on Friday.',
+        severity: 'info',
+        read: true,
+      },
+      {
+        id: 5,
+        title: 'Dentist appointment moved',
+        message: 'The crown fitting is now on Tuesday at 09:30.',
+        severity: 'warning',
+        read: true,
+      },
+    ],
+  },
+  {
+    label: 'Mon 2 Nov',
+    alerts: [
+      {
+        id: 6,
+        title: 'Lease copy was returned',
+        message: 'The signed lease reached the agent.',
+        severity: 'info',
+        read: true,
+      },
+      {
+        id: 7,
+        title: 'Photo albums are ready to share',
+        message: 'Summer trip, 214 photos in 6 albums.',
+        severity: 'info',
+        read: true,
+      },
+    ],
+  },
+];
+
+/**
+ * The golden feed screen: a filter bar above an endless, day-grouped feed of flat alert rows on
+ * `cmn-page kind="list" fill`, as finance-sentry's alerts lay it out. The feed is the one scroller
+ * (`cmn-page-scroll`), and each row is a flat, openable alert item: the item opens itself, so the
+ * page lays no positioned button over its rows.
+ */
+@Component({
+  selector: 'cmn-golden-alerts-page',
+  imports: [
+    AlertItemComponent,
+    FilterBarComponent,
+    ListSectionComponent,
+    PageComponent,
+    PageScrollComponent,
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  template: `
+    <cmn-page fill>
+      <cmn-filter-bar [(query)]="query" placeholder="Search alerts" searchLabel="Search alerts" />
+      <cmn-page-scroll label="Alerts">
+        <lk-infinite-list class="block space-y-cmn-4" end-label="No more alerts">
+          @for (day of days; track day.label) {
+            <cmn-list-section [heading]="day.label">
+              @for (alert of day.alerts; track alert.id) {
+                <cmn-alert-item
+                  [title]="alert.title"
+                  [message]="alert.message"
+                  [severity]="alert.severity"
+                  [isRead]="alert.read"
+                  density="flat"
+                  openable
+                />
+              }
+            </cmn-list-section>
+          }
+        </lk-infinite-list>
+      </cmn-page-scroll>
+    </cmn-page>
+  `,
+})
+class AlertsPageComponent {
+  protected readonly days = FEED_DAYS;
+  protected readonly query = signal('');
+}
+
 /**
  * Golden screens for the list template: the reference other lifekit apps copy and the owner
  * approves once. Each is the real shell and real components; run the screen check
@@ -172,6 +307,7 @@ const meta: Meta<GoldenShellComponent> = {
       providers: goldenProviders([
         {path: 'tasks', component: TasksPageComponent, data: {title: 'Tasks'}},
         {path: 'decisions', component: DecisionsPageComponent, data: {title: 'Decisions'}},
+        {path: 'alerts', component: AlertsPageComponent, data: {title: 'Alerts'}},
       ]),
     }),
   ],
@@ -202,6 +338,15 @@ export const DesktopWithNotice: Story = {globals: GOLDEN_DESKTOP, args: {notice:
 export const PhoneWithAppChrome: Story = {globals: GOLDEN_PHONE, args: {appChrome: true}};
 
 export const DesktopWithAppChrome: Story = {globals: GOLDEN_DESKTOP, args: {appChrome: true}};
+
+/**
+ * A feed page: `cmn-page kind="list" fill` holding a filter bar and a `cmn-page-scroll` of
+ * day-grouped flat, openable alert items. Rows below the fold must leave the scan nothing to find:
+ * no part of the feed is a positioned element the judge could read as clipped by the shell.
+ */
+export const PhoneWithFeed: Story = {globals: GOLDEN_PHONE, args: {start: '/alerts'}};
+
+export const DesktopWithFeed: Story = {globals: GOLDEN_DESKTOP, args: {start: '/alerts'}};
 
 /**
  * A list page led by body copy: a long paragraph above the rows reads inside the line-length

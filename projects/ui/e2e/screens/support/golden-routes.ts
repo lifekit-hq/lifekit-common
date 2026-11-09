@@ -40,7 +40,7 @@ function templateRoute(kind: string, state = '', preset?: string): BaselineRoute
   };
 }
 
-/** The templates' golden screens: the five kinds and the two detail states. */
+/** The templates' golden screens: the five kinds, the two detail states and the list feed. */
 export function templateRoutes(preset?: string): BaselineRoute[] {
   return [
     ...['list', 'detail', 'form', 'settings', 'overview'].map(kind =>
@@ -49,6 +49,8 @@ export function templateRoutes(preset?: string): BaselineRoute[] {
     templateRoute('detail', 'with-tiles', preset),
     // The detail template led by its verdict header (`cmn-verdict-header`).
     templateRoute('detail', 'with-verdict', preset),
+    // The list template as a feed: a filter bar above a scroller of day-grouped, openable alert items.
+    templateRoute('list', 'with-feed', preset),
   ];
 }
 

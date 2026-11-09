@@ -146,6 +146,17 @@ export const Flat: Story = {
   render: () => ({template: FLAT_FEED, props: flatFeedProps}),
 };
 
+const OPENABLE_FEED = FLAT_FEED.replaceAll('density="flat"', 'density="flat" openable');
+
+/**
+ * A feed whose rows open a detail: `openable` makes read and unread rows alike one control, the
+ * title, stretched over the row. The page lays no button of its own over the rows. Tab to a row to
+ * see the focus ring drawn around all of it.
+ */
+export const FlatOpenable: Story = {
+  render: () => ({template: OPENABLE_FEED, props: flatFeedProps}),
+};
+
 export const FlatDark: Story = {
   decorators: [darkSurface],
   globals: {theme: 'dark'},
