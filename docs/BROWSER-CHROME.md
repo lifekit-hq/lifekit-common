@@ -114,8 +114,8 @@ in dark mode). Each app declares one image **per colour scheme** for every devic
 ```
 
 The image is the first screen with no data: the `--color-surface-bg` fill of the scheme and the app
-shell chrome. iOS picks the image by the device media query, so one link per device size. The
-drift check reports a missing image per scheme; generating the images is the app's job, and the
+shell chrome. iOS picks the image by the device media query, so one link per device size.
+`lifekit-chrome-check` reports a missing image per scheme; generating the images is the app's job, and the
 head template does not emit them.
 
 ## Manifest (`manifest.webmanifest`)
@@ -313,7 +313,7 @@ It fails (exit 1) and lists every deviation:
 
 The same checks are available as functions from `@lifekit-hq/tokens/brand`: `checkBrowserChrome`,
 `checkHead`, `checkStartupImages`, `checkManifest` and `checkIcons`. `checkBrowserChrome`, `checkHead` and
-`checkManifest` take `{basePath}`. Each returns `{rule, message}[]`, empty when the app
+`checkManifest` take `{basePath}`; `checkStartupImages` takes the HTML only. Each returns `{rule, message}[]`, empty when the app
 complies, for use inside an app's own test suite.
 
 ## Design drift check
