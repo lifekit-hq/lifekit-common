@@ -35,11 +35,12 @@ export interface CmnTab {
 // label on one line; the row scrolls sideways.
 const TAB_BASE =
   'inline-flex h-cmn-size-md shrink-0 items-center whitespace-nowrap max-md:min-h-cmn-touch ' +
-  'px-cmn-4 text-cmn-sm transition-colors duration-cmn-short ease-cmn-standard border-b-2 ' +
+  'px-cmn-4 text-cmn-sm transition-colors duration-cmn-short ease-cmn-standard border-b-cmn-tab rounded-cmn-tab ' +
   'focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 ' +
   'focus-visible:outline-border-focus';
-const ROW_CLASSES = 'flex overflow-x-auto';
-const TAB_ACTIVE = 'border-accent-default font-semibold text-text-primary';
+const ROW_CLASSES =
+  'flex overflow-x-auto gap-cmn-tabs-gap p-cmn-tabs-pad rounded-cmn-tabs bg-cmn-tabs';
+const TAB_ACTIVE = 'border-accent-default bg-cmn-tab-active font-semibold text-text-primary';
 const TAB_INACTIVE =
   'border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary';
 

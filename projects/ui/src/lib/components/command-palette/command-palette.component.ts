@@ -61,7 +61,7 @@ interface PaletteGroup {
       ></div>
 
       <div
-        class="cmn-palette-panel relative z-10 w-full max-w-[560px] overflow-hidden rounded-cmn-lg border border-border-default bg-surface-card shadow-cmn-md"
+        class="cmn-palette-panel relative z-10 w-full max-w-[560px] overflow-hidden rounded-cmn-role-surface border border-cmn-float bg-surface-card shadow-cmn-md"
       >
         <!-- Search row -->
         <div class="flex items-center gap-cmn-3 border-b border-border-default px-cmn-4 py-3.5">
@@ -105,7 +105,7 @@ interface PaletteGroup {
                     <div
                       [class.bg-accent-default]="entry.idx === selectedIndex()"
                       [class.bg-surface-raised]="entry.idx !== selectedIndex()"
-                      class="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-cmn-md transition-colors duration-cmn-short ease-cmn-standard"
+                      class="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-cmn-role-inset transition-colors duration-cmn-short ease-cmn-standard"
                     >
                       <cmn-icon
                         [color]="
@@ -161,7 +161,7 @@ export class CommandPaletteComponent {
 
   /** Keyboard hints mean nothing without a keyboard: hidden wherever hover is unavailable. */
   protected readonly KEY_CLASSES =
-    'rounded-cmn-sm border border-border-default py-0.5 font-mono text-cmn-xs text-text-disabled ' +
+    'rounded-cmn-role-inset border border-border-default py-0.5 font-mono text-cmn-xs text-text-disabled ' +
     '[@media(hover:none)]:hidden';
 
   protected readonly KEY_HINTS: [string, string][] = [

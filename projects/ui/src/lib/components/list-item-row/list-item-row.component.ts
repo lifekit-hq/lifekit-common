@@ -59,7 +59,7 @@ const ACTION_ROW_CLASSES =
  * repeated on every row is the noise the screen check reports (C9).
  */
 const TRAILING_CLASSES =
-  '-my-cmn-2 inline-flex size-cmn-touch shrink-0 items-center justify-center rounded-cmn-md ' +
+  '-my-cmn-2 inline-flex size-cmn-touch shrink-0 items-center justify-center rounded-cmn-role-control ' +
   'text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary ' +
   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus';
 /** In a plain row the action's glyph lines up with the row's end padding, not the hit area's. */

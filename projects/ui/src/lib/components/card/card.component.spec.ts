@@ -22,8 +22,9 @@ describe('CardComponent', () => {
     fixture.detectChanges();
     const classes = inner()?.className ?? '';
     expect(classes).toContain('bg-surface-card');
-    expect(classes).toContain('border-border-default');
-    expect(classes).toContain('rounded-cmn-md');
+    expect(classes).toContain('border-cmn-card-border');
+    expect(classes).toContain('rounded-cmn-role-surface');
+    expect(classes).toContain('shadow-cmn-card');
   });
 
   it.each<[CardPadding, string | null]>([
@@ -44,7 +45,8 @@ describe('CardComponent', () => {
 
   it('holds the card by its border by default, with no shadow', () => {
     fixture.detectChanges();
-    expect(inner()?.classList).toContain('border-border-default');
+    expect(inner()?.classList).toContain('border-cmn-card-border');
+    expect(inner()?.classList).toContain('shadow-cmn-card');
     expect(inner()?.classList).not.toContain('shadow-cmn-md');
   });
 
@@ -53,7 +55,8 @@ describe('CardComponent', () => {
     fixture.detectChanges();
     expect(inner()?.classList).toContain('shadow-cmn-md');
     expect(inner()?.classList).toContain('border-transparent');
-    expect(inner()?.classList).not.toContain('border-border-default');
+    expect(inner()?.classList).not.toContain('border-cmn-card-border');
+    expect(inner()?.classList).not.toContain('shadow-cmn-card');
   });
 
   it('turns the host and the shell into a clipping flex column in fill mode', () => {

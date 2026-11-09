@@ -18,7 +18,7 @@ import {CmnDrawerRef} from './drawer-ref';
 
 // 32px drawn, at least --size-touch pressed on a phone.
 const CLOSE_CLASSES =
-  'flex h-8 w-8 items-center justify-center rounded-cmn-md text-text-secondary transition-colors ' +
+  'flex h-8 w-8 items-center justify-center rounded-cmn-role-control text-text-secondary transition-colors ' +
   `hover:bg-surface-raised hover:text-text-primary ${PHONE_HIT_AREA_CLASSES}`;
 
 // The grabber is 32px drawn and presses as at least --size-touch tall on a phone.

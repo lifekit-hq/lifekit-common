@@ -117,8 +117,7 @@ describe('CmnListMotionDirective', () => {
     const exits = ghost.getAnimations();
     exits.forEach(animation => animation.finish());
     await Promise.all(exits.map(animation => animation.finished));
-    await new Promise(resolve => setTimeout(resolve));
-    expect(ghost.isConnected).toBe(false);
+    await vi.waitFor(() => expect(ghost.isConnected).toBe(false));
   });
 
   it('slides the rows below a removed row up from where they were', async () => {
@@ -148,8 +147,7 @@ describe('CmnListMotionDirective', () => {
     const exits = ghost.getAnimations();
     exits.forEach(animation => animation.finish());
     await Promise.all(exits.map(animation => animation.finished));
-    await new Promise(resolve => setTimeout(resolve));
-    expect(ghost.parentElement).toBeNull();
+    await vi.waitFor(() => expect(ghost.parentElement).toBeNull());
 
     list.append(ghost);
     fixture.destroy();

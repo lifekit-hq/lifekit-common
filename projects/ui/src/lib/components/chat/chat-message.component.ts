@@ -15,10 +15,10 @@ export interface ChatToolActivity {
 // percentage basis), not on the bubble. Capping an inline-block against a shrink-wrapped parent
 // collapses `max-w-[85%]` toward zero and makes `break-words` wrap every character.
 const BUBBLE_BASE =
-  'w-fit rounded-cmn-lg px-cmn-4 py-cmn-3 text-cmn-md font-base whitespace-pre-wrap break-words';
+  'w-fit rounded-cmn-role-surface px-cmn-4 py-cmn-3 text-cmn-md font-base whitespace-pre-wrap break-words';
 
 const LINK_CLASSES =
-  'underline underline-offset-2 rounded-cmn-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus';
+  'underline underline-offset-2 rounded-cmn-role-inset focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus';
 const USER_LINK = 'text-text-inverse';
 const ASSISTANT_LINK = 'text-accent-default';
 
@@ -29,7 +29,7 @@ type RenderedSegment =
   | {kind: 'external'; label: string; href: string};
 
 const USER_BUBBLE = 'bg-accent-default text-text-inverse';
-const ASSISTANT_BUBBLE = 'bg-surface-raised text-text-primary border border-border-default';
+const ASSISTANT_BUBBLE = 'bg-surface-raised text-text-primary border border-cmn-card-border';
 
 @Component({
   selector: 'cmn-chat-message',

@@ -8,12 +8,12 @@ export type ToastVariant = 'info' | 'success' | 'warning' | 'error';
 const DEFAULT_DURATION_MS = 3000;
 
 const ACTION_CLASSES =
-  'ml-auto shrink-0 rounded-cmn-sm px-cmn-2 py-0.5 font-base text-cmn-sm font-semibold underline ' +
+  'ml-auto shrink-0 rounded-cmn-role-inset px-cmn-2 py-0.5 font-base text-cmn-sm font-semibold underline ' +
   'underline-offset-2 hover:bg-black/20 focus:outline-none focus:ring-2 focus:ring-white/50 ' +
   PHONE_HIT_AREA_CLASSES;
 
 const DISMISS_CLASSES =
-  'ml-cmn-2 inline-flex items-center justify-center rounded-cmn-sm p-0.5 hover:bg-black/20 ' +
+  'ml-cmn-2 inline-flex items-center justify-center rounded-cmn-role-inset p-0.5 hover:bg-black/20 ' +
   `focus:outline-none focus:ring-2 focus:ring-white/50 ${PHONE_HIT_AREA_CLASSES}`;
 
 const VARIANT_CONTAINER_CLASSES: Record<ToastVariant, string> = {
@@ -74,7 +74,7 @@ export class ToastComponent {
   public readonly iconName = computed(() => VARIANT_ICON_NAME[this.variant()]);
   public readonly containerClasses = computed(() =>
     [
-      'flex items-center gap-cmn-2 px-cmn-4 py-cmn-3 rounded-cmn-md shadow-cmn-md',
+      'flex items-center gap-cmn-2 px-cmn-4 py-cmn-3 rounded-cmn-role-surface shadow-cmn-md',
       'min-w-[280px] max-w-[480px]',
       VARIANT_CONTAINER_CLASSES[this.variant()],
     ].join(' ')

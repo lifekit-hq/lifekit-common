@@ -16,7 +16,7 @@ import {IconComponent} from '../icon/icon.component';
 // until checked, Carbon's 2px focus outline offset by 1px. 16px drawn, at least --size-touch pressed
 // on a phone.
 const BOX_BASE =
-  'inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-cmn-sm border ' +
+  'inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-cmn-role-inset border ' +
   'transition-colors duration-cmn-short ease-cmn-standard focus:outline-none ' +
   'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 ' +
   `focus-visible:outline-border-focus ${PHONE_HIT_AREA_CLASSES}`;

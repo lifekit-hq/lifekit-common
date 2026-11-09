@@ -88,7 +88,7 @@ describe('SidebarNavComponent', () => {
     const toggle = el.querySelector('button[title="Collapse sidebar"]');
     expect(toggle?.classList).toContain('h-cmn-size-lg');
     expect(toggle?.classList).toContain('w-cmn-size-lg');
-    expect(el.querySelector('aside')?.innerHTML).not.toContain('rounded-');
+    expect(el.querySelector('aside > div')?.innerHTML).not.toContain('rounded-');
   });
 
   it("should mark the active link with Carbon's selected state and the others with a hover fill", () => {
@@ -98,6 +98,8 @@ describe('SidebarNavComponent', () => {
     const active = links.find(link => link.getAttribute('aria-current') === 'page');
     expect(active).toBeDefined();
     expect(active?.classList).toContain('shadow-cmn-nav-active');
+    expect(active?.classList).toContain('bg-cmn-nav-active');
+    expect(active?.classList).toContain('rounded-cmn-nav');
     expect(active?.classList).toContain('font-semibold');
     const others = links.filter(link => link !== active);
     expect(others.length).toBeGreaterThan(0);

@@ -74,7 +74,7 @@ describe('CmnDialogContainerComponent', () => {
   it('is held by a shadow and a hairline border', () => {
     expect(shell().classList).toContain('shadow-cmn-lg');
     expect(shell().classList).toContain('border');
-    expect(shell().classList).toContain('border-border-default');
+    expect(shell().classList).toContain('border-cmn-float');
   });
 
   it('sizes the body to its content, leaving no empty band under the actions', () => {
@@ -163,14 +163,14 @@ describe('CmnDialogContainerComponent', () => {
       phone();
       expect(host().dataset['presentation']).toBe('sheet');
       expect(host().querySelector('[data-testid="dialog-handle"]')).not.toBeNull();
-      expect(shell().className).not.toContain('rounded-cmn-lg');
+      expect(shell().className).not.toContain('rounded-cmn-role-surface');
     });
 
     it('draws the centred dialog from md up whatever the phone mode', () => {
       setup(makeConfig({title: 'Edit account', phone: 'action-sheet'}), true);
       expect(host().dataset['presentation']).toBe('dialog');
       expect(host().querySelector('[data-testid="dialog-handle"]')).toBeNull();
-      expect(shell().className).toContain('rounded-cmn-lg');
+      expect(shell().className).toContain('rounded-cmn-role-surface');
     });
 
     it('re-presents when the viewport crosses md while open', () => {

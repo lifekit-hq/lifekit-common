@@ -29,11 +29,12 @@ const TEXT_LINE_CLASSES: Record<SkeletonText, string> = {
   '4xl': 'flex items-center text-cmn-4xl',
 };
 
-const BAR = 'cmn-skeleton-sweep block rounded-cmn-sm';
+const BAR = 'cmn-skeleton-sweep block rounded-cmn-role-inset';
 const DISC = 'cmn-skeleton-sweep block shrink-0 rounded-cmn-full';
 const ROW_CLASSES =
   'flex min-h-cmn-size-lg items-center gap-cmn-3 border-b border-border-default px-cmn-4 py-cmn-3 last:border-b-0';
-const CARD_CLASSES = 'rounded-cmn-md border border-border-default bg-surface-card';
+const CARD_CLASSES =
+  'rounded-cmn-role-surface border border-cmn-card-border bg-surface-card shadow-cmn-card';
 
 /** Rows a `row` preset draws unless `count` says otherwise: one. A `section` draws three. */
 const DEFAULT_ROWS = 1;
@@ -47,7 +48,7 @@ const LIST_SECTIONS = 2;
 const OVERVIEW_STATS = 4;
 const OVERVIEW_SECTIONS = 2;
 const PAGE_CARD_CLASSES =
-  'flex flex-col gap-cmn-2 rounded-cmn-md border border-border-default bg-surface-card p-cmn-4';
+  'flex flex-col gap-cmn-2 rounded-cmn-role-surface border border-cmn-card-border bg-surface-card shadow-cmn-card p-cmn-4';
 const FACTS_ROW_CLASSES = 'py-cmn-3 sm:grid sm:grid-cols-3 sm:gap-cmn-4';
 
 /**
@@ -148,7 +149,7 @@ const FACTS_ROW_CLASSES = 'py-cmn-3 sm:grid sm:grid-cols-3 sm:gap-cmn-4';
       }
       @case ('stat') {
         <div
-          class="flex flex-col gap-cmn-2 rounded-cmn-lg border border-border-default bg-surface-card p-cmn-4"
+          class="flex flex-col gap-cmn-2 rounded-cmn-role-surface border border-cmn-card-border bg-surface-card shadow-cmn-card p-cmn-4"
         >
           <div class="flex items-center justify-between gap-cmn-2" style="height: 1rem">
             <div [class]="bar" style="width: 40%; height: 0.75rem"></div>
@@ -162,7 +163,7 @@ const FACTS_ROW_CLASSES = 'py-cmn-3 sm:grid sm:grid-cols-3 sm:gap-cmn-4';
       }
       @case ('chart') {
         <div
-          class="flex w-full flex-col gap-cmn-3 rounded-cmn-lg border border-border-default bg-surface-card p-cmn-4"
+          class="flex w-full flex-col gap-cmn-3 rounded-cmn-role-surface border border-cmn-card-border bg-surface-card shadow-cmn-card p-cmn-4"
         >
           <div class="flex items-center text-cmn-xs" style="height: 1lh">
             <div [class]="bar" style="width: 35%; height: 0.75rem"></div>

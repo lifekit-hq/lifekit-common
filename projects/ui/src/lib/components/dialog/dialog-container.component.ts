@@ -28,13 +28,13 @@ const MAX_UNZOOMED_SCALE = 1.01;
 const SHELL_BASE = 'cmn-dialog-shell relative flex flex-col bg-surface-card text-text-primary';
 
 const DIALOG_SHELL =
-  `${SHELL_BASE} rounded-cmn-lg border border-border-default shadow-cmn-lg overflow-hidden ` +
+  `${SHELL_BASE} rounded-cmn-role-surface border border-cmn-float shadow-cmn-lg overflow-hidden ` +
   'max-h-[90vh] w-full';
 
 // Geometry that needs `env()`, `dvh` or the keyboard inset lives in tokens/theme.css, keyed on the
 // host's `data-presentation`.
 const PHONE_SHELL: Record<Exclude<CmnDialogPresentation, 'dialog'>, string> = {
-  sheet: `${SHELL_BASE} overflow-hidden w-full border-t border-border-default shadow-cmn-lg`,
+  sheet: `${SHELL_BASE} overflow-hidden w-full border-t border-cmn-float shadow-cmn-lg`,
   'full-screen': `${SHELL_BASE} overflow-hidden w-full h-full`,
   'action-sheet': 'cmn-dialog-shell relative flex flex-col gap-cmn-2 w-full text-text-primary',
 };
@@ -51,7 +51,7 @@ const SIZE_CLASSES: Record<CmnDialogSize, string> = {
 
 const BODY_BASE = 'cmn-dialog-shell__body overflow-y-auto p-cmn-6 flex-1';
 
-const ACTION_CARD = 'bg-surface-card rounded-cmn-lg shadow-cmn-lg';
+const ACTION_CARD = 'bg-surface-card rounded-cmn-role-surface shadow-cmn-lg';
 
 const PANEL_CLASS: Record<Exclude<CmnDialogPhoneMode, 'dialog'>, string> = {
   sheet: 'cmn-dialog-panel--sheet',
@@ -190,7 +190,7 @@ export class CmnDialogContainerComponent extends CdkDialogContainer<CmnDialogCon
 
   protected closeClasses(): string {
     return (
-      'cmn-dialog-shell__close inline-flex items-center justify-center w-8 h-8 rounded-cmn-sm ' +
+      'cmn-dialog-shell__close inline-flex items-center justify-center w-8 h-8 rounded-cmn-role-control ' +
       'hover:bg-surface-raised focus:outline-none focus:ring-2 focus:ring-border-focus' +
       (this.presentation() === 'dialog' ? '' : ` ${PHONE_HIT_AREA_CLASSES}`)
     );

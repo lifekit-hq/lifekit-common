@@ -40,7 +40,8 @@ const ALIGN_CLASSES: Record<CmnColumnAlign, string> = {
 };
 
 /** The table's own frame. Inside a `cmn-card` the card frames it, so it is dropped (no nested card). */
-const FRAME_CLASSES = 'rounded-cmn-lg border border-border-default bg-surface-card';
+const FRAME_CLASSES =
+  'rounded-cmn-role-surface border border-cmn-card-border shadow-cmn-card bg-surface-card';
 
 /** The table's scroll box: focusable so a keyboard can scroll it, with an inset focus ring. */
 const SCROLL_CLASSES =
@@ -49,16 +50,16 @@ const SCROLL_CLASSES =
 
 /** A sortable header's button; it keeps the header's type and lifts to primary on hover. */
 const SORT_BUTTON_CLASSES =
-  'inline-flex items-center gap-cmn-1 rounded-cmn-sm font-semibold hover:text-text-primary ' +
+  'inline-flex items-center gap-cmn-1 rounded-cmn-role-inset font-semibold hover:text-text-primary ' +
   'focus:outline-none focus-visible:ring-2 focus-visible:ring-border-focus';
 
 /** A truncated cell's text box: focusable so a keyboard reaches the full-value tooltip. */
 const TRUNCATE_CLASSES =
-  'truncate rounded-cmn-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-inset ' +
+  'truncate rounded-cmn-role-inset focus:outline-none focus-visible:ring-2 focus-visible:ring-inset ' +
   'focus-visible:ring-border-focus';
 
 const PAGE_BUTTON_BASE =
-  'inline-flex h-8 min-w-8 items-center justify-center rounded-cmn-md px-cmn-2 font-label ' +
+  'inline-flex h-8 min-w-8 items-center justify-center rounded-cmn-role-control px-cmn-2 font-label ' +
   'text-cmn-sm tabular-nums transition-colors focus:outline-none focus-visible:ring-2 ' +
   'focus-visible:ring-border-focus';
 const PAGE_BUTTON_CURRENT = 'bg-accent-default text-text-inverse';
@@ -613,7 +614,7 @@ export class DataTableComponent<T = Record<string, unknown>> {
   );
 
   public headerCellClass(align: CmnColumnAlign): string {
-    return `sticky top-0 z-10 h-cmn-size-lg bg-surface-raised shadow-[inset_0_-1px_0_var(--color-border-default)] px-cmn-4 font-label text-cmn-sm font-semibold text-text-primary ${this.alignClass(align)}`;
+    return `sticky top-0 z-10 h-cmn-size-lg bg-cmn-table-head shadow-[inset_0_-1px_0_var(--color-border-default)] px-cmn-4 font-label text-cmn-sm font-semibold text-text-primary ${this.alignClass(align)}`;
   }
 
   /** A truncated cell gets no min-content width of its own, so its text cuts off instead of widening the table. */

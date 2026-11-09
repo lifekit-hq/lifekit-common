@@ -3,9 +3,9 @@ import {ChangeDetectionStrategy, Component, computed, input, output} from '@angu
 export type SelectableCardOrientation = 'horizontal' | 'vertical';
 
 const BASE_CLASSES =
-  'group w-full h-full flex rounded-cmn-md border bg-surface-card text-left ' +
+  'group w-full h-full flex rounded-cmn-role-surface border bg-surface-card text-left ' +
   'transition-colors focus:outline-none focus:ring-2 focus:ring-border-focus ' +
-  'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-border-default';
+  'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-cmn-card-border';
 
 const ORIENTATION_CLASSES: Record<SelectableCardOrientation, string> = {
   horizontal: 'flex-row items-center gap-cmn-3 p-cmn-4',
@@ -13,7 +13,7 @@ const ORIENTATION_CLASSES: Record<SelectableCardOrientation, string> = {
 };
 
 const STATE_CLASSES = {
-  default: 'border-border-default hover:border-accent-default hover:bg-surface-raised',
+  default: 'border-cmn-card-border hover:border-accent-default hover:bg-surface-raised',
   selected: 'border-accent-default bg-accent-subtle',
 };
 

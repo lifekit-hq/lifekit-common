@@ -25,7 +25,7 @@ const EMPTY_VALUE = '—';
   host: {class: 'block'},
   template: `
     <div
-      class="flex h-full flex-col gap-cmn-2 rounded-cmn-lg border border-border-default bg-surface-card p-cmn-4"
+      class="flex h-full flex-col gap-cmn-2 rounded-cmn-role-surface border border-cmn-card-border bg-surface-card shadow-cmn-card p-cmn-4"
     >
       <div class="flex items-center justify-between gap-cmn-2">
         <span

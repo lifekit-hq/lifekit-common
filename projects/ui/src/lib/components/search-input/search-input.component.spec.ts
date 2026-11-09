@@ -105,8 +105,8 @@ describe('SearchInputComponent', () => {
   it('is the filled bottom-border field, square, with the glyph inside the padding', () => {
     const classes = input().className;
     expect(classes).toContain('bg-cmn-field');
-    expect(classes).toContain('border-b');
-    expect(classes).toContain('border-0');
+    expect(classes).toContain('border-cmn-field-frame');
+    expect(classes).toContain('border-cmn-field-border');
     expect(classes).toContain('pl-cmn-12');
     expect(classes).toContain('focus:outline-2');
     expect(classes).not.toMatch(/(^|\s)border(\s|$)/);

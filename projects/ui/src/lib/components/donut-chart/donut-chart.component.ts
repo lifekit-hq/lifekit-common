@@ -44,7 +44,7 @@ export type {DonutSegment, DonutSegmentClick} from '@lifekit-hq/charts-core';
   template: `
     @if (chrome()) {
       <div
-        class="flex flex-col gap-cmn-3 rounded-cmn-lg border border-border-default bg-surface-card p-cmn-4"
+        class="flex flex-col gap-cmn-3 rounded-cmn-role-surface border border-cmn-card-border bg-surface-card shadow-cmn-card p-cmn-4"
       >
         <span class="font-label text-cmn-xs font-semibold text-text-secondary">
           {{ label() }}
@@ -56,7 +56,7 @@ export type {DonutSegment, DonutSegmentClick} from '@lifekit-hq/charts-core';
             [attr.tabindex]="isEmpty() ? null : 0"
             [class.invisible]="isEmpty()"
             role="img"
-            class="rounded-cmn-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus"
+            class="rounded-cmn-role-inset focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus"
           ></canvas>
           @if (isEmpty()) {
             <p
@@ -82,7 +82,7 @@ export type {DonutSegment, DonutSegmentClick} from '@lifekit-hq/charts-core';
           [attr.tabindex]="isEmpty() ? null : 0"
           [class.invisible]="isEmpty()"
           role="img"
-          class="rounded-cmn-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus"
+          class="rounded-cmn-role-inset focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus"
         ></canvas>
         @if (isEmpty()) {
           <p

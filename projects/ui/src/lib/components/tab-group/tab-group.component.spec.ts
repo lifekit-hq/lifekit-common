@@ -74,6 +74,7 @@ describe('TabGroupComponent', () => {
     const buttons: NodeListOf<HTMLButtonElement> =
       fixture.nativeElement.querySelectorAll('[role="tab"]');
     expect(buttons[0].classList).toContain('border-accent-default');
+    expect(buttons[0].classList).toContain('bg-cmn-tab-active');
     expect(buttons[0].classList).toContain('text-text-primary');
     expect(buttons[0].classList).toContain('font-semibold');
   });
@@ -134,7 +135,7 @@ describe('TabGroupComponent', () => {
       expect(btn.classList).toContain('px-cmn-4');
       expect(btn.classList).toContain('h-cmn-size-md');
       expect(btn.classList).toContain('text-cmn-sm');
-      expect(btn.classList).toContain('border-b-2');
+      expect(btn.classList).toContain('border-b-cmn-tab');
     });
   });
 

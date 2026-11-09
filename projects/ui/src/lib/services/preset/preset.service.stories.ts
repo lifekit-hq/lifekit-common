@@ -6,12 +6,17 @@ import {ButtonComponent} from '../../components/button/button.component';
 import {CardComponent} from '../../components/card/card.component';
 import {InputComponent} from '../../components/input/input.component';
 import {SegmentedComponent} from '../../components/segmented/segmented.component';
+import {type CmnTab, TabGroupComponent} from '../../components/tab-group/tab-group.component';
 import {TagComponent} from '../../components/tag/tag.component';
+import {ToggleComponent} from '../../components/toggle/toggle.component';
 import {PresetService, provideDesignPresets} from './preset.service';
 
 /**
  * A preset for this story only. It is the whole contract in miniature: one rule under
- * `:root[data-preset='demo']` that overrides token names, nothing else. The real presets live in
+ * `:root[data-preset='demo']` that overrides token names, nothing else. The first block is token
+ * values (radius, control height); the second is the hooks, the anatomy a value cannot change: a
+ * framed field, a card held by a shadow, a tinted tab row with a filled tab, a tonal secondary
+ * button, a pill segmented control and a wider toggle. The real presets live in
  * `@lifekit-hq/tokens/presets/`; none ships yet besides Carbon, the default.
  */
 const DEMO_PRESET_CSS = `
@@ -20,8 +25,40 @@ const DEMO_PRESET_CSS = `
   --radius-md: 12px;
   --radius-lg: 16px;
   --cmn-control-h: 44px;
+
+  --cmn-field-border-width: 1px;
+  --cmn-select-border-width: 1px;
+  --cmn-card-border-color: transparent;
+  --cmn-card-shadow: 0 1px 3px rgb(0 0 0 / 0.14);
+  --cmn-float-border-color: transparent;
+  --cmn-btn-weight: 500;
+  --cmn-btn-secondary-bg: var(--color-accent-subtle);
+  --cmn-btn-secondary-fg: var(--color-text-primary);
+  --cmn-btn-secondary-hover: var(--color-surface-hover);
+  --cmn-tab-indicator: 0px;
+  --cmn-tab-radius: 8px;
+  --cmn-tab-active-bg: var(--color-surface-card);
+  --cmn-tabs-bg: var(--color-surface-raised);
+  --cmn-tabs-pad: 4px;
+  --cmn-tabs-gap: 4px;
+  --cmn-tabs-radius: 12px;
+  --cmn-segmented-radius: 999px;
+  --cmn-segmented-cell-radius: 999px;
+  --cmn-segmented-active-bg: var(--color-accent-default);
+  --cmn-segmented-active-fg: var(--color-text-inverse);
+  --cmn-toggle-w: 52px;
+  --cmn-toggle-h: 32px;
+  --cmn-toggle-thumb: 24px;
+  --cmn-toggle-pad: 4px;
+  --cmn-toggle-on: var(--color-accent-default);
 }
 `;
+
+const TABS: CmnTab[] = [
+  {id: 'overview', label: 'Overview'},
+  {id: 'activity', label: 'Activity'},
+  {id: 'settings', label: 'Settings'},
+];
 
 const SERIES = [
   {
@@ -47,7 +84,9 @@ const OPTIONS = [
     CardComponent,
     InputComponent,
     SegmentedComponent,
+    TabGroupComponent,
     TagComponent,
+    ToggleComponent,
   ],
   template: `
     <div class="flex max-w-xl flex-col gap-cmn-4">
@@ -68,9 +107,9 @@ const OPTIONS = [
       <cmn-card>
         <p class="mb-cmn-3 font-headline text-cmn-lg text-text-primary">Same components</p>
         <p class="mb-cmn-4 text-cmn-sm text-text-secondary">
-          Nothing below knows about presets. Choosing Demo swaps the radius and control-height
-          tokens, so the corners round and the controls change height; choosing Carbon puts them
-          back.
+          Nothing below knows about presets. Choosing Demo swaps token values (corners, control
+          height) and the hooks (field frame, card shadow, tab style, secondary button, toggle
+          geometry), so the same components change anatomy; choosing Carbon puts them back.
         </p>
         <div class="mb-cmn-4 flex flex-wrap items-center gap-cmn-2">
           <cmn-button>Primary</cmn-button>
@@ -80,7 +119,11 @@ const OPTIONS = [
         <div class="mb-cmn-4 max-w-xs">
           <cmn-input aria-label="Account name" placeholder="Everyday account" />
         </div>
-        <cmn-segmented [options]="options" value="month" label="Range" />
+        <div class="mb-cmn-4 flex flex-wrap items-center gap-cmn-4">
+          <cmn-segmented [options]="options" value="month" label="Range" />
+          <cmn-toggle [checked]="true" label="Weekly summary" />
+        </div>
+        <cmn-tab-group [tabs]="tabs" activeTab="overview" ariaLabel="Account sections" />
       </cmn-card>
 
       <cmn-area-chart [series]="series" label="Net worth" />
@@ -90,6 +133,7 @@ const OPTIONS = [
 class StoryPresetPanelComponent {
   protected readonly presets = inject(PresetService);
   protected readonly options = OPTIONS;
+  protected readonly tabs = TABS;
   protected readonly series = SERIES;
   protected readonly attribute = signal<string>('none');
 

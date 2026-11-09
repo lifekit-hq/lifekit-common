@@ -41,7 +41,7 @@ export type {BarSeries, BarValueFormat, ChartPointClick} from '@lifekit-hq/chart
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
-      class="flex w-full flex-col gap-cmn-3 rounded-cmn-lg border border-border-default bg-surface-card p-cmn-4"
+      class="flex w-full flex-col gap-cmn-3 rounded-cmn-role-surface border border-cmn-card-border bg-surface-card shadow-cmn-card p-cmn-4"
     >
       <span class="font-label text-cmn-xs font-semibold text-text-secondary">
         {{ label() }}
@@ -53,7 +53,7 @@ export type {BarSeries, BarValueFormat, ChartPointClick} from '@lifekit-hq/chart
           [attr.tabindex]="isEmpty() ? null : 0"
           [class.invisible]="isEmpty()"
           role="img"
-          class="rounded-cmn-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus"
+          class="rounded-cmn-role-inset focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus"
         ></canvas>
         @if (isEmpty()) {
           <p

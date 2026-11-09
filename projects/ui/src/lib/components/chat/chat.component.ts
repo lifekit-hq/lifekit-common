@@ -135,7 +135,7 @@ export class ChatComponent {
       container: {
         default: {
           backgroundColor: 'var(--color-accent-default)',
-          borderRadius: 'var(--radius-md)',
+          borderRadius: 'var(--cmn-radius-control)',
         },
       },
       svg: {styles: {default: {filter: 'brightness(0) invert(1)'}}},
@@ -148,7 +148,7 @@ export class ChatComponent {
 
   public readonly auxiliaryStyle = `
     ::-webkit-scrollbar { width: 8px; }
-    ::-webkit-scrollbar-thumb { background-color: var(--color-border-strong); border-radius: var(--radius-sm); }
+    ::-webkit-scrollbar-thumb { background-color: var(--color-border-strong); border-radius: var(--cmn-radius-inset); }
     ::-webkit-scrollbar-track { background: transparent; }
   `;
 
@@ -159,7 +159,7 @@ export class ChatComponent {
       container: {
         backgroundColor: 'var(--color-surface-bg)',
         border: '1px solid var(--color-border-default)',
-        borderRadius: 'var(--radius-lg)',
+        borderRadius: 'var(--cmn-radius-field)',
         boxShadow: 'none',
       },
     },

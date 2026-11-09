@@ -27,8 +27,8 @@ export type ButtonIconPosition = 'prefix' | 'suffix';
 // inset ring: the border turns to the focus colour and a 1px ground-coloured line sits inside it.
 // Every size presses as at least --size-touch square on a phone and keeps its drawn size.
 const BASE_CLASSES =
-  'inline-flex items-center justify-center gap-cmn-2 font-label font-normal text-cmn-sm ' +
-  'rounded-cmn-md border px-cmn-4 focus:outline-none ' +
+  'inline-flex items-center justify-center gap-cmn-2 font-label [font-weight:var(--cmn-btn-weight)] text-cmn-sm ' +
+  'rounded-cmn-role-control shadow-cmn-btn border px-cmn-4 focus:outline-none ' +
   'focus:border-border-focus focus:shadow-cmn-focus-inset ' +
   `transition-colors duration-cmn-short ease-cmn-standard ${PHONE_HIT_AREA_CLASSES}`;
 
@@ -36,7 +36,7 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   primary:
     'border-transparent bg-accent-default text-text-inverse hover:bg-accent-hover active:bg-accent-active',
   secondary:
-    'border-transparent bg-text-primary text-surface-card hover:bg-text-secondary active:bg-text-secondary',
+    'border-cmn-btn-secondary-border bg-cmn-btn-secondary text-cmn-btn-secondary-fg hover:bg-cmn-btn-secondary-hover active:bg-cmn-btn-secondary-hover',
   tertiary:
     'bg-transparent border-accent-default text-accent-default ' +
     'hover:bg-accent-default hover:text-text-inverse active:bg-accent-active active:text-text-inverse',

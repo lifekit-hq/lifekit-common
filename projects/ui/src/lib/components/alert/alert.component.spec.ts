@@ -97,7 +97,7 @@ describe('AlertComponent', () => {
     fixture.detectChanges();
     const classes = fixture.componentInstance.containerClasses();
     expect(classes).toContain('bg-status-error-subtle');
-    expect(classes).toContain('border-l-cmn-bar');
+    expect(classes).toContain('border-l-cmn-stripe');
     expect(classes).toContain('border-l-status-error');
     expect(classes).toContain('border-status-error/40');
     expect(classes).toContain('min-h-cmn-control-h');

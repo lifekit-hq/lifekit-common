@@ -55,14 +55,14 @@ const ICON_SIZE: Record<SelectSize, 'sm' | 'md' | 'lg'> = {
 };
 
 const FIELD_BASE =
-  'w-full rounded-cmn-md border bg-surface-bg text-text-primary outline-none transition-colors ' +
+  'w-full rounded-cmn-role-field border-cmn-select-frame bg-cmn-select text-text-primary outline-none transition-colors ' +
   'max-md:min-h-cmn-touch focus:border-accent-default focus-visible:ring-2 ' +
   'focus-visible:ring-border-focus disabled:cursor-not-allowed disabled:opacity-60';
 
 // The combobox field is a wrapper around the focusable element, so it takes the focus styles from
 // whatever inside it holds focus, and the ring from the combobox's keyboard focus alone.
 const COMBOBOX_FIELD_BASE =
-  'flex w-full items-center gap-cmn-2 rounded-cmn-md border bg-surface-bg px-cmn-2 text-text-primary ' +
+  'flex w-full items-center gap-cmn-2 rounded-cmn-role-field border-cmn-select-frame bg-cmn-select px-cmn-2 text-text-primary ' +
   'transition-colors max-md:min-h-cmn-touch focus-within:border-accent-default ' +
   'has-[[role=combobox]:focus-visible]:ring-2 has-[[role=combobox]:focus-visible]:ring-border-focus';
 
@@ -77,7 +77,7 @@ const OPTION_BASE =
   'max-md:min-h-cmn-touch';
 
 const CHECK_BOX_BASE =
-  'inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-cmn-sm border transition-colors';
+  'inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-cmn-role-inset border transition-colors';
 
 const DEFAULT_MIN_PANEL_WIDTH_PX = 192;
 
@@ -210,7 +210,7 @@ const POSITIONS: ConnectedPosition[] = [
         <!-- Pointer presses keep focus on the combobox, which owns the keyboard. -->
         <div
           (mousedown)="$event.preventDefault()"
-          class="max-h-64 w-full overflow-y-auto rounded-cmn-lg bg-surface-card py-cmn-2 shadow-cmn-lg"
+          class="max-h-64 w-full overflow-y-auto rounded-cmn-role-surface bg-surface-card py-cmn-2 shadow-cmn-lg"
         >
           <div
             [id]="listboxId"
@@ -334,14 +334,14 @@ export class SelectComponent implements ControlValueAccessor {
     [
       'col-start-1 row-start-1 block appearance-none pl-cmn-2 pr-8',
       FIELD_BASE,
-      this.hasError() ? 'border-status-error' : 'border-border-strong',
+      this.hasError() ? 'border-status-error' : 'border-cmn-field-border',
       SIZE_CLASSES[this.size()],
     ].join(' ')
   );
   public readonly fieldClasses = computed(() =>
     [
       COMBOBOX_FIELD_BASE,
-      this.hasError() ? 'border-status-error' : 'border-border-strong',
+      this.hasError() ? 'border-status-error' : 'border-cmn-field-border',
       this.disabled() ? 'cursor-not-allowed opacity-60' : 'cursor-pointer',
       SIZE_CLASSES[this.size()],
     ].join(' ')

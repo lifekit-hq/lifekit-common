@@ -24,7 +24,7 @@ export type TopBarLargeTitle = 'none' | 'visible' | 'collapsed';
  * buttons are 48px squares that abut each other and the right edge.
  */
 const HEADER_BASE_CLASSES =
-  'flex h-11 items-center border-b border-border-default px-cmn-4 md:h-cmn-size-lg md:pr-0';
+  'flex h-11 items-center border-b border-cmn-shell px-cmn-4 md:h-cmn-size-lg md:pr-0';
 /**
  * Every chrome control meets the touch target (`--size-touch`) below md, desktop density from md.
  * The targets abut below md, so the bar has no gap there: the glyphs still sit a target apart.
@@ -52,7 +52,7 @@ const OVERFLOW_INLINE_COUNT = 1;
 /** The panel clears the side safe areas (landscape notch) and never outgrows a 320px screen. */
 const OVERFLOW_PANEL_CLASSES =
   'min-w-48 max-w-[calc(100vw-2rem-env(safe-area-inset-left)-env(safe-area-inset-right))] ' +
-  'overflow-hidden rounded-cmn-lg bg-surface-card py-cmn-2 shadow-cmn-lg ' +
+  'overflow-hidden rounded-cmn-role-surface bg-surface-card py-cmn-2 shadow-cmn-lg ' +
   'mr-[env(safe-area-inset-right)]';
 const OVERFLOW_ITEM_CLASSES =
   'flex w-full items-center gap-cmn-3 px-cmn-4 py-cmn-2 text-left text-cmn-sm text-text-primary ' +
@@ -64,7 +64,7 @@ const AVATAR_TRIGGER_CLASSES =
   'group h-cmn-touch w-cmn-touch shrink-0 rounded-cmn-full md:mx-cmn-2 md:h-cmn-size-sm md:w-cmn-size-sm';
 /** Keyboard hints mean nothing without a keyboard: hidden wherever hover is unavailable. */
 const KEY_HINT_CLASSES =
-  'ml-cmn-2 hidden rounded-cmn-sm border border-border-default px-1 py-0.5 font-mono text-cmn-xs ' +
+  'ml-cmn-2 hidden rounded-cmn-role-inset border border-border-default px-1 py-0.5 font-mono text-cmn-xs ' +
   'text-text-secondary md:inline [@media(hover:none)]:hidden';
 /** The chevron's glyph sits on the content edge below md, as on iOS. */
 const BACK_BUTTON_CLASSES = `${CHROME_BUTTON_CLASSES} -ml-cmn-2 md:ml-0`;
@@ -186,7 +186,7 @@ const HEADER_FADE_CLASSES =
       <!-- Search trigger: icon-only below md -->
       <button
         (click)="searchClick.emit()"
-        class="flex h-cmn-touch w-cmn-touch shrink-0 items-center justify-center gap-cmn-2 text-cmn-sm text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary md:mr-cmn-2 md:h-cmn-size-sm md:w-auto md:border md:border-border-strong md:bg-surface-bg md:px-cmn-3 md:hover:bg-surface-hover"
+        class="flex h-cmn-touch w-cmn-touch shrink-0 items-center justify-center gap-cmn-2 text-cmn-sm text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary md:mr-cmn-2 md:h-cmn-size-sm md:w-auto md:rounded-cmn-role-field md:border md:border-cmn-field-border md:bg-surface-bg md:px-cmn-3 md:hover:bg-surface-hover"
         type="button"
         aria-label="Search"
       >

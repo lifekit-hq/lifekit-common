@@ -21,6 +21,70 @@ export const FIELD_BORDER_MIN = 3;
 export const TEXT_MIN = 4.5;
 
 const PHONE_WIDTH = 390;
+
+/**
+ * How the preset test treats every hook in theme.css's PRESET HOOKS block (test/hooks.spec.mjs
+ * fails on a hook that is not listed, so adding a hook means deciding its rule here):
+ *  - `shape`: geometry, weight, a shadow or a width. A preset may set any value; nothing about it
+ *    can fail contrast or the touch floor, and the paint tests on the stories catch the rest.
+ *  - `field-border`: a colour that identifies a field, 3:1 on the card and the page ground.
+ *  - `pair`: one half of a `-bg`/`-fg` pair, 4.5:1 together.
+ *  - `text-on`: a fill that text sits on, 4.5:1; checked when the preset sets the fill or its text
+ *    colour (a `transparent` fill is skipped, any other fill must resolve to a #hex colour).
+ *  - `on-state`: the colour of a control that is on, 3:1 on the card and the page ground.
+ *  - `toggle`: the toggle's four lengths, checked as geometry (the thumb fits the track).
+ *  - `edge`: a hairline between surfaces; decorative, so free of a ratio.
+ */
+export const HOOK_RULES = {
+  '--cmn-radius-control': 'shape',
+  '--cmn-radius-field': 'shape',
+  '--cmn-radius-surface': 'shape',
+  '--cmn-radius-inset': 'shape',
+  '--cmn-field-border-width': 'shape',
+  '--cmn-field-border-color': 'field-border',
+  '--cmn-select-bg': 'text-on',
+  '--cmn-select-border-width': 'shape',
+  '--cmn-card-border-color': 'edge',
+  '--cmn-card-shadow': 'shape',
+  '--cmn-shell-border-color': 'edge',
+  '--cmn-float-border-color': 'edge',
+  '--cmn-nav-inset': 'shape',
+  '--cmn-nav-gap': 'shape',
+  '--cmn-nav-item-h': 'shape',
+  '--cmn-nav-item-radius': 'shape',
+  '--cmn-nav-active-bg': 'text-on',
+  '--cmn-nav-active-shadow': 'shape',
+  '--cmn-btn-weight': 'shape',
+  '--cmn-btn-shadow': 'shape',
+  '--cmn-btn-secondary-bg': 'pair',
+  '--cmn-btn-secondary-fg': 'pair',
+  '--cmn-btn-secondary-hover': 'text-on',
+  '--cmn-btn-secondary-border': 'edge',
+  '--cmn-toggle-w': 'toggle',
+  '--cmn-toggle-h': 'toggle',
+  '--cmn-toggle-thumb': 'toggle',
+  '--cmn-toggle-pad': 'toggle',
+  '--cmn-toggle-on': 'on-state',
+  '--cmn-tab-indicator': 'shape',
+  '--cmn-tab-radius': 'shape',
+  '--cmn-tab-active-bg': 'text-on',
+  '--cmn-tabs-bg': 'text-on',
+  '--cmn-tabs-pad': 'shape',
+  '--cmn-tabs-gap': 'shape',
+  '--cmn-tabs-radius': 'shape',
+  '--cmn-segmented-radius': 'shape',
+  '--cmn-segmented-cell-radius': 'shape',
+  '--cmn-segmented-outline': 'field-border',
+  '--cmn-segmented-active-bg': 'pair',
+  '--cmn-segmented-active-fg': 'pair',
+  '--cmn-alert-stripe': 'shape',
+  '--cmn-table-head-bg': 'text-on',
+};
+
+/** The text colour a `text-on` fill must carry, per hook; `--color-text-primary` unless listed. */
+const TEXT_ON_FILL = {
+  '--cmn-btn-secondary-hover': '--cmn-btn-secondary-fg',
+};
 const ID = /^[a-z][a-z0-9-]*$/;
 const FIELD_BORDER = /(field|input|select|checkbox).*border|border.*(field|input|select|checkbox)/;
 const SURFACES = ['--color-surface-card', '--color-surface-bg'];
@@ -193,7 +257,9 @@ export function checkPreset({id, css, themeCss}) {
     };
     const surfaces = SURFACES.map(name => [name, colour(name)]);
 
-    for (const name of names.filter(n => FIELD_BORDER.test(n))) {
+    for (const name of names.filter(
+      n => FIELD_BORDER.test(n) || HOOK_RULES[n] === 'field-border'
+    )) {
       const value = resolve(name, ctx);
       const hex = value === null ? null : /#[0-9a-f]{3,6}\b/i.exec(value);
       if (!hex) {
@@ -225,6 +291,69 @@ export function checkPreset({id, css, themeCss}) {
           `${stem}-fg on ${stem}-bg is ${ratio(bg, fg).toFixed(2)}:1 in the ${theme} theme; text needs ${TEXT_MIN}:1`
         );
       }
+    }
+  }
+
+  const lengthPx = (name, ctx) => {
+    const match = /^(-?\d+(?:\.\d+)?)px$/.exec(resolve(name, ctx)?.trim() ?? '');
+    return match ? Number(match[1]) : null;
+  };
+
+  for (const theme of ['light', 'dark']) {
+    const ctx = {theme, width: 1280};
+    const readable = name => {
+      const value = resolve(name, ctx);
+      return value === null ? null : toRgb(value);
+    };
+    const surfaces = SURFACES.map(name => [name, readable(name)]);
+
+    const textOn = Object.keys(HOOK_RULES).filter(
+      n => HOOK_RULES[n] === 'text-on' && (names.includes(n) || names.includes(TEXT_ON_FILL[n]))
+    );
+    for (const name of textOn) {
+      const value = resolve(name, ctx)?.trim();
+      if (value === 'transparent') continue; // the text sits on the surface the page already tests
+      const fill = value ? toRgb(value) : null;
+      if (!fill) {
+        fail(`${name} does not resolve to a #hex colour in the ${theme} theme`);
+        continue;
+      }
+      const textName = TEXT_ON_FILL[name] ?? '--color-text-primary';
+      const text = readable(textName);
+      if (text && ratio(fill, text) < TEXT_MIN) {
+        fail(
+          `${textName} on ${name} is ${ratio(fill, text).toFixed(2)}:1 in the ${theme} theme; text needs ${TEXT_MIN}:1`
+        );
+      }
+    }
+
+    for (const name of names.filter(n => HOOK_RULES[n] === 'on-state')) {
+      const colour = readable(name);
+      if (!colour) {
+        fail(`${name} does not resolve to a #hex colour in the ${theme} theme`);
+        continue;
+      }
+      for (const [surface, surfaceRgb] of surfaces) {
+        if (surfaceRgb && ratio(colour, surfaceRgb) < FIELD_BORDER_MIN) {
+          fail(
+            `${name} is ${ratio(colour, surfaceRgb).toFixed(2)}:1 on ${surface} in the ${theme} theme; an on state needs ${FIELD_BORDER_MIN}:1`
+          );
+        }
+      }
+    }
+  }
+
+  if (names.some(n => HOOK_RULES[n] === 'toggle')) {
+    const ctx = {theme: 'light', width: 1280};
+    const [w, h, thumb, pad] = ['w', 'h', 'thumb', 'pad'].map(part =>
+      lengthPx(`--cmn-toggle-${part}`, ctx)
+    );
+    if ([w, h, thumb, pad].some(v => v === null)) {
+      fail('the --cmn-toggle-* lengths must resolve to px lengths');
+    } else if (thumb + 2 * pad > h || thumb + 2 * pad > w) {
+      fail(
+        `the toggle thumb (${thumb}px) plus its padding (${pad}px each side) does not fit the ${w}x${h}px track`
+      );
     }
   }
 
