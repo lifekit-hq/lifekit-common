@@ -99,6 +99,25 @@ The media queries follow the OS only. `ThemeService` (`@lifekit-hq/ui`) closes t
 it applies a theme, whether from a toggle, a stored choice or an OS change, it points every
 `theme-color` meta at the active `--color-surface-bg`. Apps write no sync code of their own.
 
+## Startup images
+
+Apple HIG (Launching): the launch screen matches the first screen. An installed iOS app paints its
+`apple-touch-startup-image` while it boots, and without one it paints a blank screen (a white flash
+in dark mode). Each app declares one image **per colour scheme** for every device size it supports:
+
+<!-- prettier-ignore -->
+```html
+<link rel="apple-touch-startup-image" href="/startup-light-1170x2532.png"
+  media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: light)" />
+<link rel="apple-touch-startup-image" href="/startup-dark-1170x2532.png"
+  media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: dark)" />
+```
+
+The image is the first screen with no data: the `--color-surface-bg` fill of the scheme and the app
+shell chrome. iOS picks the image by the device media query, so one link per device size.
+`lifekit-chrome-check` reports a missing image per scheme; generating the images is the app's job, and the
+head template does not emit them.
+
 ## Manifest (`manifest.webmanifest`)
 
 | Field                      | Value                                         |
@@ -285,14 +304,16 @@ It fails (exit 1) and lists every deviation:
 
 - **head**: the title is not the bare app name, the viewport, `color-scheme` or either
   `theme-color` is missing or wrong, or a required link is missing or an extra one is present;
+- **startup-image**: no `apple-touch-startup-image` link for the light or the dark scheme (a link
+  counts when it has an `href` and a `prefers-color-scheme` media query for that scheme);
 - **manifest**: an off-token colour, wrong `display`/`id`/`start_url`/`scope`, a long
   `short_name`, or an icon list that is not exactly the standard three;
 - **icons**: a served icon file is missing or differs by a single byte from the one this version
   of the package generated. That catches stale, hand-edited and other-app icons.
 
 The same checks are available as functions from `@lifekit-hq/tokens/brand`: `checkBrowserChrome`,
-`checkHead`, `checkManifest` and `checkIcons`. `checkBrowserChrome`, `checkHead` and
-`checkManifest` take `{basePath}`. Each returns `{rule, message}[]`, empty when the app
+`checkHead`, `checkStartupImages`, `checkManifest` and `checkIcons`. `checkBrowserChrome`, `checkHead` and
+`checkManifest` take `{basePath}`; `checkStartupImages` takes the HTML only. Each returns `{rule, message}[]`, empty when the app
 complies, for use inside an app's own test suite.
 
 ## Design drift check
