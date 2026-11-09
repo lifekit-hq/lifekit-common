@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.7.1](https://github.com/lifekit-hq/lifekit-common/compare/v4.7.0...v4.7.1) (2026-11-09)
+
+
+### Bug Fixes
+
+* **ui:** stack cmn-alert-item's dismiss button beneath a sticky list-section heading ([#336](https://github.com/lifekit-hq/lifekit-common/issues/336)) ([c7a072e](https://github.com/lifekit-hq/lifekit-common/commit/c7a072e460eaee469a740f44fbffca0a86c0f894))
+
 ## [4.7.0](https://github.com/lifekit-hq/lifekit-common/compare/v4.6.0...v4.7.0) (2026-11-09)
 
 
