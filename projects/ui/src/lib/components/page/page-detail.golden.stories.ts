@@ -1,6 +1,10 @@
 import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {applicationConfig, type Meta, type StoryObj} from '@storybook/angular';
 
+import {
+  AllocationBarComponent,
+  type AllocationSegment,
+} from '../allocation-bar/allocation-bar.component';
 import type {PageChromeData} from '../app-layout/page-chrome';
 import {ButtonComponent} from '../button/button.component';
 import {
@@ -9,6 +13,8 @@ import {
 } from '../description-list/description-list.component';
 import {ListItemRowComponent} from '../list-item-row/list-item-row.component';
 import {ListSectionComponent} from '../list-section/list-section.component';
+import {type CmnTile, TileGridComponent} from '../tile-grid/tile-grid.component';
+import {TilePanelDirective} from '../tile-grid/tile-panel.directive';
 import {
   GOLDEN_DESKTOP,
   GOLDEN_PHONE,
@@ -96,6 +102,68 @@ class TaskDetailPageComponent {
   protected readonly history = HISTORY;
 }
 
+const POLICY_TILES: readonly CmnTile[] = [
+  {id: 'premium', label: 'Premium', headline: '£524.20'},
+  {id: 'renews', label: 'Renews', headline: '14 Nov'},
+  {id: 'quotes', label: 'Quotes', headline: '3'},
+  {id: 'documents', label: 'Documents', headline: '2'},
+  {id: 'drivers', label: 'Drivers', headline: '2'},
+  {id: 'excess', label: 'Excess', headline: '£250'},
+];
+
+const PREMIUM_SPLIT: readonly AllocationSegment[] = [
+  {label: 'Base cover', value: 389.8},
+  {label: 'Add-ons', value: 96},
+  {label: 'Tax and fees', value: 38.4},
+];
+
+/**
+ * The same record read as facts: a tile grid in place of the sections, one panel shared by all
+ * six tiles. The premium panel is open, the way a person lands from a link to it
+ * (`#premium`): the summary first, then one chart as evidence, then a link out for the rest.
+ */
+@Component({
+  selector: 'cmn-golden-task-detail-tiles-page',
+  imports: [
+    AllocationBarComponent,
+    ButtonComponent,
+    DescriptionItemComponent,
+    DescriptionListComponent,
+    PageComponent,
+    TileGridComponent,
+    TilePanelDirective,
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <cmn-page kind="detail">
+      <p class="text-cmn-sm font-medium text-text-secondary">Due 14 Nov · Assigned to Sam</p>
+      <cmn-tile-grid [tiles]="tiles" ariaLabel="Policy facts" open="premium">
+        <ng-template cmnTilePanel="premium">
+          <cmn-description-list>
+            <cmn-description-item label="Paid" value="Monthly, £43.68" />
+            <cmn-description-item label="Change on last year" value="Up £38" />
+          </cmn-description-list>
+          <cmn-allocation-bar [segments]="split" currency="GBP" label="Where the premium goes" />
+          <a
+            class="inline-flex min-h-cmn-touch items-center self-start text-cmn-sm font-medium text-accent-default underline underline-offset-2"
+            href="/tasks/car-insurance/payments"
+          >
+            All payments
+          </a>
+        </ng-template>
+      </cmn-tile-grid>
+      <div class="flex flex-wrap gap-cmn-group-gap">
+        <cmn-button icon="Check">Mark as done</cmn-button>
+        <cmn-button variant="secondary" icon="Clock">Snooze a week</cmn-button>
+      </div>
+    </cmn-page>
+  `,
+})
+class TaskDetailTilesPageComponent {
+  protected readonly tiles = POLICY_TILES;
+  protected readonly split = PREMIUM_SPLIT;
+}
+
 const DETAIL_DATA: PageChromeData = {
   title: 'Car insurance',
   parent: '/tasks',
@@ -115,6 +183,11 @@ const meta: Meta<GoldenShellComponent> = {
     applicationConfig({
       providers: goldenProviders([
         {path: 'tasks/car-insurance', component: TaskDetailPageComponent, data: DETAIL_DATA},
+        {
+          path: 'tasks/car-insurance-tiles',
+          component: TaskDetailTilesPageComponent,
+          data: DETAIL_DATA,
+        },
       ]),
     }),
   ],
@@ -131,3 +204,23 @@ export const PhoneDark: Story = {globals: {...GOLDEN_PHONE, theme: 'dark'}};
 export const Desktop: Story = {globals: GOLDEN_DESKTOP};
 
 export const DesktopDark: Story = {globals: {...GOLDEN_DESKTOP, theme: 'dark'}};
+
+/**
+ * The detail template with a tile grid, the one disclosure pattern for a detail view
+ * (DESIGN.md, Tile grid). Its own screen for the route scan and the baselines.
+ */
+const TILES_START = {start: '/tasks/car-insurance-tiles'};
+
+export const PhoneWithTiles: Story = {args: TILES_START, globals: GOLDEN_PHONE};
+
+export const PhoneWithTilesDark: Story = {
+  args: TILES_START,
+  globals: {...GOLDEN_PHONE, theme: 'dark'},
+};
+
+export const DesktopWithTiles: Story = {args: TILES_START, globals: GOLDEN_DESKTOP};
+
+export const DesktopWithTilesDark: Story = {
+  args: TILES_START,
+  globals: {...GOLDEN_DESKTOP, theme: 'dark'},
+};

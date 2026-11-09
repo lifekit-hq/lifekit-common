@@ -151,12 +151,13 @@ Counts are a point-in-time measurement; re-measure before relying on them for a 
 | tab-group           | fs 0 · dash 0                                                                   | interactive | keep-own        | `model()` two-way binding for `activeTab`; APG tabs (roving tabindex, arrows/Home/End select, `aria-controls`, `role=tabpanel`); routed mode (`routerLink` tabs in a `nav`, `aria-current`) uses `RouterLink`/`RouterLinkActive`, so it stays Angular |
 | tag                 | fs 15 · dash 1                                                                  | simple-leaf | element-rewrite | Five-variant badge; trivially simple                                                                                                                                                                                                                  |
 | textarea            | new (added for the problem-report sheet); fs 0 · dash 0                         | interactive | keep-own        | `ControlValueAccessor` over a native `<textarea>` with `rows` and a `maxlength` counter; same API and native-control rationale as `input`, projects into `form-field`                                                                                 |
+| tile-grid           | new (added for detail-view disclosure, #262); fs 0 · dash 0                     | templated   | keep-own        | One shared panel drawn under the pressed tile's row; panels are `ng-template`s read by `contentChildren`, the row break follows `BreakpointObserver`, the open tile rides the router fragment; Angular-only, no Lit twin                              |
 | toast               | fs 5 · dash 0                                                                   | interactive | keep-own        | Dismiss event + aria role + `toast.service.ts` service layer; keep Angular until service strategy is decided                                                                                                                                          |
 | toggle              | fs 2 · dash 1                                                                   | interactive | element-rewrite | Switch button + thumb animation + `aria-checked`; `role="switch"` + boolean attribute = clean Lit mapping                                                                                                                                             |
 | top-bar             | fs 0 · dash 0 (composed by `app-layout`)                                        | interactive | keep-own        | Uses `MenuComponent`; event orchestration (back/page actions/search/theme/avatar); app-shell concern                                                                                                                                                  |
 | whats-new           | new (added for What's new as a library feature, #268); fs 0 · dash 0            | interactive | keep-own        | Release list over `cmn-async-state` plus `CmnWhatsNewService` (seen marker, notes fetch, the sheet through `CmnDrawerService`); drawer, shell and `MenuItem.dot` are Angular, so it stays Angular                                                     |
 
-**Summary:** 40 keep-own · 18 element-rewrite · 1 wrap-base · 0 delete
+**Summary:** 41 keep-own · 18 element-rewrite · 1 wrap-base · 0 delete
 
 ---
 
@@ -378,7 +379,7 @@ Every data-entry flow depends on these. Polish them before touching any page tha
 ### Tier 6 — domain-specific
 
 `disclosure-row` · `list-item-row` · `stat-card` ·
-`selectable-card` · `institution-avatar` · `month-stepper` · `chat`
+`selectable-card` · `institution-avatar` · `month-stepper` · `chat` · `tile-grid`
 
 Within each tier, order is the author's call. `selectable-card` has an
 `element-rewrite` decision but carries `interactive` complexity — it is included in Tier 6 as a
