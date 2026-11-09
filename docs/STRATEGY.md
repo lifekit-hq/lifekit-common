@@ -158,7 +158,7 @@ Counts are a point-in-time measurement; re-measure before relying on them for a 
 | verdict-header      | new (added for the verdict-first detail header, #263); fs 0 · dash 0            | templated   | keep-own        | Status word, up to two `cmn-tag` pills, a caveat and a price with a day-change pill; stacked-to-opposite layout and signed percent-plus-amount formatting; composes `cmn-tag` and `cmn-icon`, so it stays Angular                                     |
 | whats-new           | new (added for What's new as a library feature, #268); fs 0 · dash 0            | interactive | keep-own        | Release list over `cmn-async-state` plus `CmnWhatsNewService` (seen marker, notes fetch, the sheet through `CmnDrawerService`); drawer, shell and `MenuItem.dot` are Angular, so it stays Angular                                                     |
 
-**Summary:** 41 keep-own · 18 element-rewrite · 1 wrap-base · 0 delete
+**Summary:** 42 keep-own · 18 element-rewrite · 1 wrap-base · 0 delete
 
 ---
 
