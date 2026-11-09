@@ -150,7 +150,7 @@ A preset is one CSS file, `@lifekit-hq/tokens/presets/<id>.css`, that overrides 
 
 - **Shape.** Radius 3 / 6 / 8px (`--radius-sm|md|lg`), so a control and a field take 6px, a card, menu and sheet 8px, and a checkbox 3px. Chips, tags and avatars stay pill.
 - **Controls.** 40px on a desktop and 44px below 768px (`--cmn-control-h`), the large size 44px; the phone floor holds. Fields are a full 1px outline in `border-strong` on the card tone, the select the same. Button labels are medium weight; the secondary button is the neutral `surface-raised` fill with primary text, hover on `surface-hover`, not Carbon's ink fill.
-- **Surfaces.** A resting card has no border and no shadow: it is told from the page by tone (`surface-card` on the `surface-bg` ground). Floating panels keep their hairline and shadow, as everywhere. An alert's stripe is 1px.
+- **Surfaces.** A resting card has no border and a soft shadow (`shadow-sm`): it is told from the page by that edge and its tone (`surface-card` on the `surface-bg` ground). Floating panels keep their hairline and shadow, as everywhere. An alert's stripe is 1px.
 - **Navigation.** A side nav item is a 36px row with a 6px radius, inset 8px with a 2px gap, selected by the `accent-subtle` tone alone (no leading bar). Tabs stay line tabs. The segmented control is a rounded outline with the chosen cell tinted `accent-subtle` and labelled in the accent, as it was before Carbon.
 - **Toggle.** 44 x 24px, an 18px thumb, the accent when on (Carbon's success green is a second voice).
 - **Rhythm and motion.** Section gap 32px and group gap 12px; the medium duration 250ms and the Material 3 standard, decelerate and accelerate curves the library held before Carbon.

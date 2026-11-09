@@ -1,8 +1,8 @@
 /* Preset "lifekit": the repo's own direction, restated. Nothing here comes from a third-party system.
    Radius 3 / 6 / 8 and the M3 curves are the values theme.css held before Carbon (git 46b5acf^),
-   IBM Plex Sans stays (so no font payload), and DESIGN.md's doctrine is kept: flat surfaces held by
-   tone, a hairline OR a shadow never both, one accent that appears only where you act. A card is
-   told from the page by its tone (white on the ground), not by a border; the secondary button is
+   IBM Plex Sans stays (so no font payload), and DESIGN.md's doctrine is kept: soft-edged surfaces held by
+   a shadow OR a hairline, never both, one accent that appears only where you act. A card is
+   told from the page by a soft shadow (white on the ground), not by a border; the secondary button is
    neutral; the field is a full outline on the card tone. The type ramp is the library's own and is
    not a preset's to change, so Lifekit keeps it. Colour is the seed's: no --color-* here. */
 
@@ -12,6 +12,7 @@
   --radius-md: 6px;
   --radius-lg: 8px;
   --cmn-size-lg: 44px;
+  --cmn-nav-rail-width: 64px;
   --cmn-control-h: 40px;
   --cmn-section-gap: 32px;
   --cmn-group-gap: 12px;
@@ -26,8 +27,9 @@
   --cmn-select-border-width: 1px;
   --cmn-select-bg: var(--color-surface-card);
 
-  /* Surface: held by tone, no hairline (the shadow hook keeps its flat default) */
+  /* Surface: a soft shadow edge, no hairline */
   --cmn-card-border-color: transparent;
+  --cmn-card-shadow: var(--shadow-sm);
 
   /* Side nav: a 36px pill-cornered row, selected by tone alone (no leading bar) */
   --cmn-nav-inset: 8px;
