@@ -29,7 +29,7 @@ type RenderedSegment =
   | {kind: 'external'; label: string; href: string};
 
 const USER_BUBBLE = 'bg-accent-default text-text-inverse';
-const ASSISTANT_BUBBLE = 'bg-surface-raised text-text-primary border border-border-default';
+const ASSISTANT_BUBBLE = 'bg-surface-raised text-text-primary border border-cmn-card-border';
 
 @Component({
   selector: 'cmn-chat-message',

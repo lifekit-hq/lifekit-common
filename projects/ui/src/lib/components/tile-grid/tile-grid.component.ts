@@ -40,8 +40,8 @@ const COLUMNS_WIDE = 3;
 let gridCounter = 0;
 
 const TILE_CLASSES =
-  'flex min-h-cmn-size-lg w-full cursor-pointer flex-col items-start gap-cmn-1 rounded-cmn-md ' +
-  'border border-border-default p-cmn-4 text-left transition-colors duration-cmn-short ' +
+  'flex min-h-cmn-size-lg w-full cursor-pointer flex-col items-start gap-cmn-1 rounded-cmn-role-surface ' +
+  'border border-cmn-card-border shadow-cmn-card p-cmn-4 text-left transition-colors duration-cmn-short ' +
   'ease-cmn-standard focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset ' +
   'focus-visible:ring-border-focus';
 const TILE_CLOSED_CLASSES = 'bg-surface-card hover:bg-surface-hover';
@@ -49,7 +49,7 @@ const TILE_OPEN_CLASSES = 'bg-accent-subtle';
 const LABEL_CLASSES = 'font-label text-cmn-xs font-semibold';
 const CLOSE_CLASSES =
   '-mr-cmn-2 -mt-cmn-1 inline-flex h-cmn-size-sm w-cmn-size-sm shrink-0 cursor-pointer ' +
-  'items-center justify-center rounded-cmn-sm text-text-secondary transition-colors ' +
+  'items-center justify-center rounded-cmn-role-control text-text-secondary transition-colors ' +
   'duration-cmn-short ease-cmn-standard hover:bg-surface-hover focus:outline-none ' +
   `focus-visible:ring-2 focus-visible:ring-border-focus ${PHONE_HIT_AREA_CLASSES}`;
 
