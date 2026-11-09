@@ -10,38 +10,57 @@ import {readFileSync} from 'node:fs';
 import {createRequire} from 'node:module';
 import {describe, it} from 'node:test';
 
+import postcss from 'postcss';
+
 import {checkPreset, HOOK_RULES} from './presets-check.mjs';
 
 const read = relative => readFileSync(new URL(relative, import.meta.url), 'utf8');
 const themeCss = read('../theme.css');
 const tailwindPreset = createRequire(import.meta.url)('../tailwind/preset.cjs');
 
-/** The hook block: from its heading comment to the Motion block that follows. */
-const block = themeCss.slice(themeCss.indexOf('/* PRESET HOOKS.'), themeCss.indexOf('/* Motion'));
-const hooks = [...block.matchAll(/^\s*(--[\w-]+):\s*([^;]+);/gm)].map(([, name, value]) => ({
-  name,
-  value: value.trim(),
-}));
+const sheet = postcss.parse(themeCss);
+
+/** Every declaration of every rule in the sheet, by property: the semantic model of theme.css. */
+const declared = new Map();
+sheet.walkDecls(decl => {
+  declared.set(decl.prop, [...(declared.get(decl.prop) ?? []), decl]);
+});
+
+/** The hook block: the declarations between its heading comment and the Motion comment. */
+const hooks = [];
+sheet.walkRules(rule => {
+  let inBlock = false;
+  for (const node of rule.nodes) {
+    if (node.type === 'comment') {
+      if (node.text.startsWith('PRESET HOOKS.')) inBlock = true;
+      else if (inBlock && node.text.startsWith('Motion')) inBlock = false;
+    } else if (inBlock && node.type === 'decl') {
+      hooks.push({name: node.prop, value: node.value.trim()});
+    }
+  }
+});
 
 describe('preset hooks', () => {
   it('finds the hook block', () => {
     assert.ok(hooks.length >= 40, `expected the whole hook block, found ${hooks.length} hooks`);
+    assert.ok(hooks.every(h => h.name.startsWith('--cmn-')));
   });
 
   it('gives every hook one Carbon default in theme.css, none of them dark- or width-specific', () => {
     for (const {name} of hooks) {
-      const declarations = themeCss.match(new RegExp(`^\\s*${name}:`, 'gm')) ?? [];
-      assert.equal(declarations.length, 1, `${name} must be declared once, with its Carbon value`);
+      assert.equal(
+        declared.get(name)?.length,
+        1,
+        `${name} must be declared once, with its Carbon value`
+      );
     }
   });
 
   it('names a rule for every hook in the per-preset test, and no hook that is gone', () => {
-    const declared = hooks.map(h => h.name).sort();
-    assert.deepEqual(Object.keys(HOOK_RULES).sort(), declared);
+    assert.deepEqual(Object.keys(HOOK_RULES).sort(), hooks.map(h => h.name).sort());
   });
 
   it('declares every --cmn-* custom property the Tailwind preset reads', () => {
-    const declared = new Set([...themeCss.matchAll(/^\s*(--[\w-]+):/gm)].map(m => m[1]));
     const reads = [...JSON.stringify(tailwindPreset.theme).matchAll(/var\((--cmn-[\w-]+)/g)];
     assert.ok(reads.length > 0, 'the Tailwind preset reads no --cmn-* hook');
     for (const [, name] of reads) {
