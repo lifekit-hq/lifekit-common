@@ -63,7 +63,7 @@ describe('ToggleComponent', () => {
     fixture.componentRef.setInput('checked', true);
     fixture.detectChanges();
     expect(button()?.getAttribute('aria-checked')).toBe('true');
-    expect(button()?.className).toContain('bg-status-success');
+    expect(button()?.className).toContain('bg-cmn-toggle-on');
   });
 
   it('slides the thumb across when checked', () => {
@@ -72,7 +72,9 @@ describe('ToggleComponent', () => {
 
     fixture.componentRef.setInput('checked', true);
     fixture.detectChanges();
-    expect(thumb()?.className).toContain('translate-x-6');
+    expect(thumb()?.className).toContain(
+      'translate-x-[calc(var(--cmn-toggle-w)-var(--cmn-toggle-thumb)-2*var(--cmn-toggle-pad))]'
+    );
   });
 
   it('emits the negated value on click', () => {

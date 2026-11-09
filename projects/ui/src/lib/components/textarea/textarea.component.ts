@@ -12,7 +12,7 @@ import type {InputSize} from '../input/input.component';
 
 // The same filled field as `cmn-input` (see there): fill, bottom border only, inset outline on focus.
 const BASE_CLASSES =
-  'block w-full resize-y rounded-cmn-md border-0 border-b font-base bg-cmn-field text-text-primary ' +
+  'block w-full resize-y rounded-cmn-role-field border-solid border-cmn-field-frame border-cmn-field-border font-base bg-cmn-field text-text-primary ' +
   'placeholder:text-text-placeholder [&:read-write]:hover:bg-surface-hover ' +
   'focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-border-focus ' +
   'disabled:cursor-not-allowed disabled:resize-none disabled:border-border-default ' +
@@ -27,9 +27,9 @@ const SIZE_CLASSES: Record<InputSize, string> = {
   lg: 'px-cmn-4 py-cmn-4 text-cmn-lg',
 };
 
-const DEFAULT_BORDER = 'border-border-strong';
+const DEFAULT_BORDER = 'border-cmn-field-border';
 const ERROR_BORDER =
-  'border-border-strong outline outline-2 -outline-offset-2 outline-status-error';
+  'border-cmn-field-border outline outline-2 -outline-offset-2 outline-status-error';
 
 const DEFAULT_ROWS = 3;
 

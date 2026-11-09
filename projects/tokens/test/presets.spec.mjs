@@ -233,3 +233,57 @@ describe('the package ships presets', () => {
     }
   });
 });
+
+describe('hook rules (the real theme.css)', () => {
+  const real = body =>
+    checkPreset({id: 'soft', css: `:root[data-preset='soft'] { ${body} }`, themeCss});
+
+  it('reject a field outline colour under 3:1', () => {
+    const problems = real('--cmn-field-border-color: var(--color-border-default);');
+    assert.match(
+      problems.join('\n'),
+      /--cmn-field-border-color is 1\.\d\d:1 on --color-surface-card/
+    );
+    const outline = real('--cmn-segmented-outline: var(--color-border-default);');
+    assert.match(outline.join('\n'), /--cmn-segmented-outline is 1\.\d\d:1/);
+  });
+
+  it('reject a secondary button or segmented cell whose text is under 4.5:1 on its fill', () => {
+    const button = real(
+      '--cmn-btn-secondary-bg: var(--color-border-default); --cmn-btn-secondary-fg: var(--color-surface-card);'
+    );
+    assert.match(
+      button.join('\n'),
+      /--cmn-btn-secondary-fg on --cmn-btn-secondary-bg is 1\.\d\d:1/
+    );
+    const cell = real(
+      '--cmn-segmented-active-bg: var(--color-border-default); --cmn-segmented-active-fg: var(--color-surface-card);'
+    );
+    assert.match(cell.join('\n'), /--cmn-segmented-active-fg on --cmn-segmented-active-bg/);
+  });
+
+  it('reject a fill that primary text cannot be read on, and accept a transparent one', () => {
+    const dark = real('--cmn-nav-active-bg: var(--color-text-primary);');
+    assert.match(dark.join('\n'), /--color-text-primary on --cmn-nav-active-bg is 1\.00:1/);
+    assert.deepEqual(real('--cmn-tab-active-bg: transparent; --cmn-tabs-bg: transparent;'), []);
+    const hover = real('--cmn-btn-secondary-hover: var(--color-surface-card);');
+    assert.match(hover.join('\n'), /--cmn-btn-secondary-fg on --cmn-btn-secondary-hover/);
+  });
+
+  it('reject a toggle on colour under 3:1 on the surface, in either theme', () => {
+    const problems = real('--cmn-toggle-on: var(--color-border-default);');
+    assert.match(problems.join('\n'), /--cmn-toggle-on is 1\.\d\d:1 on --color-surface-card/);
+    assert.match(problems.join('\n'), /in the dark theme; an on state needs 3:1/);
+  });
+
+  it('reject a toggle whose thumb does not fit its track, and accept one that does', () => {
+    const problems = real('--cmn-toggle-thumb: 24px;');
+    assert.match(problems.join('\n'), /thumb \(24px\) plus its padding \(4px each side\)/);
+    assert.deepEqual(
+      real(
+        '--cmn-toggle-w: 36px; --cmn-toggle-h: 20px; --cmn-toggle-thumb: 14px; --cmn-toggle-pad: 3px;'
+      ),
+      []
+    );
+  });
+});

@@ -70,7 +70,7 @@ describe('SelectComponent', () => {
   it('bounds the field with the 3:1 border and a focus ring', () => {
     fixture.detectChanges();
 
-    expect(nativeSelect()?.classList).toContain('border-border-strong');
+    expect(nativeSelect()?.classList).toContain('border-cmn-field-border');
     expect(nativeSelect()?.classList).toContain('focus-visible:ring-2');
     expect(nativeSelect()?.classList).toContain('focus-visible:ring-border-focus');
   });
@@ -80,7 +80,7 @@ describe('SelectComponent', () => {
     fixture.detectChanges();
 
     expect(nativeSelect()?.classList).toContain('border-status-error');
-    expect(nativeSelect()?.classList).not.toContain('border-border-strong');
+    expect(nativeSelect()?.classList).not.toContain('border-cmn-field-border');
   });
 
   it('writes external form values', () => {

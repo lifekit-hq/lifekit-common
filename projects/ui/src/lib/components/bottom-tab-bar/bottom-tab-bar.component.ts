@@ -37,7 +37,7 @@ const TAB_FLOATING_ACTIVE_CLASSES = 'bg-accent-subtle';
 const TAB_INACTIVE_CLASSES = 'text-text-secondary hover:text-text-primary';
 
 const NAV_DOCKED_CLASSES =
-  '[container-type:inline-size] flex border-t border-border-default bg-surface-card pb-[env(safe-area-inset-bottom)]';
+  '[container-type:inline-size] flex border-t border-cmn-shell bg-surface-card pb-[env(safe-area-inset-bottom)]';
 /**
  * The iOS tab bar: edge to edge on the bottom edge, 49pt of items and only the bottom safe-area
  * inset below them, no margin. Translucent and blurred so content scrolling under it shows
@@ -45,7 +45,7 @@ const NAV_DOCKED_CLASSES =
  * shrink it) in step with the shell's measured inset, which pads main to clear the bar. It is a minimum: large text grows the bar.
  */
 const NAV_FLOATING_CLASSES =
-  '[container-type:inline-size] flex min-h-[calc(49px+env(safe-area-inset-bottom))] border-t border-border-default px-cmn-1 ' +
+  '[container-type:inline-size] flex min-h-[calc(49px+env(safe-area-inset-bottom))] border-t border-cmn-shell px-cmn-1 ' +
   'pb-[env(safe-area-inset-bottom)] ' +
   'bg-[color-mix(in_srgb,var(--color-surface-card)_80%,transparent)] backdrop-blur-md';
 

@@ -66,6 +66,23 @@ module.exports = {
         // Carbon's filled field (theme.css --cmn-field-*): the fill; the bottom border and the focus
         // ring are the --cmn-field-border-bottom and --cmn-field-focus values.
         'cmn-field': 'var(--cmn-field-bg)',
+        'cmn-field-border': 'var(--cmn-field-border-color)',
+        'cmn-select': 'var(--cmn-select-bg)',
+        'cmn-card-border': 'var(--cmn-card-border-color)',
+        'cmn-shell': 'var(--cmn-shell-border-color)',
+        'cmn-float': 'var(--cmn-float-border-color)',
+        'cmn-segmented-outline': 'var(--cmn-segmented-outline)',
+        'cmn-segmented-active': 'var(--cmn-segmented-active-bg)',
+        'cmn-segmented-active-fg': 'var(--cmn-segmented-active-fg)',
+        'cmn-nav-active': 'var(--cmn-nav-active-bg)',
+        'cmn-btn-secondary': 'var(--cmn-btn-secondary-bg)',
+        'cmn-btn-secondary-fg': 'var(--cmn-btn-secondary-fg)',
+        'cmn-btn-secondary-hover': 'var(--cmn-btn-secondary-hover)',
+        'cmn-btn-secondary-border': 'var(--cmn-btn-secondary-border)',
+        'cmn-toggle-on': 'var(--cmn-toggle-on)',
+        'cmn-tab-active': 'var(--cmn-tab-active-bg)',
+        'cmn-tabs': 'var(--cmn-tabs-bg)',
+        'cmn-table-head': 'var(--cmn-table-head-bg)',
       },
 
       ringOffsetColor: {
@@ -108,6 +125,19 @@ module.exports = {
         'cmn-md': 'var(--radius-md)',
         'cmn-lg': 'var(--radius-lg)',
         'cmn-full': 'var(--radius-full)',
+        // The semantic radius, by role (theme.css --cmn-radius-*). Named `role-*` on purpose: Tailwind
+        // writes same-property utilities in alphabetical order, and a caller's `rounded-cmn-full` has
+        // always lost to a component's `rounded-cmn-md` (m after f). Names that sort before `full`
+        // would flip that, so every consumer's override would change shape under Carbon.
+        'cmn-role-control': 'var(--cmn-radius-control)',
+        'cmn-role-field': 'var(--cmn-radius-field)',
+        'cmn-role-surface': 'var(--cmn-radius-surface)',
+        'cmn-role-inset': 'var(--cmn-radius-inset)',
+        'cmn-nav': 'var(--cmn-nav-item-radius)',
+        'cmn-tab': 'var(--cmn-tab-radius)',
+        'cmn-tabs': 'var(--cmn-tabs-radius)',
+        'cmn-segmented': 'var(--cmn-segmented-radius)',
+        'cmn-segmented-cell': 'var(--cmn-segmented-cell-radius)',
       },
 
       boxShadow: {
@@ -120,11 +150,17 @@ module.exports = {
           'inset 0 0 0 1px var(--color-border-focus), inset 0 0 0 2px var(--color-surface-card)',
         // Carbon's selected side-nav link: a 3px bar on the leading edge, drawn inside the box so the
         // label does not move when a link is chosen.
-        'cmn-nav-active': 'inset 3px 0 0 var(--color-accent-default)',
+        'cmn-nav-active': 'var(--cmn-nav-active-shadow)',
+        'cmn-card': 'var(--cmn-card-shadow)',
+        'cmn-btn': 'var(--cmn-btn-shadow)',
       },
       // Carbon's notification stripe (3px), the one border width off Tailwind's 0/1/2/4/8 steps.
       borderWidth: {
         'cmn-bar': '3px',
+        'cmn-field-frame': 'var(--cmn-field-border-width)',
+        'cmn-select-frame': 'var(--cmn-select-border-width)',
+        'cmn-tab': 'var(--cmn-tab-indicator)',
+        'cmn-stripe': 'var(--cmn-alert-stripe)',
       },
 
       keyframes: {
@@ -196,6 +232,15 @@ module.exports = {
         // Desktop shell (theme.css): the side nav's two widths, Carbon's 256 and 48.
         'cmn-nav': 'var(--cmn-nav-width)',
         'cmn-nav-rail': 'var(--cmn-nav-rail-width)',
+        'cmn-nav-inset': 'var(--cmn-nav-inset)',
+        'cmn-nav-gap': 'var(--cmn-nav-gap)',
+        'cmn-nav-item': 'var(--cmn-nav-item-h)',
+        'cmn-toggle-w': 'var(--cmn-toggle-w)',
+        'cmn-toggle-h': 'var(--cmn-toggle-h)',
+        'cmn-toggle-thumb': 'var(--cmn-toggle-thumb)',
+        'cmn-toggle-pad': 'var(--cmn-toggle-pad)',
+        'cmn-tabs-pad': 'var(--cmn-tabs-pad)',
+        'cmn-tabs-gap': 'var(--cmn-tabs-gap)',
         'cmn-16': '64px',
         // Page rhythm (theme.css): semantic steps the page template owns. `px-cmn-page-gutter`,
         // `mt-cmn-title-gap`, `gap-cmn-section-gap`, `gap-cmn-group-gap`, `h-cmn-control-h`.

@@ -18,7 +18,7 @@ export type SearchInputSize = 'sm' | 'md' | 'lg';
 // The text starts 48px in, after the 16px glyph and its padding, and stops short of the clear
 // button.
 const BASE_CLASSES =
-  'block w-full rounded-cmn-md border-0 border-b border-border-strong bg-cmn-field font-base ' +
+  'block w-full rounded-cmn-role-field border-solid border-cmn-field-frame border-cmn-field-border bg-cmn-field font-base ' +
   'text-text-primary placeholder:text-text-placeholder pl-cmn-12 pr-cmn-12 ' +
   'hover:bg-surface-hover focus:outline focus:outline-2 focus:-outline-offset-2 ' +
   'focus:outline-border-focus disabled:cursor-not-allowed disabled:border-border-default ' +

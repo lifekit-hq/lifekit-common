@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, Component, input} from '@angular/core';
 
 // Shadow plus a hairline border, like the menu: a shadow alone is lost on dark surfaces.
 const PANEL_CLASSES =
-  'block max-w-[min(20rem,calc(100vw-2rem))] break-words rounded-cmn-md border border-border-default bg-surface-card ' +
+  'block max-w-[min(20rem,calc(100vw-2rem))] break-words rounded-cmn-role-surface border border-cmn-float bg-surface-card ' +
   'px-cmn-2 py-cmn-1 text-cmn-xs leading-relaxed text-text-primary shadow-cmn-md ' +
   'animate-cmn-fade-in';
 

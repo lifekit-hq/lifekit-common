@@ -52,7 +52,7 @@ const WHOLE_PERCENT = 0.01;
 
 const ROW_BASE = 'flex w-full items-center gap-cmn-3 py-cmn-2 text-left text-cmn-sm';
 const CLICKABLE_ROW =
-  ' min-h-cmn-touch cursor-pointer rounded-cmn-sm hover:bg-surface-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-border-focus';
+  ' min-h-cmn-touch cursor-pointer rounded-cmn-role-inset hover:bg-surface-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-border-focus';
 
 /** The charts-core categorical series step for input position `index`, as a token reference. */
 function defaultColor(index: number): string {
@@ -159,7 +159,7 @@ function defaultColor(index: number): string {
       <span
         [style.background-color]="segment.color"
         aria-hidden="true"
-        class="size-cmn-3 shrink-0 rounded-cmn-sm"
+        class="size-cmn-3 shrink-0 rounded-cmn-role-inset"
       ></span>
       <span class="min-w-0 flex-1 break-words font-medium text-text-primary">{{
         segment.label

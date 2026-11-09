@@ -48,6 +48,34 @@ imports only the presets it offers; an app that stays on Carbon imports nothing.
   in its name) is at least 3:1 on the card and the page ground, light and dark. A `-bg`/`-fg` pair is
   at least 4.5:1. Colours are `--color-*` roles the test can read, not `color-mix()`.
 - **Self-hosted fonts.** `@font-face` `src` is a local file.
+- **Hooks** (below) are held to the rule `HOOK_RULES` names for each: a field outline 3:1, a chosen
+  or secondary fill and its text 4.5:1, text on a selected fill 4.5:1, a toggle's on colour 3:1, and
+  a toggle thumb that fits its track.
+
+## Hooks
+
+A token value cannot change anatomy Carbon fixes: an underline field against an outlined one, a
+hairline card against a shadowed one, a bar against a pill for the selected nav item. Those are
+**hooks**, the `--cmn-*` names in the PRESET HOOKS block of `theme.css`. Each defaults to its Carbon
+value, so a preset sets only the ones it disagrees on, and a component reaches them through a
+`cmn-*` utility in `tailwind/preset.cjs`, never by value. There is one component implementation;
+a preset sets values, the component owns structure.
+
+| Hook family                                                                               | What it decides                                                                                | Components                                                                                                  |
+| ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `--cmn-radius-control\|field\|surface\|inset`                                             | which size step a kind of thing takes: a button, a field, a card or panel, a small inner shape | every component (none names `--radius-sm\|md\|lg` directly; a test holds that)                              |
+| `--cmn-field-border-width\|color`, `--cmn-select-bg\|border-width`                        | field frame: bottom rule (Carbon) or full outline                                              | input, textarea, search-input, select, date-range, chat input, top-bar search                               |
+| `--cmn-card-border-color\|shadow`, `--cmn-float-border-color`, `--cmn-shell-border-color` | edge of a resting card, a floating panel and the app shell: hairline (Carbon) or shadow        | card, stat-card, charts, data-table, skeleton, dialog, menu, palette, tooltip, nav, top-bar, bottom-tab-bar |
+| `--cmn-nav-*`                                                                             | side nav item inset, gap, height, radius, selected fill and mark (3px bar in Carbon)           | sidebar-nav                                                                                                 |
+| `--cmn-btn-*`                                                                             | label weight, resting shadow, the secondary kind's fill, text, hover and border                | button                                                                                                      |
+| `--cmn-tab*`, `--cmn-tabs-*`                                                              | line tab (Carbon) or filled tab in a tinted row                                                | tab-group                                                                                                   |
+| `--cmn-segmented-*`                                                                       | box and cell radius, outline, chosen cell fill and text                                        | segmented                                                                                                   |
+| `--cmn-toggle-*`                                                                          | track, thumb, padding and the on colour                                                        | toggle                                                                                                      |
+| `--cmn-alert-stripe`, `--cmn-table-head-bg`                                               | alert stripe width, data-table header fill                                                     | alert, data-table                                                                                           |
+
+Row separators inside a list, a disclosure row or a dialog stay on `border-default`: they read the
+same in every look. `test/hooks.spec.mjs` fails on a hook with no Carbon default, a hook nothing
+uses, or a hook the per-preset test has no rule for (`HOOK_RULES` in `test/presets-check.mjs`).
 
 ## Adding a preset
 

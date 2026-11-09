@@ -47,7 +47,7 @@ const VARIANT_ROLE: Record<AlertVariant, string> = {
 
 const DISMISS_CLASSES =
   '-my-cmn-1 -mr-cmn-2 inline-flex h-cmn-size-sm w-cmn-size-sm shrink-0 items-center justify-center ' +
-  'rounded-cmn-sm transition-colors duration-cmn-short ease-cmn-standard hover:bg-surface-hover ' +
+  'rounded-cmn-role-inset transition-colors duration-cmn-short ease-cmn-standard hover:bg-surface-hover ' +
   `focus:outline-none focus:ring-2 focus:ring-border-focus ${PHONE_HIT_AREA_CLASSES}`;
 
 @Component({
@@ -99,7 +99,7 @@ export class AlertComponent {
 
   public readonly containerClasses = computed(() =>
     [
-      'flex min-h-cmn-control-h items-start gap-cmn-3 rounded-cmn-md border border-l-cmn-bar px-cmn-4 py-cmn-3',
+      'flex min-h-cmn-control-h items-start gap-cmn-3 rounded-cmn-role-surface border border-l-cmn-stripe px-cmn-4 py-cmn-3',
       VARIANT_CONTAINER_CLASSES[this.variant()],
     ].join(' ')
   );

@@ -45,7 +45,7 @@ function byDocumentOrder(a: ErrorSummaryField, b: ErrorSummaryField): number {
       <div
         #summary
         [attr.aria-labelledby]="titleId"
-        class="rounded-cmn-md border-2 border-status-error bg-surface-card p-cmn-4 focus:outline-none focus:ring-2 focus:ring-border-focus focus:ring-offset-1"
+        class="rounded-cmn-role-surface border-2 border-status-error bg-surface-card p-cmn-4 focus:outline-none focus:ring-2 focus:ring-border-focus focus:ring-offset-1"
         tabindex="-1"
       >
         <div role="alert">

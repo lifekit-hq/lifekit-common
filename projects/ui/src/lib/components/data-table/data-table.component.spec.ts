@@ -196,7 +196,7 @@ describe('DataTableComponent', () => {
   it("draws Carbon's table: a 48px header on the raised fill in primary semibold, 48px cells", () => {
     const table = fixture.debugElement.children[0].componentInstance as DataTableComponent;
     const header = table.headerCellClass('left');
-    for (const cls of ['h-cmn-size-lg', 'bg-surface-raised', 'text-cmn-sm', 'font-semibold']) {
+    for (const cls of ['h-cmn-size-lg', 'bg-cmn-table-head', 'text-cmn-sm', 'font-semibold']) {
       expect(header).toContain(cls);
     }
     expect(header).toContain('text-text-primary');

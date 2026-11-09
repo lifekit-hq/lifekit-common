@@ -12,10 +12,9 @@ export interface NavItem {
   badge?: () => number;
 }
 
-const HEADER_BASE_CLASSES =
-  'flex h-cmn-size-lg shrink-0 items-center border-b border-border-default';
+const HEADER_BASE_CLASSES = 'flex h-cmn-size-lg shrink-0 items-center border-b border-cmn-shell';
 const NAV_LINK_CLASSES =
-  'flex min-h-cmn-touch w-full items-center gap-cmn-4 px-cmn-4 text-left transition-colors md:min-h-cmn-size-sm ' +
+  'flex min-h-cmn-touch w-full items-center gap-cmn-4 rounded-cmn-nav px-cmn-4 text-left transition-colors md:min-h-cmn-nav-item ' +
   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-border-focus';
 
 @Component({
@@ -27,7 +26,7 @@ const NAV_LINK_CLASSES =
   template: `
     <aside
       [ngClass]="[
-        'flex flex-col h-full border-r border-border-default bg-surface-card',
+        'flex flex-col h-full border-r border-cmn-shell bg-surface-card',
         isCollapsed() ? 'w-cmn-nav-rail' : 'w-cmn-nav',
       ]"
     >
@@ -53,7 +52,7 @@ const NAV_LINK_CLASSES =
       </div>
 
       <!-- Nav items -->
-      <nav class="flex flex-1 flex-col">
+      <nav class="flex flex-1 flex-col gap-cmn-nav-gap p-cmn-nav-inset">
         @for (item of items(); track item.route) {
           <button
             [ngClass]="navItemClass(item)"
@@ -80,7 +79,7 @@ const NAV_LINK_CLASSES =
             [attr.aria-label]="isCollapsed() ? collapsedVersionName() : null"
             (click)="versionClick.emit()"
             type="button"
-            class="flex w-full items-center gap-cmn-2 border-t border-border-default px-cmn-4 py-cmn-2 text-left text-cmn-xs text-text-secondary hover:bg-surface-hover hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-border-focus transition-colors"
+            class="flex w-full items-center gap-cmn-2 border-t border-cmn-shell px-cmn-4 py-cmn-2 text-left text-cmn-xs text-text-secondary hover:bg-surface-hover hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-border-focus transition-colors"
           >
             @if (!isCollapsed()) {
               <span class="truncate">{{ versionLabel() }}</span>
@@ -97,7 +96,7 @@ const NAV_LINK_CLASSES =
         } @else {
           <div
             [title]="isCollapsed() ? versionLabel() : ''"
-            class="border-t border-border-default px-cmn-4 py-cmn-2 text-cmn-xs text-text-secondary"
+            class="border-t border-cmn-shell px-cmn-4 py-cmn-2 text-cmn-xs text-text-secondary"
           >
             @if (!isCollapsed()) {
               {{ versionLabel() }}
@@ -165,7 +164,7 @@ export class SidebarNavComponent {
    */
   public navItemClass(item: NavItem): string {
     const isActive = this.activeRoute() === item.route;
-    const active = 'bg-accent-subtle font-semibold text-text-primary shadow-cmn-nav-active';
+    const active = 'bg-cmn-nav-active font-semibold text-text-primary shadow-cmn-nav-active';
     const inactive = 'text-text-secondary hover:bg-surface-hover hover:text-text-primary';
     return `${NAV_LINK_CLASSES} ${isActive ? active : inactive}`;
   }

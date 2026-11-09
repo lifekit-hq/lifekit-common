@@ -153,7 +153,7 @@ describe('AlertItemComponent', () => {
   it('defaults to the bordered card density', () => {
     fixture.detectChanges();
     expect(row().classList).toContain('border');
-    expect(row().classList).toContain('rounded-cmn-lg');
+    expect(row().classList).toContain('rounded-cmn-role-surface');
     expect(row().classList).not.toContain('border-b');
   });
 
@@ -162,7 +162,7 @@ describe('AlertItemComponent', () => {
     fixture.detectChanges();
 
     expect(row().classList).toContain('border-b');
-    expect(row().classList).not.toContain('rounded-cmn-lg');
+    expect(row().classList).not.toContain('rounded-cmn-role-surface');
     expect(row().classList).not.toContain('border');
     expect(row().style.background).toBe('');
     expect(unreadDot()).not.toBeNull();

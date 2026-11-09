@@ -75,10 +75,10 @@ export class ToggleComponent implements ControlValueAccessor {
     // strong-border grey and on is the success hue (Carbon's support-success); a disabled switch
     // greys out instead of dimming.
     const base =
-      'relative inline-flex h-6 w-12 shrink-0 items-center rounded-full ' +
+      'relative inline-flex h-cmn-toggle-h w-cmn-toggle-w shrink-0 items-center rounded-full ' +
       'transition-colors duration-cmn-short ease-cmn-standard focus:outline-none ' +
       `focus:ring-2 focus:ring-border-focus focus:ring-offset-1 ${PHONE_HIT_AREA_CLASSES}`;
-    let color = this.isChecked() ? 'bg-status-success' : 'bg-border-strong';
+    let color = this.isChecked() ? 'bg-cmn-toggle-on' : 'bg-border-strong';
     if (this.isDisabled()) {
       color = 'bg-surface-hover';
     }
@@ -92,10 +92,12 @@ export class ToggleComponent implements ControlValueAccessor {
 
   public readonly thumbClass = computed(() => {
     const base =
-      'pointer-events-none ml-cmn-1 inline-flex h-4 w-4 items-center justify-center rounded-full ' +
+      'pointer-events-none ml-cmn-toggle-pad inline-flex h-cmn-toggle-thumb w-cmn-toggle-thumb items-center justify-center rounded-full ' +
       'transition-transform duration-cmn-short ease-cmn-standard';
     const color = this.isDisabled() ? 'bg-surface-card' : 'bg-white';
-    const translate = this.isChecked() ? 'translate-x-6' : 'translate-x-0';
+    const translate = this.isChecked()
+      ? 'translate-x-[calc(var(--cmn-toggle-w)-var(--cmn-toggle-thumb)-2*var(--cmn-toggle-pad))]'
+      : 'translate-x-0';
     return `${base} ${color} ${translate}`;
   });
 

@@ -11,7 +11,7 @@ export type AlertItemDensity = 'card' | 'flat';
 
 /** 24px drawn, at least --size-touch pressed on a phone. */
 const DISMISS_CLASSES =
-  'relative z-10 flex shrink-0 rounded-cmn-sm p-1 text-text-disabled transition-colors hover:bg-surface-raised ' +
+  'relative z-10 flex shrink-0 rounded-cmn-role-inset p-1 text-text-disabled transition-colors hover:bg-surface-raised ' +
   `hover:text-text-primary ${PHONE_HIT_AREA_CLASSES}`;
 
 const SEVERITY_COLOR: Record<AlertItemSeverity, string> = {
@@ -34,7 +34,7 @@ const SEVERITY_ICON: Record<AlertItemSeverity, LucideIconName> = {
     <div
       [class.border-border-default]="flat() || isRead()"
       [class.bg-surface-card]="isRead() && !flat()"
-      [class.rounded-cmn-lg]="!flat()"
+      [class.rounded-cmn-role-surface]="!flat()"
       [class.border]="!flat()"
       [class.p-cmn-4]="!flat()"
       [class.border-b]="flat()"
@@ -47,7 +47,7 @@ const SEVERITY_ICON: Record<AlertItemSeverity, LucideIconName> = {
     >
       <div
         [style.background]="color() + '18'"
-        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-cmn-md"
+        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-cmn-role-inset"
       >
         <cmn-icon [name]="resolvedIcon()" [style.color]="color()" size="sm" />
       </div>
@@ -75,7 +75,7 @@ const SEVERITY_ICON: Record<AlertItemSeverity, LucideIconName> = {
           }
           @if (referenceLabel()) {
             <span
-              class="rounded-cmn-sm bg-surface-raised px-1.5 py-0.5 text-cmn-xs text-text-secondary"
+              class="rounded-cmn-role-inset bg-surface-raised px-1.5 py-0.5 text-cmn-xs text-text-secondary"
               >{{ referenceLabel() }}</span
             >
           }

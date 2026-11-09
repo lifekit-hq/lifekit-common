@@ -25,7 +25,7 @@ describe('ButtonComponent', () => {
 
   it.each<[ButtonVariant, string]>([
     ['primary', 'bg-accent-default'],
-    ['secondary', 'bg-text-primary'],
+    ['secondary', 'bg-cmn-btn-secondary'],
     ['tertiary', 'border-accent-default'],
     ['ghost', 'text-accent-default'],
     ['destructive', 'bg-status-error'],
@@ -53,7 +53,7 @@ describe('ButtonComponent', () => {
   it("is square, with Carbon's inset focus ring and a border on every kind", () => {
     fixture.detectChanges();
     const className = button()?.className ?? '';
-    expect(className).toContain('rounded-cmn-md');
+    expect(className).toContain('rounded-cmn-role-control');
     expect(className).toMatch(/(^| )border( |$)/);
     expect(className).toContain('border-transparent');
     expect(className).toContain('focus:border-border-focus');

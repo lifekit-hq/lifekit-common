@@ -74,7 +74,7 @@ describe('MenuComponent', () => {
     const menu = overlayContainer.getContainerElement().querySelector('[role="menu"]');
     expect(menu?.classList).toContain('shadow-cmn-lg');
     expect(menu?.classList).toContain('border');
-    expect(menu?.classList).toContain('border-border-default');
+    expect(menu?.classList).toContain('border-cmn-float');
   });
 
   it('should ring the focused item, not just tint it', () => {

@@ -50,7 +50,7 @@ export type {
       [class]="
         compact()
           ? 'h-full min-h-8 w-full'
-          : 'flex w-full flex-col gap-cmn-3 rounded-cmn-lg border border-border-default bg-surface-card p-cmn-4'
+          : 'flex w-full flex-col gap-cmn-3 rounded-cmn-role-surface border border-cmn-card-border bg-surface-card shadow-cmn-card p-cmn-4'
       "
     >
       @if (!compact()) {
@@ -67,7 +67,7 @@ export type {
           [class.absolute]="compact()"
           [class.inset-0]="compact()"
           role="img"
-          class="rounded-cmn-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus"
+          class="rounded-cmn-role-inset focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus"
         ></canvas>
         @if (isEmpty() && !compact()) {
           <p

@@ -58,7 +58,7 @@ describe('SkeletonComponent', () => {
 
   it('adds nothing beyond the base classes when no caller class is given', () => {
     fixture.detectChanges();
-    const base = ['block', 'cmn-skeleton-sweep', 'rounded-cmn-sm'];
+    const base = ['block', 'cmn-skeleton-sweep', 'rounded-cmn-role-inset'];
     const classes = (bar()?.getAttribute('class') ?? '').split(/\s+/).filter(Boolean);
     for (const cls of base) {
       expect(classes).toContain(cls);
@@ -93,7 +93,7 @@ describe('SkeletonComponent', () => {
     it('draws a stat card with a label, a value and a delta', () => {
       fixture.componentRef.setInput('shape', 'stat');
       fixture.detectChanges();
-      expect(root().querySelector('.rounded-cmn-lg')).not.toBeNull();
+      expect(root().querySelector('.rounded-cmn-role-surface')).not.toBeNull();
       expect(sweeping()).toBe(4);
     });
 

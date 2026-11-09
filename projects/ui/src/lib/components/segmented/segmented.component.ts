@@ -36,7 +36,8 @@ const HOST_CLASSES =
  */
 const GROUP_CLASSES =
   'grid w-max min-w-full grid-flow-col auto-cols-[minmax(var(--size-touch),1fr)] ' +
-  'outline outline-1 -outline-offset-1 outline-text-primary aria-disabled:outline-border-default';
+  'rounded-cmn-segmented overflow-hidden outline outline-1 -outline-offset-1 outline-cmn-segmented-outline ' +
+  'aria-disabled:outline-border-default';
 
 /**
  * Cells are the 40px layout step tall (at least `--size-touch` on a phone), never narrower than
@@ -44,10 +45,10 @@ const GROUP_CLASSES =
  */
 const CELL_BASE_CLASSES =
   'h-cmn-size-md max-md:min-h-cmn-touch min-w-max cursor-pointer select-none whitespace-nowrap ' +
-  'px-cmn-1 text-cmn-sm transition-colors duration-cmn-short ease-cmn-standard ' +
+  'rounded-cmn-segmented-cell px-cmn-1 text-cmn-sm transition-colors duration-cmn-short ease-cmn-standard ' +
   'touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 ' +
   'focus-visible:outline-border-focus disabled:cursor-not-allowed disabled:text-text-disabled';
-const CELL_CHECKED_CLASSES = 'bg-text-primary font-semibold text-text-inverse';
+const CELL_CHECKED_CLASSES = 'bg-cmn-segmented-active font-semibold text-cmn-segmented-active-fg';
 /** Disabled text on the ink fill is unreadable; a disabled choice sits on a neutral surface. */
 const CELL_CHECKED_DISABLED_CLASSES = 'bg-surface-raised font-semibold';
 const CELL_UNCHECKED_CLASSES =

@@ -27,7 +27,7 @@ let zoneCounter = 0;
   template: `
     <section
       [attr.aria-labelledby]="headingId"
-      class="flex flex-col gap-cmn-4 rounded-cmn-lg border border-status-error/30 bg-status-error/[0.04] p-cmn-5 sm:flex-row sm:items-center sm:justify-between"
+      class="flex flex-col gap-cmn-4 rounded-cmn-role-surface border border-status-error/30 bg-status-error/[0.04] p-cmn-5 sm:flex-row sm:items-center sm:justify-between"
     >
       <div class="min-w-0">
         <h2 [id]="headingId" class="font-label text-cmn-sm font-semibold text-status-error">

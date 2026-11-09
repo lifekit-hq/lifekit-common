@@ -70,6 +70,65 @@
   --cmn-field-border-bottom: 1px solid var(--color-border-strong);
   --cmn-field-focus: 2px solid var(--color-border-focus);
 
+  /* PRESET HOOKS. The anatomy a token value cannot change by itself (field frame, card edge, nav
+     selection, tab style, toggle geometry, secondary button). Every default below is the Carbon
+     value; a preset overrides them under :root[data-preset='x'] (presets/README.md). A component
+     reaches them through the `cmn-*` utilities in tailwind/preset.cjs, never by value.
+     Semantic radius: which of the size steps a kind of thing takes. */
+  --cmn-radius-control: var(--radius-md);
+  --cmn-radius-field: var(--radius-md);
+  --cmn-radius-surface: var(--radius-lg);
+  --cmn-radius-inset: var(--radius-sm);
+  /* Field frame: border widths as a shorthand (Carbon: bottom only), colour, and the select's own. */
+  --cmn-field-border-width: 0 0 1px 0;
+  --cmn-field-border-color: var(--color-border-strong);
+  --cmn-select-bg: var(--color-surface-bg);
+  --cmn-select-border-width: 1px;
+  /* Surfaces: a card is held by a hairline or by a shadow (Carbon: hairline). */
+  --cmn-card-border-color: var(--color-border-default);
+  --cmn-card-shadow: 0 0 #0000;
+  --cmn-shell-border-color: var(--color-border-default);
+  /* A floating panel (menu, dialog, palette, tooltip) is held by a hairline and a shadow (Carbon). */
+  --cmn-float-border-color: var(--color-border-default);
+  /* Side nav item geometry and the selected state (Carbon: full-bleed rows, 3px leading bar). */
+  --cmn-nav-inset: 0px;
+  --cmn-nav-gap: 0px;
+  --cmn-nav-item-h: var(--cmn-size-sm);
+  --cmn-nav-item-radius: 0px;
+  --cmn-nav-active-bg: var(--color-accent-subtle);
+  --cmn-nav-active-shadow: inset 3px 0 0 var(--color-accent-default);
+  /* Button: label weight, the secondary kind's colours, and a resting shadow. */
+  --cmn-btn-weight: 400;
+  --cmn-btn-shadow: 0 0 #0000;
+  --cmn-btn-secondary-bg: var(--color-text-primary);
+  --cmn-btn-secondary-fg: var(--color-surface-card);
+  --cmn-btn-secondary-hover: var(--color-text-secondary);
+  --cmn-btn-secondary-border: transparent;
+  /* Toggle geometry and its on colour (Carbon: 48 x 24 track, 16px thumb, success green). */
+  --cmn-toggle-w: 48px;
+  --cmn-toggle-h: 24px;
+  --cmn-toggle-thumb: 16px;
+  --cmn-toggle-pad: 4px;
+  --cmn-toggle-on: var(--color-status-success);
+  /* Tabs: a line tab (Carbon) is an indicator under each tab; a pill tab is a filled tab in a tinted row. */
+  --cmn-tab-indicator: 2px;
+  --cmn-tab-radius: 0px;
+  --cmn-tab-active-bg: transparent;
+  --cmn-tabs-bg: transparent;
+  --cmn-tabs-pad: 0px;
+  --cmn-tabs-gap: 0px;
+  --cmn-tabs-radius: 0px;
+  /* Segmented control (Carbon's content switcher): a square box with an ink outline, the chosen cell
+     filled with ink. A pill preset rounds the box and the cell and tints the fill. */
+  --cmn-segmented-radius: 0px;
+  --cmn-segmented-cell-radius: 0px;
+  --cmn-segmented-outline: var(--color-text-primary);
+  --cmn-segmented-active-bg: var(--color-text-primary);
+  --cmn-segmented-active-fg: var(--color-text-inverse);
+  /* Alert stripe width and the table header fill. */
+  --cmn-alert-stripe: 3px;
+  --cmn-table-head-bg: var(--color-surface-raised);
+
   /* Motion — Carbon's durations and curves (@carbon/motion). Short (moderate-01): small state changes
      (a toggle, a fade). Medium (moderate-02): a surface entering or leaving (sheet, drawer,
      crossfade). Long (slow-01): a large or full-screen move. Decelerate what arrives, accelerate

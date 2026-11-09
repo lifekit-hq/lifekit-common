@@ -40,17 +40,15 @@ export class CardComponent {
     // elevated card keeps a transparent border so both variants occupy the same box.
     const parts: string[] = [
       'bg-surface-card',
-      'rounded-cmn-md',
+      'rounded-cmn-role-surface',
       'border',
-      this.elevated() ? 'border-transparent' : 'border-border-default',
+      this.elevated() ? 'border-transparent' : 'border-cmn-card-border',
     ];
     const paddingClass = PADDING_CLASSES[this.padding()];
     if (paddingClass) {
       parts.push(paddingClass);
     }
-    if (this.elevated()) {
-      parts.push('shadow-cmn-md');
-    }
+    parts.push(this.elevated() ? 'shadow-cmn-md' : 'shadow-cmn-card');
     if (this.fill()) {
       parts.push('flex', 'min-h-0', 'flex-1', 'flex-col', 'overflow-hidden');
     }

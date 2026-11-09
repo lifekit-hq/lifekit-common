@@ -111,7 +111,7 @@ describe('InputComponent', () => {
     expect(input().getAttribute('aria-invalid')).toBe('true');
     // Carbon's invalid field: the filled box keeps its bottom border and gains a 2px error outline.
     expect(input().className).toContain('outline-status-error');
-    expect(input().className).toContain('border-border-strong');
+    expect(input().className).toContain('border-cmn-field-border');
   });
 
   it('adopts the id handed down by a form field', () => {

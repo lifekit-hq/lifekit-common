@@ -4,7 +4,7 @@ import {ChangeDetectionStrategy, Component, computed, input, signal} from '@angu
 const MAX_INITIALS = 2;
 
 const BASE_CLASSES =
-  'inline-flex flex-shrink-0 items-center justify-center overflow-hidden rounded-cmn-md border ' +
+  'inline-flex flex-shrink-0 items-center justify-center overflow-hidden rounded-cmn-role-inset border ' +
   'border-border-default bg-surface-card text-cmn-xs font-bold text-text-secondary ' +
   'shadow-sm';
 

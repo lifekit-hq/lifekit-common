@@ -72,7 +72,7 @@ describe('CommandPaletteComponent', () => {
     const panel = host.querySelector<HTMLElement>('.cmn-palette-panel');
     expect(panel?.classList).toContain('shadow-cmn-md');
     expect(panel?.classList).toContain('border');
-    expect(panel?.classList).toContain('border-border-default');
+    expect(panel?.classList).toContain('border-cmn-float');
     expect(host.querySelector('.cmn-palette-backdrop')?.className).not.toContain('backdrop-blur');
   });
 
