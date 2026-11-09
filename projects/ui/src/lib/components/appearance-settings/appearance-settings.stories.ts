@@ -44,12 +44,12 @@ export const DeviceOnly: Story = {};
 /**
  * An app that offers more than one design preset gets a Design control above the colour. The choice
  * is kept on this device whatever the caption below says about the rest: it is not part of the
- * account appearance. `Demo` has no stylesheet here; real presets ship in `@lifekit-hq/tokens`.
+ * account appearance. Picking Lifekit applies the real preset, whose stylesheet Storybook imports.
  */
 export const WithDesignPresets: Story = {
   decorators: [
     applicationConfig({
-      providers: [provideDesignPresets({id: 'demo', label: 'Demo'})],
+      providers: [provideDesignPresets({id: 'lifekit', label: 'Lifekit'})],
     }),
   ],
 };
