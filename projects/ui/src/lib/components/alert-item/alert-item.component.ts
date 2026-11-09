@@ -16,7 +16,11 @@ import {TagComponent} from '../tag/tag.component';
 export type AlertItemSeverity = 'error' | 'warning' | 'info';
 export type AlertItemDensity = 'card' | 'flat';
 
-/** 24px drawn, at least --size-touch pressed on a phone. */
+/**
+ * 24px drawn, at least --size-touch pressed on a phone. The `z-10` only lifts it above the title's
+ * stretch; the item row is `isolate`, so that z-index stays inside the row and the row as a whole
+ * sits beneath a sticky list-section heading (also `z-10`) instead of painting over it.
+ */
 const DISMISS_CLASSES =
   'relative z-10 flex shrink-0 rounded-cmn-role-inset p-1 text-text-disabled transition-colors hover:bg-surface-raised ' +
   `hover:text-text-primary ${PHONE_HIT_AREA_CLASSES}`;
@@ -63,7 +67,7 @@ const SEVERITY_ICON: Record<AlertItemSeverity, LucideIconName> = {
       [style.border-color]="!flat() && !isRead() ? color() + '30' : ''"
       [style.background]="!flat() && !isRead() ? color() + '08' : ''"
       [class.cursor-pointer]="!isRead() || openable()"
-      class="relative flex items-start gap-cmn-3 transition-colors"
+      class="relative isolate flex items-start gap-cmn-3 transition-colors"
     >
       <div
         [style.background]="color() + '18'"
