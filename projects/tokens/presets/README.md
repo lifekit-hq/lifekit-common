@@ -81,4 +81,7 @@ same in every look. `test/hooks.spec.mjs` fails on a hook with no Carbon default
 1. Write `<id>.css` here; `npm run test:tokens` checks it.
 2. Import it in the app's entry stylesheet (Storybook's is `projects/ui/.storybook/storybook.css`)
    and list it in `provideDesignPresets` (app) and the toolbar list in `.storybook/preview.ts`.
-3. Add a section for it to `DESIGN.md`.
+3. Add a section for it to `DESIGN.md`, and a spec like `projects/ui/e2e/screens/lifekit.spec.ts` that
+   passes its id to the shared golden routes; its baselines come from the Update screen baselines workflow.
+
+Shipped: `lifekit.css` (the library's own direction; see `DESIGN.md`). Carbon is `theme.css`.

@@ -17,7 +17,7 @@ import {PresetService, provideDesignPresets} from './preset.service';
  * values (radius, control height); the second is the hooks, the anatomy a value cannot change: a
  * framed field, a card held by a shadow, a tinted tab row with a filled tab, a tonal secondary
  * button, a pill segmented control and a wider toggle. The real presets live in
- * `@lifekit-hq/tokens/presets/`; none ships yet besides Carbon, the default.
+ * `@lifekit-hq/tokens/presets/` (Lifekit; Carbon, the default, is `theme.css`).
  */
 const DEMO_PRESET_CSS = `
 :root[data-preset='demo'] {

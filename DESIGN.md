@@ -142,7 +142,21 @@ A preset is one CSS file, `@lifekit-hq/tokens/presets/<id>.css`, that overrides 
 - **Previewing one.** The Storybook toolbar's Design global renders every story in a preset.
 - **Hooks.** A value cannot change anatomy Carbon fixes (a bottom-rule field against an outlined one, a hairline card against a shadowed one, a leading bar against a pill for the selected nav item, a line tab against a filled one, the toggle's geometry, the secondary button's colours). Those are the `--cmn-*` hook tokens in the PRESET HOOKS block of `theme.css`, each defaulting to its Carbon value, and the semantic radius (`--cmn-radius-control|field|surface|inset`) says which size step a kind of thing takes. Components read them through `cmn-*` utilities and never by value, so Carbon renders exactly as before; the table is in `projects/tokens/presets/README.md`.
 - **Checked per preset.** `npm run test:tokens` runs the rules over every file in `presets/`: only its own selector, only tokens `theme.css` declares, no `--color-*`, dark and per-width values restated, field borders 3:1 on the surfaces in light and dark, `-bg`/`-fg` pairs 4.5:1, the 44px phone floor on `--size-touch` and `--cmn-control-h`, and a rule for each hook (`HOOK_RULES`): a field outline 3:1, a selected or secondary fill against its text 4.5:1, a toggle's on colour 3:1, a thumb that fits its track. The contract, with an example file, is `projects/tokens/presets/README.md`.
-- **Presets in this repo.** Carbon is the only one so far. Its values are this page. Each preset added gets a short section here.
+- **Presets in this repo.** Carbon, the default (this page), and Lifekit (below). Each preset added gets a short section here.
+
+### Lifekit preset
+
+`@lifekit-hq/tokens/presets/lifekit.css`, `data-preset="lifekit"`: the library's own direction, the values it held before Carbon restated as a preset. It borrows nothing from a third-party system and adds no font: IBM Plex Sans stays, and so does the type ramp, which is the library's and not a preset's to change. The doctrine is the one above, with a soft edge in place of Carbon's hairline: a surface is held by a shadow or a hairline, never both, and one accent appears only where you act.
+
+- **Shape.** Radius 3 / 6 / 8px (`--radius-sm|md|lg`), so a control and a field take 6px, a card, menu and sheet 8px, and a checkbox 3px. Chips, tags and avatars stay pill.
+- **Controls.** 40px on a desktop and 44px below 768px (`--cmn-control-h`), the large size 44px; the phone floor holds. Fields are a full 1px outline in `border-strong` on the card tone, the select the same. Button labels are medium weight; the secondary button is the neutral `surface-raised` fill with primary text, hover on `surface-hover`, not Carbon's ink fill.
+- **Surfaces.** A resting card has no border and a soft shadow (`shadow-sm`): it is told from the page by that edge and its tone (`surface-card` on the `surface-bg` ground). Floating panels keep their hairline and shadow, as everywhere. An alert's stripe is 1px.
+- **Navigation.** A side nav item is a 36px row with a 6px radius, inset 8px with a 2px gap, selected by the `accent-subtle` tone alone (no leading bar). Tabs stay line tabs. The segmented control is a rounded outline with the chosen cell tinted `accent-subtle` and labelled in the accent, as it was before Carbon.
+- **Toggle.** 44 x 24px, an 18px thumb, the accent when on (Carbon's success green is a second voice).
+- **Rhythm and motion.** Section gap 32px and group gap 12px; the medium duration 250ms and the Material 3 standard, decelerate and accelerate curves the library held before Carbon.
+- **Colour** is the seed's: Lifekit sets no `--color-*`, so it composes with dark mode and every app's seed.
+
+It is checked by the per-preset rules above, previewed in Storybook's Design toolbar, and held still by `projects/ui/e2e/screens/lifekit.spec.ts`: the template, controls, lists and shell golden screens at 390 and 1280, light and dark, with baselines of their own beside Carbon's.
 
 ## Colors
 

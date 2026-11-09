@@ -10,13 +10,34 @@ import {provideDesignPresets} from '../src/lib/services/preset/preset.service';
  * entry needs its `@lifekit-hq/tokens/presets/<id>.css` imported in `storybook.css`. Adding a preset
  * is one entry here and that import.
  */
-const PRESETS = [{value: 'carbon', title: 'Carbon'}];
+const PRESETS = [
+  {value: 'carbon', title: 'Carbon'},
+  {value: 'lifekit', title: 'Lifekit'},
+];
 const DEFAULT_PRESET = 'carbon';
+
+function activePreset(context: {globals: Record<string, unknown>}): string {
+  return (context.globals['preset'] as string) ?? DEFAULT_PRESET;
+}
+
+/**
+ * `PresetService` keeps a `data-preset` it is offered, so a story drawn in another preset is offered
+ * the toolbar's choices (the appearance control then shows its Design entry). A Carbon story is drawn
+ * as an app that stays on Carbon draws it, offered nothing else, so it has no Design control and the
+ * Carbon screens do not move when a preset is added.
+ */
+const withOfferedPresets: Decorator = (storyFn, context) => {
+  const offered =
+    activePreset(context) === DEFAULT_PRESET
+      ? []
+      : PRESETS.map(({value, title}) => ({id: value, label: title}));
+  return applicationConfig({providers: [provideDesignPresets(...offered)]})(storyFn, context);
+};
 
 const withThemeAndPreset: Decorator = (storyFn, context) => {
   const theme = (context.globals['theme'] as string) ?? 'light';
   document.documentElement.setAttribute('data-theme', theme);
-  const preset = (context.globals['preset'] as string) ?? DEFAULT_PRESET;
+  const preset = activePreset(context);
   if (preset === DEFAULT_PRESET) {
     document.documentElement.removeAttribute('data-preset');
   } else {
@@ -51,15 +72,7 @@ const preview: Preview = {
       },
     },
   },
-  decorators: [
-    // `PresetService` keeps a `data-preset` it is offered, so the toolbar's choices are offered to it.
-    applicationConfig({
-      providers: [
-        provideDesignPresets(...PRESETS.map(({value, title}) => ({id: value, label: title}))),
-      ],
-    }),
-    withThemeAndPreset,
-  ],
+  decorators: [withOfferedPresets, withThemeAndPreset],
 };
 
 export default preview;

@@ -171,6 +171,12 @@ local run.
 the 256px side nav, the 48px rail, and the phone tab bar docked and floating, with a hovered and a focused
 side-nav link and a hovered and a focused header button forced through the DevTools protocol.
 
+`projects/ui/e2e/screens/lifekit.spec.ts` holds the same golden screens under the Lifekit preset
+([DESIGN.md](../DESIGN.md#lifekit-preset)): the templates, the controls matrix, the lists matrix and the shell,
+opened with the Storybook toolbar's `preset` global set. They are named `lifekit-<screen>` and sit beside, not over,
+Carbon's, so a preset adds baselines and never moves Carbon's. The routes are shared with the Carbon specs
+(`projects/ui/e2e/screens/support/golden-routes.ts`); a preset's spec passes its id and gets the same screens.
+
 ## Updating a baseline
 
 A baseline changes only when you run the update step on the branch that changes the screen.
