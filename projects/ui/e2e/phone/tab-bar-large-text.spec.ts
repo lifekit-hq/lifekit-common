@@ -1,6 +1,6 @@
 import {expect, type Page, test} from '@playwright/test';
 
-import {layoutStory, openStory, settleFrames} from './phone-helpers';
+import {layoutStory, MIN_TARGET, openStory, settleFrames} from './phone-helpers';
 
 // WCAG 1.4.4 and the Apple HIG on Dynamic Type: at 200 percent root text nothing in the phone tab
 // bar clips. The bar grows with its labels (docs/PHONE-CONTRACT.md, rule on large text), so each
@@ -65,6 +65,8 @@ async function clippedTabs(page: Page): Promise<string[]> {
 }
 
 const FLOATING_BAR_HEIGHT = 49;
+// The bar's 1px top border plus the tab's 2px margin
+const FLOATING_TAB_TOP = 3;
 
 test.describe('phone tab bar | default text', () => {
   test.use({viewport: PHONE, hasTouch: true, isMobile: true});
@@ -76,6 +78,27 @@ test.describe('phone tab bar | default text', () => {
       .locator('cmn-bottom-tab-bar nav')
       .evaluate(nav => nav.getBoundingClientRect().height);
     expect(height).toBe(FLOATING_BAR_HEIGHT);
+  });
+
+  test('a floating tab is the 44px touch target with its content centred in it', async ({page}) => {
+    await openStory(page, 'components-bottom-tab-bar--floating', 'light', 'cmn-bottom-tab-bar nav');
+    await settleFrames(page);
+    const offsets = await page.locator('cmn-bottom-tab-bar nav').evaluate(nav => {
+      const bar = nav.getBoundingClientRect();
+      const tab = nav.querySelector('button') as HTMLElement;
+      const box = tab.getBoundingClientRect();
+      const icon = (tab.firstElementChild as HTMLElement).getBoundingClientRect();
+      const label = (tab.lastElementChild as HTMLElement).getBoundingClientRect();
+      return {
+        tabTop: box.top - bar.top,
+        tabHeight: box.height,
+        iconTop: icon.top - box.top,
+        labelBottom: box.bottom - label.bottom,
+      };
+    });
+    expect(offsets.tabTop).toBe(FLOATING_TAB_TOP);
+    expect(offsets.tabHeight).toBe(MIN_TARGET);
+    expect(Math.abs(offsets.iconTop - offsets.labelBottom)).toBeLessThanOrEqual(TOLERANCE);
   });
 });
 
