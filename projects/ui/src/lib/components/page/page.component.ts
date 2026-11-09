@@ -77,8 +77,15 @@ const COLUMN_FILL_CLASSES = 'min-h-0 flex-1';
  * names the row for the route scan (`PAGE_COLUMNS_CLASS` in `@lifekit-hq/tokens/screen`), which
  * accepts the template's own rail beside a body that runs on below the fold.
  */
-const COLUMNS_CLASSES =
-  'cmn-page-columns flex flex-col gap-cmn-section-gap xl:flex-row xl:items-start';
+const COLUMNS_CLASSES = 'cmn-page-columns flex flex-col gap-cmn-section-gap xl:flex-row';
+/**
+ * Beside each other, the columns align at the top and each is as tall as its content. A fill page
+ * stretches them to the row instead: the row is bounded to the space below the title, and a
+ * column that is only as tall as its content would let a `cmn-page-scroll` in it grow past that
+ * space, so `main` would scroll rather than the list.
+ */
+const COLUMNS_ALIGN_START = 'xl:items-start';
+const COLUMNS_ALIGN_STRETCH = 'xl:items-stretch';
 /** A rail the page puts nothing in takes no room, so the main column runs the frame's width. */
 const RAIL_CLASSES = 'empty:hidden';
 
@@ -117,7 +124,8 @@ const RAIL_CLASSES = 'empty:hidden';
  * Each kind has golden screens in Storybook (Templates/List, Detail, Form, Settings and Overview).
  *
  * `fill` makes it a full-height column whose content can take the remaining height (a
- * `cmn-page-scroll` list), as `cmn-page-container fill` does.
+ * `cmn-page-scroll` list), as `cmn-page-container fill` does. On an overview that holds from xl up
+ * too, where the main column and the rail stretch to the row's height.
  *
  * The host carries `data-cmn-page="<kind>"`, the main column `data-cmn-page-column` and the rail
  * `data-cmn-page-column="rail"`, which the screen check (`@lifekit-hq/tokens/screen`) reads to know
@@ -190,7 +198,9 @@ export class PageComponent {
   );
 
   protected readonly columnsClasses = computed(() =>
-    this.fill() ? `${COLUMNS_CLASSES} ${COLUMN_FILL_CLASSES}` : COLUMNS_CLASSES
+    this.fill()
+      ? `${COLUMNS_CLASSES} ${COLUMNS_ALIGN_STRETCH} ${COLUMN_FILL_CLASSES}`
+      : `${COLUMNS_CLASSES} ${COLUMNS_ALIGN_START}`
   );
 
   protected readonly railClasses = computed(
