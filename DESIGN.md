@@ -146,7 +146,7 @@ A preset is one CSS file, `@lifekit-hq/tokens/presets/<id>.css`, that overrides 
 
 ### Lifekit preset
 
-`@lifekit-hq/tokens/presets/lifekit.css`, `data-preset="lifekit"`: the library's own direction, the values it held before Carbon restated as a preset. It borrows nothing from a third-party system and adds no font: IBM Plex Sans stays, and so does the type ramp, which is the library's and not a preset's to change. The doctrine is the one above: flat surfaces, tone over borders, one accent that appears only where you act.
+`@lifekit-hq/tokens/presets/lifekit.css`, `data-preset="lifekit"`: the library's own direction, the values it held before Carbon restated as a preset. It borrows nothing from a third-party system and adds no font: IBM Plex Sans stays, and so does the type ramp, which is the library's and not a preset's to change. The doctrine is the one above, with a soft edge in place of Carbon's hairline: a surface is held by a shadow or a hairline, never both, and one accent appears only where you act.
 
 - **Shape.** Radius 3 / 6 / 8px (`--radius-sm|md|lg`), so a control and a field take 6px, a card, menu and sheet 8px, and a checkbox 3px. Chips, tags and avatars stay pill.
 - **Controls.** 40px on a desktop and 44px below 768px (`--cmn-control-h`), the large size 44px; the phone floor holds. Fields are a full 1px outline in `border-strong` on the card tone, the select the same. Button labels are medium weight; the secondary button is the neutral `surface-raised` fill with primary text, hover on `surface-hover`, not Carbon's ink fill.
