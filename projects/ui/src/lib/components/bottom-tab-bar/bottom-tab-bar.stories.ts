@@ -78,3 +78,28 @@ export const FloatingDark: Story = {
   args: {floating: true},
   globals: {...PHONE, theme: 'dark'},
 };
+
+const LARGE_TEXT = '200%';
+
+/** Sets the root text size for the story and puts it back after: rem-sized chrome follows it. */
+const atLargeText: Story['beforeEach'] = () => {
+  const root = document.documentElement;
+  const previous = root.style.fontSize;
+  root.style.fontSize = LARGE_TEXT;
+  return () => {
+    root.style.fontSize = previous;
+  };
+};
+
+/**
+ * 200 percent root text (WCAG 1.4.4, HIG Dynamic Type): labels wrap within their tab and the bar
+ * grows taller, so none is clipped and the bar never runs wider than the screen.
+ */
+export const LargeText: Story = {
+  beforeEach: atLargeText,
+};
+
+export const FloatingLargeText: Story = {
+  args: {floating: true},
+  beforeEach: atLargeText,
+};

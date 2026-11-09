@@ -158,10 +158,10 @@ describe('BottomTabBarComponent', () => {
       expect(tabButtons()[0]?.classList).not.toContain('bg-accent-subtle');
     });
 
-    it('sits on the bottom edge: 49px of items, then only the safe-area inset, no margin', () => {
+    it('sits on the bottom edge: at least 49px of items, then only the safe-area inset, no margin', () => {
       fixture.componentRef.setInput('floating', true);
       fixture.detectChanges();
-      expect(nav().classList).toContain('h-[calc(49px+env(safe-area-inset-bottom))]');
+      expect(nav().classList).toContain('min-h-[calc(49px+env(safe-area-inset-bottom))]');
       expect(nav().classList).toContain('pb-[env(safe-area-inset-bottom)]');
       expect(nav().classList).toContain('backdrop-blur-md');
       expect(nav().classList).toContain('border-t');

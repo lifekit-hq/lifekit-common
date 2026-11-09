@@ -610,7 +610,12 @@ that holds each one. A rule marked "follow-up" is the target; its parts and chec
     suite (`phone-sweep.spec.ts`), plus the top bar's scroll edge.
 11. **Navigation.** The tab bar stays visible with five destinations or fewer and one-word labels,
     badges only for critical information; root pages have a large title that collapses on scroll.
-    Sources: HIG Tab bars and Toolbars; M3 Navigation bar. Check: tab labels, shell by device.
+    The bar grows with the text: at 200% root text the labels wrap within their tabs (hyphenated
+    where they can be, else broken), the tabs share the bar and the bar gets taller, so no label
+    is clipped and the bar never runs wider than the screen; at default text size nothing changes.
+    Sources: HIG Tab bars and Toolbars, Typography and Accessibility; WCAG 1.4.4. M3 Navigation bar.
+    Check: tab labels, shell by device, and at 200% text no tab label clips
+    (`e2e/phone/tab-bar-large-text.spec.ts`).
 
 Touch-sized controls in the landscape phone's and the tablet's chrome (the top bar's account menu
 and search, the rail's buttons) are not promised yet: those layouts keep desktop density. The suite
