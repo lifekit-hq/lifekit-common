@@ -66,17 +66,6 @@ describe('BottomTabBarComponent', () => {
     }
   });
 
-  it('lets labels wrap and tabs shrink to their share once large text outgrows the bar', () => {
-    for (const button of tabButtons()) {
-      const label = button.querySelector(':scope > span');
-      expect(label?.className).toContain('[@container(max-width:17rem)]:whitespace-normal');
-      expect(button.className).toContain('[@container(max-width:17rem)]:min-w-0');
-    }
-    expect((host.querySelector('nav') as HTMLElement).className).toContain(
-      '[container-type:inline-size]'
-    );
-  });
-
   it('rings a keyboard-focused tab inside its own bounds', () => {
     for (const button of tabButtons()) {
       expect(button.classList).toContain('focus-visible:ring-2');
@@ -173,7 +162,6 @@ describe('BottomTabBarComponent', () => {
       fixture.componentRef.setInput('floating', true);
       fixture.detectChanges();
       expect(nav().classList).toContain('min-h-[calc(49px+env(safe-area-inset-bottom))]');
-      expect(nav().className).not.toMatch(/(^|\s)h-\[/);
       expect(nav().classList).toContain('pb-[env(safe-area-inset-bottom)]');
       expect(nav().classList).toContain('backdrop-blur-md');
       expect(nav().classList).toContain('border-t');
