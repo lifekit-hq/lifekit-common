@@ -190,6 +190,7 @@ describe('PageComponent overview', () => {
     ]) {
       expect(row.classList).toContain(cls);
     }
+    expect(row.classList).not.toContain('xl:items-stretch');
   });
 
   it('leaves the rail empty, so it takes no room, when the page marks no block for it', () => {
@@ -215,6 +216,19 @@ describe('PageComponent overview', () => {
     expect(row.classList).toContain('flex-1');
     expect(row.classList).toContain('min-h-0');
     expect(main().classList).toContain('flex-1');
+  });
+
+  it('stretches the columns to the row from xl when it fills, so a scroller in the main column is bounded', () => {
+    fixture.componentInstance.fill.set(true);
+    fixture.detectChanges();
+    const row = main().parentElement as HTMLElement;
+    expect(row.classList).toContain('xl:flex-row');
+    expect(row.classList).toContain('xl:items-stretch');
+    expect(row.classList).not.toContain('xl:items-start');
+    fixture.componentInstance.fill.set(false);
+    fixture.detectChanges();
+    expect(row.classList).toContain('xl:items-start');
+    expect(row.classList).not.toContain('xl:items-stretch');
   });
 });
 

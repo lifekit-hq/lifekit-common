@@ -5,6 +5,7 @@ import {applicationConfig, type Meta, type StoryObj} from '@storybook/angular';
 import {EmptyStateComponent} from '../empty-state/empty-state.component';
 import {ListItemRowComponent} from '../list-item-row/list-item-row.component';
 import {ListSectionComponent} from '../list-section/list-section.component';
+import {PageComponent} from '../page/page.component';
 import {PageContainerComponent} from '../page-container/page-container.component';
 import {PageScrollComponent} from '../page-scroll/page-scroll.component';
 import type {NavItem} from '../sidebar-nav/sidebar-nav.component';
@@ -94,6 +95,38 @@ class EmptyListPageComponent {}
 class GroupedListPageComponent {
   protected readonly groups = GROUPS;
   protected readonly rowsPerGroup = Array.from({length: ROWS_PER_GROUP}, (_, i) => i + 1);
+}
+
+/**
+ * A budgets-style overview: `cmn-page kind="overview" fill`, a stepper above a `cmn-page-scroll`
+ * holding a card grid, and a rail beside it from xl. The main column must be bounded from xl up
+ * too, so the card grid is the one scroller.
+ */
+@Component({
+  selector: 'cmn-fill-overview-page',
+  imports: [ListItemRowComponent, ListSectionComponent, PageComponent, PageScrollComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <cmn-page kind="overview" fill>
+      <p class="pb-cmn-4 text-cmn-sm text-text-secondary" data-above-list>November 2026</p>
+      <cmn-page-scroll label="Budgets" data-list>
+        <div class="grid grid-cols-1 gap-cmn-4 md:grid-cols-2 xl:grid-cols-3">
+          @for (card of cards; track card) {
+            <div class="rounded-cmn-lg border border-border-default bg-surface-card p-cmn-4">
+              <p class="text-cmn-sm text-text-secondary">Budget {{ card }}</p>
+              <p class="h-24 text-cmn-lg text-text-primary">€{{ card * 40 }} left</p>
+            </div>
+          }
+        </div>
+      </cmn-page-scroll>
+      <cmn-list-section cmnPageRail heading="Coming up">
+        <cmn-list-item-row label="Rent" sublabel="Friday" />
+      </cmn-list-section>
+    </cmn-page>
+  `,
+})
+class OverviewFillPageComponent {
+  protected readonly cards = Array.from({length: ROWS}, (_, i) => i + 1);
 }
 
 /** A `fill` page with no `cmn-page-scroll`: on a phone it grows with its rows and main scrolls it. */
@@ -194,6 +227,7 @@ const fillStory = (
             {path: 'transactions', component: GroupedListPageComponent, data: {title}},
             {path: 'reports', component: UnscrolledFillPageComponent, data: {title}},
             {path: 'ledger', component: FixedHeightPageComponent, data: {title}},
+            {path: 'budgets', component: OverviewFillPageComponent, data: {title}},
           ],
           withHashLocation()
         ),
@@ -225,3 +259,9 @@ export const LongListWithAppChrome = fillStory('events', 'Events', true);
  * none showing: `main` and the document still do not scroll.
  */
 export const FixedHeightWithAppChrome = fillStory('ledger', 'Ledger', true);
+
+/**
+ * An overview page with `fill` and a `cmn-page-scroll` in its main column: the card grid is the one
+ * scroller at every width, xl and up included, where the rail sits beside the main column.
+ */
+export const OverviewFill = fillStory('budgets', 'Budgets');

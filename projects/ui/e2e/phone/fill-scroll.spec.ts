@@ -14,6 +14,7 @@ const STORIES = {
   empty: 'conformance-fill-app-layout--empty-list',
   grouped: 'conformance-fill-app-layout--grouped-list',
   unscrolled: 'conformance-fill-app-layout--fill-without-list-scroll',
+  overview: 'conformance-fill-app-layout--overview-fill',
   chrome: 'conformance-fill-app-layout--long-list-with-app-chrome',
   fixed: 'conformance-fill-app-layout--fixed-height-with-app-chrome',
 } as const;
@@ -54,6 +55,17 @@ for (const viewport of [DESKTOP, PHONE]) {
 
     test('a long list scrolls inside itself and main does not scroll', async ({page}) => {
       await openStory(page, STORIES.long, 'light', READY);
+      const main = await measure(page, 'main');
+      expect(main.scrollHeight).toBe(main.clientHeight);
+      const list = await measure(page, 'cmn-page-scroll');
+      expect(list.scrollHeight).toBeGreaterThan(list.clientHeight);
+      expect(await scrollers(page)).toEqual(['cmn-page-scroll']);
+    });
+
+    test('an overview page with fill scrolls only its card grid, rail beside it', async ({
+      page,
+    }) => {
+      await openStory(page, STORIES.overview, 'light', READY);
       const main = await measure(page, 'main');
       expect(main.scrollHeight).toBe(main.clientHeight);
       const list = await measure(page, 'cmn-page-scroll');
