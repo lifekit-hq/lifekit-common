@@ -99,6 +99,34 @@ const EMPTY_VALUE = '—';
 export class VerdictHeaderComponent {
   private readonly locale = inject(LOCALE_ID);
 
+  /** What the pill shows and the direction it shows: both come from the rounded, formatted values. */
+  private readonly changeView = computed(() => {
+    const change = this.change();
+    if (!change) {
+      return {text: '', direction: 0};
+    }
+    const currency = this.currency();
+    const formatPercent = (value: number) =>
+      formatNumber(value, {
+        locale: this.locale,
+        percent: true,
+        delta: true,
+        fractionDigits: PERCENT_FRACTION_DIGITS,
+      });
+    const formatAmount = (value: number) =>
+      currency
+        ? formatMoney(value, currency, {locale: this.locale, delta: true})
+        : formatNumber(value, {locale: this.locale, delta: true});
+    const percent = formatPercent(change.percent);
+    const amount = formatAmount(change.amount);
+    if (!percent || !amount) {
+      return {text: '', direction: 0};
+    }
+    const amountDirection = amount === formatAmount(0) ? 0 : Math.sign(change.amount);
+    const percentDirection = percent === formatPercent(0) ? 0 : Math.sign(change.percent);
+    return {text: `${percent} · ${amount}`, direction: amountDirection || percentDirection};
+  });
+
   /** The state of the thing, as a tone and a word. The app owns the vocabulary. */
   public readonly status = input.required<VerdictStatus>();
   /** Up to two short facts beside the word; any more are not drawn. */
@@ -136,34 +164,6 @@ export class VerdictHeaderComponent {
       ? formatMoney(price, currency, {locale: this.locale})
       : formatNumber(price, {locale: this.locale});
     return formatted || EMPTY_VALUE;
-  });
-
-  /** What the pill shows and the direction it shows: both come from the rounded, formatted values. */
-  private readonly changeView = computed(() => {
-    const change = this.change();
-    if (!change) {
-      return {text: '', direction: 0};
-    }
-    const currency = this.currency();
-    const formatPercent = (value: number) =>
-      formatNumber(value, {
-        locale: this.locale,
-        percent: true,
-        delta: true,
-        fractionDigits: PERCENT_FRACTION_DIGITS,
-      });
-    const formatAmount = (value: number) =>
-      currency
-        ? formatMoney(value, currency, {locale: this.locale, delta: true})
-        : formatNumber(value, {locale: this.locale, delta: true});
-    const percent = formatPercent(change.percent);
-    const amount = formatAmount(change.amount);
-    if (!percent || !amount) {
-      return {text: '', direction: 0};
-    }
-    const amountDirection = amount === formatAmount(0) ? 0 : Math.sign(change.amount);
-    const percentDirection = percent === formatPercent(0) ? 0 : Math.sign(change.percent);
-    return {text: `${percent} · ${amount}`, direction: amountDirection || percentDirection};
   });
 
   protected readonly changeText = computed(() => this.changeView().text);
