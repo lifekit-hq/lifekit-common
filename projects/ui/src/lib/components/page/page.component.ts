@@ -101,7 +101,8 @@ const RAIL_CLASSES = 'empty:hidden';
  *
  * `kind` picks the template (`PAGE_TEMPLATES`), `list` by default:
  *
- * - `list`: rows grouped in `cmn-list-section`s under an add field or a filter (640px).
+ * - `list`: rows grouped in `cmn-list-section`s under an add field or a filter (640px). Body copy
+ *   in any kind (an intro, a disclaimer) goes in `cmn-prose`, which caps its line length.
  * - `detail`: one record: its status, its facts in a `cmn-description-list`, related rows, then its
  *   own actions; Edit and the back chevron (the route's `parent`) live in the top bar (720px).
  * - `form`: a new or edited record. Make the `<form>` `display: contents` (`class="contents"`) so

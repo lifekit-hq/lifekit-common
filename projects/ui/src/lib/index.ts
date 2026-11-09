@@ -69,6 +69,7 @@ export * from './components/page/page.component';
 export * from './components/page-container/page-container.component';
 export * from './components/page-header/page-header.component';
 export * from './components/page-scroll/page-scroll.component';
+export * from './components/prose/prose.component';
 export * from './components/search-input/search-input.component';
 export * from './components/segmented/segmented.component';
 export * from './components/select/select.component';
