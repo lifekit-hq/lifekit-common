@@ -14,7 +14,7 @@ Everything comes from `@lifekit-hq/tokens`:
 | Manifest fields            | `@lifekit-hq/tokens/brand/manifest.fragment.json`                                      |
 | Node helpers + drift check | `@lifekit-hq/tokens/brand`, `lifekit-chrome-check` (bin)                               |
 | Design drift check         | `lifekit-chrome-check drift` (see the section below)                                   |
-| Icon check                 | `lifekit-chrome-check icons` (see the last section)                                    |
+| Icon check                 | `lifekit-chrome-check icons` (see the "Icon check" section)                            |
 | Vite plugin                | `@lifekit-hq/tokens/brand/vite`                                                        |
 | IBM Plex Sans / Mono       | `@lifekit-hq/tokens/fonts.css`                                                         |
 

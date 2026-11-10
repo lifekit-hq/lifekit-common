@@ -70,9 +70,13 @@ Design tokens for the lifekit ecosystem, framework-agnostic.
 - `drift`: `lifekit-chrome-check drift <path>…`, a static scan of an app's source for what
   bypasses these tokens (font, colour, text size, radius, root font size, layout transitions,
   spacing) and error copy that says "please" or "invalid". Run it in CI; it exits 1 on any
-  finding. Rules and options: the last section of
+  finding. Rules and options: the "Design drift check" section of
   [`docs/BROWSER-CHROME.md`](../../docs/BROWSER-CHROME.md). Rule logic adapted from impeccable
   (Apache-2.0), see [`NOTICE.md`](NOTICE.md).
+- `icons`: `lifekit-chrome-check icons <path>…`, a static scan of an app's source for Lucide icon
+  names that `<cmn-icon>` would render empty (outside the library's subset and the app's own
+  `provideLucideIcons`). Run it in CI; it exits 1 on any finding. Rules and fixes: the "Icon check"
+  section of [`docs/BROWSER-CHROME.md`](../../docs/BROWSER-CHROME.md).
 - `whats-new`: `lifekit-whats-new`, the bin that turns an app's `src/whats-new/notes.md` (and,
   optionally, its release-please `CHANGELOG.md`) into the `whats-new.json` that `cmn-whats-new` in
   `@lifekit-hq/ui` fetches, with `--check` for CI. The parser and the `WhatsNewData` types are
