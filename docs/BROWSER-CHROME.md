@@ -13,7 +13,8 @@ Everything comes from `@lifekit-hq/tokens`:
 | Head template              | `@lifekit-hq/tokens/brand/head.html`                                                   |
 | Manifest fields            | `@lifekit-hq/tokens/brand/manifest.fragment.json`                                      |
 | Node helpers + drift check | `@lifekit-hq/tokens/brand`, `lifekit-chrome-check` (bin)                               |
-| Design drift check         | `lifekit-chrome-check drift` (see the last section)                                    |
+| Design drift check         | `lifekit-chrome-check drift` (see the section below)                                   |
+| Icon check                 | `lifekit-chrome-check icons` (see the "Icon check" section)                            |
 | Vite plugin                | `@lifekit-hq/tokens/brand/vite`                                                        |
 | IBM Plex Sans / Mono       | `@lifekit-hq/tokens/fonts.css`                                                         |
 
@@ -354,3 +355,32 @@ lifekit-common runs it against Storybook (`npm run design:scan`).
 
 The rule logic is adapted from [impeccable](https://github.com/pbakaus/impeccable) (Apache-2.0).
 See [`NOTICE.md`](../projects/tokens/NOTICE.md).
+
+## Icon check
+
+`lifekit-chrome-check icons` is the same bin's third check. `<cmn-icon>` renders the Lucide icons in
+the library's generated subset (`lucide-icon-set.ts`) plus whatever the app registers with
+`provideLucideIcons`; any other name draws an empty box, and only a dev build says so. The check
+reads **one app's source** and fails on each Lucide icon name it uses that is in neither. Run it in
+CI next to the drift check:
+
+```bash
+npx lifekit-chrome-check icons src
+```
+
+It takes files or directories (default: the current directory), reads `.ts`, `.tsx` and `.html`,
+skips the same files and directories as the drift check, and exits 1 on a finding, 2 on a usage
+error. It prints `file:line [rule] message`:
+
+| Rule           | Flags                                                                                                                                                                                                                                      |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `missing-icon` | A quoted PascalCase string that is a Lucide icon name (`'WalletCards'`, `name="Maximize2"`), outside the subset and outside the names the app registers in `provideLucideIcons({…})` or `new LucideIconProvider({…})`, in any scanned file |
+| `registration` | A registration the scan cannot read: its argument is not an object literal, or it has a spread or a computed key. List the icons in the call instead, so the names it registers are known                                                  |
+
+Fix a finding by registering the icon in the app (`provideLucideIcons({WalletCards})`), or, when
+several apps use it, by adding the name to `scripts/icon-set/consumers.json` in lifekit-common and
+running `npm run generate:icons` so it ships in the subset. The subset and the Lucide catalog the
+check compares against ship in the package (`icons/lucide-icons.json`), written by the same
+generator as `lucide-icon-set.ts`, so the two cannot disagree; `npm run check:icons` fails CI when
+either is stale. A quoted string that happens to equal an icon name (a label `'Share'`) counts as a
+use; it is only flagged when that name is outside the subset.

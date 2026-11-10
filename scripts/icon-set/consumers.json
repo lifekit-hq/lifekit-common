@@ -1,5 +1,5 @@
 {
-  "_": "Lucide icon names the apps pass to <cmn-icon> or to icon inputs (cmn-button icon, cmn-empty-state icon, nav items, ...), found by scanning each app's frontend/src for quoted names that are Lucide icons (2026-11-07). The library's own usage is scanned from source by the generator. Add a name here when an app starts using an icon the library does not, then run `npm run generate:icons`.",
+  "_": "Lucide icon names the apps pass to <cmn-icon> or to icon inputs (cmn-button icon, cmn-empty-state icon, nav items, ...), found by scanning each app's frontend/src for quoted names that are Lucide icons (2026-11-07). The library's own usage is scanned from source by the generator. Add a name here when an app starts using an icon the library does not, then run `npm run generate:icons`. An app is checked against the result with `lifekit-chrome-check icons <src>` (docs/BROWSER-CHROME.md), which fails on an icon outside the subset and the app's own provideLucideIcons registrations.",
   "finance-sentry": [
     "Activity", "ArrowLeft", "ArrowLeftRight", "ArrowRight", "ArrowUpRight", "Bell", "BellOff", "Building2",
     "Calendar", "CalendarClock", "CalendarDays", "CalendarRange", "ChartColumn", "ChartLine",
@@ -19,7 +19,8 @@
     "Scissors", "Settings", "Settings2", "Trash2", "UserPlus", "Users", "Wallet"
   ],
   "basket": [
-    "Copy", "Ellipsis", "FingerprintPattern", "KeyRound", "Link", "List", "Plus", "RefreshCw", "Settings",
-    "Share", "ShoppingBasket", "Tag", "Trash2", "Unlink", "UserPlus", "Users", "X"
+    "BadgePercent", "Copy", "Ellipsis", "FingerprintPattern", "KeyRound", "Link", "List", "Maximize2", "Plus",
+    "RefreshCw", "Settings", "Share", "ShoppingBasket", "Tag", "Trash2", "Unlink", "UserPlus", "Users",
+    "WalletCards", "X"
   ]
 }
