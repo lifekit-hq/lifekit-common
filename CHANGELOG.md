@@ -1,5 +1,20 @@
 # Changelog
 
+## [4.8.0](https://github.com/lifekit-hq/lifekit-common/compare/v4.7.1...v4.8.0) (2026-11-10)
+
+
+### Features
+
+* **ui:** add a per-app mark hook whose colour follows the seed, and a basket icon set ([#345](https://github.com/lifekit-hq/lifekit-common/issues/345)) ([d644be0](https://github.com/lifekit-hq/lifekit-common/commit/d644be0b1e2e059398295b91cbef6bd38098f221))
+* **ui:** add BadgePercent, WalletCards and Maximize2 icons and gate apps on missing icons ([#340](https://github.com/lifekit-hq/lifekit-common/issues/340)) ([cfb0e1f](https://github.com/lifekit-hq/lifekit-common/commit/cfb0e1f603a704f992ca7c939beafff768f5c7c8))
+
+
+### Bug Fixes
+
+* **elements:** start theme-picker Custom at the app seed and paint the colour well from tokens ([#343](https://github.com/lifekit-hq/lifekit-common/issues/343)) ([3ee62b9](https://github.com/lifekit-hq/lifekit-common/commit/3ee62b979ed2d5f0e253264cfeb63a308d7ade8e))
+* **ui:** remember an explicit Carbon preset choice apart from no choice ([#346](https://github.com/lifekit-hq/lifekit-common/issues/346)) ([0477942](https://github.com/lifekit-hq/lifekit-common/commit/04779420a1641c936772cf833056dbb4ea5cb351))
+* **ui:** stop command palette saying "No results" for an empty query and use the dialog scrim token ([#344](https://github.com/lifekit-hq/lifekit-common/issues/344)) ([309482a](https://github.com/lifekit-hq/lifekit-common/commit/309482a6367044c5d876df3f7d287e940004993e))
+
 ## [4.7.1](https://github.com/lifekit-hq/lifekit-common/compare/v4.7.0...v4.7.1) (2026-11-09)
 
 
