@@ -20,12 +20,13 @@ import {buildBrand} from '../scripts/build-brand.mjs';
 function runPage({
   stored,
   preset,
+  pagePreset,
   seed,
   osDark = false,
   moreContrast = false,
   storageThrows = false,
 }) {
-  const attrs = {};
+  const attrs = pagePreset === undefined ? {} : {'data-preset': pagePreset};
   const style = {};
   const items = {
     [THEME_STORAGE_KEY]: stored,
@@ -49,6 +50,7 @@ function runPage({
     document: {
       documentElement: {
         setAttribute: (name, value) => (attrs[name] = value),
+        removeAttribute: name => delete attrs[name],
         style: {setProperty: (name, value) => (style[name] = value)},
       },
     },
@@ -94,14 +96,27 @@ describe('theme script design preset', () => {
     assert.equal(runPage({preset: 'soft-2'}).preset, 'soft-2');
   });
 
-  it('leaves the attribute off for no choice and for carbon, the default look', () => {
+  it('leaves the attribute off for no choice and for carbon on a page with no default', () => {
     assert.equal(runPage({}).preset, undefined);
     assert.equal(runPage({preset: 'carbon'}).preset, undefined);
+  });
+
+  it('keeps the page default when nothing is stored', () => {
+    assert.equal(runPage({pagePreset: 'lifekit'}).preset, 'lifekit');
+  });
+
+  it('treats a stored carbon as a choice and removes the default the page ships', () => {
+    assert.equal(runPage({pagePreset: 'lifekit', preset: 'carbon'}).preset, undefined);
+  });
+
+  it('lets a stored id win over the page default', () => {
+    assert.equal(runPage({pagePreset: 'lifekit', preset: 'soft'}).preset, 'soft');
   });
 
   it('ignores a value that is not a plain id, so nothing hostile reaches the selector', () => {
     for (const preset of ['', 'Lifekit', '1soft', "x'] { }", 'a b', 'a/b']) {
       assert.equal(runPage({preset}).preset, undefined, preset);
+      assert.equal(runPage({preset, pagePreset: 'lifekit'}).preset, 'lifekit', preset);
     }
   });
 
@@ -109,6 +124,10 @@ describe('theme script design preset', () => {
     const page = runPage({preset: 'lifekit', storageThrows: true, osDark: true});
     assert.equal(page.preset, undefined);
     assert.equal(page.theme, 'light');
+    assert.equal(
+      runPage({preset: 'carbon', pagePreset: 'lifekit', storageThrows: true}).preset,
+      'lifekit'
+    );
   });
 
   it('is independent of the theme and of the seed colour', () => {
@@ -166,7 +185,7 @@ describe('theme script CSP hash', () => {
   // A script edit changes the hash every app pins in its CSP. Update this value
   // deliberately, in the same change, and say so in the release notes.
   it('is pinned', () => {
-    assert.equal(themeScriptCspHash(), "'sha256-XLcDH9EabaP4jL2nLTj6/11XVBY0EZPUT0250YykyFQ='");
+    assert.equal(themeScriptCspHash(), "'sha256-lB2TK3fM1tmz+XVy+rs1kVppL/vjx0TWtCmXNmzwVYY='");
   });
 });
 
