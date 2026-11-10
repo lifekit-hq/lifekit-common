@@ -36,6 +36,12 @@ and the letters name the app:
 | `lk`    | Lifekit, the lifekit dashboard |
 | `fs`    | Finance Sentry                 |
 | `dc`    | Devclaw                        |
+| `bk`    | Basket                         |
+
+`lk`, `fs` and `dc` wear the shared petrol tile. An app with its own colour is listed in
+`APP_MARK_SEEDS` (`projects/tokens/brand/tokens.mjs`): its tile is that seed's accent
+(`--color-accent-default`) and its ink the matching `--color-text-inverse`, so `bk` is Basket's Violet
+seed, not petrol. Its favicon, apple-touch and manifest icons are generated in that colour.
 
 The mark is pure geometry with no `<text>`, so it renders identically as a favicon, where web
 fonts never load. Stems sit on whole grid units, which keeps them crisp at 16 px.
@@ -47,8 +53,24 @@ from it by `projects/tokens/scripts/build-brand.mjs`, which runs on `npm run bui
 or hand-edited.
 
 **Adding an app** means adding one glyph entry to `mark.mjs`: two letters drawn on the 32 grid
-with stems on whole units, kept inside the safe zone (the build tests check it). Everything else
-follows from the build.
+with stems on whole units, kept inside the safe zone (the build tests check it). An app that is not
+petrol also gets one `APP_MARK_SEEDS` entry. Everything else follows from the build.
+
+### The mark in the page and the chosen colour
+
+A static icon cannot read the page's colours, so the build-time set always wears the app's own seed.
+Two things follow the colour a user picks at runtime:
+
+- **In the page**, draw the mark with `<cmn-app-mark />` (`@lifekit-hq/ui`), not
+  `<img src="/favicon.svg">`. It is inline SVG in `--color-accent-default` / `--color-text-inverse`, so it
+  follows the app's seed, the user's colour and light/dark. `provideAppMark('bk')` sets which mark is
+  the app's own once; `<cmn-app-mark app="…">` overrides it for one place.
+- **The tab icon**: `provideAppMark` also keeps the `image/svg+xml` favicon `<link>` on the user's
+  colour (a `data:` URL, so `img-src` needs `data:`; pass `{followSeed: false}` to opt out) and puts
+  the shipped file back when the colour is reset.
+
+`favicon.ico`, the apple-touch icon and the PWA icons are files the OS or browser fetches once, so
+they stay on the app's own colour; a user's colour never reaches them.
 
 ## Title
 

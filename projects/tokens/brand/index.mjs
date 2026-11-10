@@ -10,7 +10,7 @@ export {
   checkManifest,
   checkStartupImages,
 } from './check.mjs';
-export {BRAND_APPS, fullBleedSvg, markSvg, TILE_RADIUS} from './mark.mjs';
+export {BRAND_APPS, fullBleedSvg, markSvg, seedMarkColors, TILE_RADIUS} from './mark.mjs';
 export {
   BRAND_FILES,
   brandAssetsDir,
@@ -32,7 +32,7 @@ export {
   THEME_INIT_END,
   THEME_INIT_MARKER,
 } from './sync.mjs';
-export {brandColors} from './tokens.mjs';
+export {APP_MARK_SEEDS, appBrandColors, brandColors} from './tokens.mjs';
 export {
   PRESET_STORAGE_KEY,
   THEME_SCRIPT,

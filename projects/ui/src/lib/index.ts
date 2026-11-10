@@ -7,6 +7,7 @@ export * from './components/alert/alert.component';
 export * from './components/alert-item/alert-item.component';
 export * from './components/allocation-bar/allocation-bar.component';
 export * from './components/app-layout/app-layout.component';
+export * from './components/app-mark/app-mark.component';
 export * from './components/appearance-settings/appearance-settings.component';
 export * from './components/area-chart/area-chart.component';
 export * from './components/async-state/async-state.component';
@@ -109,6 +110,7 @@ export * from './pipes/money/number.pipe';
 export * from './pipes/relative-time/relative-time.pipe';
 
 // Services
+export * from './services/app-mark/app-mark.service';
 export * from './services/appearance/appearance.service';
 export * from './services/dialog/dialog.service';
 export * from './services/drawer/drawer.service';
@@ -120,6 +122,7 @@ export * from './services/shell/shell.service';
 export * from './services/theme/theme.service';
 
 // Providers
+export * from './providers/provide-app-mark';
 export * from './providers/provide-custom-icons';
 export * from './providers/provide-lucide-icons';
 

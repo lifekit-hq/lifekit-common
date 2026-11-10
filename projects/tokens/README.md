@@ -46,7 +46,8 @@ Design tokens for the lifekit ecosystem, framework-agnostic.
 - `brand`: the lifekit mark and the browser-chrome standard. That covers per-app icon sets under
   `brand/<app>/`, `brand/head.html`, `brand/manifest.fragment.json`, the pre-paint theme script
   (`brand/theme-init.js`) with its CSP hash, Node helpers, a Vite plugin
-  (`brand/vite`), the `lifekit-chrome-check` drift check and the `lifekit-theme-sync` bin. See
+  (`brand/vite`), the browser-safe mark geometry (`brand/mark`: `markSvg`, `seedMarkColors`; per-app
+  glyphs `lk`, `fs`, `dc`, `bk`), the `lifekit-chrome-check` drift check and the `lifekit-theme-sync` bin. See
   [`docs/BROWSER-CHROME.md`](../../docs/BROWSER-CHROME.md).
 - `engine`: the seed engine, plain zero-dependency ES modules with types
   (`@lifekit-hq/tokens/engine`). `derive({seed, intensity, mode, contrast})` turns one colour into
@@ -146,5 +147,5 @@ node in its shadow tree, out of reach of `routerLink`.
 ```
 
 The icons, head template and manifest fragment under `brand/` are generated from
-`brand/mark.mjs` and `theme.css` by `scripts/build-brand.mjs` (`npm run build:brand` at the
+`brand/mark.mjs`, `theme.css` and, for an app with its own colour, its `APP_MARK_SEEDS` seed by `scripts/build-brand.mjs` (`npm run build:brand` at the
 workspace root, and automatically on `prepack`). Never edit them by hand.

@@ -29,6 +29,10 @@
     "./seeds/*": "./seeds/*",
     "./brand": "./brand/index.mjs",
     "./brand/vite": "./brand/vite.mjs",
+    "./brand/mark": {
+      "types": "./brand/mark.d.mts",
+      "default": "./brand/mark.mjs"
+    },
     "./brand/theme-script": "./brand/theme-script.mjs",
     "./brand/*": "./brand/dist/*",
     "./whats-new": {
