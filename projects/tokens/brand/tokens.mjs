@@ -4,6 +4,9 @@
  */
 import {readFileSync} from 'node:fs';
 
+import {PRESETS} from '../engine/presets.mjs';
+import {seedMarkColors} from './mark.mjs';
+
 const THEME_CSS = new URL('../theme.css', import.meta.url);
 
 /** Custom properties declared directly in the blocks whose selector matches `selector`. */
@@ -41,4 +44,24 @@ export function brandColors(css = readFileSync(THEME_CSS, 'utf8')) {
     surfaceLight: required(light, '--color-surface-bg', 'light'),
     surfaceDark: required(dark, '--color-surface-bg', 'dark'),
   };
+}
+
+/**
+ * Apps whose mark wears their own seed instead of the shared lifekit petrol, by initials. An app
+ * not listed here (lk, fs, dc) keeps the petrol tile, so its icons never change with a seed. Adding
+ * an app = one glyph in ./mark.mjs and, when it has its own colour, one entry here.
+ */
+export const APP_MARK_SEEDS = Object.freeze({
+  // Basket: the Violet preset.
+  bk: PRESETS.find(preset => preset.id === 'violet').seed,
+});
+
+/**
+ * The brand palette for one app: {@link brandColors} with the tile and ink replaced by the app's
+ * seed accent when the app has one in {@link APP_MARK_SEEDS}. The surfaces (theme-color, manifest
+ * background) are the shared lifekit ones either way.
+ */
+export function appBrandColors(app, colors = brandColors()) {
+  const seed = APP_MARK_SEEDS[app];
+  return seed ? {...colors, ...seedMarkColors(seed)} : colors;
 }

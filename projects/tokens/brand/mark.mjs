@@ -6,8 +6,13 @@
  * Glyphs sit on a 32-unit grid with stems on whole units, so 16 px lands on whole pixels.
  *
  * Colours are parameters, never literals here: callers pass the token values
- * (`brandColors()` in ./tokens.mjs reads them from theme.css).
+ * (`brandColors()` in ./tokens.mjs reads them from theme.css), or CSS `var(--token)` strings
+ * when the mark is drawn inline in a page, where it then follows the theme and the seed.
+ *
+ * Browser-safe: no Node imports, so `@lifekit-hq/tokens/brand/mark` can be imported by app code.
  */
+import {derive} from '../engine/derive.mjs';
+import {DEFAULT_INTENSITY} from '../engine/presets.mjs';
 
 /** Tile corner radius on the 32-unit grid. */
 export const TILE_RADIUS = 7;
@@ -32,6 +37,12 @@ const GLYPHS = {
     `<circle cx="9.5" cy="20.5" r="4" fill="none" stroke="${ink}" stroke-width="3"/>` +
     `<rect x="12" y="6" width="3" height="20" fill="${ink}"/>` +
     `<path d="M25.3 17.7 A4 4 0 1 0 25.3 23.3" fill="none" stroke="${ink}" stroke-width="3"/>`,
+  // bk — Basket: b (stem + ring bowl) and k (stem + one mitred arm/leg stroke), all 3 wide.
+  bk: ink =>
+    `<rect x="5" y="6" width="3" height="20" fill="${ink}"/>` +
+    `<path d="M8 16.5 H10 a4 4 0 0 1 0 8 H8" fill="none" stroke="${ink}" stroke-width="3"/>` +
+    `<rect x="18" y="6" width="3" height="20" fill="${ink}"/>` +
+    `<path d="M26 11 L21 17.8 L26.5 26" fill="none" stroke="${ink}" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>`,
 };
 
 /** Every app initials pair the mark is drawn for. */
@@ -71,4 +82,21 @@ export function fullBleedSvg({app, tile, ink}) {
     '0 0 180 180',
     `<rect width="180" height="180" fill="${tile}"/><g transform="translate(26 26) scale(4)">${glyph(app, ink)}</g>`
   );
+}
+
+/**
+ * The tile and ink of the mark for an app whose colour is its seed rather than the shared
+ * lifekit petrol: the seed's own accent (`--color-accent-default`) and the ink that sits on it
+ * (`--color-text-inverse`), light theme. This is what a favicon, an apple-touch icon and a
+ * manifest icon wear, because none of them can read the page's custom properties. In a page,
+ * draw the mark with `var(--color-accent-default)` / `var(--color-text-inverse)` instead and it
+ * follows the theme and a user's chosen colour by itself.
+ *
+ * @param {string} seed `#rgb` / `#rrggbb`
+ * @param {number} [intensity] how far the seed tints surfaces; the accent does not depend on it
+ * @returns {{tile: string, ink: string}}
+ */
+export function seedMarkColors(seed, intensity = DEFAULT_INTENSITY) {
+  const {tokens} = derive({seed, intensity, mode: 'light', contrast: 'standard'});
+  return {tile: tokens['accent-default'], ink: tokens['text-inverse']};
 }

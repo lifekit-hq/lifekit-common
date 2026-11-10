@@ -20,7 +20,7 @@ import {Resvg} from '@resvg/resvg-js';
 import {BRAND_APPS, fullBleedSvg, markSvg} from '../brand/mark.mjs';
 import {headMarkup, manifestFragment} from '../brand/standard.mjs';
 import {THEME_SCRIPT, themeScriptCspHash} from '../brand/theme-script.mjs';
-import {brandColors} from '../brand/tokens.mjs';
+import {appBrandColors, brandColors} from '../brand/tokens.mjs';
 import {encodeIco} from './ico.mjs';
 
 export const DEFAULT_OUT_DIR = fileURLToPath(new URL('../brand/dist/', import.meta.url));
@@ -32,8 +32,11 @@ export function renderPng(svg, size) {
     .asPng();
 }
 
-/** Every file for one app, as `[fileName, contents]`. */
-export function appAssets(app, colors = brandColors()) {
+/**
+ * Every file for one app, as `[fileName, contents]`. `colors` is the app's own palette
+ * (`appBrandColors(app)`): the lifekit petrol, or the app's seed for an app that has one.
+ */
+export function appAssets(app, colors = appBrandColors(app)) {
   const mark = markSvg({app, tile: colors.tile, ink: colors.ink});
   const fullBleed = fullBleedSvg({app, tile: colors.tile, ink: colors.ink});
   return [
@@ -52,7 +55,8 @@ export function buildBrand({outDir = DEFAULT_OUT_DIR, colors = brandColors()} = 
   for (const app of BRAND_APPS) {
     const dir = join(outDir, app);
     mkdirSync(dir, {recursive: true});
-    for (const [file, contents] of appAssets(app, colors)) writeFileSync(join(dir, file), contents);
+    for (const [file, contents] of appAssets(app, appBrandColors(app, colors)))
+      writeFileSync(join(dir, file), contents);
   }
   writeFileSync(
     join(outDir, 'manifest.fragment.json'),

@@ -4,7 +4,16 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {after, before, describe, it} from 'node:test';
 
-import {BRAND_APPS, BRAND_FILES, brandColors, markSvg} from '../brand/index.mjs';
+import {
+  APP_MARK_SEEDS,
+  appBrandColors,
+  BRAND_APPS,
+  BRAND_FILES,
+  brandColors,
+  markSvg,
+  seedMarkColors,
+} from '../brand/index.mjs';
+import {contrastRatio} from '../engine/index.mjs';
 import {buildBrand} from '../scripts/build-brand.mjs';
 import {decodePng, isPng, pngSize} from './png.mjs';
 
@@ -59,6 +68,44 @@ describe('brand colours', () => {
   });
 });
 
+describe('per-app mark colour', () => {
+  it('keeps the shared petrol tile for apps without a seed', () => {
+    for (const app of ['lk', 'fs', 'dc']) {
+      assert.equal(APP_MARK_SEEDS[app], undefined, app);
+      assert.deepEqual(appBrandColors(app), brandColors(), app);
+    }
+  });
+
+  it('draws basket in its Violet seed, not the petrol', () => {
+    assert.equal(APP_MARK_SEEDS.bk, '#7c3aed');
+    const {tile, ink} = appBrandColors('bk');
+    assert.deepEqual({tile, ink}, seedMarkColors('#7c3aed'));
+    assert.notEqual(tile, brandColors().tile);
+    assert.match(tile, /^#[0-9a-f]{6}$/);
+    assert.ok(contrastRatio(tile, ink) >= 4.5, 'glyph reads on the tile');
+  });
+
+  it('only swaps tile and ink, never the surfaces', () => {
+    const {surfaceLight, surfaceDark} = appBrandColors('bk');
+    assert.equal(surfaceLight, brandColors().surfaceLight);
+    assert.equal(surfaceDark, brandColors().surfaceDark);
+  });
+
+  it('follows the seed: another seed gives another tile', () => {
+    assert.notEqual(seedMarkColors('#be2533').tile, seedMarkColors('#7c3aed').tile);
+  });
+
+  it('draws the glyph with var() colours for inline use', () => {
+    const svg = markSvg({
+      app: 'bk',
+      tile: 'var(--color-accent-default)',
+      ink: 'var(--color-text-inverse)',
+    });
+    assert.match(svg, /fill="var\(--color-accent-default\)"/);
+    assert.match(svg, /stroke="var\(--color-text-inverse\)"/);
+  });
+});
+
 describe('markSvg', () => {
   it('draws the tile and glyph in the given colours', () => {
     const svg = markSvg({app: 'lk', tile: '#175a6d', ink: '#ffffff'});
@@ -74,7 +121,6 @@ describe('markSvg', () => {
 
 describe('buildBrand', () => {
   let out;
-  const colors = brandColors();
   before(() => {
     out = buildBrand({outDir: mkdtempSync(join(tmpdir(), 'lk-brand-'))});
   });
@@ -82,6 +128,7 @@ describe('buildBrand', () => {
 
   for (const app of BRAND_APPS) {
     describe(app, () => {
+      const colors = appBrandColors(app);
       const file = name => readFileSync(join(out, app, name));
 
       it('emits the full icon set', () => {
@@ -164,7 +211,20 @@ describe('buildBrand', () => {
     });
   }
 
+  it('keeps lk, fs and dc on the petrol tile', () => {
+    for (const app of ['lk', 'fs', 'dc']) {
+      assert.match(readFileSync(join(out, app, 'favicon.svg'), 'utf8'), /fill="#175a6d"/, app);
+    }
+  });
+
+  it('gives basket a Violet favicon', () => {
+    const svg = readFileSync(join(out, 'bk', 'favicon.svg'), 'utf8');
+    assert.match(svg, new RegExp(`fill="${appBrandColors('bk').tile}"`));
+    assert.doesNotMatch(svg, /#175a6d/);
+  });
+
   it('writes the shared manifest fragment and head template', () => {
+    const colors = brandColors();
     const fragment = JSON.parse(readFileSync(join(out, 'manifest.fragment.json'), 'utf8'));
     assert.equal(fragment.theme_color, colors.surfaceLight);
     assert.equal(fragment.icons.length, 3);
