@@ -137,8 +137,22 @@ export class LkThemePicker extends LitElement {
       padding: 0;
       border: 1px solid var(--color-border-default, #d9e0e3);
       border-radius: 50%;
-      background: none;
+      background-color: var(--color-surface-card, #ffffff);
       cursor: pointer;
+    }
+
+    .swatch input[type='color']::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+
+    .swatch input[type='color']::-webkit-color-swatch {
+      border: 0;
+      border-radius: 50%;
+    }
+
+    .swatch input[type='color']::-moz-color-swatch {
+      border: 0;
+      border-radius: 50%;
     }
 
     .intensity {
@@ -235,6 +249,11 @@ export class LkThemePicker extends LitElement {
     return PRESETS.some(preset => preset.seed === seed);
   }
 
+  /** What Custom starts at before a colour is dialled in: the app's own colour, else the first preset. */
+  private get customFallback(): string {
+    return this.customSeed || normalizeHex(this.appSeed) || PRESETS[0].seed;
+  }
+
   private get selected(): string {
     const seed = normalizeHex(this.seed);
     if (!seed) {
@@ -248,7 +267,7 @@ export class LkThemePicker extends LitElement {
     if (value === APP_DEFAULT) {
       this.choose(null);
     } else {
-      this.choose(value === CUSTOM ? this.customSeed || PRESETS[0].seed : value);
+      this.choose(value === CUSTOM ? this.customFallback : value);
     }
   };
 
@@ -333,7 +352,7 @@ export class LkThemePicker extends LitElement {
             <input
               type="color"
               aria-label="Custom colour"
-              .value=${this.customSeed || PRESETS[0].seed}
+              .value=${this.customFallback}
               @input=${this.onCustomColour}
             />
             <span>Custom</span>
