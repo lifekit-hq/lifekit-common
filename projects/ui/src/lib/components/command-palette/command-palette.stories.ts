@@ -67,7 +67,8 @@ type Story = StoryObj<StoryPaletteLauncherComponent>;
 
 /**
  * The palette in its real states: grouped results, a single group, and the
- * empty result set you get by typing a query nothing matches (or by opening it
- * with no items at all).
+ * empty result set you get by typing a query nothing matches. Opening it with
+ * no items (and nothing typed) shows a quiet, empty list rather than "No results".
+ * The backdrop is the `--color-scrim-dialog` token, the same scrim as dialogs and drawers.
  */
 export const Playground: Story = {};

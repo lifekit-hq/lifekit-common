@@ -76,6 +76,17 @@ describe('CommandPaletteComponent', () => {
     expect(host.querySelector('.cmn-palette-backdrop')?.className).not.toContain('backdrop-blur');
   });
 
+  it('paints the backdrop with the dialog scrim token, not a fixed black', () => {
+    const backdrop = (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>(
+      '.cmn-palette-backdrop'
+    ) as HTMLElement;
+    expect(backdrop.className).not.toContain('bg-black');
+    const sheet = Array.from(document.querySelectorAll('style'))
+      .map(el => el.textContent ?? '')
+      .join('');
+    expect(sheet).toContain('background-color: var(--color-scrim-dialog)');
+  });
+
   it('lists every item grouped by its group', () => {
     expect(rows()).toHaveLength(3);
     expect(groupHeadings()).toEqual(['Pages', 'Actions']);
@@ -95,6 +106,28 @@ describe('CommandPaletteComponent', () => {
     type('zzzz');
     expect(rows()).toHaveLength(0);
     expect((fixture.nativeElement as HTMLElement).textContent).toContain('No results for "zzzz"');
+  });
+
+  it('does not report "No results" for an empty query, even with no items', () => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      imports: [CommandPaletteComponent],
+      providers: [
+        provideHttpClient(withXhr()),
+        provideHttpClientTesting(),
+        {provide: DialogRef, useValue: {close}},
+        {provide: CMN_DIALOG_DATA, useValue: []},
+      ],
+    });
+    const empty = TestBed.createComponent(CommandPaletteComponent);
+    empty.detectChanges();
+    const text = (empty.nativeElement as HTMLElement).textContent;
+    expect(text).not.toContain('No results');
+    const input = (empty.nativeElement as HTMLElement).querySelector('input') as HTMLInputElement;
+    input.value = 'zzzz';
+    input.dispatchEvent(new Event('input'));
+    empty.detectChanges();
+    expect((empty.nativeElement as HTMLElement).textContent).toContain('No results for "zzzz"');
   });
 
   it('moves the selection down and stops at the last item', () => {

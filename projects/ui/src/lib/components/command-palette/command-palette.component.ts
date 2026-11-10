@@ -44,6 +44,7 @@ interface PaletteGroup {
         }
       }
       .cmn-palette-backdrop {
+        background-color: var(--color-scrim-dialog);
         animation: cmn-fade-in var(--cmn-duration-short) var(--cmn-ease-standard) both;
       }
       .cmn-palette-panel {
@@ -54,11 +55,7 @@ interface PaletteGroup {
   template: `
     <div class="fixed inset-0 z-[2000] flex items-start justify-center" style="padding-top: 18vh">
       <!-- Pointer-only dismissal; Escape is the keyboard path (window keydown). -->
-      <div
-        (click)="close()"
-        class="cmn-palette-backdrop absolute inset-0 bg-black/45"
-        aria-hidden="true"
-      ></div>
+      <div (click)="close()" class="cmn-palette-backdrop absolute inset-0" aria-hidden="true"></div>
 
       <div
         class="cmn-palette-panel relative z-10 w-full max-w-[560px] overflow-hidden rounded-cmn-role-surface border border-cmn-float bg-surface-card shadow-cmn-md"
@@ -79,9 +76,12 @@ interface PaletteGroup {
         <!-- Results -->
         <div class="max-h-[360px] overflow-y-auto py-1.5">
           @if (filteredItems().length === 0) {
-            <div class="px-cmn-6 py-cmn-6 text-center text-cmn-sm text-text-disabled">
-              No results for "{{ query() }}"
-            </div>
+            <!-- An empty query is the initial state, not a failed search: nothing to report yet. -->
+            @if (query()) {
+              <div class="px-cmn-6 py-cmn-6 text-center text-cmn-sm text-text-disabled">
+                No results for "{{ query() }}"
+              </div>
+            }
           } @else {
             @for (group of groupedItems(); track group.group) {
               <div>
