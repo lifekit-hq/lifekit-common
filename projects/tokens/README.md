@@ -40,7 +40,7 @@ Design tokens for the lifekit ecosystem, framework-agnostic.
   so they follow the theme. (Tailwind 3 silently drops a modifier on a bare `var()` colour, and the
   border then falls back to Preflight's gray-200 in both themes; a test fails on that.) A utility with
   no modifier stays the plain custom property. Chosen over replacing the component classes with
-  dedicated border tokens because it fixes the class for every consumer, not only the five places the
+  dedicated border tokens because it fixes the class for every consumer, not only the places the
   library used it.
 - `fonts.css`: self-hosted IBM Plex Sans (variable), the `--font-sans` font, and IBM Plex Mono for code (`--font-mono`). No font CDN.
 - `brand`: the lifekit mark and the browser-chrome standard. That covers per-app icon sets under
