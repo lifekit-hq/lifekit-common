@@ -12,7 +12,7 @@ const TW_OPACITY_VARIABLE = 'var(--tw-';
 const tokenColour =
   value =>
   ({opacityValue}) =>
-    opacityValue === undefined || opacityValue.startsWith(TW_OPACITY_VARIABLE)
+    opacityValue === undefined || String(opacityValue).startsWith(TW_OPACITY_VARIABLE)
       ? value
       : `color-mix(in srgb, ${value} calc(${opacityValue} * 100%), transparent)`;
 

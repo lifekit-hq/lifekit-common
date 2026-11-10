@@ -71,6 +71,19 @@ describe('tailwind preset', () => {
     assert.match(css, /border-accent-default\\\/40\s*\{[^}]*var\(--color-accent-default\)/);
   });
 
+  it('generates gradient stops from a token colour, whose transparent end Tailwind asks for at alpha 0', async () => {
+    const css = await generate(['bg-gradient-to-r', 'from-status-error', 'via-accent-default']);
+    assert.match(
+      css,
+      /\.from-status-error\s*\{[^}]*--tw-gradient-from:\s*var\(--color-status-error\)/
+    );
+    assert.match(
+      css,
+      /\.from-status-error\s*\{[^}]*--tw-gradient-to:\s*color-mix\(in srgb, var\(--color-status-error\) calc\(0 \* 100%\), transparent\)/
+    );
+    assert.match(css, /\.via-accent-default\s*\{[^}]*var\(--color-accent-default\)/);
+  });
+
   it('leaves a token colour without an opacity modifier as the plain custom property', async () => {
     const css = await generate(['border-status-warning', 'text-status-error', 'bg-surface-card']);
     assert.match(
