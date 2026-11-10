@@ -222,7 +222,9 @@ copy it by hand: `@lifekit-hq/tokens` ships it, along with the hash your CSP nee
   back to the OS `prefers-color-scheme`, and sets `data-theme` on `<html>`. No stored choice means
   the `system` preference, which `ThemeService` then follows live. When the user picked a design
   preset on this device (`cmn-preset`, written by `PresetService`), it sets `data-preset` on
-  `<html>` too; no stored preset, or `carbon`, leaves the attribute off. When the user picked their own
+  `<html>` too. A stored `carbon` is a choice, not an absence: it removes a `data-preset` the page
+  ships as its own default, so a user who picked Carbon on an app that defaults to another preset
+  keeps it across reloads. No stored preset touches nothing (no attribute is Carbon). When the user picked their own
   colour on this device (`cmn-theme-seed`), it also sets that palette inline on `<html>`, the
   variant for the active theme and `prefers-contrast`, so a custom colour never flashes the app's
   default first. The palette is set through the CSSOM, so `style-src` needs nothing new.

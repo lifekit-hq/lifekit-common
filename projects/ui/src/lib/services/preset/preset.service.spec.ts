@@ -106,13 +106,48 @@ describe('PresetService', () => {
     expect(storage.getItem('cmn-preset')).toBe('lifekit');
   });
 
-  it('goes back to Carbon by removing the attribute and the stored key', () => {
+  it('goes back to Carbon by removing the attribute and storing carbon as the choice', () => {
     const {service, storage} = build({offered: [LIFEKIT]});
     service.setPreset('lifekit');
     service.setPreset('carbon');
     expect(attribute()).toBeNull();
     expect(service.preset()).toBe('carbon');
+    expect(storage.getItem('cmn-preset')).toBe('carbon');
+  });
+
+  it('stores an explicit Carbon pick even when nothing was stored before', () => {
+    const {service, storage} = build({});
     expect(storage.getItem('cmn-preset')).toBeNull();
+    service.setPreset('carbon');
+    expect(storage.getItem('cmn-preset')).toBe('carbon');
+  });
+
+  it('keeps a Carbon pick across a reload on an app whose default is another preset', () => {
+    document.documentElement.setAttribute('data-preset', 'lifekit');
+    const first = build({offered: [LIFEKIT]});
+    expect(first.service.preset()).toBe('lifekit');
+    first.service.setPreset('carbon');
+    expect(attribute()).toBeNull();
+
+    // reload: the page ships its default again, the stored choice is all that survives
+    document.documentElement.setAttribute('data-preset', 'lifekit');
+    const second = build({offered: [LIFEKIT], storage: first.storage});
+    expect(second.service.preset()).toBe('carbon');
+    expect(attribute()).toBeNull();
+  });
+
+  it('reads a stored carbon as a choice that beats the page default', () => {
+    document.documentElement.setAttribute('data-preset', 'lifekit');
+    const {service} = build({stored: 'carbon', offered: [LIFEKIT]});
+    expect(service.preset()).toBe('carbon');
+    expect(attribute()).toBeNull();
+  });
+
+  it('reads the absent key as no choice, so the page default stands', () => {
+    document.documentElement.setAttribute('data-preset', 'lifekit');
+    const {service} = build({offered: [LIFEKIT]});
+    expect(service.preset()).toBe('lifekit');
+    expect(attribute()).toBe('lifekit');
   });
 
   it('restores a stored preset the app offers', () => {

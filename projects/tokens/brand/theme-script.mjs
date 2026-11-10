@@ -8,8 +8,11 @@
  * stored choice means "follow the OS", so a stored value other than those two is ignored.
  *
  * The stored design preset is the `cmn-preset` key `PresetService` writes (a lowercase id such as
- * `lifekit`). It is set as `data-preset` on `<html>`. No stored choice, `carbon` or anything that is
- * not a plain id means the default look, which is the absence of the attribute. An id whose
+ * `lifekit`). It is set as `data-preset` on `<html>`. A stored `carbon` is an explicit choice of the
+ * Carbon look, so it removes the attribute: an app whose `index.html` ships another default
+ * (`<html data-preset="lifekit">`) still opens in Carbon for a user who picked it. No stored
+ * choice, or anything that is not a plain id, touches nothing, so the page keeps its own default
+ * (which is Carbon, the absence of the attribute, unless the app ships one). An id whose
  * stylesheet the app does not load changes nothing, so a stale choice is harmless.
  *
  * A user's own colour (`cmn-theme-seed`, written by `ThemeService.setSeed` or the engine's
@@ -46,8 +49,8 @@ export const THEME_SCRIPT = `// Apply the stored/OS theme, the stored design pre
   root.setAttribute('data-theme', theme);
   try {
     var preset = localStorage.getItem('${PRESET_STORAGE_KEY}');
-    if (preset && preset !== 'carbon' && /^[a-z][a-z0-9-]*$/.test(preset))
-      root.setAttribute('data-preset', preset);
+    if (preset === 'carbon') root.removeAttribute('data-preset');
+    else if (preset && /^[a-z][a-z0-9-]*$/.test(preset)) root.setAttribute('data-preset', preset);
   } catch (e) {}
   try {
     var seed = JSON.parse(localStorage.getItem('${SEED_STORAGE_KEY}'));

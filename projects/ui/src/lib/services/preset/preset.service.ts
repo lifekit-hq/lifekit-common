@@ -17,7 +17,11 @@ export interface DesignPresetOption {
   label: string;
 }
 
-/** Carbon: the look the unscoped values in `theme.css` give, so it is the absence of `data-preset`. */
+/**
+ * Carbon: the look the unscoped values in `theme.css` give, so it is the absence of `data-preset`.
+ * It is also a stored choice (`cmn-preset` = `carbon`), which is how an app whose own default is
+ * another preset tells a user who picked Carbon from one who picked nothing.
+ */
 export const DEFAULT_PRESET = 'carbon';
 
 const DEFAULT_OPTION: DesignPresetOption = {id: DEFAULT_PRESET, label: 'Carbon'};
@@ -52,12 +56,13 @@ export function provideDesignPresets(...presets: DesignPresetOption[]): Environm
  * Owns `data-preset` on `<html>`: the design preset, a third axis next to `data-theme` (light or
  * dark) and the seed colour (`--color-*`), so the result is theme x seed x preset.
  *
- * Carbon is the default and has no attribute. Choosing it removes the attribute and the stored
- * key, so a device on the default carries nothing; any other preset is stored under `cmn-preset`,
+ * Carbon is the look with no attribute. Every choice, Carbon included, is stored under `cmn-preset`,
  * which the pre-paint script in `@lifekit-hq/tokens` reads before first paint, so the page never
- * flashes Carbon first. At start a stored choice wins; with none, an offered `data-preset` already
- * on `<html>` (an app that ships a different default in its `index.html`) is kept; anything the app
- * does not offer falls back to Carbon.
+ * flashes the wrong preset first. An absent key is no choice, which is not the same as `carbon`: with
+ * none, an offered `data-preset` already on `<html>` (an app that ships a different default in its
+ * `index.html`) is kept, and a stored `carbon` removes that attribute. At start a stored choice
+ * wins; anything the app does not offer falls back to Carbon. A device that stored nothing before
+ * this change still reads as no choice.
  *
  * The choice is per device. It is not part of the account `appearance` (`AppearanceService`), whose
  * shape belongs to each app's preferences API.
@@ -87,7 +92,8 @@ export class PresetService {
   }
 
   /**
-   * Applies and persists a preset; `carbon` goes back to the default and clears the stored choice.
+   * Applies and persists a preset; `carbon` is stored like any other, so it survives a reload on an
+   * app whose default is not Carbon.
    *
    * @throws TypeError when the app does not offer `id`.
    */
@@ -95,11 +101,7 @@ export class PresetService {
     if (!this.offers(id)) {
       throw new TypeError(`PresetService.setPreset: not an offered design preset: ${id}`);
     }
-    if (id === DEFAULT_PRESET) {
-      this.remove();
-    } else {
-      this.write(id);
-    }
+    this.write(id);
     this.apply(id);
   }
 
@@ -135,14 +137,6 @@ export class PresetService {
       this.storage.setItem(PRESET_STORAGE_KEY, id);
     } catch {
       // storage blocked: the choice applies for this session only
-    }
-  }
-
-  private remove(): void {
-    try {
-      this.storage.removeItem(PRESET_STORAGE_KEY);
-    } catch {
-      // storage blocked: nothing was persisted
     }
   }
 }
