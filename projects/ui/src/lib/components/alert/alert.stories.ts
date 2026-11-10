@@ -79,7 +79,6 @@ const FRAME_VARIANTS = [
 
 const FRAME_HAIRLINE_PERCENT = 40;
 const FULL_PERCENT = 100;
-const FRAME_THEMES = ['light', 'dark'] as const;
 
 /** The border colour a token resolves to inside `scope`, read through a probe element. */
 function resolveBorder(scope: Element, token: string, percent: number, side: 'top' | 'left') {
@@ -96,52 +95,43 @@ function resolveBorder(scope: Element, token: string, percent: number, side: 'to
 }
 
 /**
- * Every notification kind in both themes, side by side. The play function reads each frame's
- * computed border and compares it with the status token it should resolve to, so a frame that falls
- * back to the Preflight gray-200 (a hairline class the stylesheet dropped) fails here, in light and
- * in dark, instead of in an app.
+ * Every notification kind in the active theme (the toolbar switches it; the a11y and screen runs
+ * render both). The play function reads each frame's computed border and compares it with the
+ * status token it should resolve to, so a frame that falls back to the Preflight gray-200 (a
+ * hairline class the stylesheet dropped) fails here, in light and in dark, instead of in an app.
  */
 export const FrameFollowsTheme: Story = {
   render: () => ({
     template: `
-      <div class="grid gap-cmn-4 md:grid-cols-2">
-        ${FRAME_THEMES.map(
-          theme => `
-          <div data-theme="${theme}" data-frame-theme="${theme}" class="flex flex-col gap-cmn-3 bg-surface-bg p-cmn-4">
-            ${FRAME_VARIANTS.map(
-              ({variant}) =>
-                `<cmn-alert variant="${variant}" title="${variant}">The frame is a ${variant} token colour in the ${theme} theme.</cmn-alert>`
-            ).join('')}
-          </div>`
+      <div class="flex flex-col gap-cmn-3" data-frame-scope>
+        ${FRAME_VARIANTS.map(
+          ({variant}) =>
+            `<cmn-alert variant="${variant}" title="${variant}">The frame is a ${variant} token colour.</cmn-alert>`
         ).join('')}
       </div>
     `,
   }),
   play: ({canvasElement}) => {
-    for (const theme of FRAME_THEMES) {
-      const scope = canvasElement.querySelector(`[data-frame-theme="${theme}"]`);
-      if (!scope) {
-        throw new globalThis.Error(`Missing ${theme} scope`);
-      }
-      const frames = scope.querySelectorAll('[role]');
-      FRAME_VARIANTS.forEach(({variant, token}, index) => {
-        const style = getComputedStyle(frames[index]);
-        const checks = [
-          [
-            'hairline',
-            style.borderTopColor,
-            resolveBorder(scope, token, FRAME_HAIRLINE_PERCENT, 'top'),
-          ],
-          ['stripe', style.borderLeftColor, resolveBorder(scope, token, FULL_PERCENT, 'left')],
-        ] as const;
-        for (const [part, actual, expected] of checks) {
-          if (actual !== expected) {
-            throw new globalThis.Error(
-              `${variant} ${part} in ${theme}: ${actual}, expected ${expected}`
-            );
-          }
-        }
-      });
+    const scope = canvasElement.querySelector('[data-frame-scope]');
+    if (!scope) {
+      throw new globalThis.Error('Missing frame scope');
     }
+    const frames = scope.querySelectorAll('[role]');
+    FRAME_VARIANTS.forEach(({variant, token}, index) => {
+      const style = getComputedStyle(frames[index]);
+      const checks = [
+        [
+          'hairline',
+          style.borderTopColor,
+          resolveBorder(scope, token, FRAME_HAIRLINE_PERCENT, 'top'),
+        ],
+        ['stripe', style.borderLeftColor, resolveBorder(scope, token, FULL_PERCENT, 'left')],
+      ] as const;
+      for (const [part, actual, expected] of checks) {
+        if (actual !== expected) {
+          throw new globalThis.Error(`${variant} ${part}: ${actual}, expected ${expected}`);
+        }
+      }
+    });
   },
 };
