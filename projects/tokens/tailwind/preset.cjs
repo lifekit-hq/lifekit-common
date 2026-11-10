@@ -1,9 +1,36 @@
+/**
+ * A colour that is a bare `var(--token)` gives Tailwind 3 nothing to put an alpha channel into, so
+ * `border-status-warning/40` is dropped without a warning and the border falls back to Preflight's
+ * gray-200 in both themes. This returns the colour as a function Tailwind calls with the opacity the
+ * class asks for: no modifier keeps the plain `var(--token)` (so the CSS an app already ships does not
+ * change), a modifier mixes the token with transparent, which follows the theme because the token is
+ * still resolved at paint time. Tailwind hands a bare utility its `--tw-*-opacity` variable; that
+ * stays the plain token too.
+ */
+const TW_OPACITY_VARIABLE = 'var(--tw-';
+
+const tokenColour =
+  value =>
+  ({opacityValue}) =>
+    opacityValue === undefined || opacityValue.startsWith(TW_OPACITY_VARIABLE)
+      ? value
+      : `color-mix(in srgb, ${value} calc(${opacityValue} * 100%), transparent)`;
+
+/** Every `var(--token)` entry of a colour map as an opacity-aware colour. */
+const withOpacity = colours =>
+  Object.fromEntries(
+    Object.entries(colours).map(([name, value]) => [
+      name,
+      typeof value === 'string' && value.startsWith('var(') ? tokenColour(value) : value,
+    ])
+  );
+
 /** @type {Partial<import('tailwindcss').Config>} */
 module.exports = {
   darkMode: ['selector', '[data-theme="dark"]'],
   theme: {
     extend: {
-      colors: {
+      colors: withOpacity({
         'surface-bg': 'var(--color-surface-bg)',
         'surface-card': 'var(--color-surface-card)',
         'surface-raised': 'var(--color-surface-raised)',
@@ -83,7 +110,7 @@ module.exports = {
         'cmn-tab-active': 'var(--cmn-tab-active-bg)',
         'cmn-tabs': 'var(--cmn-tabs-bg)',
         'cmn-table-head': 'var(--cmn-table-head-bg)',
-      },
+      }),
 
       ringOffsetColor: {
         DEFAULT: 'var(--color-surface-card)',

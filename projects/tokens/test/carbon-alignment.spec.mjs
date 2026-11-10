@@ -140,7 +140,7 @@ describe('geometry is Carbon’s', () => {
     assert.equal(token('--cmn-field-bg'), 'var(--color-surface-raised)');
     assert.equal(token('--cmn-field-border-bottom'), '1px solid var(--color-border-strong)');
     assert.equal(token('--cmn-field-focus'), '2px solid var(--color-border-focus)');
-    assert.equal(preset.theme.extend.colors['cmn-field'], 'var(--cmn-field-bg)');
+    assert.equal(preset.theme.extend.colors['cmn-field']({}), 'var(--cmn-field-bg)');
   });
 });
 
