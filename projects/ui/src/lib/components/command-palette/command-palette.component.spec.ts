@@ -80,11 +80,12 @@ describe('CommandPaletteComponent', () => {
     const backdrop = (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>(
       '.cmn-palette-backdrop'
     ) as HTMLElement;
-    expect(backdrop.className).not.toContain('bg-black');
-    const sheet = Array.from(document.querySelectorAll('style'))
-      .map(el => el.textContent ?? '')
-      .join('');
-    expect(sheet).toContain('background-color: var(--color-scrim-dialog)');
+    document.documentElement.style.setProperty('--color-scrim-dialog', 'rgb(1, 2, 3)');
+    try {
+      expect(getComputedStyle(backdrop).backgroundColor).toBe('rgb(1, 2, 3)');
+    } finally {
+      document.documentElement.style.removeProperty('--color-scrim-dialog');
+    }
   });
 
   it('lists every item grouped by its group', () => {
