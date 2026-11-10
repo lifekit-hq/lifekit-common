@@ -68,7 +68,7 @@
     },
     {
       "rule": "side-tab",
-      "stories": ["controls-golden--matrix"],
+      "stories": ["controls-golden--matrix", "components-alert--frame-follows-theme"],
       "match": "border-left: 3px",
       "reason": "Carbon's inline notification carries a 3px severity bar on its left edge (cmn-alert, square corners); it is the status signal, not decoration."
     },

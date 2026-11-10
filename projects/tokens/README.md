@@ -35,6 +35,13 @@ Design tokens for the lifekit ecosystem, framework-agnostic.
   shadows and `cmn-touch` size read the `theme.css` custom properties, so a value change lands in `theme.css` only.
   The rhythm tokens are spacing steps of the same name (`px-cmn-page-gutter`, `mb-cmn-title-gap`,
   `gap-cmn-section-gap`, `gap-cmn-group-gap`, `h-cmn-control-h`), added beside Tailwind's defaults.
+  Every colour is the plain `var(--color-*)` and takes an opacity modifier too: `border-status-warning/40`
+  and `bg-status-error/[0.04]` compile to `color-mix(in srgb, var(--color-status-warning) 40%, transparent)`,
+  so they follow the theme. (Tailwind 3 silently drops a modifier on a bare `var()` colour, and the
+  border then falls back to Preflight's gray-200 in both themes; a test fails on that.) A utility with
+  no modifier stays the plain custom property. Chosen over replacing the component classes with
+  dedicated border tokens because it fixes the class for every consumer, not only the places the
+  library used it.
 - `fonts.css`: self-hosted IBM Plex Sans (variable), the `--font-sans` font, and IBM Plex Mono for code (`--font-mono`). No font CDN.
 - `brand`: the lifekit mark and the browser-chrome standard. That covers per-app icon sets under
   `brand/<app>/`, `brand/head.html`, `brand/manifest.fragment.json`, the pre-paint theme script
