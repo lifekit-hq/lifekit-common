@@ -109,6 +109,14 @@ export const CustomColour: Story = {
   args: {appSeed: APP_SEEDS.fs.seed, seed: '#c2410c', intensity: DEFAULT_INTENSITY},
 };
 
+/**
+ * Custom before any colour is dialled in starts at the app's own colour, not at another app's.
+ * Toggle the theme to see the colour well painted from the surface and border tokens.
+ */
+export const CustomStartsAtAppColour: Story = {
+  args: {appSeed: APP_SEEDS.dc.seed, seed: '', intensity: DEFAULT_INTENSITY},
+};
+
 /** The Discord-strength tint: surfaces carry the colour too. */
 export const Immersive: Story = {
   args: {appSeed: APP_SEEDS.dc.seed, seed: APP_SEEDS.dc.seed, intensity: INTENSITY_STOPS.immersive},

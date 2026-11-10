@@ -105,6 +105,40 @@ describe('LkThemePicker', () => {
     expect(el.shadowRoot?.querySelector<HTMLInputElement>('input[type=color]')?.value).toBe(CUSTOM);
   });
 
+  it('starts the custom colour at the app colour, not at the first preset', async () => {
+    el = await mount({'app-seed': APP_SEEDS.dc.seed});
+    const well = el.shadowRoot?.querySelector<HTMLInputElement>('input[type=color]');
+    expect(well?.value).toBe(APP_SEEDS.dc.seed);
+    expect(APP_SEEDS.dc.seed).not.toBe(PRESETS[0].seed);
+  });
+
+  it('proposes the app colour when Custom is picked before any colour is dialled in', async () => {
+    el = await mount({'app-seed': APP_SEEDS.dc.seed});
+    const seen = changes(el);
+    pick(radios(el).find(r => r.value === 'custom') as HTMLInputElement);
+    expect(seen).toEqual([{seed: APP_SEEDS.dc.seed, intensity: DEFAULT_INTENSITY}]);
+  });
+
+  it('keeps a dialled-in colour over the app colour', async () => {
+    el = await mount({'app-seed': APP, seed: CUSTOM});
+    expect(el.shadowRoot?.querySelector<HTMLInputElement>('input[type=color]')?.value).toBe(CUSTOM);
+  });
+
+  it('falls back to the first preset when the app names no colour', async () => {
+    el = await mount();
+    expect(el.shadowRoot?.querySelector<HTMLInputElement>('input[type=color]')?.value).toBe(
+      PRESETS[0].seed
+    );
+  });
+
+  it('paints the colour well from surface tokens, not the browser default', async () => {
+    el = await mount({'app-seed': APP});
+    const well = el.shadowRoot?.querySelector<HTMLInputElement>('input[type=color]') as HTMLElement;
+    el.style.setProperty('--color-surface-card', 'rgb(1, 2, 3)');
+    expect(getComputedStyle(well).backgroundColor).toBe('rgb(1, 2, 3)');
+    el.style.removeProperty('--color-surface-card');
+  });
+
   it('emits the preset picked, at the current intensity', async () => {
     el = await mount({'app-seed': APP});
     const seen = changes(el);
