@@ -81,12 +81,13 @@ uses it, is the app's pattern page, which for these is finance-sentry's.
 | lifekit        | Indigo `#4f46e5` | Quiet (0.12)      |
 | devclaw        | Plum `#8e3b8a`   | Quiet (0.12)      |
 | backstage      | Wine `#8a2a5c`   | Quiet (0.12)      |
+| basket         | Violet `#7c3aed` | Quiet (0.12)      |
 
 Intensity is how far the seed tints the surfaces: Quiet 0.12 (the default: near-neutral
 surfaces, colour only where you act), Tinted 0.45, Immersive 0.85.
 
 - `theme.css` ships finance-sentry's palette as the default. Each app imports its own generated
-  stylesheet after it: `@import '@lifekit-hq/tokens/seeds/<app>.css';` (`fs`, `lk`, `dc`, `bs`). With
+  stylesheet after it: `@import '@lifekit-hq/tokens/seeds/<app>.css';` (`fs`, `lk`, `dc`, `bs`, `bk`). With
   no seed stylesheet an app renders as finance-sentry does.
 - A user can pick another colour and intensity, in Settings > Appearance with
   `<lk-theme-picker>`. In an Angular app `cmn-appearance-settings` sends the picker's
