@@ -90,7 +90,7 @@ describe('BadgeComponent', () => {
     fixture.detectChanges();
     const classes = (indicator()?.className ?? '').split(/\s+/);
     expect(classes).toEqual(
-      expect.arrayContaining(['right-0', 'top-0', 'translate-x-1.5', '-translate-y-1.5'])
+      expect.arrayContaining(['right-0', 'top-0', 'translate-x-cmn-2', '-translate-y-cmn-2'])
     );
     expect(classes.filter(cls => /^-(?:top|right|bottom|left|inset)-/.test(cls))).toEqual([]);
   });

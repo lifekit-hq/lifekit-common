@@ -15,7 +15,7 @@ export type SkeletonShape =
 const PAGE_SHAPES: readonly SkeletonShape[] = ['list', 'card', 'detail', 'overview'];
 
 /** A step of the type ramp (`text-cmn-*`): the line a `text` skeleton stands in for. */
-export type SkeletonText = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl';
+export type SkeletonText = 'xs' | 'sm' | 'md' | 'lg' | '2xl' | '3xl' | '4xl';
 
 // Spelled out in full: Tailwind finds classes by scanning for whole class names.
 const TEXT_LINE_CLASSES: Record<SkeletonText, string> = {
@@ -23,7 +23,6 @@ const TEXT_LINE_CLASSES: Record<SkeletonText, string> = {
   sm: 'flex items-center text-cmn-sm',
   md: 'flex items-center text-cmn-md',
   lg: 'flex items-center text-cmn-lg',
-  xl: 'flex items-center text-cmn-xl',
   '2xl': 'flex items-center text-cmn-2xl',
   '3xl': 'flex items-center text-cmn-3xl',
   '4xl': 'flex items-center text-cmn-4xl',

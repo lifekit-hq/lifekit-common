@@ -42,7 +42,7 @@ const EMPTY_VALUE = '—';
       @if (loading()) {
         <cmn-skeleton height="2.275rem" width="75%" />
         @if (delta() !== null) {
-          <div class="flex items-center gap-1">
+          <div class="flex items-center gap-cmn-1">
             <cmn-skeleton height="1rem" width="50%" />
           </div>
         }
@@ -52,7 +52,7 @@ const EMPTY_VALUE = '—';
           {{ displayValue() }}
         </span>
         @if (delta() !== null) {
-          <div class="flex items-center gap-1">
+          <div class="flex items-center gap-cmn-1">
             <cmn-icon [name]="deltaIcon()" [class]="deltaClasses()" size="sm" />
             <span [class]="deltaClasses()" class="font-label text-cmn-xs font-medium">
               {{ deltaLabel() }}

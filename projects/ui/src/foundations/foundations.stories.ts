@@ -42,12 +42,6 @@ const RAMP: readonly {name: string; cls: string; latin: string; cyrillic: string
     cyrillic: 'Оренда квартири за жовтень',
   },
   {
-    name: 'cmn-xl',
-    cls: 'text-cmn-xl',
-    latin: 'Salary from the studio, 62 500,00',
-    cyrillic: 'Зарплата від студії, Львів',
-  },
-  {
     name: 'cmn-lg',
     cls: 'text-cmn-lg',
     latin: 'Coffee and a croissant, 145,00',
@@ -115,7 +109,7 @@ export const TypeRamp: Story = {
             @for (w of weights; track w.name) {
               <div class="rounded-cmn-lg border border-border-default bg-surface-card p-cmn-4">
                 <div class="text-cmn-xs text-text-secondary">{{ w.name }}</div>
-                <div [class]="'text-cmn-xl ' + w.cls">Aa Бб Ґґ 0123456789</div>
+                <div [class]="'text-cmn-lg ' + w.cls">Aa Бб Ґґ 0123456789</div>
               </div>
             }
           </div>
@@ -280,7 +274,7 @@ export const ColourTokens: Story = {
 
         @for (t of themes; track t.theme) {
           <div [attr.data-theme]="t.theme" class="flex flex-col gap-cmn-6 rounded-cmn-lg bg-surface-bg p-cmn-6 text-text-primary">
-            <h2 class="text-cmn-xl font-semibold capitalize">{{ t.theme }}</h2>
+            <h2 class="text-cmn-lg font-semibold capitalize">{{ t.theme }}</h2>
 
             <div class="grid gap-cmn-2" style="grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr))">
               @for (s of t.swatches; track s.name) {

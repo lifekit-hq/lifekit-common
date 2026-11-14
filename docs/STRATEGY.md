@@ -135,7 +135,6 @@ Counts are a point-in-time measurement; re-measure before relying on them for a 
 | menu                | fs 8 · dash 0                                                                   | interactive | keep-own        | `CdkConnectedOverlay` for smart positioning + viewport clamping; APG menu button keys (arrows, Home/End, typeahead via `FocusKeyManager`, focus returns to trigger); overlay lifecycle                                                                |
 | month-stepper       | new (added for Budgets and Flow breakdown); fs 4 · dash 0                       | interactive | keep-own        | `model()` two-way `Date` binding with min/max clamping and arrow-key stepping; depends on `icon`                                                                                                                                                      |
 | more-page           | new (added for the account standard); fs 0 · dash 0                             | interactive | keep-own        | Phone More tab: overflow nav, account card, Settings/extras/Sign out rows; `RouterLink` navigation and an `itemSelect` output reported to the app; composes `card`, `list-item-row` and `account-avatar`; app-shell concern                           |
-| page-container      | fs 0 · dash 5                                                                   | simple-leaf | element-rewrite | Layout wrapper + token CSS; no logic                                                                                                                                                                                                                  |
 | page                | new (the page template layer, design-root-cause first slice); fs 0 · dash 0     | templated   | keep-own        | The page template (`kind`: list, detail, form, settings, overview): owns gutter, reading width, large title and section rhythm, and takes the title over from `app-layout` through DI (`PageFrameService`); moves with the shell                      |
 | page-header         | fs 15 · dash 5                                                                  | interactive | keep-own        | Depends on `ButtonComponent` internally; action button with loading/disabled state                                                                                                                                                                    |
 | page-scroll         | new (added for the fill-scroll contract); fs 0 · dash 0                         | interactive | keep-own        | Focusable scroll region (`tabindex=0`, optional `role=region` + label) that takes the height a `fill` page container has left; the one scroller on a list page                                                                                        |
@@ -160,7 +159,7 @@ Counts are a point-in-time measurement; re-measure before relying on them for a 
 | verdict-header      | new (added for the verdict-first detail header, #263); fs 0 · dash 0            | templated   | keep-own        | Status word, up to two `cmn-tag` pills, a caveat and a price with a day-change pill; stacked-to-opposite layout and signed percent-plus-amount formatting; composes `cmn-tag` and `cmn-icon`, so it stays Angular                                     |
 | whats-new           | new (added for What's new as a library feature, #268); fs 0 · dash 0            | interactive | keep-own        | Release list over `cmn-async-state` plus `CmnWhatsNewService` (seen marker, notes fetch, the sheet through `CmnDrawerService`); drawer, shell and `MenuItem.dot` are Angular, so it stays Angular                                                     |
 
-**Summary:** 44 keep-own · 18 element-rewrite · 1 wrap-base · 0 delete
+**Summary:** 44 keep-own · 17 element-rewrite · 1 wrap-base · 0 delete
 
 ---
 
@@ -321,7 +320,7 @@ grow into (see the status table below).
    failed first load shows an error state in place of the skeleton.
 7. **One page frame.** Pages sit in a page template, `cmn-page` (the 1200px frame inset by
    `--cmn-page-gutter`, the kind's reading width, the title and the page rhythm), so width,
-   padding and rhythm match across products. `cmn-page-container` is deprecated for it.
+   padding and rhythm match across products. `cmn-page-container` is gone since 5.0.
 
 | Rule                                 | Status   | Where                                                                             |
 | ------------------------------------ | -------- | --------------------------------------------------------------------------------- |
@@ -373,7 +372,7 @@ Every data-entry flow depends on these. Polish them before touching any page tha
 
 ### Tier 4 — navigation shell
 
-`sidebar-nav` · `top-bar` · `bottom-tab-bar` · `app-layout` · `tab-group` · `page` · `page-container` · `page-header`
+`sidebar-nav` · `top-bar` · `bottom-tab-bar` · `app-layout` · `tab-group` · `page` · `page-header`
 
 ### Tier 5 — data and overlays
 

@@ -15,7 +15,7 @@ const SIZE_CLASSES = {
 } as const;
 
 const STATUS_BASE_CLASSES =
-  'absolute -right-0.5 -bottom-0.5 h-2 w-2 rounded-full ring-2 ring-surface-card';
+  'absolute -right-cmn-0.5 -bottom-cmn-0.5 h-2 w-2 rounded-full ring-2 ring-surface-card';
 
 const STATUS_CLASSES = {
   success: 'bg-status-success',

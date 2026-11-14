@@ -63,7 +63,6 @@ describe('MorePageComponent', () => {
   it('should be a routed page template: rooted on a list cmn-page the screen check reads', () => {
     const page = host().querySelector('cmn-page');
     expect(page?.getAttribute('data-cmn-page')).toBe('list');
-    expect(host().querySelector('cmn-page-container')).toBeNull();
     // The cards are the page's top-level blocks: the template's rhythm sits between them.
     const column = page?.querySelector('[data-cmn-page-column]');
     expect(

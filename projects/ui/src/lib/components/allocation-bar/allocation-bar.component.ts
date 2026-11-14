@@ -114,7 +114,7 @@ function defaultColor(index: number): string {
       <div class="flex flex-col gap-cmn-3">
         <div
           [attr.aria-label]="summary()"
-          class="flex h-cmn-3 w-full gap-0.5 overflow-hidden rounded-cmn-full"
+          class="flex h-cmn-3 w-full gap-cmn-0.5 overflow-hidden rounded-cmn-full"
           data-testid="allocation-bar"
           role="img"
         >

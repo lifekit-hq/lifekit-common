@@ -6,7 +6,6 @@ import {EmptyStateComponent} from '../empty-state/empty-state.component';
 import {ListItemRowComponent} from '../list-item-row/list-item-row.component';
 import {ListSectionComponent} from '../list-section/list-section.component';
 import {PageComponent} from '../page/page.component';
-import {PageContainerComponent} from '../page-container/page-container.component';
 import {PageScrollComponent} from '../page-scroll/page-scroll.component';
 import type {NavItem} from '../sidebar-nav/sidebar-nav.component';
 import {defineAppChromeElements} from './app-chrome-elements';
@@ -25,14 +24,14 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 // The pages below carry no host styling and no height classes: the contract is
-// `cmn-page-container fill` holding a `cmn-page-scroll`, and nothing else sizes.
+// `cmn-page fill` holding a `cmn-page-scroll`, and nothing else sizes.
 
 @Component({
   selector: 'cmn-fill-long-list-page',
-  imports: [ListItemRowComponent, PageContainerComponent, PageScrollComponent],
+  imports: [ListItemRowComponent, PageComponent, PageScrollComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <cmn-page-container spacing="none" fill>
+    <cmn-page kind="list" fill>
       <p class="pb-cmn-4 text-cmn-sm text-text-secondary" data-above-list>
         What is coming, what fired, and what it meant
       </p>
@@ -41,7 +40,7 @@ const NAV_ITEMS: NavItem[] = [
           <cmn-list-item-row [label]="'Event ' + row" sublabel="Scheduled" />
         }
       </cmn-page-scroll>
-    </cmn-page-container>
+    </cmn-page>
   `,
 })
 class LongListPageComponent {
@@ -50,10 +49,10 @@ class LongListPageComponent {
 
 @Component({
   selector: 'cmn-fill-empty-list-page',
-  imports: [EmptyStateComponent, PageContainerComponent, PageScrollComponent],
+  imports: [EmptyStateComponent, PageComponent, PageScrollComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <cmn-page-container spacing="none" fill>
+    <cmn-page kind="list" fill>
       <p class="pb-cmn-4 text-cmn-sm text-text-secondary" data-above-list>
         What is coming, what fired, and what it meant
       </p>
@@ -62,7 +61,7 @@ class LongListPageComponent {
           <cmn-empty-state message="Nothing here" subMessage="No alerts have fired." icon="Bell" />
         </div>
       </cmn-page-scroll>
-    </cmn-page-container>
+    </cmn-page>
   `,
 })
 class EmptyListPageComponent {}
@@ -70,15 +69,10 @@ class EmptyListPageComponent {}
 /** A transactions-style page: a header above the list, then day groups with sticky headings. */
 @Component({
   selector: 'cmn-fill-grouped-list-page',
-  imports: [
-    ListItemRowComponent,
-    ListSectionComponent,
-    PageContainerComponent,
-    PageScrollComponent,
-  ],
+  imports: [ListItemRowComponent, ListSectionComponent, PageComponent, PageScrollComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <cmn-page-container spacing="none" fill>
+    <cmn-page kind="list" fill>
       <p class="pb-cmn-4 text-cmn-sm text-text-secondary" data-above-list>Everything that moved</p>
       <cmn-page-scroll label="Transactions" data-list>
         @for (group of groups; track group) {
@@ -89,7 +83,7 @@ class EmptyListPageComponent {}
           </cmn-list-section>
         }
       </cmn-page-scroll>
-    </cmn-page-container>
+    </cmn-page>
   `,
 })
 class GroupedListPageComponent {
@@ -132,17 +126,17 @@ class OverviewFillPageComponent {
 /** A `fill` page with no `cmn-page-scroll`: on a phone it grows with its rows and main scrolls it. */
 @Component({
   selector: 'cmn-fill-unscrolled-page',
-  imports: [ListItemRowComponent, PageContainerComponent],
+  imports: [ListItemRowComponent, PageComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <cmn-page-container spacing="none" fill>
+    <cmn-page kind="list" fill>
       <p class="pb-cmn-4 text-cmn-sm text-text-secondary">
         Rows straight in the page, no list scroller
       </p>
       @for (row of rows; track row) {
         <cmn-list-item-row [label]="'Report ' + row" sublabel="Monthly" data-row />
       }
-    </cmn-page-container>
+    </cmn-page>
   `,
 })
 class UnscrolledFillPageComponent {
@@ -196,7 +190,7 @@ class FillShellComponent {
 }
 
 /**
- * A list page that scrolls only its list. The page is `cmn-page-container fill` holding a
+ * A list page that scrolls only its list. The page is `cmn-page fill` holding a
  * `cmn-page-scroll`; the shell gives the page everything below the large title and notices, at
  * every width, so `main` never scrolls and the list is the one scroller. Apps add no height
  * classes: the pages here have no host styling at all. The conformance suite measures these

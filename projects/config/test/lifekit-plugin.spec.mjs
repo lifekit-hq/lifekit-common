@@ -121,21 +121,21 @@ test('require-disable-reason asks for a reason when a lifekit rule is disabled',
   assert.deepEqual(lint('<!-- eslint-disable-next-line no-console -->\n<p></p>', 'a.html'), []);
 });
 
-test('the preset warns on the lifekit rules for apps and turns them off for the library', async () => {
+test('the preset sets the lifekit rules for apps (page-root an error since 5.0) and turns them off for the library', async () => {
   const {createEslintConfig} = await import('../eslint/index.mjs');
   const severity = (configs, rule) =>
     configs.reduce((level, config) => config.rules?.[rule] ?? level, undefined);
-  const rules = [
-    'lifekit/no-raw-controls',
-    'lifekit/no-local-currency-format',
-    'lifekit/page-root',
-  ];
+  const rules = {
+    'lifekit/no-raw-controls': 'warn',
+    'lifekit/no-local-currency-format': 'warn',
+    'lifekit/page-root': 'error',
+  };
 
   const app = createEslintConfig({selectorPrefix: 'app'});
   const library = createEslintConfig({selectorPrefix: 'cmn', consumerGuardrails: false});
 
-  for (const rule of rules) {
-    assert.equal(severity(app, rule), 'warn', rule);
+  for (const [rule, level] of Object.entries(rules)) {
+    assert.equal(severity(app, rule), level, rule);
     assert.equal(severity(library, rule), 'off', rule);
   }
 });
@@ -386,9 +386,9 @@ test('the preset applies page-root to page files and their inline templates only
     });
     assert.ok(
       results.every(result =>
-        result.messages.filter(m => m.ruleId === 'lifekit/page-root').every(m => m.severity === 1)
+        result.messages.filter(m => m.ruleId === 'lifekit/page-root').every(m => m.severity === 2)
       ),
-      'a warning for one release'
+      'an error since 5.0'
     );
   } finally {
     rmSync(dir, {recursive: true, force: true});

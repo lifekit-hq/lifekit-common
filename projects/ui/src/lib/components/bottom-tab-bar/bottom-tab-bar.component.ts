@@ -18,7 +18,7 @@ export const MAX_BOTTOM_TABS = 4;
  * the root text size; at default text size it never matches and the bar is unchanged.
  */
 const TAB_BASE_CLASSES =
-  'flex min-h-cmn-touch min-w-fit flex-1 flex-col items-center justify-center gap-0.5 px-0.5 ' +
+  'flex min-h-cmn-touch min-w-fit flex-1 flex-col items-center justify-center gap-cmn-0.5 px-cmn-0.5 ' +
   '[@container(max-width:17rem)]:min-w-0 [@container(max-width:17rem)]:justify-start ' +
   'transition-colors focus:outline-none focus-visible:bg-surface-raised ' +
   'focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-border-focus';
@@ -31,7 +31,7 @@ const TAB_LABEL_CLASSES =
  * A floating tab is exactly the 44px touch target (`h-cmn-touch`), its content centred. Text large
  * enough to wrap the labels releases the height so the tab, and the bar, grow with the labels.
  */
-const TAB_FLOATING_CLASSES = 'my-0.5 py-1 h-cmn-touch [@container(max-width:17rem)]:h-auto';
+const TAB_FLOATING_CLASSES = 'my-cmn-0.5 py-cmn-1 h-cmn-touch [@container(max-width:17rem)]:h-auto';
 const TAB_ACTIVE_CLASSES = 'text-accent-default';
 const TAB_FLOATING_ACTIVE_CLASSES = 'bg-accent-subtle';
 const TAB_INACTIVE_CLASSES = 'text-text-secondary hover:text-text-primary';

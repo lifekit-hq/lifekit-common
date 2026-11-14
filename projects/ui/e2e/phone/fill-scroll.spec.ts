@@ -2,7 +2,7 @@ import {expect, type Page, test} from '@playwright/test';
 
 import {openStory, settleFrames} from './phone-helpers';
 
-// A fill page scrolls only its list. `cmn-page-container fill` holding a `cmn-page-scroll` is the
+// A fill page scrolls only its list. `cmn-page fill` holding a `cmn-page-scroll` is the
 // whole contract: the shell bounds the page to what is left of `main` below the large title, so
 // `main` never scrolls, at a desktop and a phone size, with a long list and with an empty one.
 const READY = 'cmn-page-scroll';
@@ -87,7 +87,11 @@ for (const viewport of [DESKTOP, PHONE]) {
           mainBottom:
             main.getBoundingClientRect().bottom -
             parseFloat(style.paddingBottom) -
-            parseFloat(getComputedStyle(list.parentElement as HTMLElement).paddingBottom),
+            // The page's frame holds the gutter; the list sits in a column inside it.
+            parseFloat(
+              getComputedStyle(list.closest('cmn-page')?.firstElementChild as HTMLElement)
+                .paddingBottom
+            ),
         };
       });
       expect(geometry.listTop).toBeGreaterThanOrEqual(geometry.aboveBottom);
@@ -140,7 +144,7 @@ test.describe(`fill page without a list scroller ${PHONE.name}`, () => {
     await openStory(page, STORIES.unscrolled, 'light', '[data-row]');
     const geometry = await page.evaluate(() => {
       const main = document.querySelector('main') as HTMLElement;
-      const box = document.querySelector('cmn-page-container > div') as HTMLElement;
+      const box = document.querySelector('cmn-page > div') as HTMLElement;
       const rows = document.querySelectorAll('[data-row]');
       const last = rows[rows.length - 1] as HTMLElement;
       return {

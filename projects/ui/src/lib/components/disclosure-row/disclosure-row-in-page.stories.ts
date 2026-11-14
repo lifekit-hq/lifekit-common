@@ -5,7 +5,7 @@ import {applicationConfig, type Meta, type StoryObj} from '@storybook/angular';
 import {AppLayoutComponent} from '../app-layout/app-layout.component';
 import {CardComponent} from '../card/card.component';
 import {ListItemRowComponent} from '../list-item-row/list-item-row.component';
-import {PageContainerComponent} from '../page-container/page-container.component';
+import {PageComponent} from '../page/page.component';
 import type {NavItem} from '../sidebar-nav/sidebar-nav.component';
 import {DisclosureRowComponent} from './disclosure-row.component';
 
@@ -20,10 +20,10 @@ const NAV_ITEMS: NavItem[] = [
 /** A page long enough to scroll, ending in a collapsed section the owner opens in place. */
 @Component({
   selector: 'cmn-story-disclosure-page',
-  imports: [CardComponent, DisclosureRowComponent, ListItemRowComponent, PageContainerComponent],
+  imports: [CardComponent, DisclosureRowComponent, ListItemRowComponent, PageComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <cmn-page-container>
+    <cmn-page>
       <cmn-card padding="none">
         @for (row of filler; track row) {
           <cmn-list-item-row [label]="'Account ' + row" sublabel="Checking" />
@@ -45,7 +45,7 @@ const NAV_ITEMS: NavItem[] = [
           </ul>
         </cmn-disclosure-row>
       </cmn-card>
-    </cmn-page-container>
+    </cmn-page>
   `,
 })
 class DisclosurePageComponent {

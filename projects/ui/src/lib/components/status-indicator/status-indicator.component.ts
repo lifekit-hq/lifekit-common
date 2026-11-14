@@ -16,13 +16,13 @@ const VARIANT_DOT: Record<StatusIndicatorVariant, string> = {
   neutral: 'bg-text-secondary',
 };
 
-const STATUS_BASE = 'inline-flex items-center gap-1.5 font-bold text-cmn-xs';
+const STATUS_BASE = 'inline-flex items-center gap-cmn-2 font-bold text-cmn-xs';
 
 @Component({
   selector: 'cmn-status-indicator',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="flex flex-col gap-0.5">
+    <div class="flex flex-col gap-cmn-0.5">
       <span [class]="statusClasses()">
         <span [class]="dotClasses()"></span>
         <ng-content />

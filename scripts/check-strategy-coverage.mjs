@@ -40,7 +40,6 @@ export const LEGACY_SIMPLE_LEAVES = new Set([
   'icon',
   'institution-avatar',
   'line-chart',
-  'page-container',
   'skeleton',
   'status-indicator',
   'tag',

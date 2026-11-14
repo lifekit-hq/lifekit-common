@@ -22,7 +22,7 @@ const clean = (file, text) => assert.deepEqual(scanSource(file, text), []);
 
 describe('contract', () => {
   it('reads the ramp and the radius scale from the package', () => {
-    assert.deepEqual(TEXT_RAMP_PX, [12, 14, 16, 20, 20, 28, 32, 42]);
+    assert.deepEqual(TEXT_RAMP_PX, [12, 14, 16, 20, 28, 32, 42]);
     assert.deepEqual(RADIUS_SCALE_PX, [0, 9999]);
     assert.deepEqual(SPACING_SCALE_PX, [0, 1, 2, 4, 8, 12, 16, 20, 24, 28, 32, 40, 48, 64]);
   });
@@ -303,6 +303,29 @@ describe('layout-transition', () => {
     clean(
       'a.html',
       '<i class="transition-colors transition-[opacity] transition-transform w-[4rem]"></i>'
+    );
+  });
+});
+
+describe('classes the preset replaced', () => {
+  it('flags Tailwind default spacing and text classes in a template and a TS string', () => {
+    assert.deepEqual(
+      scan('a.html', '<div class="p-4 md:gap-2 -mt-1 hover:!px-3 text-sm">x</div>'),
+      ['spacing:1', 'spacing:1', 'spacing:1', 'spacing:1', 'text-size:1']
+    );
+    assert.deepEqual(scan('a.ts', "const C = 'flex gap-1.5 text-lg';"), [
+      'spacing:1',
+      'text-size:1',
+    ]);
+  });
+
+  it('passes the cmn-* steps, zero, sizing and arbitrary values', () => {
+    assert.deepEqual(
+      scan(
+        'a.html',
+        '<div class="p-cmn-4 gap-cmn-0.5 -mt-cmn-1 p-0 top-0 w-8 h-2 size-3 left-1/2 text-cmn-sm text-center text-text-primary"></div>'
+      ),
+      []
     );
   });
 });

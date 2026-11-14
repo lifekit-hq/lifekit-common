@@ -32,7 +32,7 @@ describe('TypographyDirective', () => {
     ['display', ['font-headline', 'text-cmn-4xl', 'tracking-tight']],
     ['h1', ['font-headline', 'text-cmn-3xl']],
     ['h2', ['font-headline', 'text-cmn-2xl']],
-    ['h3', ['font-headline', 'text-cmn-xl']],
+    ['h3', ['font-headline', 'text-cmn-lg']],
     ['h4', ['font-headline', 'text-cmn-lg']],
     ['body', ['font-base', 'text-cmn-md']],
     ['small', ['font-base', 'text-cmn-sm']],

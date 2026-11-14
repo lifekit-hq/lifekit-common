@@ -40,7 +40,7 @@ export const Default: Story = {
 export const AllVariants: Story = {
   render: () => ({
     template: `
-      <div class="flex flex-col gap-3">
+      <div class="flex flex-col gap-cmn-3">
         <cmn-status-indicator variant="success" timestampLabel="3 mins ago">Synced</cmn-status-indicator>
         <cmn-status-indicator variant="warning" timestampLabel="14h ago">Stale</cmn-status-indicator>
         <cmn-status-indicator variant="error" timestampLabel="2 days ago">Failed</cmn-status-indicator>
@@ -59,7 +59,7 @@ export const NoTimestamp: Story = {
 export const Live: Story = {
   render: () => ({
     template: `
-      <div class="flex flex-col gap-3">
+      <div class="flex flex-col gap-cmn-3">
         <cmn-status-indicator variant="success" [live]="true">Syncing</cmn-status-indicator>
         <cmn-status-indicator variant="warning" [live]="true">Retrying</cmn-status-indicator>
         <cmn-status-indicator variant="neutral">Idle</cmn-status-indicator>

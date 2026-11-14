@@ -205,7 +205,7 @@ Every routed page sits in a page template, `cmn-page`. Its `kind` names the arch
 - **Rhythm.** Top-level blocks sit a section gap apart; inside a group (a heading and its rows, a field and its button) the gap is the group gap. Stacked surfaces keep at least the group gap (8px) apart.
 - **Controls side by side share one height** (`--cmn-control-h`): the md input, button, select and search field. It is Carbon's 48px default on the phone and the desktop alike, so it is also above the 44px touch target (`--size-touch`) a phone control must keep; a smaller control (a 24 or 32px icon button, a 32px chip) keeps its drawn size and gets a 44px hit area below md.
 
-A page sets no padding, margin or width of its own; it projects its blocks. `cmn-page-container` is deprecated for `cmn-page` and keeps working for the pages that still use it.
+A page sets no padding, margin or width of its own; it projects its blocks. A page outside a template fails the lint: `lifekit/page-root` is an error in the shared ESLint config, and the screen check's C0 fails a route that is not built on `cmn-page`. `cmn-page-container` is gone (5.0).
 
 The rhythm is five tokens in `theme.css`, read through the preset's `cmn-*` spacing steps:
 
@@ -237,7 +237,7 @@ Each template has golden screens in Storybook (`Templates/List`, `Templates/Deta
 | C9   | row-action-noise  | a bordered text button repeats on three or more rows of a list             |
 | C10  | text-escapes      | text runs past its surface                                                 |
 
-Every app runs it on every route at 390 and 1280, once the data has settled, from its own Playwright e2e ([docs/SCREEN-CHECK.md](docs/SCREEN-CHECK.md)). Enforcement lands per app: an app adopts `cmn-page` and turns the check on in the same pull request. Once every app has adopted, a major release removes Tailwind's off-scale default spacing and type steps from the preset, so page spacing stops being a call-site choice.
+Every app runs it on every route at 390 and 1280, once the data has settled, from its own Playwright e2e ([docs/SCREEN-CHECK.md](docs/SCREEN-CHECK.md)). Every app has adopted `cmn-page` and the check. Since 5.0 the preset replaces Tailwind's default spacing and type scales instead of extending them (padding, margin, gap, inset and translate take the `cmn-*` steps, text takes the `text-cmn-*` ramp), so page spacing is not a call-site choice; see [docs/MIGRATING-TO-5.md](docs/MIGRATING-TO-5.md).
 
 ## Elevation & Depth
 

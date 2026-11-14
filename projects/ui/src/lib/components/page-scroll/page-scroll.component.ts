@@ -1,9 +1,9 @@
 import {ChangeDetectionStrategy, Component, input} from '@angular/core';
 
 /**
- * Takes the height `cmn-page-container fill` has left and scrolls its content inside it, so a
+ * Takes the height `cmn-page fill` has left and scrolls its content inside it, so a
  * list page scrolls the list and nothing else: not `main`, not the page. The shell bounds the
- * page to the space below the title, the container passes that on, and this region is the one
+ * page to the space below the title, the page passes that on, and this region is the one
  * scroller. Sticky section headings inside it stick to its top edge, which is already clear of the
  * top bar and notices (`--cmn-sticky-top` is reset to 0px).
  *

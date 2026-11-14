@@ -20,7 +20,7 @@ export interface ConfirmDialogData {
   template: `
     <!-- On an action sheet the container draws the title and the Cancel button -->
     @if (data.title && !actionSheet()) {
-      <h2 class="font-headline text-base font-semibold text-text-primary mb-cmn-2">
+      <h2 class="font-headline text-cmn-md font-semibold text-text-primary mb-cmn-2">
         {{ data.title }}
       </h2>
     }

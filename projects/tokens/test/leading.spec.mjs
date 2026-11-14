@@ -26,7 +26,7 @@ const ROLE_STEPS = {
 };
 
 const DESIGN = readFileSync(new URL('../../../DESIGN.md', import.meta.url), 'utf8');
-const STEPS = preset.theme.extend.fontSize;
+const STEPS = preset.theme.fontSize;
 
 function designLineHeight(role) {
   const block = DESIGN.match(new RegExp(`^  ${role}:\\n((?:    .+\\n)+)`, 'm'));

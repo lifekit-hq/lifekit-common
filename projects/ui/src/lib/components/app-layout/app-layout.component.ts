@@ -116,7 +116,7 @@ export interface AppLayoutAccount extends AccountIdentity {
 }
 
 /**
- * The large title of a page without a template: it lines up with `cmn-page-container`'s default
+ * The large title of a page without a template: it lines up with `cmn-page`'s frame
  * box, and the page's own top padding spaces it. A `cmn-page` draws its own title instead (see
  * `PageFrameService`), so its gutter and the gap under the title have one owner.
  */
@@ -175,10 +175,10 @@ const MAIN_OVERLAY_TOP_CLASSES =
 const MAIN_OVERLAY_BOTTOM_CLASSES =
   'pb-[var(--cmn-content-inset-bottom,0px)] scroll-pb-[var(--cmn-content-inset-bottom,0px)]';
 /**
- * A `cmn-page-container fill` anywhere in main marks itself `data-cmn-fill`. While one is showing
+ * A `cmn-page fill` anywhere in main marks itself `data-cmn-fill`. While one is showing
  * the page frame is a column that is exactly what main has left below the title and notices, and
  * whatever the route renders into it (the page's own host element) takes all of it, so a page
- * needs no height classes of its own: its `fill` container and a scrolling child
+ * needs no height classes of its own: its `fill` page and a scrolling child
  * (`cmn-page-scroll`) are the only things that size. Non-fill pages keep the frame as it was.
  */
 // Spelled out in full: Tailwind finds classes by scanning for whole class names.

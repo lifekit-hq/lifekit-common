@@ -63,7 +63,7 @@ const ASSISTANT_BUBBLE = 'bg-surface-raised text-text-primary border border-cmn-
             </span>
           }
           @if (streaming() && !text()) {
-            <span class="inline-flex gap-1" role="img" aria-label="Thinking">
+            <span class="inline-flex gap-cmn-1" role="img" aria-label="Thinking">
               <span class="h-1.5 w-1.5 rounded-full bg-text-secondary animate-pulse"></span>
               <span
                 class="h-1.5 w-1.5 rounded-full bg-text-secondary animate-pulse [animation-delay:150ms]"
@@ -75,7 +75,7 @@ const ASSISTANT_BUBBLE = 'bg-surface-raised text-text-primary border border-cmn-
           }
           @if (streaming() && text()) {
             <span
-              class="ml-0.5 inline-block h-4 w-1 align-middle bg-text-secondary animate-pulse"
+              class="ml-cmn-0.5 inline-block h-4 w-1 align-middle bg-text-secondary animate-pulse"
             ></span>
           }
         </div>
@@ -84,7 +84,7 @@ const ASSISTANT_BUBBLE = 'bg-surface-raised text-text-primary border border-cmn-
           <div class="flex flex-wrap gap-cmn-1" role="status" aria-label="Tool activity">
             @for (tool of tools(); track tool.name) {
               <span
-                class="inline-flex items-center gap-1 rounded-cmn-full bg-surface-hover px-cmn-2 py-0.5 text-cmn-xs font-medium text-text-secondary"
+                class="inline-flex items-center gap-cmn-1 rounded-cmn-full bg-surface-hover px-cmn-2 py-cmn-0.5 text-cmn-xs font-medium text-text-secondary"
               >
                 <span
                   [class.animate-pulse]="tool.running"

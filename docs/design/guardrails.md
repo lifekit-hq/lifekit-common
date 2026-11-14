@@ -343,7 +343,7 @@ page lives: `*.page.ts` and `*.page.html`, and anything under a `pages/` folder 
 included; specs and stories excluded). A component there that is not a routed page, such as an
 auth screen or a layout shell with its own frame, disables the rule with a reason.
 
-All four are warnings for one release, then errors. The library lints its own source with
+`page-root` is an error since 5.0; `no-raw-controls`, `no-local-currency-format` and `require-disable-reason` are warnings for one release, then errors. The library lints its own source with
 `createEslintConfig({consumerGuardrails: false})`, since that is where the components themselves
 are built. K3's two template rules are errors
 from the start.

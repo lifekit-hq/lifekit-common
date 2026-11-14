@@ -18,6 +18,12 @@ async function generate(classes, css = '@tailwind utilities;') {
   return result.css;
 }
 
+/** The class names a stylesheet defines, unescaped (`.gap-cmn-0\\.5` is `gap-cmn-0.5`). */
+const classes = css =>
+  new Set(
+    [...css.matchAll(/^\.((?:\\.|[^\s{,>:])+)/gm)].map(([, name]) => name.replace(/\\(.)/g, '$1'))
+  );
+
 describe('tailwind preset', () => {
   it('generates the border colour classes cmn-select uses for resting and invalid states', async () => {
     const css = await generate(['border-status-error', 'border-border-strong']);
@@ -35,6 +41,90 @@ describe('tailwind preset', () => {
     const css = await generate(FIXED_COLOUR_NAMES.map(name => `bg-${name}`));
     for (const name of FIXED_COLOUR_NAMES) {
       assert.match(css, new RegExp(`\\.bg-${name}\\s*\\{[^}]*var\\(--color-${name}\\)`), name);
+    }
+  });
+
+  it("replaces Tailwind's default spacing: only the cmn-* steps, 0 and px generate", async () => {
+    const generated = classes(
+      await generate([
+        'p-cmn-4',
+        'gap-cmn-0.5',
+        '-mt-cmn-2',
+        'p-0',
+        'top-px',
+        'p-4',
+        'gap-2',
+        'mt-1.5',
+        '-mx-3',
+        'space-y-6',
+        'translate-x-1',
+        'inset-8',
+      ])
+    );
+    for (const kept of ['p-cmn-4', 'gap-cmn-0.5', '-mt-cmn-2', 'p-0', 'top-px']) {
+      assert.ok(generated.has(kept), kept);
+    }
+    for (const gone of [
+      'p-4',
+      'gap-2',
+      'mt-1.5',
+      '-mx-3',
+      'space-y-6',
+      'translate-x-1',
+      'inset-8',
+    ]) {
+      assert.ok(!generated.has(gone), gone);
+    }
+  });
+
+  it("keeps element sizing on Tailwind's numeric scale, since sizing is not spacing", async () => {
+    const css = await generate([
+      'w-8',
+      'h-2',
+      'size-3',
+      'min-h-11',
+      'max-h-64',
+      'basis-64',
+      'w-1/2',
+      'h-full',
+      'max-w-md',
+      'h-cmn-control-h',
+      'w-cmn-size-md',
+    ]);
+    const generated = classes(css);
+    for (const kept of [
+      'w-8',
+      'h-2',
+      'size-3',
+      'min-h-11',
+      'max-h-64',
+      'basis-64',
+      'w-1/2',
+      'h-full',
+      'max-w-md',
+    ]) {
+      assert.ok(generated.has(kept), kept);
+    }
+    assert.match(css, /\.h-cmn-control-h\s*\{[^}]*var\(--cmn-control-h\)/);
+    assert.match(css, /\.w-cmn-size-md\s*\{[^}]*var\(--cmn-size-md\)/);
+  });
+
+  it("replaces Tailwind's default type sizes: only the text-cmn-* ramp generates", async () => {
+    const css = await generate([
+      'text-cmn-md',
+      'text-cmn-4xl',
+      'text-cmn-xl',
+      'text-xs',
+      'text-sm',
+      'text-base',
+      'text-lg',
+      'text-2xl',
+    ]);
+    const generated = classes(css);
+    assert.match(css, /\.text-cmn-md\s*\{[^}]*font-size:\s*1rem/);
+    assert.ok(generated.has('text-cmn-4xl'));
+    for (const gone of ['text-cmn-xl', 'text-xs', 'text-sm', 'text-base', 'text-lg', 'text-2xl']) {
+      assert.ok(!generated.has(gone), gone);
     }
   });
 

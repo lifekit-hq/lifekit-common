@@ -32,7 +32,7 @@ export const Default: Story = {
 export const AllSizes: Story = {
   render: () => ({
     template: `
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-cmn-3">
         <cmn-institution-avatar name="Chase Bank" size="sm" />
         <cmn-institution-avatar name="Wells Fargo" size="md" />
         <cmn-institution-avatar name="Vanguard" size="lg" />
@@ -44,7 +44,7 @@ export const AllSizes: Story = {
 export const InstitutionGallery: Story = {
   render: () => ({
     template: `
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-cmn-3">
         <cmn-institution-avatar name="Chase Bank" />
         <cmn-institution-avatar name="Wells Fargo" />
         <cmn-institution-avatar name="Vanguard" />
@@ -59,7 +59,7 @@ export const InstitutionGallery: Story = {
 export const StatusDots: Story = {
   render: () => ({
     template: `
-      <div class="flex items-center gap-4">
+      <div class="flex items-center gap-cmn-4">
         <cmn-institution-avatar name="Chase Bank" status="success" statusLabel="Synced 2h ago" />
         <cmn-institution-avatar name="Wells Fargo" status="warning" statusLabel="Retrying 2h ago" />
         <cmn-institution-avatar name="Monobank" status="error" statusLabel="Reconnect needed" />
@@ -73,7 +73,7 @@ export const StatusDots: Story = {
 export const StatusDotAllSizes: Story = {
   render: () => ({
     template: `
-      <div class="flex items-center gap-4">
+      <div class="flex items-center gap-cmn-4">
         <cmn-institution-avatar name="Chase Bank" size="sm" status="success" statusLabel="Synced" />
         <cmn-institution-avatar name="Wells Fargo" size="md" status="warning" statusLabel="Retrying" />
         <cmn-institution-avatar name="Vanguard" size="lg" status="error" statusLabel="Reconnect needed" />
