@@ -54,15 +54,25 @@ describe('the Linear preset keeps the accent restrained', () => {
   });
 
   it('is held by a hairline and not a shadow', () => {
-    assert.doesNotMatch(css, /--cmn-card-shadow|--shadow-/);
+    const props = [];
+    postcss.parse(css).walkDecls(decl => props.push(decl.prop));
+    assert.deepEqual(
+      props.filter(prop => /^--cmn-card-shadow$|^--shadow-/.test(prop)),
+      []
+    );
   });
 
   it('leaves the phone to Carbon: density applies from 768px only', () => {
-    const sizes = [...css.matchAll(/(--cmn-(?:size-\w+|control-h|nav-item-h)):/g)];
-    assert.ok(sizes.length > 0);
-    const desktop = css.slice(css.indexOf('@media (min-width: 768px)'));
-    for (const [, prop] of sizes)
-      assert.ok(desktop.includes(`${prop}:`), `${prop} is desktop-only`);
-    assert.equal(css.indexOf('--cmn-control-h'), css.lastIndexOf('--cmn-control-h'));
+    const sized = [];
+    postcss.parse(css).walkDecls(/^--cmn-(size-\w+|control-h|nav-item-h)$/, decl => {
+      sized.push(decl);
+    });
+    assert.ok(sized.length > 0);
+    for (const decl of sized) {
+      const media = decl.parent?.parent;
+      assert.equal(media?.type, 'atrule', `${decl.prop} is inside an at-rule`);
+      assert.equal(media.name, 'media');
+      assert.equal(media.params, '(min-width: 768px)', `${decl.prop} is desktop-only`);
+    }
   });
 });
