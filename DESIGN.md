@@ -142,7 +142,7 @@ A preset is one CSS file, `@lifekit-hq/tokens/presets/<id>.css`, that overrides 
 - **Previewing one.** The Storybook toolbar's Design global renders every story in a preset.
 - **Hooks.** A value cannot change anatomy Carbon fixes (a bottom-rule field against an outlined one, a hairline card against a shadowed one, a leading bar against a pill for the selected nav item, a line tab against a filled one, the toggle's geometry, the secondary button's colours). Those are the `--cmn-*` hook tokens in the PRESET HOOKS block of `theme.css`, each defaulting to its Carbon value, and the semantic radius (`--cmn-radius-control|field|surface|inset`) says which size step a kind of thing takes. Components read them through `cmn-*` utilities and never by value, so Carbon renders exactly as before; the table is in `projects/tokens/presets/README.md`.
 - **Checked per preset.** `npm run test:tokens` runs the rules over every file in `presets/`: only its own selector, only tokens `theme.css` declares, no `--color-*`, dark and per-width values restated, field borders 3:1 on the surfaces in light and dark, `-bg`/`-fg` pairs 4.5:1, the 44px phone floor on `--size-touch` and `--cmn-control-h`, and a rule for each hook (`HOOK_RULES`): a field outline 3:1, a selected or secondary fill against its text 4.5:1, a toggle's on colour 3:1, a thumb that fits its track. The contract, with an example file, is `projects/tokens/presets/README.md`.
-- **Presets in this repo.** Carbon, the default (this page), and Lifekit (below). Each preset added gets a short section here.
+- **Presets in this repo.** Carbon, the default (this page), Lifekit and Linear (below). Each preset added gets a short section here.
 
 ### Lifekit preset
 
@@ -157,6 +157,19 @@ A preset is one CSS file, `@lifekit-hq/tokens/presets/<id>.css`, that overrides 
 - **Colour** is the seed's: Lifekit sets no `--color-*`, so it composes with dark mode and every app's seed.
 
 It is checked by the per-preset rules above, previewed in Storybook's Design toolbar, and held still by `projects/ui/e2e/screens/lifekit.spec.ts`: the template, controls, lists and shell golden screens at 390 and 1280, light and dark, with baselines of their own beside Carbon's.
+
+### Linear preset
+
+`@lifekit-hq/tokens/presets/linear.css`, `data-preset="linear"`: the owner's target look (2026-11-10), dark, dense and quiet, picked from three rendered options. It is a look and not a palette: it sets no `--color-*`, so Linear's violet is an app's seed choice and light and dark both pass the same per-preset checks. The library default stays Carbon; an app opts in with `data-preset="linear"` and boots in `data-theme="dark"` (the preset does not set the theme).
+
+- **Type.** Inter, the variable file with its optical-size axis (Display cut at heading sizes), self-hosted through `@fontsource-variable/inter` and imported by the preset itself, so an app on Carbon never fetches it. Inter and Geist were rendered side by side and Geist set wider, which costs the density this look is for. Inter alone was ruled the problem on 2026-10-05; the fix is Inter inside a system (one UI sans, tabular figures on every column of numbers, hierarchy by tone and hairline), not a default stack. The type ramp stays the library's.
+- **Density.** From 768px: rows 36px (`--cmn-size-lg`), controls and nav items 32px, size steps 20 / 28 / 32 / 36. Below 768px the preset sets nothing, so a phone keeps Carbon's 48px rows and dialogs stay bottom sheets (Apple HIG: 44px floor).
+- **Shape.** Radius 4 / 6 / 8px: a control and a field 6px, a card, menu and sheet 8px, a checkbox 4px. Fields are a full 1px outline on the card tone. A resting card keeps Carbon's 1px hairline and no shadow; the table header has no fill.
+- **Navigation.** A 32px row, 6px radius, inset 8px, selected by the quiet `accent-subtle` fill with no leading bar. The segmented control is a rounded outline with a neutral chosen cell.
+- **Accent restraint.** The accent shows only for what is active (the on toggle, the selected nav item) and the one primary action: a view carries at most one accent-filled button and its siblings are secondary or ghost. The secondary button is the neutral `surface-raised` fill with a hairline. Green and red stay money's. `test/linear.spec.mjs` fails if the preset reads a status colour or lets the accent fill anything but the toggle.
+- **Motion.** 100 / 160 / 240ms, shorter than Carbon's, on Carbon's curves.
+
+It is checked by the per-preset rules, previewed in Storybook's Design toolbar (and offered to the appearance control in any story drawn in a non-Carbon preset), and held still by `projects/ui/e2e/screens/linear.spec.ts`: the template, controls, lists and shell golden screens at 390 and 1280, light and dark, baselines of their own.
 
 ## Colors
 

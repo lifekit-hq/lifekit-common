@@ -84,4 +84,4 @@ same in every look. `test/hooks.spec.mjs` fails on a hook with no Carbon default
 3. Add a section for it to `DESIGN.md`, and a spec like `projects/ui/e2e/screens/lifekit.spec.ts` that
    passes its id to the shared golden routes; its baselines come from the Update screen baselines workflow.
 
-Shipped: `lifekit.css` (the library's own direction; see `DESIGN.md`). Carbon is `theme.css`.
+Shipped: `lifekit.css` (the library's own direction) and `linear.css` (dark, dense, quiet; it imports its own self-hosted Inter, so the font is fetched only when the preset is used); see `DESIGN.md`. Carbon is `theme.css`.

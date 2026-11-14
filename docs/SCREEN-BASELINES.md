@@ -177,6 +177,8 @@ opened with the Storybook toolbar's `preset` global set. They are named `lifekit
 Carbon's, so a preset adds baselines and never moves Carbon's. The routes are shared with the Carbon specs
 (`projects/ui/e2e/screens/support/golden-routes.ts`); a preset's spec passes its id and gets the same screens.
 
+`projects/ui/e2e/screens/linear.spec.ts` does the same for the Linear preset ([DESIGN.md](../DESIGN.md#linear-preset)), named `linear-<screen>`.
+
 ## Updating a baseline
 
 A baseline changes only when you run the update step on the branch that changes the screen.

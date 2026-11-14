@@ -1,0 +1,78 @@
+/* Preset "linear": dark, dense, quiet (owner pick 2026-11-10, lifekit-common#347). A look, not a
+   palette: it sets geometry, density, type and the anatomy hooks, and no --color-* (colour stays on
+   the seed axis, so Linear's violet is an app's seed choice and light and dark both pass the same
+   checks). Dark-first is the app's call: an app that wants it opts in with data-preset="linear" and
+   boots with data-theme="dark"; the library default stays Carbon.
+   - Type: Inter, the variable file with its optical-size axis, so a heading is drawn in the Display
+     cut and body text in the text cut (font-optical-sizing is auto). Geist was rendered beside it
+     and set wider, which costs the density this look is for. Inter alone was "the problem" before;
+     here it sits inside a system (one UI sans, tabular figures from the `tabular-nums` the figures
+     already carry, a hairline-and-tone hierarchy), not as a default stack.
+   - Density: a desktop row and a compact control are 32-36px. Below 768px nothing here applies, so a
+     phone keeps Carbon's 48px rows and the 44px touch floor.
+   - Surfaces: a 1px low-contrast hairline holds a card, never a shadow; a fill marks a selected row.
+   - Accent restraint: the accent shows only for what is active (the on toggle, the selected nav
+     item) and the primary action; the secondary button and the chosen segment are neutral; green
+     and red stay money's. test/linear.spec.mjs holds this. */
+@import '@fontsource-variable/inter/opsz.css';
+
+:root[data-preset='linear'] {
+  /* Reference tokens */
+  --font-sans: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --cmn-nav-rail-width: 48px;
+  --cmn-duration-short: 100ms;
+  --cmn-duration-medium: 160ms;
+  --cmn-duration-long: 240ms;
+  --cmn-field-bg: var(--color-surface-card);
+
+  /* Field: a full outline on the card tone */
+  --cmn-field-border-width: 1px;
+  --cmn-select-border-width: 1px;
+  --cmn-select-bg: var(--color-surface-card);
+
+  /* Side nav: a 32px row, 6px radius, inset 8px, selected by a quiet fill (no leading bar) */
+  --cmn-nav-inset: 8px;
+  --cmn-nav-gap: 2px;
+  --cmn-nav-item-radius: var(--radius-md);
+  --cmn-nav-active-shadow: none;
+
+  /* Button: medium weight, a neutral secondary held by a hairline */
+  --cmn-btn-weight: 500;
+  --cmn-btn-secondary-bg: var(--color-surface-raised);
+  --cmn-btn-secondary-fg: var(--color-text-primary);
+  --cmn-btn-secondary-hover: var(--color-surface-hover);
+  --cmn-btn-secondary-border: var(--color-border-default);
+
+  /* Segmented: a rounded outline, the chosen cell a neutral fill (accent is not for a choice) */
+  --cmn-segmented-radius: var(--radius-md);
+  --cmn-segmented-cell-radius: var(--radius-sm);
+  --cmn-segmented-outline: var(--color-border-strong);
+  --cmn-segmented-active-bg: var(--color-surface-hover);
+  --cmn-segmented-active-fg: var(--color-text-primary);
+
+  /* Toggle: 36 x 20, the accent when on */
+  --cmn-toggle-w: 36px;
+  --cmn-toggle-h: 20px;
+  --cmn-toggle-thumb: 16px;
+  --cmn-toggle-pad: 2px;
+  --cmn-toggle-on: var(--color-accent-default);
+
+  /* Alert stripe and the table header: a thin stripe, no header fill */
+  --cmn-alert-stripe: 2px;
+  --cmn-table-head-bg: transparent;
+}
+
+/* Desktop density. Phone width keeps Carbon's sizes, which clear the 44px floor. */
+@media (min-width: 768px) {
+  :root[data-preset='linear'] {
+    --cmn-size-xs: 20px;
+    --cmn-size-sm: 28px;
+    --cmn-size-md: 32px;
+    --cmn-size-lg: 36px;
+    --cmn-control-h: 32px;
+    --cmn-nav-item-h: 32px;
+  }
+}
