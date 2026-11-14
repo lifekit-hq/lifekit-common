@@ -13,6 +13,7 @@ import {provideDesignPresets} from '../src/lib/services/preset/preset.service';
 const PRESETS = [
   {value: 'carbon', title: 'Carbon'},
   {value: 'lifekit', title: 'Lifekit'},
+  {value: 'linear', title: 'Linear'},
 ];
 const DEFAULT_PRESET = 'carbon';
 
