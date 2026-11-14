@@ -62,7 +62,7 @@ Design tokens for the lifekit ecosystem, framework-agnostic.
   them and `CATEGORY_COLOUR_NAMES` the categorical palette in index order. `flow-in|out` are the text
   grade (gain and loss); the `-fill` pair is for bars and dots, a lightness gap apart. Categories are
   a fixed palette a host maps its category keys onto, not a seed-derived series.
-- `seeds/<app>.css`: each app's palette (`fs`, `lk`, `dc`, `bs`) for light, dark and
+- `seeds/<app>.css`: each app's palette (`fs`, `lk`, `dc`, `bs`, `bk`) for light, dark and
   `prefers-contrast: more`, generated from the engine by `scripts/build-seeds.mjs`
   (`npm run build:seeds`). Import it after `theme.css`; with none, the app gets the default
   (finance-sentry's petrol) palette.
