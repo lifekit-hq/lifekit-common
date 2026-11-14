@@ -319,6 +319,13 @@ describe('classes the preset replaced', () => {
     ]);
   });
 
+  it('flags the same classes in [class.*] bindings', () => {
+    assert.deepEqual(
+      scan('a.html', '<div [class.mt-1]="a()" [class.text-sm]="b()" [class.mt-cmn-1]="c()"></div>'),
+      ['spacing:1', 'text-size:1']
+    );
+  });
+
   it('passes the cmn-* steps, zero, sizing and arbitrary values', () => {
     assert.deepEqual(
       scan(

@@ -26,7 +26,7 @@ const UTILITY_RULES = `
   .items-center { align-items: center; }
   .justify-between { justify-content: space-between; }
   .min-h-cmn-size-md { min-height: 40px; }
-  .p-1 { padding: 0.25rem; }
+  .p-cmn-1 { padding: 0.25rem; }
   .p-cmn-4 { padding: 1rem; }
   .max-md\\:sticky { position: sticky; }
   .max-md\\:z-10 { z-index: 10; }

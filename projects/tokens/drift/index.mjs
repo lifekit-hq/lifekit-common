@@ -109,11 +109,11 @@ function declarationProblems({selector = '', atRules = [], prop, value}) {
 const SPACING_UTILITIES =
   'p|px|py|pt|pr|pb|pl|ps|pe|m|mx|my|mt|mr|mb|ml|ms|me|gap|gap-x|gap-y|space-x|space-y|top|right|bottom|left|inset|inset-x|inset-y|start|end|translate-x|translate-y|indent|scroll-m[trblxy]?|scroll-p[trblxy]?';
 const DEFAULT_SPACING_CLASS = new RegExp(
-  `(?<![\\w\\-\\[/.])((?:[a-z0-9-]+:)*!?-?(?:${SPACING_UTILITIES}))-(\\d+(?:\\.\\d+)?)(?![\\w\\-\\[/]|\\.\\d)`,
+  `(?<![\\w\\-\\[/]|(?<!\\[class)\\.)((?:[a-z0-9-]+:)*!?-?(?:${SPACING_UTILITIES}))-(\\d+(?:\\.\\d+)?)(?![\\w\\-\\[/]|\\.\\d)`,
   'g'
 );
 const DEFAULT_TEXT_CLASS =
-  /(?<![\w\-[/.])(?:[a-z0-9-]+:)*!?text-(xs|sm|base|lg|xl|[2-9]xl)(?![\w\-[])/g;
+  /(?<![\w\-[/]|(?<!\[class)\.)(?:[a-z0-9-]+:)*!?text-(xs|sm|base|lg|xl|[2-9]xl)(?![\w\-[])/g;
 const CMN_SPACING_STEPS = new Set([
   '0.5',
   '1',
