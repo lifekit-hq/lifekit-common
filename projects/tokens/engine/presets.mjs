@@ -20,6 +20,8 @@ export const APP_SEEDS = Object.freeze({
   dc: Object.freeze({name: 'devclaw', seed: '#8e3b8a', intensity: DEFAULT_INTENSITY}),
   // Velvet-curtain wine, the backstage of a theatre; the hue sits clear of the status colours.
   bs: Object.freeze({name: 'Backstage', seed: '#8a2a5c', intensity: DEFAULT_INTENSITY}),
+  // The Violet preset, so the app default and the picker's Violet are the same colour.
+  bk: Object.freeze({name: 'basket', seed: '#7c3aed', intensity: DEFAULT_INTENSITY}),
 });
 
 /**

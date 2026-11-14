@@ -66,7 +66,10 @@ export const FIXED_COLOUR_NAMES: readonly string[];
 export const CATEGORY_COLOUR_NAMES: readonly string[];
 
 export const APP_SEEDS: Readonly<
-  Record<'fs' | 'lk' | 'dc' | 'bs', Readonly<{name: string; seed: string; intensity: number}>>
+  Record<
+    'fs' | 'lk' | 'dc' | 'bs' | 'bk',
+    Readonly<{name: string; seed: string; intensity: number}>
+  >
 >;
 export const PRESETS: readonly Readonly<{id: string; name: string; seed: string}>[];
 
