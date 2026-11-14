@@ -180,7 +180,7 @@ The sizes are Carbon's productive type scale (`@carbon/type`), the only sizes th
 
 - **Display** (700, 2.625rem, 1.2; Carbon heading-06, 42px): page titles in large layouts. `text-cmn-4xl`.
 - **Headline** (600, 1.75rem, 1.3; heading-04, 28px): stat values and section titles. `text-cmn-2xl`. Page titles use `text-cmn-3xl` (heading-05, 32px).
-- **Title** (600, 1.25rem, 1.4; heading-03, 20px): card titles. `text-cmn-lg`. `text-cmn-xl` is the same size, kept as a deprecated alias for the old second 20px step and removed in the next major.
+- **Title** (600, 1.25rem, 1.4; heading-03, 20px): card titles. `text-cmn-lg`.
 - **Body** (400, 0.875rem, 1.5; body-compact-01 size, 14/21): default UI text. `text-cmn-sm`; `text-cmn-md` is 1rem / 1.5 (body-02).
 - **Label** (600, 0.75rem, 1.33333; label-01, 12/16): sentence case, 12px minimum. No uppercase or tracked micro-labels. `text-cmn-xs`.
 

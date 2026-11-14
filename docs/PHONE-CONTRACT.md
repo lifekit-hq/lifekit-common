@@ -212,8 +212,8 @@ area; outside the phone shell the property is unset.
   by `--cmn-content-inset-bottom` (and `scroll-padding-bottom` reads the same inset), and projects
   the page into a frame that fills main's content box below the large title and the notices,
   followed by a spacer the shell sizes to the frame's overflow. So the last row clears the tab bar after bare content following a page
-  container, after two sibling top-level page containers (no gap opens between them), and after an
-  `h-full` host whose content overflows it. A page container adds no end inset of its own.
+  template, after two sibling top-level pages (no gap opens between them), and after an
+  `h-full` host whose content overflows it. A page adds no end inset of its own.
 - **Page height.** A page is as tall as its content unless it is a fill page. A `cmn-page fill`
   holding a `cmn-page-scroll` is bounded to the frame below the large title and notices at every width:
   the shell makes that frame exactly what main has left (in the overlay and outside it), so main does
@@ -227,7 +227,7 @@ area; outside the phone shell the property is unset.
   does not scroll. The spacer is re-measured when the page's children, their sizes or the chrome
   change; content that only grows through images or CSS-only changes is not observed. A `sticky`
   element that is a direct child of the page frame releases once the frame ends, so keep sticky
-  headers inside a page container or section.
+  headers inside a page or section.
 - **Sticky headers.** A sticky offset inside `<main>` counts from its padding edge, which is
   already below the top bar. So a sticky header uses `top: var(--cmn-sticky-top, 0px)`, never
   `--cmn-content-inset-top`: that would count the top bar twice and leave a gap of its height.
