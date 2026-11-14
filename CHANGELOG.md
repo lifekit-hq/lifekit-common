@@ -1,5 +1,17 @@
 # Changelog
 
+## [5.0.0](https://github.com/lifekit-hq/lifekit-common/compare/v4.8.0...v5.0.0) (2026-11-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* **ui:** Tailwind's default spacing (`p-4`, `gap-2`, `-mt-1`) and type (`text-sm`, `text-lg`) classes no longer generate; use `p-cmn-4`, `gap-cmn-2`, `-mt-cmn-1` and `text-cmn-sm`. `text-cmn-xl` is removed (use `text-cmn-lg`). `cmn-page-container` is removed (use `cmn-page`). `lifekit/page-root` is an error. The preset sets `theme.spacing` and `theme.fontSize` instead of the `extend` keys. See docs/MIGRATING-TO-5.md.
+
+### Features
+
+* **tokens:** add the basket colour seed ([#351](https://github.com/lifekit-hq/lifekit-common/issues/351)) ([d846930](https://github.com/lifekit-hq/lifekit-common/commit/d84693002bef2a6515387873b451ece8a0009a3d))
+* **ui:** make page templates mandatory and drop Tailwind default spacing and type scales ([#348](https://github.com/lifekit-hq/lifekit-common/issues/348)) ([c4cb983](https://github.com/lifekit-hq/lifekit-common/commit/c4cb983378f56cf4c25c51473ac9938aba73d04c))
+
 ## [4.8.0](https://github.com/lifekit-hq/lifekit-common/compare/v4.7.1...v4.8.0) (2026-11-10)
 
 
