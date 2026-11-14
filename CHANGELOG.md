@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.1.0](https://github.com/lifekit-hq/lifekit-common/compare/v5.0.0...v5.1.0) (2026-11-14)
+
+
+### Features
+
+* **tokens:** add the Linear design preset ([#350](https://github.com/lifekit-hq/lifekit-common/issues/350)) ([abdc4ac](https://github.com/lifekit-hq/lifekit-common/commit/abdc4ac0e76095198bf0f9bdb2a008f9ac3fe14e))
+
 ## [5.0.0](https://github.com/lifekit-hq/lifekit-common/compare/v4.8.0...v5.0.0) (2026-11-14)
 
 
