@@ -32,9 +32,9 @@ function toPx(value) {
 }
 
 /** The type ramp (px), from the preset's `cmn-*` font sizes. */
-export const TEXT_RAMP_PX = Object.values(
-  require('../tailwind/preset.cjs').theme.extend.fontSize
-).map(([size]) => toPx(size));
+export const TEXT_RAMP_PX = Object.values(require('../tailwind/preset.cjs').theme.fontSize).map(
+  ([size]) => toPx(size)
+);
 
 /** The radius scale (px): every `--radius-*` in theme.css. The pill is any radius from 99px up. */
 export const RADIUS_SCALE_PX = [
@@ -127,12 +127,14 @@ export function radiusMessage(value) {
  * mini-units).
  */
 export const SPACING_SCALE_PX = [
-  0,
-  1,
-  2,
-  ...Object.values(require('../tailwind/preset.cjs').theme.extend.spacing)
-    .map(value => toPx(value))
-    .filter(px => px !== null),
+  ...new Set([
+    0,
+    1,
+    2,
+    ...Object.values(require('../tailwind/preset.cjs').theme.spacing)
+      .map(value => toPx(value))
+      .filter(px => px !== null),
+  ]),
 ].sort((a, b) => a - b);
 
 /** (g) Spacing: every padding, margin, gap or inset length on the scale; tokens and calc() pass. */

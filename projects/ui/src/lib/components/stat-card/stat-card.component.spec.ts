@@ -124,7 +124,7 @@ describe('StatCardComponent', () => {
     fixture.componentRef.setInput('delta', null);
     fixture.detectChanges();
     let deltaRow: HTMLElement | null = fixture.nativeElement.querySelector(
-      '.flex.items-center.gap-1'
+      '.flex.items-center.gap-cmn-1'
     );
     expect(deltaRow).toBeFalsy();
 

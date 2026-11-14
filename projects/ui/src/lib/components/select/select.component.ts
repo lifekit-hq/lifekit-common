@@ -43,9 +43,9 @@ type ActivePosition = 'selected' | 'first' | 'last';
 // presses as at least --size-touch tall. md is at least the control height (`--cmn-control-h`) a
 // button beside it shares: Carbon's 48px at every width.
 const SIZE_CLASSES: Record<SelectSize, string> = {
-  sm: 'py-1 text-cmn-md md:text-cmn-xs',
-  md: 'min-h-cmn-control-h py-1.5 text-cmn-md md:text-cmn-sm',
-  lg: 'py-2 text-cmn-md',
+  sm: 'py-cmn-1 text-cmn-md md:text-cmn-xs',
+  md: 'min-h-cmn-control-h py-cmn-2 text-cmn-md md:text-cmn-sm',
+  lg: 'py-cmn-2 text-cmn-md',
 };
 
 const ICON_SIZE: Record<SelectSize, 'sm' | 'md' | 'lg'> = {
@@ -67,7 +67,7 @@ const COMBOBOX_FIELD_BASE =
   'has-[[role=combobox]:focus-visible]:ring-2 has-[[role=combobox]:focus-visible]:ring-border-focus';
 
 const CLEAR_BUTTON_CLASSES =
-  'inline-flex shrink-0 cursor-pointer items-center justify-center rounded-cmn-full p-0.5 ' +
+  'inline-flex shrink-0 cursor-pointer items-center justify-center rounded-cmn-full p-cmn-0.5 ' +
   'text-text-secondary hover:bg-surface-raised hover:text-text-primary focus:outline-none ' +
   'focus-visible:ring-2 focus-visible:ring-border-focus ' +
   PHONE_HIT_AREA_CLASSES;
@@ -279,7 +279,7 @@ const POSITIONS: ConnectedPosition[] = [
         <cmn-icon
           [size]="iconSize()"
           name="ChevronDown"
-          class="pointer-events-none col-start-1 row-start-1 mr-2 self-center justify-self-end text-text-secondary"
+          class="pointer-events-none col-start-1 row-start-1 mr-cmn-2 self-center justify-self-end text-text-secondary"
         />
       </div>
     }
@@ -332,7 +332,7 @@ export class SelectComponent implements ControlValueAccessor {
   public readonly iconSize = computed(() => ICON_SIZE[this.size()]);
   public readonly selectClasses = computed(() =>
     [
-      'col-start-1 row-start-1 block appearance-none pl-cmn-2 pr-8',
+      'col-start-1 row-start-1 block appearance-none pl-cmn-2 pr-cmn-8',
       FIELD_BASE,
       this.hasError() ? 'border-status-error' : 'border-cmn-field-border',
       SIZE_CLASSES[this.size()],

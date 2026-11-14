@@ -26,7 +26,7 @@ export const Default: Story = {
     template: `
       <div class="w-96">
         <cmn-date-range [(ngModel)]="range" />
-        <p class="mt-2 text-cmn-sm text-text-secondary">{{ range | json }}</p>
+        <p class="mt-cmn-2 text-cmn-sm text-text-secondary">{{ range | json }}</p>
       </div>
     `,
   }),
@@ -80,7 +80,7 @@ export const WithPresets: Story = {
     template: `
       <div class="w-96">
         <cmn-date-range [(ngModel)]="range" [presets]="presets" />
-        <p class="mt-2 text-cmn-sm text-text-secondary">{{ range | json }}</p>
+        <p class="mt-cmn-2 text-cmn-sm text-text-secondary">{{ range | json }}</p>
       </div>
     `,
   }),

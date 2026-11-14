@@ -11,7 +11,7 @@ const STATUS_CLASSES: Record<BadgeStatus, string> = {
 };
 
 const DEFAULT_OVERFLOW_COUNT = 99;
-const COUNT_SIZE_CLASSES = 'min-w-5 h-5 px-1 text-cmn-xs font-semibold leading-none';
+const COUNT_SIZE_CLASSES = 'min-w-5 h-5 px-cmn-1 text-cmn-xs font-semibold leading-none';
 const DOT_SIZE_CLASSES = 'w-2 h-2';
 const BASE_INDICATOR_CLASSES =
   'cmn-badge-indicator inline-flex items-center justify-center rounded-full text-text-inverse';
@@ -19,7 +19,7 @@ const BASE_INDICATOR_CLASSES =
 // reads a positioned child with negative insets inside a `display: none` subtree (the nav the shell
 // hides at this size) as escaping the shell's clip, and flags `clipped-overflow-container` on every
 // route of an app whose nav carries a badge.
-const ABSOLUTE_POSITION_CLASSES = 'absolute right-0 top-0 translate-x-1.5 -translate-y-1.5';
+const ABSOLUTE_POSITION_CLASSES = 'absolute right-0 top-0 translate-x-cmn-2 -translate-y-cmn-2';
 
 @Component({
   selector: 'cmn-badge',

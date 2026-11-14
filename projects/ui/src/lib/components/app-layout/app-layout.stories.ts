@@ -26,7 +26,7 @@ import {type FilterBarChip, FilterBarComponent} from '../filter-bar/filter-bar.c
 import {ListItemRowComponent} from '../list-item-row/list-item-row.component';
 import {ListSectionComponent} from '../list-section/list-section.component';
 import type {MenuItem} from '../menu/menu.component';
-import {PageContainerComponent} from '../page-container/page-container.component';
+import {PageComponent} from '../page/page.component';
 import {SegmentedComponent, type SegmentedOption} from '../segmented/segmented.component';
 import type {NavItem} from '../sidebar-nav/sidebar-nav.component';
 import {ToastService} from '../toast/toast.service';
@@ -72,16 +72,16 @@ const FEED_PAGE_DELAY_MS = 40;
       data-last-content
       data-infinite-list
     >
-      <cmn-page-container spacing="md">
+      <cmn-page>
         @for (row of rows(); track row) {
           <cmn-list-item-row [label]="'Payment ' + row" sublabel="Card payment">
             <span amount class="text-cmn-sm tabular-nums text-text-primary">-€12.24</span>
           </cmn-list-item-row>
         }
-      </cmn-page-container>
+      </cmn-page>
     </lk-infinite-list>
   `,
-  imports: [ListItemRowComponent, PageContainerComponent],
+  imports: [ListItemRowComponent, PageComponent],
 })
 class StoryInfiniteFeedComponent implements OnDestroy {
   private page = 0;
@@ -621,12 +621,12 @@ const LIST_ROWS_PER_DAY = 5;
 
 /**
  * A list page as consumers build one: the page component's host is a full-height flex column
- * (`flex h-full flex-col`) holding `cmn-page-container fill`, a filter bar with a quick-filter
+ * (`flex h-full flex-col`) holding `cmn-page fill`, a filter bar with a quick-filter
  * chip row, a segmented control and day groups in `cmn-list-section`s.
  */
 const LIST_PAGE_BODY = `
   <div class="flex h-full flex-col">
-    <cmn-page-container spacing="md" fill>
+    <cmn-page kind="list" fill>
       <cmn-filter-bar [activeCount]="applied.length" [applied]="applied" placeholder="Search transactions">
         <lk-chip-row [options]="periods" [selected]="['month']" cmnFilterBarQuick label="Period"></lk-chip-row>
       </cmn-filter-bar>
@@ -642,7 +642,7 @@ const LIST_PAGE_BODY = `
         </cmn-list-section>
       }
       <p class="text-center text-cmn-xs text-text-secondary" data-last-content>Last item clears the tab bar</p>
-    </cmn-page-container>
+    </cmn-page>
   </div>
 `;
 
@@ -669,7 +669,7 @@ export const PhoneOverlayListPage: Story = {
         FilterBarComponent,
         ListItemRowComponent,
         ListSectionComponent,
-        PageContainerComponent,
+        PageComponent,
         SegmentedComponent,
       ],
     }),
@@ -743,24 +743,24 @@ const STORY_ROW = `
 `;
 
 const AFTER_CONTAINER_BODY = `
-  <cmn-page-container spacing="md">
+  <cmn-page>
     @for (row of rows; track row) {${STORY_ROW}}
-  </cmn-page-container>
+  </cmn-page>
   <p class="mx-cmn-4 py-cmn-2 text-center text-cmn-xs leading-relaxed text-text-secondary" data-last-content>
     Bare content after the page container clears the tab bar
   </p>
 `;
 
 const SIBLING_CONTAINERS_BODY = `
-  <cmn-page-container spacing="md">
+  <cmn-page>
     @for (row of rows; track row) {${STORY_ROW}}
-  </cmn-page-container>
-  <cmn-page-container spacing="md" data-second-container>
+  </cmn-page>
+  <cmn-page data-second-container>
     @for (row of rows; track row) {${STORY_ROW}}
     <p class="text-center text-cmn-xs text-text-secondary" data-last-content>
       The second page container clears the tab bar
     </p>
-  </cmn-page-container>
+  </cmn-page>
 `;
 
 const OVERFLOWING_HOST_BODY = `
@@ -792,7 +792,7 @@ const CHAT_HOST_BODY = `
       }
     </div>
     <form class="shrink-0 border-t border-border-default p-cmn-3" data-last-content>
-      <input aria-label="Message" class="h-11 w-full rounded-cmn-lg border border-border-default bg-surface-card px-cmn-3 text-base" />
+      <input aria-label="Message" class="h-11 w-full rounded-cmn-lg border border-border-default bg-surface-card px-cmn-3 text-cmn-md" />
     </form>
   </div>
 `;
@@ -812,7 +812,7 @@ const shellStory = (body: string, summary: string): Story => ({
   globals: PHONE,
   parameters: {docs: {description: {story: summary}}},
   decorators: [
-    moduleMetadata({imports: [ListItemRowComponent, PageContainerComponent, SegmentedComponent]}),
+    moduleMetadata({imports: [ListItemRowComponent, PageComponent, SegmentedComponent]}),
   ],
   render: args => ({
     props: {...args, ...STORY_SHELL_PROPS},
@@ -835,7 +835,7 @@ const shellStory = (body: string, summary: string): Story => ({
 /** Bare content after a page container: the shell, not the container, reserves the clearance. */
 export const PhoneOverlayContentAfterContainer: Story = shellStory(
   AFTER_CONTAINER_BODY,
-  'A paragraph follows a `cmn-page-container`; the last line still rests clear of the tab bar.'
+  'A paragraph follows a `cmn-page`; the last line still rests clear of the tab bar.'
 );
 
 /** Two sibling page containers: clearance only after the last, no gap between them. */

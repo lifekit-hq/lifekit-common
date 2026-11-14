@@ -64,7 +64,7 @@ const AVATAR_TRIGGER_CLASSES =
   'group h-cmn-touch w-cmn-touch shrink-0 rounded-cmn-full md:mx-cmn-2 md:h-cmn-size-sm md:w-cmn-size-sm';
 /** Keyboard hints mean nothing without a keyboard: hidden wherever hover is unavailable. */
 const KEY_HINT_CLASSES =
-  'ml-cmn-2 hidden rounded-cmn-role-inset border border-border-default px-1 py-0.5 font-mono text-cmn-xs ' +
+  'ml-cmn-2 hidden rounded-cmn-role-inset border border-border-default px-cmn-1 py-cmn-0.5 font-mono text-cmn-xs ' +
   'text-text-secondary md:inline [@media(hover:none)]:hidden';
 /** The chevron's glyph sits on the content edge below md, as on iOS. */
 const BACK_BUTTON_CLASSES = `${CHROME_BUTTON_CLASSES} -ml-cmn-2 md:ml-0`;

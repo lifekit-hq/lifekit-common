@@ -28,7 +28,7 @@ function token(name) {
   return value.trim();
 }
 
-const SIZES = preset.theme.extend.fontSize;
+const SIZES = preset.theme.fontSize;
 const px = rem => Number.parseFloat(rem) * 16;
 const CARBON_STEPS = [
   'label01',
@@ -91,8 +91,8 @@ describe('type ramp is Carbon’s', () => {
     );
   });
 
-  it('keeps xl as an alias of lg', () => {
-    assert.deepEqual(SIZES['cmn-xl'], SIZES['cmn-lg']);
+  it('has no xl: Carbon has no step between 20 and 28', () => {
+    assert.equal(SIZES['cmn-xl'], undefined);
   });
 });
 
@@ -111,7 +111,7 @@ describe('layout sizes are Carbon’s', () => {
 
   it('exposes the sizes as spacing steps', () => {
     for (const name of ['xs', 'sm', 'md', 'lg']) {
-      assert.equal(preset.theme.extend.spacing[`cmn-size-${name}`], `var(--cmn-size-${name})`);
+      assert.equal(preset.theme.spacing[`cmn-size-${name}`], `var(--cmn-size-${name})`);
     }
   });
 });
@@ -125,8 +125,8 @@ describe('desktop shell is Carbon’s UI Shell', () => {
   });
 
   it('exposes the widths as spacing steps', () => {
-    assert.equal(preset.theme.extend.spacing['cmn-nav'], 'var(--cmn-nav-width)');
-    assert.equal(preset.theme.extend.spacing['cmn-nav-rail'], 'var(--cmn-nav-rail-width)');
+    assert.equal(preset.theme.spacing['cmn-nav'], 'var(--cmn-nav-width)');
+    assert.equal(preset.theme.spacing['cmn-nav-rail'], 'var(--cmn-nav-rail-width)');
   });
 });
 

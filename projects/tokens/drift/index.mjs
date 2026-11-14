@@ -5,11 +5,13 @@
  *   font-family           a font stack that does not start from var(--font-*)
  *   color                 a colour literal in CSS or TS (not templates, inline `template:` included)
  *                         that is not the var(--x, #hex) fallback mirroring its own token
- *   text-size             text below 12px, or off the cmn-* type ramp
+ *   text-size             text below 12px, or off the cmn-* type ramp, and a Tailwind default text
+ *                         class (`text-sm`, `text-lg`) the preset replaced
  *   radius                a radius off the --radius-* scale
  *   root-font-size        `html { font-size }`: the rem scale assumes the 16px root
  *   layout-transition     a transition on width or height
- *   spacing               a padding, margin, gap or inset length off the spacing scale
+ *   spacing               a padding, margin, gap or inset length off the spacing scale, and a
+ *                         Tailwind default-scale class (`p-4`, `gap-2`, `-mt-1`) the preset replaced
  *   error-copy            a TS prose string that says please, sorry, oops, valid or invalid
  *                         (not in an inline template)
  *
@@ -102,6 +104,55 @@ function declarationProblems({selector = '', atRules = [], prop, value}) {
   return problems;
 }
 
+// The utilities that read the spacing scale, which the preset replaces (sizing keeps Tailwind's
+// numeric scale: `w-8`, `h-2`, `size-3` and the like are not here).
+const SPACING_UTILITIES =
+  'p|px|py|pt|pr|pb|pl|ps|pe|m|mx|my|mt|mr|mb|ml|ms|me|gap|gap-x|gap-y|space-x|space-y|top|right|bottom|left|inset|inset-x|inset-y|start|end|translate-x|translate-y|indent|scroll-m[trblxy]?|scroll-p[trblxy]?';
+const DEFAULT_SPACING_CLASS = new RegExp(
+  `(?<![\\w\\-\\[/]|(?<!\\[class)\\.)((?:[a-z0-9-]+:)*!?-?(?:${SPACING_UTILITIES}))-(\\d+(?:\\.\\d+)?)(?![\\w\\-\\[/]|\\.\\d)`,
+  'g'
+);
+const DEFAULT_TEXT_CLASS =
+  /(?<![\w\-[/]|(?<!\[class)\.)(?:[a-z0-9-]+:)*!?text-(xs|sm|base|lg|xl|[2-9]xl)(?![\w\-[])/g;
+const CMN_SPACING_STEPS = new Set([
+  '0.5',
+  '1',
+  '2',
+  '3',
+  '4',
+  '5',
+  '6',
+  '7',
+  '8',
+  '10',
+  '12',
+  '16',
+]);
+
+/** Tailwind classes the preset no longer generates: default spacing steps and default text sizes. */
+function* removedScaleClassProblems(text) {
+  for (const match of text.matchAll(DEFAULT_SPACING_CLASS)) {
+    const [, utility, step] = match;
+    if (step === '0') continue;
+    const bare = utility.replace(/^.*:/, '');
+    const use = CMN_SPACING_STEPS.has(step)
+      ? `${bare}-cmn-${step}`
+      : 'a cmn-* spacing step or a --cmn-* page rhythm token';
+    yield {
+      rule: 'spacing',
+      message: `${bare}-${step} is Tailwind's default spacing, which the lifekit preset replaces (5.0), so the class generates nothing; use ${use}`,
+      offset: match.index,
+    };
+  }
+  for (const match of text.matchAll(DEFAULT_TEXT_CLASS)) {
+    yield {
+      rule: 'text-size',
+      message: `text-${match[1]} is Tailwind's default type size, which the lifekit preset replaces (5.0), so the class generates nothing; use a text-cmn-* step`,
+      offset: match.index,
+    };
+  }
+}
+
 /** Tailwind arbitrary values (`text-[10px]`, `rounded-[10px]`, `transition-[width]`, `font-['X']`). */
 function* arbitraryClassProblems(text) {
   const rules = [
@@ -134,6 +185,7 @@ function* arbitraryClassProblems(text) {
       if (message) yield {rule, message, offset: match.index};
     }
   }
+  yield* removedScaleClassProblems(text);
 }
 
 /** Declarations written as `style="…"` attributes. */

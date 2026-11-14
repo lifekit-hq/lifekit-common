@@ -59,7 +59,7 @@ describe('SettingsSectionComponent', () => {
   it('leaves the space between sections to a cmn-page column, keeping a section gap above its divider', () => {
     fixture.detectChanges();
     const classes = el().classList;
-    // In a cmn-page-container it draws its own divider and the space around it
+    // Outside a cmn-page column it draws its own divider and the space around it
     expect(classes).toContain('border-b');
     expect(classes).toContain('mb-cmn-8');
     // In a cmn-page column the template's section gap is the space below the divider

@@ -180,7 +180,7 @@ The sizes are Carbon's productive type scale (`@carbon/type`), the only sizes th
 
 - **Display** (700, 2.625rem, 1.2; Carbon heading-06, 42px): page titles in large layouts. `text-cmn-4xl`.
 - **Headline** (600, 1.75rem, 1.3; heading-04, 28px): stat values and section titles. `text-cmn-2xl`. Page titles use `text-cmn-3xl` (heading-05, 32px).
-- **Title** (600, 1.25rem, 1.4; heading-03, 20px): card titles. `text-cmn-lg`. `text-cmn-xl` is the same size, kept as a deprecated alias for the old second 20px step and removed in the next major.
+- **Title** (600, 1.25rem, 1.4; heading-03, 20px): card titles. `text-cmn-lg`.
 - **Body** (400, 0.875rem, 1.5; body-compact-01 size, 14/21): default UI text. `text-cmn-sm`; `text-cmn-md` is 1rem / 1.5 (body-02).
 - **Label** (600, 0.75rem, 1.33333; label-01, 12/16): sentence case, 12px minimum. No uppercase or tracked micro-labels. `text-cmn-xs`.
 
@@ -205,7 +205,7 @@ Every routed page sits in a page template, `cmn-page`. Its `kind` names the arch
 - **Rhythm.** Top-level blocks sit a section gap apart; inside a group (a heading and its rows, a field and its button) the gap is the group gap. Stacked surfaces keep at least the group gap (8px) apart.
 - **Controls side by side share one height** (`--cmn-control-h`): the md input, button, select and search field. It is Carbon's 48px default on the phone and the desktop alike, so it is also above the 44px touch target (`--size-touch`) a phone control must keep; a smaller control (a 24 or 32px icon button, a 32px chip) keeps its drawn size and gets a 44px hit area below md.
 
-A page sets no padding, margin or width of its own; it projects its blocks. `cmn-page-container` is deprecated for `cmn-page` and keeps working for the pages that still use it.
+A page sets no padding, margin or width of its own; it projects its blocks. A page outside a template fails the lint: `lifekit/page-root` is an error in the shared ESLint config, and the screen check's C0 fails a route that is not built on `cmn-page`. `cmn-page-container` is gone (5.0).
 
 The rhythm is five tokens in `theme.css`, read through the preset's `cmn-*` spacing steps:
 
@@ -237,7 +237,7 @@ Each template has golden screens in Storybook (`Templates/List`, `Templates/Deta
 | C9   | row-action-noise  | a bordered text button repeats on three or more rows of a list             |
 | C10  | text-escapes      | text runs past its surface                                                 |
 
-Every app runs it on every route at 390 and 1280, once the data has settled, from its own Playwright e2e ([docs/SCREEN-CHECK.md](docs/SCREEN-CHECK.md)). Enforcement lands per app: an app adopts `cmn-page` and turns the check on in the same pull request. Once every app has adopted, a major release removes Tailwind's off-scale default spacing and type steps from the preset, so page spacing stops being a call-site choice.
+Every app runs it on every route at 390 and 1280, once the data has settled, from its own Playwright e2e ([docs/SCREEN-CHECK.md](docs/SCREEN-CHECK.md)). Every app has adopted `cmn-page` and the check. Since 5.0 the preset replaces Tailwind's default spacing and type scales instead of extending them (padding, margin, gap, inset and translate take the `cmn-*` steps, text takes the `text-cmn-*` ramp), so page spacing is not a call-site choice; see [docs/MIGRATING-TO-5.md](docs/MIGRATING-TO-5.md).
 
 ## Elevation & Depth
 

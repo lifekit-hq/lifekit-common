@@ -8,12 +8,12 @@ export type ToastVariant = 'info' | 'success' | 'warning' | 'error';
 const DEFAULT_DURATION_MS = 3000;
 
 const ACTION_CLASSES =
-  'ml-auto shrink-0 rounded-cmn-role-inset px-cmn-2 py-0.5 font-base text-cmn-sm font-semibold underline ' +
+  'ml-auto shrink-0 rounded-cmn-role-inset px-cmn-2 py-cmn-0.5 font-base text-cmn-sm font-semibold underline ' +
   'underline-offset-2 hover:bg-black/20 focus:outline-none focus:ring-2 focus:ring-white/50 ' +
   PHONE_HIT_AREA_CLASSES;
 
 const DISMISS_CLASSES =
-  'ml-cmn-2 inline-flex items-center justify-center rounded-cmn-role-inset p-0.5 hover:bg-black/20 ' +
+  'ml-cmn-2 inline-flex items-center justify-center rounded-cmn-role-inset p-cmn-0.5 hover:bg-black/20 ' +
   `focus:outline-none focus:ring-2 focus:ring-white/50 ${PHONE_HIT_AREA_CLASSES}`;
 
 const VARIANT_CONTAINER_CLASSES: Record<ToastVariant, string> = {

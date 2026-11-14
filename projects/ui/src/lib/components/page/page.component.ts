@@ -61,7 +61,7 @@ export const PAGE_TEMPLATES: Readonly<Record<PageKind, PageTemplate>> = {
 };
 
 const HOST_CLASSES = 'block';
-// Full-height column, as `cmn-page-container fill`: a phone page grows with its content unless it
+// Full-height column: a phone page grows with its content unless it
 // holds a `cmn-page-scroll`, which needs the host bounded at every width.
 const HOST_FILL_CLASSES = 'flex min-h-full flex-col md:h-full has-[cmn-page-scroll]:h-full';
 /** The frame: the shell's 1200px cap with the page gutter inside it, on every side. */
@@ -125,7 +125,7 @@ const RAIL_CLASSES = 'empty:hidden';
  * Each kind has golden screens in Storybook (Templates/List, Detail, Form, Settings and Overview).
  *
  * `fill` makes it a full-height column whose content can take the remaining height (a
- * `cmn-page-scroll` list), as `cmn-page-container fill` does. On an overview that holds from xl up
+ * `cmn-page-scroll` list), as a fill page does. On an overview that holds from xl up
  * too, where the main column and the rail stretch to the row's height.
  *
  * The host carries `data-cmn-page="<kind>"`, the main column `data-cmn-page-column` and the rail

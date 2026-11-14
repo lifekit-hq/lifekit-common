@@ -31,7 +31,7 @@ const REMOVABLE_PILL_CLASSES =
   'py-cmn-1 pl-cmn-3 pr-cmn-1 text-cmn-sm font-medium text-text-primary';
 
 const REMOVE_BUTTON_CLASSES =
-  'inline-flex shrink-0 cursor-pointer items-center justify-center rounded-cmn-full p-0.5 ' +
+  'inline-flex shrink-0 cursor-pointer items-center justify-center rounded-cmn-full p-cmn-0.5 ' +
   'text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary ' +
   'focus:outline-none focus-visible:ring-2 focus-visible:ring-border-focus ' +
   'disabled:cursor-not-allowed disabled:opacity-60 ' +

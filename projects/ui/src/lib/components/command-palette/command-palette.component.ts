@@ -61,7 +61,7 @@ interface PaletteGroup {
         class="cmn-palette-panel relative z-10 w-full max-w-[560px] overflow-hidden rounded-cmn-role-surface border border-cmn-float bg-surface-card shadow-cmn-md"
       >
         <!-- Search row -->
-        <div class="flex items-center gap-cmn-3 border-b border-border-default px-cmn-4 py-3.5">
+        <div class="flex items-center gap-cmn-3 border-b border-border-default px-cmn-4 py-cmn-4">
           <cmn-icon name="Search" size="sm" class="shrink-0 text-text-secondary" />
           <input
             #searchInput
@@ -70,11 +70,11 @@ interface PaletteGroup {
             placeholder="Search pages, actions…"
             class="flex-1 border-none bg-transparent text-cmn-md text-text-primary outline-none placeholder:text-text-placeholder"
           />
-          <kbd [class]="KEY_CLASSES + ' shrink-0 px-1.5'">ESC</kbd>
+          <kbd [class]="KEY_CLASSES + ' shrink-0 px-cmn-2'">ESC</kbd>
         </div>
 
         <!-- Results -->
-        <div class="max-h-[360px] overflow-y-auto py-1.5">
+        <div class="max-h-[360px] overflow-y-auto py-cmn-2">
           @if (filteredItems().length === 0) {
             <!-- An empty query is the initial state, not a failed search: nothing to report yet. -->
             @if (query()) {
@@ -87,7 +87,7 @@ interface PaletteGroup {
               <div>
                 <div
                   data-group-heading
-                  class="px-cmn-4 pb-1 pt-1.5 text-cmn-xs font-semibold text-text-disabled"
+                  class="px-cmn-4 pb-cmn-1 pt-cmn-2 text-cmn-xs font-semibold text-text-disabled"
                 >
                   {{ group.group }}
                 </div>
@@ -100,7 +100,7 @@ interface PaletteGroup {
                     (keydown.enter)="activate(entry.item)"
                     (mouseenter)="selectedIndex.set(entry.idx)"
                     tabindex="-1"
-                    class="flex cursor-pointer items-center gap-cmn-3 border-l-2 px-cmn-4 py-2.5 transition-colors duration-cmn-short ease-cmn-standard"
+                    class="flex cursor-pointer items-center gap-cmn-3 border-l-2 px-cmn-4 py-cmn-3 transition-colors duration-cmn-short ease-cmn-standard"
                   >
                     <div
                       [class.bg-accent-default]="entry.idx === selectedIndex()"
@@ -124,7 +124,7 @@ interface PaletteGroup {
                     >
                     @if (entry.idx === selectedIndex()) {
                       <div class="ml-auto">
-                        <kbd [class]="KEY_CLASSES + ' px-1.5'">↵</kbd>
+                        <kbd [class]="KEY_CLASSES + ' px-cmn-2'">↵</kbd>
                       </div>
                     }
                   </div>
@@ -136,11 +136,11 @@ interface PaletteGroup {
 
         <!-- Footer hints -->
         <div
-          class="flex gap-3.5 border-t border-border-default px-cmn-4 py-2 [@media(hover:none)]:hidden"
+          class="flex gap-cmn-4 border-t border-border-default px-cmn-4 py-cmn-2 [@media(hover:none)]:hidden"
         >
           @for (hint of KEY_HINTS; track hint[0]) {
-            <div class="flex items-center gap-1">
-              <kbd [class]="KEY_CLASSES + ' px-1'">{{ hint[0] }}</kbd>
+            <div class="flex items-center gap-cmn-1">
+              <kbd [class]="KEY_CLASSES + ' px-cmn-1'">{{ hint[0] }}</kbd>
               <span class="text-cmn-xs text-text-disabled">{{ hint[1] }}</span>
             </div>
           }
@@ -161,7 +161,7 @@ export class CommandPaletteComponent {
 
   /** Keyboard hints mean nothing without a keyboard: hidden wherever hover is unavailable. */
   protected readonly KEY_CLASSES =
-    'rounded-cmn-role-inset border border-border-default py-0.5 font-mono text-cmn-xs text-text-disabled ' +
+    'rounded-cmn-role-inset border border-border-default py-cmn-0.5 font-mono text-cmn-xs text-text-disabled ' +
     '[@media(hover:none)]:hidden';
 
   protected readonly KEY_HINTS: [string, string][] = [

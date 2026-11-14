@@ -503,11 +503,12 @@ export function createEslintConfig({
       },
     },
     {
-      // Guardrails: a routed page is rooted on `cmn-page` and sets no spacing of its own. A
-      // warning for one release, then an error.
+      // Guardrails: a routed page is rooted on `cmn-page` and sets no spacing of its own. An
+      // error since 5.0 (a warning through 4.x); a surface that is not a shell page opts out with a
+      // scoped `'lifekit/page-root': 'off'` override and a comment saying why.
       files: [...PAGE_ROOT_TEMPLATES, ...PAGE_ROOT_SCRIPTS],
       ignores: PAGE_ROOT_IGNORES,
-      rules: {'lifekit/page-root': 'warn'},
+      rules: {'lifekit/page-root': 'error'},
     },
     ...(consumerGuardrails ? [] : [LIFEKIT_RULES_OFF]),
     ...extraConfigs

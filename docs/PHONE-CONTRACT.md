@@ -184,7 +184,7 @@ protected readonly account: AppLayoutAccount = {
   the section rhythm come from the template, the screen check finds its `data-cmn-page` (C0 passes),
   and `lifekit/page-root` accepts a component whose template root is `<cmn-more-page>`. The app puts
   it on the route, or wraps it in a component whose template is just `<cmn-more-page …/>`; it adds no
-  `cmn-page` or `cmn-page-container` around it.
+  `cmn-page` around it.
 
 ### Content clears the chrome
 
@@ -212,9 +212,9 @@ area; outside the phone shell the property is unset.
   by `--cmn-content-inset-bottom` (and `scroll-padding-bottom` reads the same inset), and projects
   the page into a frame that fills main's content box below the large title and the notices,
   followed by a spacer the shell sizes to the frame's overflow. So the last row clears the tab bar after bare content following a page
-  container, after two sibling top-level page containers (no gap opens between them), and after an
-  `h-full` host whose content overflows it. A page container adds no end inset of its own.
-- **Page height.** A page is as tall as its content unless it is a fill page. A `cmn-page-container fill`
+  template, after two sibling top-level pages (no gap opens between them), and after an
+  `h-full` host whose content overflows it. A page adds no end inset of its own.
+- **Page height.** A page is as tall as its content unless it is a fill page. A `cmn-page fill`
   holding a `cmn-page-scroll` is bounded to the frame below the large title and notices at every width:
   the shell makes that frame exactly what main has left (in the overlay and outside it), so main does
   not scroll and the `cmn-page-scroll` is the only scroller. The page's own host element needs no height
@@ -227,7 +227,7 @@ area; outside the phone shell the property is unset.
   does not scroll. The spacer is re-measured when the page's children, their sizes or the chrome
   change; content that only grows through images or CSS-only changes is not observed. A `sticky`
   element that is a direct child of the page frame releases once the frame ends, so keep sticky
-  headers inside a page container or section.
+  headers inside a page or section.
 - **Sticky headers.** A sticky offset inside `<main>` counts from its padding edge, which is
   already below the top bar. So a sticky header uses `top: var(--cmn-sticky-top, 0px)`, never
   `--cmn-content-inset-top`: that would count the top bar twice and leave a gap of its height.
@@ -260,11 +260,11 @@ A route that declares none of these keeps the layout's `title` input and gets no
 
 The parts of a long list page (transactions, alerts, events) are shared, so every app filters,
 groups and scrolls a list the same way. The list scrolls inside the page and nothing else does: put
-the rows in a `cmn-page-scroll` inside `cmn-page-container fill`. It takes the height left under the
+the rows in a `cmn-page-scroll` inside `cmn-page fill`. It takes the height left under the
 filters, so no page needs its own height or overflow classes.
 
 ```html
-<cmn-page-container fill>
+<cmn-page kind="list" fill>
   <cmn-filter-bar
     [(query)]="query"
     [activeCount]="activeFilters()"
@@ -290,7 +290,7 @@ filters, so no page needs its own height or overflow classes.
     </cmn-list-section>
     }
   </cmn-page-scroll>
-</cmn-page-container>
+</cmn-page>
 ```
 
 | Part                             | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
@@ -298,7 +298,7 @@ filters, so no page needs its own height or overflow classes.
 | `cmn-filter-bar`                 | The filter flow: a search field (`[(query)]`), a Filters button badged with `activeCount`, a `cmnFilterBarQuick` slot for a quick-filter row, and the `applied` filters as removable chips with Clear (`remove`, `clear`). A `cmnFilterBarSheet` template opens from the Filters button as a bottom sheet on a phone and a side drawer from `md`. The bar keeps no filter state.                                                                                                     |
 | `lk-chip-row`                    | Quick filters on one line: a period, a status, an account. Scrolls sideways with an edge fade and snap, never truncates a label, keeps the selected chip in view, shows counts as badges, single or multi select, 44px chips.                                                                                                                                                                                                                                                        |
 | `cmn-segmented` / `lk-segmented` | A short parameter choice (a view mode, a chart period): five segments or fewer, short noun labels. Cells are equal and as wide as the widest label, and never narrower than their own: a row that needs more than its container scrolls inside itself (chosen cell kept in view, page never widens) rather than truncate. `lk-segmented` warns in development when it overflows. More choices, or long labels, use `lk-chip-row`; a rarely changed setting such as sort uses a menu. |
-| `cmn-page-scroll`                | The one scroller of a list page: takes the height `cmn-page-container fill` has left and scrolls its rows inside it, keyboard reachable, with sticky headings stuck to its top edge. `label` names it as a region. Needs a `fill` container; an empty list or an empty state fills the same space.                                                                                                                                                                                   |
+| `cmn-page-scroll`                | The one scroller of a list page: takes the height `cmn-page fill` has left and scrolls its rows inside it, keyboard reachable, with sticky headings stuck to its top edge. `label` names it as a region. Needs a `fill` container; an empty list or an empty state fills the same space.                                                                                                                                                                                             |
 | `cmn-list-section`               | One group of rows under a heading: a day of transactions, a severity of alerts. The heading is an `h2` that names the section, with a `cmnListSectionAside` slot for a total or count; the rows sit in an unpadded `cmn-card` (`card` false leaves them bare). On a phone the heading sticks flush under the top bar while its rows scroll past, and the next heading pushes it out.                                                                                                 |
 
 #### Swipe actions on a row

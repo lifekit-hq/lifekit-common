@@ -27,7 +27,7 @@ export const Default: Story = {
     template: `
       <div class="w-80">
         <cmn-search-input [(ngModel)]="query" [size]="size" [placeholder]="placeholder" />
-        <p class="mt-2 text-cmn-sm text-text-secondary">Query: "{{ query }}"</p>
+        <p class="mt-cmn-2 text-cmn-sm text-text-secondary">Query: "{{ query }}"</p>
       </div>
     `,
   }),

@@ -9,7 +9,7 @@ import {ButtonComponent} from '../button/button.component';
 import {DangerZoneComponent} from '../danger-zone/danger-zone.component';
 import {FormFieldComponent} from '../form-field/form-field.component';
 import {InputComponent} from '../input/input.component';
-import {PageContainerComponent} from '../page-container/page-container.component';
+import {PageComponent} from '../page/page.component';
 import {SelectComponent, type SelectOption} from '../select/select.component';
 import {SettingRowComponent} from '../setting-row/setting-row.component';
 import {ToggleComponent} from '../toggle/toggle.component';
@@ -51,14 +51,14 @@ const CURRENCIES: SelectOption[] = [
     FormFieldComponent,
     FormsModule,
     InputComponent,
-    PageContainerComponent,
+    PageComponent,
     SelectComponent,
     SettingRowComponent,
     SettingsSectionComponent,
     ToggleComponent,
   ],
   template: `
-    <cmn-page-container maxWidth="max-w-[900px]" spacing="none">
+    <cmn-page kind="settings">
       <p class="mb-cmn-8 text-cmn-sm text-text-secondary">
         Manage your profile, preferences, and security.
       </p>
@@ -193,7 +193,7 @@ const CURRENCIES: SelectOption[] = [
       <p class="text-cmn-xs text-text-secondary" aria-live="polite">
         Last change: {{ lastChange() }}
       </p>
-    </cmn-page-container>
+    </cmn-page>
   `,
 })
 class StorySettingsPageComponent {

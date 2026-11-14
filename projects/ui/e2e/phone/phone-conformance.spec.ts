@@ -777,7 +777,7 @@ for (const size of LIST_WIDTHS) {
     test(`${SIBLING_STORY} | no gap opens between the containers`, async ({page}) => {
       await open(page, layoutStory(SIBLING_STORY));
       const gap = await page.evaluate(() => {
-        const [first, second] = document.querySelectorAll('cmn-page-container');
+        const [first, second] = document.querySelectorAll('cmn-page');
         if (!first || !second) {
           return Number.NaN;
         }

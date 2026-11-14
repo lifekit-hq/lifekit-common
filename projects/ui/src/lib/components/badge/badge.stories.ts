@@ -39,7 +39,7 @@ export const Dot: Story = {
 export const Standalone: Story = {
   render: () => ({
     template: `
-      <div class="flex gap-2">
+      <div class="flex gap-cmn-2">
         <cmn-badge [count]="3" [standalone]="true" status="error" />
         <cmn-badge [count]="120" [standalone]="true" status="warning" />
         <cmn-badge [count]="0" [showZero]="true" [standalone]="true" status="success" />
@@ -51,7 +51,7 @@ export const Standalone: Story = {
 export const Statuses: Story = {
   render: () => ({
     template: `
-      <div class="flex flex-wrap gap-6 items-center">
+      <div class="flex flex-wrap gap-cmn-6 items-center">
         <cmn-badge [count]="1" status="default"><cmn-icon name="Bell" size="md" /></cmn-badge>
         <cmn-badge [count]="1" status="success"><cmn-icon name="Bell" size="md" /></cmn-badge>
         <cmn-badge [count]="1" status="processing"><cmn-icon name="Bell" size="md" /></cmn-badge>

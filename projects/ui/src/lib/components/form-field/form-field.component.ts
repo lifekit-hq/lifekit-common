@@ -72,7 +72,7 @@ let fieldCounter = 0;
         >
           {{ label() }}
           @if (required()) {
-            <span class="text-status-error ml-0.5" aria-hidden="true">*</span>
+            <span class="text-status-error ml-cmn-0.5" aria-hidden="true">*</span>
           }
         </label>
       }

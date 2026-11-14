@@ -22,7 +22,7 @@ export type AlertItemDensity = 'card' | 'flat';
  * sits beneath a sticky list-section heading (also `z-10`) instead of painting over it.
  */
 const DISMISS_CLASSES =
-  'relative z-10 flex shrink-0 rounded-cmn-role-inset p-1 text-text-disabled transition-colors hover:bg-surface-raised ' +
+  'relative z-10 flex shrink-0 rounded-cmn-role-inset p-cmn-1 text-text-disabled transition-colors hover:bg-surface-raised ' +
   `hover:text-text-primary ${PHONE_HIT_AREA_CLASSES}`;
 
 /**
@@ -100,7 +100,7 @@ const SEVERITY_ICON: Record<AlertItemSeverity, LucideIconName> = {
           }
           @if (referenceLabel()) {
             <span
-              class="rounded-cmn-role-inset bg-surface-raised px-1.5 py-0.5 text-cmn-xs text-text-secondary"
+              class="rounded-cmn-role-inset bg-surface-raised px-cmn-2 py-cmn-0.5 text-cmn-xs text-text-secondary"
               >{{ referenceLabel() }}</span
             >
           }
@@ -123,7 +123,7 @@ const SEVERITY_ICON: Record<AlertItemSeverity, LucideIconName> = {
           [class.absolute]="!flat()"
           [class.right-cmn-3]="!flat()"
           [class.top-cmn-3]="!flat()"
-          [class.mt-1.5]="flat()"
+          [class.mt-cmn-2]="flat()"
           [class.shrink-0]="flat()"
           [style.background]="color()"
           class="h-2 w-2 rounded-full"

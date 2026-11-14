@@ -92,7 +92,7 @@ export const LongValue: Story = {
 export const LoadingToLoaded: Story = {
   render: () => ({
     template: `
-      <div class="grid grid-cols-2 gap-4 p-4 bg-surface-bg">
+      <div class="grid grid-cols-2 gap-cmn-4 p-cmn-4 bg-surface-bg">
         <cmn-stat-card label="Total Wealth" value="" [loading]="true" [delta]="4.2" deltaLabel="+4.2% this month" />
         <cmn-stat-card label="Total Wealth" value="$1,420,892.12" [delta]="4.2" deltaLabel="+4.2% this month" icon="Wallet" />
       </div>
@@ -103,7 +103,7 @@ export const LoadingToLoaded: Story = {
 export const AllCards: Story = {
   render: () => ({
     template: `
-      <div class="grid grid-cols-4 gap-4 p-4 bg-surface-bg">
+      <div class="grid grid-cols-4 gap-cmn-4 p-cmn-4 bg-surface-bg">
         <cmn-stat-card label="Total Wealth" value="$1,420,892.12" [delta]="4.2" deltaLabel="+4.2% this month" icon="Wallet" />
         <cmn-stat-card label="Banks" value="$412,050.00" [delta]="1.8" deltaLabel="+1.8%" icon="Building2" />
         <cmn-stat-card label="Crypto" value="$84,320.45" [delta]="-2.1" deltaLabel="-2.1%" icon="Bitcoin" />

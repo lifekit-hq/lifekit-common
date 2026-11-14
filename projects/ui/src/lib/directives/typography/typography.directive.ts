@@ -7,7 +7,7 @@ const LEVEL_CLASSES: Record<TypographyLevel, string[]> = {
   display: ['font-headline', 'text-cmn-4xl', 'font-bold', 'leading-tight', 'tracking-tight'],
   h1: ['font-headline', 'text-cmn-3xl', 'font-bold'],
   h2: ['font-headline', 'text-cmn-2xl', 'font-semibold'],
-  h3: ['font-headline', 'text-cmn-xl', 'font-semibold'],
+  h3: ['font-headline', 'text-cmn-lg', 'font-semibold'],
   h4: ['font-headline', 'text-cmn-lg', 'font-medium'],
   body: ['font-base', 'text-cmn-md', 'font-normal'],
   small: ['font-base', 'text-cmn-sm', 'font-normal'],

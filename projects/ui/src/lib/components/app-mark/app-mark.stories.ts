@@ -45,7 +45,7 @@ export const Default: Story = {
 export const EveryApp: Story = {
   render: () => ({
     template: `
-      <div class="flex items-center gap-4">
+      <div class="flex items-center gap-cmn-4">
         <cmn-app-mark app="lk" label="Lifekit" />
         <cmn-app-mark app="fs" label="Finance Sentry" />
         <cmn-app-mark app="dc" label="devclaw" />
@@ -58,7 +58,7 @@ export const EveryApp: Story = {
 export const SmallSizes: Story = {
   render: () => ({
     template: `
-      <div class="flex items-end gap-4">
+      <div class="flex items-end gap-cmn-4">
         <cmn-app-mark app="bk" [size]="16" />
         <cmn-app-mark app="bk" [size]="24" />
         <cmn-app-mark app="bk" [size]="32" />
@@ -72,10 +72,10 @@ export const SmallSizes: Story = {
 export const FollowsTheSeed: Story = {
   render: () => ({
     template: `
-      <div class="flex items-center gap-4">
+      <div class="flex items-center gap-cmn-4">
         <cmn-app-mark app="bk" label="Basket, app colour" />
         <div
-          class="flex items-center gap-4"
+          class="flex items-center gap-cmn-4"
           style="--color-accent-default: #c2410c; --color-text-inverse: #ffffff"
         >
           <cmn-app-mark app="bk" label="Basket, chosen colour" />

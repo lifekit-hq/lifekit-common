@@ -37,7 +37,7 @@ export const Transactions: Story = {
       ],
     },
     template: `
-      <div class="flex flex-wrap items-center gap-3">
+      <div class="flex flex-wrap items-center gap-cmn-3">
         <cmn-search-input class="w-64" [(ngModel)]="query" placeholder="Search transactions" />
         <cmn-select class="w-52" mode="multiple" [(ngModel)]="accounts" [options]="accountOptions" placeholder="All accounts" aria-label="Accounts" />
         <cmn-select class="w-52" mode="multiple" [(ngModel)]="categories" [options]="categoryOptions" placeholder="All categories" aria-label="Categories" />

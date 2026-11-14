@@ -25,10 +25,102 @@ const withOpacity = colours =>
     ])
   );
 
+/**
+ * Sizing is not spacing. `w-*`, `h-*`, `size-*`, `min-*`, `max-*` and `basis-*` size an element (a dot,
+ * an avatar, a bar, a list cap) and keep Tailwind's numeric scale, which they read from `spacing`,
+ * so replacing `spacing` below would drop every one of them without a warning. Each takes the
+ * default scale plus whatever `spacing` adds (the `cmn-*` steps, the control heights and the page
+ * rhythm), so `h-cmn-control-h` and `w-8` both still generate.
+ */
+const sizing = key => context =>
+  require('tailwindcss/defaultTheme')[key]({
+    ...context,
+    theme: name =>
+      name === 'spacing'
+        ? {...require('tailwindcss/defaultTheme').spacing, ...context.theme('spacing')}
+        : context.theme(name),
+  });
+
+const SIZING_KEYS = [
+  'width',
+  'height',
+  'size',
+  'minWidth',
+  'minHeight',
+  'maxWidth',
+  'maxHeight',
+  'flexBasis',
+];
+
 /** @type {Partial<import('tailwindcss').Config>} */
 module.exports = {
   darkMode: ['selector', '[data-theme="dark"]'],
   theme: {
+    // Spacing is replaced, not extended: padding, margin, gap, `space-*`, inset, translate and the like
+    // take the `cmn-*` steps below (plus 0 and 1px) and nothing else, so the space around and between
+    // things is a step of the scale or a page-rhythm token and never a call-site number. Tailwind's own
+    // 0.5, 1, 2 ... 96 steps are gone from this preset; `p-4` is `p-cmn-4`, the step with the same value.
+    // 2px (`cmn-0.5`) is Carbon's spacing-01, the one half step the scale keeps.
+    spacing: {
+      0: '0px',
+      px: '1px',
+      'cmn-0.5': '2px',
+      'cmn-1': '4px',
+      'cmn-2': '8px',
+      'cmn-3': '12px',
+      'cmn-4': '16px',
+      'cmn-5': '20px',
+      'cmn-6': '24px',
+      'cmn-7': '28px',
+      'cmn-8': '32px',
+      'cmn-10': '40px',
+      'cmn-touch': 'var(--size-touch)',
+      'cmn-12': '48px',
+      // Carbon layout sizes (theme.css): 24 / 32 / 40 / 48, the control heights.
+      'cmn-size-xs': 'var(--cmn-size-xs)',
+      'cmn-size-sm': 'var(--cmn-size-sm)',
+      'cmn-size-md': 'var(--cmn-size-md)',
+      'cmn-size-lg': 'var(--cmn-size-lg)',
+      // Desktop shell (theme.css): the side nav's two widths, Carbon's 256 and 48.
+      'cmn-nav': 'var(--cmn-nav-width)',
+      'cmn-nav-rail': 'var(--cmn-nav-rail-width)',
+      'cmn-nav-inset': 'var(--cmn-nav-inset)',
+      'cmn-nav-gap': 'var(--cmn-nav-gap)',
+      'cmn-nav-item': 'var(--cmn-nav-item-h)',
+      'cmn-toggle-w': 'var(--cmn-toggle-w)',
+      'cmn-toggle-h': 'var(--cmn-toggle-h)',
+      'cmn-toggle-thumb': 'var(--cmn-toggle-thumb)',
+      'cmn-toggle-pad': 'var(--cmn-toggle-pad)',
+      'cmn-tabs-pad': 'var(--cmn-tabs-pad)',
+      'cmn-tabs-gap': 'var(--cmn-tabs-gap)',
+      'cmn-16': '64px',
+      // Page rhythm (theme.css): semantic steps the page template owns. `px-cmn-page-gutter`,
+      // `mt-cmn-title-gap`, `gap-cmn-section-gap`, `gap-cmn-group-gap`, `h-cmn-control-h`.
+      'cmn-page-gutter': 'var(--cmn-page-gutter)',
+      'cmn-title-gap': 'var(--cmn-title-gap)',
+      'cmn-section-gap': 'var(--cmn-section-gap)',
+      'cmn-group-gap': 'var(--cmn-group-gap)',
+      'cmn-control-h': 'var(--cmn-control-h)',
+    },
+
+    // The type ramp is Carbon's productive scale (@carbon/type), kept to the sizes Carbon has and the
+    // 12px floor. xs label-01, sm the compact body (14px, held at our 1.5 line, so 21px), md body-02,
+    // lg heading-03, 2xl heading-04, 3xl heading-05, 4xl heading-06. Carbon sets heading-04 and -05
+    // under 1.3 leading; they take 1.3, the floor the design judge holds multi-line text to.
+    // Replaced, not extended: Tailwind's text-xs ... text-9xl are gone, so a size is a step of this ramp.
+    // There is no xl (a second 20px step beside lg, which Carbon does not have).
+    fontSize: {
+      'cmn-xs': ['0.75rem', {lineHeight: '1.33333'}],
+      'cmn-sm': ['0.875rem', {lineHeight: '1.5'}],
+      'cmn-md': ['1rem', {lineHeight: '1.5'}],
+      'cmn-lg': ['1.25rem', {lineHeight: '1.4'}],
+      'cmn-2xl': ['1.75rem', {lineHeight: '1.3'}],
+      'cmn-3xl': ['2rem', {lineHeight: '1.3'}],
+      'cmn-4xl': ['2.625rem', {lineHeight: '1.2'}],
+    },
+
+    ...Object.fromEntries(SIZING_KEYS.map(key => [key, sizing(key)])),
+
     extend: {
       colors: withOpacity({
         'surface-bg': 'var(--color-surface-bg)',
@@ -122,23 +214,6 @@ module.exports = {
         headline: ['var(--font-sans)'],
         label: ['var(--font-sans)'],
         mono: ['var(--font-mono)'],
-      },
-
-      // The type ramp is Carbon's productive scale (@carbon/type), kept to the sizes Carbon has and the
-      // 12px floor. xs label-01, sm the compact body (14px, held at our 1.5 line, so 21px), md body-02,
-      // lg heading-03, 2xl heading-04, 3xl heading-05, 4xl heading-06. Carbon sets heading-04 and -05
-      // under 1.3 leading; they take 1.3, the floor the design judge holds multi-line text to.
-      // xl was a second 20px step beside the old 18px lg; Carbon has none between 20 and 28, so xl
-      // is now an alias of lg, deprecated, and goes in the next major.
-      fontSize: {
-        'cmn-xs': ['0.75rem', {lineHeight: '1.33333'}],
-        'cmn-sm': ['0.875rem', {lineHeight: '1.5'}],
-        'cmn-md': ['1rem', {lineHeight: '1.5'}],
-        'cmn-lg': ['1.25rem', {lineHeight: '1.4'}],
-        'cmn-xl': ['1.25rem', {lineHeight: '1.4'}],
-        'cmn-2xl': ['1.75rem', {lineHeight: '1.3'}],
-        'cmn-3xl': ['2rem', {lineHeight: '1.3'}],
-        'cmn-4xl': ['2.625rem', {lineHeight: '1.2'}],
       },
 
       // Tailwind's `leading-tight` is 1.25, under the 1.3 floor the design judge holds multi-line
@@ -237,45 +312,6 @@ module.exports = {
         'cmn-expressive': 'var(--cmn-ease-expressive-standard)',
         'cmn-expressive-decelerate': 'var(--cmn-ease-expressive-decelerate)',
         'cmn-expressive-accelerate': 'var(--cmn-ease-expressive-accelerate)',
-      },
-
-      spacing: {
-        'cmn-1': '4px',
-        'cmn-2': '8px',
-        'cmn-3': '12px',
-        'cmn-4': '16px',
-        'cmn-5': '20px',
-        'cmn-6': '24px',
-        'cmn-7': '28px',
-        'cmn-8': '32px',
-        'cmn-10': '40px',
-        'cmn-touch': 'var(--size-touch)',
-        'cmn-12': '48px',
-        // Carbon layout sizes (theme.css): 24 / 32 / 40 / 48, the control heights.
-        'cmn-size-xs': 'var(--cmn-size-xs)',
-        'cmn-size-sm': 'var(--cmn-size-sm)',
-        'cmn-size-md': 'var(--cmn-size-md)',
-        'cmn-size-lg': 'var(--cmn-size-lg)',
-        // Desktop shell (theme.css): the side nav's two widths, Carbon's 256 and 48.
-        'cmn-nav': 'var(--cmn-nav-width)',
-        'cmn-nav-rail': 'var(--cmn-nav-rail-width)',
-        'cmn-nav-inset': 'var(--cmn-nav-inset)',
-        'cmn-nav-gap': 'var(--cmn-nav-gap)',
-        'cmn-nav-item': 'var(--cmn-nav-item-h)',
-        'cmn-toggle-w': 'var(--cmn-toggle-w)',
-        'cmn-toggle-h': 'var(--cmn-toggle-h)',
-        'cmn-toggle-thumb': 'var(--cmn-toggle-thumb)',
-        'cmn-toggle-pad': 'var(--cmn-toggle-pad)',
-        'cmn-tabs-pad': 'var(--cmn-tabs-pad)',
-        'cmn-tabs-gap': 'var(--cmn-tabs-gap)',
-        'cmn-16': '64px',
-        // Page rhythm (theme.css): semantic steps the page template owns. `px-cmn-page-gutter`,
-        // `mt-cmn-title-gap`, `gap-cmn-section-gap`, `gap-cmn-group-gap`, `h-cmn-control-h`.
-        'cmn-page-gutter': 'var(--cmn-page-gutter)',
-        'cmn-title-gap': 'var(--cmn-title-gap)',
-        'cmn-section-gap': 'var(--cmn-section-gap)',
-        'cmn-group-gap': 'var(--cmn-group-gap)',
-        'cmn-control-h': 'var(--cmn-control-h)',
       },
     },
   },

@@ -30,7 +30,7 @@ export const Default: Story = {
 export const AllVariants: Story = {
   render: () => ({
     template: `
-      <div class="flex flex-wrap gap-2">
+      <div class="flex flex-wrap gap-cmn-2">
         <cmn-tag variant="success">Synced</cmn-tag>
         <cmn-tag variant="error">Error</cmn-tag>
         <cmn-tag variant="warning">Stale</cmn-tag>
@@ -44,7 +44,7 @@ export const AllVariants: Story = {
 export const Sizes: Story = {
   render: () => ({
     template: `
-      <div class="flex flex-wrap items-center gap-2">
+      <div class="flex flex-wrap items-center gap-cmn-2">
         <cmn-tag variant="success" size="md">Synced, 24px</cmn-tag>
         <cmn-tag variant="success" size="lg">Synced, 32px</cmn-tag>
       </div>

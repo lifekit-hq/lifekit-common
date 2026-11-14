@@ -2,7 +2,7 @@ import type {Meta, StoryObj} from '@storybook/angular';
 import {moduleMetadata} from '@storybook/angular';
 
 import {ListItemRowComponent} from '../list-item-row/list-item-row.component';
-import {PageContainerComponent} from '../page-container/page-container.component';
+import {PageComponent} from '../page/page.component';
 import {PageScrollComponent} from './page-scroll.component';
 
 const ROWS = Array.from({length: 40}, (_, i) => i + 1);
@@ -12,7 +12,7 @@ const meta: Meta<PageScrollComponent> = {
   component: PageScrollComponent,
   tags: ['autodocs'],
   decorators: [
-    moduleMetadata({imports: [ListItemRowComponent, PageContainerComponent, PageScrollComponent]}),
+    moduleMetadata({imports: [ListItemRowComponent, PageComponent, PageScrollComponent]}),
   ],
   parameters: {layout: 'fullscreen'},
 };
@@ -22,19 +22,19 @@ type Story = StoryObj<PageScrollComponent>;
 
 const TEMPLATE = `
   <div class="h-[480px]">
-    <cmn-page-container spacing="none" fill>
+    <cmn-page kind="list" fill>
       <p class="pb-cmn-4 text-cmn-sm text-text-secondary">Content above the list stays put.</p>
       <cmn-page-scroll [label]="label">
         @for (row of rows; track row) {
           <cmn-list-item-row [label]="'Row ' + row" sublabel="Scheduled" />
         }
       </cmn-page-scroll>
-    </cmn-page-container>
+    </cmn-page>
   </div>
 `;
 
 /**
- * Inside `cmn-page-container fill` it takes the height left under the content above it and scrolls
+ * Inside `cmn-page fill` it takes the height left under the content above it and scrolls
  * its rows; the page itself does not scroll. Here a 480px box stands in for the app shell's page frame.
  */
 export const Default: Story = {

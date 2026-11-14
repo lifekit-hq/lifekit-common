@@ -60,7 +60,7 @@ const DISMISS_CLASSES =
 
       <div class="flex-1 min-w-0">
         @if (title()) {
-          <p class="font-label text-cmn-sm font-semibold mb-0.5">
+          <p class="font-label text-cmn-sm font-semibold mb-cmn-0.5">
             {{ title() }}
           </p>
         }
