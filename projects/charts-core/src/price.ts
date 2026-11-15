@@ -533,7 +533,7 @@ export function alignToPrimary(series: readonly PriceSeries[]): PriceSeries[] {
   return [
     primary,
     ...overlays.map(overlay => {
-      const sorted = [...overlay.points].sort(byTime);
+      const sorted = overlay.points.filter(p => Number.isFinite(p.time)).sort(byTime);
       let cursor = 0;
       const points = primary.points.map(({time}) => {
         while (cursor + 1 < sorted.length && sorted[cursor + 1].time <= time) {
@@ -571,14 +571,14 @@ export interface PriceView {
   end: number;
 }
 
-/** Slices, aligns and (for a benchmark) rebases `input.series` into what the block shows; null when there is nothing to draw. */
+/** Slices the instrument to the period, aligns each overlay's full history to it and (for a benchmark) rebases `input.series` into what the block shows; null when there is nothing to draw. */
 export function buildPriceView(input: PriceViewInput): PriceView | null {
-  const sliced = slicePriceSeries(input.series, input.period);
-  const primary = sliced[0];
+  const [instrument, ...overlays] = input.series;
+  const primary = instrument && slicePriceSeries([instrument], input.period)[0];
   if (!primary || primary.points.length === 0) {
     return null;
   }
-  const aligned = alignToPrimary(sliced);
+  const aligned = alignToPrimary([primary, ...overlays]);
   const mode = resolvePriceMode(input.mode, aligned.length);
   const drawn = aligned.map((s, i) => ({
     label: s.label,

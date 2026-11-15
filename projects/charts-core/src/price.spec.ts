@@ -292,6 +292,30 @@ describe('buildPriceView', () => {
     expect(percent && priceChartModel(percent, 0).baseline).toBe(0);
   });
 
+  it('rebases a benchmark from its price at the period start, on a different calendar', () => {
+    const everyDay: PriceSeries = {
+      label: 'ACME',
+      points: [
+        {time: utc(2026, 2, 14), value: 90},
+        {time: utc(2026, 2, 15), value: 100},
+        {time: utc(2026, 2, 16), value: 101},
+        {time: utc(2026, 3, 13), value: 102},
+        {time: utc(2026, 3, 15), value: 103},
+      ],
+    };
+    const weekdays: PriceSeries = {
+      label: 'Index',
+      points: [
+        {time: utc(2026, 2, 13), value: 200},
+        {time: utc(2026, 2, 16), value: 210},
+        {time: utc(2026, 3, 13), value: 220},
+      ],
+    };
+    const view = buildPriceView({...base, period: '1M', series: [everyDay, weekdays]});
+    expect(view?.prices.map(p => p.value)).toEqual([100, 101, 102, 103]);
+    expect(view?.drawn[1].points.map(p => p.value)).toEqual([0, 5, 10, 10]);
+  });
+
   it('can hold percent mode on a single series', () => {
     expect(buildPriceView({...base, mode: 'percent', series: [instrument]})?.mode).toBe('percent');
   });
