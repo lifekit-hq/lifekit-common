@@ -140,8 +140,7 @@ export class LineChartComponent implements AfterViewInit, OnDestroy {
   public readonly caption = input<string>('');
   /** Where each row of the data table came from, in row order; adds a Source column. */
   public readonly sources = input<readonly string[] | undefined>(undefined);
-  /** Opens the chart with its data table showing in place of the plot; the Table chip toggles it. */
-  /** Ignored when `compact`. */
+  /** Opens the chart with its data table showing in place of the plot (ignored when `compact`). */
   public readonly showDataTable = input<boolean>(false);
   protected readonly isEmpty = computed(() => this.data().length === 0);
   /** A focused chart reads its points by key; a compact one is a still glyph. */

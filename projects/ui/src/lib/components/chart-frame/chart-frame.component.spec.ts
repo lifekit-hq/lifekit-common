@@ -169,6 +169,12 @@ describe('ChartFrameComponent', () => {
       expect(query('span.font-label')).toBeNull();
       expect(plot().classList).toContain('contents');
     });
+
+    it('keeps the plot showing when opened on the table, as there is no chip to return', () => {
+      set({table: TABLE, bare: true, tableOpen: true});
+      expect(plot().classList).not.toContain('hidden');
+      expect(table()?.classList).toContain('sr-only');
+    });
   });
 
   it('announces what the plot is reading, politely', () => {
