@@ -22,13 +22,17 @@ export type AlertItemSeverity = 'error' | 'warning' | 'info';
 export type AlertItemDensity = 'card' | 'flat';
 
 /**
- * 24px drawn, at least --size-touch pressed on a phone. The `z-10` only lifts it above the title's
+ * 24px drawn, at least --size-touch pressed on a phone. The pressed box is pinned to the button's
+ * end edge instead of centred on it, so it grows toward the title and never past the card's edge:
+ * a centred one reaches beyond a flat row's 4px inset and scrolls a `cmn-page-scroll` sideways.
+ * The `!` wins over the shared helper's centring. The `z-10` only lifts it above the title's
  * stretch; the item row is `isolate`, so that z-index stays inside the row and the row as a whole
  * sits beneath a sticky list-section heading (also `z-10`) instead of painting over it.
  */
 const DISMISS_CLASSES =
   'relative z-10 flex shrink-0 rounded-cmn-role-inset p-cmn-1 text-text-disabled transition-colors hover:bg-surface-raised ' +
-  `hover:text-text-primary ${PHONE_HIT_AREA_CLASSES}`;
+  `hover:text-text-primary ${PHONE_HIT_AREA_CLASSES} ` +
+  'max-md:after:!left-auto max-md:after:!right-0 max-md:after:!translate-x-0';
 
 /**
  * The title's `::after` stretches over the whole item; the item is `relative`, so the stretch is
