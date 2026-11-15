@@ -58,7 +58,7 @@ function byDocumentOrder(a: ErrorSummaryField, b: ErrorSummaryField): number {
                 <a
                   [href]="'#' + entry.fieldId"
                   (click)="follow($event, entry)"
-                  class="inline-block py-cmn-1 text-cmn-sm font-medium text-status-error underline underline-offset-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-border-focus"
+                  class="inline-block py-cmn-1 text-cmn-sm max-md:inline-flex max-md:min-h-cmn-touch max-md:items-center font-medium text-status-error underline underline-offset-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-border-focus"
                   >{{ entry.submitError() }}</a
                 >
               </li>

@@ -135,7 +135,8 @@ node in its shadow tree, out of reach of `routerLink`.
 - `.cmn-link` is the accent link: underlined on hover, with a `--color-border-focus` ring on
   keyboard focus. Modifiers `--primary`, `--secondary` and `--inherit` pick the text colour, and
   `--underlined` keeps the underline on, for a link inside running text. It sets no size or weight.
-  Add `.cmn-hit-slop` to a small link on a phone.
+  Add `.cmn-hit-slop` to a small link on a phone, or `--row` to a link that is a row of its own
+  (below md its line is 44px tall).
 - `.cmn-code-block` is a monospace `<pre>` in a bordered box that wraps long lines instead of
   widening the page. `--cmn-code-block-max-height` caps it and makes it scroll; give that box
   `tabindex="0"` and an `aria-label`. `--bare` drops the box.

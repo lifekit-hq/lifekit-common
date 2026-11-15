@@ -78,8 +78,8 @@ export const WithActionButtons: Story = {
     template: `
       <cmn-disclosure-row label="Binance" sublabel="Crypto holdings" avatarName="Binance" [amount]="4210.50" currency="USD">
         <div actions class="flex gap-cmn-2">
-          <button class="text-cmn-xs text-text-secondary hover:text-text-primary px-cmn-2 py-cmn-1 rounded-cmn-sm border border-border-default">Sync</button>
-          <button class="text-cmn-xs text-status-error hover:text-status-error px-cmn-2 py-cmn-1 rounded-cmn-sm border border-border-default">Disconnect</button>
+          <button class="cmn-hit-slop text-cmn-xs text-text-secondary hover:text-text-primary px-cmn-2 py-cmn-1 rounded-cmn-sm border border-border-default">Sync</button>
+          <button class="cmn-hit-slop text-cmn-xs text-status-error hover:text-status-error px-cmn-2 py-cmn-1 rounded-cmn-sm border border-border-default">Disconnect</button>
         </div>
         <p class="px-cmn-4 py-cmn-3 text-cmn-sm text-text-secondary">Crypto holdings appear here.</p>
       </cmn-disclosure-row>
@@ -96,8 +96,8 @@ export const FullFeatures: Story = {
             Active
           </span>
           <div actions class="flex gap-cmn-2">
-            <button class="text-cmn-xs text-text-secondary hover:text-text-primary px-cmn-2 py-cmn-1 rounded-cmn-sm border border-border-default">Sync</button>
-            <button class="text-cmn-xs text-status-error hover:text-status-error px-cmn-2 py-cmn-1 rounded-cmn-sm border border-border-default">Disconnect</button>
+            <button class="cmn-hit-slop text-cmn-xs text-text-secondary hover:text-text-primary px-cmn-2 py-cmn-1 rounded-cmn-sm border border-border-default">Sync</button>
+            <button class="cmn-hit-slop text-cmn-xs text-status-error hover:text-status-error px-cmn-2 py-cmn-1 rounded-cmn-sm border border-border-default">Disconnect</button>
           </div>
           <div class="px-cmn-4 py-cmn-3 space-y-cmn-1">
             <p class="text-cmn-sm text-text-primary">Checking ••••4242 — $3,540.22</p>
@@ -109,7 +109,7 @@ export const FullFeatures: Story = {
             Active
           </span>
           <div actions class="flex gap-cmn-2">
-            <button class="text-cmn-xs text-status-error hover:text-status-error px-cmn-2 py-cmn-1 rounded-cmn-sm border border-border-default">Disconnect</button>
+            <button class="cmn-hit-slop text-cmn-xs text-status-error hover:text-status-error px-cmn-2 py-cmn-1 rounded-cmn-sm border border-border-default">Disconnect</button>
           </div>
           <div class="px-cmn-4 py-cmn-3">
             <p class="text-cmn-sm text-text-primary">Checking ••••1234 — $12,450.00</p>

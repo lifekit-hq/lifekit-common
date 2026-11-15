@@ -588,11 +588,13 @@ that holds each one. A rule marked "follow-up" is the target; its parts and chec
    (`PHONE_HIT_AREA_CLASSES`, `.cmn-hit-slop`). Phone controls take the same Carbon geometry as the
    desktop (square corners, a 48px `--cmn-control-h`), which is already above the 44px minimum; the
    44px stays the floor for anything drawn smaller and never shrinks with a control's height.
-   Inline text links follow WCAG 2.5.8. Sources: HIG
+   Inline text links follow WCAG 2.5.8; a link that is a row of its own takes `.cmn-link--row`
+   (block padding to 44px) and a small link beside other content takes `.cmn-hit-slop`. Sources: HIG
    Buttons and Accessibility (44pt, 28pt minimum); WCAG 2.5.8 and 2.5.5; M3 48dp. A checkbox in a
    row's avatar slot, a switch, an icon-only button and a chip's × are drawn small and press at 44.
    Check: targets are at least 44 in the phone chrome, on the list page and on every golden screen
-   at 390 (`e2e/phone/golden-targets.spec.ts`).
+   at 390 (`e2e/phone/golden-targets.spec.ts`), and in every component story
+   (`e2e/phone/component-targets.spec.ts`, which lists the few controls it exempts and why).
 4. **Overflow rows.** A control row never overlaps or clips a label. Segmented controls keep to
    five segments or fewer with equal cells at least as wide as the widest label. A filter with
    counts, more than five options or two dimensions uses `lk-chip-row`; a rarely changed setting

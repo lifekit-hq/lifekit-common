@@ -122,7 +122,7 @@ class StorySheetContentComponent {}
   selector: 'cmn-story-sheet-launcher',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template:
-    '<button (click)="open()" type="button" class="cmn-story-open-sheet">Open sheet</button>',
+    '<button (click)="open()" type="button" class="cmn-hit-slop cmn-story-open-sheet">Open sheet</button>',
 })
 class StorySheetLauncherComponent {
   private readonly drawer = inject(CmnDrawerService);
@@ -137,7 +137,7 @@ class StorySheetLauncherComponent {
   selector: 'cmn-story-toast-launcher',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template:
-    '<button (click)="show()" type="button" class="cmn-story-show-toasts">Show toasts</button>',
+    '<button (click)="show()" type="button" class="cmn-hit-slop cmn-story-show-toasts">Show toasts</button>',
 })
 class StoryToastLauncherComponent {
   private readonly toast = inject(ToastService);

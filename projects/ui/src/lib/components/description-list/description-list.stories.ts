@@ -27,7 +27,7 @@ export const Default: Story = {
             <cmn-tag variant="success">Held</cmn-tag>
           </cmn-description-item>
           <cmn-description-item label="Investor relations">
-            <a class="text-accent-default underline" href="#investor-relations">ir.example.com</a>
+            <a class="cmn-link cmn-link--underlined cmn-link--row" href="#investor-relations">ir.example.com</a>
           </cmn-description-item>
         </cmn-description-list>
       </cmn-card>

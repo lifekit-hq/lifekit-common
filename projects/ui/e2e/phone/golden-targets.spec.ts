@@ -17,6 +17,11 @@ interface IndexEntry {
 }
 
 const GOLDEN_PREFIX = 'templates-';
+// The reference screens that are not page templates: every control family on one page, the lists
+// and tables, the shell and the charts. Their stories carry no page frame, so they are ready when
+// the story root has rendered.
+const REFERENCE_STORY = /^(controls|lists|shell|charts)-golden--/;
+const REFERENCE_READY = '#storybook-root > *';
 const PHONE = {width: 390, height: 844};
 const READY = 'cmn-page[data-cmn-page]';
 
@@ -32,11 +37,19 @@ const screenOf = (id: string): string => {
 };
 
 const firstStoryOf = new Map<string, string>();
+const readyOf = new Map<string, string>();
 for (const entry of Object.values(index.entries)) {
-  if (entry.type === 'story' && entry.id.startsWith(GOLDEN_PREFIX)) {
+  if (entry.type !== 'story') {
+    continue;
+  }
+  if (entry.id.startsWith(GOLDEN_PREFIX)) {
     if (!firstStoryOf.has(screenOf(entry.id))) {
       firstStoryOf.set(screenOf(entry.id), entry.id);
+      readyOf.set(entry.id, READY);
     }
+  } else if (REFERENCE_STORY.test(entry.id)) {
+    firstStoryOf.set(entry.id, entry.id);
+    readyOf.set(entry.id, REFERENCE_READY);
   }
 }
 
@@ -52,7 +65,7 @@ test.describe('golden screens | phone targets', () => {
       test(`${screen} (${theme}) | every control is at least ${MIN_TARGET}x${MIN_TARGET}`, async ({
         page,
       }) => {
-        await openStory(page, id, theme, READY);
+        await openStory(page, id, theme, readyOf.get(id) ?? READY);
         await settleFrames(page);
         report(await undersizedTargets(page, MIN_TARGET), 'enforce');
       });

@@ -62,7 +62,7 @@ class ChromeRowsComponent {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <cmn-page>
-      <a routerLink="/activity" class="text-cmn-sm text-accent-default">Recent activity</a>
+      <a routerLink="/activity" class="cmn-link cmn-link--row text-cmn-sm">Recent activity</a>
       <cmn-chrome-rows label="Account" link="/accounts/checking" />
     </cmn-page>
   `,

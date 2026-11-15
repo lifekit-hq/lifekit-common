@@ -136,6 +136,31 @@ export const PhoneHitArea: Story = {
   globals: {viewport: {value: 'mobile2', isRotated: false}},
 };
 
+@Component({
+  selector: 'cmn-link-rows',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <ul class="flex max-w-sm flex-col p-cmn-4 text-cmn-sm">
+      <li><a class="cmn-link cmn-link--row" href="#goal-1">Ship the phone contract</a></li>
+      <li><a class="cmn-link cmn-link--row" href="#goal-2">Retire the old table</a></li>
+      <li><a class="cmn-link cmn-link--row" href="#goal-3">Adopt the Carbon shell</a></li>
+    </ul>
+  `,
+})
+class LinkRowsComponent {}
+
+/**
+ * A list of links, one per line (goals, tickers, pull requests): `cmn-link--row` makes each line
+ * 44px tall below md with the text centred in it, so the rows press at 44px and sit end to end.
+ */
+export const LinkRows: Story = {
+  render: () => ({
+    template: '<cmn-link-rows />',
+    moduleMetadata: {imports: [LinkRowsComponent]},
+  }),
+  globals: {viewport: {value: 'mobile2', isRotated: false}},
+};
+
 export const Dark: Story = {
   decorators: [
     componentWrapperDecorator(story => `<div class="bg-surface-bg p-cmn-4">${story}</div>`),

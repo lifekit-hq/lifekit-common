@@ -90,7 +90,7 @@ h6 {
    colour and decoration only; size and weight stay with the surrounding text or a utility.
    Modifiers pick the colour: `--primary`, `--secondary`, `--inherit`. Inside running text add
    `--underlined`, so the link is not told apart by colour alone. Add `cmn-hit-slop` to a small
-   link on a phone. */
+   link beside other content on a phone, or `--row` to a link that stands on a line of its own. */
 .cmn-link {
   color: var(--color-accent-default);
   text-decoration: none;
@@ -121,6 +121,18 @@ h6 {
 
 .cmn-link--underlined {
   text-decoration: underline;
+}
+
+/* A link that is a row of its own (a list of goals, tickers or pull requests): below md its line
+   grows to --size-touch with the text centred in it, so the row presses at 44px and the next row
+   starts where the target ends. Where links stack with no gap this is the block padding that the
+   hit-slop of a link beside other content would otherwise overlap. */
+@media (max-width: 767.98px) {
+  .cmn-link--row {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--size-touch);
+  }
 }
 
 /* Code and log block: a `<pre>` for logs, JSON and briefs. Monospace, and long lines wrap
