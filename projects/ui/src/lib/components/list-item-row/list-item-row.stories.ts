@@ -1,13 +1,14 @@
 import {type Meta, moduleMetadata, type StoryObj} from '@storybook/angular';
 
 import {InstitutionAvatarComponent} from '../institution-avatar/institution-avatar.component';
+import {TagComponent} from '../tag/tag.component';
 import {ListItemRowComponent} from './list-item-row.component';
 
 const meta: Meta<ListItemRowComponent> = {
   title: 'Components/ListItemRow',
   component: ListItemRowComponent,
   tags: ['autodocs'],
-  decorators: [moduleMetadata({imports: [InstitutionAvatarComponent]})],
+  decorators: [moduleMetadata({imports: [InstitutionAvatarComponent, TagComponent]})],
   argTypes: {
     label: {control: 'text'},
     sublabel: {control: 'text'},
@@ -158,6 +159,50 @@ export const SwipeRevealedByFocus: Story = {
   play: ({canvasElement}) => {
     canvasElement.querySelector<HTMLButtonElement>('button[aria-label^="Remove"]')?.focus();
   },
+};
+
+/**
+ * A row whose text needs more than a label and one truncated sublabel: a `[body]` element replaces
+ * both. Here a watchlist row keeps its ticker as a link to the dossier, an exchange tag, the added
+ * date and the owner's whole multi-line note, and still swipes. `label` names the row for the
+ * swipe action ("Remove AAPL"). The row is plain, not an `action` row: a link cannot sit inside a
+ * button. A tap on the link while the row is open only shuts it.
+ */
+export const RichBodySwipe: Story = {
+  render: args => ({
+    props: args,
+    template: `
+      <div class="border border-border-default rounded-cmn-md overflow-hidden">
+        <cmn-list-item-row label="AAPL"
+          [swipeTrailing]="{label: 'Remove', icon: 'Trash2', tone: 'danger'}"
+          (swipeTrailingAction)="swipeTrailingAction($event)">
+          <div body class="flex flex-col gap-cmn-1">
+            <div class="flex flex-wrap items-center gap-cmn-2">
+              <a href="#dossier-aapl" class="cmn-link cmn-hit-slop font-label text-cmn-sm font-medium">AAPL</a>
+              <cmn-tag size="sm">NASDAQ</cmn-tag>
+              <span class="text-cmn-xs text-text-secondary">Added Nov 2</span>
+            </div>
+            <p class="text-cmn-xs text-text-secondary">
+              Buy under 180 after the next earnings call.
+              Revisit the services margin before sizing the position.
+            </p>
+          </div>
+        </cmn-list-item-row>
+        <cmn-list-item-row label="CEDAR"
+          [swipeTrailing]="{label: 'Remove', icon: 'Trash2', tone: 'danger'}"
+          (swipeTrailingAction)="swipeTrailingAction($event)">
+          <div body class="flex flex-col gap-cmn-1">
+            <div class="flex flex-wrap items-center gap-cmn-2">
+              <a href="#dossier-cedar" class="cmn-link cmn-hit-slop font-label text-cmn-sm font-medium">CEDAR</a>
+              <cmn-tag size="sm">NYSE</cmn-tag>
+              <span class="text-cmn-xs text-text-secondary">Added Oct 18</span>
+            </div>
+            <p class="text-cmn-xs text-text-secondary">Watching the dividend cover.</p>
+          </div>
+        </cmn-list-item-row>
+      </div>
+    `,
+  }),
 };
 
 export const WithAvatar: Story = {

@@ -168,3 +168,50 @@ export const CardDark: Story = {
   globals: {theme: 'dark'},
   args: Unread.args,
 };
+
+const SWIPE_FEED = `
+  <div class="flex max-w-xl flex-col gap-cmn-3">
+    <cmn-alert-item
+      title="Sync failed"
+      message="Monobank returned 502 on the last three attempts."
+      severity="error"
+      badgeLabel="error"
+      referenceLabel="JOB-1421"
+      description="Bank sync"
+      [timestamp]="now"
+      [swipeLeading]="{label: 'Mark read', icon: 'Check', tone: 'positive'}"
+      [swipeTrailing]="{label: 'Dismiss', icon: 'X', tone: 'danger'}"
+      (swipeLeadingAction)="swipeLeadingAction($event)"
+      (swipeTrailingAction)="swipeTrailingAction($event)"
+    />
+    <div>
+      <cmn-alert-item
+        density="flat"
+        title="Budget nearly spent"
+        message="Groceries is at 92% with 9 days left in the period."
+        severity="warning"
+        [timestamp]="hourAgo"
+        [swipeTrailing]="{label: 'Dismiss', icon: 'X', tone: 'danger'}"
+        (swipeTrailingAction)="swipeTrailingAction($event)"
+      />
+    </div>
+  </div>
+`;
+
+/**
+ * Swipe actions (Apple HIG, Lists and tables): a swipe toward the end marks the alert read, a swipe
+ * toward the start dismisses it. It is a shortcut: the title control and the Dismiss X stay, and
+ * each action is also a button a keyboard or screen reader reaches (named "Dismiss Sync failed"),
+ * which slides the item open when focused. On a desktop browser turn on touch emulation to swipe;
+ * a mouse never does.
+ */
+export const SwipeActions: Story = {
+  argTypes: {
+    swipeLeadingAction: {action: 'swipeLeadingAction'},
+    swipeTrailingAction: {action: 'swipeTrailingAction'},
+  },
+  render: args => ({
+    template: SWIPE_FEED,
+    props: {...flatFeedProps, ...args},
+  }),
+};

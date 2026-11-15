@@ -1,33 +1,11 @@
-import {DOCUMENT, NgTemplateOutlet} from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  effect,
-  ElementRef,
-  inject,
-  input,
-  output,
-  viewChild,
-} from '@angular/core';
+import {NgTemplateOutlet} from '@angular/common';
+import {ChangeDetectionStrategy, Component, computed, input, output} from '@angular/core';
 
 import {type Nullable} from '../../types';
 import {IconComponent, type LucideIconName} from '../icon/icon.component';
-import {RowSwipe, type RowSwipeSide} from './row-swipe';
+import {type CmnRowSwipeAction, RowSwipeFrameComponent} from './row-swipe-frame.component';
 
-/** What a revealed action looks like: a fill that names its weight, never a new palette. */
-export type CmnRowSwipeTone = 'neutral' | 'positive' | 'danger';
-
-/**
- * One action a row reveals under a swipe: Apple HIG puts the affirmative one on the leading edge
- * (tick, mark read) and the destructive one on the trailing edge (delete, dismiss).
- */
-export interface CmnRowSwipeAction {
-  /** The word under the icon; it also names the action for assistive tech, with the row's label. */
-  label: string;
-  icon: LucideIconName;
-  tone?: CmnRowSwipeTone;
-}
+export type {CmnRowSwipeAction, CmnRowSwipeTone} from './row-swipe-frame.component';
 
 /**
  * The hairline divider sits on the host, so the last-row rule matches the last row among its
@@ -68,52 +46,33 @@ const TRAILING_IN_ROW_CLASSES = '-mr-cmn-2';
 const ACTION_WRAPPER_CLASSES = 'flex items-center pr-cmn-2';
 
 /**
- * The swipe frame clips the trays; the surface is the row itself, opaque so a closed tray never
- * shows through, and `touch-pan-y` leaves vertical panning to the page. It slides on the medium
- * step and snaps for a reader who asked for reduced motion.
+ * One row of a contained list. The text is `label` and one truncated `sublabel`; a row whose text
+ * needs more (a link, a wrapped multi-line note, tags) projects it as a `[body]` element, which
+ * replaces both and is drawn between the avatar and the meta/amount/actions slots. A body that
+ * holds a link or a control needs a plain row: an `action` row is one button, and a button cannot
+ * hold another control.
  */
-const SWIPE_FRAME_CLASSES = 'relative overflow-hidden';
-const SWIPE_SURFACE_CLASSES = 'relative touch-pan-y bg-surface-card';
-const SWIPE_SLIDE_CLASSES =
-  ' transition-transform duration-cmn-medium ease-cmn-standard motion-reduce:transition-none';
-/**
- * A tray paints only while the surface uncovers it: a closed tray under the opaque surface would
- * otherwise draw its label beneath the row's text. It goes transparent, never `hidden`, `invisible`
- * or `inert`, so its button stays focusable and in the accessibility tree; focus then slides the
- * row open. It fades with the slide and snaps with it.
- */
-const SWIPE_TRAY_CLASSES = 'absolute inset-y-0 flex';
-const SWIPE_TRAY_FADE_CLASSES =
-  ' transition-opacity duration-cmn-medium ease-cmn-standard motion-reduce:transition-none';
-const SWIPE_ACTION_CLASSES =
-  'flex min-w-cmn-size-lg flex-col items-center justify-center gap-cmn-1 px-cmn-4 ' +
-  'text-text-inverse focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset ' +
-  'focus-visible:ring-text-inverse';
-const SWIPE_TONE_CLASSES: Record<CmnRowSwipeTone, string> = {
-  neutral: 'bg-accent-default',
-  positive: 'bg-status-success',
-  danger: 'bg-status-error',
-};
-
 @Component({
   selector: 'cmn-list-item-row',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [IconComponent, NgTemplateOutlet],
-  host: {class: HOST_CLASSES, '(keydown.escape)': 'shut()'},
+  imports: [IconComponent, NgTemplateOutlet, RowSwipeFrameComponent],
+  host: {class: HOST_CLASSES},
   template: `
     <!-- The content is written once and stamped into whichever row element the mode needs, so
          both modes share one layout. -->
     <ng-template #content>
       <ng-content select="[avatar]" />
       <div class="flex-1 min-w-0">
-        <div [class]="labelClasses()">
-          {{ label() }}
-        </div>
-        @if (sublabel()) {
-          <div class="text-cmn-xs truncate text-text-secondary">
-            {{ sublabel() }}
+        <ng-content select="[body]">
+          <div [class]="labelClasses()">
+            {{ label() }}
           </div>
-        }
+          @if (sublabel()) {
+            <div class="text-cmn-xs truncate text-text-secondary">
+              {{ sublabel() }}
+            </div>
+          }
+        </ng-content>
       </div>
       <ng-content select="[meta]" />
       <ng-content select="[amount]" />
@@ -123,7 +82,7 @@ const SWIPE_TONE_CLASSES: Record<CmnRowSwipeTone, string> = {
       <button
         [class]="trailingClasses + extra"
         [attr.aria-label]="trailingName()"
-        (click)="pressTrailing($event)"
+        (click)="trailingAction.emit()"
         type="button"
       >
         <cmn-icon [name]="trailingIcon()!" size="md" aria-hidden="true" />
@@ -133,7 +92,7 @@ const SWIPE_TONE_CLASSES: Record<CmnRowSwipeTone, string> = {
       @if (action()) {
         @if (trailingIcon()) {
           <div [class]="actionWrapperClasses">
-            <button [class]="rowClasses()" (click)="press($event)" type="button">
+            <button [class]="rowClasses()" (click)="activated.emit()" type="button">
               <ng-container [ngTemplateOutlet]="content" />
             </button>
             <ng-container
@@ -142,7 +101,7 @@ const SWIPE_TONE_CLASSES: Record<CmnRowSwipeTone, string> = {
             />
           </div>
         } @else {
-          <button [class]="rowClasses()" (click)="press($event)" type="button">
+          <button [class]="rowClasses()" (click)="activated.emit()" type="button">
             <ng-container [ngTemplateOutlet]="content" />
           </button>
         }
@@ -159,67 +118,25 @@ const SWIPE_TONE_CLASSES: Record<CmnRowSwipeTone, string> = {
       }
     </ng-template>
     @if (swipeable()) {
-      <div [class]="frameClasses">
-        @if (swipeLeading(); as leading) {
-          <div
-            #leadingTray
-            [class]="leadingTrayClasses()"
-            (focusin)="revealFrom('leading', leadingTray)"
-            (focusout)="closeOnFocusLeave($event, leadingTray)"
-          >
-            <button
-              [class]="actionClasses(leading)"
-              [attr.aria-label]="actionName(leading)"
-              (click)="activate('leading')"
-              type="button"
-            >
-              <cmn-icon [name]="leading.icon" size="md" aria-hidden="true" />
-              <span class="text-cmn-xs font-medium">{{ leading.label }}</span>
-            </button>
-          </div>
-        }
-        @if (swipeTrailing(); as trailingSwipe) {
-          <div
-            #trailingTray
-            [class]="trailingTrayClasses()"
-            (focusin)="revealFrom('trailing', trailingTray)"
-            (focusout)="closeOnFocusLeave($event, trailingTray)"
-          >
-            <button
-              [class]="actionClasses(trailingSwipe)"
-              [attr.aria-label]="actionName(trailingSwipe)"
-              (click)="activate('trailing')"
-              type="button"
-            >
-              <cmn-icon [name]="trailingSwipe.icon" size="md" aria-hidden="true" />
-              <span class="text-cmn-xs font-medium">{{ trailingSwipe.label }}</span>
-            </button>
-          </div>
-        }
-        <div
-          #surface
-          [class]="surfaceClasses()"
-          [style.transform]="swipe.transform()"
-          (pointerdown)="swipe.start($event)"
-          (pointermove)="swipe.move($event)"
-          (pointerup)="swipe.end()"
-          (pointercancel)="swipe.end(true)"
-        >
-          <ng-container [ngTemplateOutlet]="row" />
-        </div>
-      </div>
+      <cmn-row-swipe-frame
+        [leading]="swipeLeading()"
+        [trailing]="swipeTrailing()"
+        [name]="label()"
+        (leadingAction)="swipeLeadingAction.emit()"
+        (trailingAction)="swipeTrailingAction.emit()"
+      >
+        <ng-container [ngTemplateOutlet]="row" />
+      </cmn-row-swipe-frame>
     } @else {
       <ng-container [ngTemplateOutlet]="row" />
     }
   `,
 })
 export class ListItemRowComponent {
-  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
-  private readonly document = inject(DOCUMENT);
-  private readonly leadingTray = viewChild<ElementRef<HTMLElement>>('leadingTray');
-  private readonly trailingTray = viewChild<ElementRef<HTMLElement>>('trailingTray');
-  private readonly surface = viewChild<ElementRef<HTMLElement>>('surface');
-
+  /**
+   * The row's text, and its name for assistive tech ("Remove <label>", "More for <label>"). A row
+   * that projects a `[body]` still sets it: the body replaces what is drawn, not the name.
+   */
   public readonly label = input.required<string>();
   public readonly sublabel = input<string | null>(null);
   public readonly dimmed = input<boolean>(false);
@@ -259,25 +176,7 @@ export class ListItemRowComponent {
   protected readonly trailingInRowClasses = TRAILING_IN_ROW_CLASSES;
   protected readonly actionWrapperClasses = ACTION_WRAPPER_CLASSES;
 
-  protected readonly frameClasses = SWIPE_FRAME_CLASSES;
-
   protected readonly swipeable = computed(() => !!this.swipeLeading() || !!this.swipeTrailing());
-  protected readonly swipe = new RowSwipe({
-    widths: () => ({
-      leading: this.leadingTray()?.nativeElement.offsetWidth ?? 0,
-      trailing: this.trailingTray()?.nativeElement.offsetWidth ?? 0,
-    }),
-  });
-  protected readonly surfaceClasses = computed(
-    () => SWIPE_SURFACE_CLASSES + (this.swipe.dragging() ? '' : SWIPE_SLIDE_CLASSES)
-  );
-
-  protected readonly leadingTrayClasses = computed(() =>
-    this.trayClasses('left-0', this.swipe.offset() > 0)
-  );
-  protected readonly trailingTrayClasses = computed(() =>
-    this.trayClasses('right-0', this.swipe.offset() < 0)
-  );
 
   protected readonly trailingName = computed(
     () => this.trailingLabel() || `More for ${this.label()}`
@@ -297,85 +196,4 @@ export class ListItemRowComponent {
     () =>
       `font-label text-cmn-sm font-medium truncate ${this.dimmed() ? 'text-text-secondary' : 'text-text-primary'}`
   );
-
-  constructor() {
-    // An open row shuts when the reader touches anywhere else.
-    effect(onCleanup => {
-      if (!this.swipe.open()) {
-        return;
-      }
-      const shut = (event: Event): void => {
-        if (!this.host.nativeElement.contains(event.target as Node)) {
-          this.swipe.close();
-        }
-      };
-      this.document.addEventListener('pointerdown', shut, true);
-      onCleanup(() => this.document.removeEventListener('pointerdown', shut, true));
-    });
-  }
-
-  private trayClasses(edge: string, uncovered: boolean): string {
-    const fade = this.swipe.dragging() ? '' : SWIPE_TRAY_FADE_CLASSES;
-    return `${SWIPE_TRAY_CLASSES} ${edge} ${uncovered ? 'opacity-100' : 'opacity-0'}${fade}`;
-  }
-
-  protected actionClasses(action: CmnRowSwipeAction): string {
-    return `${SWIPE_ACTION_CLASSES} ${SWIPE_TONE_CLASSES[action.tone ?? 'neutral']}`;
-  }
-
-  /** The visible word leads, so the name contains what the button shows. */
-  protected actionName(action: CmnRowSwipeAction): string {
-    return `${action.label} ${this.label()}`;
-  }
-
-  /** Focus reaching a tray (Tab, or a screen reader's cursor) slides the row open to show it. */
-  protected revealFrom(side: RowSwipeSide, tray: HTMLElement): void {
-    this.swipe.reveal(side, tray.offsetWidth);
-  }
-
-  protected closeOnFocusLeave(event: FocusEvent, tray: HTMLElement): void {
-    if (!tray.contains(event.relatedTarget as Node | null)) {
-      this.swipe.close();
-    }
-  }
-
-  protected press(event: MouseEvent): void {
-    if (!this.swipe.takeShutTap(event)) {
-      this.activated.emit();
-    }
-  }
-
-  protected pressTrailing(event: MouseEvent): void {
-    if (!this.swipe.takeShutTap(event)) {
-      this.trailingAction.emit();
-    }
-  }
-
-  /** Shuts the row without leaving focus on a tray button the surface now covers. */
-  protected shut(): void {
-    const active = this.document.activeElement as HTMLElement | null;
-    const inTray = [this.leadingTray(), this.trailingTray()].some(tray =>
-      tray?.nativeElement.contains(active)
-    );
-    this.swipe.close();
-    if (inTray) {
-      const visible = this.surface()?.nativeElement.querySelector<HTMLElement>(
-        'button, a[href], input, select, textarea, [tabindex]'
-      );
-      if (visible) {
-        visible.focus();
-      } else {
-        active?.blur();
-      }
-    }
-  }
-
-  protected activate(side: RowSwipeSide): void {
-    this.shut();
-    if (side === 'leading') {
-      this.swipeLeadingAction.emit();
-    } else {
-      this.swipeTrailingAction.emit();
-    }
-  }
 }

@@ -3,6 +3,7 @@ import {provideHttpClientTesting} from '@angular/common/http/testing';
 import {type ComponentFixture, TestBed} from '@angular/core/testing';
 import {beforeEach, describe, expect, it} from 'vitest';
 
+import {type CmnRowSwipeAction} from '../list-item-row/list-item-row.component';
 import {AlertItemComponent, type AlertItemSeverity} from './alert-item.component';
 
 const MINUTE = 60_000;
@@ -252,5 +253,131 @@ describe('AlertItemComponent', () => {
     fixture.detectChanges();
     expect(titleButton()).toBeNull();
     expect(row().classList).not.toContain('cursor-pointer');
+  });
+});
+
+describe('AlertItemComponent — swipe actions', () => {
+  const TRAY_PX = 80;
+  const MARK_READ: CmnRowSwipeAction = {label: 'Mark read', icon: 'Check', tone: 'positive'};
+  const DISMISS: CmnRowSwipeAction = {label: 'Dismiss', icon: 'X', tone: 'danger'};
+  let fixture: ComponentFixture<AlertItemComponent>;
+  let log: string[];
+
+  function create(inputs: Record<string, unknown> = {}): void {
+    fixture = TestBed.createComponent(AlertItemComponent);
+    fixture.componentRef.setInput('title', 'Sync failed');
+    fixture.componentRef.setInput('swipeLeading', MARK_READ);
+    fixture.componentRef.setInput('swipeTrailing', DISMISS);
+    for (const [name, value] of Object.entries(inputs)) {
+      fixture.componentRef.setInput(name, value);
+    }
+    log = [];
+    fixture.componentInstance.read.subscribe(() => log.push('read'));
+    fixture.componentInstance.dismissed.subscribe(() => log.push('dismissed'));
+    fixture.componentInstance.swipeLeadingAction.subscribe(() => log.push('leading'));
+    fixture.componentInstance.swipeTrailingAction.subscribe(() => log.push('trailing'));
+    fixture.detectChanges();
+    // The unit run loads no Tailwind: give each tray the width its classes would.
+    fixture.nativeElement
+      .querySelectorAll('[class*="absolute"]')
+      .forEach((tray: HTMLElement) => (tray.style.width = `${TRAY_PX}px`));
+  }
+
+  const surface = (): HTMLElement => fixture.nativeElement.querySelector('.touch-pan-y');
+  const trayButton = (name: string): HTMLButtonElement =>
+    fixture.nativeElement.querySelector(`button[aria-label^="${name}"]`);
+
+  function touch(type: string, x: number): void {
+    surface().dispatchEvent(
+      new PointerEvent(type, {clientX: x, clientY: 0, pointerType: 'touch', bubbles: true})
+    );
+    fixture.detectChanges();
+  }
+
+  function swipeBy(x: number): void {
+    touch('pointerdown', 0);
+    touch('pointermove', x);
+    touch('pointerup', x);
+  }
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [AlertItemComponent],
+      providers: [provideHttpClient(withXhr()), provideHttpClientTesting()],
+    }).compileComponents();
+  });
+
+  it('draws an item with no swipe action exactly as before', () => {
+    fixture = TestBed.createComponent(AlertItemComponent);
+    fixture.componentRef.setInput('title', 'Sync failed');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.touch-pan-y')).toBeNull();
+    expect(fixture.nativeElement.querySelector('cmn-row-swipe-frame')).toBeNull();
+  });
+
+  it('names each action by the alert, with the visible word first', () => {
+    create();
+    expect(trayButton('Mark read').getAttribute('aria-label')).toBe('Mark read Sync failed');
+    expect(trayButton('Dismiss ').getAttribute('aria-label')).toBe('Dismiss Sync failed');
+    expect(trayButton('Mark read').className).toContain('bg-status-success');
+    expect(trayButton('Dismiss ').className).toContain('bg-status-error');
+  });
+
+  it('keeps the Dismiss X and the title control beside the swipe', () => {
+    create();
+    expect(surface().querySelector('button[aria-label="Dismiss"]')).not.toBeNull();
+    expect(surface().querySelector('button:not([aria-label])')?.textContent).toContain(
+      'Sync failed'
+    );
+  });
+
+  it('clips the trays to the corners of a card, but not of a flat row', () => {
+    create();
+    const frame = (): HTMLElement => surface().parentElement as HTMLElement;
+    expect(frame().className).toContain('rounded-cmn-role-surface');
+    fixture.componentRef.setInput('density', 'flat');
+    fixture.detectChanges();
+    expect(frame().className).not.toContain('rounded-cmn-role-surface');
+  });
+
+  it('emits the trailing action from its button after a swipe toward the start', () => {
+    create();
+    swipeBy(-TRAY_PX);
+    expect(surface().style.transform).toBe(`translateX(-${TRAY_PX}px)`);
+    trayButton('Dismiss ').click();
+    fixture.detectChanges();
+    expect(log).toEqual(['trailing']);
+    expect(surface().style.transform).toBe('');
+  });
+
+  it('emits the leading action from its button after a swipe toward the end', () => {
+    create();
+    swipeBy(TRAY_PX);
+    trayButton('Mark read').click();
+    expect(log).toEqual(['leading']);
+  });
+
+  it('opens when focus reaches an action, for a keyboard and a screen reader', () => {
+    create();
+    trayButton('Dismiss ').focus();
+    fixture.detectChanges();
+    expect(surface().style.transform).toBe(`translateX(-${TRAY_PX}px)`);
+  });
+
+  it('shuts an open item on a tap without marking it read, and marks it read once shut', () => {
+    create();
+    swipeBy(-TRAY_PX);
+    const title = surface().querySelector('button:not([aria-label])') as HTMLButtonElement;
+    const tap = (): void => {
+      touch('pointerdown', 0);
+      touch('pointerup', 0);
+      title.dispatchEvent(new MouseEvent('click', {detail: 1, bubbles: true}));
+    };
+    tap();
+    expect(surface().style.transform).toBe('');
+    expect(log).toEqual([]);
+
+    tap();
+    expect(log).toEqual(['read']);
   });
 });

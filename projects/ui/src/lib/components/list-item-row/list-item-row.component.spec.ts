@@ -567,6 +567,106 @@ describe('ListItemRowComponent — swipe actions', () => {
 });
 
 @Component({
+  imports: [ListItemRowComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <cmn-list-item-row
+      [swipeTrailing]="trailing"
+      (swipeTrailingAction)="log.push('trailing')"
+      label="AAPL"
+      sublabel="Never drawn: the body replaces it"
+    >
+      <div body>
+        <a (click)="log.push('link'); $event.preventDefault()" href="#dossier">AAPL</a>
+        <p>First line of the note.</p>
+        <p>Second line of the note, which wraps instead of truncating.</p>
+      </div>
+      <span amount>$190</span>
+    </cmn-list-item-row>
+  `,
+})
+class BodyHostComponent {
+  public trailing: CmnRowSwipeAction | null = null;
+  public log: string[] = [];
+}
+
+describe('ListItemRowComponent — projected body', () => {
+  const TRAY_PX = 80;
+  let fixture: ComponentFixture<BodyHostComponent>;
+
+  function create(trailing: CmnRowSwipeAction | null = null): void {
+    fixture = TestBed.createComponent(BodyHostComponent);
+    fixture.componentInstance.trailing = trailing;
+    fixture.detectChanges();
+    fixture.nativeElement
+      .querySelectorAll('[class*="absolute"]')
+      .forEach((tray: HTMLElement) => (tray.style.width = `${TRAY_PX}px`));
+  }
+
+  const text = (): string => fixture.nativeElement.textContent;
+  const link = (): HTMLAnchorElement => fixture.nativeElement.querySelector('a');
+  const surface = (): HTMLElement => fixture.nativeElement.querySelector('.touch-pan-y');
+
+  function touch(type: string, x: number): void {
+    surface().dispatchEvent(
+      new PointerEvent(type, {clientX: x, clientY: 0, pointerType: 'touch', bubbles: true})
+    );
+    fixture.detectChanges();
+  }
+
+  it('draws the body in place of the label and sublabel, keeping the other slots', () => {
+    create();
+    expect(text()).toContain('Second line of the note');
+    expect(text()).not.toContain('Never drawn');
+    expect(text()).toContain('$190');
+    expect(link().closest('.flex-1')).not.toBeNull();
+  });
+
+  it('lets the body wrap: nothing in it is truncated', () => {
+    create();
+    expect(fixture.nativeElement.querySelector('.truncate')).toBeNull();
+  });
+
+  it('keeps a link in the body clickable in a plain row', () => {
+    create();
+    link().click();
+    expect(fixture.componentInstance.log).toEqual(['link']);
+  });
+
+  it('swipes a row with a body, naming the action after the label', () => {
+    create({label: 'Remove', icon: 'Trash2', tone: 'danger'});
+    const remove = fixture.nativeElement.querySelector(
+      'button[aria-label="Remove AAPL"]'
+    ) as HTMLButtonElement;
+    expect(remove).not.toBeNull();
+    touch('pointerdown', 0);
+    touch('pointermove', -TRAY_PX);
+    touch('pointerup', -TRAY_PX);
+    expect(surface().style.transform).toBe(`translateX(-${TRAY_PX}px)`);
+    remove.click();
+    expect(fixture.componentInstance.log).toEqual(['trailing']);
+  });
+
+  it('shuts an open row on a tap on its link without following the link', () => {
+    create({label: 'Remove', icon: 'Trash2', tone: 'danger'});
+    touch('pointerdown', 0);
+    touch('pointermove', -TRAY_PX);
+    touch('pointerup', -TRAY_PX);
+    const tap = (): void => {
+      touch('pointerdown', 0);
+      touch('pointerup', 0);
+      link().dispatchEvent(new MouseEvent('click', {detail: 1, bubbles: true, cancelable: true}));
+    };
+    tap();
+    expect(surface().style.transform).toBe('');
+    expect(fixture.componentInstance.log).toEqual([]);
+
+    tap();
+    expect(fixture.componentInstance.log).toEqual(['link']);
+  });
+});
+
+@Component({
   imports: [ListItemRowComponent, CmnListMotionDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
