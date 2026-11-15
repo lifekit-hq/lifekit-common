@@ -2,6 +2,7 @@ import {ChangeDetectionStrategy, Component, signal} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import type {Meta, StoryObj} from '@storybook/angular';
 
+import {AlertItemComponent} from '../components/alert-item/alert-item.component';
 import {CardComponent} from '../components/card/card.component';
 import {DataTableComponent} from '../components/data-table/data-table.component';
 import {
@@ -26,6 +27,7 @@ import {
   type SegmentedOption,
 } from '../components/segmented/segmented.component';
 import {type CmnTab, TabGroupComponent} from '../components/tab-group/tab-group.component';
+import {TagComponent} from '../components/tag/tag.component';
 
 interface Payment {
   date: string;
@@ -66,6 +68,7 @@ const RANGES: readonly SegmentedOption[] = [
 @Component({
   selector: 'cmn-lists-golden',
   imports: [
+    AlertItemComponent,
     CardComponent,
     CmnCellDirective,
     CmnColumnComponent,
@@ -81,6 +84,7 @@ const RANGES: readonly SegmentedOption[] = [
     SearchInputComponent,
     SegmentedComponent,
     TabGroupComponent,
+    TagComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {class: 'block bg-surface-bg p-cmn-4 md:p-cmn-8'},
@@ -160,6 +164,55 @@ const RANGES: readonly SegmentedOption[] = [
         </cmn-list-section>
       </section>
 
+      <section class="flex flex-col gap-cmn-3" aria-labelledby="g-rich-swipe">
+        <h2 id="g-rich-swipe" class="text-cmn-lg font-semibold text-text-primary">
+          Swipe on rows with a body
+        </h2>
+        <cmn-list-section heading="Watchlist">
+          <cmn-list-item-row [swipeTrailing]="remove" label="AAPL">
+            <div body class="flex flex-col gap-cmn-1">
+              <div class="flex flex-wrap items-center gap-cmn-2">
+                <a
+                  class="cmn-link cmn-hit-slop font-label text-cmn-sm font-medium"
+                  href="#dossier-aapl"
+                  >AAPL</a
+                >
+                <cmn-tag size="sm">NASDAQ</cmn-tag>
+                <span class="text-cmn-xs text-text-secondary">Added Nov 2</span>
+              </div>
+              <p class="text-cmn-xs text-text-secondary">
+                Buy under 180 after the next earnings call. Revisit the services margin before
+                sizing the position.
+              </p>
+            </div>
+          </cmn-list-item-row>
+          <cmn-list-item-row [swipeTrailing]="remove" label="CEDAR">
+            <div body class="flex flex-col gap-cmn-1">
+              <div class="flex flex-wrap items-center gap-cmn-2">
+                <a
+                  class="cmn-link cmn-hit-slop font-label text-cmn-sm font-medium"
+                  href="#dossier-cedar"
+                  >CEDAR</a
+                >
+                <cmn-tag size="sm">NYSE</cmn-tag>
+                <span class="text-cmn-xs text-text-secondary">Added Oct 18</span>
+              </div>
+              <p class="text-cmn-xs text-text-secondary">Watching the dividend cover.</p>
+            </div>
+          </cmn-list-item-row>
+        </cmn-list-section>
+        <cmn-alert-item
+          [swipeLeading]="markRead"
+          [swipeTrailing]="dismiss"
+          badgeLabel="error"
+          description="Bank sync"
+          message="Monobank returned 502 on the last three attempts."
+          referenceLabel="JOB-1421"
+          severity="error"
+          title="Sync failed"
+        />
+      </section>
+
       <section class="flex flex-col gap-cmn-3" aria-labelledby="g-structured">
         <h2 id="g-structured" class="text-cmn-lg font-semibold text-text-primary">
           Structured list
@@ -225,6 +278,12 @@ class ListsGoldenComponent {
   protected readonly payments = PAYMENTS;
   protected readonly done: CmnRowSwipeAction = {label: 'Done', icon: 'Check', tone: 'positive'};
   protected readonly remove: CmnRowSwipeAction = {label: 'Remove', icon: 'Trash2', tone: 'danger'};
+  protected readonly markRead: CmnRowSwipeAction = {
+    label: 'Mark read',
+    icon: 'Check',
+    tone: 'positive',
+  };
+  protected readonly dismiss: CmnRowSwipeAction = {label: 'Dismiss', icon: 'X', tone: 'danger'};
   protected readonly tab = signal('payments');
   protected readonly range = signal('3M');
 }

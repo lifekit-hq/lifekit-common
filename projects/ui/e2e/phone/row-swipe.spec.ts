@@ -2,7 +2,7 @@ import {expect, type Page, test} from '@playwright/test';
 
 import {openStory} from './phone-helpers';
 
-// cmn-list-item-row swipe actions on a real touch: the leading action under a swipe toward the end,
+// cmn-list-item-row and cmn-alert-item swipe actions on a real touch: the leading action under a swipe toward the end,
 // the trailing under a swipe toward the start, the visible control kept, and a vertical pan left to
 // the page. The unit spec drives the same gesture with synthetic pointer events; this one goes
 // through the browser's own touch pipeline.
@@ -27,8 +27,8 @@ async function touchDrag(page: Page, from: Point, dx: number, dy = 0): Promise<v
   await session.send('Input.dispatchTouchEvent', {type: 'touchEnd', touchPoints: []});
 }
 
-async function centreOf(page: Page, row: number): Promise<Point> {
-  const box = await page.locator(`${READY} .touch-pan-y`).nth(row).boundingBox();
+async function centreOf(page: Page, row: number, ready = READY): Promise<Point> {
+  const box = await page.locator(`${ready} .touch-pan-y`).nth(row).boundingBox();
   if (!box) {
     throw new Error('the row surface is not on screen');
   }
@@ -36,9 +36,9 @@ async function centreOf(page: Page, row: number): Promise<Point> {
 }
 
 /** How far the row surface is moved from the frame that clips it (the story pads the page). */
-const surfaceX = (page: Page, row: number): Promise<number> =>
+const surfaceX = (page: Page, row: number, ready = READY): Promise<number> =>
   page
-    .locator(`${READY} .touch-pan-y`)
+    .locator(`${ready} .touch-pan-y`)
     .nth(row)
     .evaluate(
       el => el.getBoundingClientRect().x - (el.parentElement?.getBoundingClientRect().x ?? 0)
@@ -88,5 +88,91 @@ test.describe(`row swipe ${PHONE.width}x${PHONE.height}`, () => {
       expect(box?.width).toBeGreaterThanOrEqual(44);
       expect(box?.height).toBeGreaterThanOrEqual(44);
     }
+  });
+});
+
+const TOUCH_PX = 44;
+
+async function expectTouchSized(page: Page, name: string): Promise<void> {
+  const box = await page.getByRole('button', {name}).boundingBox();
+  expect(box?.width).toBeGreaterThanOrEqual(TOUCH_PX);
+  expect(box?.height).toBeGreaterThanOrEqual(TOUCH_PX);
+}
+
+// A row with a free body: the alert item's own layout, and a list row that projects a `[body]`
+// (a watchlist row: a link and a wrapped note). Same gesture, same contract, nothing lost.
+test.describe(`alert item swipe ${PHONE.width}x${PHONE.height}`, () => {
+  const ALERT = 'cmn-alert-item';
+  test.use({viewport: PHONE, hasTouch: true, isMobile: true});
+
+  test.beforeEach(async ({page}) => {
+    await openStory(page, 'components-alert-item--swipe-actions', 'light', ALERT);
+  });
+
+  test('a swipe toward the start uncovers Dismiss and the visible X stays', async ({page}) => {
+    await touchDrag(page, await centreOf(page, 0, ALERT), -SWIPE_PX);
+    await expect.poll(() => surfaceX(page, 0, ALERT)).toBeLessThan(0);
+    await expect(page.getByRole('button', {name: 'Dismiss Sync failed'})).toBeVisible();
+    await expect(page.getByRole('button', {name: 'Dismiss', exact: true}).first()).toBeVisible();
+  });
+
+  test('a swipe toward the end uncovers Mark read', async ({page}) => {
+    await touchDrag(page, await centreOf(page, 0, ALERT), SWIPE_PX);
+    await expect.poll(() => surfaceX(page, 0, ALERT)).toBeGreaterThan(0);
+    await expectTouchSized(page, 'Mark read Sync failed');
+  });
+
+  test('a revealed action is a touch target and a keyboard reaches it', async ({page}) => {
+    await page.getByRole('button', {name: 'Dismiss Sync failed'}).focus();
+    await expect.poll(() => surfaceX(page, 0, ALERT)).toBeLessThan(0);
+    await expectTouchSized(page, 'Dismiss Sync failed');
+    await page.keyboard.press('Escape');
+    await expect.poll(() => surfaceX(page, 0, ALERT)).toBe(0);
+  });
+
+  test('a vertical pan does not open the item', async ({page}) => {
+    await touchDrag(page, await centreOf(page, 0, ALERT), 4, 60);
+    expect(await surfaceX(page, 0, ALERT)).toBe(0);
+  });
+});
+
+test.describe(`rich list row swipe ${PHONE.width}x${PHONE.height}`, () => {
+  test.use({viewport: PHONE, hasTouch: true, isMobile: true});
+
+  test.beforeEach(async ({page}) => {
+    await openStory(page, 'components-listitemrow--rich-body-swipe', 'light', READY);
+  });
+
+  test('the whole note is drawn, never truncated', async ({page}) => {
+    const note = page.locator(`${READY} p`).first();
+    await expect(note).toBeVisible();
+    expect(await note.evaluate(el => getComputedStyle(el).textOverflow)).not.toBe('ellipsis');
+    expect(await note.evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true);
+    expect(await note.evaluate(el => el.getBoundingClientRect().height)).toBeGreaterThan(
+      await page
+        .locator(`${READY} a`)
+        .first()
+        .evaluate(el => el.getBoundingClientRect().height)
+    );
+  });
+
+  test('the link has a touch-sized hit area, and a swipe uncovers a touch-sized Remove', async ({
+    page,
+  }) => {
+    // The drawn link is text height; `cmn-hit-slop` grows what a finger can press around it.
+    const slop = await page
+      .getByRole('link', {name: 'AAPL'})
+      .evaluate(el => parseFloat(getComputedStyle(el, '::after').height));
+    expect(slop).toBeGreaterThanOrEqual(TOUCH_PX);
+    await touchDrag(page, await centreOf(page, 0), -SWIPE_PX);
+    await expect.poll(() => surfaceX(page, 0)).toBeLessThan(0);
+    await expectTouchSized(page, 'Remove AAPL');
+  });
+
+  test('a tap on the body of an open row shuts it', async ({page}) => {
+    await touchDrag(page, await centreOf(page, 0), -SWIPE_PX);
+    await expect.poll(() => surfaceX(page, 0)).toBeLessThan(0);
+    await page.locator(`${READY} p`).first().tap();
+    await expect.poll(() => surfaceX(page, 0)).toBe(0);
   });
 });

@@ -305,7 +305,8 @@ filters, so no page needs its own height or overflow classes.
 
 A row that has a quick action on a phone takes it as a swipe (Apple HIG, Lists and tables): the
 leading edge holds the affirmative action (tick, mark read), the trailing edge the destructive one
-(delete, dismiss). `cmn-list-item-row` carries it, so no app builds its own gesture:
+(delete, dismiss). `cmn-list-item-row` and `cmn-alert-item` carry it, with the same inputs and
+outputs, so no app builds its own gesture:
 
 ```html
 <cmn-list-item-row
@@ -317,6 +318,17 @@ leading edge holds the affirmative action (tick, mark read), the trailing edge t
   (swipeTrailingAction)="store.remove(item)"
 />
 ```
+
+A row whose text is more than a label and one truncated sublabel keeps its content and still swipes:
+
+- **A list row with a free body.** Project the text as a `[body]` element of `cmn-list-item-row`; it
+  replaces `label` and `sublabel` and may hold a link, tags and a wrapped multi-line note (a
+  watchlist row: ticker link, exchange, added date, the owner's note). `label` still names the row
+  ("Remove AAPL"). Use a plain row, not `action`: a link cannot sit inside the button an `action` row
+  is. A tap on that link while the row is open only shuts the row; it does not follow the link.
+- **An alert item.** `cmn-alert-item` takes `swipeLeading` (mark read) and `swipeTrailing`
+  (dismiss) and emits `swipeLeadingAction` and `swipeTrailingAction`; the actions are named after the
+  alert's title ("Dismiss Sync failed"). Its title control and its Dismiss X stay.
 
 - **The visible control stays.** A swipe is a shortcut for a touch reader, never the only way: the row
   keeps its quiet trailing icon, its menu or its button for the same action, so a reader who never

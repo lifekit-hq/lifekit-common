@@ -1,3 +1,4 @@
+import {NgTemplateOutlet} from '@angular/common';
 import {
   booleanAttribute,
   ChangeDetectionStrategy,
@@ -11,6 +12,10 @@ import {formatRelativeTime} from '@lifekit-hq/core/format';
 import {PHONE_HIT_AREA_CLASSES} from '../../tokens/hit-area';
 import {type Nullable} from '../../types';
 import {IconComponent, type LucideIconName} from '../icon/icon.component';
+import {
+  type CmnRowSwipeAction,
+  RowSwipeFrameComponent,
+} from '../list-item-row/row-swipe-frame.component';
 import {TagComponent} from '../tag/tag.component';
 
 export type AlertItemSeverity = 'error' | 'warning' | 'info';
@@ -53,94 +58,110 @@ const SEVERITY_ICON: Record<AlertItemSeverity, LucideIconName> = {
 @Component({
   selector: 'cmn-alert-item',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TagComponent, IconComponent],
+  imports: [TagComponent, IconComponent, NgTemplateOutlet, RowSwipeFrameComponent],
   template: `
-    <div
-      [class.border-border-default]="flat() || isRead()"
-      [class.bg-surface-card]="isRead() && !flat()"
-      [class.rounded-cmn-role-surface]="!flat()"
-      [class.border]="!flat()"
-      [class.p-cmn-4]="!flat()"
-      [class.border-b]="flat()"
-      [class.px-cmn-1]="flat()"
-      [class.py-cmn-3]="flat()"
-      [style.border-color]="!flat() && !isRead() ? color() + '30' : ''"
-      [style.background]="!flat() && !isRead() ? color() + '08' : ''"
-      [class.cursor-pointer]="!isRead() || openable()"
-      class="relative isolate flex items-start gap-cmn-3 transition-colors"
-    >
+    <ng-template #card>
       <div
-        [style.background]="color() + '18'"
-        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-cmn-role-inset"
+        [class.border-border-default]="flat() || isRead()"
+        [class.bg-surface-card]="isRead() && !flat()"
+        [class.rounded-cmn-role-surface]="!flat()"
+        [class.border]="!flat()"
+        [class.p-cmn-4]="!flat()"
+        [class.border-b]="flat()"
+        [class.px-cmn-1]="flat()"
+        [class.py-cmn-3]="flat()"
+        [style.border-color]="!flat() && !isRead() ? color() + '30' : ''"
+        [style.background]="!flat() && !isRead() ? color() + '08' : ''"
+        [class.cursor-pointer]="!isRead() || openable()"
+        class="relative isolate flex items-start gap-cmn-3 transition-colors"
       >
-        <cmn-icon [name]="resolvedIcon()" [style.color]="color()" size="sm" />
-      </div>
+        <div
+          [style.background]="color() + '18'"
+          class="flex h-9 w-9 shrink-0 items-center justify-center rounded-cmn-role-inset"
+        >
+          <cmn-icon [name]="resolvedIcon()" [style.color]="color()" size="sm" />
+        </div>
 
-      <div class="flex-1 min-w-0">
-        <div class="mb-cmn-1 flex flex-wrap items-center gap-cmn-2">
-          @if (isRead() && !openable()) {
-            <span class="font-label text-cmn-sm font-semibold text-text-primary">{{
-              title()
-            }}</span>
-          } @else {
-            <!-- The title is the card's one control: its ::after stretches over the whole card, so a
+        <div class="flex-1 min-w-0">
+          <div class="mb-cmn-1 flex flex-wrap items-center gap-cmn-2">
+            @if (isRead() && !openable()) {
+              <span class="font-label text-cmn-sm font-semibold text-text-primary">{{
+                title()
+              }}</span>
+            } @else {
+              <!-- The title is the card's one control: its ::after stretches over the whole card, so a
                  tap anywhere marks the item read (or opens it) and a keyboard reaches it as a real
                  button. -->
-            <button
-              [class]="titleClasses()"
-              [style.color]="isRead() ? '' : color()"
-              (click)="onContainerClick()"
-              type="button"
-            >
-              {{ title() }}
-            </button>
+              <button
+                [class]="titleClasses()"
+                [style.color]="isRead() ? '' : color()"
+                (click)="onContainerClick()"
+                type="button"
+              >
+                {{ title() }}
+              </button>
+            }
+            @if (badgeLabel()) {
+              <cmn-tag [variant]="severity()">{{ badgeLabel() }}</cmn-tag>
+            }
+            @if (referenceLabel()) {
+              <span
+                class="rounded-cmn-role-inset bg-surface-raised px-cmn-2 py-cmn-0.5 text-cmn-xs text-text-secondary"
+                >{{ referenceLabel() }}</span
+              >
+            }
+          </div>
+          @if (description()) {
+            <p class="mb-cmn-1 text-cmn-xs font-medium text-text-secondary">
+              {{ description() }}
+            </p>
           }
-          @if (badgeLabel()) {
-            <cmn-tag [variant]="severity()">{{ badgeLabel() }}</cmn-tag>
-          }
-          @if (referenceLabel()) {
-            <span
-              class="rounded-cmn-role-inset bg-surface-raised px-cmn-2 py-cmn-0.5 text-cmn-xs text-text-secondary"
-              >{{ referenceLabel() }}</span
-            >
+          <p class="mb-cmn-2 text-cmn-xs leading-relaxed text-text-secondary">
+            {{ message() }}
+          </p>
+          @if (relativeTime()) {
+            <span class="text-cmn-xs text-text-secondary">{{ relativeTime() }}</span>
           }
         </div>
-        @if (description()) {
-          <p class="mb-cmn-1 text-cmn-xs font-medium text-text-secondary">
-            {{ description() }}
-          </p>
+
+        @if (!isRead()) {
+          <span
+            [class.absolute]="!flat()"
+            [class.right-cmn-3]="!flat()"
+            [class.top-cmn-3]="!flat()"
+            [class.mt-cmn-2]="flat()"
+            [class.shrink-0]="flat()"
+            [style.background]="color()"
+            class="h-2 w-2 rounded-full"
+          ></span>
         }
-        <p class="mb-cmn-2 text-cmn-xs leading-relaxed text-text-secondary">
-          {{ message() }}
-        </p>
-        @if (relativeTime()) {
-          <span class="text-cmn-xs text-text-secondary">{{ relativeTime() }}</span>
+
+        @if (dismissible()) {
+          <button
+            [class]="dismissClasses"
+            (click)="onDismissClick($event)"
+            type="button"
+            aria-label="Dismiss"
+          >
+            <cmn-icon name="X" size="sm" />
+          </button>
         }
       </div>
-
-      @if (!isRead()) {
-        <span
-          [class.absolute]="!flat()"
-          [class.right-cmn-3]="!flat()"
-          [class.top-cmn-3]="!flat()"
-          [class.mt-cmn-2]="flat()"
-          [class.shrink-0]="flat()"
-          [style.background]="color()"
-          class="h-2 w-2 rounded-full"
-        ></span>
-      }
-
-      @if (dismissible()) {
-        <button
-          [class]="dismissClasses"
-          (click)="onDismissClick($event)"
-          type="button"
-          aria-label="Dismiss"
-        >
-          <cmn-icon name="X" size="sm" />
-        </button>
-      }
-    </div>
+    </ng-template>
+    @if (swipeable()) {
+      <cmn-row-swipe-frame
+        [leading]="swipeLeading()"
+        [trailing]="swipeTrailing()"
+        [name]="title()"
+        [rounded]="!flat()"
+        (leadingAction)="swipeLeadingAction.emit()"
+        (trailingAction)="swipeTrailingAction.emit()"
+      >
+        <ng-container [ngTemplateOutlet]="card" />
+      </cmn-row-swipe-frame>
+    } @else {
+      <ng-container [ngTemplateOutlet]="card" />
+    }
   `,
 })
 export class AlertItemComponent {
@@ -163,10 +184,23 @@ export class AlertItemComponent {
    */
   public readonly openable = input(false, {transform: booleanAttribute});
 
+  /**
+   * The action a swipe toward the end reveals on the start edge (mark read). A swipe is a shortcut,
+   * never the only way: the item keeps its title control and its Dismiss X, and the same action is
+   * also a button that keyboard and screen-reader users reach, named `<action> <title>`.
+   */
+  public readonly swipeLeading = input<Nullable<CmnRowSwipeAction>>(null);
+  /** The action a swipe toward the start reveals on the end edge (dismiss). */
+  public readonly swipeTrailing = input<Nullable<CmnRowSwipeAction>>(null);
+
   public readonly read = output<void>();
   /** The item was pressed and `openable` is on; an unread item reports `read` first. */
   public readonly opened = output<void>();
   public readonly dismissed = output<void>();
+  /** Emits when the leading swipe action is pressed. The item closes first. */
+  public readonly swipeLeadingAction = output<void>();
+  /** Emits when the trailing swipe action is pressed. The item closes first. */
+  public readonly swipeTrailingAction = output<void>();
 
   public readonly color = computed(() => SEVERITY_COLOR[this.severity()]);
   public readonly resolvedIcon = computed<LucideIconName>(
@@ -174,6 +208,7 @@ export class AlertItemComponent {
   );
   public readonly relativeTime = computed(() => formatRelativeTime(this.timestamp()));
   public readonly flat = computed(() => this.density() === 'flat');
+  protected readonly swipeable = computed(() => !!this.swipeLeading() || !!this.swipeTrailing());
   protected readonly titleClasses = computed(() =>
     [
       TITLE_CLASSES,
