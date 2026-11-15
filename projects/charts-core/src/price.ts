@@ -117,7 +117,12 @@ export function periodStart(period: PricePeriod, anchor: number): number {
     return Date.UTC(end.getUTCFullYear(), 0, 1);
   }
   const start = new Date(anchor);
+  start.setUTCDate(1);
   start.setUTCMonth(end.getUTCMonth() - (MONTHS_IN_PERIOD[period] ?? 0));
+  const lastDay = new Date(
+    Date.UTC(start.getUTCFullYear(), start.getUTCMonth() + 1, 0),
+  ).getUTCDate();
+  start.setUTCDate(Math.min(end.getUTCDate(), lastDay));
   return start.getTime();
 }
 

@@ -44,6 +44,19 @@ describe('periodStart', () => {
     expect(periodStart('5Y', ANCHOR)).toBe(utc(2021, 3, 15));
   });
 
+  it('clamps to the last day of a shorter target month instead of rolling into the next', () => {
+    expect(periodStart('1M', utc(2026, 3, 31))).toBe(utc(2026, 2, 28));
+    expect(periodStart('1M', utc(2025, 12, 31))).toBe(utc(2025, 11, 30));
+    expect(periodStart('6M', utc(2026, 8, 31))).toBe(utc(2026, 2, 28));
+    expect(periodStart('1Y', utc(2028, 2, 29))).toBe(utc(2027, 2, 28));
+    expect(periodStart('1M', utc(2028, 3, 31))).toBe(utc(2028, 2, 29));
+  });
+
+  it('keeps the time of day of the anchor', () => {
+    const anchor = Date.UTC(2026, 2, 31, 16, 30);
+    expect(periodStart('1M', anchor)).toBe(Date.UTC(2026, 1, 28, 16, 30));
+  });
+
   it('starts year to date on 1 January of the anchor year', () => {
     expect(periodStart('YTD', ANCHOR)).toBe(utc(2026, 1, 1));
   });
