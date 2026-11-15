@@ -320,6 +320,6 @@ this change's.
 
 The component VRT baselines under `projects/ui/e2e/screenshots` are `*-win32.png` files captured on
 the owner's Windows machine. They cannot be regenerated on CI or Linux. Carbon step 2 re-specced the
-button (48px `md`, square, secondary now the ink fill, the outline now `tertiary`), so the
+button (48px `md`, square, secondary now the deep-accent fill, the outline now `tertiary`), so the
 `button-*-chromium-win32.png` baselines are stale and need regenerating on the owner's Windows
 machine.
