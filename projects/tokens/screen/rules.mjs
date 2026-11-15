@@ -121,7 +121,15 @@ export function inspectScreen(options = {}) {
   const vis = el => {
     const r = R(el);
     const cs = getComputedStyle(el);
-    return r.width > 0 && r.height > 0 && cs.visibility !== 'hidden' && cs.display !== 'none';
+    // `checkVisibility` honours `content-visibility`, so a closed <details>' hidden content (laid
+    // out, with a real rect) is not on screen.
+    return (
+      r.width > 0 &&
+      r.height > 0 &&
+      cs.visibility !== 'hidden' &&
+      cs.display !== 'none' &&
+      el.checkVisibility()
+    );
   };
   const text = el => (el.textContent || '').trim().replace(/\s+/g, ' ');
   const name = el => {

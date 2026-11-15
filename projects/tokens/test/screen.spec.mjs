@@ -250,6 +250,34 @@ describe('heading rhythm (C8) on a side-by-side heading column', () => {
   });
 });
 
+describe('visibility (vis) ignores the hidden content of a closed <details>', () => {
+  // A closed details lays its rows out (a real rect) but hides them with content-visibility. With
+  // the heading 44px under the summary, the hidden rows end a few px above it, so measuring them
+  // reports a false C8 finding ("5px above < 40px below"); the real gap above is 44px.
+  const ROWS = Array.from({length: 4}, (_, i) => `<li>Row ${i}</li>`).join('');
+  const page = (open, gap) =>
+    PASSING.replace(
+      /<section>\s*<h2>Ticked[\s\S]*?<\/section>/,
+      `<details${open ? ' open' : ''}><summary>More</summary><ul>${ROWS}</ul></details>
+       <section><h2>Needs you</h2><div class="card"><div class="row"><span>Pick one</span></div></div></section>`
+    ).replace(
+      '</head>',
+      `<style>details { margin: 0 0 ${gap}px; } ul { margin: 0; } h2 { margin: 0 0 40px; }</style></head>`
+    );
+  const c8 = result =>
+    result.findings.filter(finding => finding.rule === 'C8' && /Needs you/.test(finding.message));
+
+  it('does not measure a closed details as the element above a heading', async () => {
+    const result = await inspect(page(false, 44), 'desktop');
+    assert.deepEqual(c8(result), [], formatScreen(result));
+  });
+
+  it('still measures an open details', async () => {
+    const result = await inspect(page(true, 4), 'desktop');
+    assert.equal(c8(result).length, 1, formatScreen(result));
+  });
+});
+
 describe('row actions (C9) count rows, not ancestors', () => {
   const card = buttons =>
     PASSING.replace(
