@@ -5,6 +5,7 @@ export * from './describe';
 export * from './donut';
 export * from './highlight';
 export * from './line';
+export * from './price';
 export * from './scrub';
 export type * from './types';
 export * from './utils';
