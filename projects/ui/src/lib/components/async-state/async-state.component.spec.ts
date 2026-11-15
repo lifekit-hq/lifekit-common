@@ -621,6 +621,33 @@ const LONG_CONTENT_HEIGHT = 1000;
   template: `
     <div [style.height.px]="height" style="display: flex; flex-direction: column">
       <cmn-async-state
+        [keepContent]="keepContent()"
+        [showDelay]="0"
+        [minDisplay]="0"
+        [status]="status()"
+        emptySubMessage="Nothing here yet."
+        style="display: contents"
+      >
+        <div class="scroller" style="flex: 1 1 0; min-height: 0; overflow: auto">
+          <div [style.height.px]="contentHeight"></div>
+        </div>
+      </cmn-async-state>
+    </div>
+  `,
+})
+class FlexUnboundHostComponent {
+  public readonly status = signal<AsyncStateStatus>('success');
+  public readonly keepContent = signal(false);
+  protected readonly height = FLEX_HEIGHT;
+  protected readonly contentHeight = LONG_CONTENT_HEIGHT;
+}
+
+@Component({
+  imports: [AsyncStateComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <div [style.height.px]="height" style="display: flex; flex-direction: column">
+      <cmn-async-state
         [crossfade]="crossfade()"
         [keepContent]="keepContent()"
         [showDelay]="0"
@@ -636,17 +663,17 @@ const LONG_CONTENT_HEIGHT = 1000;
     </div>
   `,
 })
-class FlexHostComponent {
+class FlexBoundHostComponent {
   public readonly status = signal<AsyncStateStatus>('success');
   public readonly keepContent = signal(false);
-  public readonly crossfade = signal<boolean | null>(null);
+  public readonly crossfade = signal(true);
   protected readonly height = FLEX_HEIGHT;
   protected readonly contentHeight = LONG_CONTENT_HEIGHT;
 }
 
-describe('AsyncStateComponent without a wrapper (keepContent false)', () => {
-  let fixture: ComponentFixture<FlexHostComponent>;
-  let host: FlexHostComponent;
+describe('AsyncStateComponent without a wrapper (keepContent false, crossfade unbound)', () => {
+  let fixture: ComponentFixture<FlexUnboundHostComponent>;
+  let host: FlexUnboundHostComponent;
 
   const root = (): HTMLElement => fixture.nativeElement as HTMLElement;
   const scroller = (): HTMLElement => root().querySelector('.scroller') as HTMLElement;
@@ -658,7 +685,7 @@ describe('AsyncStateComponent without a wrapper (keepContent false)', () => {
   }
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(FlexHostComponent);
+    fixture = TestBed.createComponent(FlexUnboundHostComponent);
     host = fixture.componentInstance;
   });
 
@@ -680,8 +707,8 @@ describe('AsyncStateComponent without a wrapper (keepContent false)', () => {
     expect(scroller().getBoundingClientRect().height).toBe(FLEX_HEIGHT);
   });
 
-  it('wraps and fades when crossfade is asked for explicitly', async () => {
-    host.crossfade.set(true);
+  it('still wraps and fades by default when keepContent is on', async () => {
+    host.keepContent.set(true);
     host.status.set('loading');
     await render();
     host.status.set('success');
@@ -690,9 +717,27 @@ describe('AsyncStateComponent without a wrapper (keepContent false)', () => {
     expect(wrapper).not.toBe(state());
     expect(wrapper.classList.contains('animate-cmn-fade-in')).toBe(true);
   });
+});
 
-  it('still wraps and fades by default when keepContent is on', async () => {
-    host.keepContent.set(true);
+describe('AsyncStateComponent with an explicit crossfade in a flex host', () => {
+  let fixture: ComponentFixture<FlexBoundHostComponent>;
+  let host: FlexBoundHostComponent;
+
+  const root = (): HTMLElement => fixture.nativeElement as HTMLElement;
+  const scroller = (): HTMLElement => root().querySelector('.scroller') as HTMLElement;
+  const state = (): HTMLElement => root().querySelector('cmn-async-state') as HTMLElement;
+
+  async function render(): Promise<void> {
+    fixture.detectChanges();
+    await fixture.whenStable();
+  }
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(FlexBoundHostComponent);
+    host = fixture.componentInstance;
+  });
+
+  it('wraps and fades when crossfade is asked for explicitly', async () => {
     host.status.set('loading');
     await render();
     host.status.set('success');
@@ -712,6 +757,12 @@ describe('AsyncStateComponent without a wrapper (keepContent false)', () => {
     const wrapper = scroller().parentElement as HTMLElement;
     expect(wrapper).not.toBe(state());
     expect(wrapper.classList.contains('animate-cmn-fade-in')).toBe(false);
+  });
+
+  it('adds no wrapper when crossfade is explicitly off and keepContent is off', async () => {
+    host.crossfade.set(false);
+    await render();
+    expect(scroller().parentElement).toBe(state());
   });
 });
 
