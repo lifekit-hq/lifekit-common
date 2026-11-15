@@ -22,7 +22,9 @@ const FRAME_CLASSES =
   selector: 'cmn-chart-frame',
   imports: [ChartA11yComponent, ChipComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {class: 'contents'},
+  // Framed, the host is the box the figure fills; bare, it dissolves so the plot keeps the height it
+  // is given (a sparkline fills its parent, a ring-only donut its wrapper).
+  host: {'[class]': "bare() ? 'contents' : 'block'"},
   template: `
     <figure [class]="bare() ? 'contents' : frameClasses">
       @if (!bare()) {

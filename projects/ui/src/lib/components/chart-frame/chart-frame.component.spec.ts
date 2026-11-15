@@ -161,6 +161,22 @@ describe('ChartFrameComponent', () => {
     });
   });
 
+  describe('host box', () => {
+    const hostClasses = (): DOMTokenList => (fixture.nativeElement as HTMLElement).classList;
+
+    it('is a real box when framed, so a parent can measure the chart', () => {
+      set({label: 'Revenue'});
+      expect(hostClasses()).toContain('block');
+      expect(hostClasses()).not.toContain('contents');
+    });
+
+    it('dissolves when bare, so the plot keeps the height its parent gives it', () => {
+      set({bare: true});
+      expect(hostClasses()).toContain('contents');
+      expect(hostClasses()).not.toContain('block');
+    });
+  });
+
   describe('bare', () => {
     it('draws the plot alone: no title, chip or caption', () => {
       set({label: 'Revenue', table: TABLE, caption: 'Caption', bare: true});
