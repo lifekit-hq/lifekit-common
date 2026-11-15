@@ -93,6 +93,6 @@ export class ChartFrameComponent {
   protected readonly name = computed(() => this.tableName() || this.label());
   /** The table replaces the plot only when there is a table to show and a chip to bring it back. */
   protected readonly swapped = computed(
-    () => this.tableOpen() && this.table() !== null && !this.bare(),
+    () => this.tableOpen() && this.table() !== null && !this.bare()
   );
 }
