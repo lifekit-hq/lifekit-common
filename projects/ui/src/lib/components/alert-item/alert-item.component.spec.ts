@@ -279,7 +279,7 @@ describe('AlertItemComponent — swipe actions', () => {
     fixture.detectChanges();
     // The unit run loads no Tailwind: give each tray the width its classes would.
     fixture.nativeElement
-      .querySelectorAll('[class*="absolute"]')
+      .querySelectorAll('[data-swipe-tray]')
       .forEach((tray: HTMLElement) => (tray.style.width = `${TRAY_PX}px`));
   }
 

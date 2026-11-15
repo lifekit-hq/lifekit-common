@@ -190,6 +190,15 @@ and `(opened)`), never through a button the page lays over the row with `absolut
 overlay was `clipped-overflow-container` on the shell's two wrappers, and axe's `target-size` on the
 title it covered.
 
+A row that swipes is scanned too: `Templates/List` has a `WithSwipe` state, a `fill` page holding a
+`cmn-page-scroll` of `cmn-list-item-row`s with `swipeLeading` and `swipeTrailing`, long enough that
+rows lie below the fold. A swipe tray used to be `absolute inset-y-0` inside the row's clipping
+frame, and the judge read it, below the fold, as escaping the shell: `clipped-overflow-container` on
+the shell's two wrappers, never on the row, for every page with a swipeable row. The trays now share
+the frame's one grid cell with the surface (`col-start-1 row-start-1`, pinned to their edge with
+`justify-self`), so no part of the swipe is a positioned element and an app needs no exception to
+adopt it.
+
 It takes **no exceptions**: a finding on a golden is a defect of a component, a token or a template,
 and is fixed there. The first run found two on `Templates/Settings`, both fixed in the library:
 

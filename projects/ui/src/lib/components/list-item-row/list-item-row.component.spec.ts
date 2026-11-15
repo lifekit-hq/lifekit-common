@@ -352,7 +352,7 @@ describe('ListItemRowComponent — swipe actions', () => {
     fixture.detectChanges();
     // The unit run loads no Tailwind: give each tray the width its classes would.
     fixture.nativeElement
-      .querySelectorAll('[class*="absolute"]')
+      .querySelectorAll('[data-swipe-tray]')
       .forEach((tray: HTMLElement) => (tray.style.width = `${TRAY_PX}px`));
   }
 
@@ -376,6 +376,20 @@ describe('ListItemRowComponent — swipe actions', () => {
     touch('pointermove', x);
     touch('pointerup', x);
   }
+
+  it('lays no absolutely positioned element in a swipeable row, whichever trays it has', () => {
+    // The design judge reads an `absolute` element in a row below the fold as clipped by the app
+    // shell (`clipped-overflow-container`), on the shell's wrappers rather than on the row, so a
+    // tray is placed in the frame's grid cell instead. The unit run has no stylesheet, so the
+    // classes are what can be checked here; the route scan over `Templates/List` (`with-swipe`)
+    // judges the rendered page.
+    create();
+    const positioned = [...(fixture.nativeElement as HTMLElement).querySelectorAll('*')].filter(
+      element => /\b(absolute|fixed|sticky)\b/.test(element.getAttribute('class') ?? '')
+    );
+    expect(positioned).toEqual([]);
+    expect(fixture.nativeElement.querySelectorAll('[data-swipe-tray]').length).toBe(2);
+  });
 
   it('draws a row with no swipe action exactly as before', () => {
     const plain = TestBed.createComponent(ListItemRowComponent);
@@ -442,7 +456,7 @@ describe('ListItemRowComponent — swipe actions', () => {
   it('draws a neutral action in the accent when it names no tone', () => {
     create({leading: {label: 'Read', icon: 'Check'}, trailing: null});
     expect(trayButton('Read').className).toContain('bg-accent-default');
-    expect(fixture.nativeElement.querySelectorAll('[class*="absolute"]').length).toBe(1);
+    expect(fixture.nativeElement.querySelectorAll('[data-swipe-tray]').length).toBe(1);
   });
 
   it('slides open on a swipe toward the end and emits the leading action from its button', () => {
@@ -599,7 +613,7 @@ describe('ListItemRowComponent — projected body', () => {
     fixture.componentInstance.trailing = trailing;
     fixture.detectChanges();
     fixture.nativeElement
-      .querySelectorAll('[class*="absolute"]')
+      .querySelectorAll('[data-swipe-tray]')
       .forEach((tray: HTMLElement) => (tray.style.width = `${TRAY_PX}px`));
   }
 
