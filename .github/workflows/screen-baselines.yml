@@ -11,7 +11,7 @@ name: Render screen baselines
 #       permissions: {contents: write, actions: write, pull-requests: write, packages: read}
 #       uses: lifekit-hq/lifekit-common/.github/workflows/screen-baselines.yml@v4.5.0
 #       with:
-#         command: npx playwright test e2e/screens --update-snapshots=changed
+#         command: npx playwright test -g "screen baseline" --update-snapshots=changed
 #         baselines: e2e/screens/baselines
 on:
   workflow_call:
@@ -19,7 +19,7 @@ on:
       command:
         description: >-
           The app's Playwright command in update mode, run from `working-directory`
-          (for example `npx playwright test e2e/screens --update-snapshots=changed`)
+          (for example `npx playwright test -g "screen baseline" --update-snapshots=changed`)
         type: string
         required: true
       baselines:

@@ -225,24 +225,24 @@ jobs:
       lifekit-common-ref: v4.5.0
       working-directory: frontend # where package.json and the Playwright config live
       build-command: npm run build # what the Playwright webServer serves; blank when nothing
-      command: npx playwright test e2e/screens --update-snapshots=changed
+      command: npx playwright test -g "screen baseline" --update-snapshots=changed
       baselines: frontend/e2e/screens # the folder the images are in, from the repository root
 ```
 
-| Input                  | Default                                       | What                                                                                               |
-| ---------------------- | --------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `command` (required)   |                                               | The app's Playwright command in update mode, run from `working-directory`                          |
-| `baselines` (required) |                                               | The folder holding the images, from the repository root; every `*-linux.png` under it is committed |
-| `working-directory`    | `.`                                           | Where `package.json` and the Playwright config live                                                |
-| `install-command`      | `npm ci`                                      | Installs the app                                                                                   |
-| `build-command`        | none                                          | Builds what the Playwright command serves                                                          |
-| `playwright-install`   | `npx playwright install --with-deps chromium` | Installs the browser                                                                               |
-| `ci-workflow`          | `ci.yml`                                      | The workflow started on the branch afterwards (it needs a `workflow_dispatch`)                     |
-| `runs-on`              | `ubuntu-latest`                               | The runner: one label, or a JSON array of labels such as `["self-hosted","linux","arm64"]`         |
-| `node-version`         | `22`                                          | Node on the runner                                                                                 |
-| `commit-message`       | `test: update screen baselines`               | The commit the images land in                                                                      |
-| `lifekit-common-ref`   | `main`                                        | The lifekit-common tag to take the report action from                                              |
-| secret `token`         | the workflow token                            | A token whose push starts the pull request's own CI run, instead of `ci-workflow`                  |
+| Input                  | Default                                       | What                                                                                                                                                                           |
+| ---------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `command` (required)   |                                               | The app's Playwright command in update mode, run from `working-directory`; filter by `-g "screen baseline"`, not a folder (tests are filed under the library's `baseline.mjs`) |
+| `baselines` (required) |                                               | The folder holding the images, from the repository root; every `*-linux.png` under it is committed                                                                             |
+| `working-directory`    | `.`                                           | Where `package.json` and the Playwright config live                                                                                                                            |
+| `install-command`      | `npm ci`                                      | Installs the app                                                                                                                                                               |
+| `build-command`        | none                                          | Builds what the Playwright command serves                                                                                                                                      |
+| `playwright-install`   | `npx playwright install --with-deps chromium` | Installs the browser                                                                                                                                                           |
+| `ci-workflow`          | `ci.yml`                                      | The workflow started on the branch afterwards (it needs a `workflow_dispatch`)                                                                                                 |
+| `runs-on`              | `ubuntu-latest`                               | The runner: one label, or a JSON array of labels such as `["self-hosted","linux","arm64"]`                                                                                     |
+| `node-version`         | `22`                                          | Node on the runner                                                                                                                                                             |
+| `commit-message`       | `test: update screen baselines`               | The commit the images land in                                                                                                                                                  |
+| `lifekit-common-ref`   | `main`                                        | The lifekit-common tag to take the report action from                                                                                                                          |
+| secret `token`         | the workflow token                            | A token whose push starts the pull request's own CI run, instead of `ci-workflow`                                                                                              |
 
 The job renders on `runs-on` (`ubuntu-latest` unless a caller sets it, for example a private repository on a self-hosted runner), commits the changed images to the branch, starts CI on it and
 posts (or edits) the before and after comment on the branch's pull request. It does nothing on
