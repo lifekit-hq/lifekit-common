@@ -123,14 +123,19 @@ h6 {
   text-decoration: underline;
 }
 
-/* A link that is a row of its own (a list of goals, tickers or pull requests): below md its line
-   grows to --size-touch with the text centred in it, so the row presses at 44px and the next row
-   starts where the target ends. Where links stack with no gap this is the block padding that the
-   hit-slop of a link beside other content would otherwise overlap. */
+/* A link that is a row of its own (a list of goals, tickers or pull requests): its line is at
+   least 24px tall (WCAG 2.5.8) with the text centred in it, and below md grows to --size-touch, so
+   the row presses at 44px and the next row starts where the target ends. Where links stack with no
+   gap this is the block padding that the hit-slop of a link beside other content would otherwise
+   overlap. */
+.cmn-link--row {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
+}
+
 @media (max-width: 767.98px) {
   .cmn-link--row {
-    display: inline-flex;
-    align-items: center;
     min-height: var(--size-touch);
   }
 }
