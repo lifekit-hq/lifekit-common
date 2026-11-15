@@ -72,9 +72,9 @@ export const RowMotion: Story = {
     template: `
       <div class="flex max-w-md flex-col gap-cmn-4">
         <div class="flex gap-cmn-2">
-          <button (click)="add()" class="rounded-cmn-md border border-border-default px-cmn-3 py-cmn-2 text-cmn-sm" type="button">Add a row</button>
-          <button (click)="remove()" class="rounded-cmn-md border border-border-default px-cmn-3 py-cmn-2 text-cmn-sm" type="button">Remove the first</button>
-          <button (click)="reverse()" class="rounded-cmn-md border border-border-default px-cmn-3 py-cmn-2 text-cmn-sm" type="button">Reverse</button>
+          <button (click)="add()" class="cmn-hit-slop rounded-cmn-md border border-border-default px-cmn-3 py-cmn-2 text-cmn-sm" type="button">Add a row</button>
+          <button (click)="remove()" class="cmn-hit-slop rounded-cmn-md border border-border-default px-cmn-3 py-cmn-2 text-cmn-sm" type="button">Remove the first</button>
+          <button (click)="reverse()" class="cmn-hit-slop rounded-cmn-md border border-border-default px-cmn-3 py-cmn-2 text-cmn-sm" type="button">Reverse</button>
         </div>
         <cmn-list-section [heading]="heading" [card]="card">
           @for (row of rows; track row) {

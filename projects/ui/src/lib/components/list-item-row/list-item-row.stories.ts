@@ -229,7 +229,7 @@ export const WithAllSlots: Story = {
           <div class="text-cmn-xs text-text-secondary">/ mo</div>
         </div>
         <div actions class="flex shrink-0 gap-cmn-1">
-          <button class="px-cmn-2 py-cmn-1 text-cmn-xs rounded-cmn-sm border border-border-default text-text-secondary hover:text-text-primary">Dismiss</button>
+          <button class="cmn-hit-slop px-cmn-2 py-cmn-1 text-cmn-xs rounded-cmn-sm border border-border-default text-text-secondary hover:text-text-primary">Dismiss</button>
         </div>
       </cmn-list-item-row>
     `,
@@ -246,7 +246,7 @@ export const DimmedWithActions: Story = {
           <div class="text-cmn-xs text-text-secondary">/ mo</div>
         </div>
         <div actions class="flex shrink-0 gap-cmn-1">
-          <button class="px-cmn-2 py-cmn-1 text-cmn-xs rounded-cmn-sm border border-border-default text-text-secondary hover:text-text-primary">Restore</button>
+          <button class="cmn-hit-slop px-cmn-2 py-cmn-1 text-cmn-xs rounded-cmn-sm border border-border-default text-text-secondary hover:text-text-primary">Restore</button>
         </div>
       </cmn-list-item-row>
     `,
@@ -268,7 +268,7 @@ export const MultipleRowsInCard: Story = {
             <div class="text-cmn-xs text-text-secondary">/ mo</div>
           </div>
           <div actions class="flex shrink-0 gap-cmn-1">
-            <button class="px-cmn-2 py-cmn-1 text-cmn-xs rounded-cmn-sm border border-border-default text-text-secondary">Dismiss</button>
+            <button class="cmn-hit-slop px-cmn-2 py-cmn-1 text-cmn-xs rounded-cmn-sm border border-border-default text-text-secondary">Dismiss</button>
           </div>
         </cmn-list-item-row>
         <cmn-list-item-row label="Spotify" sublabel="Music">
@@ -282,7 +282,7 @@ export const MultipleRowsInCard: Story = {
             <div class="text-cmn-xs text-text-secondary">/ mo</div>
           </div>
           <div actions class="flex shrink-0 gap-cmn-1">
-            <button class="px-cmn-2 py-cmn-1 text-cmn-xs rounded-cmn-sm border border-border-default text-text-secondary">Dismiss</button>
+            <button class="cmn-hit-slop px-cmn-2 py-cmn-1 text-cmn-xs rounded-cmn-sm border border-border-default text-text-secondary">Dismiss</button>
           </div>
         </cmn-list-item-row>
         <cmn-list-item-row label="Adobe CC" sublabel="Creative suite" [dimmed]="true">
@@ -292,7 +292,7 @@ export const MultipleRowsInCard: Story = {
             <div class="text-cmn-xs text-text-secondary">/ mo</div>
           </div>
           <div actions class="flex shrink-0 gap-cmn-1">
-            <button class="px-cmn-2 py-cmn-1 text-cmn-xs rounded-cmn-sm border border-border-default text-text-secondary">Restore</button>
+            <button class="cmn-hit-slop px-cmn-2 py-cmn-1 text-cmn-xs rounded-cmn-sm border border-border-default text-text-secondary">Restore</button>
           </div>
         </cmn-list-item-row>
       </div>

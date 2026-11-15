@@ -19,6 +19,7 @@ import {map} from 'rxjs';
 
 import {TooltipDirective} from '../../directives/tooltip/tooltip.directive';
 import {CMN_MEDIA_MD} from '../../tokens/breakpoints';
+import {PHONE_HIT_AREA_CLASSES} from '../../tokens/hit-area';
 import {ButtonComponent} from '../button/button.component';
 import {CardComponent} from '../card/card.component';
 import {IconComponent, type LucideIconName} from '../icon/icon.component';
@@ -48,10 +49,13 @@ const SCROLL_CLASSES =
   'min-h-0 flex-1 overflow-auto focus-visible:outline-none focus-visible:ring-2 ' +
   'focus-visible:ring-inset focus-visible:ring-border-focus';
 
-/** A sortable header's button; it keeps the header's type and lifts to primary on hover. */
+/**
+ * A sortable header's button; it keeps the header's type and lifts to primary on hover. On a phone
+ * it presses as at least --size-touch tall, inside the 48px header cell.
+ */
 const SORT_BUTTON_CLASSES =
   'inline-flex items-center gap-cmn-1 rounded-cmn-role-inset font-semibold hover:text-text-primary ' +
-  'focus:outline-none focus-visible:ring-2 focus-visible:ring-border-focus';
+  `focus:outline-none focus-visible:ring-2 focus-visible:ring-border-focus ${PHONE_HIT_AREA_CLASSES}`;
 
 /** A truncated cell's text box: focusable so a keyboard reaches the full-value tooltip. */
 const TRUNCATE_CLASSES =
