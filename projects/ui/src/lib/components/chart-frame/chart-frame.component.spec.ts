@@ -19,6 +19,8 @@ const TABLE: ChartTable = {
     <cmn-chart-frame [table]="table" label="Revenue">
       <div data-testid="plot">plot</div>
       <span chartCaption data-testid="slotted">Blue bars are actuals.</span>
+      <p chartHeader data-testid="header">$120</p>
+      <div chartControls data-testid="controls">1M 6M</div>
     </cmn-chart-frame>
   `,
 })
@@ -207,6 +209,34 @@ describe('ChartFrameComponent', () => {
       expect(el.querySelector('figcaption [data-testid="slotted"]')?.textContent).toContain(
         'Blue bars are actuals.'
       );
+    });
+
+    it('keeps the header and the controls on screen when the table replaces the plot', () => {
+      const host = TestBed.createComponent(HostComponent);
+      host.detectChanges();
+      const el: HTMLElement = host.nativeElement;
+      const plotEl = el.querySelector('[data-testid="chart-plot"]') as HTMLElement;
+      (el.querySelector('[data-testid="chart-table-chip"] button') as HTMLButtonElement).click();
+      host.detectChanges();
+      const header = el.querySelector('[data-testid="header"]') as HTMLElement;
+      const controls = el.querySelector('[data-testid="controls"]') as HTMLElement;
+      expect(plotEl.classList).toContain('hidden');
+      expect(plotEl.contains(header)).toBe(false);
+      expect(plotEl.contains(controls)).toBe(false);
+    });
+
+    it('orders header, plot, controls, caption', () => {
+      const host = TestBed.createComponent(HostComponent);
+      host.detectChanges();
+      const el: HTMLElement = host.nativeElement;
+      const order = ['header', 'chart-plot', 'controls', 'slotted'].map(
+        id => el.querySelector(`[data-testid="${id}"]`) as HTMLElement
+      );
+      for (let i = 1; i < order.length; i++) {
+        expect(
+          order[i - 1].compareDocumentPosition(order[i]) & Node.DOCUMENT_POSITION_FOLLOWING
+        ).toBeTruthy();
+      }
     });
   });
 });

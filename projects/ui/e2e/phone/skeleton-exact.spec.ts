@@ -8,7 +8,7 @@ import {openStory} from './phone-helpers';
 // literal rem that drifts when the ramp does.
 const STORY = 'conformance-skeleton-geometry--geometry';
 const READY = 'cmn-skeleton-geometry';
-const PAIRS = ['hero', 'stat', 'chart', 'row', 'section'] as const;
+const PAIRS = ['hero', 'stat', 'chart', 'price', 'row', 'section'] as const;
 const SUBPIXEL = 0.01;
 const SIZES = [
   {name: '390x844', width: 390, height: 844},

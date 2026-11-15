@@ -2,7 +2,7 @@ import {NgTemplateOutlet} from '@angular/common';
 import {ChangeDetectionStrategy, Component, computed, input} from '@angular/core';
 
 export type SkeletonShape =
-  'bar' | 'row' | 'stat' | 'chart' | 'section' | 'list' | 'card' | 'detail' | 'overview';
+  'bar' | 'row' | 'stat' | 'chart' | 'price' | 'section' | 'list' | 'card' | 'detail' | 'overview';
 
 /**
  * The page presets: the body of a `cmn-page` of that kind, drawn from the parts above. Their host
@@ -46,6 +46,8 @@ const DETAIL_RELATED_ROWS = 2;
 const LIST_SECTIONS = 2;
 const OVERVIEW_STATS = 4;
 const OVERVIEW_SECTIONS = 2;
+/** Period tabs a `price` block draws (1M, 6M, YTD, 1Y, 5Y, Max). */
+const PRICE_TABS = 6;
 const PAGE_CARD_CLASSES =
   'flex flex-col gap-cmn-2 rounded-cmn-role-surface border border-cmn-card-border bg-surface-card shadow-cmn-card p-cmn-4';
 const FACTS_ROW_CLASSES = 'py-cmn-3 sm:grid sm:grid-cols-3 sm:gap-cmn-4';
@@ -63,6 +65,8 @@ const FACTS_ROW_CLASSES = 'py-cmn-3 sm:grid sm:grid-cols-3 sm:gap-cmn-4';
  * - `chart`: a `cmn-line-chart` card, its title row as tall as the Table chip. The plot reserves the
  *   chart's `h-48`, or `aspect` (e.g. `16 / 9`) when the chart is sized by ratio, so the box is the
  *   same before and after the data
+ * - `price`: a `cmn-price-block` card: the chart's title row, the price and its change pill, the
+ *   `h-64` plot and the row of period tabs, at the loaded block's exact height
  * - `section`: a `cmn-list-section` (sticky-heading height) over a card of `count` rows
  *
  * The page presets draw the body of a whole page of one kind (the title is the page's own), so a
@@ -146,6 +150,36 @@ const FACTS_ROW_CLASSES = 'py-cmn-3 sm:grid sm:grid-cols-3 sm:gap-cmn-4';
         @for (_ of overviewSections; track $index) {
           <cmn-skeleton [count]="count()" shape="section" />
         }
+      }
+      @case ('price') {
+        <div
+          class="flex w-full flex-col gap-cmn-3 rounded-cmn-role-surface border border-cmn-card-border bg-surface-card shadow-cmn-card p-cmn-4"
+        >
+          <div class="flex items-center justify-between gap-cmn-3">
+            <div [class]="bar" style="width: 35%; height: 0.75rem"></div>
+            <div class="flex items-center max-md:min-h-cmn-touch">
+              <div class="py-cmn-1 text-cmn-sm">
+                <div [class]="bar" style="width: 3.5rem; height: 1lh"></div>
+              </div>
+            </div>
+          </div>
+          <!-- The price (as tall as the headline row) and its change pill (as tall as the tag) -->
+          <div class="flex flex-col items-start gap-cmn-2">
+            <div class="flex h-cmn-size-md w-full items-center">
+              <div [class]="bar" style="width: 40%; height: 1.5rem"></div>
+            </div>
+            <div class="flex h-cmn-size-sm w-full items-center">
+              <div [class]="bar" style="width: 9rem; height: 1.5rem"></div>
+            </div>
+          </div>
+          <div [class]="bar" class="h-64 w-full"></div>
+          <!-- The period tabs: a row as tall as a tab, and below md as a touch target -->
+          <div class="flex h-cmn-size-md w-full items-center justify-around max-md:min-h-cmn-touch">
+            @for (_ of priceTabs; track $index) {
+              <div [class]="bar" style="width: 1.75rem; height: 0.875rem"></div>
+            }
+          </div>
+        </div>
       }
       @case ('stat') {
         <div
@@ -255,6 +289,7 @@ export class SkeletonComponent {
   protected readonly factsRow = FACTS_ROW_CLASSES;
   protected readonly relatedRows = DETAIL_RELATED_ROWS;
   protected readonly listSections = Array.from({length: LIST_SECTIONS});
+  protected readonly priceTabs = Array.from({length: PRICE_TABS});
   protected readonly overviewStats = Array.from({length: OVERVIEW_STATS});
   protected readonly overviewSections = Array.from({length: OVERVIEW_SECTIONS});
   protected readonly disc = DISC;

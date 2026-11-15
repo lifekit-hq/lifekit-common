@@ -6,6 +6,8 @@ import {CardComponent} from '../card/card.component';
 import {type ChartPoint, LineChartComponent} from '../line-chart/line-chart.component';
 import {ListItemRowComponent} from '../list-item-row/list-item-row.component';
 import {ListSectionComponent} from '../list-section/list-section.component';
+import {PriceBlockComponent} from '../price-block/price-block.component';
+import {RISING} from '../price-block/price-block.fixtures';
 import {StatCardComponent} from '../stat-card/stat-card.component';
 import {SkeletonComponent} from './skeleton.component';
 
@@ -30,6 +32,7 @@ const ROWS = [1, 2, 3];
     AccountAvatarComponent,
     CardComponent,
     LineChartComponent,
+    PriceBlockComponent,
     ListItemRowComponent,
     ListSectionComponent,
     SkeletonComponent,
@@ -77,6 +80,10 @@ const ROWS = [1, 2, 3];
         <div data-skeleton><cmn-skeleton shape="chart" /></div>
         <div data-loaded><cmn-line-chart [data]="points" label="Balance" /></div>
       </div>
+      <div data-pair="price" class="flex flex-col gap-cmn-2">
+        <div data-skeleton><cmn-skeleton shape="price" /></div>
+        <div data-loaded><cmn-price-block [series]="prices" label="ACME" /></div>
+      </div>
       <div data-pair="row" class="flex flex-col gap-cmn-2">
         <div data-skeleton>
           <div class="rounded-cmn-md border border-border-default bg-surface-card">
@@ -113,6 +120,7 @@ const ROWS = [1, 2, 3];
 })
 class SkeletonGeometryComponent {
   protected readonly points = POINTS;
+  protected readonly prices = [RISING];
   protected readonly rows = ROWS;
 }
 
