@@ -35,6 +35,8 @@ on('text-secondary', S4, 4.5, 7, 'secondary text');
 on('text-disabled', S3, 4.5, 7, 'tertiary text');
 on('text-placeholder', S3, 4.5, 7, 'placeholder');
 on('text-inverse', ['accent-default', 'accent-hover', 'accent-active'], 4.5, 7, 'label on a fill');
+on('text-inverse', ['accent-900', 'accent-800'], 4.5, 7, 'label on the secondary / chosen fill');
+on('accent-900', S3, 3, 4.5, 'segmented outline (1.4.11)');
 on('accent-default', [...S3, 'accent-subtle'], 4.5, 7, 'link / accent text');
 on('accent-hover', S3, 4.5, 7, 'hovered link');
 on('border-strong', S3, 3, 4.5, 'input boundary (1.4.11)');

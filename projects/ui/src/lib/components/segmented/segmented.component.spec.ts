@@ -157,7 +157,7 @@ describe('SegmentedComponent', () => {
     expect(emitted).toEqual([]);
   });
 
-  it('draws the chosen cell as the ink fill, square, and a disabled one off it', () => {
+  it('draws the chosen cell as the accent fill, square, and a disabled one off it', () => {
     const chosen = (): HTMLButtonElement =>
       cells().find(c => c.getAttribute('aria-checked') === 'true') as HTMLButtonElement;
     expect(chosen().classList).toContain('bg-cmn-segmented-active');
@@ -169,7 +169,7 @@ describe('SegmentedComponent', () => {
     fixture.componentRef.setInput('disabled', true);
     fixture.detectChanges();
 
-    // Disabled text on the ink fill would be gray on dark, so a disabled choice moves to a neutral surface.
+    // Disabled text on the accent fill would be gray on dark, so a disabled choice moves to a neutral surface.
     expect(chosen().classList).not.toContain('bg-cmn-segmented-active');
     expect(chosen().classList).toContain('bg-surface-raised');
   });

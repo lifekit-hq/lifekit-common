@@ -31,7 +31,7 @@ const HOST_CLASSES =
 
 /**
  * Carbon's content switcher: equal columns as wide as the widest label (at least `--size-touch`)
- * in one square box with a 1px ink outline. The row fills its container when that is wider, and
+ * in one square box with a 1px deep-accent outline. The row fills its container when that is wider, and
  * scrolls inside it rather than squeeze a label.
  */
 const GROUP_CLASSES =
@@ -49,7 +49,7 @@ const CELL_BASE_CLASSES =
   'touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 ' +
   'focus-visible:outline-border-focus disabled:cursor-not-allowed disabled:text-text-disabled';
 const CELL_CHECKED_CLASSES = 'bg-cmn-segmented-active font-semibold text-cmn-segmented-active-fg';
-/** Disabled text on the ink fill is unreadable; a disabled choice sits on a neutral surface. */
+/** Disabled text on the accent fill is unreadable; a disabled choice sits on a neutral surface. */
 const CELL_CHECKED_DISABLED_CLASSES = 'bg-surface-raised font-semibold';
 const CELL_UNCHECKED_CLASSES =
   'text-text-secondary enabled:hover:bg-surface-hover enabled:hover:text-text-primary';

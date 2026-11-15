@@ -57,8 +57,10 @@ describe('CheckboxComponent', () => {
     fixture.componentRef.setInput('checked', true);
     fixture.detectChanges();
     expect(box().getAttribute('aria-checked')).toBe('true');
-    // Carbon fills a checked box with the ink colour, not the accent.
-    expect(box().className).toContain('bg-text-primary');
+    // A checked box takes the colour seed, as the select's multi-select box does.
+    expect(box().className).toContain('bg-accent-default');
+    expect(box().className).toContain('text-text-inverse');
+    expect(box().className).not.toContain('bg-text-primary');
 
     fixture.componentRef.setInput('indeterminate', true);
     fixture.detectChanges();

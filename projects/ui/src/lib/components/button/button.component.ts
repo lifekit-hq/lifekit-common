@@ -6,7 +6,7 @@ import {IconComponent, type LucideIconName} from '../icon/icon.component';
 
 /**
  * Carbon's button kinds. `destructive` is Carbon's danger button (primary); the tertiary and ghost
- * danger kinds follow it. `secondary` is Carbon's secondary (a filled button in the ink colour), and
+ * danger kinds follow it. `secondary` is Carbon's secondary (a filled button in the seed's deep accent, `accent-900`), and
  * the outlined button an earlier version called `secondary` is now `tertiary`.
  */
 export type ButtonVariant =

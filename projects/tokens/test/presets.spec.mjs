@@ -276,7 +276,7 @@ describe('hook rules (the real theme.css)', () => {
     );
     assert.match(
       problems.join('\n'),
-      /--cmn-btn-secondary-fg on --cmn-btn-secondary-hover is 2\.\d\d:1 in the light theme/
+      /--cmn-btn-secondary-fg on --cmn-btn-secondary-hover is 1\.\d\d:1 in the light theme/
     );
   });
 
