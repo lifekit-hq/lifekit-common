@@ -238,12 +238,13 @@ jobs:
 | `build-command`        | none                                          | Builds what the Playwright command serves                                                          |
 | `playwright-install`   | `npx playwright install --with-deps chromium` | Installs the browser                                                                               |
 | `ci-workflow`          | `ci.yml`                                      | The workflow started on the branch afterwards (it needs a `workflow_dispatch`)                     |
+| `runs-on`              | `ubuntu-latest`                               | The runner: one label, or a JSON array of labels such as `["self-hosted","linux","arm64"]`         |
 | `node-version`         | `22`                                          | Node on the runner                                                                                 |
 | `commit-message`       | `test: update screen baselines`               | The commit the images land in                                                                      |
 | `lifekit-common-ref`   | `main`                                        | The lifekit-common tag to take the report action from                                              |
 | secret `token`         | the workflow token                            | A token whose push starts the pull request's own CI run, instead of `ci-workflow`                  |
 
-The job renders on `ubuntu-latest`, commits the changed images to the branch, starts CI on it and
+The job renders on `runs-on` (`ubuntu-latest` unless a caller sets it, for example a private repository on a self-hosted runner), commits the changed images to the branch, starts CI on it and
 posts (or edits) the before and after comment on the branch's pull request. It does nothing on
 `main` or on a fork's branch. The calling job grants the four permissions above; the workflow cannot
 raise them, and `packages: read` is the one that lets the install step read the app's private

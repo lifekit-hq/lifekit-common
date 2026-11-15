@@ -32,6 +32,13 @@ on:
         description: Where the app's package.json and Playwright config live
         type: string
         default: .
+      runs-on:
+        description: >-
+          The runner to render on: one label (`ubuntu-latest`) or a JSON array of labels
+          (`["self-hosted","linux","arm64"]`), for a private repository on a self-hosted runner. Baselines
+          are `*-linux.png`, so the runner has to be the one every later comparison runs on.
+        type: string
+        default: ubuntu-latest
       node-version:
         type: string
         default: '22'
@@ -87,7 +94,8 @@ jobs:
       github.ref != 'refs/heads/main' &&
       (github.event_name != 'pull_request' ||
       github.event.pull_request.head.repo.full_name == github.repository)
-    runs-on: ubuntu-latest
+    # A JSON array (`'["self-hosted","linux","arm64"]'`) is parsed into a label list; anything else is one label.
+    runs-on: ${{ startsWith(inputs.runs-on, '[') && fromJSON(inputs.runs-on) || inputs.runs-on }}
     env:
       BRANCH: ${{ github.head_ref || github.ref_name }}
       # What the app's `.npmrc` reads (`//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}`). Always the
