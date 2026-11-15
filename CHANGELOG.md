@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.2.0](https://github.com/lifekit-hq/lifekit-common/compare/v5.1.0...v5.2.0) (2026-11-15)
+
+
+### Features
+
+* **ui:** add cmn-price-block with period tabs, delta pill and scrub crosshair ([#355](https://github.com/lifekit-hq/lifekit-common/issues/355)) ([d296dd5](https://github.com/lifekit-hq/lifekit-common/commit/d296dd5c41a78e46cd13004b0207a1a4f0554fb4))
+
 ## [5.1.0](https://github.com/lifekit-hq/lifekit-common/compare/v5.0.0...v5.1.0) (2026-11-15)
 
 
