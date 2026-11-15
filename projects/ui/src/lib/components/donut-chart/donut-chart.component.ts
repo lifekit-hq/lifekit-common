@@ -28,54 +28,34 @@ import {
 } from '@lifekit-hq/charts-core';
 import {Chart} from 'chart.js';
 
-import {ChartA11yComponent} from '../../chart-a11y/chart-a11y.component';
 import {isOutputObserved} from '../../chart-click/output-observed';
 import {injectChartThemeKey} from '../../chart-theme/chart-theme';
+import {ChartFrameComponent} from '../chart-frame/chart-frame.component';
 
 export type {DonutSegment, DonutSegmentClick} from '@lifekit-hq/charts-core';
 
 @Component({
   selector: 'cmn-donut-chart',
-  imports: [ChartA11yComponent],
+  imports: [ChartFrameComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   // A custom element is inline by default, which lets the ring-only wrapper's percentage
   // height collapse; block gives Chart.js a real box to size against.
   host: {class: 'block'},
   template: `
-    @if (chrome()) {
+    <cmn-chart-frame
+      [announcement]="announcement()"
+      [bare]="!chrome()"
+      [caption]="caption()"
+      [label]="label()"
+      [sources]="sources()"
+      [table]="table()"
+      [tableName]="name()"
+      [tableOpen]="showDataTable()"
+    >
       <div
-        class="flex flex-col gap-cmn-3 rounded-cmn-role-surface border border-cmn-card-border bg-surface-card shadow-cmn-card p-cmn-4"
+        [class]="chrome() ? 'relative w-full' : 'relative h-full w-full'"
+        [style.min-height]="chrome() ? '280px' : '220px'"
       >
-        <span class="font-label text-cmn-xs font-semibold text-text-secondary">
-          {{ label() }}
-        </span>
-        <div class="relative w-full" style="min-height: 280px">
-          <canvas
-            #chartCanvas
-            [attr.aria-label]="accessibleName()"
-            [attr.tabindex]="isEmpty() ? null : 0"
-            [class.invisible]="isEmpty()"
-            role="img"
-            class="rounded-cmn-role-inset focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus"
-          ></canvas>
-          @if (isEmpty()) {
-            <p
-              class="absolute inset-0 flex items-center justify-center text-center text-cmn-sm text-text-secondary"
-              data-testid="chart-empty"
-            >
-              {{ emptyMessage() }}
-            </p>
-          }
-        </div>
-        <cmn-chart-a11y
-          [announcement]="announcement()"
-          [caption]="name()"
-          [table]="table()"
-          [visible]="showDataTable()"
-        />
-      </div>
-    } @else {
-      <div class="relative h-full w-full" style="min-height: 220px">
         <canvas
           #chartCanvas
           [attr.aria-label]="accessibleName()"
@@ -93,13 +73,7 @@ export type {DonutSegment, DonutSegmentClick} from '@lifekit-hq/charts-core';
           </p>
         }
       </div>
-      <cmn-chart-a11y
-        [announcement]="announcement()"
-        [caption]="name()"
-        [table]="table()"
-        [visible]="showDataTable()"
-      />
-    }
+    </cmn-chart-frame>
   `,
 })
 export class DonutChartComponent implements AfterViewInit, OnDestroy {
@@ -132,7 +106,14 @@ export class DonutChartComponent implements AfterViewInit, OnDestroy {
    * how many segments, their total and the largest one's share).
    */
   public readonly summary = input<string | undefined>(undefined);
-  /** Shows the data table under the chart; otherwise only a screen reader reaches it. */
+  /**
+   * The plain-language line under the chart: each series by how it is drawn and what the marks
+   * mean, in place of an in-plot legend. Ignored when `chrome` is false.
+   */
+  public readonly caption = input<string>('');
+  /** Where each row of the data table came from, in row order; adds a Source column. */
+  public readonly sources = input<readonly string[] | undefined>(undefined);
+  /** Opens the chart with its data table showing in place of the plot; the Table chip toggles it. */
   public readonly showDataTable = input<boolean>(false);
   protected readonly isEmpty = computed(() => isDonutEmpty(this.segments()));
   protected readonly name = computed(() => this.label() || 'Donut chart');

@@ -16,6 +16,7 @@ export * from './components/bar-chart/bar-chart.component';
 export * from './components/bottom-tab-bar/bottom-tab-bar.component';
 export * from './components/button/button.component';
 export * from './components/card/card.component';
+export * from './components/chart-frame/chart-frame.component';
 export * from './components/chat/chat.component';
 export type * from './components/chat/chat.model';
 export * from './components/chat/chat-input.component';

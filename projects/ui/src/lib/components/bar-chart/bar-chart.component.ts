@@ -29,23 +29,26 @@ import {
 } from '@lifekit-hq/charts-core';
 import {Chart} from 'chart.js';
 
-import {ChartA11yComponent} from '../../chart-a11y/chart-a11y.component';
 import {isOutputObserved} from '../../chart-click/output-observed';
 import {injectChartThemeKey} from '../../chart-theme/chart-theme';
+import {ChartFrameComponent} from '../chart-frame/chart-frame.component';
 
 export type {BarSeries, BarValueFormat, ChartPointClick} from '@lifekit-hq/charts-core';
 
 @Component({
   selector: 'cmn-bar-chart',
-  imports: [ChartA11yComponent],
+  imports: [ChartFrameComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div
-      class="flex w-full flex-col gap-cmn-3 rounded-cmn-role-surface border border-cmn-card-border bg-surface-card shadow-cmn-card p-cmn-4"
+    <cmn-chart-frame
+      [announcement]="announcement()"
+      [caption]="caption()"
+      [label]="label()"
+      [sources]="sources()"
+      [table]="table()"
+      [tableName]="name()"
+      [tableOpen]="showDataTable()"
     >
-      <span class="font-label text-cmn-xs font-semibold text-text-secondary">
-        {{ label() }}
-      </span>
       <div class="relative h-64">
         <canvas
           #chartCanvas
@@ -64,13 +67,7 @@ export type {BarSeries, BarValueFormat, ChartPointClick} from '@lifekit-hq/chart
           </p>
         }
       </div>
-      <cmn-chart-a11y
-        [announcement]="announcement()"
-        [caption]="name()"
-        [table]="table()"
-        [visible]="showDataTable()"
-      />
-    </div>
+    </cmn-chart-frame>
   `,
 })
 export class BarChartComponent implements AfterViewInit, OnDestroy {
@@ -102,7 +99,14 @@ export class BarChartComponent implements AfterViewInit, OnDestroy {
    * its span and, for one series, its highest and lowest bar).
    */
   public readonly summary = input<string | undefined>(undefined);
-  /** Shows the data table under the chart; otherwise only a screen reader reaches it. */
+  /**
+   * The plain-language line under the chart: each series by how it is drawn and what the marks
+   * mean, in place of an in-plot legend.
+   */
+  public readonly caption = input<string>('');
+  /** Where each row of the data table came from, in row order; adds a Source column. */
+  public readonly sources = input<readonly string[] | undefined>(undefined);
+  /** Opens the chart with its data table showing in place of the plot; the Table chip toggles it. */
   public readonly showDataTable = input<boolean>(false);
   protected readonly isEmpty = computed(() => isSeriesEmpty(this.series()));
   protected readonly name = computed(() => this.label() || 'Bar chart');

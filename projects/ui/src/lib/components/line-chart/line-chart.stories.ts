@@ -187,8 +187,8 @@ export const LongRange: Story = {
 
 /**
  * The canvas is an image named by `label` and a derived summary (span, ends, trend; replace it
- * with `summary`), and a screen reader reaches every point in a data table. `showDataTable` shows
- * that table under the chart. Tab to the chart and ArrowLeft/ArrowRight, Home and End read a
+ * with `summary`), and a screen reader reaches every point in a data table. `showDataTable` opens the chart on
+ * that table; the Table chip swaps back. Tab to the chart and ArrowLeft/ArrowRight, Home and End read a
  * point, announced politely.
  */
 export const DataTable: Story = {
