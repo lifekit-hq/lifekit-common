@@ -1,5 +1,20 @@
 # Changelog
 
+## [5.3.1](https://github.com/lifekit-hq/lifekit-common/compare/v5.3.0...v5.3.1) (2026-11-15)
+
+
+### Bug Fixes
+
+* **tokens:** skip a closed details' hidden content in the screen check's vis() ([#366](https://github.com/lifekit-hq/lifekit-common/issues/366)) ([1a1ce54](https://github.com/lifekit-hq/lifekit-common/commit/1a1ce541fcf0aba787a67fbe3a9cffff7d61c561))
+* **ui:** keep cmn-alert-item's dismiss hit area inside the card on a phone ([#364](https://github.com/lifekit-hq/lifekit-common/issues/364)) ([9057c70](https://github.com/lifekit-hq/lifekit-common/commit/9057c70b34a715e7fa772d28a34db8b183726660))
+* **ui:** keep swipe trays out of absolute positioning so the route scan passes ([#368](https://github.com/lifekit-hq/lifekit-common/issues/368)) ([c1e4627](https://github.com/lifekit-hq/lifekit-common/commit/c1e462724e57f155afb674a0f515b69b9a88e7b8))
+* **ui:** make cmn-async-state keepContent=false project the body with no wrapper ([#363](https://github.com/lifekit-hq/lifekit-common/issues/363)) ([d4e0313](https://github.com/lifekit-hq/lifekit-common/commit/d4e0313523ff79df3290243002c7119d5ecbf4fe))
+
+
+### Documentation
+
+* **tokens:** use a -g grep, not a folder filter, in the baselines update command ([#362](https://github.com/lifekit-hq/lifekit-common/issues/362)) ([20c3e5b](https://github.com/lifekit-hq/lifekit-common/commit/20c3e5b5399a03db3f0ff106139a4dace80ce35a))
+
 ## [5.3.0](https://github.com/lifekit-hq/lifekit-common/compare/v5.2.0...v5.3.0) (2026-11-15)
 
 
