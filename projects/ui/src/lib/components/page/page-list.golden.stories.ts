@@ -7,7 +7,10 @@ import {ButtonComponent} from '../button/button.component';
 import {CheckboxComponent} from '../checkbox/checkbox.component';
 import {FilterBarComponent} from '../filter-bar/filter-bar.component';
 import {InputComponent} from '../input/input.component';
-import {ListItemRowComponent} from '../list-item-row/list-item-row.component';
+import {
+  type CmnRowSwipeAction,
+  ListItemRowComponent,
+} from '../list-item-row/list-item-row.component';
 import {ListSectionComponent} from '../list-section/list-section.component';
 import {PageScrollComponent} from '../page-scroll/page-scroll.component';
 import {ProseComponent} from '../prose/prose.component';
@@ -294,6 +297,49 @@ class AlertsPageComponent {
 }
 
 /**
+ * The golden list screen with swipe actions: rows that reveal a tray under a swipe. The route scan
+ * must read nothing in a row as escaping the shell's clip (`clipped-overflow-container`).
+ */
+@Component({
+  selector: 'cmn-golden-swipe-page',
+  imports: [ListItemRowComponent, ListSectionComponent, PageComponent, PageScrollComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <cmn-page fill>
+      <cmn-page-scroll label="Tasks">
+        <cmn-list-section [heading]="'To do · ' + open.length">
+          @for (task of open; track task.id) {
+            <cmn-list-item-row
+              [label]="task.title"
+              [sublabel]="task.note"
+              [swipeLeading]="done"
+              [swipeTrailing]="remove"
+            />
+          }
+        </cmn-list-section>
+        <cmn-list-section [heading]="'Done · ' + finished.length">
+          @for (task of finished; track task.id) {
+            <cmn-list-item-row
+              [label]="task.title"
+              [sublabel]="task.note"
+              [dimmed]="true"
+              [swipeTrailing]="undo"
+            />
+          }
+        </cmn-list-section>
+      </cmn-page-scroll>
+    </cmn-page>
+  `,
+})
+class SwipePageComponent {
+  protected readonly open = [...OPEN, ...OPEN.map(t => ({...t, id: t.id + 100}))];
+  protected readonly finished = [...DONE, ...DONE.map(t => ({...t, id: t.id + 100}))];
+  protected readonly done: CmnRowSwipeAction = {label: 'Done', icon: 'Check', tone: 'positive'};
+  protected readonly remove: CmnRowSwipeAction = {label: 'Delete', icon: 'Trash2', tone: 'danger'};
+  protected readonly undo: CmnRowSwipeAction = {label: 'Reverse', icon: 'Undo2', tone: 'danger'};
+}
+
+/**
  * Golden screens for the list template: the reference other lifekit apps copy and the owner
  * approves once. Each is the real shell and real components; run the screen check
  * (`lifekit-chrome-check screen`, docs/SCREEN-CHECK.md) against them at 390 and 1280.
@@ -308,6 +354,7 @@ const meta: Meta<GoldenShellComponent> = {
         {path: 'tasks', component: TasksPageComponent, data: {title: 'Tasks'}},
         {path: 'decisions', component: DecisionsPageComponent, data: {title: 'Decisions'}},
         {path: 'alerts', component: AlertsPageComponent, data: {title: 'Alerts'}},
+        {path: 'swipes', component: SwipePageComponent, data: {title: 'Swipes'}},
       ]),
     }),
   ],
@@ -368,3 +415,11 @@ export const DesktopWithLedeDark: Story = {
   args: LEDE_START,
   globals: {...GOLDEN_DESKTOP, theme: 'dark'},
 };
+
+/**
+ * A list page whose rows swipe open: the trays share the row's grid cell, so no row holds a
+ * positioned element the route scan could read as escaping the shell's clipping wrappers.
+ */
+export const PhoneWithSwipe: Story = {globals: GOLDEN_PHONE, args: {start: '/swipes'}};
+
+export const DesktopWithSwipe: Story = {globals: GOLDEN_DESKTOP, args: {start: '/swipes'}};

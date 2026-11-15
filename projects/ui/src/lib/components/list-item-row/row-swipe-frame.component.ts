@@ -33,11 +33,17 @@ export interface CmnRowSwipeAction {
  * The swipe frame clips the trays; the surface is the row itself, opaque so a closed tray never
  * shows through, and `touch-pan-y` leaves vertical panning to the page. It slides on the medium
  * step and snaps for a reader who asked for reduced motion.
+ *
+ * The trays and the surface share the frame's one grid cell, the tray pinned to its edge with
+ * `justify-self`, and none is `absolute`: the design judge reads an `absolute` element in a row
+ * below the fold as clipped by the app shell (`clipped-overflow-container`), on the shell's two
+ * wrappers rather than on the row, so any page with a swipeable row would fail the route scan.
  */
-const FRAME_CLASSES = 'relative overflow-hidden';
+const FRAME_CLASSES = 'grid grid-cols-[minmax(0,1fr)] overflow-hidden';
 /** A card-shaped row clips its trays to the card's own corners. */
 const FRAME_ROUNDED_CLASSES = ' rounded-cmn-role-surface';
-const SURFACE_CLASSES = 'relative touch-pan-y bg-surface-card';
+const CELL_CLASSES = 'col-start-1 row-start-1';
+const SURFACE_CLASSES = `${CELL_CLASSES} relative touch-pan-y bg-surface-card`;
 const SLIDE_CLASSES =
   ' transition-transform duration-cmn-medium ease-cmn-standard motion-reduce:transition-none';
 /**
@@ -46,7 +52,7 @@ const SLIDE_CLASSES =
  * or `inert`, so its button stays focusable and in the accessibility tree; focus then slides the
  * row open. It fades with the slide and snaps with it.
  */
-const TRAY_CLASSES = 'absolute inset-y-0 flex';
+const TRAY_CLASSES = `${CELL_CLASSES} flex`;
 const TRAY_FADE_CLASSES =
   ' transition-opacity duration-cmn-medium ease-cmn-standard motion-reduce:transition-none';
 const ACTION_CLASSES =
@@ -84,6 +90,7 @@ const VISIBLE_CONTROL = 'button, a[href], input, select, textarea, [tabindex]';
           [class]="leadingTrayClasses()"
           (focusin)="revealFrom('leading', leadingTray)"
           (focusout)="closeOnFocusLeave($event, leadingTray)"
+          data-swipe-tray
         >
           <button
             [class]="actionClasses(action)"
@@ -102,6 +109,7 @@ const VISIBLE_CONTROL = 'button, a[href], input, select, textarea, [tabindex]';
           [class]="trailingTrayClasses()"
           (focusin)="revealFrom('trailing', trailingTray)"
           (focusout)="closeOnFocusLeave($event, trailingTray)"
+          data-swipe-tray
         >
           <button
             [class]="actionClasses(action)"
@@ -163,10 +171,10 @@ export class RowSwipeFrameComponent {
     () => SURFACE_CLASSES + (this.swipe.dragging() ? '' : SLIDE_CLASSES)
   );
   protected readonly leadingTrayClasses = computed(() =>
-    this.trayClasses('left-0', this.swipe.offset() > 0)
+    this.trayClasses('justify-self-start', this.swipe.offset() > 0)
   );
   protected readonly trailingTrayClasses = computed(() =>
-    this.trayClasses('right-0', this.swipe.offset() < 0)
+    this.trayClasses('justify-self-end', this.swipe.offset() < 0)
   );
 
   constructor() {
