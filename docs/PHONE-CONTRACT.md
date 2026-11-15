@@ -336,6 +336,29 @@ leading edge holds the affirmative action (tick, mark read), the trailing edge t
 - **A swipe reveals, it does not commit.** The action runs when its button is pressed, so a slip of
   the thumb never deletes anything; there is no full-swipe-to-act.
 
+#### Reading a chart with a finger
+
+`cmn-price-block` (and any chart that scrubs) is read by dragging across its plot. On a phone that
+is a touch, so the gesture has to leave the page's own scroll alone. Checked on Chromium's real
+touch pipeline at 320, 360 and 390 wide (`e2e/phone/price-block-touch.spec.ts`: `hasTouch`,
+`isMobile`, DevTools touch events). That is emulation of a phone, not a physical device:
+
+- **A horizontal drag reads, a vertical one scrolls.** The plot sets `touch-action: pan-y`, so the
+  browser keeps vertical panning and hands the sideways movement to the chart. A horizontal drag
+  across the plot moves the crosshair, the headline price, the change pill and the combined pill; the
+  page does not scroll sideways under it. A vertical drag that starts on the plot scrolls the page and
+  leaves no read behind.
+- **The pill is never under the finger.** The one combined tooltip pill (date and every series'
+  value) sits in a band reserved above the plot, not beside the point, so a thumb or finger on the plot
+  never covers it. It stays inside the screen at both ends of the plot. The cost is a blank band above
+  the plot at rest.
+- **Let go and it is gone.** Lifting the finger removes the crosshair and pill and puts the headline
+  and change pill back to the period's last price.
+- **The period tabs are touch targets.** All six are at least 44x44 at 320 wide (the row bleeds
+  `cmn-2` past the card's padding below `md` to get there) and a tap selects the period.
+- **Not by touch alone.** The same read is on the keyboard (Tab to the plot, Left, Right, Home, End,
+  Escape) and in the chart's live region and Table chip.
+
 #### Paging a long list
 
 A list longer than one page of rows ends in `lk-infinite-list`, not a Load More button or a pager.
@@ -440,6 +463,7 @@ page does not move when the content arrives:
 | `section` | `cmn-list-section`                             | The sticky-heading height, then a card of `count` rows (default 3).                                                      |
 | `stat`    | `cmn-stat-card`                                | Label, value and delta.                                                                                                  |
 | `chart`   | `cmn-line-chart` card                          | The plot keeps the chart's own height (`h-48`); `aspect` (`16 / 9`) reserves a ratio instead for a chart sized by ratio. |
+| `price`   | `cmn-price-block` card                         | Title row, price and change pill, the `h-64` plot, and the period tab row, to the sub-pixel height of the loaded block.  |
 
 The page presets draw the body of a whole `cmn-page` of one kind, so a first load is the same
 blocks in the same order as the loaded page. The page draws its own title and gutter; the preset
