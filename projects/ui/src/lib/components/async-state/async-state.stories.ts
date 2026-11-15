@@ -487,3 +487,26 @@ export const RefreshKeepsContentInstant: Story = {
 export const RefreshInstant: Story = {
   render: () => ({template: '<cmn-story-refresh [keepContent]="false" [calm]="false" />'}),
 };
+
+/**
+ * `[keepContent]="false"` on its own projects the content with no wrapper element, so a host that
+ * lays the children out itself reaches them: here a fixed-height flex column, with the host set to
+ * `contents`, whose one child is the scroll container (`flex-1 min-h-0 overflow-auto`). The long
+ * list scrolls inside it, and the page around it does not. Add `[crossfade]="true"` to fade the
+ * content in; that wraps it.
+ */
+export const NoWrapperInFlexHost: Story = {
+  render: () => ({
+    template: `
+      <div class="flex h-64 max-w-md flex-col border border-border-default">
+        <cmn-async-state class="contents" [keepContent]="false" status="success" emptySubMessage="New activity appears here after the next sync.">
+          <div class="min-h-0 flex-1 overflow-auto" data-testid="scroller">
+            <div class="h-96 bg-surface-card p-cmn-4 text-cmn-sm text-text-primary">
+              A long list: the only scroll container, because the flex column reaches it.
+            </div>
+          </div>
+        </cmn-async-state>
+      </div>
+    `,
+  }),
+};

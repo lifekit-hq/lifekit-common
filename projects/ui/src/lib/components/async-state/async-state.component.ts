@@ -46,6 +46,11 @@ const DEFAULT_SKELETON_ROWS = 3;
 export const ASYNC_STATE_SHOW_DELAY_MS = 200;
 export const ASYNC_STATE_MIN_DISPLAY_MS = 400;
 
+/** `crossfade` is tri-state: unset (null) follows `keepContent`; anything else is a boolean attribute. */
+function crossfadeAttribute(value: unknown): boolean | null {
+  return value === null || value === undefined ? null : booleanAttribute(value);
+}
+
 const TIME_ONLY: Intl.DateTimeFormatOptions = {timeStyle: 'short'};
 const DATE_AND_TIME: Intl.DateTimeFormatOptions = {dateStyle: 'medium', timeStyle: 'short'};
 
@@ -82,7 +87,9 @@ const DATE_AND_TIME: Intl.DateTimeFormatOptions = {dateStyle: 'medium', timeStyl
  *   least that long, so it never flashes.
  * - `crossfade` fades the content in when it replaces the skeleton (or nothing) during the
  *   component's lifetime. Content already there at the first render (a revisit whose store kept
- *   its data) paints at full opacity.
+ *   its data) paints at full opacity. Unset, it follows `keepContent`, so `[keepContent]="false"`
+ *   alone projects the content with no wrapper element, for a host that lays the children out
+ *   itself (a flex column, `space-y-*`); pass `[crossfade]="true"` to fade there too, which wraps.
  *
  * Set `retryable` to render the built-in Retry button next to the error or offline message; it
  * emits `retry`. Leave it off when the page projects its own `[error-action]`.
@@ -209,6 +216,9 @@ export class AsyncStateComponent {
   /** The projected content is on screen (inside the wrapper or not). */
   private readonly contentShown = computed(() => this.showBody() && !this.showEmpty());
 
+  /** The effective crossfade: the explicit input, else on exactly when the content is kept. */
+  private readonly fades = computed(() => this.crossfade() ?? this.keepContent());
+
   public readonly status = input<AsyncStateStatus>('idle');
   public readonly errorMessage = input<string>('');
   public readonly errorPlacement = input<AsyncStateErrorPlacement>('replace');
@@ -239,9 +249,11 @@ export class AsyncStateComponent {
   /**
    * Fades the content in when it replaces the skeleton, over `--cmn-duration-short`; content there
    * at first render does not fade, and nothing fades under Reduce Motion. On by default; set
-   * `[crossfade]="false"` to opt out.
+   * `[crossfade]="false"` to opt out. Unset, it follows `keepContent`: with `[keepContent]="false"`
+   * the content is projected with no wrapper element, so a host's flex or `space-y-*` layout
+   * reaches the children. Pass `[crossfade]="true"` to fade (and wrap) regardless.
    */
-  public readonly crossfade = input(true, {transform: booleanAttribute});
+  public readonly crossfade = input<boolean | null, unknown>(null, {transform: crossfadeAttribute});
   /**
    * Draws the loading placeholder as a `cmn-skeleton` part preset (`row`, `section`, `stat`, `chart`;
    * `skeletonRows` rows) instead of bars. Not a page preset (`list`, `card`, `detail`, `overview`):
@@ -261,12 +273,12 @@ export class AsyncStateComponent {
     () => this.status() === 'loading' && this.keeping() && this.indicating()
   );
 
-  protected readonly wrapBody = computed(() => this.keepContent() || this.crossfade());
+  protected readonly wrapBody = computed(() => this.keepContent() || this.fades());
 
   protected readonly bodyClasses = computed(() => {
     const motion =
       'transition-opacity duration-cmn-short ease-cmn-standard motion-reduce:transition-none';
-    const fade = this.crossfade() && this.contentWasAbsent() ? ' animate-cmn-fade-in' : '';
+    const fade = this.fades() && this.contentWasAbsent() ? ' animate-cmn-fade-in' : '';
     return `${motion}${fade}${this.dimmed() ? ' opacity-60' : ''}`;
   });
 
