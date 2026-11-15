@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.3.0](https://github.com/lifekit-hq/lifekit-common/compare/v5.2.0...v5.3.0) (2026-11-15)
+
+
+### Features
+
+* **ui:** add swipe actions to cmn-alert-item and rich list rows ([#359](https://github.com/lifekit-hq/lifekit-common/issues/359)) ([9ee7d59](https://github.com/lifekit-hq/lifekit-common/commit/9ee7d594f202a001ccaabbfe89a3e9b85a15ee88))
+
 ## [5.2.0](https://github.com/lifekit-hq/lifekit-common/compare/v5.1.0...v5.2.0) (2026-11-15)
 
 
