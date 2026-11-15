@@ -1,5 +1,15 @@
 # Changelog
 
+## [5.1.0](https://github.com/lifekit-hq/lifekit-common/compare/v5.0.0...v5.1.0) (2026-11-15)
+
+
+### Features
+
+* **ci:** add a runs-on input to the screen-baselines workflow ([#356](https://github.com/lifekit-hq/lifekit-common/issues/356)) ([21b9581](https://github.com/lifekit-hq/lifekit-common/commit/21b9581f34f6fee7a4744517c76830791e36eabf))
+* **tokens:** add the Linear design preset ([#350](https://github.com/lifekit-hq/lifekit-common/issues/350)) ([abdc4ac](https://github.com/lifekit-hq/lifekit-common/commit/abdc4ac0e76095198bf0f9bdb2a008f9ac3fe14e))
+* **ui:** add cmn-chart-frame with a per-chart table chip and plain-language caption ([#353](https://github.com/lifekit-hq/lifekit-common/issues/353)) ([1f7c687](https://github.com/lifekit-hq/lifekit-common/commit/1f7c687d32209eb3532f446f095d54e1219e6b64))
+* **ui:** make secondary button, checked checkbox and active segmented control follow the colour seed ([#354](https://github.com/lifekit-hq/lifekit-common/issues/354)) ([64d8c92](https://github.com/lifekit-hq/lifekit-common/commit/64d8c924509352c58c01ba7726577cdca59a15b5))
+
 ## [5.0.0](https://github.com/lifekit-hq/lifekit-common/compare/v4.8.0...v5.0.0) (2026-11-14)
 
 
