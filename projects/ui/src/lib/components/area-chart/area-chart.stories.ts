@@ -113,6 +113,6 @@ export const Clickable: Story = {
 /**
  * The canvas is an image named by `label` and a derived summary (bands, span, how the total
  * moved; replace it with `summary`), and a screen reader reaches every point in a data table with
- * the stacked total. `showDataTable` shows that table under the chart.
+ * the stacked total. `showDataTable` opens the chart on that table; the Table chip swaps back.
  */
 export const DataTable: Story = {args: {showDataTable: true}};

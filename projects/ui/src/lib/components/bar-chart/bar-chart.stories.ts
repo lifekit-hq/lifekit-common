@@ -119,7 +119,7 @@ export const LongRange: Story = {
 /**
  * The canvas is an image named by `label` and a derived summary (span, highest and lowest bar;
  * replace it with `summary`), and a screen reader reaches every bar in a data table.
- * `showDataTable` shows that table under the chart. Hover a bar, or Tab to the chart and use
+ * `showDataTable` opens the chart on that table; the Table chip swaps back. Hover a bar, or Tab to the chart and use
  * ArrowLeft/ArrowRight, Home and End: the column highlights and its values are announced.
  */
 export const DataTable: Story = {

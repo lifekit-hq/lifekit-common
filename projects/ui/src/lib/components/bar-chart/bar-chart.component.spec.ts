@@ -242,4 +242,44 @@ describe('BarChartComponent', () => {
       expect(announcement()).toBe('Jan: $3,000');
     });
   });
+
+  describe('chart frame', () => {
+    const chip = (): HTMLButtonElement | null =>
+      fixture.nativeElement.querySelector('[data-testid="chart-table-chip"] button');
+    const caption = (): HTMLElement | null =>
+      fixture.nativeElement.querySelector('[data-testid="chart-caption"]');
+
+    it('offers no Table chip while there is nothing to tabulate', () => {
+      expect(chip()).toBeNull();
+    });
+
+    it('swaps the plot for the table with the Table chip', () => {
+      fixture.componentRef.setInput('series', SAMPLE);
+      fixture.detectChanges();
+      const plot = fixture.nativeElement.querySelector('[data-testid="chart-plot"]');
+      expect(plot.classList).not.toContain('hidden');
+      chip()?.click();
+      fixture.detectChanges();
+      expect(plot.classList).toContain('hidden');
+      expect(
+        fixture.nativeElement.querySelector('[data-testid="chart-data-table"]').classList
+      ).not.toContain('sr-only');
+    });
+
+    it('shows the caption under the plot', () => {
+      fixture.componentRef.setInput('caption', 'Blue is income, green is spending.');
+      fixture.detectChanges();
+      expect(caption()?.textContent?.trim()).toBe('Blue is income, green is spending.');
+    });
+
+    it('adds a Source column from sources', () => {
+      fixture.componentRef.setInput('series', SAMPLE);
+      fixture.componentRef.setInput('sources', ['Bank feed', 'Manual entry']);
+      fixture.detectChanges();
+      const heads = [...fixture.nativeElement.querySelectorAll('th[scope="col"]')];
+      expect(heads.at(-1)?.textContent?.trim()).toBe('Source');
+      const first = fixture.nativeElement.querySelector('tbody tr').lastElementChild;
+      expect(first.textContent.trim()).toBe('Bank feed');
+    });
+  });
 });

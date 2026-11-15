@@ -14,9 +14,9 @@
     "PanelLeftClose", "PanelLeftOpen", "Pencil", "Phone", "PiggyBank", "Plus", "Radar", "Receipt",
     "ReceiptText", "RefreshCw", "Repeat", "Save", "Scale", "Scissors", "Search", "Send", "Settings",
     "Settings2", "Share", "Sheet", "ShieldAlert", "ShieldCheck", "ShoppingBasket", "SlidersHorizontal",
-    "Sparkles", "Star", "Sun", "Tag", "Target", "Trash2", "TrendingDown", "TrendingUp", "TriangleAlert",
-    "Type", "Undo", "Unlink", "Unplug", "User", "UserPlus", "Users", "Wallet", "WalletCards", "Watch",
-    "Weight", "WifiOff", "Wrench", "X", "Zap"
+    "Sparkles", "Star", "Sun", "Table", "Tag", "Target", "Trash2", "TrendingDown", "TrendingUp",
+    "TriangleAlert", "Type", "Undo", "Unlink", "Unplug", "User", "UserPlus", "Users", "Wallet",
+    "WalletCards", "Watch", "Weight", "WifiOff", "Wrench", "X", "Zap"
   ],
   "catalog": [
     "AArrowDown", "AArrowUp", "Accessibility", "Activity", "Airplay", "AirVent", "ALargeSmall",

@@ -60,8 +60,9 @@ const FACTS_ROW_CLASSES = 'py-cmn-3 sm:grid sm:grid-cols-3 sm:gap-cmn-4';
  *
  * - `row`: `count` two-line list rows (avatar, label and sublabel, amount), as `cmn-list-item-row`
  * - `stat`: a `cmn-stat-card` (label, value, delta)
- * - `chart`: a `cmn-line-chart` card. The plot reserves the chart's `h-48`, or `aspect` (e.g.
- *   `16 / 9`) when the chart is sized by ratio, so the box is the same before and after the data
+ * - `chart`: a `cmn-line-chart` card, its title row as tall as the Table chip. The plot reserves the
+ *   chart's `h-48`, or `aspect` (e.g. `16 / 9`) when the chart is sized by ratio, so the box is the
+ *   same before and after the data
  * - `section`: a `cmn-list-section` (sticky-heading height) over a card of `count` rows
  *
  * The page presets draw the body of a whole page of one kind (the title is the page's own), so a
@@ -164,8 +165,14 @@ const FACTS_ROW_CLASSES = 'py-cmn-3 sm:grid sm:grid-cols-3 sm:gap-cmn-4';
         <div
           class="flex w-full flex-col gap-cmn-3 rounded-cmn-role-surface border border-cmn-card-border bg-surface-card shadow-cmn-card p-cmn-4"
         >
-          <div class="flex items-center text-cmn-xs" style="height: 1lh">
+          <!-- The title row is as tall as the Table chip it holds: its pill, and below md its touch target -->
+          <div class="flex items-center justify-between gap-cmn-3">
             <div [class]="bar" style="width: 35%; height: 0.75rem"></div>
+            <div class="flex items-center max-md:min-h-cmn-touch">
+              <div class="py-cmn-1 text-cmn-sm">
+                <div [class]="bar" style="width: 3.5rem; height: 1lh"></div>
+              </div>
+            </div>
           </div>
           <div
             [class]="bar"

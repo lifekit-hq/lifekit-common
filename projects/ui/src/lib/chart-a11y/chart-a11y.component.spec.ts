@@ -68,4 +68,19 @@ describe('ChartA11yComponent', () => {
     expect(wrapper?.classList).not.toContain('sr-only');
     expect(query('caption')?.classList).toContain('sr-only');
   });
+
+  it('adds a Source column, one source per row, when given sources', () => {
+    fixture.componentRef.setInput('table', TABLE);
+    fixture.componentRef.setInput('sources', ['Bank feed']);
+    fixture.detectChanges();
+    const cols = [...fixture.nativeElement.querySelectorAll('th[scope="col"]')];
+    expect(cols.map(th => th.textContent.trim())).toEqual(['Label', 'Spend', 'Source']);
+    const rows = [...fixture.nativeElement.querySelectorAll('tbody tr')].map(tr =>
+      [...tr.children].map(cell => cell.textContent.trim())
+    );
+    expect(rows).toEqual([
+      ['Jan', '$100', 'Bank feed'],
+      ['Feb', '$200', ''],
+    ]);
+  });
 });

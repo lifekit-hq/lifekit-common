@@ -29,8 +29,8 @@ import {
 } from '@lifekit-hq/charts-core';
 import {Chart} from 'chart.js';
 
-import {ChartA11yComponent} from '../../chart-a11y/chart-a11y.component';
 import {injectChartThemeKey} from '../../chart-theme/chart-theme';
+import {ChartFrameComponent} from '../chart-frame/chart-frame.component';
 
 export type {
   ChartDomain,
@@ -42,22 +42,20 @@ export type {
 
 @Component({
   selector: 'cmn-line-chart',
-  imports: [ChartA11yComponent],
+  imports: [ChartFrameComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {'[style.display]': "compact() ? 'block' : null"},
   template: `
-    <div
-      [class]="
-        compact()
-          ? 'h-full min-h-8 w-full'
-          : 'flex w-full flex-col gap-cmn-3 rounded-cmn-role-surface border border-cmn-card-border bg-surface-card shadow-cmn-card p-cmn-4'
-      "
+    <cmn-chart-frame
+      [announcement]="announcement()"
+      [bare]="compact()"
+      [caption]="caption()"
+      [label]="label()"
+      [sources]="sources()"
+      [table]="table()"
+      [tableName]="name()"
+      [tableOpen]="showDataTable()"
     >
-      @if (!compact()) {
-        <span class="font-label text-cmn-xs font-semibold text-text-secondary">
-          {{ label() }}
-        </span>
-      }
       <div [class]="compact() ? 'relative h-full min-h-8' : 'relative h-48'">
         <canvas
           #chartCanvas
@@ -78,13 +76,7 @@ export type {
           </p>
         }
       </div>
-      <cmn-chart-a11y
-        [announcement]="announcement()"
-        [caption]="name()"
-        [table]="table()"
-        [visible]="showDataTable()"
-      />
-    </div>
+    </cmn-chart-frame>
   `,
 })
 export class LineChartComponent implements AfterViewInit, OnDestroy {
@@ -141,7 +133,14 @@ export class LineChartComponent implements AfterViewInit, OnDestroy {
    * last values and the trend between them), e.g. to say what the trend means.
    */
   public readonly summary = input<string | undefined>(undefined);
-  /** Shows the data table under the chart; otherwise only a screen reader reaches it. Ignored when `compact`. */
+  /**
+   * The plain-language line under the chart: each series by how it is drawn and what the marks
+   * mean, in place of an in-plot legend. Ignored when `compact`.
+   */
+  public readonly caption = input<string>('');
+  /** Where each row of the data table came from, in row order; adds a Source column. */
+  public readonly sources = input<readonly string[] | undefined>(undefined);
+  /** Opens the chart with its data table showing in place of the plot (ignored when `compact`). */
   public readonly showDataTable = input<boolean>(false);
   protected readonly isEmpty = computed(() => this.data().length === 0);
   /** A focused chart reads its points by key; a compact one is a still glyph. */

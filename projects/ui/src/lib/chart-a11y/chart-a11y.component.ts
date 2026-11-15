@@ -34,6 +34,14 @@ import {type ChartTable} from '@lifekit-hq/charts-core';
                   {{ header }}
                 </th>
               }
+              @if (sources()) {
+                <th
+                  scope="col"
+                  class="px-cmn-2 py-cmn-2 text-left font-label text-cmn-xs font-semibold text-text-secondary"
+                >
+                  Source
+                </th>
+              }
             </tr>
           </thead>
           <tbody>
@@ -45,6 +53,11 @@ import {type ChartTable} from '@lifekit-hq/charts-core';
                 @for (cell of row.cells; track $index) {
                   <td class="px-cmn-2 py-cmn-2 text-right tabular-nums text-text-primary">
                     {{ cell }}
+                  </td>
+                }
+                @if (sources(); as list) {
+                  <td class="px-cmn-2 py-cmn-2 text-left text-text-secondary">
+                    {{ list[$index] ?? '' }}
                   </td>
                 }
               </tr>
@@ -60,6 +73,8 @@ export class ChartA11yComponent {
   public readonly caption = input<string>('');
   /** The chart's data; null renders no table (an empty chart). */
   public readonly table = input<ChartTable | null>(null);
+  /** Where each row came from, in row order; adds a Source column. Unset adds none. */
+  public readonly sources = input<readonly string[] | undefined>(undefined);
   /** Shows the table under the chart instead of only to a screen reader. */
   public readonly visible = input<boolean>(false);
   /** What the chart is reading now; empty when nothing is. */
