@@ -13,7 +13,7 @@ import {PHONE_HIT_AREA_CLASSES} from '../../tokens/hit-area';
 import {IconComponent} from '../icon/icon.component';
 
 // Carbon's checkbox: a 16px square (radius 0 with the rest of the library), a 1px ink border, no fill
-// until checked, Carbon's 2px focus outline offset by 1px. 16px drawn, at least --size-touch pressed
+// until checked (then the accent, as the select's multi-select box), Carbon's 2px focus outline offset by 1px. 16px drawn, at least --size-touch pressed
 // on a phone.
 const BOX_BASE =
   'inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-cmn-role-inset border ' +
@@ -89,7 +89,7 @@ export class CheckboxComponent implements ControlValueAccessor {
         : 'bg-transparent border-border-default';
     } else {
       color = filled
-        ? 'bg-text-primary border-text-primary text-surface-card'
+        ? 'bg-accent-default border-accent-default text-text-inverse'
         : 'bg-transparent border-text-primary';
     }
     return [

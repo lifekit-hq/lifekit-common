@@ -53,9 +53,9 @@ describe('LkSegmented', () => {
     );
   });
 
-  it("marks the chosen cell with the ink fill, square, as Carbon's content switcher does", async () => {
+  it("marks the chosen cell with the deep-accent fill, square, as Carbon's content switcher does", async () => {
     const el = await mount();
-    el.style.setProperty('--color-text-primary', 'rgb(1, 2, 3)');
+    el.style.setProperty('--color-accent-900', 'rgb(1, 2, 3)');
     el.style.setProperty('--color-text-inverse', 'rgb(4, 5, 6)');
     const chosen = getComputedStyle(cells(el)[2]);
     expect(chosen.backgroundColor).toBe('rgb(1, 2, 3)');
@@ -85,7 +85,7 @@ describe('LkSegmented', () => {
 
   it('greys the group outline when the whole control is disabled', async () => {
     const el = await mount({disabled: true});
-    el.style.setProperty('--color-text-primary', 'rgb(1, 2, 3)');
+    el.style.setProperty('--color-accent-900', 'rgb(1, 2, 3)');
     el.style.setProperty('--color-border-default', 'rgb(7, 8, 9)');
     const group = getComputedStyle(el.shadowRoot?.querySelector('.group') as HTMLElement);
     expect(group.outlineColor).toBe('rgb(7, 8, 9)');

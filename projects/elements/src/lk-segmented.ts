@@ -112,7 +112,7 @@ export class LkSegmented extends LitElement {
     }
 
     /* Carbon's content switcher: equal columns as wide as the widest label (at least 44px) in one
-       square box with a 1px ink outline (grey when disabled); cells 40px tall from 768px up, 44px
+       square box with a 1px deep-accent outline (grey when disabled); cells 40px tall from 768px up, 44px
        below; fills the container when that is wider, and scrolls inside it rather than squeeze a
        label. */
     .group {
@@ -122,7 +122,7 @@ export class LkSegmented extends LitElement {
       grid-auto-columns: minmax(2.75rem, 1fr);
       width: max-content;
       min-width: 100%;
-      outline: 1px solid var(--color-text-primary, #0f1a1f);
+      outline: 1px solid var(--color-accent-900, #0f3846);
       outline-offset: -1px;
     }
 
@@ -159,7 +159,7 @@ export class LkSegmented extends LitElement {
     }
 
     .cell[aria-checked='true'] {
-      background: var(--color-text-primary, #0f1a1f);
+      background: var(--color-accent-900, #0f3846);
       color: var(--color-text-inverse, #ffffff);
       font-weight: 600;
     }

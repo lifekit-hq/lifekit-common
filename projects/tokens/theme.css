@@ -100,9 +100,9 @@
   /* Button: label weight, the secondary kind's colours, and a resting shadow. */
   --cmn-btn-weight: 400;
   --cmn-btn-shadow: 0 0 #0000;
-  --cmn-btn-secondary-bg: var(--color-text-primary);
-  --cmn-btn-secondary-fg: var(--color-surface-card);
-  --cmn-btn-secondary-hover: var(--color-text-secondary);
+  --cmn-btn-secondary-bg: var(--color-accent-900);
+  --cmn-btn-secondary-fg: var(--color-text-inverse);
+  --cmn-btn-secondary-hover: var(--color-accent-800);
   --cmn-btn-secondary-border: transparent;
   /* Toggle geometry and its on colour (Carbon: 48 x 24 track, 16px thumb, success green). */
   --cmn-toggle-w: 48px;
@@ -118,12 +118,12 @@
   --cmn-tabs-pad: 0px;
   --cmn-tabs-gap: 0px;
   --cmn-tabs-radius: 0px;
-  /* Segmented control (Carbon's content switcher): a square box with an ink outline, the chosen cell
-     filled with ink. A pill preset rounds the box and the cell and tints the fill. */
+  /* Segmented control (Carbon's content switcher): a square box with a deep-accent outline, the chosen
+     cell filled with it (the seed's 900 step, as the secondary button). A pill preset rounds the box and the cell and tints the fill. */
   --cmn-segmented-radius: 0px;
   --cmn-segmented-cell-radius: 0px;
-  --cmn-segmented-outline: var(--color-text-primary);
-  --cmn-segmented-active-bg: var(--color-text-primary);
+  --cmn-segmented-outline: var(--color-accent-900);
+  --cmn-segmented-active-bg: var(--color-accent-900);
   --cmn-segmented-active-fg: var(--color-text-inverse);
   /* Alert stripe width and the table header fill. */
   --cmn-alert-stripe: 3px;
