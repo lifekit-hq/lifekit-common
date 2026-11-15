@@ -893,7 +893,7 @@ for (const size of LIST_WIDTHS) {
 // when the content arrives (rule 5). Each pair sits in `Conformance/Skeleton Geometry`.
 const SKELETON_STORY = 'conformance-skeleton-geometry--geometry';
 const SKELETON_READY = 'cmn-skeleton-geometry';
-const SKELETON_PAIRS = ['stat', 'chart', 'row', 'section'] as const;
+const SKELETON_PAIRS = ['stat', 'chart', 'price', 'row', 'section'] as const;
 const GEOMETRY_TOLERANCE = 8;
 const SWEEP_PROBE_MS = 400;
 const TRANSFORM_PROPERTIES = ['transform', 'translate', 'scale', 'rotate'];

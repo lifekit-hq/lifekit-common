@@ -17,6 +17,10 @@ const FRAME_CLASSES =
  * independent of the chart library behind it. `cmn-line-chart`, `cmn-bar-chart`,
  * `cmn-area-chart` and `cmn-donut-chart` already draw in it. Describe the series in `caption`,
  * or project richer markup with the `chartCaption` attribute.
+ *
+ * Two more slots hold what belongs to the chart but not to its plot, and so stays on screen when
+ * the table replaces the plot: `chartHeader` (above the plot, e.g. a headline value) and
+ * `chartControls` (below it, e.g. period tabs).
  */
 @Component({
   selector: 'cmn-chart-frame',
@@ -43,6 +47,7 @@ const FRAME_CLASSES =
           }
         </div>
       }
+      <ng-content select="[chartHeader]" />
       <div [class]="swapped() ? 'hidden' : bare() ? 'contents' : 'block'" data-testid="chart-plot">
         <ng-content />
       </div>
@@ -53,6 +58,7 @@ const FRAME_CLASSES =
         [table]="table()"
         [visible]="swapped()"
       />
+      <ng-content select="[chartControls]" />
       @if (!bare()) {
         <figcaption
           class="text-cmn-sm text-text-secondary empty:hidden"
