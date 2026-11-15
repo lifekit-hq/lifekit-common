@@ -297,9 +297,8 @@ class AlertsPageComponent {
 }
 
 /**
- * The golden list screen with swipe actions: rows that reveal a tray under a swipe. The trays are
- * positioned children of the shell's clipping wrappers, and the route scan must read none of them
- * as escaping that clip (`clipped-overflow-container`).
+ * The golden list screen with swipe actions: rows that reveal a tray under a swipe. The route scan
+ * must read nothing in a row as escaping the shell's clip (`clipped-overflow-container`).
  */
 @Component({
   selector: 'cmn-golden-swipe-page',
@@ -418,8 +417,8 @@ export const DesktopWithLedeDark: Story = {
 };
 
 /**
- * A list page whose rows swipe open: the tray is positioned inside the row's own clip, so the shell's
- * clipping wrappers hold no positioned child the route scan could read as escaping them.
+ * A list page whose rows swipe open: the trays share the row's grid cell, so no row holds a
+ * positioned element the route scan could read as escaping the shell's clipping wrappers.
  */
 export const PhoneWithSwipe: Story = {globals: GOLDEN_PHONE, args: {start: '/swipes'}};
 
