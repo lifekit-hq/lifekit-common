@@ -234,3 +234,11 @@ describe('seeds/<app>.css', () => {
     });
   }
 });
+
+describe('seeds/<app>.css app seed', () => {
+  for (const [app, {seed}] of Object.entries(APP_SEEDS)) {
+    it(`${app}.css declares --app-seed as the seed, for the appearance picker's default`, () => {
+      assert.match(seedCss(app), new RegExp(`:root \\{\\n  --app-seed: ${seed};\\n\\}`));
+    });
+  }
+});

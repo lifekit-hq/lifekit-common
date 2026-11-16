@@ -2,7 +2,9 @@
 export type * from './types';
 
 // Components
+export * from './components/about-section/about-section.component';
 export * from './components/account-avatar/account-avatar.component';
+export * from './components/account-section/account-section.component';
 export * from './components/alert/alert.component';
 export * from './components/alert-item/alert-item.component';
 export * from './components/allocation-bar/allocation-bar.component';
@@ -80,6 +82,7 @@ export * from './components/secret-reveal/secret-reveal.component';
 export * from './components/segmented/segmented.component';
 export * from './components/select/select.component';
 export * from './components/selectable-card/selectable-card.component';
+export * from './components/session-section/session-section.component';
 export * from './components/setting-row/setting-row.component';
 export * from './components/settings-section/settings-section.component';
 export * from './components/sidebar-nav/sidebar-nav.component';

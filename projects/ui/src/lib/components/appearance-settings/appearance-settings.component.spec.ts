@@ -102,6 +102,31 @@ afterEach(() => {
 });
 
 describe('AppearanceSettingsComponent', () => {
+  describe('app seed', () => {
+    it("defaults to the seed theme's --app-seed, read once", () => {
+      document.documentElement.style.setProperty('--app-seed', TEAL);
+      const fixture = setup(true);
+      expect(picker(fixture).getAttribute('app-seed')).toBe(TEAL);
+
+      document.documentElement.style.setProperty('--app-seed', '#000000');
+      fixture.detectChanges();
+      expect(picker(fixture).getAttribute('app-seed')).toBe(TEAL);
+    });
+
+    it('is overridden by an appSeed input', () => {
+      document.documentElement.style.setProperty('--app-seed', TEAL);
+      const fixture = setup(true);
+      fixture.componentRef.setInput('appSeed', '#7c3aed');
+      fixture.detectChanges();
+      expect(picker(fixture).getAttribute('app-seed')).toBe('#7c3aed');
+    });
+
+    it('offers no app colour without a seed theme or an input', () => {
+      const fixture = setup(true);
+      expect(picker(fixture).hasAttribute('app-seed')).toBe(false);
+    });
+  });
+
   describe('with an account store', () => {
     let fixture: ComponentFixture<AppearanceSettingsComponent>;
     let store: FakeStore;

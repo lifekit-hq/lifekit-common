@@ -2,15 +2,17 @@ import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {applicationConfig, type Meta, type StoryObj} from '@storybook/angular';
 
+import {AboutSectionComponent} from '../about-section/about-section.component';
+import {AccountSectionComponent} from '../account-section/account-section.component';
 import {AppearanceSettingsComponent} from '../appearance-settings/appearance-settings.component';
 import {ButtonComponent} from '../button/button.component';
 import {DangerZoneComponent} from '../danger-zone/danger-zone.component';
-import {FormFieldComponent} from '../form-field/form-field.component';
-import {InputComponent} from '../input/input.component';
 import {SelectComponent, type SelectOption} from '../select/select.component';
+import {SessionSectionComponent} from '../session-section/session-section.component';
 import {SettingRowComponent} from '../setting-row/setting-row.component';
 import {SettingsSectionComponent} from '../settings-section/settings-section.component';
 import {ToggleComponent} from '../toggle/toggle.component';
+import {provideWhatsNew} from '../whats-new/whats-new.config';
 import {
   GOLDEN_DESKTOP,
   GOLDEN_PHONE,
@@ -28,20 +30,21 @@ const WEEK_STARTS: readonly SelectOption[] = [
 /**
  * The golden settings screen: the standard Settings page on the settings template, built only from
  * library parts, in the fixed section order (Account, Appearance, Notifications, the app's own
- * section, About, then the Danger zone and Sign out). Each section's heading sits beside its
+ * section, About, then the Danger zone and the Session section). Each section's heading sits beside its
  * controls from md up and above them on a phone; the template sets the rhythm between sections.
  */
 @Component({
   selector: 'cmn-golden-settings-page',
   imports: [
+    AboutSectionComponent,
+    AccountSectionComponent,
     AppearanceSettingsComponent,
     ButtonComponent,
     DangerZoneComponent,
-    FormFieldComponent,
     FormsModule,
-    InputComponent,
     PageComponent,
     SelectComponent,
+    SessionSectionComponent,
     SettingRowComponent,
     SettingsSectionComponent,
     ToggleComponent,
@@ -49,16 +52,7 @@ const WEEK_STARTS: readonly SelectOption[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <cmn-page kind="settings">
-      <cmn-settings-section
-        [saveDisabled]="true"
-        heading="Account"
-        description="The name the household sees on tasks."
-        saveLabel="Save name"
-      >
-        <cmn-form-field label="Name">
-          <cmn-input [ngModel]="'Alex Morgan'" autocomplete="name" enterkeyhint="done" />
-        </cmn-form-field>
-      </cmn-settings-section>
+      <cmn-account-section [account]="account" caption="Signed in through the Lifekit gate" />
       <cmn-settings-section
         heading="Appearance"
         description="Light or dark, and the colour the app takes."
@@ -99,23 +93,18 @@ const WEEK_STARTS: readonly SelectOption[] = [
           <cmn-button variant="secondary" size="sm" icon="Users">Manage people</cmn-button>
         </cmn-setting-row>
       </cmn-settings-section>
-      <cmn-settings-section heading="About" description="Version and what changed.">
-        <cmn-setting-row label="Version" description="4.4.0">
-          <cmn-button variant="secondary" size="sm">What's new</cmn-button>
-        </cmn-setting-row>
-      </cmn-settings-section>
+      <cmn-about-section />
       <cmn-danger-zone
         description="Leave the Morgan household. Your tasks stay with the household; you lose access to them."
         actionLabel="Leave household"
         heading="Leave household"
       />
-      <div class="flex justify-end">
-        <cmn-button variant="secondary" icon="LogOut">Sign out</cmn-button>
-      </div>
+      <cmn-session-section appName="Lifekit" />
     </cmn-page>
   `,
 })
 class SettingsPageComponent {
+  protected readonly account = {name: 'Alex Morgan', email: 'alex@example.com'};
   protected readonly weekStarts = WEEK_STARTS;
 }
 
@@ -130,9 +119,15 @@ const meta: Meta<GoldenShellComponent> = {
   parameters: {layout: 'fullscreen', viewport: {options: GOLDEN_VIEWPORTS}},
   decorators: [
     applicationConfig({
-      providers: goldenProviders([
-        {path: 'settings', component: SettingsPageComponent, data: {title: 'Settings'}},
-      ]),
+      providers: [
+        ...goldenProviders([
+          {path: 'settings', component: SettingsPageComponent, data: {title: 'Settings'}},
+        ]),
+        provideWhatsNew({
+          version: '4.4.0',
+          storage: {getItem: () => '4.4.0', setItem: () => undefined},
+        }),
+      ],
     }),
   ],
   args: {start: '/settings', notice: false},

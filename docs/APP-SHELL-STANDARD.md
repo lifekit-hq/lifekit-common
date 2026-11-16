@@ -18,10 +18,11 @@ document is the contract for the account and settings surface inside it.
 | `AppearanceService`, `provideAppearanceSync(Store)`                     | `ui`                                     | Built  |
 | `provideAccountAppearance()` (sync + toast errors + load at start)      | `ui`                                     | Built  |
 | `showThemeToggle` default `false`                                       | `cmn-app-layout`                         | Built  |
-| `cmn-settings-section`, `cmn-setting-row`, `cmn-danger-zone`            | `ui`                                     | Target |
+| `cmn-settings-section`, `cmn-setting-row`, `cmn-danger-zone`            | `ui`                                     | Built  |
+| `cmn-account-section`, `cmn-about-section`, `cmn-session-section`       | `ui`                                     | Built  |
 | Identity header, `accountMenu()`, `accountOnPhone`, `cmn-more-page`     | `ui`                                     | Built  |
 | `provideGatewayAccount()` (oauth2-proxy userinfo to the layout account) | `ui`                                     | Built  |
-| `lifekit-theme-sync`, `APP_SEEDS.bs`                                    | `tokens`                                 | Target |
+| `lifekit-theme-sync`, `APP_SEEDS.bs`                                    | `tokens`                                 | Built  |
 
 Every app migrates to the standard in its own PR after the library parts land. Until an app has, the
 rules below describe where it is going, not where it is.
@@ -193,16 +194,17 @@ More page on a phone, and from the command palette.
 
 Sections, in this order. An app includes only the ones that apply.
 
-1. **Account**: identity (name, email, avatar). Read-only in an app behind a gateway; editable where
-   the app owns the profile.
+1. **Account**: identity (name, email, avatar). Read-only in an app behind a gateway
+   (`cmn-account-section`); editable where the app owns the profile.
 2. **Appearance**: theme mode (System / Light / Dark) and the seed colour picker, the same in every app
    (`cmn-appearance-settings`). Every app has the colour picker; none locks its brand colour.
 3. **Notifications**: the push opt-in and the app's own alert toggles.
 4. **App-specific sections**: finance-sentry Preferences and Financial independence, backstage
    Agency and Extension tokens, devclaw Dispatch.
 5. **Security, People, admin** links.
-6. **About**: version, What's new (`cmn-whats-new`, [WHATS-NEW.md](WHATS-NEW.md)), links.
-7. **Danger zone**, then **Sign out**.
+6. **About**: version, What's new (`cmn-whats-new`, [WHATS-NEW.md](WHATS-NEW.md)), links
+   (`cmn-about-section` carries the Version row and the What's new button).
+7. **Danger zone**, then **Sign out** (`cmn-session-section`).
 
 Personal sections (Account tier) come before Workspace sections.
 
