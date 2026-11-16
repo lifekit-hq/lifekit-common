@@ -262,7 +262,7 @@ export class PriceBlockComponent implements AfterViewInit, OnDestroy {
   /**
    * Dated points drawn on the price: a triangle under the line for a `'buy'`, over it for a
    * `'sell'`, at the marker's `value` (the fill price) or else on the price that day. Markers
-   * outside the selected period are left out; they are named in the chart's description.
+   * outside the selected period are left out; those inside are named in the chart's description.
    */
   public readonly markers = input<readonly PriceMarker[]>([]);
   /**
