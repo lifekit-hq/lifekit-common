@@ -68,6 +68,9 @@ Angular owns the service worker. This repo owns the shared pieces on top of it:
   reads the live subscription) detects VAPID rotation, `unsubscribe()` drops the subscription, and
   `subscriptionChanges` / `notificationClicks` pass through from `SwPush`. It does no HTTP — each
   app owns its backend, keys and preferences. Inert when the service worker is disabled.
+- `provideLifekitServiceWorker()` from `@lifekit-hq/core/pwa` — the shared registration (after the
+  app is stable, `updateViaCache: 'none'`, off in dev) and the `ngsw-config.json` template; see
+  [docs/SERVICE-WORKER.md](docs/SERVICE-WORKER.md).
 - `<lk-update-prompt>`, `<lk-offline-banner>` and `<lk-install-hint>` from
   `@lifekit-hq/elements`.
 
