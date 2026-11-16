@@ -1,9 +1,11 @@
-import {ChangeDetectionStrategy, Component, computed, input, output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input, output} from '@angular/core';
 import {RouterLink} from '@angular/router';
 
 import {AccountAvatarComponent} from '../account-avatar/account-avatar.component';
 import {accountHeader} from '../account-avatar/account-header';
+import {ACCOUNT_SIGN_OUT_ID} from '../app-layout/account-menu';
 import {type AppLayoutAccount} from '../app-layout/app-layout.component';
+import {AppLayoutContext} from '../app-layout/app-layout-context';
 import {overflowNavItems} from '../app-layout/phone-tabs';
 import {BadgeComponent} from '../badge/badge.component';
 import {CardComponent} from '../card/card.component';
@@ -32,8 +34,9 @@ const ROW_CLASSES =
  * <cmn-more-page [items]="navItems" [account]="account()" [versionLabel]="version" (itemSelect)="onAccountItem($event)" />
  * ```
  *
- * It owns no sign-in: a route item (Settings) is a link and every other item is reported by
- * `itemSelect`, like `cmn-app-layout`'s `avatarMenuSelect`, for the app to handle.
+ * Inside a `cmn-app-layout` it needs no bindings: items, tab routes, account and version come from
+ * the layout, and each input above overrides its value. It owns no sign-in: a route item (Settings)
+ * is a link, Sign out reaches the layout's `signOut`, and every item is reported by `itemSelect`.
  */
 @Component({
   selector: 'cmn-more-page',
@@ -65,7 +68,7 @@ const ROW_CLASSES =
         </cmn-card>
       }
 
-      @if (account(); as signedIn) {
+      @if (effectiveAccount(); as signedIn) {
         @for (group of groups(); track $index; let first = $first) {
           <cmn-card class="block" padding="none" data-more-section="account">
             @if (first && identity(); as who) {
@@ -89,7 +92,7 @@ const ROW_CLASSES =
             }
             @for (item of group; track item.id) {
               @if (isRoute(item) && !item.disabled) {
-                <a [routerLink]="item.id" [class]="rowClasses" (click)="itemSelect.emit(item)">
+                <a [routerLink]="item.id" [class]="rowClasses" (click)="select(item)">
                   <cmn-list-item-row [label]="item.label">
                     @if (item.icon) {
                       <cmn-icon [name]="item.icon" avatar />
@@ -107,7 +110,7 @@ const ROW_CLASSES =
                 <button
                   [class]="rowClasses"
                   [disabled]="item.disabled"
-                  (click)="itemSelect.emit(item)"
+                  (click)="select(item)"
                   type="button"
                 >
                   <cmn-list-item-row [label]="item.label">
@@ -132,23 +135,25 @@ const ROW_CLASSES =
         }
       }
 
-      @if (versionLabel()) {
+      @if (effectiveVersion()) {
         <p class="text-center text-cmn-xs text-text-secondary" data-more-version>
-          {{ versionLabel() }}
+          {{ effectiveVersion() }}
         </p>
       }
     </cmn-page>
   `,
 })
 export class MorePageComponent {
+  private readonly layout = inject(AppLayoutContext, {optional: true});
+
   /** The app's nav items; the ones `tabRoutes` leaves out of the tab bar are listed. */
-  public readonly items = input<NavItem[]>([]);
+  public readonly items = input<NavItem[] | undefined>(undefined);
   /** The routes shown as phone tabs, as given to `cmn-app-layout`; those are not repeated here. */
-  public readonly tabRoutes = input<string[]>([]);
+  public readonly tabRoutes = input<string[] | undefined>(undefined);
   /** The signed-in account; without it only the nav items and the version show. */
   public readonly account = input<AppLayoutAccount | undefined>(undefined);
   /** Shown as a caption at the end of the page, e.g. `v3.2.0`. */
-  public readonly versionLabel = input<string>('');
+  public readonly versionLabel = input<string | undefined>(undefined);
   /**
    * An account item was selected: a route item (Settings) as it navigates, any other as the app
    * is to handle it (Sign out is `ACCOUNT_SIGN_OUT_ID`).
@@ -157,14 +162,25 @@ export class MorePageComponent {
 
   protected readonly rowClasses = ROW_CLASSES;
 
+  /** Each input overrides the enclosing `cmn-app-layout`'s value; left unset, the layout's is used. */
+  protected readonly effectiveAccount = computed<AppLayoutAccount | undefined>(
+    () => this.account() ?? this.layout?.account()
+  );
+  protected readonly effectiveVersion = computed<string>(
+    () => this.versionLabel() ?? this.layout?.versionLabel() ?? ''
+  );
+
   protected readonly overflow = computed<NavItem[]>(() =>
-    overflowNavItems(this.items(), this.tabRoutes())
+    overflowNavItems(
+      this.items() ?? this.layout?.navItems() ?? [],
+      this.tabRoutes() ?? this.layout?.tabRoutes() ?? []
+    )
   );
 
   /** The account's items in cards: a new card starts at each item that sets `separatorBefore`. */
   protected readonly groups = computed<MenuItem[][]>(() => {
     const groups: MenuItem[][] = [];
-    for (const item of this.account()?.menuItems ?? []) {
+    for (const item of this.effectiveAccount()?.menuItems ?? []) {
       const current = groups.at(-1);
       if (current && !item.separatorBefore) {
         current.push(item);
@@ -176,8 +192,16 @@ export class MorePageComponent {
   });
 
   protected readonly identity = computed(() =>
-    accountHeader(this.account(), this.account()?.label)
+    accountHeader(this.effectiveAccount(), this.effectiveAccount()?.label)
   );
+
+  /** Reports the item; Sign out also reaches the layout's `signOut`. */
+  protected select(item: MenuItem): void {
+    this.itemSelect.emit(item);
+    if (item.id === ACCOUNT_SIGN_OUT_ID) {
+      this.layout?.signOut();
+    }
+  }
 
   protected isRoute(item: MenuItem): boolean {
     return isRouteMenuItem(item);

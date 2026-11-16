@@ -1,9 +1,9 @@
 import {LkInstallHint, LkOfflineBanner, LkUpdatePrompt} from '@lifekit-hq/elements';
 
 /**
- * Registers the PWA notices an app projects into the shell's notices slot (`cmnAppLayoutNotice`).
- * Stories only: they show the shell as an app wires it, with the three notices there and none of
- * them showing. Imported by name so a bundler cannot tree-shake the customElements.define() call.
+ * Registers the three PWA notices (`pwaNotices` on `cmn-app-layout` renders them; an app can also
+ * project its own into `cmnAppLayoutNotice`). Imported by name so a bundler cannot tree-shake the
+ * customElements.define() call.
  */
 export function defineAppChromeElements(): void {
   for (const [tag, element] of [

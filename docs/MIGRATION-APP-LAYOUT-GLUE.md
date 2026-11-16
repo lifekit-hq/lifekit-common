@@ -42,3 +42,27 @@ load at start. `AppearanceService` then
 writes every mode and colour change to `PATCH /api/me/preferences`, and the server's `appearance`
 wins after sign-in. Without it the choice stays on the device and
 `cmn-appearance-settings` says "On this device". See `docs/APP-SHELL-STANDARD.md`.
+
+## Shell glue and the More page (additive)
+
+Delete these from the app shell and its More page; every option below is optional and the old
+bindings keep working.
+
+- **Palette list.** Omit `[paletteItems]` and the layout builds it: a Pages entry per nav item, the
+  account menu's route items (Settings), `APPEARANCE_PALETTE_ITEMS`, and Sign out when the account
+  menu has `ACCOUNT_SIGN_OUT_ID`. Pass app actions in `[paletteExtras]`. An explicit
+  `[paletteItems]` is still the whole list.
+- **Sign out.** Bind `(signOut)` once. It fires for the account menu item, the palette entry and the
+  More page row. `avatarMenuSelect` and `paletteAction` still report it too, so existing handlers
+  keep working; once you bind `(signOut)`, delete the ones that only test
+  `id === ACCOUNT_SIGN_OUT_ID` (leaving both would end the session twice).
+- **Phone guard.** A sidebar click now navigates by itself outside the phone shell (on the phone the
+  tab bar navigates). Drop the `navigate()` that returns early on the phone; `(navClick)` still reports.
+- **PWA notices.** `[pwaNotices]="true"` renders `lk-update-prompt`, `lk-offline-banner` and
+  `lk-install-hint` in the notices slot and owns `AppUpdateService` (inert without
+  `provideLifekitServiceWorker`). Pass `['offline']` for a subset. Delete the projected elements.
+- **Version.** `provideAppVersion(VERSION)` in the app providers; the sidebar footer and the More
+  page read it. `[versionLabel]` still overrides.
+- **More page.** `cmn-more-page` takes items, tab routes, account and version from the enclosing
+  layout; its inputs are overrides. Point the `moreRoute` at `MorePageComponent` with
+  `data: {title: 'More'}` and delete the per-app wrapper component.

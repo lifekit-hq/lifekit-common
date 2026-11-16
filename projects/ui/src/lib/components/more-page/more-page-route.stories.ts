@@ -73,6 +73,37 @@ class StoryMoreShellComponent {
   protected readonly account = ACCOUNT;
 }
 
+/** The shell glue lifted into the layout: no per-app wrapper, no palette list, no PWA notices by hand. */
+@Component({
+  selector: 'cmn-story-glue-shell',
+  imports: [AppLayoutComponent, RouterOutlet],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <cmn-app-layout
+      [navItems]="items"
+      [tabRoutes]="tabRoutes"
+      [account]="account"
+      [phoneOverlay]="true"
+      [pwaNotices]="true"
+      (signOut)="signedOut = true"
+      versionLabel="v3.2.0"
+      moreRoute="/more"
+      brand="Household"
+    >
+      <router-outlet />
+    </cmn-app-layout>
+    @if (signedOut) {
+      <p class="fixed bottom-0 left-0 p-2 text-xs">Signed out</p>
+    }
+  `,
+})
+class StoryGlueShellComponent {
+  protected readonly items = ITEMS;
+  protected readonly tabRoutes = TAB_ROUTES;
+  protected readonly account = ACCOUNT;
+  protected signedOut = false;
+}
+
 const meta: Meta = {
   title: 'Components/MorePageRoute',
   tags: ['!autodocs'],
@@ -99,6 +130,34 @@ export const OnTheRoute: StoryObj = {
             {path: '', redirectTo: 'more', pathMatch: 'full'},
             {path: 'more', component: StoryMoreRouteComponent, data: {title: 'More'}},
             {path: '**', component: StoryMoreRouteComponent, data: {title: 'More'}},
+          ],
+          withHashLocation()
+        ),
+      ],
+    }),
+  ],
+  parameters: {layout: 'fullscreen'},
+  globals: {viewport: {value: 'mobile2', isRotated: false}},
+};
+
+/**
+ * The same More tab with the route pointing at `cmn-more-page` itself: items, tab routes, account
+ * and version come from `cmn-app-layout`, Sign out reaches the layout's `(signOut)`, and
+ * `[pwaNotices]` renders the update prompt, offline banner and install hint (none showing here).
+ */
+export const FromTheLayout: StoryObj = {
+  render: () => ({
+    template: '<cmn-story-glue-shell />',
+    moduleMetadata: {imports: [StoryGlueShellComponent]},
+  }),
+  decorators: [
+    applicationConfig({
+      providers: [
+        provideRouter(
+          [
+            {path: '', redirectTo: 'more', pathMatch: 'full'},
+            {path: 'more', component: MorePageComponent, data: {title: 'More'}},
+            {path: '**', component: MorePageComponent, data: {title: 'More'}},
           ],
           withHashLocation()
         ),
