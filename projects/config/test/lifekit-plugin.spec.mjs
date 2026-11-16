@@ -168,6 +168,15 @@ test('page-root requires a routed page to be rooted on cmn-page (template)', () 
         code: '<cmn-more-page [items]="items" [account]="account()" (itemSelect)="onSelect($event)" />',
         filename: 'a.html',
       },
+      {
+        // The shell-less status screens are the `status` page kind: signed-out and no-access root on them.
+        code: '<cmn-status-page preset="signed-out" (action)="signIn()" (secondaryAction)="home()" />',
+        filename: 'a.html',
+      },
+      {
+        code: '<cmn-auth-page title="Sign in"><cmn-button>Continue</cmn-button></cmn-auth-page>',
+        filename: 'a.html',
+      },
     ],
     invalid: [
       {code: '<div></div>', filename: 'a.html', errors: [{messageId: 'missing'}]},
@@ -180,6 +189,16 @@ test('page-root requires a routed page to be rooted on cmn-page (template)', () 
         code: '<div class="p-4"><cmn-more-page /></div>',
         filename: 'a.html',
         errors: [{messageId: 'missing'}],
+      },
+      {
+        code: '<div class="p-4"><cmn-status-page preset="no-access" /></div>',
+        filename: 'a.html',
+        errors: [{messageId: 'missing'}],
+      },
+      {
+        code: '<cmn-status-page preset="no-access" class="px-4" />',
+        filename: 'a.html',
+        errors: [{messageId: 'spacing', data: {owner: '<cmn-status-page>', found: 'px-4'}}],
       },
       {
         code: '<cmn-more-page /><cmn-alert />',

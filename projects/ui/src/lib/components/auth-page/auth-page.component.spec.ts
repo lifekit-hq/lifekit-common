@@ -32,6 +32,15 @@ describe('AuthPageComponent', () => {
     expect(headings[0].textContent?.trim()).toBe('Sign in');
   });
 
+  it('is the status page kind: main holds the one column and the title', () => {
+    const main = render().querySelector('main') as HTMLElement;
+    expect(main.getAttribute('data-cmn-page')).toBe('status');
+    const columns = main.querySelectorAll('[data-cmn-page-column]');
+    expect(columns).toHaveLength(1);
+    expect(columns[0].querySelector('h1')?.hasAttribute('data-cmn-page-title')).toBe(true);
+    expect(columns[0].querySelector('#go')).toBeTruthy();
+  });
+
   it('draws the mark, the lead, and the projected content and footer', () => {
     const el = render();
     expect(el.querySelector('cmn-app-mark')).toBeTruthy();

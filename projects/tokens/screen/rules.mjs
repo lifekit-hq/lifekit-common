@@ -88,6 +88,7 @@ export function inspectScreen(options = {}) {
     form: ['main'],
     settings: ['main'],
     overview: ['main', 'rail'],
+    status: ['main'],
   };
   const OPTIONAL_COLUMNS = new Set(['rail']);
   const TITLE_GAP_MIN = 16;
@@ -170,7 +171,7 @@ export function inspectScreen(options = {}) {
   const inDialog = el => el.closest('cmn-dialog, cmn-drawer, [role=dialog]');
 
   const main = document.querySelector('main') || document.body;
-  const page = main.querySelector('[data-cmn-page]');
+  const page = main.matches('[data-cmn-page]') ? main : main.querySelector('[data-cmn-page]');
   const kind = options.kind || (page && page.getAttribute('data-cmn-page')) || null;
   const notices = [...main.querySelectorAll('[data-cmn-notices] > *')].filter(vis);
   const title =

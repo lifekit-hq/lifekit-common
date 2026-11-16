@@ -1,0 +1,56 @@
+<!doctype html>
+<!-- A signed-out page composed the way `cmn-auth-page` composes it: `main` itself is the `status`
+     page, and one centred card holds its single column with the title inside it. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>status screen</title>
+    <style>
+      body {
+        color: #0f1a1f;
+        margin: 0;
+        font: 14px/1.5 sans-serif;
+      }
+      main {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        box-sizing: border-box;
+        padding: 32px 16px;
+      }
+      .card {
+        border: 1px solid #7d8c93;
+        box-sizing: border-box;
+        width: 100%;
+        max-width: 384px;
+        padding: 24px;
+      }
+      h1 {
+        margin: 0 0 16px;
+        font-size: 1.25rem;
+        text-align: center;
+      }
+      p {
+        margin: 0 0 16px;
+        text-align: center;
+      }
+      button {
+        width: 100%;
+        min-height: 44px;
+      }
+    </style>
+  </head>
+  <body>
+    <main data-cmn-page="status">
+      <div class="card">
+        <div data-cmn-page-column>
+          <h1 data-cmn-page-title>Sign in</h1>
+          <p>Use your account.</p>
+          <button type="button">Continue</button>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>

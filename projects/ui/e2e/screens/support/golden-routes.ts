@@ -35,7 +35,7 @@ function templateRoute(kind: string, state = '', preset?: string): BaselineRoute
     name: routeName(`templates-${kind}${suffix}`, preset),
     url: ({scheme}) => storyUrl(`templates-${kind}--phone${suffix}`, scheme, preset),
     ready: async (page: Page): Promise<void> => {
-      await page.locator('cmn-page[data-cmn-page]').waitFor({state: 'visible'});
+      await page.locator('[data-cmn-page]').waitFor({state: 'visible'});
     },
   };
 }
@@ -51,6 +51,9 @@ export function templateRoutes(preset?: string): BaselineRoute[] {
     templateRoute('detail', 'with-verdict', preset),
     // The list template as a feed: a filter bar above a scroller of day-grouped, openable alert items.
     templateRoute('list', 'with-feed', preset),
+    // The shell-less status kind (`cmn-status-page`): signed-out and no-access, a centred card with no shell.
+    templateRoute('status', '', preset),
+    templateRoute('status', 'no-access', preset),
   ];
 }
 

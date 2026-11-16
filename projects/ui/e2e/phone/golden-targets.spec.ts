@@ -23,7 +23,7 @@ const GOLDEN_PREFIX = 'templates-';
 const REFERENCE_STORY = /^(controls|lists|shell|charts)-golden--/;
 const REFERENCE_READY = '#storybook-root > *';
 const PHONE = {width: 390, height: 844};
-const READY = 'cmn-page[data-cmn-page]';
+const READY = '[data-cmn-page]';
 
 const index = JSON.parse(
   readFileSync(join(__dirname, '../../storybook-static/index.json'), 'utf8')

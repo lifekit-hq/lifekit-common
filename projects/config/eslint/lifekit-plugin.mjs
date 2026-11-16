@@ -152,9 +152,10 @@ const noLocalCurrencyFormat = {
 
 /**
  * The elements a routed page may be rooted on: the page template, and the library's ready-made
- * routed pages (`cmn-more-page`), which are built on it.
+ * routed pages (`cmn-more-page`), which are built on it, and the shell-less status screens
+ * (`cmn-auth-page`, `cmn-status-page`), which are the `status` kind.
  */
-const PAGE_ROOT_TAGS = new Set(['cmn-page', 'cmn-more-page']);
+const PAGE_ROOT_TAGS = new Set(['cmn-page', 'cmn-more-page', 'cmn-auth-page', 'cmn-status-page']);
 
 /** Tailwind utilities that give an element padding, margin or width. */
 const SPACING_UTILITY = /^(?:p[xytrblse]?|m[xytrblse]?|w|min-w|max-w|size)-/;

@@ -325,7 +325,8 @@ entry whose story lands fails the check until it is removed.
 - `lifekit/no-local-currency-format` flags `Intl.NumberFormat` and `toLocaleString` with
   `style: 'currency'`, and the Angular `currency` pipe.
 - `lifekit/page-root` holds a routed page to its template: the template root is `<cmn-page>` or
-  `<cmn-more-page>`, the library's ready-made More tab, which is built on it (whitespace, comments,
+  `<cmn-more-page>`, the library's ready-made More tab, which is built on it, or `<cmn-auth-page>` /
+  `<cmn-status-page>`, the shell-less `status` screens (whitespace, comments,
   `@let` and `<ng-template>` aside), and the page sets no padding, margin or width of its own. The page template owns them, so a spacing finding is fixed in
   `@lifekit-hq/ui` once, not per page. It flags a root that is anything else, content outside the
   `<cmn-page>`, and spacing on the `<cmn-page>` element (`class`, `style`, `[class.x]`,

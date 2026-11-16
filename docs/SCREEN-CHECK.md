@@ -25,6 +25,12 @@ another; the overview's second column is its `rail`:
 | `form`     | main                  | 640px                            | `Templates/Form`     |
 | `settings` | main                  | 720px                            | `Templates/Settings` |
 | `overview` | main, rail (optional) | 1200px; the rail 320px from 1280 | `Templates/Overview` |
+| `status`   | main                  | one centred card, 384px          | `Templates/Status`   |
+
+The `status` kind is the shell-less screen: signed-out, no-access, sign-in failed. It is drawn by
+`cmn-auth-page` (and `cmn-status-page` on top of it), which marks its `main` `data-cmn-page="status"`
+and the card's content `data-cmn-page-column`; it has no top bar, tab bar or sidebar and a centred
+card instead of a left-edged column, and `lifekit/page-root` accepts both as a routed page root.
 
 A page with more columns than its kind has, without one its kind requires, or with a column its
 kind does not name fails C1, as does a notice, the title or a top-level block that starts off a

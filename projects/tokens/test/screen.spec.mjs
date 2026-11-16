@@ -26,6 +26,7 @@ const FIXTURES = new URL('./fixtures/screen/', import.meta.url);
 const FAILING = readFileSync(new URL('failing.html', FIXTURES), 'utf8');
 const PASSING = readFileSync(new URL('passing.html', FIXTURES), 'utf8');
 const OVERVIEW = readFileSync(new URL('overview.html', FIXTURES), 'utf8');
+const STATUS = readFileSync(new URL('status.html', FIXTURES), 'utf8');
 const BIN = fileURLToPath(new URL('../bin/lifekit-chrome-check.mjs', import.meta.url));
 const ROOT = fileURLToPath(new URL('../../../', import.meta.url));
 const ALL_RULES = SCREEN_RULES.map(rule => rule.id);
@@ -337,6 +338,35 @@ describe('row actions (C9) count rows, not ancestors', () => {
     );
     const result = await inspect(html, 'desktop');
     assert.ok(rulesOf(result).includes('C9'), formatScreen(result));
+  });
+});
+
+describe('the status kind, whose page is main itself', () => {
+  for (const size of ['phone', 'desktop']) {
+    it(`reads main as the status page and passes it, at ${size}`, async () => {
+      const result = await inspect(STATUS, size);
+      assert.equal(result.kind, 'status');
+      assert.equal(result.template, true);
+      assert.deepEqual(result.findings, [], formatScreen(result));
+    });
+  }
+
+  it('refuses a second column on a status page', async () => {
+    const html = STATUS.replace(
+      '</main>',
+      '<div data-cmn-page-column="rail"><p>Aside</p></div></main>'
+    );
+    const result = await inspect(html, 'desktop');
+    assert.ok(
+      result.findings.some(finding => finding.rule === 'C1'),
+      formatScreen(result)
+    );
+  });
+
+  it('still reports a main without the attribute as not built on a template', async () => {
+    const result = await inspect(STATUS.replace(' data-cmn-page="status"', ''), 'desktop');
+    assert.equal(result.template, false);
+    assert.ok(result.findings.some(finding => finding.rule === 'C0'));
   });
 });
 
