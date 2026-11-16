@@ -13,7 +13,8 @@
       "@lifekit-hq/charts-core": ["../../dist/lifekit-hq/charts-core"],
       "@lifekit-hq/elements": ["../../dist/lifekit-hq/elements"],
       "@lifekit-hq/core/format": ["../../dist/lifekit-hq/core/format"],
-      "@lifekit-hq/core/preferences": ["../../dist/lifekit-hq/core/preferences"]
+      "@lifekit-hq/core/preferences": ["../../dist/lifekit-hq/core/preferences"],
+      "@lifekit-hq/core/pwa": ["../../dist/lifekit-hq/core/pwa"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts"],
