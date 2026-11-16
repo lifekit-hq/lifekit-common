@@ -544,7 +544,9 @@ pattern (a skeleton that matches the content); web.dev CLS.
 
 Check: the swap from `Conformance/First Paint` skeleton to the loaded page shifts the layout by at
 most 0.1 on a phone (390) and a laptop (1280) for each preset (`e2e/phone/first-paint-cls.spec.ts`);
-each preset's parts are held to the loaded component's box by `Conformance/Skeleton Geometry`.
+each preset's parts are held to the loaded component's box by `Conformance/Skeleton Geometry`. A
+routed page and its chrome (large title, gutter, bars) render in the same pass, so the shell adds
+no layout shift after its first paint at either width (`e2e/phone/shell-first-paint-cls.spec.ts`).
 
 ## Forms and notifications
 

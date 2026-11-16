@@ -1,5 +1,6 @@
 import {Location} from '@angular/common';
 import {
+  ApplicationRef,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -13,7 +14,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import {toSignal} from '@angular/core/rxjs-interop';
+import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
 import {createUrlTreeFromSnapshot, NavigationEnd, Router} from '@angular/router';
 import {type ThemeMode} from '@lifekit-hq/core/preferences';
 import {filter, map} from 'rxjs';
@@ -323,6 +324,7 @@ export const CMN_CONTENT_INSET_PROPERTIES = {
 })
 export class AppLayoutComponent {
   private readonly router = inject(Router);
+  private readonly appRef = inject(ApplicationRef);
   private readonly dialog = inject(CmnDialogService);
   private readonly themeService = inject(ThemeService);
   private readonly appearance = inject(AppearanceService);
@@ -669,6 +671,7 @@ export class AppLayoutComponent {
       tabs: () => this.destinations(),
       activeTab: () => this.effectiveActiveRoute(),
     });
+    this.flushOnNavigationEnd();
     this.publishContentInsets();
     fadeRouteChanges(this.router, () => this.main().nativeElement, this.destroyRef);
     effect(onCleanup => onCleanup(stackNotices(this.noticesRef().nativeElement)));
@@ -723,6 +726,22 @@ export class AppLayoutComponent {
         observer?.disconnect();
       });
     });
+  }
+
+  /**
+   * Renders the new page and the chrome it declares (title, gutter, bars) in one pass. The router
+   * activates a page synchronously, which draws its template but not its bindings; those wait for
+   * the next scheduled change detection, so a paint in between shows the page without the large
+   * title or the page gutter and the next one moves everything by that much. Running the tick
+   * here, in the same task as the activation, leaves no paint in between.
+   */
+  private flushOnNavigationEnd(): void {
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(() => this.appRef.tick());
   }
 
   /**
