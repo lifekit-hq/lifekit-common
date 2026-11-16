@@ -44,11 +44,6 @@
       "reason": "The secret sits in an outlined mono block (Carbon's code snippet) inside the warning alert on purpose; the block is a code field, not a card."
     },
     {
-      "rule": "nested-cards",
-      "stories": ["services-preset--playground"],
-      "reason": "The playground shows one card holding a sample of every control; the segmented control's outlined frame inside that card is read as a nested card, in Carbon as much as in the demo preset."
-    },
-    {
       "rule": "cramped-padding",
       "stories": [
         "primitives-code-block--capped-height",
@@ -139,7 +134,7 @@
       "marquee": 42,
       "flat-type-hierarchy": 6,
       "pulsing-dot": 10,
-      "nested-cards": 8,
+      "nested-cards": 6,
       "low-contrast": 2,
       "text-overflow": 2,
       "gpt-thin-border-wide-shadow": 8

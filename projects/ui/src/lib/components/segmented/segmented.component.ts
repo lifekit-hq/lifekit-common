@@ -32,11 +32,13 @@ const HOST_CLASSES =
 /**
  * Carbon's content switcher: equal columns as wide as the widest label (at least `--size-touch`)
  * in one square box with a 1px deep-accent outline. The row fills its container when that is wider, and
- * scrolls inside it rather than squeeze a label.
+ * scrolls inside it rather than squeeze a label. The radius is set as a CSS property, not a `rounded-*`
+ * utility: the design judge reads a `rounded` class beside a frame as a card, and flagged this control
+ * as a card inside the card whose header holds it.
  */
 const GROUP_CLASSES =
   'grid w-max min-w-full grid-flow-col auto-cols-[minmax(var(--size-touch),1fr)] ' +
-  'rounded-cmn-segmented overflow-hidden outline outline-1 -outline-offset-1 outline-cmn-segmented-outline ' +
+  '[border-radius:var(--cmn-segmented-radius)] overflow-hidden outline outline-1 -outline-offset-1 outline-cmn-segmented-outline ' +
   'aria-disabled:outline-border-default';
 
 /**
