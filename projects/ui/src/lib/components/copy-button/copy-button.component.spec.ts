@@ -1,7 +1,12 @@
+import {Clipboard} from '@angular/cdk/clipboard';
 import {type ComponentFixture, TestBed} from '@angular/core/testing';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
-import {CmnClipboardService} from '../../services/clipboard/clipboard.service';
+import {
+  CMN_COPY_FALLBACK_HINT,
+  CmnClipboardService,
+} from '../../services/clipboard/clipboard.service';
+import {ToastService} from '../toast/toast.service';
 import {COPY_FEEDBACK_MS, CopyButtonComponent} from './copy-button.component';
 
 describe('CopyButtonComponent', () => {
@@ -53,13 +58,20 @@ describe('CopyButtonComponent', () => {
     expect(button().textContent?.trim()).toBe('');
   });
 
-  it('shows Copy failed with the hand-copy hint when the copy does not work', async () => {
+  it('shows Copy failed, announced once, when the copy does not work', async () => {
     copy.mockResolvedValue(false);
     await press();
     expect(button().textContent).toContain('Copy failed');
+    expect(button().getAttribute('aria-label')).toBe('Copy failed');
     expect(
-      (fixture.nativeElement as HTMLElement).querySelector('cmn-button')?.getAttribute('title')
-    ).toContain('copy it yourself');
+      (fixture.nativeElement as HTMLElement).querySelector('[role="status"]')?.textContent
+    ).toBe('Copy failed');
+  });
+
+  it('leaves the failure hint to the service and passes it no message of its own', async () => {
+    copy.mockResolvedValue(false);
+    await press();
+    expect(copy).toHaveBeenCalledExactlyOnceWith('secret');
   });
 
   it('restarts the two seconds when pressed again', async () => {
@@ -69,5 +81,38 @@ describe('CopyButtonComponent', () => {
     await vi.advanceTimersByTimeAsync(COPY_FEEDBACK_MS - 1);
     fixture.detectChanges();
     expect(button().getAttribute('aria-label')).toBe('Copied');
+  });
+});
+
+describe('CopyButtonComponent with the real clipboard service', () => {
+  const error = vi.fn();
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.stubGlobal('navigator', {clipboard: undefined});
+    error.mockReset();
+    TestBed.configureTestingModule({
+      imports: [CopyButtonComponent],
+      providers: [
+        {provide: Clipboard, useValue: {copy: () => false}},
+        {provide: ToastService, useValue: {success: vi.fn(), error}},
+      ],
+    });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
+  });
+
+  it('toasts the hand-copy hint exactly once when both copy paths fail', async () => {
+    const fixture = TestBed.createComponent(CopyButtonComponent);
+    fixture.componentRef.setInput('text', 'secret');
+    fixture.detectChanges();
+    (fixture.nativeElement as HTMLElement).querySelector('button')?.click();
+    await vi.advanceTimersByTimeAsync(0);
+    fixture.detectChanges();
+    expect(error).toHaveBeenCalledExactlyOnceWith(CMN_COPY_FALLBACK_HINT);
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Copy failed');
   });
 });

@@ -3,7 +3,7 @@ import {TestBed} from '@angular/core/testing';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
 import {ToastService} from '../../components/toast/toast.service';
-import {CmnClipboardService} from './clipboard.service';
+import {CMN_COPY_FALLBACK_HINT, CmnClipboardService} from './clipboard.service';
 
 describe('CmnClipboardService', () => {
   let service: CmnClipboardService;
@@ -71,7 +71,21 @@ describe('CmnClipboardService', () => {
     stubNavigator(undefined);
     cdkCopy.mockReturnValue(false);
     await service.copy('abc', {success: 'Copied', failure: 'Could not copy'});
-    expect(error).toHaveBeenCalledWith('Could not copy');
+    expect(error).toHaveBeenCalledExactlyOnceWith('Could not copy');
     expect(success).not.toHaveBeenCalled();
+  });
+
+  it('toasts the hand-copy hint once when neither path works and no failure message is given', async () => {
+    stubNavigator(undefined);
+    cdkCopy.mockReturnValue(false);
+    expect(await service.copy('abc')).toBe(false);
+    expect(error).toHaveBeenCalledExactlyOnceWith(CMN_COPY_FALLBACK_HINT);
+    expect(CMN_COPY_FALLBACK_HINT).toContain('copy it yourself');
+  });
+
+  it('shows no hint when the copy worked', async () => {
+    stubNavigator(vi.fn().mockResolvedValue(undefined));
+    await service.copy('abc');
+    expect(error).not.toHaveBeenCalled();
   });
 });

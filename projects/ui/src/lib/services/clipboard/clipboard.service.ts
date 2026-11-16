@@ -3,7 +3,7 @@ import {inject, Injectable} from '@angular/core';
 
 import {ToastService} from '../../components/toast/toast.service';
 
-/** What to say when a copy lands or does not; a message that is left out shows nothing. */
+/** What to say when a copy lands or does not; a success message that is left out shows nothing. */
 export interface CmnCopyOptions {
   readonly success?: string;
   readonly failure?: string;
@@ -15,8 +15,8 @@ export const CMN_COPY_FALLBACK_HINT = 'Couldn’t copy. Select the text and copy
 /**
  * Copies text to the clipboard behind one call: `navigator.clipboard` where the browser allows it
  * (a secure context, with permission), the CDK's selection-based copy where it does not. Resolves
- * to whether either worked, and reports it as a toast when the caller gives a message. A control
- * that shows its own state, such as `cmn-copy-button`, passes none.
+ * to whether either worked. A copy that lands toasts `success` when given; a copy that fails toasts
+ * `failure`, or the hand-copy hint when none is given.
  */
 @Injectable({providedIn: 'root'})
 export class CmnClipboardService {
@@ -27,8 +27,8 @@ export class CmnClipboardService {
     const copied = (await this.viaNavigator(text)) || this.cdkClipboard.copy(text);
     if (copied && options.success) {
       this.toast.success(options.success);
-    } else if (!copied && options.failure) {
-      this.toast.error(options.failure);
+    } else if (!copied) {
+      this.toast.error(options.failure ?? CMN_COPY_FALLBACK_HINT);
     }
     return copied;
   }

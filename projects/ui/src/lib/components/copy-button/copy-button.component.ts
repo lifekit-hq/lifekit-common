@@ -8,10 +8,7 @@ import {
   signal,
 } from '@angular/core';
 
-import {
-  CMN_COPY_FALLBACK_HINT,
-  CmnClipboardService,
-} from '../../services/clipboard/clipboard.service';
+import {CmnClipboardService} from '../../services/clipboard/clipboard.service';
 import {ButtonComponent} from '../button/button.component';
 
 export type CopyButtonState = 'idle' | 'copied' | 'failed';
@@ -22,7 +19,7 @@ export const COPY_FEEDBACK_MS = 2000;
 /**
  * An icon button that copies `text` and says so on itself, not in a toast (Carbon's copy button
  * and code-snippet feedback): the icon turns to a check and "Copied" shows for two seconds. A copy
- * that fails shows "Copy failed" the same way and offers the hand-copy hint as its tooltip.
+ * that fails shows "Copy failed" the same way, and the clipboard service toasts the hand-copy hint.
  * Presses as 44px on a phone through `cmn-button`.
  */
 @Component({
@@ -33,7 +30,6 @@ export const COPY_FEEDBACK_MS = 2000;
     <cmn-button
       [icon]="icon()"
       [aria-label]="ariaLabel()"
-      [attr.title]="state() === 'failed' ? hint : null"
       (clicked)="copy()"
       variant="ghost"
       size="sm"
@@ -54,7 +50,6 @@ export class CopyButtonComponent {
   /** Names the button while idle, e.g. "Copy invite link". */
   public readonly label = input('Copy');
 
-  protected readonly hint = CMN_COPY_FALLBACK_HINT;
   protected readonly state = signal<CopyButtonState>('idle');
   protected readonly icon = computed(() => (this.state() === 'copied' ? 'Check' : 'Copy'));
   protected readonly visibleLabel = computed(() =>
