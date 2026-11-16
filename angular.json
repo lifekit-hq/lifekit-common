@@ -26,9 +26,7 @@
           "options": {
             "tsConfig": "projects/ui/tsconfig.spec.json",
             "coverage": true,
-            "browsers": [
-              "chromium"
-            ],
+            "browsers": ["chromium"],
             "headless": true
           },
           "configurations": {
@@ -48,10 +46,7 @@
           "builder": "@angular-eslint/builder:lint",
           "options": {
             "eslintConfig": "projects/ui/eslint.config.mjs",
-            "lintFilePatterns": [
-              "projects/ui/src/**/*.ts",
-              "projects/ui/src/**/*.html"
-            ]
+            "lintFilePatterns": ["projects/ui/src/**/*.ts", "projects/ui/src/**/*.html"]
           }
         },
         "storybook": {
@@ -62,9 +57,7 @@
             "tsConfig": "projects/ui/tsconfig.storybook.json",
             "port": 6006,
             "compodoc": false,
-            "styles": [
-              "projects/ui/.storybook/storybook.css"
-            ]
+            "styles": ["projects/ui/.storybook/storybook.css"]
           }
         },
         "build-storybook": {
@@ -75,9 +68,7 @@
             "tsConfig": "projects/ui/tsconfig.storybook.json",
             "outputDir": "projects/ui/storybook-static",
             "compodoc": false,
-            "styles": [
-              "projects/ui/.storybook/storybook.css"
-            ]
+            "styles": ["projects/ui/.storybook/storybook.css"]
           }
         }
       }
@@ -108,12 +99,11 @@
               "**/*.spec.ts",
               "../pwa/**/*.spec.ts",
               "../format/**/*.spec.ts",
-              "../preferences/**/*.spec.ts"
+              "../preferences/**/*.spec.ts",
+              "../routing/**/*.spec.ts"
             ],
             "coverage": true,
-            "browsers": [
-              "chromium"
-            ],
+            "browsers": ["chromium"],
             "headless": true
           },
           "configurations": {
@@ -137,7 +127,8 @@
               "projects/core/src/**/*.ts",
               "projects/core/pwa/**/*.ts",
               "projects/core/format/**/*.ts",
-              "projects/core/preferences/**/*.ts"
+              "projects/core/preferences/**/*.ts",
+              "projects/core/routing/**/*.ts"
             ]
           }
         }
@@ -164,9 +155,7 @@
           "builder": "@angular/build:unit-test",
           "options": {
             "tsConfig": "projects/charts-core/tsconfig.spec.json",
-            "browsers": [
-              "chromium"
-            ],
+            "browsers": ["chromium"],
             "headless": true
           },
           "configurations": {
@@ -180,9 +169,7 @@
           "builder": "@angular-eslint/builder:lint",
           "options": {
             "eslintConfig": "projects/charts-core/eslint.config.mjs",
-            "lintFilePatterns": [
-              "projects/charts-core/src/**/*.ts"
-            ]
+            "lintFilePatterns": ["projects/charts-core/src/**/*.ts"]
           }
         }
       }
@@ -200,9 +187,7 @@
             "index": ".storybook-host/index.html",
             "browser": ".storybook-host/main.ts",
             "tsConfig": ".storybook-host/tsconfig.json",
-            "styles": [
-              "projects/ui/.storybook/storybook.css"
-            ],
+            "styles": ["projects/ui/.storybook/storybook.css"],
             "assets": []
           }
         }
@@ -229,9 +214,7 @@
           "builder": "@angular/build:unit-test",
           "options": {
             "tsConfig": "projects/elements/tsconfig.spec.json",
-            "browsers": [
-              "chromium"
-            ],
+            "browsers": ["chromium"],
             "headless": true
           },
           "configurations": {
@@ -245,9 +228,7 @@
           "builder": "@angular-eslint/builder:lint",
           "options": {
             "eslintConfig": "projects/elements/eslint.config.mjs",
-            "lintFilePatterns": [
-              "projects/elements/src/**/*.ts"
-            ]
+            "lintFilePatterns": ["projects/elements/src/**/*.ts"]
           }
         }
       }

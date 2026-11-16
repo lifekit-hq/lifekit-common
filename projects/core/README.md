@@ -3,7 +3,8 @@
 Angular signal-store features and helpers for the lifekit apps (`withAsyncStatus`,
 `withUrlSync`, `ApiService`, …), plus the framework-free
 `@lifekit-hq/core/format` and the `@lifekit-hq/core/pwa` entry points, and
-`@lifekit-hq/core/preferences` (device and account preference storage).
+`@lifekit-hq/core/preferences` (device and account preference storage) and
+`@lifekit-hq/core/routing` (`provideAppTitle(appName)`, the `Page · App` tab title).
 
 ## `withAsyncStatus`
 
