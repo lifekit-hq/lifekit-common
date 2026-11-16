@@ -315,7 +315,7 @@ export const EmptyWithCallToAction: Story = {
   args: {status: 'success', isEmpty: true},
 };
 
-/** The built-in Retry button: `retryable` renders it and `retry` fires when it is pressed (here it switches to loading). */
+/** The built-in Retry: `retryable` renders a small secondary `cmn-button` on its own row under the message (44px to press on a phone); `retry` fires when it is pressed (here it switches to loading). */
 export const ErrorWithBuiltInRetry: Story = {
   render: args => ({
     props: args,

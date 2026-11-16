@@ -361,7 +361,29 @@ describe('AsyncStateComponent state pattern', () => {
       expect(button?.type).toBe('button');
       expect(button?.tabIndex).toBe(0);
       expect(button?.disabled).toBe(false);
-      expect(button?.classList.contains('min-h-cmn-touch')).toBe(true);
+    });
+
+    it('renders Retry as a cmn-button on its own row under the error message', () => {
+      host.retryable.set(true);
+      render('error');
+
+      const wrapper = query('[role="alert"] cmn-button');
+      expect(wrapper).not.toBeNull();
+      expect(wrapper?.parentElement?.classList.contains('mt-cmn-3')).toBe(true);
+      expect(
+        query('[role="alert"] cmn-button button')?.classList.contains('bg-cmn-btn-secondary')
+      ).toBe(true);
+    });
+
+    it('keeps the action row empty, so it collapses, when nothing is retryable', () => {
+      render('error');
+      expect(query('[role="alert"] .mt-cmn-3')?.childElementCount).toBe(0);
+    });
+
+    it('presses Retry as a 44px phone target', () => {
+      host.retryable.set(true);
+      render('error');
+      expect(retryButton()?.classList.contains('max-md:after:h-cmn-touch')).toBe(true);
     });
 
     it('does not render Retry in the content state', () => {

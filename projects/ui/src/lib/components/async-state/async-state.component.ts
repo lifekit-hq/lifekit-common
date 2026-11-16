@@ -16,6 +16,7 @@ import {
 
 import {type Nullable} from '../../types';
 import {AlertComponent} from '../alert/alert.component';
+import {ButtonComponent} from '../button/button.component';
 import {
   EmptyStateComponent,
   type EmptyStateKind,
@@ -91,12 +92,18 @@ const DATE_AND_TIME: Intl.DateTimeFormatOptions = {dateStyle: 'medium', timeStyl
  *   alone projects the content with no wrapper element, for a host that lays the children out
  *   itself (a flex column, `space-y-*`); pass `[crossfade]="true"` to fade there too, which wraps.
  *
- * Set `retryable` to render the built-in Retry button next to the error or offline message; it
+ * Set `retryable` to render the built-in Retry button (a small secondary `cmn-button`, on its own row under the message in the alert, pressable at 44px on a phone); it
  * emits `retry`. Leave it off when the page projects its own `[error-action]`.
  */
 @Component({
   selector: 'cmn-async-state',
-  imports: [AlertComponent, EmptyStateComponent, NgTemplateOutlet, SkeletonComponent],
+  imports: [
+    AlertComponent,
+    ButtonComponent,
+    EmptyStateComponent,
+    NgTemplateOutlet,
+    SkeletonComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   // Angular projects light DOM into the FIRST outlet that matches it, so every selector below
   // has exactly one outlet. The error action is a template because the alert and the offline
@@ -113,7 +120,9 @@ const DATE_AND_TIME: Intl.DateTimeFormatOptions = {dateStyle: 'medium', timeStyl
     } @else if (offline()) {
       <cmn-alert class="mb-cmn-6 block" icon="WifiOff" variant="info">
         You're offline. {{ syncedLabel() }}
-        <ng-container [ngTemplateOutlet]="actions" />
+        <div class="mt-cmn-3 flex flex-wrap items-center gap-cmn-2 empty:hidden">
+          <ng-container [ngTemplateOutlet]="actions" />
+        </div>
       </cmn-alert>
     }
 
@@ -135,7 +144,9 @@ const DATE_AND_TIME: Intl.DateTimeFormatOptions = {dateStyle: 'medium', timeStyl
     @if (showErrorAlert()) {
       <cmn-alert [class]="errorPlacement() === 'above' ? 'mb-cmn-6 block' : ''" variant="error">
         {{ errorMessage() || 'Something went wrong.' }}
-        <ng-container [ngTemplateOutlet]="actions" />
+        <div class="mt-cmn-3 flex flex-wrap items-center gap-cmn-2 empty:hidden">
+          <ng-container [ngTemplateOutlet]="actions" />
+        </div>
       </cmn-alert>
     }
 
@@ -167,13 +178,7 @@ const DATE_AND_TIME: Intl.DateTimeFormatOptions = {dateStyle: 'medium', timeStyl
     <ng-template #actions>
       <ng-content select="[error-action]" />
       @if (retryable()) {
-        <button
-          (click)="retry.emit()"
-          class="min-h-cmn-touch min-w-cmn-touch cursor-pointer border border-transparent px-cmn-4 text-cmn-sm text-accent-default transition-colors duration-cmn-short ease-cmn-standard hover:bg-surface-hover hover:text-accent-hover active:bg-surface-raised focus:outline-none focus-visible:border-border-focus focus-visible:shadow-cmn-focus-inset md:min-h-cmn-size-sm"
-          type="button"
-        >
-          Retry
-        </button>
+        <cmn-button (clicked)="retry.emit()" size="sm" variant="secondary">Retry</cmn-button>
       }
     </ng-template>
   `,
