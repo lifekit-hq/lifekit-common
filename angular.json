@@ -126,6 +126,7 @@
             "lintFilePatterns": [
               "projects/core/src/**/*.ts",
               "projects/core/pwa/**/*.ts",
+              "projects/core/errors/**/*.ts",
               "projects/core/format/**/*.ts",
               "projects/core/preferences/**/*.ts",
               "projects/core/routing/**/*.ts"
