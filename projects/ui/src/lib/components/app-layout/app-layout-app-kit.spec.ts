@@ -125,10 +125,10 @@ describe('AppLayoutComponent app-kit glue', () => {
       expect(openPalette()).toEqual([]);
     });
 
-    it('should fire signOut, not paletteAction, for the Sign out entry', () => {
+    it('should fire signOut and still report paletteAction for the Sign out entry', () => {
       openPalette({type: 'action', id: ACCOUNT_SIGN_OUT_ID});
       expect(fixture.componentInstance.signOuts).toBe(1);
-      expect(fixture.componentInstance.actions).toEqual([]);
+      expect(fixture.componentInstance.actions).toEqual([ACCOUNT_SIGN_OUT_ID]);
     });
 
     it('should still report other palette actions', () => {

@@ -53,8 +53,9 @@ bindings keep working.
   menu has `ACCOUNT_SIGN_OUT_ID`. Pass app actions in `[paletteExtras]`. An explicit
   `[paletteItems]` is still the whole list.
 - **Sign out.** Bind `(signOut)` once. It fires for the account menu item, the palette entry and the
-  More page row, so `avatarMenuSelect` and `paletteAction` handlers that only test
-  `id === ACCOUNT_SIGN_OUT_ID` go away.
+  More page row. `avatarMenuSelect` and `paletteAction` still report it too, so existing handlers
+  keep working; once you bind `(signOut)`, delete the ones that only test
+  `id === ACCOUNT_SIGN_OUT_ID` (leaving both would end the session twice).
 - **Phone guard.** A sidebar click now navigates by itself outside the phone shell (on the phone the
   tab bar navigates). Drop the `navigate()` that returns early on the phone; `(navClick)` still reports.
 - **PWA notices.** `[pwaNotices]="true"` renders `lk-update-prompt`, `lk-offline-banner` and

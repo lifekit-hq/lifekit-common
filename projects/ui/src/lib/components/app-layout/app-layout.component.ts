@@ -571,8 +571,8 @@ export class AppLayoutComponent {
   public readonly avatarMenuSelect = output<MenuItem>();
   /**
    * The user chose Sign out: the account menu's item (`ACCOUNT_SIGN_OUT_ID`), the More page's row
-   * or the palette's entry. The app ends the session; `avatarMenuSelect` and `paletteAction` do not
-   * need to test for it.
+   * or the palette's entry. The app ends the session; `avatarMenuSelect` and `paletteAction` still
+   * report it too, so existing handlers keep working, but they no longer need to test for it.
    */
   public readonly signOut = output<void>();
   /** A palette action entry was chosen (the built-in theme toggle is handled by the layout). */
@@ -1085,10 +1085,11 @@ export class AppLayoutComponent {
       this.appearance.toggle();
     } else if (Object.hasOwn(APPEARANCE_MODE_BY_ACTION, result.id)) {
       this.appearance.setMode(APPEARANCE_MODE_BY_ACTION[result.id]);
-    } else if (result.id === ACCOUNT_SIGN_OUT_ID) {
-      this.signOut.emit();
     } else {
       this.paletteAction.emit(result.id);
+      if (result.id === ACCOUNT_SIGN_OUT_ID) {
+        this.signOut.emit();
+      }
     }
   }
 }
