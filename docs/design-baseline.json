@@ -40,6 +40,11 @@
     },
     {
       "rule": "nested-cards",
+      "stories": ["components-secret-reveal--*"],
+      "reason": "The secret sits in an outlined mono block (Carbon's code snippet) inside the warning alert on purpose; the block is a code field, not a card."
+    },
+    {
+      "rule": "nested-cards",
       "stories": ["services-preset--playground"],
       "reason": "The playground shows one card holding a sample of every control; the segmented control's outlined frame inside that card is read as a nested card, in Carbon as much as in the demo preset."
     },
