@@ -30,7 +30,7 @@ export const Copied: Story = {
   },
 };
 
-/** Neither clipboard path works: "Copy failed", with the hand-copy hint as its tooltip. */
+/** Neither clipboard path works: "Copy failed" on the button, and the clipboard service toasts the hand-copy hint. */
 export const Failed: Story = {
   decorators: [
     applicationConfig({
