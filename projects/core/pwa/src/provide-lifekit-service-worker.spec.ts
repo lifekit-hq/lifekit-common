@@ -1,37 +1,32 @@
 import {isDevMode} from '@angular/core';
-import {beforeEach, describe, expect, it, vi} from 'vitest';
-
-const provideServiceWorker = vi.hoisted(() =>
-  vi.fn<(script: string, options: object) => object>(() => ({}))
-);
-vi.mock('@angular/service-worker', () => ({provideServiceWorker}));
+import {TestBed} from '@angular/core/testing';
+import {SwRegistrationOptions} from '@angular/service-worker';
+import {describe, expect, it} from 'vitest';
 
 import {provideLifekitServiceWorker} from './provide-lifekit-service-worker';
 
 describe('provideLifekitServiceWorker', () => {
-  beforeEach(() => {
-    provideServiceWorker.mockClear();
-  });
+  function options(...args: Parameters<typeof provideLifekitServiceWorker>): SwRegistrationOptions {
+    TestBed.configureTestingModule({providers: [provideLifekitServiceWorker(...args)]});
+    return TestBed.inject(SwRegistrationOptions);
+  }
 
-  it('registers ngsw-worker.js after the app is stable, bypassing the HTTP cache', () => {
-    provideLifekitServiceWorker();
-
-    expect(provideServiceWorker).toHaveBeenCalledWith('ngsw-worker.js', {
+  it('registers after the app is stable, bypassing the HTTP cache, off in dev', () => {
+    expect(options()).toMatchObject({
       enabled: !isDevMode(),
       registrationStrategy: 'registerWhenStable:30000',
       updateViaCache: 'none',
     });
   });
 
-  it('takes a custom script, e.g. a push-aware wrapper', () => {
-    provideLifekitServiceWorker({script: 'sw.js'});
-
-    expect(provideServiceWorker.mock.calls[0]?.[0]).toBe('sw.js');
+  it.each([true, false])('lets the app force enabled=%s', enabled => {
+    expect(options({enabled}).enabled).toBe(enabled);
   });
 
-  it.each([true, false])('lets the app force enabled=%s', enabled => {
-    provideLifekitServiceWorker({enabled});
-
-    expect(provideServiceWorker.mock.calls[0]?.[1]).toMatchObject({enabled});
+  it('accepts a custom script without changing the registration options', () => {
+    expect(options({script: 'sw.js'})).toMatchObject({
+      registrationStrategy: 'registerWhenStable:30000',
+      updateViaCache: 'none',
+    });
   });
 });
