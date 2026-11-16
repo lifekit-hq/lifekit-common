@@ -35,6 +35,11 @@
     },
     {
       "rule": "nested-cards",
+      "stories": ["components-authpage--with-alert", "components-statuspage--with-alert"],
+      "reason": "The sign-in card holds the failure reason as a bordered alert; the alert is the card's own content, a status inside the one card on the page, not a card of cards."
+    },
+    {
+      "rule": "nested-cards",
       "stories": ["services-preset--playground"],
       "reason": "The playground shows one card holding a sample of every control; the segmented control's outlined frame inside that card is read as a nested card, in Carbon as much as in the demo preset."
     },
