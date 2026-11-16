@@ -14,8 +14,8 @@ const meta: Meta<StatusPageComponent> = {
     docs: {
       description: {
         component:
-          'A full-page status on the sign-in frame. `preset` picks the words and the primary ' +
-          'action (`signed-out`, `no-access`, `unreachable`, `not-found`); the inputs replace ' +
+          'A full-page status on the sign-in frame. `preset` picks the words and both ' +
+          'actions (`signed-out`, `no-access`, `unreachable`, `not-found`); the inputs replace ' +
           'them and the page decides what each action does.',
       },
     },

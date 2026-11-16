@@ -34,11 +34,13 @@ describe('StatusPageComponent', () => {
     expect(el().getAttribute('data-preset')).toBe(preset);
   });
 
-  it('shows a secondary action only where the preset has one or it is given', () => {
-    setup('signed-out');
-    expect(buttons().length).toBe(1);
-    setup('not-found');
+  it.each(PRESETS)('%s shows a primary and a secondary action', preset => {
+    setup(preset);
     expect(buttons().length).toBe(2);
+    expect(buttons()[1].textContent?.trim()).toBe(STATUS_PAGE_COPY[preset].secondary);
+  });
+
+  it('lets the page replace the secondary action', () => {
     setup('unreachable', {secondaryLabel: 'Work offline'});
     expect(buttons()[1].textContent?.trim()).toBe('Work offline');
   });
