@@ -16,6 +16,7 @@ document is the contract for the account and settings surface inside it.
 | Save-failure toast wiring                                             | `provideToastPreferenceErrors()` in `ui` | Built  |
 | `cmn-segmented`, `cmn-appearance-settings`, palette System/Light/Dark | `ui`                                     | Built  |
 | `AppearanceService`, `provideAppearanceSync(Store)`                   | `ui`                                     | Built  |
+| `provideAccountAppearance()` (sync + toast errors + load at start)    | `ui`                                     | Built  |
 | `showThemeToggle` default `false`                                     | `cmn-app-layout`                         | Built  |
 | `cmn-settings-section`, `cmn-setting-row`, `cmn-danger-zone`          | `ui`                                     | Target |
 | Identity header, `accountMenu()`, `accountOnPhone`, `cmn-more-page`   | `ui`                                     | Built  |
@@ -78,8 +79,12 @@ only has the cache, so it follows the last theme used on this device.
 In `@lifekit-hq/ui` the whole path is `AppearanceService`: `setMode`, `setSeed`, `resetSeed` and
 `toggle` write the cache and the account together, and the store's `appearance()` is mirrored into
 `ThemeService` so the server value wins once `load()` has answered. An app wires it once with
-`provideAppearanceSync(AppPreferencesStore)`. An app with no preferences endpoint omits that and
-keeps working on the cache alone; `cmn-appearance-settings` then captions the control "On this
+`provideAccountAppearance()`, which does three things: `provideAppearanceSync(AppPreferencesStore)`,
+`provideToastPreferenceErrors()`, and an app initializer that calls `load()` on the store at start. A
+failed load leaves the cache in charge. `AppPreferencesStore` is the default
+`accountPreferencesStore()`, exported from `@lifekit-hq/core/preferences`; an app with extra account
+fields passes its own store, `provideAccountAppearance(MyPreferencesStore)`. An app with no
+preferences endpoint omits that and keeps working on the cache alone; `cmn-appearance-settings` then captions the control "On this
 device" instead of "Synced to your account".
 
 The page and the cache change at once on every input. A colour drag fires an input per step, so a

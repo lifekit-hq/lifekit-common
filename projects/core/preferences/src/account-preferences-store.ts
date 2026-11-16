@@ -204,3 +204,10 @@ export function accountPreferencesStore<P extends AccountPreferences = AccountPr
     })
   );
 }
+
+/**
+ * The default account preferences store, over `ACCOUNT_PREFERENCES_ENDPOINT` with the base
+ * `AccountPreferences`. `provideAccountAppearance()` in `@lifekit-hq/ui` uses it. An app with extra
+ * account fields builds its own with `accountPreferencesStore<MyPreferences>()` instead.
+ */
+export const AppPreferencesStore = accountPreferencesStore();

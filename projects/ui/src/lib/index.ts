@@ -113,6 +113,7 @@ export * from './pipes/relative-time/relative-time.pipe';
 // Services
 export * from './services/app-mark/app-mark.service';
 export * from './services/appearance/appearance.service';
+export * from './services/appearance/provide-account-appearance';
 export * from './services/dialog/dialog.service';
 export * from './services/drawer/drawer.service';
 export * from './services/icon-registry/icon-registry.service';
