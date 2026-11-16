@@ -24,6 +24,12 @@ export const detailReader: FailureBodyReader = body => nonEmpty(asRecord(body)?.
 /** `{error: "..."}`. */
 export const errorFieldReader: FailureBodyReader = body => nonEmpty(asRecord(body)?.['error']);
 
+/** A plain-text body (`HttpErrorResponse.error` is the string itself); markup such as a proxy's HTML error page is not a sentence. */
+export const textBodyReader: FailureBodyReader = body => {
+  const text = nonEmpty(body);
+  return text && !text.startsWith('<') ? text : null;
+};
+
 /** `{errors: ["...", ...]}` or `{errors: {field: "..." | ["..."]}}`, joined with a space. */
 export const errorsReader: FailureBodyReader = body => {
   const errors = asRecord(body)?.['errors'];
@@ -43,6 +49,7 @@ const DEFAULT_READERS: readonly FailureBodyReader[] = [
   detailReader,
   errorsReader,
   errorFieldReader,
+  textBodyReader,
 ];
 
 /** The HTTP status of a failed call, or `null` when `error` carries none. 0 means unreachable. */

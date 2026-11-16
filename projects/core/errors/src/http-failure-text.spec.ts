@@ -44,6 +44,10 @@ describe('httpFailureText', () => {
     expect(httpFailureText(failure({error: 'Forbidden'}, 403), options)).toBe('Forbidden');
   });
 
+  it('reads a plain-text body', () => {
+    expect(httpFailureText(failure('Quota exceeded', 429), options)).toBe('Quota exceeded');
+  });
+
   it('falls back when the body has no sentence', () => {
     expect(httpFailureText(failure({detail: '  '}, 500), options)).toBe(options.fallback);
     expect(httpFailureText(failure('<html>', 502), options)).toBe(options.fallback);

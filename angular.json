@@ -98,6 +98,7 @@
             "include": [
               "**/*.spec.ts",
               "../pwa/**/*.spec.ts",
+              "../errors/**/*.spec.ts",
               "../format/**/*.spec.ts",
               "../preferences/**/*.spec.ts",
               "../routing/**/*.spec.ts"

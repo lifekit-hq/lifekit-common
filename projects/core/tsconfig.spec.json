@@ -11,6 +11,7 @@
   "include": [
     "src/**/*.ts",
     "pwa/**/*.ts",
+    "errors/**/*.ts",
     "format/**/*.ts",
     "preferences/**/*.ts",
     "routing/**/*.ts"
