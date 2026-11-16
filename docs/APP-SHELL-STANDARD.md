@@ -22,7 +22,7 @@ document is the contract for the account and settings surface inside it.
 | `cmn-account-section`, `cmn-about-section`, `cmn-session-section`       | `ui`                                     | Built  |
 | Identity header, `accountMenu()`, `accountOnPhone`, `cmn-more-page`     | `ui`                                     | Built  |
 | `provideGatewayAccount()` (oauth2-proxy userinfo to the layout account) | `ui`                                     | Built  |
-| `lifekit-theme-sync`, `APP_SEEDS.bs`                                    | `tokens`                                 | Target |
+| `lifekit-theme-sync`, `APP_SEEDS.bs`                                    | `tokens`                                 | Built  |
 
 Every app migrates to the standard in its own PR after the library parts land. Until an app has, the
 rules below describe where it is going, not where it is.
