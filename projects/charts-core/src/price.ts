@@ -78,6 +78,31 @@ export interface PriceSeries {
   points: readonly PricePoint[];
 }
 
+/** Whether a dated point is a purchase or a sale. */
+export type PriceMarkerKind = 'buy' | 'sell';
+
+/**
+ * A dated point on the chart, such as a fill. It sits at `value` (the fill's price) when given and
+ * on the instrument's price at that day otherwise. A marker outside the period is not drawn.
+ */
+export interface PriceMarker {
+  /** When (epoch ms). */
+  time: number;
+  kind: PriceMarkerKind;
+  /** The price the marker sits at, in the series' own units. */
+  value?: number;
+  /** Names the marker for assistive technology and the data summary, e.g. "10 shares". */
+  label?: string;
+}
+
+/** A horizontal line at a price, such as the average cost of a holding. */
+export interface PriceReferenceLine {
+  /** The price the line sits at, in the series' own units. */
+  value: number;
+  /** What the line is, drawn beside it and read aloud: "Average cost". */
+  label: string;
+}
+
 /** A price block's chart axis: the series' own values, or each one's change since the period began. */
 export type PriceMode = 'price' | 'percent';
 
@@ -365,12 +390,121 @@ export const priceBaselinePlugin: Plugin<'line', PriceBaselineOptions> = {
   },
 };
 
+/** A marker placed on the chart: where (time, y as drawn) and what kind. */
+export interface PriceChartMarker {
+  time: number;
+  y: number;
+  kind: PriceMarkerKind;
+}
+
+/** What the annotations plugin draws: a dashed reference line and the markers over the series. */
+export interface PriceAnnotationOptions {
+  /** The line's y value and its text; null draws no line. */
+  reference: {value: number; text: string} | null;
+  markers: readonly PriceChartMarker[];
+  /** The line and its label. */
+  color: string;
+  buyColor: string;
+  sellColor: string;
+  /** Behind the label and round each marker, so both stay legible over the lines. */
+  halo: string;
+  fontFamily: string;
+}
+
+declare module 'chart.js' {
+  // The type parameter must keep Chart.js's name for the declarations to merge.
+  // eslint-disable-next-line unused-imports/no-unused-vars
+  interface PluginOptionsByType<TType extends ChartType> {
+    priceAnnotations?: PriceAnnotationOptions;
+  }
+}
+
+const REFERENCE_DASH_LENGTH = 6;
+const REFERENCE_DASH_GAP = 4;
+const REFERENCE_DASH = [REFERENCE_DASH_LENGTH, REFERENCE_DASH_GAP];
+const REFERENCE_WIDTH = 1;
+const MARKER_HALF_WIDTH = 5;
+const MARKER_HEIGHT = 8;
+const MARKER_GAP = 3;
+const MARKER_RING = 2;
+
+/**
+ * Draws what a host marks on the price: a dashed reference line across the plot with its text at
+ * the left end (the dotted baseline keeps the right), and a triangle per marker, pointing up under
+ * the price for a buy and down over it for a sell. Drawn over the series, so a marker is never hidden.
+ */
+export const priceAnnotationsPlugin: Plugin<'line', PriceAnnotationOptions> = {
+  id: 'priceAnnotations',
+  afterDatasetsDraw(chart, _args, options) {
+    const xScale = chart.scales['x'];
+    const yScale = chart.scales['y'];
+    if (!options || !xScale || !yScale) {
+      return;
+    }
+    const {ctx} = chart;
+    const {left, right, top, bottom} = chart.chartArea;
+    ctx.save();
+    const {reference} = options;
+    if (reference) {
+      const y = yScale.getPixelForValue(reference.value);
+      if (Number.isFinite(y) && y >= top && y <= bottom) {
+        ctx.beginPath();
+        ctx.moveTo(left, y);
+        ctx.lineTo(right, y);
+        ctx.lineWidth = REFERENCE_WIDTH;
+        ctx.setLineDash(REFERENCE_DASH);
+        ctx.strokeStyle = options.color;
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.font = `${CHART_FONT_SIZE}px ${options.fontFamily}`;
+        ctx.textAlign = 'left';
+        const above = y - top >= CHART_FONT_SIZE + LABEL_GAP;
+        ctx.textBaseline = above ? 'bottom' : 'top';
+        const textY = above ? y - LABEL_GAP : y + LABEL_GAP;
+        ctx.lineJoin = 'round';
+        ctx.lineWidth = HALO_WIDTH;
+        ctx.strokeStyle = options.halo;
+        ctx.strokeText(reference.text, left + LABEL_INSET, textY);
+        ctx.fillStyle = options.color;
+        ctx.fillText(reference.text, left + LABEL_INSET, textY);
+      }
+    }
+    for (const marker of options.markers) {
+      const x = xScale.getPixelForValue(marker.time);
+      const y = yScale.getPixelForValue(marker.y);
+      if (!Number.isFinite(x) || !Number.isFinite(y) || x < left || x > right) {
+        continue;
+      }
+      // A buy points up from below the price, a sell points down from above it.
+      const dir = marker.kind === 'buy' ? 1 : -1;
+      const tip = y + dir * MARKER_GAP;
+      const base = tip + dir * MARKER_HEIGHT;
+      ctx.beginPath();
+      ctx.moveTo(x, tip);
+      ctx.lineTo(x - MARKER_HALF_WIDTH, base);
+      ctx.lineTo(x + MARKER_HALF_WIDTH, base);
+      ctx.closePath();
+      ctx.lineJoin = 'round';
+      ctx.lineWidth = MARKER_RING;
+      ctx.strokeStyle = options.halo;
+      ctx.stroke();
+      ctx.fillStyle = marker.kind === 'buy' ? options.buyColor : options.sellColor;
+      ctx.fill();
+    }
+    ctx.restore();
+  },
+};
+
 export interface PriceChartTokens {
   fontFamily?: string;
   textSecondary: string;
   borderDefault: string;
   /** The card the chart sits on. */
   surface: string;
+  /** A buy marker. */
+  success: string;
+  /** A sell marker. */
+  error: string;
 }
 
 export function resolvePriceChartTokens(): PriceChartTokens {
@@ -379,6 +513,8 @@ export function resolvePriceChartTokens(): PriceChartTokens {
     textSecondary: cssVar('--color-text-secondary', '#46565e'),
     borderDefault: cssVar('--color-border-default', '#d9e0e3'),
     surface: cssVar('--color-surface-card', '#ffffff'),
+    success: cssVar('--color-status-success', '#0e7446'),
+    error: cssVar('--color-status-error', '#bb2530'),
   };
 }
 
@@ -392,6 +528,10 @@ export interface PriceChartModel {
   baseline: number | null;
   /** Room (px) kept above the plot for the host's tooltip pill. */
   headroom: number;
+  /** The dashed reference line (its value as drawn and its text), or null for none. */
+  reference?: {value: number; text: string} | null;
+  /** The markers inside the period, positioned as drawn. */
+  markers?: readonly PriceChartMarker[];
 }
 
 const INSTRUMENT_WIDTH = 2;
@@ -432,6 +572,30 @@ function baselineOptions(model: PriceChartModel, tokens: PriceChartTokens): Pric
   };
 }
 
+/** The y range the marks need, so the axis stretches to hold them; undefined bounds leave it to the data. */
+function annotationBounds(model: PriceChartModel): {min?: number; max?: number} {
+  const ys = [
+    ...(model.reference ? [model.reference.value] : []),
+    ...(model.markers ?? []).map(m => m.y),
+  ];
+  return ys.length === 0 ? {} : {min: Math.min(...ys), max: Math.max(...ys)};
+}
+
+function annotationOptions(
+  model: PriceChartModel,
+  tokens: PriceChartTokens
+): PriceAnnotationOptions {
+  return {
+    reference: model.reference ?? null,
+    markers: model.markers ?? [],
+    color: tokens.textSecondary,
+    buyColor: tokens.success,
+    sellColor: tokens.error,
+    halo: tokens.surface,
+    fontFamily: fontFamily(tokens),
+  };
+}
+
 /**
  * The Chart.js config of a price chart: the series as lines on a time-spaced x axis, the dotted
  * baseline, and the scrub crosshair (a dot on every series at the point under a pointer, with
@@ -445,7 +609,11 @@ export function buildPriceChartConfig(
   const font = {family: fontFamily(tokens), size: CHART_FONT_SIZE};
   return {
     type: 'line',
-    plugins: [scrubPlugin(handlers, tokens.textSecondary), priceBaselinePlugin],
+    plugins: [
+      scrubPlugin(handlers, tokens.textSecondary),
+      priceBaselinePlugin,
+      priceAnnotationsPlugin,
+    ],
     data: {datasets: model.series.map(datasetOf)},
     options: {
       responsive: true,
@@ -456,6 +624,7 @@ export function buildPriceChartConfig(
         legend: {display: false},
         tooltip: {enabled: false},
         priceBaseline: baselineOptions(model, tokens),
+        priceAnnotations: annotationOptions(model, tokens),
       },
       scales: {
         x: {
@@ -472,6 +641,8 @@ export function buildPriceChartConfig(
         },
         y: {
           grace: Y_GRACE,
+          suggestedMin: annotationBounds(model).min,
+          suggestedMax: annotationBounds(model).max,
           grid: {color: tokens.borderDefault},
           border: {display: false},
           ticks: {
@@ -505,6 +676,12 @@ export function updatePriceChart(
   if (xTicks) {
     xTicks.callback = priceTickFormatter(spanOf(model.series));
   }
+  const yScale = scales?.['y'];
+  if (yScale) {
+    const bounds = annotationBounds(model);
+    yScale.suggestedMin = bounds.min;
+    yScale.suggestedMax = bounds.max;
+  }
   const yTicks = scales?.['y']?.ticks;
   if (yTicks) {
     yTicks.callback = val => model.format(val as number, true);
@@ -516,6 +693,7 @@ export function updatePriceChart(
   const plugins = chart.options.plugins;
   if (plugins) {
     plugins.priceBaseline = baselineOptions(model, tokens);
+    plugins.priceAnnotations = annotationOptions(model, tokens);
   }
   chart.update('none');
 }
@@ -552,6 +730,19 @@ export interface PriceViewInput {
   mode: PriceModeSetting;
   valueFormat: PriceValueFormat;
   currency: string;
+  markers?: readonly PriceMarker[];
+  reference?: PriceReferenceLine | null;
+}
+
+/** A marker inside the period, read in the series' own units. */
+export interface PriceViewMarker {
+  time: number;
+  kind: PriceMarkerKind;
+  /** The price it sits at. */
+  value: number;
+  label: string;
+  /** The date, as the pill writes it. */
+  date: string;
 }
 
 /** Everything a price block draws and says for one period: the chart's model plus the figures. */
@@ -569,6 +760,35 @@ export interface PriceView {
   start: number;
   /** The primary's last price of the period. */
   end: number;
+  /** The markers inside the period, in time order. */
+  markers: PriceViewMarker[];
+  /** The reference line, in the series' own units. */
+  reference: PriceReferenceLine | null;
+}
+
+/**
+ * The markers that fall inside the primary's period, in time order. Each sits at its own `value`,
+ * or on the last price on or before its day (the first price when the day precedes them all).
+ */
+function viewMarkers(
+  markers: readonly PriceMarker[],
+  points: readonly PricePoint[]
+): PriceViewMarker[] {
+  const first = points[0].time;
+  const last = points[points.length - 1].time;
+  return markers
+    .filter(m => Number.isFinite(m.time) && m.time >= first && m.time <= last)
+    .sort((a, b) => a.time - b.time)
+    .map(m => {
+      const at = points.filter(p => p.time <= m.time).pop() ?? points[0];
+      return {
+        time: m.time,
+        kind: m.kind,
+        value: m.value ?? at.value,
+        label: m.label ?? '',
+        date: priceDateLabel(m.time),
+      };
+    });
 }
 
 /** Slices the instrument to the period, aligns each overlay's full history to it and (for a benchmark) rebases `input.series` into what the block shows; null when there is nothing to draw. */
@@ -586,6 +806,7 @@ export function buildPriceView(input: PriceViewInput): PriceView | null {
     points: toPricePoints(mode === 'percent' ? rebaseToPercent(s.points) : s.points),
   }));
   const prices = toPricePoints(primary.points);
+  const markers = viewMarkers(input.markers ?? [], primary.points);
   return {
     mode,
     drawn,
@@ -594,15 +815,27 @@ export function buildPriceView(input: PriceViewInput): PriceView | null {
     priceFormat: priceFormatter(input.valueFormat, input.currency, 'price'),
     start: prices[0].value,
     end: prices[prices.length - 1].value,
+    markers,
+    reference: input.reference && Number.isFinite(input.reference.value) ? input.reference : null,
   };
 }
 
 /** The chart model of a view: a baseline at the start price, or at 0% when the chart reads in percent. */
 export function priceChartModel(view: PriceView, headroom: number): PriceChartModel {
+  const percent = view.mode === 'percent';
+  // In percent mode a price is drawn as its change from the period's start.
+  const drawnAt = (value: number): number => (percent ? percentFrom(view.start, value) : value);
   return {
     series: view.drawn,
     format: view.format,
-    baseline: view.mode === 'percent' ? 0 : view.start,
+    baseline: percent ? 0 : view.start,
     headroom,
+    reference: view.reference
+      ? {
+          value: drawnAt(view.reference.value),
+          text: `${view.reference.label} ${view.priceFormat(view.reference.value, false)}`,
+        }
+      : null,
+    markers: view.markers.map(m => ({time: m.time, kind: m.kind, y: drawnAt(m.value)})),
   };
 }

@@ -28,8 +28,10 @@ import {
   priceChartModel,
   priceDelta,
   priceFormatter,
+  type PriceMarker,
   type PriceModeSetting,
   type PricePeriod,
+  type PriceReferenceLine,
   type PriceSeries,
   type PriceValueFormat,
   resolvePriceChartTokens,
@@ -46,9 +48,12 @@ import {IconComponent, LucideIconName} from '../icon/icon.component';
 import {TagComponent, TagVariant} from '../tag/tag.component';
 
 export type {
+  PriceMarker,
+  PriceMarkerKind,
   PriceModeSetting,
   PricePeriod,
   PricePoint,
+  PriceReferenceLine,
   PriceSeries,
   PriceValueFormat,
 } from '@lifekit-hq/charts-core';
@@ -224,6 +229,8 @@ export class PriceBlockComponent implements AfterViewInit, OnDestroy {
           series: [],
           format: priceFormatter(this.valueFormat(), this.currency(), 'price'),
           baseline: null,
+          reference: null,
+          markers: [],
           headroom: this.headroom(),
         };
   });
@@ -252,6 +259,17 @@ export class PriceBlockComponent implements AfterViewInit, OnDestroy {
   public readonly valueFormat = input<PriceValueFormat>('price');
   /** Shown in place of the plot when the period holds no prices. */
   public readonly emptyMessage = input<string>('No prices for this period');
+  /**
+   * Dated points drawn on the price: a triangle under the line for a `'buy'`, over it for a
+   * `'sell'`, at the marker's `value` (the fill price) or else on the price that day. Markers
+   * outside the selected period are left out; they are named in the chart's description.
+   */
+  public readonly markers = input<readonly PriceMarker[]>([]);
+  /**
+   * A dashed horizontal line at a price (the average cost of a holding), with its label beside
+   * it. The price axis stretches to hold it, as it does for a marker at a price off the line.
+   */
+  public readonly referenceLine = input<PriceReferenceLine | null>(null);
   /** Opens the block with its data table showing in place of the plot. */
   public readonly showDataTable = input<boolean>(false);
 
@@ -269,6 +287,8 @@ export class PriceBlockComponent implements AfterViewInit, OnDestroy {
       mode: this.mode(),
       valueFormat: this.valueFormat(),
       currency: this.currency(),
+      markers: this.markers(),
+      reference: this.referenceLine(),
     });
   });
   protected readonly name = computed(() => this.label() || 'Price chart');
@@ -287,7 +307,7 @@ export class PriceBlockComponent implements AfterViewInit, OnDestroy {
       view.mode === 'percent' && benchmarks.length > 0
         ? ` Compared with ${benchmarks.join(' and ')}, each shown as its percent change since the period began.`
         : '';
-    return `${this.name()}, ${PRICE_PERIOD_PHRASES[this.period()]}. ${describeLineChart(view.prices, format)}.${compared}`;
+    return `${this.name()}, ${PRICE_PERIOD_PHRASES[this.period()]}. ${describeLineChart(view.prices, format)}.${compared}${this.annotationSummary(view)}`;
   });
 
   /** The price shown large: the instrument's last price, or its price at the scrubbed point. */
@@ -397,6 +417,19 @@ export class PriceBlockComponent implements AfterViewInit, OnDestroy {
     event.preventDefault();
     this.period.set(periods[next]);
     this.tabButtons()[next]?.nativeElement.focus();
+  }
+
+  /** What the markers and the reference line say, for the chart's spoken description. */
+  private annotationSummary(view: NonNullable<ReturnType<typeof this.view>>): string {
+    const parts = view.markers.map(m => {
+      const what = m.kind === 'buy' ? 'Bought' : 'Sold';
+      const detail = m.label ? ` ${m.label}` : '';
+      return `${what}${detail} at ${view.priceFormat(m.value, false)} on ${m.date}`;
+    });
+    if (view.reference) {
+      parts.push(`${view.reference.label} ${view.priceFormat(view.reference.value, false)}`);
+    }
+    return parts.length > 0 ? ` ${parts.join('. ')}.` : '';
   }
 
   private buildChart(): void {

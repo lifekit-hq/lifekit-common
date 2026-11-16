@@ -1,5 +1,10 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers -- fixture data: dates and price shapes are the data */
-import type {PricePoint, PriceSeries} from '@lifekit-hq/charts-core';
+import type {
+  PriceMarker,
+  PricePoint,
+  PriceReferenceLine,
+  PriceSeries,
+} from '@lifekit-hq/charts-core';
 
 /**
  * Deterministic price histories for the price block's stories, specs and screenshots: weekdays
@@ -68,3 +73,14 @@ export const RECENT: PriceSeries = {
   label: 'NEWCO',
   points: RISING.points.slice(-45),
 };
+
+/** A holding's fills over the last two years: three buys and a sell, the first of them more than a year before the history ends. */
+export const FILLS: readonly PriceMarker[] = [
+  {time: Date.UTC(2024, 5, 12), kind: 'buy', label: '20 shares'},
+  {time: Date.UTC(2025, 5, 11), kind: 'buy', label: '10 shares'},
+  {time: Date.UTC(2025, 10, 5), kind: 'sell', label: '8 shares'},
+  {time: Date.UTC(2026, 0, 14), kind: 'buy', label: '5 shares'},
+];
+
+/** The average cost of that holding. */
+export const AVERAGE_COST: PriceReferenceLine = {value: 150, label: 'Average cost'};

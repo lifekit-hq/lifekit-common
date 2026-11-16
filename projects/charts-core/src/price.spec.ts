@@ -7,6 +7,7 @@ import {
   buildPriceView,
   periodStart,
   priceAnchor,
+  priceAnnotationsPlugin,
   priceBaselinePlugin,
   priceChartModel,
   priceDateLabel,
@@ -25,7 +26,13 @@ import {
   updatePriceChart,
 } from './price';
 
-const TOKENS = {textSecondary: '#46565e', borderDefault: '#d9e0e3', surface: '#ffffff'};
+const TOKENS = {
+  textSecondary: '#46565e',
+  borderDefault: '#d9e0e3',
+  surface: '#ffffff',
+  success: '#0e7446',
+  error: '#bb2530',
+};
 const DAY = 86_400_000;
 const utc = (y: number, m: number, d: number): number => Date.UTC(y, m - 1, d);
 
@@ -369,9 +376,9 @@ describe('buildPriceChartConfig', () => {
     expect(config().options?.plugins?.priceBaseline).toMatchObject({value: 0, text: '0.00%'});
   });
 
-  it('registers the scrub and the baseline plugins', () => {
+  it('registers the scrub, baseline and annotations plugins', () => {
     const ids = (config().plugins ?? []).map(p => p.id);
-    expect(ids).toEqual(['scrub', 'priceBaseline']);
+    expect(ids).toEqual(['scrub', 'priceBaseline', 'priceAnnotations']);
   });
 
   it('formats y ticks with the view format', () => {
@@ -480,5 +487,165 @@ describe('priceBaselinePlugin', () => {
       run();
       expect(ctx.stroke).not.toHaveBeenCalled();
     }
+  });
+});
+
+describe('price annotations', () => {
+  const instrument: PriceSeries = {label: 'AAPL', points: daily(utc(2025, 1, 1), 500, 100, 1)};
+  const benchmark: PriceSeries = {label: 'S&P 500', points: daily(utc(2025, 1, 1), 500, 4000, 2)};
+  const base = {
+    period: '1Y' as const,
+    mode: 'auto' as const,
+    valueFormat: 'price' as const,
+    currency: 'USD',
+  };
+  const last = instrument.points[instrument.points.length - 1].time;
+  const inside = last - 30 * DAY;
+  const inputs = {
+    markers: [
+      {time: inside, kind: 'buy' as const, label: '5 shares'},
+      {time: last - 10 * DAY, kind: 'sell' as const, value: 777},
+      {time: utc(2025, 1, 2), kind: 'buy' as const},
+    ],
+    reference: {value: 400, label: 'Average cost'},
+  };
+
+  it("keeps the markers inside the period, in time order, at the fill or the day's price", () => {
+    const view = buildPriceView({...base, ...inputs, series: [instrument]});
+    expect(view?.markers.map(m => m.kind)).toEqual(['buy', 'sell']);
+    const day = instrument.points.find(p => p.time === inside);
+    expect(view?.markers[0]).toMatchObject({value: day?.value, label: '5 shares'});
+    expect(view?.markers[1].value).toBe(777);
+    expect(view?.markers[1].date).toBe(priceDateLabel(last - 10 * DAY));
+  });
+
+  it('has none by default', () => {
+    const view = buildPriceView({...base, series: [instrument]});
+    expect(view?.markers).toEqual([]);
+    expect(view?.reference).toBeNull();
+  });
+
+  it('puts them on the chart model in price units, with the line labelled', () => {
+    const view = buildPriceView({...base, ...inputs, series: [instrument]});
+    if (!view) {
+      throw new Error('no view');
+    }
+    const model = priceChartModel(view, 40);
+    expect(model.reference).toEqual({value: 400, text: 'Average cost $400.00'});
+    expect(model.markers?.[1]).toEqual({time: last - 10 * DAY, kind: 'sell', y: 777});
+  });
+
+  it('moves them to percent change since the start while a benchmark overlays', () => {
+    const view = buildPriceView({...base, ...inputs, series: [instrument, benchmark]});
+    if (!view) {
+      throw new Error('no view');
+    }
+    const model = priceChartModel(view, 40);
+    expect(model.reference?.value).toBeCloseTo(((400 - view.start) / view.start) * 100);
+    expect(model.reference?.text).toBe('Average cost $400.00');
+  });
+
+  it('reaches the chart config and a live update', () => {
+    const view = buildPriceView({...base, ...inputs, series: [instrument]});
+    if (!view) {
+      throw new Error('no view');
+    }
+    const config = buildPriceChartConfig(priceChartModel(view, 40), TOKENS, {
+      onScrub: vi.fn(),
+      onRelease: vi.fn(),
+    });
+    // The axis stretches to hold the line (400) and the highest fill (777).
+    expect(config.options?.scales?.['y']).toMatchObject({suggestedMin: 400, suggestedMax: 777});
+    expect(config.options?.plugins?.priceAnnotations).toMatchObject({
+      reference: {value: 400},
+      buyColor: TOKENS.success,
+      sellColor: TOKENS.error,
+    });
+    const chart = {data: config.data, options: config.options, update: vi.fn()} as unknown as Chart;
+    const bare = buildPriceView({...base, series: [instrument]});
+    if (!bare) {
+      throw new Error('no view');
+    }
+    updatePriceChart(chart, priceChartModel(bare, 40), TOKENS);
+    expect(config.options?.scales?.['y']?.suggestedMin).toBeUndefined();
+    expect(config.options?.plugins?.priceAnnotations?.markers).toEqual([]);
+    expect(config.options?.plugins?.priceAnnotations?.reference).toBeNull();
+  });
+});
+
+describe('priceAnnotationsPlugin', () => {
+  function run(options: unknown, pixel: {x: number; y: number}) {
+    const ctx = {
+      save: vi.fn(),
+      restore: vi.fn(),
+      beginPath: vi.fn(),
+      moveTo: vi.fn(),
+      lineTo: vi.fn(),
+      closePath: vi.fn(),
+      stroke: vi.fn(),
+      fill: vi.fn(),
+      setLineDash: vi.fn(),
+      strokeText: vi.fn(),
+      fillText: vi.fn(),
+      fillStyle: '',
+    };
+    const chart = {
+      ctx,
+      chartArea: {left: 10, right: 210, top: 20, bottom: 120},
+      scales: {x: {getPixelForValue: () => pixel.x}, y: {getPixelForValue: () => pixel.y}},
+    } as unknown as Chart;
+    (priceAnnotationsPlugin.afterDatasetsDraw as (c: Chart, a: unknown, o: unknown) => void)(
+      chart,
+      {},
+      options
+    );
+    return ctx;
+  }
+
+  const options = {
+    reference: {value: 100, text: 'Average cost $100.00'},
+    markers: [{time: 1, y: 100, kind: 'buy' as const}],
+    color: '#000',
+    buyColor: '#0f0',
+    sellColor: '#f00',
+    halo: '#fff',
+    fontFamily: 'sans',
+  };
+
+  it('draws a dashed line with its label at the left, and a marker', () => {
+    const ctx = run(options, {x: 100, y: 60});
+    expect(ctx.moveTo).toHaveBeenCalledWith(10, 60);
+    expect(ctx.lineTo).toHaveBeenCalledWith(210, 60);
+    expect(ctx.setLineDash).toHaveBeenCalledWith([6, 4]);
+    expect(ctx.fillText).toHaveBeenCalledWith('Average cost $100.00', 14, expect.any(Number));
+    expect(ctx.fill).toHaveBeenCalledTimes(1);
+  });
+
+  it('points a buy up from below the price and a sell down from above it', () => {
+    const buy = run(options, {x: 100, y: 60});
+    const sell = run(
+      {...options, reference: null, markers: [{time: 1, y: 1, kind: 'sell'}]},
+      {x: 100, y: 60}
+    );
+    expect(buy.moveTo.mock.calls.at(-1)?.[1]).toBeGreaterThan(60);
+    expect(sell.moveTo.mock.calls.at(-1)?.[1]).toBeLessThan(60);
+  });
+
+  it('colours a sell with the error colour', () => {
+    const sell = run(
+      {...options, reference: null, markers: [{time: 1, y: 1, kind: 'sell'}]},
+      {x: 100, y: 60}
+    );
+    expect(sell.fillStyle).toBe('#f00');
+  });
+
+  it('skips a line off the plot and a marker outside it', () => {
+    const ctx = run(options, {x: 500, y: 300});
+    expect(ctx.moveTo).not.toHaveBeenCalled();
+    expect(ctx.fill).not.toHaveBeenCalled();
+  });
+
+  it('draws nothing without options', () => {
+    expect(run(undefined, {x: 100, y: 60}).save).not.toHaveBeenCalled();
   });
 });
