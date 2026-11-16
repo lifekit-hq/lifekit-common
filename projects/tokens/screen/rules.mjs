@@ -88,6 +88,7 @@ export function inspectScreen(options = {}) {
     form: ['main'],
     settings: ['main'],
     overview: ['main', 'rail'],
+    status: ['main'],
   };
   const OPTIONAL_COLUMNS = new Set(['rail']);
   const TITLE_GAP_MIN = 16;

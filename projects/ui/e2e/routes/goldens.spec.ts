@@ -49,7 +49,7 @@ const routes: RouteScanRoute[] = [...firstStoryOf].map(([name, id]) => ({
   url: ({scheme}) => `/iframe.html?id=${id}&viewMode=story&globals=theme:${scheme}`,
   ready: async page => {
     await page
-      .locator('cmn-page[data-cmn-page]')
+      .locator('[data-cmn-page]')
       .waitFor({state: 'visible', timeout: STORY_READY_TIMEOUT_MS});
   },
 }));
@@ -72,11 +72,13 @@ const GOLDEN_SCREENS = [
   'templates-overview',
   'templates-overview-with-long-body',
   'templates-settings',
+  'templates-status',
+  'templates-status-no-access',
   'templates-whats-new',
   'templates-whats-new-with-badge',
 ];
 const GOLDEN_STORY =
-  /^templates-(detail|form|list|overview|settings)--(phone|desktop)(-dark)?$|^templates-detail--(phone|desktop)-with-(tiles|verdict)(-dark)?$|^templates-list--(phone|desktop)-with-(notice|app-chrome|feed|swipe)$|^templates-list--(phone|desktop)-with-lede(-dark)?$|^templates-overview--desktop-with-long-body$|^templates-whats-new--(phone|desktop)(-with-badge)?(-dark)?$/;
+  /^templates-(detail|form|list|overview|settings)--(phone|desktop)(-dark)?$|^templates-detail--(phone|desktop)-with-(tiles|verdict)(-dark)?$|^templates-list--(phone|desktop)-with-(notice|app-chrome|feed|swipe)$|^templates-list--(phone|desktop)-with-lede(-dark)?$|^templates-status--(phone|desktop)(-no-access)?(-dark)?$|^templates-overview--desktop-with-long-body$|^templates-whats-new--(phone|desktop)(-with-badge)?(-dark)?$/;
 
 test('the scan covers every golden story', () => {
   expect(stories.filter(id => !GOLDEN_STORY.test(id))).toEqual([]);
