@@ -1,5 +1,15 @@
 # Changelog
 
+## [5.6.0](https://github.com/lifekit-hq/lifekit-common/compare/v5.5.0...v5.6.0) (2026-11-16)
+
+
+### Features
+
+* **ui:** add Account, About and Session settings sections ([#378](https://github.com/lifekit-hq/lifekit-common/issues/378)) ([279d151](https://github.com/lifekit-hq/lifekit-common/commit/279d15121a959f789259dc32bf6cd2337bf1861a))
+* **ui:** add the status page kind for shell-less screens ([#388](https://github.com/lifekit-hq/lifekit-common/issues/388)) ([781cea4](https://github.com/lifekit-hq/lifekit-common/commit/781cea4b335d9be6199751d7b06c11638c5eb554))
+* **ui:** let a nav item's child routes count as its tab root ([#392](https://github.com/lifekit-hq/lifekit-common/issues/392)) ([eb639cc](https://github.com/lifekit-hq/lifekit-common/commit/eb639cc8a0a0f746e3db937d5c357342d9338595)), closes [#391](https://github.com/lifekit-hq/lifekit-common/issues/391)
+* **ui:** let cmn-app-layout own the shell glue and More page wiring ([#386](https://github.com/lifekit-hq/lifekit-common/issues/386)) ([7a123f9](https://github.com/lifekit-hq/lifekit-common/commit/7a123f963c34412d9c4d9820b9e9671ff2e55687))
+
 ## [5.5.0](https://github.com/lifekit-hq/lifekit-common/compare/v5.4.0...v5.5.0) (2026-11-16)
 
 
