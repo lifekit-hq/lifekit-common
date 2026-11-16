@@ -128,6 +128,18 @@ describe('PushRowComponent', () => {
     );
   });
 
+  it('stays on and retryable when the backend refuses the unregister', async () => {
+    push.subscription.mockReturnValue({endpoint: SUB_JSON.endpoint});
+    backend.unregister.mockRejectedValue(new Error('500'));
+    render();
+    await press();
+    expect(push.unsubscribe).not.toHaveBeenCalled();
+    expect(toggle().getAttribute('aria-checked')).toBe('true');
+    expect(el().querySelector('cmn-alert')?.textContent).toContain(
+      'Could not turn notifications off'
+    );
+  });
+
   it('shows the blocked notice, not a stale failure, after Block', async () => {
     push.subscribe.mockImplementation(() => {
       push.permission.set('denied');

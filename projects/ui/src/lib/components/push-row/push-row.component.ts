@@ -127,9 +127,9 @@ export class PushRowComponent {
 
   private async disable(): Promise<void> {
     const endpoint = this.push.subscription()?.endpoint;
-    await this.push.unsubscribe();
     if (endpoint) {
       await this.backend.unregister(endpoint);
     }
+    await this.push.unsubscribe();
   }
 }
