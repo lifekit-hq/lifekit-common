@@ -10,17 +10,18 @@ document is the contract for the account and settings surface inside it.
 
 ## Status
 
-| Part                                                                  | Where                                    | Status |
-| --------------------------------------------------------------------- | ---------------------------------------- | ------ |
-| Preference tiers, `devicePreference`, `accountPreferencesStore`       | `@lifekit-hq/core/preferences`           | Built  |
-| Save-failure toast wiring                                             | `provideToastPreferenceErrors()` in `ui` | Built  |
-| `cmn-segmented`, `cmn-appearance-settings`, palette System/Light/Dark | `ui`                                     | Built  |
-| `AppearanceService`, `provideAppearanceSync(Store)`                   | `ui`                                     | Built  |
-| `provideAccountAppearance()` (sync + toast errors + load at start)    | `ui`                                     | Built  |
-| `showThemeToggle` default `false`                                     | `cmn-app-layout`                         | Built  |
-| `cmn-settings-section`, `cmn-setting-row`, `cmn-danger-zone`          | `ui`                                     | Target |
-| Identity header, `accountMenu()`, `accountOnPhone`, `cmn-more-page`   | `ui`                                     | Built  |
-| `lifekit-theme-sync`, `APP_SEEDS.bs`                                  | `tokens`                                 | Target |
+| Part                                                                    | Where                                    | Status |
+| ----------------------------------------------------------------------- | ---------------------------------------- | ------ |
+| Preference tiers, `devicePreference`, `accountPreferencesStore`         | `@lifekit-hq/core/preferences`           | Built  |
+| Save-failure toast wiring                                               | `provideToastPreferenceErrors()` in `ui` | Built  |
+| `cmn-segmented`, `cmn-appearance-settings`, palette System/Light/Dark   | `ui`                                     | Built  |
+| `AppearanceService`, `provideAppearanceSync(Store)`                     | `ui`                                     | Built  |
+| `provideAccountAppearance()` (sync + toast errors + load at start)      | `ui`                                     | Built  |
+| `showThemeToggle` default `false`                                       | `cmn-app-layout`                         | Built  |
+| `cmn-settings-section`, `cmn-setting-row`, `cmn-danger-zone`            | `ui`                                     | Target |
+| Identity header, `accountMenu()`, `accountOnPhone`, `cmn-more-page`     | `ui`                                     | Built  |
+| `provideGatewayAccount()` (oauth2-proxy userinfo to the layout account) | `ui`                                     | Built  |
+| `lifekit-theme-sync`, `APP_SEEDS.bs`                                    | `tokens`                                 | Target |
 
 Every app migrates to the standard in its own PR after the library parts land. Until an app has, the
 rules below describe where it is going, not where it is.

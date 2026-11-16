@@ -118,6 +118,7 @@ export * from './services/appearance/provide-account-appearance';
 export * from './services/clipboard/clipboard.service';
 export * from './services/dialog/dialog.service';
 export * from './services/drawer/drawer.service';
+export * from './services/gateway-account/gateway-account';
 export * from './services/icon-registry/icon-registry.service';
 export * from './services/page-actions/page-actions.service';
 export * from './services/preset/preset.service';
