@@ -767,8 +767,10 @@ export interface PriceView {
 }
 
 /**
- * The markers that fall inside the primary's period, in time order. Each sits at its own `value`,
- * or on the last price on or before its day (the first price when the day precedes them all).
+ * The markers that fall inside the primary's period, in time order. A marker is inside when its UTC
+ * day is, so a fill carrying a time of day still counts on the period's first and last day; it is
+ * drawn at the nearest point's time. Each sits at its own `value` when finite, or on the last price
+ * on or before its day (the first price when the day precedes them all).
  */
 function viewMarkers(
   markers: readonly PriceMarker[],
@@ -776,17 +778,19 @@ function viewMarkers(
 ): PriceViewMarker[] {
   const first = points[0].time;
   const last = points[points.length - 1].time;
+  const day = (time: number): number => Math.floor(time / DAY_MS);
   return markers
-    .filter(m => Number.isFinite(m.time) && m.time >= first && m.time <= last)
+    .filter(m => Number.isFinite(m.time) && day(m.time) >= day(first) && day(m.time) <= day(last))
     .sort((a, b) => a.time - b.time)
     .map(m => {
-      const at = points.filter(p => p.time <= m.time).pop() ?? points[0];
+      const time = Math.min(Math.max(m.time, first), last);
+      const at = points.filter(p => p.time <= time).pop() ?? points[0];
       return {
-        time: m.time,
+        time,
         kind: m.kind,
-        value: m.value ?? at.value,
+        value: m.value !== undefined && Number.isFinite(m.value) ? m.value : at.value,
         label: m.label ?? '',
-        date: priceDateLabel(m.time),
+        date: priceDateLabel(time),
       };
     });
 }

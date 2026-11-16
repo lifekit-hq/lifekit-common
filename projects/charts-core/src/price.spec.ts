@@ -34,6 +34,7 @@ const TOKENS = {
   error: '#bb2530',
 };
 const DAY = 86_400_000;
+const HOUR = 3_600_000;
 const utc = (y: number, m: number, d: number): number => Date.UTC(y, m - 1, d);
 
 /** One price a day from `start` for `days` days, rising by `step` from `first`. */
@@ -517,6 +518,32 @@ describe('price annotations', () => {
     expect(view?.markers[0]).toMatchObject({value: day?.value, label: '5 shares'});
     expect(view?.markers[1].value).toBe(777);
     expect(view?.markers[1].date).toBe(priceDateLabel(last - 10 * DAY));
+  });
+
+  it('keeps a fill with a time of day on the first and last day, drawn at that day\'s point', () => {
+    const first = buildPriceView({...base, series: [instrument]})?.prices[0].time ?? 0;
+    const view = buildPriceView({
+      ...base,
+      series: [instrument],
+      markers: [
+        {time: last + 15 * HOUR, kind: 'buy', label: 'late'},
+        {time: first - 2 * HOUR, kind: 'sell', label: 'early'},
+        {time: last + DAY, kind: 'buy', label: 'tomorrow'},
+      ],
+    });
+    expect(view?.markers.map(m => m.label)).toEqual(['early', 'late']);
+    expect(view?.markers.map(m => m.time)).toEqual([first, last]);
+    expect(view?.markers[1].value).toBe(instrument.points[instrument.points.length - 1].value);
+  });
+
+  it('treats a non-finite marker value as absent', () => {
+    const view = buildPriceView({
+      ...base,
+      series: [instrument],
+      markers: [{time: inside, kind: 'buy', value: Number.NaN}],
+    });
+    const day = instrument.points.find(p => p.time === inside);
+    expect(view?.markers[0].value).toBe(day?.value);
   });
 
   it('has none by default', () => {
