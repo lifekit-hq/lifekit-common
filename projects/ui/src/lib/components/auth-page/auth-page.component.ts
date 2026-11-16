@@ -9,7 +9,8 @@ import {CardComponent} from '../card/card.component';
  * page ground, the same on a phone and a desktop, in place of each app's own frame.
  *
  * - The component is the page's `main` landmark, and `title` is its one `h1`.
- * - Project the content into the default slot and the legal links into `[footer]`.
+ * - Project the content into the default slot and the legal links into `[footer]`; give each link
+ *   `cmn-link cmn-hit-slop` so it presses at 44px on a phone.
  * - The mark is the app's own, set once with `provideAppMark()`.
  * - It owns no sign-in: a passkey or a redirect to the identity provider is the app's.
  */

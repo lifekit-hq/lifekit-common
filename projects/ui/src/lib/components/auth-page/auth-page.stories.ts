@@ -35,8 +35,8 @@ export const SignIn: Story = {
     template: `
       <cmn-auth-page title="Sign in to Basket" lead="Use your passkey to continue.">
         <cmn-button class="block [&_button]:w-full" icon="KeyRound">Sign in with a passkey</cmn-button>
-        <a footer href="#">Privacy</a>
-        <a footer href="#">Terms</a>
+        <a footer class="cmn-link cmn-hit-slop" href="#">Privacy</a>
+        <a footer class="cmn-link cmn-hit-slop" href="#">Terms</a>
       </cmn-auth-page>
     `,
   }),
