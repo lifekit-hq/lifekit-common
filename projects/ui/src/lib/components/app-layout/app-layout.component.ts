@@ -4,11 +4,13 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  CUSTOM_ELEMENTS_SCHEMA,
   DestroyRef,
   DOCUMENT,
   effect,
   ElementRef,
   inject,
+  Injector,
   input,
   output,
   signal,
@@ -17,6 +19,7 @@ import {
 import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
 import {createUrlTreeFromSnapshot, NavigationEnd, Router} from '@angular/router';
 import {type ThemeMode} from '@lifekit-hq/core/preferences';
+import {AppUpdateService} from '@lifekit-hq/core/pwa';
 import {filter, map} from 'rxjs';
 
 import {isOutputObserved} from '../../chart-click/output-observed';
@@ -27,6 +30,7 @@ import {CmnPageActionsService} from '../../services/page-actions/page-actions.se
 import {CmnPullRefreshService} from '../../services/pull-refresh/pull-refresh.service';
 import {CmnShellService} from '../../services/shell/shell.service';
 import {ThemeService} from '../../services/theme/theme.service';
+import {CMN_APP_VERSION} from '../../tokens/app-version';
 import {prefersReducedMotion} from '../../tokens/motion';
 import {CMN_OVERLAY_INSET_BOTTOM} from '../../tokens/overlay-inset';
 import {type AccountIdentity} from '../account-avatar/account-avatar.component';
@@ -41,6 +45,9 @@ import {type MenuItem} from '../menu/menu.component';
 import {isRouteMenuItem} from '../menu/route-menu-item';
 import {type NavItem, SidebarNavComponent} from '../sidebar-nav/sidebar-nav.component';
 import {TopBarComponent, type TopBarLargeTitle} from '../top-bar/top-bar.component';
+import {ACCOUNT_SIGN_OUT_ID} from './account-menu';
+import {defineAppChromeElements} from './app-chrome-elements';
+import {AppLayoutContext} from './app-layout-context';
 import {stackNotices} from './notice-stack';
 import {
   type BackTarget,
@@ -60,6 +67,7 @@ import {healViewportOnBlur} from './viewport-heal';
 
 export {type NavItem} from '../sidebar-nav/sidebar-nav.component';
 export * from './account-menu';
+export * from './app-layout-context';
 export * from './page-chrome';
 export {PageFrameService} from './page-frame';
 export {LAST_TAB_STORAGE_KEY} from './shell-navigation.service';
@@ -100,6 +108,16 @@ const APPEARANCE_MODE_BY_ACTION: Readonly<Record<string, ThemeMode>> = {
   [PALETTE_APPEARANCE_ACTIONS.light]: 'light',
   [PALETTE_APPEARANCE_ACTIONS.dark]: 'dark',
 };
+
+/** One of the PWA notices `cmn-app-layout` renders for `pwaNotices`. */
+export type PwaNotice = 'update' | 'offline' | 'install';
+
+const PALETTE_PAGES_GROUP = 'Pages';
+const PALETTE_ACTIONS_GROUP = 'Actions';
+const PALETTE_FALLBACK_ICON = 'Settings2';
+const PALETTE_SIGN_OUT_ICON = 'LogOut';
+
+const ALL_PWA_NOTICES: readonly PwaNotice[] = ['update', 'offline', 'install'];
 
 /** Where the account lives on a phone: the More page, or the top bar's avatar menu. */
 export type AccountOnPhone = 'more' | 'avatar';
@@ -223,7 +241,8 @@ export const CMN_CONTENT_INSET_PROPERTIES = {
     TopBarComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [ShellNavigationService, PageFrameService],
+  providers: [ShellNavigationService, PageFrameService, AppLayoutContext],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   host: {'(window:keydown)': 'onWindowKeydown($event)'},
   template: `
     <!-- Pinned with fixed/inset-0, not viewport units: h-screen/h-dvh overshoot the real
@@ -235,13 +254,13 @@ export const CMN_CONTENT_INSET_PROPERTIES = {
       <cmn-sidebar-nav
         [items]="navItems()"
         [activeRoute]="effectiveActiveRoute()"
-        [versionLabel]="versionLabel()"
+        [versionLabel]="effectiveVersionLabel()"
         [versionDot]="versionDot()"
         [versionClickable]="versionClickable()"
         [brand]="brand()"
         [rail]="shellMode() === 'rail'"
         [class]="sidebarClasses()"
-        (navClick)="navClick.emit($event)"
+        (navClick)="onSidebarClick($event)"
         (collapsedChange)="collapsedChange.emit($event)"
         (versionClick)="versionClick.emit()"
       />
@@ -300,6 +319,18 @@ export const CMN_CONTENT_INSET_PROPERTIES = {
             </div>
           }
           <div #notices [class]="noticesClasses" data-cmn-notices>
+            @if (showsNotice('update')) {
+              <lk-update-prompt
+                [ready]="updateReady()"
+                (lk-update-prompt-reload)="onUpdateReload()"
+              />
+            }
+            @if (showsNotice('offline')) {
+              <lk-offline-banner />
+            }
+            @if (showsNotice('install')) {
+              <lk-install-hint />
+            }
             <ng-content select="[cmnAppLayoutNotice]" />
           </div>
           <!-- The frame page hosts size against; whatever overflows it gets a spacer in the overlay -->
@@ -337,6 +368,9 @@ export class AppLayoutComponent {
   private readonly pageFrame = inject(PageFrameService);
   private readonly pullRefresh = inject(CmnPullRefreshService);
   private readonly sheets = inject(CmnDrawerService);
+  private readonly injector = inject(Injector);
+  private readonly context = inject(AppLayoutContext);
+  private readonly appVersion = inject(CMN_APP_VERSION, {optional: true}) ?? '';
 
   /** The account is set to live on the More page (the phone shell's default) and there is one to show. */
   private readonly accountOnMore = computed<boolean>(
@@ -346,6 +380,27 @@ export class AppLayoutComponent {
       (this.account() !== undefined || this.accountPending())
   );
   private paletteOpen = false;
+
+  /** The notices `pwaNotices` asks for. */
+  private readonly noticeSet = computed<ReadonlySet<PwaNotice>>(() => {
+    const wanted = this.pwaNotices();
+    if (wanted === false) {
+      return new Set();
+    }
+    return new Set(wanted === true ? ALL_PWA_NOTICES : wanted);
+  });
+
+  /** `AppUpdateService`, once the update prompt is asked for and the app has a service worker. */
+  private readonly updates = computed<AppUpdateService | undefined>(() => {
+    if (!this.noticeSet().has('update')) {
+      return undefined;
+    }
+    try {
+      return this.injector.get(AppUpdateService);
+    } catch {
+      return undefined;
+    }
+  });
 
   private readonly frame = viewChild.required<ElementRef<HTMLElement>>('frame');
   private readonly main = viewChild.required<ElementRef<HTMLElement>>('main');
@@ -449,8 +504,22 @@ export class AppLayoutComponent {
    * open it, choosing a page entry navigates there, and the built-in appearance actions
    * (`APPEARANCE_PALETTE_ITEMS`) set System, Light or Dark.
    */
-  public readonly paletteItems = input<CommandPaletteItem[]>([]);
-  public readonly versionLabel = input<string>('');
+  public readonly paletteItems = input<CommandPaletteItem[] | undefined>(undefined);
+  /**
+   * Left unset, the palette lists the app's pages: every nav item, the account menu's route items
+   * (Settings), the appearance actions (`APPEARANCE_PALETTE_ITEMS`) and Sign out when the account
+   * menu has it. Set, it is the whole list, as before.
+   */
+  public readonly paletteExtras = input<CommandPaletteItem[]>([]);
+  /**
+   * Renders the PWA notices in the notices slot, in this order: `update` (the prompt that reloads
+   * into a downloaded version; the layout owns `AppUpdateService`), `offline` (the banner) and
+   * `install` (the home-screen hint). `true` is all three, an array picks some. `update` is inert
+   * until the app provides the service worker (`provideLifekitServiceWorker`).
+   */
+  public readonly pwaNotices = input<boolean | readonly PwaNotice[]>(false);
+  /** The sidebar footer's version. Left unset it is the one `provideAppVersion` gave. */
+  public readonly versionLabel = input<string | undefined>(undefined);
   /** Marks the sidebar's version footer with a dot, e.g. while there is something new to read. */
   public readonly versionDot = input<boolean>(false);
   /** Product name shown in the sidebar header; defaults to "Lifekit". */
@@ -500,6 +569,12 @@ export class AppLayoutComponent {
   public readonly searchClick = output<void>();
   public readonly themeToggle = output<void>();
   public readonly avatarMenuSelect = output<MenuItem>();
+  /**
+   * The user chose Sign out: the account menu's item (`ACCOUNT_SIGN_OUT_ID`), the More page's row
+   * or the palette's entry. The app ends the session; `avatarMenuSelect` and `paletteAction` do not
+   * need to test for it.
+   */
+  public readonly signOut = output<void>();
   /** A palette action entry was chosen (the built-in theme toggle is handled by the layout). */
   public readonly paletteAction = output<string>();
   /**
@@ -537,6 +612,48 @@ export class AppLayoutComponent {
       ? `${MAIN_BASE_CLASSES} ${MAIN_OVERLAY_TOP_CLASSES} ${MAIN_OVERLAY_BOTTOM_CLASSES}`
       : `${MAIN_BASE_CLASSES} ${MAIN_FILL_CLASSES}`;
     return this.pull.dragging() ? base : base + MAIN_PULL_SETTLE_CLASSES;
+  });
+
+  /** The sidebar footer's version: the input, else the app's `provideAppVersion`. */
+  protected readonly effectiveVersionLabel = computed<string>(
+    () => this.versionLabel() ?? this.appVersion
+  );
+
+  protected readonly updateReady = computed<boolean>(() => this.updates()?.updateReady() ?? false);
+
+  /** The palette's entries: the app's own list, else the standard one derived from the shell. */
+  protected readonly effectivePaletteItems = computed<CommandPaletteItem[]>(() => {
+    const explicit = this.paletteItems();
+    if (explicit) {
+      return explicit;
+    }
+    const menu = this.effectiveAvatarMenuItems();
+    return [
+      ...this.navItems().map(item => ({
+        id: item.route,
+        label: item.label,
+        icon: item.icon,
+        group: PALETTE_PAGES_GROUP,
+      })),
+      ...menu
+        .filter(item => isRouteMenuItem(item) && !item.disabled)
+        .map(item => ({
+          id: item.id,
+          label: item.label,
+          icon: item.icon ?? PALETTE_FALLBACK_ICON,
+          group: PALETTE_PAGES_GROUP,
+        })),
+      ...APPEARANCE_PALETTE_ITEMS,
+      ...menu
+        .filter(item => item.id === ACCOUNT_SIGN_OUT_ID)
+        .map(item => ({
+          id: item.id,
+          label: item.label,
+          icon: item.icon ?? PALETTE_SIGN_OUT_ICON,
+          group: PALETTE_ACTIONS_GROUP,
+        })),
+      ...this.paletteExtras(),
+    ];
   });
 
   /** The shell this window and device call for: tab bar, rail or sidebar. */
@@ -670,6 +787,18 @@ export class AppLayoutComponent {
       scroller: () => this.main().nativeElement,
       tabs: () => this.destinations(),
       activeTab: () => this.effectiveActiveRoute(),
+    });
+    this.context.connect({
+      navItems: this.navItems,
+      tabRoutes: this.tabRoutes,
+      account: this.account,
+      versionLabel: this.effectiveVersionLabel,
+      signOut: () => this.signOut.emit(),
+    });
+    effect(() => {
+      if (this.noticeSet().size > 0) {
+        defineAppChromeElements();
+      }
     });
     this.flushOnNavigationEnd();
     this.publishContentInsets();
@@ -852,6 +981,25 @@ export class AppLayoutComponent {
     }
   }
 
+  protected showsNotice(notice: PwaNotice): boolean {
+    return this.noticeSet().has(notice);
+  }
+
+  protected onUpdateReload(): void {
+    void this.updates()?.reload();
+  }
+
+  /**
+   * A sidebar or rail item was pressed. The layout moves to it, except on the phone where the
+   * tab bar (not the sidebar) navigates; `navClick` reports it either way.
+   */
+  protected onSidebarClick(item: NavItem): void {
+    this.navClick.emit(item);
+    if (!this.shellService.isPhone()) {
+      void this.router.navigateByUrl(item.route);
+    }
+  }
+
   protected onSearchClick(): void {
     this.searchClick.emit();
     this.openPalette();
@@ -890,6 +1038,9 @@ export class AppLayoutComponent {
       void this.router.navigateByUrl(item.id);
     }
     this.avatarMenuSelect.emit(item);
+    if (item.id === ACCOUNT_SIGN_OUT_ID) {
+      this.signOut.emit();
+    }
   }
 
   protected onThemeToggle(): void {
@@ -905,7 +1056,7 @@ export class AppLayoutComponent {
     const ref = this.dialog.open<PaletteResult | undefined, CommandPaletteItem[]>(
       CommandPaletteComponent,
       {
-        data: this.paletteItems(),
+        data: this.effectivePaletteItems(),
         container: CmnDialogBareContainerComponent,
         hasBackdrop: false,
         panelClass: [],
@@ -934,6 +1085,8 @@ export class AppLayoutComponent {
       this.appearance.toggle();
     } else if (Object.hasOwn(APPEARANCE_MODE_BY_ACTION, result.id)) {
       this.appearance.setMode(APPEARANCE_MODE_BY_ACTION[result.id]);
+    } else if (result.id === ACCOUNT_SIGN_OUT_ID) {
+      this.signOut.emit();
     } else {
       this.paletteAction.emit(result.id);
     }
