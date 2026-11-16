@@ -442,7 +442,12 @@ export class AppLayoutComponent {
   /** The screen on show is a destination itself (a tab or the More page), not something opened from one. */
   private readonly tabRoot = computed<boolean>(() => {
     const path = this.routerUrl().split(/[?#]/, 1)[0];
-    return path === this.moreRoute() || this.navItems().some(item => item.route === path);
+    return (
+      path === this.moreRoute() ||
+      this.navItems().some(
+        item => item.route === path || (item.childrenAreRoot && path.startsWith(`${item.route}/`))
+      )
+    );
   });
 
   private readonly hasTabBar = computed<boolean>(

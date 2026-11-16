@@ -10,6 +10,12 @@ export interface NavItem {
   icon: LucideIconName;
   route: string;
   badge?: () => number;
+  /**
+   * The route redirects or lands on child routes (`/months` to `/months/2026-11`), and those
+   * children are the tab's own screens, so the shell treats them as tab roots too: pull to refresh
+   * engages and there is no back chevron. Left off, a child is a pushed screen, as a detail page is.
+   */
+  childrenAreRoot?: boolean;
 }
 
 const HEADER_BASE_CLASSES = 'flex h-cmn-size-lg shrink-0 items-center border-b border-cmn-shell';
