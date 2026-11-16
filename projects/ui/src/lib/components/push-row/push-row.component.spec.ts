@@ -141,6 +141,8 @@ describe('PushRowComponent', () => {
   });
 
   it('shows the blocked notice, not a stale failure, after Block', async () => {
+    // The loosely typed mock's implementation signature is void-returning, so the rule misfires.
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     push.subscribe.mockImplementation(() => {
       push.permission.set('denied');
       return Promise.reject(new Error('NotAllowedError'));
