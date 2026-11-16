@@ -91,7 +91,8 @@ top of it, and a tab root that registers nothing has no pull, as before.
 registerPullRefresh(() => store.load(), {busy: store.isLoading});
 ```
 
-- **A tab root only.** The page on show is a destination of the shell (a tab or the More page). A
+- **A tab root only.** The page on show is a destination of the shell (a tab or the More page, or the
+  children of a tab whose nav item sets `childrenAreRoot`, e.g. `/months` redirecting to `/months/2026-11`). A
   pushed screen does not pull, and neither does anything while a sheet is open.
 - **The reload is a hook the page's store provides.** `[reload]` on `cmn-page` or
   `registerPullRefresh()` (both register with `CmnPullRefreshService`; the latest registration

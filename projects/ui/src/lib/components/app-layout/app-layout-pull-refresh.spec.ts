@@ -137,6 +137,29 @@ describe('AppLayoutComponent pull to refresh', () => {
     expect(reload).not.toHaveBeenCalled();
   });
 
+  it('should pull the children of a nav item that opts in, as its own tab root', async () => {
+    fixture.componentRef.setInput('navItems', [
+      ...NAV_ITEMS,
+      {label: 'Month', icon: 'Calendar', route: '/months', childrenAreRoot: true},
+    ]);
+    fixture.detectChanges();
+    service.register(reload);
+    await openAt('/months/2026-11');
+    expect(pull(THRESHOLD_TRAVEL_PX)).toBe(true);
+    fire(main, 'touchend');
+    expect(reload).toHaveBeenCalledOnce();
+  });
+
+  it('should not match a sibling that only shares the route text as a prefix', async () => {
+    fixture.componentRef.setInput('navItems', [
+      {label: 'Month', icon: 'Calendar', route: '/months', childrenAreRoot: true},
+    ]);
+    fixture.detectChanges();
+    service.register(reload);
+    await openAt('/months-archive/1');
+    expect(pull(THRESHOLD_TRAVEL_PX)).toBe(false);
+  });
+
   it('should not pull while a bottom sheet is open', async () => {
     service.register(reload);
     await openAt('/tasks');
