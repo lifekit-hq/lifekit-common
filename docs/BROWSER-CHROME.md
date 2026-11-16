@@ -83,17 +83,13 @@ name.
 - The static `index.html` title is the bare app name. Inner routes must never keep it.
 
 ```ts
-// Angular: provide {provide: TitleStrategy, useClass: AppTitleStrategy}
-@Injectable({providedIn: 'root'})
-export class AppTitleStrategy extends TitleStrategy {
-  private readonly title = inject(Title);
-
-  public override updateTitle(snapshot: RouterStateSnapshot): void {
-    const page = this.buildTitle(snapshot);
-    this.title.setTitle(page ? `${page} · ${APP_NAME}` : APP_NAME);
-  }
-}
+// Angular: one provider, from @lifekit-hq/core/routing
+provideAppTitle('Finance Sentry'); // in the app's providers
 ```
+
+`provideAppTitle(appName)` registers a `TitleStrategy` that sets `{deepest route title} · {appName}`.
+A nested route without its own `title` inherits its parent's; when no route in the chain has a
+title the tab shows the bare app name. Apps do not write their own strategy.
 
 ## Icon set
 
