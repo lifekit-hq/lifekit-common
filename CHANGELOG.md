@@ -1,5 +1,18 @@
 # Changelog
 
+## [5.7.0](https://github.com/lifekit-hq/lifekit-common/compare/v5.6.0...v5.7.0) (2026-11-16)
+
+
+### Features
+
+* **ui:** add markers and a reference line to cmn-price-block ([#396](https://github.com/lifekit-hq/lifekit-common/issues/396)) ([2401ba8](https://github.com/lifekit-hq/lifekit-common/commit/2401ba8b3f2c05ed6d2f954c92b41f3491c10cb3))
+* **ui:** let cmn-prose set small print so a card's note keeps the reading width ([#395](https://github.com/lifekit-hq/lifekit-common/issues/395)) ([a9d759c](https://github.com/lifekit-hq/lifekit-common/commit/a9d759cc079260785bad449c6e0fb7cf9ebf4bfc))
+
+
+### Bug Fixes
+
+* **ui:** render the cmn-async-state Retry as a secondary button under the message ([#393](https://github.com/lifekit-hq/lifekit-common/issues/393)) ([0cc4adf](https://github.com/lifekit-hq/lifekit-common/commit/0cc4adf81c2aa4285b0de20ab379762dfed16566))
+
 ## [5.6.0](https://github.com/lifekit-hq/lifekit-common/compare/v5.5.0...v5.6.0) (2026-11-16)
 
 
