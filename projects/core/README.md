@@ -4,7 +4,8 @@ Angular signal-store features and helpers for the lifekit apps (`withAsyncStatus
 `withUrlSync`, `ApiService`, …), plus the framework-free
 `@lifekit-hq/core/format` and the `@lifekit-hq/core/pwa` entry points, and
 `@lifekit-hq/core/preferences` (device and account preference storage) and
-`@lifekit-hq/core/routing` (`provideAppTitle(appName)`, the `Page · App` tab title).
+`@lifekit-hq/core/routing` (`provideAppTitle(appName)`, the `Page · App` tab title) and
+`@lifekit-hq/core/errors` (`statusOf`, `httpFailureText`).
 
 ## `withAsyncStatus`
 
@@ -136,6 +137,24 @@ formatNumber(0.042, {percent: true, delta: true, fractionDigits: 1}); // '+4.2%'
 `@lifekit-hq/ui`, which pass the app's `LOCALE_ID`. A missing or non-finite value formats as `''`.
 Apps do not format currency themselves: `lifekit/no-local-currency-format` in `@lifekit-hq/config`
 flags a local `Intl.NumberFormat`, `toLocaleString` or `currency` pipe.
+
+## Failed calls as a sentence: `@lifekit-hq/core/errors`
+
+`statusOf(error)` is the HTTP status of a failed call (`0` means the request never got a response), or
+`null` for an error that carries none. `httpFailureText(error, {unreachable, fallback, readers?})`
+picks the sentence to show: `unreachable` for status `0`, otherwise the first sentence a body reader
+finds, otherwise `fallback`. The wording stays the app's; the helper only decides which one applies.
+
+The built-in readers, tried in order, take `detail`, `errors` (an array or a field map, joined with a
+space), `error`, and a plain-text body (markup such as a proxy's HTML page is skipped). Pass `readers`
+to replace them with your own `(body) => string | null` functions.
+
+```ts
+httpFailureText(err, {
+  unreachable: 'You appear to be offline.',
+  fallback: 'Something went wrong. Try again.',
+});
+```
 
 ## `@lifekit-hq/core/preferences`
 
