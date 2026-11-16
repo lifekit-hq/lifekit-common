@@ -1,5 +1,6 @@
 import type {Meta, StoryObj} from '@storybook/angular';
 
+import {CardComponent} from '../card/card.component';
 import {ProseComponent} from './prose.component';
 
 const meta: Meta<ProseComponent> = {
@@ -42,5 +43,22 @@ export const Paragraphs: Story = {
 export const Narrow: Story = {
   render: () => ({
     template: `<div class="max-w-[320px]"><cmn-prose>${DISCLAIMER}</cmn-prose></div>`,
+  }),
+};
+
+const ASSUMPTIONS =
+  'Assumes a 4% real return, your last twelve months of spending carried forward, and no change ' +
+  'in income. Each figure is a reading of your own data, not a forecast, and it moves whenever a ' +
+  'new transaction syncs from your bank.';
+
+/** Small print inside a card of a wide overview page: the card runs the frame's width, the text does not. */
+export const SmallPrintInCard: Story = {
+  render: () => ({
+    template: `
+      <div class="max-w-[1136px]">
+        <cmn-card><cmn-prose size="xs">${ASSUMPTIONS}</cmn-prose></cmn-card>
+      </div>
+    `,
+    moduleMetadata: {imports: [CardComponent]},
   }),
 };

@@ -14,6 +14,13 @@ const DISCLAIMER =
   'and shows the order for you to place at your broker yourself. Nothing here is financial ' +
   'advice, and every proposal is a reading of your own data.';
 
+const ASSUMPTIONS =
+  'Assumes a 4% real return, your last twelve months of spending carried forward, and no change ' +
+  'in income. Each figure is a reading of your own data, not a forecast, and it moves whenever a ' +
+  'new transaction syncs from your bank. Nothing here is financial advice.';
+/** An overview page's main column on a desktop screen: the frame's width less the gutter. */
+const OVERVIEW_COLUMN_PX = 1136;
+
 const PLEX_SANS = new URL(
   '../../../../../../node_modules/@fontsource-variable/ibm-plex-sans/files/ibm-plex-sans-latin-wght-normal.woff2',
   import.meta.url
@@ -30,6 +37,8 @@ const UTILITY_RULES = `
   cmn-prose { font-family: '${PLEX_FAMILY}'; }
   .block { display: block; }
   .text-cmn-sm { font-size: 0.875rem; line-height: 1.5; }
+  .text-cmn-xs { font-size: 0.75rem; line-height: 1.5; }
+  .leading-relaxed { line-height: 1.625; }
   .break-words { overflow-wrap: break-word; }
   .max-w-\\[56ch\\] { max-width: 56ch; }
   .max-w-prose { max-width: 65ch; }
@@ -91,6 +100,15 @@ describe('ProseComponent', () => {
   })
   class PageHostComponent {}
 
+  @Component({
+    imports: [ProseComponent],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    template: '<cmn-prose size="xs">{{ assumptions }}</cmn-prose>',
+  })
+  class SmallPrintHostComponent {
+    protected readonly assumptions = ASSUMPTIONS;
+  }
+
   const style = document.createElement('style');
   let plex: FontFace;
   let fixture: ComponentFixture<unknown>;
@@ -143,6 +161,33 @@ describe('ProseComponent', () => {
       prose().textContent = 'x'.repeat(DISCLAIMER.length);
 
       expect(prose().scrollWidth).toBeLessThanOrEqual(prose().clientWidth);
+    });
+  });
+
+  describe('small print in the overview page column', () => {
+    beforeEach(() => {
+      fixture = TestBed.createComponent(SmallPrintHostComponent);
+      (fixture.nativeElement as HTMLElement).style.width = `${OVERVIEW_COLUMN_PX}px`;
+      document.body.append(fixture.nativeElement);
+      fixture.detectChanges();
+    });
+
+    afterEach(() => {
+      (fixture.nativeElement as HTMLElement).remove();
+    });
+
+    it('sets the copy at the xs size, with no width class from the app', () => {
+      expect(prose().className).toContain('text-cmn-xs');
+      expect(prose().className).not.toContain('text-cmn-sm');
+    });
+
+    it('wraps onto several lines, none of them 80 characters or longer', () => {
+      const lines = charactersPerLine(prose());
+
+      expect(lines.length).toBeGreaterThan(2);
+      for (const characters of lines) {
+        expect(characters).toBeLessThan(LINE_LENGTH_AIM);
+      }
     });
   });
 
