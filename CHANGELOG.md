@@ -1,5 +1,19 @@
 # Changelog
 
+## [5.4.0](https://github.com/lifekit-hq/lifekit-common/compare/v5.3.1...v5.4.0) (2026-11-16)
+
+
+### Features
+
+* **ui:** add CmnClipboardService and cmn-copy-button ([#376](https://github.com/lifekit-hq/lifekit-common/issues/376)) ([aa515d8](https://github.com/lifekit-hq/lifekit-common/commit/aa515d8356ea92da29caec2003b2f47ad380d1f9))
+* **ui:** add provideAccountAppearance for account-preference wiring ([#374](https://github.com/lifekit-hq/lifekit-common/issues/374)) ([f90e9c2](https://github.com/lifekit-hq/lifekit-common/commit/f90e9c2769ac23ef06c6b6a3d64af97ba84c922e))
+
+
+### Bug Fixes
+
+* **ui:** give every phone control a 44px hit area ([#369](https://github.com/lifekit-hq/lifekit-common/issues/369)) ([e211bbd](https://github.com/lifekit-hq/lifekit-common/commit/e211bbd2a510e6929773b2e5eebf626254328023))
+* **ui:** render routed page and shell chrome in one pass to stop first-paint shift ([#375](https://github.com/lifekit-hq/lifekit-common/issues/375)) ([ff87f5d](https://github.com/lifekit-hq/lifekit-common/commit/ff87f5d9a7c3fa56555e92ddae70439b9d7386a5))
+
 ## [5.3.1](https://github.com/lifekit-hq/lifekit-common/compare/v5.3.0...v5.3.1) (2026-11-15)
 
 
