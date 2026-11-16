@@ -2,7 +2,7 @@ import type {Meta, StoryObj} from '@storybook/angular';
 
 import {SkeletonComponent} from '../skeleton/skeleton.component';
 import {PriceBlockComponent} from './price-block.component';
-import {BENCHMARK, FALLING, RECENT, RISING} from './price-block.fixtures';
+import {AVERAGE_COST, BENCHMARK, FALLING, FILLS, RECENT, RISING} from './price-block.fixtures';
 
 const CAPTION =
   'ACME’s price in US dollars. The dotted line marks the price at the start of the period; ' +
@@ -30,7 +30,12 @@ const meta: Meta<PriceBlockComponent> = {
           'it (the page does not scroll sideways) and a vertical drag still scrolls the page; the ' +
           'pill sits in its own band above the plot, so a finger never covers it. Keys: Tab to the ' +
           'plot, then Left and Right step a point, Home and End jump to the ends, Escape lets go. ' +
-          'The period tabs take Left, Right, Home and End.',
+          'The period tabs take Left, Right, Home and End.\n\n' +
+          '**Marks:** `markers` puts dated points on the price (a triangle under the line for a ' +
+          '`buy`, over it for a `sell`, at the fill’s `value` or else the day’s price), and ' +
+          '`referenceLine` draws a dashed line at a price, such as an average cost. Both are read ' +
+          'out in the chart’s description; say in the caption what the marks are. Markers outside ' +
+          'the period are left out.',
       },
     },
   },
@@ -54,6 +59,35 @@ export const MonthDown: Story = {args: {period: '1M'}};
 /** A benchmark overlays, so the chart reads in percent and both lines start from the dotted 0%. */
 export const WithBenchmark: Story = {
   args: {series: [RISING, BENCHMARK], caption: COMPARED_CAPTION},
+};
+
+/**
+ * A holding's fills and its average cost on the chart: a triangle under the line per buy, over it
+ * per sell (at the fill price), and a dashed line at the average cost. Say in the caption what the
+ * marks are, since the colour alone does not.
+ */
+export const WithFillsAndCost: Story = {
+  args: {
+    period: '1Y',
+    markers: FILLS,
+    referenceLine: AVERAGE_COST,
+    caption:
+      'ACME’s price in US dollars. Triangles under the line are buys and over it are sells; the ' +
+      'dashed line is the average cost. The dotted line marks the price at the start of the period.',
+  },
+};
+
+/** Fills alone, with no cost line, over a shorter period: the fills before it are left out. */
+export const FillsOnly: Story = {args: {period: '6M', markers: FILLS}};
+
+/** With a benchmark the chart reads in percent, and the marks move to their percent change. */
+export const FillsCompared: Story = {
+  args: {
+    series: [RISING, BENCHMARK],
+    caption: COMPARED_CAPTION,
+    markers: FILLS,
+    referenceLine: AVERAGE_COST,
+  },
 };
 
 /** The percent reading held on a single series, which `mode` allows. */

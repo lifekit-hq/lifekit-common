@@ -2,7 +2,15 @@ import {type ComponentFixture, TestBed} from '@angular/core/testing';
 import type {PriceSeries} from '@lifekit-hq/charts-core';
 
 import {PriceBlockComponent} from './price-block.component';
-import {BENCHMARK, FALLING, PRICE_HISTORY_END, RECENT, RISING} from './price-block.fixtures';
+import {
+  AVERAGE_COST,
+  BENCHMARK,
+  FALLING,
+  FILLS,
+  PRICE_HISTORY_END,
+  RECENT,
+  RISING,
+} from './price-block.fixtures';
 
 const DAY_MS = 86_400_000;
 const FLAT: PriceSeries = {
@@ -336,6 +344,45 @@ describe('PriceBlockComponent', () => {
     it('says what is missing when there is nothing to read', () => {
       set({series: []});
       expect(canvas().getAttribute('aria-label')).toContain('No prices for this period');
+    });
+  });
+  describe('markers and reference line', () => {
+    const annotations = (): {markers: {kind: string}[]; reference: {text: string} | null} =>
+      (
+        fixture.componentInstance as unknown as {
+          chart: {options: {plugins: {priceAnnotations: never}}};
+        }
+      ).chart.options.plugins.priceAnnotations;
+
+    it('draws nothing extra by default', () => {
+      expect(annotations().markers).toEqual([]);
+      expect(annotations().reference).toBeNull();
+      expect(canvas().getAttribute('aria-label')).not.toContain('Bought');
+    });
+
+    it('passes the fills inside the period and the line to the chart', () => {
+      set({markers: FILLS, referenceLine: AVERAGE_COST, period: '1Y'});
+      expect(annotations().markers.map(m => m.kind)).toEqual(['buy', 'sell', 'buy']);
+      expect(annotations().reference?.text).toBe('Average cost $150.00');
+    });
+
+    it('follows the period: a longer one brings the older fills in', () => {
+      set({markers: FILLS, period: '5Y'});
+      expect(annotations().markers).toHaveLength(FILLS.length);
+    });
+
+    it('says them in the chart description', () => {
+      set({markers: FILLS, referenceLine: AVERAGE_COST, period: '1Y'});
+      const name = canvas().getAttribute('aria-label') ?? '';
+      expect(name).toContain('Sold 8 shares at');
+      expect(name).toContain('Bought 5 shares at');
+      expect(name).toContain('Average cost $150.00.');
+    });
+
+    it('keeps the chart when they change, without rebuilding it', () => {
+      const before = chartOf();
+      set({markers: FILLS, referenceLine: AVERAGE_COST});
+      expect(chartOf()).toBe(before);
     });
   });
 });
