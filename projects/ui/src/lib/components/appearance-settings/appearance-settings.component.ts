@@ -30,6 +30,17 @@ const MODE_HELP: Record<ThemePreference, string> = {
 };
 
 const PRESET_HELP = 'The look of the whole app. Kept on this device.';
+/** The custom property every seed stylesheet (`@lifekit-hq/tokens/seeds/<app>.css`) sets to its seed. */
+const APP_SEED_PROPERTY = '--app-seed';
+
+/** The app's seed from the seed theme on `<html>`; empty without a document or a seed stylesheet. */
+function readAppSeed(): string {
+  if (typeof document === 'undefined') {
+    return '';
+  }
+  return getComputedStyle(document.documentElement).getPropertyValue(APP_SEED_PROPERTY).trim();
+}
+
 const SYNCED_CAPTION = 'Synced to your account';
 const DEVICE_CAPTION = 'On this device';
 
@@ -49,7 +60,8 @@ const DEVICE_CAPTION = 'On this device';
  * part of the account appearance.
  *
  * `appSeed` is the app's own colour (an `APP_SEEDS` entry): the picker's first swatch, and what a
- * reset goes back to. Without it the picker offers only the presets and a custom colour.
+ * reset goes back to. Omitted, it is the seed the app's seed stylesheet declares (`--app-seed`, read
+ * once); an app with no seed stylesheet gets only the presets and a custom colour.
  */
 @Component({
   selector: 'cmn-appearance-settings',
@@ -88,7 +100,7 @@ const DEVICE_CAPTION = 'On this device';
       }
 
       <lk-theme-picker
-        [attr.app-seed]="appSeed() || null"
+        [attr.app-seed]="effectiveSeed() || null"
         [seed]="seed()?.seed ?? ''"
         [intensity]="seed()?.intensity ?? defaultIntensity"
         (lk-theme-picker-change)="onSeed($event)"
@@ -101,9 +113,12 @@ const DEVICE_CAPTION = 'On this device';
 export class AppearanceSettingsComponent {
   private readonly appearance = inject(AppearanceService);
   private readonly presets = inject(PresetService);
+  private readonly themeSeed = readAppSeed();
 
-  /** The app's own colour as `#rrggbb` (an `APP_SEEDS` entry). */
+  /** The app's own colour as `#rrggbb` (an `APP_SEEDS` entry); defaults to the seed theme's. */
   public readonly appSeed = input<string>('');
+
+  protected readonly effectiveSeed = computed(() => this.appSeed() || this.themeSeed);
 
   protected readonly modeOptions = MODE_OPTIONS;
   protected readonly defaultIntensity = DEFAULT_INTENSITY;
