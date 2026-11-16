@@ -16,9 +16,14 @@ import {TagComponent} from '../tag/tag.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ButtonComponent, TagComponent, RelativeTimePipe],
   template: `
-    <div [class.opacity-60]="revoked()" class="flex items-center gap-cmn-3 py-cmn-3">
+    <div class="flex items-center gap-cmn-3 py-cmn-3">
       <div class="min-w-0 flex-1">
-        <p class="truncate font-label text-cmn-sm font-semibold text-text-primary">{{ label() }}</p>
+        <p
+          [class]="revoked() ? 'text-text-secondary' : 'text-text-primary'"
+          class="truncate font-label text-cmn-sm font-semibold"
+        >
+          {{ label() }}
+        </p>
         <p class="truncate text-cmn-xs text-text-secondary">
           @if (prefix()) {
             <code class="font-mono">{{ prefix() }}…</code> ·
