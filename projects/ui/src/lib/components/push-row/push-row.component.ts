@@ -74,7 +74,7 @@ export class PushRowComponent {
 
   protected readonly notice = computed<PushRowNotice | null>(() => {
     const failure = this.failure();
-    if (failure) {
+    if (failure && this.usable()) {
       return {variant: 'error', text: failure};
     }
     switch (this.state()) {

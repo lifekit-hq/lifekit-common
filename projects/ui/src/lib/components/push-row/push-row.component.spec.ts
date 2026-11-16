@@ -1,3 +1,4 @@
+import {signal, type WritableSignal} from '@angular/core';
 import {type ComponentFixture, TestBed} from '@angular/core/testing';
 import {PUSH_BACKEND, PushSubscriptionService} from '@lifekit-hq/core/pwa';
 import {beforeEach, describe, expect, it, vi} from 'vitest';
@@ -12,7 +13,7 @@ describe('PushRowComponent', () => {
   let push: {
     isSupported: ReturnType<typeof vi.fn>;
     requiresInstall: ReturnType<typeof vi.fn>;
-    permission: ReturnType<typeof vi.fn>;
+    permission: WritableSignal<NotificationPermission>;
     subscription: ReturnType<typeof vi.fn>;
     subscribe: ReturnType<typeof vi.fn>;
     unsubscribe: ReturnType<typeof vi.fn>;
@@ -44,7 +45,7 @@ describe('PushRowComponent', () => {
     push = {
       isSupported: vi.fn().mockReturnValue(true),
       requiresInstall: vi.fn().mockReturnValue(false),
-      permission: vi.fn().mockReturnValue('default'),
+      permission: signal<NotificationPermission>('default'),
       subscription: vi.fn().mockReturnValue(null),
       subscribe: vi.fn().mockResolvedValue(SUB_JSON),
       unsubscribe: vi.fn().mockResolvedValue(undefined),
@@ -81,7 +82,7 @@ describe('PushRowComponent', () => {
   });
 
   it('explains a blocked permission and disables the switch', () => {
-    push.permission.mockReturnValue('denied');
+    push.permission.set('denied');
     render();
     expect(toggle().disabled).toBe(true);
     expect(el().querySelector('cmn-alert')?.textContent).toContain('Notifications blocked');
@@ -125,5 +126,18 @@ describe('PushRowComponent', () => {
     expect(el().querySelector('cmn-alert')?.textContent).toContain(
       'Could not turn notifications off'
     );
+  });
+
+  it('shows the blocked notice, not a stale failure, after Block', async () => {
+    push.subscribe.mockImplementation(() => {
+      push.permission.set('denied');
+      return Promise.reject(new Error('NotAllowedError'));
+    });
+    render();
+    await press();
+    expect(toggle().disabled).toBe(true);
+    const text = el().querySelector('cmn-alert')?.textContent;
+    expect(text).toContain('Notifications blocked');
+    expect(text).not.toContain('Try again');
   });
 });
