@@ -520,20 +520,23 @@ describe('price annotations', () => {
     expect(view?.markers[1].date).toBe(priceDateLabel(last - 10 * DAY));
   });
 
-  it('keeps a fill with a time of day on the first and last day, drawn at that day\'s point', () => {
-    const first = buildPriceView({...base, series: [instrument]})?.prices[0].time ?? 0;
+  it("keeps a fill with a time of day on the first and last day, drawn at that day's point", () => {
+    const noon = {label: 'AAPL', points: daily(utc(2025, 1, 1) + 12 * HOUR, 500, 100, 1)};
+    const lastNoon = noon.points[noon.points.length - 1];
+    const first = buildPriceView({...base, series: [noon]})?.prices[0].time ?? 0;
     const view = buildPriceView({
       ...base,
-      series: [instrument],
+      series: [noon],
       markers: [
-        {time: last + 15 * HOUR, kind: 'buy', label: 'late'},
+        {time: lastNoon.time + 6 * HOUR, kind: 'buy', label: 'late'},
+        {time: lastNoon.time + 13 * HOUR, kind: 'buy', label: 'tomorrow'},
         {time: first - 2 * HOUR, kind: 'sell', label: 'early'},
-        {time: last + DAY, kind: 'buy', label: 'tomorrow'},
+        {time: first - 13 * HOUR, kind: 'sell', label: 'yesterday'},
       ],
     });
     expect(view?.markers.map(m => m.label)).toEqual(['early', 'late']);
-    expect(view?.markers.map(m => m.time)).toEqual([first, last]);
-    expect(view?.markers[1].value).toBe(instrument.points[instrument.points.length - 1].value);
+    expect(view?.markers.map(m => m.time)).toEqual([first, lastNoon.time]);
+    expect(view?.markers[1].value).toBe(lastNoon.value);
   });
 
   it('treats a non-finite marker value as absent', () => {
