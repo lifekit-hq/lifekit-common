@@ -35,8 +35,10 @@ used to carry, or it runs twice (the theme flips back, two palettes open).
 
 ## Sync appearance to the account
 
-Add `provideAppearanceSync(YourPreferencesStore)` to the app providers (the store is an
-`accountPreferencesStore()` class from `@lifekit-hq/core/preferences`). `AppearanceService` then
+Add `provideAccountAppearance()` to the app providers (pass your own `accountPreferencesStore()`
+class when the app has extra account fields; the default is `AppPreferencesStore` from
+`@lifekit-hq/core/preferences`). It wires `provideAppearanceSync`, the save-failure toast and the
+load at start. `AppearanceService` then
 writes every mode and colour change to `PATCH /api/me/preferences`, and the server's `appearance`
 wins after sign-in. Without it the choice stays on the device and
 `cmn-appearance-settings` says "On this device". See `docs/APP-SHELL-STANDARD.md`.
