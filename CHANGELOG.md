@@ -1,5 +1,18 @@
 # Changelog
 
+## [5.5.0](https://github.com/lifekit-hq/lifekit-common/compare/v5.4.0...v5.5.0) (2026-11-16)
+
+
+### Features
+
+* **core:** add httpFailureText and statusOf in core/errors ([#384](https://github.com/lifekit-hq/lifekit-common/issues/384)) ([4af9d9b](https://github.com/lifekit-hq/lifekit-common/commit/4af9d9b8eb9b6e1c67b69539c4102bc21847a4f1))
+* **core:** add provideAppTitle for the Page · App title rule ([#377](https://github.com/lifekit-hq/lifekit-common/issues/377)) ([d51a6a9](https://github.com/lifekit-hq/lifekit-common/commit/d51a6a97dbeccdd1145d26ddac26be207b25b001))
+* **core:** add provideLifekitServiceWorker and ngsw-config template ([#381](https://github.com/lifekit-hq/lifekit-common/issues/381)) ([f2bb109](https://github.com/lifekit-hq/lifekit-common/commit/f2bb10909240d504a6c6ee67e712066dfe442c52))
+* **ui:** add cmn-auth-page and cmn-status-page sign-in frame ([#382](https://github.com/lifekit-hq/lifekit-common/issues/382)) ([a7fc4e3](https://github.com/lifekit-hq/lifekit-common/commit/a7fc4e304eaf252c3e32f4226d8407695ce67148))
+* **ui:** add cmn-push-row for the notification opt-in ([#385](https://github.com/lifekit-hq/lifekit-common/issues/385)) ([7482949](https://github.com/lifekit-hq/lifekit-common/commit/74829490d9eb8788c58eb4190d92b90a17213412))
+* **ui:** add cmn-secret-reveal and cmn-token-list-row ([#383](https://github.com/lifekit-hq/lifekit-common/issues/383)) ([88301b2](https://github.com/lifekit-hq/lifekit-common/commit/88301b275b71c9aeb69db7242536f3785cdf20af))
+* **ui:** add provideGatewayAccount for oauth2-proxy userinfo to layout account ([#379](https://github.com/lifekit-hq/lifekit-common/issues/379)) ([f53356f](https://github.com/lifekit-hq/lifekit-common/commit/f53356f03027909515126d516b9a6c454ca1bca8))
+
 ## [5.4.0](https://github.com/lifekit-hq/lifekit-common/compare/v5.3.1...v5.4.0) (2026-11-16)
 
 
