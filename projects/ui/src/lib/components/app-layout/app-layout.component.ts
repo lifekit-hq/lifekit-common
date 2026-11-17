@@ -249,7 +249,7 @@ export const CMN_CONTENT_INSET_PROPERTIES = {
          viewport in iOS home-screen apps, which scrolls the document -->
     <!-- touch-manipulation: a double tap never zooms the page -->
     <!-- The phone shell re-measures it after the keyboard closes (see viewport-heal.ts) -->
-    <div #frame class="fixed inset-0 flex touch-manipulation overflow-hidden bg-surface-bg">
+    <div #frame class="fixed inset-0 flex touch-manipulation bg-surface-bg">
       <!-- The sidebar, or its rail, outside the phone shell; the phone shell has the bottom tab bar -->
       <cmn-sidebar-nav
         [items]="navItems()"
@@ -264,7 +264,7 @@ export const CMN_CONTENT_INSET_PROPERTIES = {
         (collapsedChange)="collapsedChange.emit($event)"
         (versionClick)="versionClick.emit()"
       />
-      <div class="relative flex min-w-0 flex-1 flex-col overflow-hidden">
+      <div class="relative flex min-h-0 min-w-0 flex-1 flex-col">
         <cmn-top-bar
           [class]="overlay() ? overlayTopBarClasses : ''"
           [overlay]="overlay()"

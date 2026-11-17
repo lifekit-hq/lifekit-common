@@ -326,6 +326,40 @@ export const ScrollingContent: Story = {
   }),
 };
 
+/**
+ * A page whose positioned parts lie below the fold: visually hidden text (`sr-only`), a chart's
+ * empty-state overlay, anything an app lays out `absolute` in a long page. The design judge reads
+ * such a part as cut off by any `overflow: hidden` wrapper above it
+ * (`clipped-overflow-container`), so the shell's frame and column do not clip: the frame is
+ * `fixed` to the viewport and `main` scrolls, so nothing needs cutting and no page can raise the
+ * finding on the shell.
+ */
+export const PositionedBelowTheFold: Story = {
+  render: args => ({
+    props: {...args, rows: Array.from({length: 40}, (_, i) => i + 1)},
+    template: `
+      <cmn-app-layout
+        [navItems]="navItems"
+        [activeRoute]="activeRoute"
+        [title]="title"
+        [avatarLabel]="avatarLabel"
+        [avatarMenuItems]="avatarMenuItems"
+        [versionLabel]="versionLabel"
+      >
+        <div class="flex flex-col gap-cmn-2 p-cmn-6">
+          @for (row of rows; track row) {
+            <p class="text-cmn-sm text-text-secondary">Row {{ row }}</p>
+          }
+          <div class="relative h-cmn-size-lg">
+            <span class="sr-only">Hidden for assistive technology, below the fold</span>
+            <p class="absolute inset-0 text-cmn-sm text-text-secondary">An overlay in a long page</p>
+          </div>
+        </div>
+      </cmn-app-layout>
+    `,
+  }),
+};
+
 /** Desktop shell in the dark theme. */
 export const Dark: Story = {
   globals: {theme: 'dark'},
