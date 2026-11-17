@@ -102,8 +102,8 @@ served build with fixture data, a public demo, or a Storybook story's `iframe.ht
 
 The screen check judges the loaded page. `checkSkeleton` judges the loading state against it: a
 page's skeleton must lay out like the page it stands in for, so nothing jumps when the data lands.
-The presets are held to this one at a time (`skeleton-conformance.stories.ts`, guardrail S1); this
-holds a whole route, which until now was only caught by eye.
+The part presets are held to the component they copy one at a time (`skeleton-conformance.stories.ts`,
+guardrail S1); this holds a whole route, which until now was only caught by eye.
 
 Size a skeleton for text from the type ramp, not from a rem you worked out once: `<cmn-skeleton
 text="2xl" />` is a bar on one line of `text-cmn-2xl`, as tall as that line is (`1lh`) whatever the
