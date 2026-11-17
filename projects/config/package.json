@@ -1,6 +1,6 @@
 {
   "name": "@lifekit-hq/config",
-  "version": "5.7.1",
+  "version": "5.8.0",
   "type": "module",
   "exports": {
     "./eslint": "./eslint/index.mjs",

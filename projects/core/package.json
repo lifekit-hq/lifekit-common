@@ -1,6 +1,6 @@
 {
   "name": "@lifekit-hq/core",
-  "version": "5.7.1",
+  "version": "5.8.0",
   "peerDependencies": {
     "@angular/common": "^21.2.0 || ^22.0.0",
     "@angular/core": "^21.2.0 || ^22.0.0",

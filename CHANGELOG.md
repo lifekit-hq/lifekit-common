@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.8.0](https://github.com/lifekit-hq/lifekit-common/compare/v5.7.1...v5.8.0) (2026-11-17)
+
+
+### Features
+
+* **ui:** hold page skeleton presets to a loaded page of their kind in CI ([#402](https://github.com/lifekit-hq/lifekit-common/issues/402)) ([168719c](https://github.com/lifekit-hq/lifekit-common/commit/168719c6f69f57b4fb44f6a2c021522e99d4d8ce))
+
 ## [5.7.1](https://github.com/lifekit-hq/lifekit-common/compare/v5.7.0...v5.7.1) (2026-11-17)
 
 
