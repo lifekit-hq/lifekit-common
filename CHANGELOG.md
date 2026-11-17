@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.9.0](https://github.com/lifekit-hq/lifekit-common/compare/v5.8.0...v5.9.0) (2026-11-17)
+
+
+### Features
+
+* **ui:** add chat page kind to cmn-page with a sessions drawer ([#405](https://github.com/lifekit-hq/lifekit-common/issues/405)) ([e5e1548](https://github.com/lifekit-hq/lifekit-common/commit/e5e1548462fae0f854533c6934a0181cb7137ac7))
+
 ## [5.8.0](https://github.com/lifekit-hq/lifekit-common/compare/v5.7.1...v5.8.0) (2026-11-17)
 
 
