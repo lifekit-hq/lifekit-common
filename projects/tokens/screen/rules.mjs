@@ -88,6 +88,7 @@ export function inspectScreen(options = {}) {
     form: ['main'],
     settings: ['main'],
     overview: ['main', 'rail'],
+    chat: ['main'],
     status: ['main'],
   };
   const OPTIONAL_COLUMNS = new Set(['rail']);

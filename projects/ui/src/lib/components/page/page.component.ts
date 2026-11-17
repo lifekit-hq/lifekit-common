@@ -9,20 +9,25 @@ import {
   type ElementRef,
   inject,
   input,
+  type TemplateRef,
   viewChild,
 } from '@angular/core';
 
+import {CmnDrawerService} from '../../services/drawer/drawer.service';
 import {
   CmnPullRefreshService,
   type CmnReloadHook,
 } from '../../services/pull-refresh/pull-refresh.service';
 import {PageFrameService} from '../app-layout/page-frame';
+import {ButtonComponent} from '../button/button.component';
+import {CMN_DRAWER_DATA} from '../drawer/drawer-config';
+import {CmnDrawerRef} from '../drawer/drawer-ref';
 
 /**
  * The page archetype a routed screen is built on. Each kind owns the composition: its reading
  * width and the columns content may start on. Every kind has an entry in `PAGE_TEMPLATES`.
  */
-export type PageKind = 'list' | 'detail' | 'form' | 'settings' | 'overview';
+export type PageKind = 'list' | 'detail' | 'form' | 'settings' | 'overview' | 'chat';
 
 /** What one kind of page decides: how wide its main column runs, and whether a rail sits beside it. */
 interface PageTemplate {
@@ -34,6 +39,13 @@ interface PageTemplate {
    * a page that marks none has no rail, and its main column runs the frame's width.
    */
   readonly rail?: string;
+  /** The kind is a full-height column whose content takes the remaining height, `fill` or not. */
+  readonly fill?: true;
+  /**
+   * The kind keeps a list of sibling threads (a chat's sessions) in a drawer, opened from a
+   * button beside the title; the blocks the page marks `cmnPageSessions` fill it.
+   */
+  readonly sessions?: true;
 }
 
 /**
@@ -48,6 +60,9 @@ interface PageTemplate {
  *   and the eye runs down one edge from label to label.
  * - Settings (720px): settings sections, whose heading column sits beside the controls from md up
  *   and still leaves a select or a text field its own width.
+ * - Chat (the frame's width): one conversation filling the page, from under the title to the
+ *   bottom of the screen. The list of earlier sessions is never a second column: it opens as a
+ *   drawer (a bottom sheet on a phone, a side panel from md) from a button beside the title.
  * - Overview (1200px): a dashboard. The main column takes the frame's whole width (the shell's
  *   1200px cap less the gutter), for a card grid or a chart, and a 320px rail of secondary blocks
  *   sits beside it from xl up. Below xl the rail stacks under the main column on the same edge.
@@ -58,17 +73,27 @@ export const PAGE_TEMPLATES: Readonly<Record<PageKind, PageTemplate>> = {
   form: {column: 'max-w-[640px]'},
   settings: {column: 'max-w-[720px]'},
   overview: {column: 'xl:min-w-0 xl:flex-1', rail: 'xl:w-[320px] xl:shrink-0'},
+  chat: {column: 'min-w-0', fill: true, sessions: true},
 };
 
 const HOST_CLASSES = 'block';
 // Full-height column: a phone page grows with its content unless it
 // holds a `cmn-page-scroll`, which needs the host bounded at every width.
 const HOST_FILL_CLASSES = 'flex min-h-full flex-col md:h-full has-[cmn-page-scroll]:h-full';
+/**
+ * A kind whose content is one surface that fills the screen (a chat) bounds the host on a phone
+ * too: its own scroller, not the page, takes the overflow, and its input stays at the bottom.
+ */
+const HOST_BOUNDED_CLASSES = 'flex h-full min-h-full flex-col';
 /** The frame: the shell's 1200px cap with the page gutter inside it, on every side. */
 const FRAME_CLASSES = 'mx-auto w-full max-w-[1200px] p-cmn-page-gutter';
 const FRAME_FILL_CLASSES = 'flex min-h-0 flex-1 flex-col';
-const TITLE_CLASSES =
-  'mb-cmn-title-gap font-headline text-cmn-3xl break-words font-semibold text-text-primary';
+const TITLE_TEXT_CLASSES = 'font-headline text-cmn-3xl break-words font-semibold text-text-primary';
+const TITLE_CLASSES = `mb-cmn-title-gap ${TITLE_TEXT_CLASSES}`;
+/** A page with a sessions drawer: the title and the button that opens it share one row. */
+const TITLE_ROW_CLASSES = 'mb-cmn-title-gap flex items-start justify-between gap-cmn-4';
+/** The sessions drawer's width from md up; a phone gets the bottom sheet, which spans the screen. */
+const SESSIONS_DRAWER_WIDTH = '360px';
 /** Top-level blocks stack a section apart; a tighter pair (a field and its chips) is one block. */
 const COLUMN_CLASSES = 'flex w-full flex-col gap-cmn-section-gap';
 const COLUMN_FILL_CLASSES = 'min-h-0 flex-1';
@@ -88,6 +113,17 @@ const COLUMNS_ALIGN_START = 'xl:items-start';
 const COLUMNS_ALIGN_STRETCH = 'xl:items-stretch';
 /** A rail the page puts nothing in takes no room, so the main column runs the frame's width. */
 const RAIL_CLASSES = 'empty:hidden';
+
+/** The sessions drawer's body: the page's `cmnPageSessions` blocks, projected into the overlay. */
+@Component({
+  selector: 'cmn-page-sessions',
+  imports: [NgTemplateOutlet],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: '<ng-container [ngTemplateOutlet]="sessions" />',
+})
+export class PageSessionsComponent {
+  protected readonly sessions = inject<TemplateRef<unknown>>(CMN_DRAWER_DATA);
+}
 
 /**
  * The page template: the root of every routed page. It owns what no part can: the gutter (16px on a
@@ -114,6 +150,11 @@ const RAIL_CLASSES = 'empty:hidden';
  *   (1200px less the gutter), and secondary blocks marked `cmnPageRail` (a plain attribute on each
  *   top-level block) in a 320px rail beside it from xl up, under it below xl. Only a kind with a
  *   rail draws `cmnPageRail` blocks.
+ * - `chat`: one conversation (`cmn-chat`, `class="min-h-0 flex-1"`) filling the page under the
+ *   title; the page is a fill page. The sessions list is the blocks marked `cmnPageSessions`: they
+ *   are not drawn in the page but in a drawer, which a "Sessions" button beside the title opens
+ *   (`sessionsLabel` names it), so no second panel ever sits on the left. A block that picks a
+ *   session calls `closeSessions()` (`<cmn-page #page>`, `exportAs: 'cmnPage'`).
  *
  * `reload` makes a tab root pull to refresh (Apple HIG, Refreshing content): hand it the function
  * that fetches the page's data again, usually a store method (`[reload]="store.load"`), and the
@@ -122,7 +163,8 @@ const RAIL_CLASSES = 'empty:hidden';
  * method that returns nothing cannot say itself. Only a tab root pulls; the page on a pushed
  * screen has no gesture to wire.
  *
- * Each kind has golden screens in Storybook (Templates/List, Detail, Form, Settings and Overview).
+ * Each kind has golden screens in Storybook (Templates/List, Detail, Form, Settings, Overview and
+ * Chat).
  *
  * `fill` makes it a full-height column whose content can take the remaining height (a
  * `cmn-page-scroll` list), as a fill page does. On an overview that holds from xl up
@@ -134,17 +176,32 @@ const RAIL_CLASSES = 'empty:hidden';
  */
 @Component({
   selector: 'cmn-page',
-  imports: [NgTemplateOutlet],
+  exportAs: 'cmnPage',
+  imports: [ButtonComponent, NgTemplateOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'hostClasses()',
     '[attr.data-cmn-page]': 'kind()',
     // The shell bounds its page frame to the space below the title when a fill page is showing
-    '[attr.data-cmn-fill]': 'fill() ? "" : null',
+    '[attr.data-cmn-fill]': 'filled() ? "" : null',
   },
   template: `
     <div [class]="frameClasses()">
-      @if (titleText(); as text) {
+      @if (hasSessions()) {
+        <div [class]="titleRowClasses" data-cmn-page-title-row>
+          @if (titleText(); as text) {
+            <h1 #title [class]="titleTextClasses" data-cmn-page-title>{{ text }}</h1>
+          }
+          <cmn-button
+            (clicked)="openSessions()"
+            class="ml-auto shrink-0"
+            icon="History"
+            size="sm"
+            variant="secondary"
+            >{{ sessionsLabel() }}</cmn-button
+          >
+        </div>
+      } @else if (titleText(); as text) {
         <h1 #title [class]="titleClasses" data-cmn-page-title>{{ text }}</h1>
       }
       @if (hasRail()) {
@@ -163,10 +220,14 @@ const RAIL_CLASSES = 'empty:hidden';
       }
     </div>
     <ng-template #main><ng-content /></ng-template>
+    <ng-template #sessions><ng-content select="[cmnPageSessions]" /></ng-template>
   `,
 })
 export class PageComponent {
   private readonly frame = inject(PageFrameService, {optional: true});
+  private readonly drawer = inject(CmnDrawerService);
+  private sessionsRef: CmnDrawerRef | null = null;
+  private readonly sessionsTemplate = viewChild<TemplateRef<unknown>>('sessions');
   private readonly titleRef = viewChild<ElementRef<HTMLElement>>('title');
   private readonly template = computed(() => PAGE_TEMPLATES[this.kind()]);
 
@@ -174,32 +235,45 @@ export class PageComponent {
   /** The large title when the route declares none in its data (or outside `cmn-app-layout`). */
   public readonly title = input<string>('');
   public readonly fill = input(false, {transform: booleanAttribute});
+  /** Names the button that opens the sessions drawer, and the drawer, on a kind that has one. */
+  public readonly sessionsLabel = input<string>('Sessions');
   /** Reloads the page's data when a tab root is pulled down (see above). */
   public readonly reload = input<CmnReloadHook | undefined>(undefined);
   /** The reload is still running; the pull's indicator stays up while it is. */
   public readonly reloading = input(false, {transform: booleanAttribute});
 
   protected readonly titleClasses = TITLE_CLASSES;
+  protected readonly titleTextClasses = TITLE_TEXT_CLASSES;
+  protected readonly titleRowClasses = TITLE_ROW_CLASSES;
 
   /** The route's title wins, so the top bar and the page always show the same one. */
   protected readonly titleText = computed(() => this.frame?.routeTitle() || this.title());
 
-  protected readonly hostClasses = computed(() => (this.fill() ? HOST_FILL_CLASSES : HOST_CLASSES));
+  protected readonly filled = computed(() => this.fill() || !!this.template().fill);
+
+  protected readonly hasSessions = computed(() => !!this.template().sessions);
+
+  protected readonly hostClasses = computed(() => {
+    if (this.template().fill) {
+      return HOST_BOUNDED_CLASSES;
+    }
+    return this.fill() ? HOST_FILL_CLASSES : HOST_CLASSES;
+  });
 
   protected readonly frameClasses = computed(() =>
-    this.fill() ? `${FRAME_CLASSES} ${FRAME_FILL_CLASSES}` : FRAME_CLASSES
+    this.filled() ? `${FRAME_CLASSES} ${FRAME_FILL_CLASSES}` : FRAME_CLASSES
   );
 
   protected readonly hasRail = computed(() => !!this.template().rail);
 
   protected readonly columnClasses = computed(() =>
-    [COLUMN_CLASSES, this.template().column, this.fill() ? COLUMN_FILL_CLASSES : '']
+    [COLUMN_CLASSES, this.template().column, this.filled() ? COLUMN_FILL_CLASSES : '']
       .filter(Boolean)
       .join(' ')
   );
 
   protected readonly columnsClasses = computed(() =>
-    this.fill()
+    this.filled()
       ? `${COLUMNS_CLASSES} ${COLUMNS_ALIGN_STRETCH} ${COLUMN_FILL_CLASSES}`
       : `${COLUMNS_CLASSES} ${COLUMNS_ALIGN_START}`
   );
@@ -209,6 +283,7 @@ export class PageComponent {
   );
 
   constructor() {
+    inject(DestroyRef).onDestroy(() => this.closeSessions());
     const pullRefresh = inject(CmnPullRefreshService);
     effect(onCleanup => {
       const reload = this.reload();
@@ -231,5 +306,27 @@ export class PageComponent {
       onCleanup(() => frame.clearTitle(element));
     });
     inject(DestroyRef).onDestroy(() => frame.release());
+  }
+
+  /** Opens the sessions list in a drawer: a bottom sheet on a phone, a side panel from md. */
+  public openSessions(): void {
+    const template = this.sessionsTemplate();
+    if (!template || this.sessionsRef) {
+      return;
+    }
+    const ref = this.drawer.open(PageSessionsComponent, {
+      title: this.sessionsLabel(),
+      data: template,
+      width: SESSIONS_DRAWER_WIDTH,
+    });
+    this.sessionsRef = ref;
+    ref.afterClosed().subscribe(() => {
+      this.sessionsRef = null;
+    });
+  }
+
+  /** Closes the sessions drawer, as a block does once it has switched to the session picked. */
+  public closeSessions(): void {
+    this.sessionsRef?.close();
   }
 }

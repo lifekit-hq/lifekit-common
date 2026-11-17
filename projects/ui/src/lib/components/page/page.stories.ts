@@ -14,7 +14,7 @@ interface PageStoryArgs {
 /**
  * `cmn-page` on its own, outside the app shell: the frame, the title and the kind's columns (pick
  * the kind to see its reading width). The golden screens (Templates/List, Templates/Detail,
- * Templates/Form, Templates/Settings and Templates/Overview) show each kind composed in the shell
+ * Templates/Form, Templates/Settings, Templates/Overview and Templates/Chat) show each kind composed in the shell
  * at the sizes the owner approves.
  */
 const meta: Meta<PageStoryArgs> = {
@@ -25,7 +25,7 @@ const meta: Meta<PageStoryArgs> = {
   argTypes: {
     kind: {
       control: 'select',
-      options: ['list', 'detail', 'form', 'settings', 'overview'] satisfies PageKind[],
+      options: ['list', 'detail', 'form', 'settings', 'overview', 'chat'] satisfies PageKind[],
     },
     fill: {control: 'boolean'},
   },

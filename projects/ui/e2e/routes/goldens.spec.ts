@@ -59,6 +59,7 @@ const routes: RouteScanRoute[] = [...firstStoryOf].map(([name, id]) => ({
 // here on purpose, so a story that would be merged into another screen, or that no one meant to
 // scan, fails instead of passing quietly.
 const GOLDEN_SCREENS = [
+  'templates-chat',
   'templates-detail',
   'templates-detail-with-tiles',
   'templates-detail-with-verdict',
@@ -78,7 +79,7 @@ const GOLDEN_SCREENS = [
   'templates-whats-new-with-badge',
 ];
 const GOLDEN_STORY =
-  /^templates-(detail|form|list|overview|settings)--(phone|desktop)(-dark)?$|^templates-detail--(phone|desktop)-with-(tiles|verdict)(-dark)?$|^templates-list--(phone|desktop)-with-(notice|app-chrome|feed|swipe)$|^templates-list--(phone|desktop)-with-lede(-dark)?$|^templates-status--(phone|desktop)(-no-access)?(-dark)?$|^templates-overview--desktop-with-long-body$|^templates-whats-new--(phone|desktop)(-with-badge)?(-dark)?$/;
+  /^templates-(chat|detail|form|list|overview|settings)--(phone|desktop)(-dark)?$|^templates-detail--(phone|desktop)-with-(tiles|verdict)(-dark)?$|^templates-list--(phone|desktop)-with-(notice|app-chrome|feed|swipe)$|^templates-list--(phone|desktop)-with-lede(-dark)?$|^templates-status--(phone|desktop)(-no-access)?(-dark)?$|^templates-overview--desktop-with-long-body$|^templates-whats-new--(phone|desktop)(-with-badge)?(-dark)?$/;
 
 test('the scan covers every golden story', () => {
   expect(stories.filter(id => !GOLDEN_STORY.test(id))).toEqual([]);
