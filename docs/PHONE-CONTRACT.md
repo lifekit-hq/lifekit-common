@@ -486,7 +486,8 @@ blocks as it does between the real ones only when the preset is a direct child o
 column: put `<cmn-skeleton shape="...">` straight in `cmn-page`. Inside `cmn-async-state` the
 column's section gap does not apply to a page preset's blocks (`cmn-async-state` has no display of
 its own), so they would stack flush; give `skeletonShape` a part preset (`row`, `section`, `stat`,
-`chart`) there, never a page preset.
+`chart`) there, never a page preset. `e2e/phone/skeleton-pages.spec.ts` holds each page preset to a
+loaded page of its kind within 8px, at 390 and 1280 ([SCREEN-CHECK.md](SCREEN-CHECK.md#the-library-holds-its-own-page-presets-to-it)).
 
 | `shape`    | Page kind       | Draws                                                                                                                                                                    | `count`              |
 | ---------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------- |
