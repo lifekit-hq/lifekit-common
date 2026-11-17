@@ -27,6 +27,7 @@ const FAILING = readFileSync(new URL('failing.html', FIXTURES), 'utf8');
 const PASSING = readFileSync(new URL('passing.html', FIXTURES), 'utf8');
 const OVERVIEW = readFileSync(new URL('overview.html', FIXTURES), 'utf8');
 const STATUS = readFileSync(new URL('status.html', FIXTURES), 'utf8');
+const CHAT = readFileSync(new URL('chat.html', FIXTURES), 'utf8');
 const BIN = fileURLToPath(new URL('../bin/lifekit-chrome-check.mjs', import.meta.url));
 const ROOT = fileURLToPath(new URL('../../../', import.meta.url));
 const ALL_RULES = SCREEN_RULES.map(rule => rule.id);
@@ -367,6 +368,44 @@ describe('the status kind, whose page is main itself', () => {
     const result = await inspect(STATUS.replace(' data-cmn-page="status"', ''), 'desktop');
     assert.equal(result.template, false);
     assert.ok(result.findings.some(finding => finding.rule === 'C0'));
+  });
+});
+
+describe('the chat kind, one conversation in a single main column (C1)', () => {
+  const messages = result => result.findings.map(finding => `${finding.rule} ${finding.message}`);
+
+  for (const size of ['phone', 'desktop']) {
+    it(`accepts one main column holding the conversation, at ${size}`, async () => {
+      const result = await inspect(CHAT, size);
+      assert.equal(result.kind, 'chat');
+      assert.equal(result.template, true);
+      assert.deepEqual(result.findings, [], formatScreen(result));
+    });
+  }
+
+  it('refuses a rail beside the conversation', async () => {
+    const html = CHAT.replace(
+      '</div>\n    </main>',
+      '<div data-cmn-page-column="rail"><p>Sessions</p></div></div>\n    </main>'
+    );
+    assert.ok(html.includes('data-cmn-page-column="rail"'));
+    const result = await inspect(html, 'desktop');
+    assert.ok(
+      messages(result).includes('C1 a chat page has 1 column(s); this one has 2'),
+      messages(result).join('\n')
+    );
+  });
+
+  it('refuses a second main column', async () => {
+    const html = CHAT.replace(
+      '</div>\n    </main>',
+      '<div data-cmn-page-column><p>Sessions</p></div></div>\n    </main>'
+    );
+    const result = await inspect(html, 'desktop');
+    assert.ok(
+      messages(result).includes('C1 a chat page has 1 column(s); this one has 2'),
+      messages(result).join('\n')
+    );
   });
 });
 

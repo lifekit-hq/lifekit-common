@@ -1,0 +1,58 @@
+<!doctype html>
+<!-- A chat page composed the way `cmn-page kind="chat"` composes it: the title row with its
+     Sessions button, then one conversation filling the page's single main column. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>chat screen</title>
+    <style>
+      body {
+        color: #0f1a1f;
+        margin: 0;
+        font: 14px/1.5 sans-serif;
+      }
+      main {
+        box-sizing: border-box;
+        padding: 24px 16px;
+      }
+      [data-cmn-page] {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        max-width: 720px;
+        height: 480px;
+      }
+      h1 {
+        margin: 0;
+        font-size: 1.25rem;
+      }
+      [data-cmn-page-column] {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        justify-content: flex-end;
+        min-height: 0;
+      }
+      .chat {
+        border: 1px solid #7d8c93;
+        box-sizing: border-box;
+        padding: 16px;
+      }
+      p {
+        margin: 0 0 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div data-cmn-page="chat">
+        <h1 data-cmn-page-title>Ask</h1>
+        <div data-cmn-page-column>
+          <div class="chat">
+            <p>Ask me anything about your household's tasks.</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
