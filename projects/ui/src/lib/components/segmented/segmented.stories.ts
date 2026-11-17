@@ -1,6 +1,7 @@
 import type {Meta, StoryObj} from '@storybook/angular';
 import {moduleMetadata} from '@storybook/angular';
 
+import {CardComponent} from '../card/card.component';
 import {SegmentedComponent, type SegmentedOption} from './segmented.component';
 
 const MODES: SegmentedOption[] = [
@@ -13,7 +14,7 @@ const meta: Meta<SegmentedComponent> = {
   title: 'Components/Segmented',
   component: SegmentedComponent,
   tags: ['autodocs'],
-  decorators: [moduleMetadata({imports: [SegmentedComponent]})],
+  decorators: [moduleMetadata({imports: [SegmentedComponent, CardComponent]})],
 };
 
 export default meta;
@@ -67,6 +68,29 @@ export const NarrowPhone: Story = {
         {value: 'ytd', label: 'Year'},
       ],
       period: '30d',
+    },
+  }),
+};
+
+/** A card header holding a view switch: the control's frame is not a second card inside the first. */
+export const InCardHeader: Story = {
+  render: () => ({
+    template: `
+      <cmn-card class="block max-w-lg">
+        <div class="flex items-center justify-between gap-cmn-3">
+          <h2 class="text-cmn-lg font-semibold">Verdict</h2>
+          <cmn-segmented [options]="options" [(value)]="period" label="Period" />
+        </div>
+        <p class="mt-cmn-3 text-cmn-sm text-text-secondary">The switch sits in the header; the body follows.</p>
+      </cmn-card>
+    `,
+    props: {
+      options: [
+        {value: '1m', label: '1M'},
+        {value: '1y', label: '1Y'},
+        {value: 'all', label: 'All'},
+      ],
+      period: '1y',
     },
   }),
 };
