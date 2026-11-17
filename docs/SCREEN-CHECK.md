@@ -25,7 +25,14 @@ another; the overview's second column is its `rail`:
 | `form`     | main                  | 640px                            | `Templates/Form`     |
 | `settings` | main                  | 720px                            | `Templates/Settings` |
 | `overview` | main, rail (optional) | 1200px; the rail 320px from 1280 | `Templates/Overview` |
+| `chat`     | main                  | the frame's width, full height   | `Templates/Chat`     |
 | `status`   | main                  | one centred card, 384px          | `Templates/Status`   |
+
+The `chat` kind is one conversation (`cmn-chat`) filling the page under the title; it is a fill page.
+Its sessions list is never a second column on the left: the blocks a page marks `cmnPageSessions`
+are drawn in a drawer (`CmnDrawerService`: a bottom sheet below 768px, a side panel from it) that a
+Sessions button beside the title opens, so the page declares the one `main` column and C1 holds
+on every viewport. A block that switches to a session calls `closeSessions()` on the page.
 
 The `status` kind is the shell-less screen: signed-out, no-access, sign-in failed. It is drawn by
 `cmn-auth-page` (and `cmn-status-page` on top of it), which marks its `main` `data-cmn-page="status"`
@@ -204,7 +211,7 @@ the app setting its own skeleton as the table above says, not a drift to fix her
 ## The golden screens
 
 Each kind has golden screens in Storybook (`Templates/List`, `Templates/Detail`, `Templates/Form`,
-`Templates/Settings` and `Templates/Overview`): the template at 390 and 1280, light and dark, in the real shell, built
+`Templates/Settings`, `Templates/Overview` and `Templates/Chat`): the template at 390 and 1280, light and dark, in the real shell, built
 from real components with realistic content. Every golden passes the check with no findings, and
 they are what the owner approves once per template. Check them against a built catalog with:
 
@@ -221,7 +228,7 @@ npx lifekit-chrome-check screen \
 request that makes it: [SCREEN-BASELINES.md](SCREEN-BASELINES.md). Every golden also goes through
 the design judge and axe-core at both sizes and both schemes, with no exceptions:
 [ROUTE-SCAN.md](ROUTE-SCAN.md) (`Templates/Overview` also has a state with a body of three screens
-beside its rail). Detail, Form, Settings and Overview join it when their first
+beside its rail). Detail, Form, Settings, Overview and Chat join it when their first
 baselines are added.
 The story ids are `templates-<kind>--<phone|phone-dark|desktop|desktop-dark>`.
 

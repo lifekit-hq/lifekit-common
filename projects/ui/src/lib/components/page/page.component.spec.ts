@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, signal} from '@angular/core';
 import {type ComponentFixture, TestBed} from '@angular/core/testing';
 import {provideRouter, Router, RouterOutlet, type Routes} from '@angular/router';
-import {beforeEach, describe, expect, it, vi} from 'vitest';
+import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
 import {CmnPullRefreshService} from '../../services/pull-refresh/pull-refresh.service';
 import {motionDurationMs} from '../../tokens/motion';
@@ -9,24 +9,24 @@ import {AppLayoutComponent} from '../app-layout/app-layout.component';
 import {PageFrameService} from '../app-layout/page-frame';
 import {PAGE_TEMPLATES, PageComponent, type PageKind} from './page.component';
 
-describe('PageComponent', () => {
-  @Component({
-    imports: [PageComponent],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    template: `
-      <cmn-page [kind]="kind()" [title]="title()" [fill]="fill()">
-        <p class="first">First block</p>
-        <p class="second">Second block</p>
-      </cmn-page>
-    `,
-  })
-  class HostComponent {
-    public readonly kind = signal<PageKind>('list');
-    public readonly title = signal('Tasks');
-    public readonly fill = signal(false);
-  }
+@Component({
+  imports: [PageComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <cmn-page [kind]="kind()" [title]="title()" [fill]="fill()">
+      <p class="first">First block</p>
+      <p class="second">Second block</p>
+    </cmn-page>
+  `,
+})
+class PageHostComponent {
+  public readonly kind = signal<PageKind>('list');
+  public readonly title = signal('Tasks');
+  public readonly fill = signal(false);
+}
 
-  let fixture: ComponentFixture<HostComponent>;
+describe('PageComponent', () => {
+  let fixture: ComponentFixture<PageHostComponent>;
   const page = (): HTMLElement =>
     (fixture.nativeElement as HTMLElement).querySelector('cmn-page') as HTMLElement;
   const frame = (): HTMLElement => page().firstElementChild as HTMLElement;
@@ -34,7 +34,7 @@ describe('PageComponent', () => {
   const title = (): HTMLElement | null => page().querySelector('h1');
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(HostComponent);
+    fixture = TestBed.createComponent(PageHostComponent);
     fixture.detectChanges();
   });
 
@@ -90,8 +90,8 @@ describe('PageComponent', () => {
     }
   });
 
-  it('keeps every single-column kind inside the 640 to 720px reading band', () => {
-    for (const template of Object.values(PAGE_TEMPLATES).filter(each => !each.rail)) {
+  it('keeps every single-column kind inside the 640 to 720px reading band, bar the chat', () => {
+    for (const template of Object.values(PAGE_TEMPLATES).filter(each => !each.rail && !each.fill)) {
       const width = Number(/max-w-\[(\d+)px\]/.exec(template.column)?.[1]);
       expect(width).toBeGreaterThanOrEqual(640);
       expect(width).toBeLessThanOrEqual(720);
@@ -501,5 +501,117 @@ describe('PageComponent reload (pull to refresh)', () => {
     fixture.detectChanges();
     await done;
     expect(settled).toBe(true);
+  });
+});
+
+describe('PageComponent chat', () => {
+  @Component({
+    imports: [PageComponent],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    template: `
+      <cmn-page #page [sessionsLabel]="label()" kind="chat" title="Ask Tasks">
+        <div class="conversation">Conversation</div>
+        <ul cmnPageSessions class="sessions">
+          <li><button (click)="page.closeSessions()" class="pick" type="button">Pick</button></li>
+        </ul>
+      </cmn-page>
+    `,
+  })
+  class ChatHostComponent {
+    public readonly label = signal('Sessions');
+  }
+
+  let fixture: ComponentFixture<ChatHostComponent>;
+  const page = (): HTMLElement =>
+    (fixture.nativeElement as HTMLElement).querySelector('cmn-page') as HTMLElement;
+  const column = (): HTMLElement => page().querySelector('[data-cmn-page-column]') as HTMLElement;
+  const trigger = (): HTMLButtonElement =>
+    page().querySelector('[data-cmn-page-title-row] button') as HTMLButtonElement;
+  const panel = (): HTMLElement | null => document.querySelector('.cmn-drawer-panel');
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(ChatHostComponent);
+    fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    fixture.destroy();
+    document.querySelectorAll('.cdk-overlay-container').forEach(el => (el.innerHTML = ''));
+  });
+
+  it('marks a chat page with one column, the conversation, and no rail', () => {
+    expect(page().getAttribute('data-cmn-page')).toBe('chat');
+    expect(page().querySelectorAll('[data-cmn-page-column]')).toHaveLength(1);
+    expect(column().querySelector('.conversation')).not.toBeNull();
+  });
+
+  it('is a fill page without being asked, its column filling the frame', () => {
+    expect(page().hasAttribute('data-cmn-fill')).toBe(true);
+    expect(page().classList).toContain('h-full');
+    for (const cls of ['flex-1', 'min-h-0', 'min-w-0']) {
+      expect(column().classList).toContain(cls);
+    }
+    expect(Array.from(column().classList).some(cls => cls.startsWith('max-w-'))).toBe(false);
+  });
+
+  it('does not draw the sessions beside the conversation', () => {
+    expect(page().querySelector('.sessions')).toBeNull();
+    expect(page().querySelector('[data-cmn-page-column="rail"]')).toBeNull();
+  });
+
+  it('puts the title and the button that opens the sessions in one row', () => {
+    const row = page().querySelector('[data-cmn-page-title-row]') as HTMLElement;
+    expect(row.querySelector('h1')?.textContent?.trim()).toBe('Ask Tasks');
+    expect(trigger().textContent?.trim()).toBe('Sessions');
+    expect(row.nextElementSibling).toBe(column());
+  });
+
+  it('names the button and the drawer by sessionsLabel', () => {
+    fixture.componentInstance.label.set('Past chats');
+    fixture.detectChanges();
+    expect(trigger().textContent?.trim()).toBe('Past chats');
+
+    trigger().click();
+    fixture.detectChanges();
+    expect(panel()?.querySelector('h2')?.textContent?.trim()).toBe('Past chats');
+  });
+
+  it('opens the sessions in a drawer, once however often the button is pressed', () => {
+    trigger().click();
+    trigger().click();
+    fixture.detectChanges();
+    expect(document.querySelectorAll('.cmn-drawer-panel')).toHaveLength(1);
+    expect(panel()?.querySelector('.sessions')).not.toBeNull();
+    expect(page().querySelector('.sessions')).toBeNull();
+  });
+
+  it('closes the drawer when a block calls closeSessions, and opens it again after', async () => {
+    trigger().click();
+    fixture.detectChanges();
+    (panel()?.querySelector('.pick') as HTMLButtonElement).click();
+    await new Promise(resolve => setTimeout(resolve, motionDurationMs('short') + 20));
+    expect(panel()).toBeNull();
+
+    trigger().click();
+    fixture.detectChanges();
+    expect(panel()).not.toBeNull();
+  });
+
+  it('closes the drawer with the page', async () => {
+    trigger().click();
+    fixture.detectChanges();
+    fixture.destroy();
+    await new Promise(resolve => setTimeout(resolve, motionDurationMs('short') + 20));
+    expect(panel()).toBeNull();
+  });
+
+  it('draws no sessions button on a kind without sessions', () => {
+    const other = TestBed.createComponent(PageHostComponent);
+    other.detectChanges();
+    expect(
+      (other.nativeElement as HTMLElement).querySelector('[data-cmn-page-title-row]')
+    ).toBeNull();
+    expect(PAGE_TEMPLATES.list.sessions).toBeUndefined();
+    expect(PAGE_TEMPLATES.chat.sessions).toBe(true);
   });
 });

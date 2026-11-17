@@ -40,10 +40,10 @@ function templateRoute(kind: string, state = '', preset?: string): BaselineRoute
   };
 }
 
-/** The templates' golden screens: the five kinds, the two detail states and the list feed. */
+/** The templates' golden screens: the six kinds, the two detail states and the list feed. */
 export function templateRoutes(preset?: string): BaselineRoute[] {
   return [
-    ...['list', 'detail', 'form', 'settings', 'overview'].map(kind =>
+    ...['list', 'detail', 'form', 'settings', 'overview', 'chat'].map(kind =>
       templateRoute(kind, '', preset)
     ),
     templateRoute('detail', 'with-tiles', preset),
