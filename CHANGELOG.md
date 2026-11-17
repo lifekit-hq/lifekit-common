@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.7.1](https://github.com/lifekit-hq/lifekit-common/compare/v5.7.0...v5.7.1) (2026-11-17)
+
+
+### Bug Fixes
+
+* **ui:** stop the app shell clipping its own edge so the route scan never reads page content as clipped ([#401](https://github.com/lifekit-hq/lifekit-common/issues/401)) ([ae2f840](https://github.com/lifekit-hq/lifekit-common/commit/ae2f840e95150e4e1f66497e8f687f893a34c74b))
+* **ui:** stop the design judge reading cmn-segmented as a card inside a card ([#399](https://github.com/lifekit-hq/lifekit-common/issues/399)) ([b59746f](https://github.com/lifekit-hq/lifekit-common/commit/b59746f418a97d7b6f260141b0a8e8873eb07f2b))
+
 ## [5.7.0](https://github.com/lifekit-hq/lifekit-common/compare/v5.6.0...v5.7.0) (2026-11-16)
 
 
