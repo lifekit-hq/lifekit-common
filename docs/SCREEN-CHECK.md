@@ -102,8 +102,8 @@ served build with fixture data, a public demo, or a Storybook story's `iframe.ht
 
 The screen check judges the loaded page. `checkSkeleton` judges the loading state against it: a
 page's skeleton must lay out like the page it stands in for, so nothing jumps when the data lands.
-The presets are held to this one at a time (`skeleton-conformance.stories.ts`, guardrail S1); this
-holds a whole route, which until now was only caught by eye.
+The part presets are held to the component they copy one at a time (`skeleton-conformance.stories.ts`,
+guardrail S1); this holds a whole route, which until now was only caught by eye.
 
 Size a skeleton for text from the type ramp, not from a rem you worked out once: `<cmn-skeleton
 text="2xl" />` is a bar on one line of `text-cmn-2xl`, as tall as that line is (`1lh`) whatever the
@@ -179,6 +179,27 @@ The self-test (`projects/tokens/test/skeleton.spec.mjs`) runs the check against 
 and shows it pass on a skeleton drawn to the page's sections and fail on one drifted by a taller
 section, a missing section, an extra section, a page that never shows a skeleton and a page that
 keeps loading after its data lands.
+
+### The library holds its own page presets to it
+
+The page presets (`cmn-skeleton shape="list" | "card" | "detail" | "overview"`) are the one skeleton
+the library draws for a whole page, so the library runs `checkSkeleton` on them in CI. The fixture
+is `Conformance/Skeleton Pages` (`skeleton-pages.stories.ts`): a `cmn-page` of each kind that fetches
+`/api/skeleton-pages/<kind>`, draws the preset while the request is pending and the real blocks of
+that kind of page once it lands. `e2e/phone/skeleton-pages.spec.ts` holds the request, runs the
+check at 390 and 1280 and fails on any finding, with no exception list: a finding there is a preset
+that drifted from the page it stands in for, and is fixed in the preset. It runs in the
+`phone-conformance` job, so a pull request that moves a preset, a template or a part a preset copies
+fails CI instead of waiting for someone to notice by eye.
+
+```bash
+npm run build-storybook && npm run test:phone -- skeleton-pages
+```
+
+A new page preset adds a story to the fixture and its name to the spec's list. The loaded blocks
+there stand for what the preset claims to be (rows with an avatar and an amount, stat cards with a
+delta line): a page whose rows carry no avatar is shorter than the preset's rows by design, which is
+the app setting its own skeleton as the table above says, not a drift to fix here.
 
 ## The golden screens
 
