@@ -199,6 +199,15 @@ the frame's one grid cell with the surface (`col-start-1 row-start-1`, pinned to
 `justify-self`), so no part of the swipe is a positioned element and an app needs no exception to
 adopt it.
 
+A page with a positioned part below the fold is scanned too: `Components/App Layout` has a
+`PositionedBelowTheFold` story, a long page ending in visually hidden text (`sr-only`) and an
+`absolute` overlay. The judge reads any positioned element that lies outside a wrapper with
+`overflow: hidden` as cut off by it, so the shell's `fixed inset-0` frame and its column used to
+raise `clipped-overflow-container` for every page long enough to push a hidden label or an overlay
+below the fold, such as a dossier with a chart and long lists. They no longer set `overflow` at all:
+the frame is pinned to the viewport and `main` is the only scroller, so the shell clips nothing and
+an app needs no exception for it.
+
 It takes **no exceptions**: a finding on a golden is a defect of a component, a token or a template,
 and is fixed there. The first run found two on `Templates/Settings`, both fixed in the library:
 
