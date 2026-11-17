@@ -211,7 +211,7 @@ the app setting its own skeleton as the table above says, not a drift to fix her
 ## The golden screens
 
 Each kind has golden screens in Storybook (`Templates/List`, `Templates/Detail`, `Templates/Form`,
-`Templates/Settings` and `Templates/Overview`): the template at 390 and 1280, light and dark, in the real shell, built
+`Templates/Settings`, `Templates/Overview` and `Templates/Chat`): the template at 390 and 1280, light and dark, in the real shell, built
 from real components with realistic content. Every golden passes the check with no findings, and
 they are what the owner approves once per template. Check them against a built catalog with:
 

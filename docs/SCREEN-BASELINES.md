@@ -148,7 +148,7 @@ and mask the rest. A baseline that depends on the day it was taken fails on the 
 ## The reference app: lifekit-common
 
 The golden screens of the page templates (`Templates/List`, `Templates/Detail`, `Templates/Form`,
-`Templates/Settings` and `Templates/Overview` in Storybook) are the reference app. Their
+`Templates/Settings`, `Templates/Overview` and `Templates/Chat` in Storybook) are the reference app. Their
 spec is `projects/ui/e2e/screens/templates.spec.ts`, their config `projects/ui/playwright.screens.config.ts`,
 and their baselines sit in `projects/ui/e2e/screens/templates.spec.ts-snapshots/`.
 
