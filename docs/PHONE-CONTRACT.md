@@ -339,6 +339,9 @@ A row whose text is more than a label and one truncated sublabel keeps its conte
   row, named `<action> <row label>` ("Remove Oat milk"). Focus on one slides the row open to show it;
   Escape or moving focus away puts it back, and pressing an action closes the row and moves focus to
   the row's visible control, so focus never sits on a button the row now covers.
+  A tray whose action the row already shows as a visible control (an alert's Dismiss X, the title
+  that marks it read; any row action flagged `duplicated`) is `inert` while closed, so a reader meets
+  that action once; a swipe still opens it. A tray no visible control repeats stays reachable.
 - **Reduce Motion.** The row slides on the medium duration step and snaps open or shut for a reader
   who asked for reduced motion. The row still follows the finger while it is held, because that is the
   reader's own movement.

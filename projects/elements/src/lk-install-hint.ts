@@ -96,12 +96,9 @@ export class LkInstallHint extends LitElement {
       font-size: 0.875rem;
     }
 
-    /* One line: the text gives way (ellipsis), the buttons never wrap. */
+    /* The copy is short enough for one line on a phone; if it ever is not, it wraps, never clips. */
     .hint > span {
       min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
     }
 
     .actions {
@@ -170,7 +167,7 @@ export class LkInstallHint extends LitElement {
     if (deferredPrompt) {
       return html`
         <div class="hint" role="region" aria-label="Install app">
-          <span>Install this app for quick access.</span>
+          <span>Install this app.</span>
           <div class="actions">
             <button type="button" class="install" @click=${this.onInstall}>Install</button>
             <button type="button" @click=${this.onDismiss}>Not now</button>
@@ -181,7 +178,7 @@ export class LkInstallHint extends LitElement {
     if (isIosSafari()) {
       return html`
         <div class="hint" role="region" aria-label="Install app">
-          <span>Install this app: tap Share, then Add to Home Screen.</span>
+          <span>Tap Share, then Add to Home Screen.</span>
           <div class="actions">
             <button type="button" @click=${this.onDismiss}>Got it</button>
           </div>
