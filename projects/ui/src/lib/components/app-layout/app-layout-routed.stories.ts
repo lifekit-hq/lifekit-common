@@ -178,7 +178,7 @@ class RoutedShortShellComponent {
 }
 
 /**
- * A short page under a large title and a pinned notice: the frame the page sits in fills what is
+ * A short page under a large title and a notice: the frame the page sits in fills what is
  * left of main, so a few rows leave main with nothing to scroll.
  */
 export const RoutedShortPage: StoryObj<RoutedShortShellComponent> = {
