@@ -122,6 +122,7 @@ const ACTION_WRAPPER_CLASSES = 'flex items-center pr-cmn-2';
         [leading]="swipeLeading()"
         [trailing]="swipeTrailing()"
         [name]="label()"
+        [visibleAction]="action() || !!trailingIcon()"
         (leadingAction)="swipeLeadingAction.emit()"
         (trailingAction)="swipeTrailingAction.emit()"
       >

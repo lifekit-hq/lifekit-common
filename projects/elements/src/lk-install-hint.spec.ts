@@ -110,6 +110,32 @@ describe('LkInstallHint', () => {
     expect(el.shadowRoot?.querySelector('button.install')).toBeTruthy();
   });
 
+  it('fits one line at 390px wide, with its buttons on one line', async () => {
+    stubStandalone(false);
+    fireInstallPrompt();
+    const holder = document.createElement('div');
+    holder.style.width = '390px';
+    document.body.appendChild(holder);
+    const el = document.createElement('lk-install-hint') as LkInstallHint;
+    holder.appendChild(el);
+    await el.updateComplete;
+    const hint = el.shadowRoot?.querySelector<HTMLElement>('.hint') as HTMLElement;
+    const buttons = [...(el.shadowRoot?.querySelectorAll<HTMLButtonElement>('button') ?? [])];
+    expect(buttons.map(button => button.textContent?.trim())).toEqual(['Install', 'Not now']);
+    // "Not now" does not wrap: every button shares one row, and the hint is a single compact line.
+    expect(
+      new Set(buttons.map(button => Math.round(button.getBoundingClientRect().top))).size
+    ).toBe(1);
+    for (const button of buttons) {
+      expect(button.getBoundingClientRect().height).toBeLessThan(
+        hint.getBoundingClientRect().height
+      );
+    }
+    const MAX_LINE_PX = 64;
+    expect(hint.getBoundingClientRect().height).toBeLessThanOrEqual(MAX_LINE_PX);
+    holder.remove();
+  });
+
   it('hides after appinstalled', async () => {
     stubStandalone(false);
     stubUserAgent('Mozilla/5.0 (X11; Linux x86_64) Chrome/120.0');

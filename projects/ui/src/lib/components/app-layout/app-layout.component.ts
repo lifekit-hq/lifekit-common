@@ -149,18 +149,17 @@ const PHONE_ONLY_CLASSES = 'hidden';
 const OVERLAY_TOP_BAR_CLASSES = 'absolute inset-x-0 top-0 z-30';
 const OVERLAY_TAB_BAR_CLASSES = 'absolute inset-x-0 bottom-0 z-30';
 /**
- * Notices (install hint, offline banner, update prompt) pin to the top of main, in flow below
- * the top bar. Sticky offsets are measured from main's content box, which main's overlay
- * padding already shifts below the bar, so top-0 is flush under it on every size.
+ * Notices (install hint, offline banner, update prompt) sit at the top of main, in flow below the
+ * top bar, and scroll away with the content: a notice that stayed pinned would cover the page
+ * (the install hint sat over a page's first heading on a phone).
  *
  * They sit in the page frame's box (the 1200px cap, inset by the page gutter), so a notice starts
- * on the page's one left edge rather than running edge to edge; they stay flush under the bar
- * (PHONE-CONTRACT.md) and a group gap separates notices that are showing. The page background fills the
- * inset so a page scrolling under a pinned notice never shows through beside it.
+ * on the page's one left edge rather than running edge to edge (PHONE-CONTRACT.md) and a group gap
+ * separates notices that are showing.
  */
 const NOTICES_BASE_CLASSES =
-  'sticky top-0 z-20 mx-auto flex w-full max-w-[1200px] shrink-0 flex-col ' +
-  'bg-surface-bg px-cmn-page-gutter empty:hidden ' +
+  'mx-auto flex w-full max-w-[1200px] shrink-0 flex-col ' +
+  'px-cmn-page-gutter empty:hidden ' +
   // The gap sits on a notice that has another showing above it (see `stackNotices`), not on the
   // column: a notice that is not showing is a box with no height and must cost the page nothing.
   '[&>[data-cmn-notice-stacked]]:mt-cmn-group-gap';
@@ -181,7 +180,7 @@ const MAIN_PULL_SETTLE_CLASSES =
   ' transition-transform duration-cmn-medium ease-cmn-expressive-decelerate motion-reduce:transition-none';
 /**
  * Clears the top bar by its measured cover (`--cmn-content-inset-top`). Scrolling an element into
- * view also clears the pinned notices (`--cmn-sticky-top`).
+ * view also clears anything pinned (`--cmn-sticky-top`, 0 while notices scroll with the content).
  */
 const MAIN_OVERLAY_TOP_CLASSES =
   'pt-[var(--cmn-content-inset-top,0px)] ' +
@@ -228,7 +227,7 @@ export const CMN_CONTENT_INSET_PROPERTIES = {
   top: '--cmn-content-inset-top',
   /** How far the tab bar and the floating action (plus breathing room) cover main's bottom edge. */
   bottom: '--cmn-content-inset-bottom',
-  /** Height of the pinned notices: where a content sticky header sticks, below main's top padding. */
+  /** Where a content sticky header sticks, below main's top padding: 0, as the notices scroll away. */
   sticky: '--cmn-sticky-top',
 } as const;
 
@@ -928,7 +927,7 @@ export class AppLayoutComponent {
         const insets = {
           top,
           bottom: bottom > 0 ? bottom + INSET_BREATHING_PX : 0,
-          sticky: notices.getBoundingClientRect().height,
+          sticky: 0,
         };
         for (const [key, property] of Object.entries(CMN_CONTENT_INSET_PROPERTIES)) {
           main.style.setProperty(property, `${Math.ceil(insets[key as keyof typeof insets])}px`);

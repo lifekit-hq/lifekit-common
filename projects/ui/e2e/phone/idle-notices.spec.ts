@@ -5,7 +5,7 @@ import {openStory, settleFrames} from './phone-helpers';
 // A notice that is not showing costs the page nothing. An app projects the offline banner, the
 // update prompt and the install hint as three children of the shell's notices column; with none of
 // them showing, the column has no height and the page starts where it does without them, so a
-// sticky page header never starts a gap down (`--cmn-sticky-top` follows the column's height).
+// page never starts a gap down.
 const READY = 'cmn-page[data-cmn-page]';
 const SIZES = [
   {name: 'phone 390x844', width: 390, height: 844, story: 'phone'},

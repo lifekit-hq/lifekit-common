@@ -357,8 +357,17 @@ describe('AlertItemComponent — swipe actions', () => {
     expect(log).toEqual(['leading']);
   });
 
-  it('opens when focus reaches an action, for a keyboard and a screen reader', () => {
+  it('keeps the closed trays out of the tab order while the item has its own controls', () => {
     create();
+    for (const name of ['Mark read', 'Dismiss ']) {
+      expect(trayButton(name).closest('[data-swipe-tray]')?.hasAttribute('inert')).toBe(true);
+    }
+  });
+
+  it('opens when focus reaches an action, for a keyboard and a screen reader', () => {
+    // An item with no control of its own (read, not dismissible, not openable) keeps its trays reachable.
+    create({isRead: true, dismissible: false});
+    expect(trayButton('Dismiss ').closest('[data-swipe-tray]')?.hasAttribute('inert')).toBe(false);
     trayButton('Dismiss ').focus();
     fixture.detectChanges();
     expect(surface().style.transform).toBe(`translateX(-${TRAY_PX}px)`);

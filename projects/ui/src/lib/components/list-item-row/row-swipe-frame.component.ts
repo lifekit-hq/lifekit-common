@@ -48,9 +48,11 @@ const SLIDE_CLASSES =
   ' transition-transform duration-cmn-medium ease-cmn-standard motion-reduce:transition-none';
 /**
  * A tray paints only while the surface uncovers it: a closed tray under the opaque surface would
- * otherwise draw its label beneath the row's text. It goes transparent, never `hidden`, `invisible`
- * or `inert`, so its button stays focusable and in the accessibility tree; focus then slides the
- * row open. It fades with the slide and snaps with it.
+ * otherwise draw its label beneath the row's text. It goes transparent, never `hidden` or
+ * `invisible`. A row with no visible control of its own keeps the tray's button focusable and in the
+ * accessibility tree (focus slides the row open); a row that has one (`visibleAction`) makes the
+ * closed tray `inert`, so a keyboard or screen reader meets one action, not two of the same name.
+ * It fades with the slide and snaps with it.
  */
 const TRAY_CLASSES = `${CELL_CLASSES} flex`;
 const TRAY_FADE_CLASSES =
@@ -88,6 +90,7 @@ const VISIBLE_CONTROL = 'button, a[href], input, select, textarea, [tabindex]';
         <div
           #leadingTray
           [class]="leadingTrayClasses()"
+          [attr.inert]="trayInert(swipe.offset() > 0)"
           (focusin)="revealFrom('leading', leadingTray)"
           (focusout)="closeOnFocusLeave($event, leadingTray)"
           data-swipe-tray
@@ -107,6 +110,7 @@ const VISIBLE_CONTROL = 'button, a[href], input, select, textarea, [tabindex]';
         <div
           #trailingTray
           [class]="trailingTrayClasses()"
+          [attr.inert]="trayInert(swipe.offset() < 0)"
           (focusin)="revealFrom('trailing', trailingTray)"
           (focusout)="closeOnFocusLeave($event, trailingTray)"
           data-swipe-tray
@@ -151,6 +155,11 @@ export class RowSwipeFrameComponent {
   public readonly name = input.required<string>();
   /** A card-shaped row: the trays are clipped to its rounded corners. */
   public readonly rounded = input<boolean>(false);
+  /**
+   * The row already shows a control that does the same job (its own button, a dismiss). The closed
+   * trays then leave the tab order and the accessibility tree; a swipe still opens them for touch.
+   */
+  public readonly visibleAction = input<boolean>(false);
 
   /** Emits when the leading action is pressed. The row closes first. */
   public readonly leadingAction = output<void>();
@@ -213,6 +222,11 @@ export class RowSwipeFrameComponent {
   private trayClasses(edge: string, uncovered: boolean): string {
     const fade = this.swipe.dragging() ? '' : TRAY_FADE_CLASSES;
     return `${TRAY_CLASSES} ${edge} ${uncovered ? 'opacity-100' : 'opacity-0'}${fade}`;
+  }
+
+  /** `inert` while the tray is closed and the row has a visible action: `''` sets it, `null` drops it. */
+  protected trayInert(uncovered: boolean): '' | null {
+    return this.visibleAction() && !uncovered ? '' : null;
   }
 
   protected actionClasses(action: CmnRowSwipeAction): string {

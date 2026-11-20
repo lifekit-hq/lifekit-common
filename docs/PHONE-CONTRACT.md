@@ -198,7 +198,7 @@ on a fixed bar height, safe-area insets included:
 | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `--cmn-content-inset-top`    | The top bar's height, safe area included. `<main>`'s top padding.                                                                                                                                             |
 | `--cmn-content-inset-bottom` | What covers main's bottom: the tab bar plus any declared `floatingActionClearance`, or up to the floating action's top when that sits higher, plus 8px of breathing room. Where the page's end padding stops. |
-| `--cmn-sticky-top`           | The height of the notices pinned under the top bar (offline, install, update), 0px when there are none. Where a sticky header sticks.                                                                         |
+| `--cmn-sticky-top`           | Always 0px: the notices (offline, install, update) scroll with the content, so nothing is pinned under the top bar. Where a sticky header sticks.                                                             |
 
 Outside the phone shell all three are unset, and everything that reads them falls back to 0px.
 
@@ -585,7 +585,7 @@ that holds each one. A rule marked "follow-up" is the target; its parts and chec
    covers the chrome. A notice that is not showing costs the page nothing: each notice is its own
    child of the slot (offline banner, update prompt, install hint), an idle one is a box with no
    height, and the group gap sits only between notices that show, so with none showing the slot is
-   0px high and `--cmn-sticky-top` is 0. Check: notices sit below the top bar and above the tab bar;
+   0px high. Notices scroll with the content and never stay pinned over it. Check: notices sit below the top bar and above the tab bar;
    toasts sit above the tab bar and the floating action; with three idle notices the slot is 0px.
 3. **Touch targets.** Every interactive element on a phone has a hit area of at least 44x44 CSS
    px. A smaller visual (a 32px chip, a `sm` button) keeps its look and gets a 44px hit area
@@ -636,7 +636,7 @@ that holds each one. A rule marked "follow-up" is the target; its parts and chec
      severity, events) pins the current group's header under the top bar while its rows scroll,
      and the next header pushes it out, as an iOS plain list does. Use `cmn-list-section`. The
      header sticks at `--cmn-sticky-top` with an opaque surface fill, flush under the top bar and
-     any pinned notices. Source: UIKit `UITableView.Style.plain`. Check: the header pins flush
+     the top bar. Source: UIKit `UITableView.Style.plain`. Check: the header pins flush
      under the top bar, never overlapping it, at 375, 390 and 402. The rows take Carbon's
      contained-list geometry (at least 48px, a hairline between them, a hover fill only on a
      pressable row) and the header is 14px semibold, at least 40px tall; a disclosure row keeps its

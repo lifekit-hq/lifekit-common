@@ -157,6 +157,7 @@ const SEVERITY_ICON: Record<AlertItemSeverity, LucideIconName> = {
         [leading]="swipeLeading()"
         [trailing]="swipeTrailing()"
         [name]="title()"
+        [visibleAction]="dismissible() || !isRead() || openable()"
         [rounded]="!flat()"
         (leadingAction)="swipeLeadingAction.emit()"
         (trailingAction)="swipeTrailingAction.emit()"

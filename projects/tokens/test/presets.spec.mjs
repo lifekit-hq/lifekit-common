@@ -266,13 +266,13 @@ describe('hook rules (the real theme.css)', () => {
     const dark = real('--cmn-nav-active-bg: var(--color-text-primary);');
     assert.match(dark.join('\n'), /--color-text-primary on --cmn-nav-active-bg is 1\.00:1/);
     assert.deepEqual(real('--cmn-tab-active-bg: transparent; --cmn-tabs-bg: transparent;'), []);
-    const hover = real('--cmn-btn-secondary-hover: var(--color-surface-card);');
+    const hover = real('--cmn-btn-secondary-hover: var(--color-text-primary);');
     assert.match(hover.join('\n'), /--cmn-btn-secondary-fg on --cmn-btn-secondary-hover/);
   });
 
-  it('check the secondary hover fill against a text colour the preset changed, hover left at Carbon', () => {
+  it('check the secondary hover fill against a text colour the preset changed, hover left at the default', () => {
     const problems = real(
-      '--cmn-btn-secondary-bg: var(--color-accent-subtle); --cmn-btn-secondary-fg: var(--color-text-primary);'
+      '--cmn-btn-secondary-bg: var(--color-accent-subtle); --cmn-btn-secondary-fg: var(--color-text-inverse);'
     );
     assert.match(
       problems.join('\n'),

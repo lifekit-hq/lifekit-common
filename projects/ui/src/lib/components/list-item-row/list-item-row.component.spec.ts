@@ -327,18 +327,21 @@ describe('ListItemRowComponent — trailing action', () => {
     <cmn-list-item-row
       [swipeLeading]="leading"
       [swipeTrailing]="trailing"
-      [action]="true"
+      [action]="action"
       (swipeLeadingAction)="log.push('leading')"
       (swipeTrailingAction)="log.push('trailing')"
       (activated)="log.push('activated')"
       label="Oat milk"
-    />
+    >
+      <button actions type="button">More</button>
+    </cmn-list-item-row>
     <button id="elsewhere" type="button">Elsewhere</button>
   `,
 })
 class SwipeHostComponent {
   public leading: CmnRowSwipeAction | null = {label: 'Done', icon: 'Check', tone: 'positive'};
   public trailing: CmnRowSwipeAction | null = {label: 'Remove', icon: 'Trash2', tone: 'danger'};
+  public action = true;
   public log: string[] = [];
 }
 
@@ -408,8 +411,8 @@ describe('ListItemRowComponent — swipe actions', () => {
     expect(trayButton('Done').className).toContain('bg-status-success');
   });
 
-  it('paints a tray only on the side the surface uncovers, keeping its button in the tab order', () => {
-    create();
+  it('paints a tray only on the side the surface uncovers, keeping its button in the tab order when the row has no visible action', () => {
+    create({action: false});
     const tray = (name: string): HTMLElement => trayButton(name).parentElement as HTMLElement;
     const painted = (name: string): boolean => tray(name).classList.contains('opacity-100');
     expect([painted('Done'), painted('Remove')]).toEqual([false, false]);
@@ -432,6 +435,31 @@ describe('ListItemRowComponent — swipe actions', () => {
     }
   });
 
+  it('keeps a closed tray out of the tab order and the accessibility tree when the row has its own action', () => {
+    create();
+    for (const name of ['Done', 'Remove']) {
+      const tray = trayButton(name).parentElement as HTMLElement;
+      expect(tray.hasAttribute('inert')).toBe(true);
+    }
+    // One action per name for a keyboard and a screen reader: the row's own button only.
+    const reachable = [...(fixture.nativeElement as HTMLElement).querySelectorAll('button')].filter(
+      button => !button.closest('[inert]')
+    );
+    expect(reachable.map(button => button.textContent?.trim())).not.toContain('Done');
+    expect(reachable.map(button => button.getAttribute('aria-label'))).not.toContain(
+      'Remove Oat milk'
+    );
+  });
+
+  it('lets a tray take a tap once a swipe has opened it, though the row has its own action', () => {
+    create();
+    swipeBy(-TRAY_PX);
+    expect((trayButton('Remove').parentElement as HTMLElement).hasAttribute('inert')).toBe(false);
+    expect((trayButton('Done').parentElement as HTMLElement).hasAttribute('inert')).toBe(true);
+    trayButton('Remove').click();
+    expect(fixture.componentInstance.log).toEqual(['trailing']);
+  });
+
   it('fades a tray with the slide, but not while a finger drags or for reduced motion', () => {
     create();
     const tray = trayButton('Done').parentElement as HTMLElement;
@@ -447,7 +475,7 @@ describe('ListItemRowComponent — swipe actions', () => {
   });
 
   it('paints the tray a focused button sits in, since focus slides the row open', () => {
-    create();
+    create({action: false});
     trayButton('Remove').focus();
     fixture.detectChanges();
     expect((trayButton('Remove').parentElement as HTMLElement).className).toContain('opacity-100');
@@ -499,7 +527,7 @@ describe('ListItemRowComponent — swipe actions', () => {
   });
 
   it('opens when focus reaches a tray button, and shuts when focus leaves it', () => {
-    create();
+    create({action: false});
     trayButton('Remove').focus();
     fixture.detectChanges();
     expect(surface().style.transform).toBe(`translateX(-${TRAY_PX}px)`);
@@ -526,7 +554,7 @@ describe('ListItemRowComponent — swipe actions', () => {
   });
 
   it("moves focus to the row's visible control when Escape shuts a row focus is open on", () => {
-    create();
+    create({action: false});
     trayButton('Done').focus();
     fixture.detectChanges();
     trayButton('Done').dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}));
@@ -535,7 +563,7 @@ describe('ListItemRowComponent — swipe actions', () => {
   });
 
   it('moves focus to the visible control after a tray action, so it never rests on a covered button', () => {
-    create();
+    create({action: false});
     trayButton('Remove').focus();
     fixture.detectChanges();
     trayButton('Remove').click();

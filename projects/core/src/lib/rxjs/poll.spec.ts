@@ -133,4 +133,54 @@ describe('poll', () => {
     await vi.advanceTimersByTimeAsync(INTERVAL_MS * 5);
     expect(request).toHaveBeenCalledTimes(3);
   });
+
+  describe('while the tab is hidden', () => {
+    let hidden = false;
+
+    function setHidden(value: boolean): void {
+      hidden = value;
+      document.dispatchEvent(new Event('visibilitychange'));
+    }
+
+    beforeEach(() => {
+      hidden = false;
+      vi.spyOn(document, 'hidden', 'get').mockImplementation(() => hidden);
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('makes no request while hidden, and one as soon as the tab shows', async () => {
+      const request = vi.fn(() => of<Job>({state: 'running'}));
+      const sub = poll(request, {intervalMs: INTERVAL_MS, isDone: () => false}).subscribe();
+      await vi.advanceTimersByTimeAsync(0);
+      expect(request).toHaveBeenCalledTimes(1);
+
+      setHidden(true);
+      await vi.advanceTimersByTimeAsync(INTERVAL_MS * 5);
+      expect(request).toHaveBeenCalledTimes(1);
+
+      setHidden(false);
+      await vi.advanceTimersByTimeAsync(0);
+      expect(request).toHaveBeenCalledTimes(2);
+
+      await vi.advanceTimersByTimeAsync(INTERVAL_MS);
+      expect(request).toHaveBeenCalledTimes(3);
+      sub.unsubscribe();
+    });
+
+    it('makes no request at all when subscribed in a hidden tab, until it shows', async () => {
+      hidden = true;
+      const request = vi.fn(() => of<Job>({state: 'running'}));
+      const sub = poll(request, {intervalMs: INTERVAL_MS, isDone: () => false}).subscribe();
+      await vi.advanceTimersByTimeAsync(INTERVAL_MS * 3);
+      expect(request).not.toHaveBeenCalled();
+
+      setHidden(false);
+      await vi.advanceTimersByTimeAsync(0);
+      expect(request).toHaveBeenCalledTimes(1);
+      sub.unsubscribe();
+    });
+  });
 });

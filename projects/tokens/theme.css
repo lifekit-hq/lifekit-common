@@ -100,10 +100,10 @@
   /* Button: label weight, the secondary kind's colours, and a resting shadow. */
   --cmn-btn-weight: 400;
   --cmn-btn-shadow: 0 0 #0000;
-  --cmn-btn-secondary-bg: var(--color-accent-900);
-  --cmn-btn-secondary-fg: var(--color-text-inverse);
-  --cmn-btn-secondary-hover: var(--color-accent-800);
-  --cmn-btn-secondary-border: transparent;
+  --cmn-btn-secondary-bg: var(--color-surface-raised);
+  --cmn-btn-secondary-fg: var(--color-text-primary);
+  --cmn-btn-secondary-hover: var(--color-surface-hover);
+  --cmn-btn-secondary-border: var(--color-border-default);
   /* Toggle geometry and its on colour (Carbon: 48 x 24 track, 16px thumb, success green). */
   --cmn-toggle-w: 48px;
   --cmn-toggle-h: 24px;
