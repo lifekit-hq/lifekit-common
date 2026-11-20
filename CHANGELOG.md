@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.9.1](https://github.com/lifekit-hq/lifekit-common/compare/v5.9.0...v5.9.1) (2026-11-20)
+
+
+### Bug Fixes
+
+* **ui:** compact scrolling install hint, single swipe action, lighter secondary button, tab-aware poll, time input ([#408](https://github.com/lifekit-hq/lifekit-common/issues/408)) ([f29ed0d](https://github.com/lifekit-hq/lifekit-common/commit/f29ed0df7cbc882367c006c4d5d0daf542c69a87))
+
 ## [5.9.0](https://github.com/lifekit-hq/lifekit-common/compare/v5.8.0...v5.9.0) (2026-11-17)
 
 
