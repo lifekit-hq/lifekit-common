@@ -727,8 +727,8 @@ export const PhoneOverlayListPage: Story = {
 };
 
 /**
- * The list page with notices pinned under the top bar and a floating action: day headings stick
- * under the notices (`--cmn-sticky-top`), and the last line clears the floating action too.
+ * The list page with notices above the rows and a floating action: the notices scroll away, day
+ * headings stick under the top bar (`--cmn-sticky-top`, 0px), and the last line clears the floating action too.
  */
 export const PhoneOverlayListPageNotices: Story = {
   ...PhoneOverlayListPage,

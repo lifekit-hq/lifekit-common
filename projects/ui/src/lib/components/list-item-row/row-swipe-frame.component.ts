@@ -27,6 +27,13 @@ export interface CmnRowSwipeAction {
   label: string;
   icon: LucideIconName;
   tone?: CmnRowSwipeTone;
+  /**
+   * The row already shows a control that does this same job (its own Dismiss X, a button that marks
+   * it read). The closed tray then leaves the tab order and the accessibility tree, so a keyboard or
+   * screen reader meets the action once; a swipe still opens it for touch. Unset, the tray stays
+   * reachable: a swipe is a shortcut, never the only way.
+   */
+  duplicated?: boolean;
 }
 
 /**
@@ -48,9 +55,11 @@ const SLIDE_CLASSES =
   ' transition-transform duration-cmn-medium ease-cmn-standard motion-reduce:transition-none';
 /**
  * A tray paints only while the surface uncovers it: a closed tray under the opaque surface would
- * otherwise draw its label beneath the row's text. It goes transparent, never `hidden`, `invisible`
- * or `inert`, so its button stays focusable and in the accessibility tree; focus then slides the
- * row open. It fades with the slide and snaps with it.
+ * otherwise draw its label beneath the row's text. It goes transparent, never `hidden` or
+ * `invisible`. A tray keeps its button focusable and in the accessibility tree (focus slides the
+ * row open) unless its action is `duplicated` by a visible control of the row, when the closed tray
+ * is `inert` so a keyboard or screen reader meets one action, not two. It fades with the slide and
+ * snaps with it.
  */
 const TRAY_CLASSES = `${CELL_CLASSES} flex`;
 const TRAY_FADE_CLASSES =
@@ -88,6 +97,7 @@ const VISIBLE_CONTROL = 'button, a[href], input, select, textarea, [tabindex]';
         <div
           #leadingTray
           [class]="leadingTrayClasses()"
+          [attr.inert]="trayInert(action, swipe.offset() > 0)"
           (focusin)="revealFrom('leading', leadingTray)"
           (focusout)="closeOnFocusLeave($event, leadingTray)"
           data-swipe-tray
@@ -107,6 +117,7 @@ const VISIBLE_CONTROL = 'button, a[href], input, select, textarea, [tabindex]';
         <div
           #trailingTray
           [class]="trailingTrayClasses()"
+          [attr.inert]="trayInert(action, swipe.offset() < 0)"
           (focusin)="revealFrom('trailing', trailingTray)"
           (focusout)="closeOnFocusLeave($event, trailingTray)"
           data-swipe-tray
@@ -213,6 +224,11 @@ export class RowSwipeFrameComponent {
   private trayClasses(edge: string, uncovered: boolean): string {
     const fade = this.swipe.dragging() ? '' : TRAY_FADE_CLASSES;
     return `${TRAY_CLASSES} ${edge} ${uncovered ? 'opacity-100' : 'opacity-0'}${fade}`;
+  }
+
+  /** `inert` while a tray whose action the row already shows is closed: `''` sets it, `null` drops it. */
+  protected trayInert(action: CmnRowSwipeAction, uncovered: boolean): '' | null {
+    return action.duplicated && !uncovered ? '' : null;
   }
 
   protected actionClasses(action: CmnRowSwipeAction): string {

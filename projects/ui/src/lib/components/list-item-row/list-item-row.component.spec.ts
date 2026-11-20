@@ -432,6 +432,33 @@ describe('ListItemRowComponent — swipe actions', () => {
     }
   });
 
+  it('keeps a tray reachable by keyboard and screen reader when the visible control does another job', () => {
+    // The row button opens the detail; Remove and Done are not what it does, so neither tray is inert.
+    create();
+    for (const name of ['Done', 'Remove']) {
+      expect((trayButton(name).parentElement as HTMLElement).hasAttribute('inert')).toBe(false);
+    }
+    const reachable = [...(fixture.nativeElement as HTMLElement).querySelectorAll('button')]
+      .filter(button => !button.closest('[inert]'))
+      .map(button => button.getAttribute('aria-label'));
+    expect(reachable).toContain('Done Oat milk');
+    expect(reachable).toContain('Remove Oat milk');
+  });
+
+  it('keeps only the closed tray whose action the row already shows out of the tab order', () => {
+    create({trailing: {label: 'Remove', icon: 'Trash2', tone: 'danger', duplicated: true}});
+    expect((trayButton('Remove').parentElement as HTMLElement).hasAttribute('inert')).toBe(true);
+    expect((trayButton('Done').parentElement as HTMLElement).hasAttribute('inert')).toBe(false);
+  });
+
+  it('lets a duplicated tray take a tap once a swipe has opened it', () => {
+    create({trailing: {label: 'Remove', icon: 'Trash2', tone: 'danger', duplicated: true}});
+    swipeBy(-TRAY_PX);
+    expect((trayButton('Remove').parentElement as HTMLElement).hasAttribute('inert')).toBe(false);
+    trayButton('Remove').click();
+    expect(fixture.componentInstance.log).toEqual(['trailing']);
+  });
+
   it('fades a tray with the slide, but not while a finger drags or for reduced motion', () => {
     create();
     const tray = trayButton('Done').parentElement as HTMLElement;

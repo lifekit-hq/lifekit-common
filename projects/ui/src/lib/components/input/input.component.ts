@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 
-export type InputType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'search';
+export type InputType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'search' | 'time';
 export type InputSize = 'sm' | 'md' | 'lg';
 /** The virtual keyboard a phone shows for the field (the HTML `inputmode` attribute). */
 export type InputMode =

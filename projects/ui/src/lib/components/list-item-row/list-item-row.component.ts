@@ -158,6 +158,8 @@ export class ListItemRowComponent {
    * The action a swipe toward the end reveals on the start edge (tick, mark read). A swipe is a
    * shortcut, never the only way: keep the row's visible control, and the same action is also a
    * button here that keyboard and screen-reader users reach, which slides the row open on focus.
+   * Set `duplicated` on an action the row already shows as a control of its own (a menu entry, a
+   * button), so that closed tray leaves the tab order and the reader meets the action once.
    */
   public readonly swipeLeading = input<Nullable<CmnRowSwipeAction>>(null);
   /** The action a swipe toward the start reveals on the end edge (delete, dismiss). */

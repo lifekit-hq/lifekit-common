@@ -27,7 +27,7 @@ describe('InputComponent', () => {
     fixture.detectChanges();
   }
 
-  it.each<InputType>(['text', 'email', 'password', 'number', 'tel', 'search'])(
+  it.each<InputType>(['text', 'email', 'password', 'number', 'tel', 'search', 'time'])(
     'forwards the "%s" input type',
     inputType => {
       fixture.componentRef.setInput('type', inputType);
@@ -35,6 +35,14 @@ describe('InputComponent', () => {
       expect(input().type).toBe(inputType);
     }
   );
+
+  it('renders a time field and binds its value', () => {
+    fixture.componentRef.setInput('type', 'time');
+    fixture.detectChanges();
+    type('09:30');
+    expect(input().value).toBe('09:30');
+    expect(input().type).toBe('time');
+  });
 
   it.each<[InputSize, string]>([
     ['sm', 'h-cmn-size-sm'],

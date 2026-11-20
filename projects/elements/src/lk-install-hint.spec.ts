@@ -110,6 +110,53 @@ describe('LkInstallHint', () => {
     expect(el.shadowRoot?.querySelector('button.install')).toBeTruthy();
   });
 
+  async function mountAt390(): Promise<{el: LkInstallHint; holder: HTMLElement}> {
+    const holder = document.createElement('div');
+    holder.style.width = '390px';
+    document.body.appendChild(holder);
+    const el = document.createElement('lk-install-hint') as LkInstallHint;
+    holder.appendChild(el);
+    await el.updateComplete;
+    return {el, holder};
+  }
+
+  function expectCompactSingleLine(el: LkInstallHint, labels: string[]): void {
+    const root = el.shadowRoot as ShadowRoot;
+    const hint = root.querySelector<HTMLElement>('.hint') as HTMLElement;
+    const copy = root.querySelector<HTMLElement>('.hint > span') as HTMLElement;
+    const buttons = [...root.querySelectorAll<HTMLButtonElement>('button')];
+    expect(buttons.map(button => button.textContent?.trim())).toEqual(labels);
+    // The buttons share one row ("Not now" does not wrap).
+    expect(
+      new Set(buttons.map(button => Math.round(button.getBoundingClientRect().top))).size
+    ).toBe(1);
+    // The copy is shown whole on one line: no clipping, no second line.
+    const range = document.createRange();
+    range.selectNodeContents(copy);
+    const lineTops = new Set([...range.getClientRects()].map(rect => Math.round(rect.top)));
+    expect(lineTops.size).toBe(1);
+    expect(copy.scrollWidth).toBeLessThanOrEqual(copy.clientWidth);
+    const MAX_LINE_PX = 64;
+    expect(hint.getBoundingClientRect().height).toBeLessThanOrEqual(MAX_LINE_PX);
+  }
+
+  it('fits one line at 390px wide, with its buttons on one line', async () => {
+    stubStandalone(false);
+    fireInstallPrompt();
+    const {el, holder} = await mountAt390();
+    expectCompactSingleLine(el, ['Install', 'Not now']);
+    holder.remove();
+  });
+
+  it('shows the whole iOS Safari instruction on one line at 390px wide', async () => {
+    stubUserAgent(IOS_SAFARI_UA);
+    stubStandalone(false);
+    const {el, holder} = await mountAt390();
+    expectCompactSingleLine(el, ['Got it']);
+    expect(el.shadowRoot?.textContent).toContain('Tap Share, then Add to Home Screen.');
+    holder.remove();
+  });
+
   it('hides after appinstalled', async () => {
     stubStandalone(false);
     stubUserAgent('Mozilla/5.0 (X11; Linux x86_64) Chrome/120.0');

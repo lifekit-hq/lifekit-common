@@ -680,21 +680,19 @@ describe('AppLayoutComponent', () => {
       host.detectChanges();
     });
 
-    it('should render notices inside main, stuck below the top bar', () => {
+    it('should render notices inside main, scrolling with the content below the top bar', () => {
       const notices = q('main .notice').parentElement as HTMLElement;
-      expect(notices.classList).toContain('sticky');
-      expect(notices.classList).toContain('top-0');
-      expect(notices.className).not.toContain('max-md:top-');
+      expect(notices.classList).not.toContain('sticky');
+      expect(notices.className).not.toMatch(/\btop-0\b/);
       expect(q('cmn-top-bar').contains(notices)).toBe(false);
       expect(q('cmn-bottom-tab-bar').contains(notices)).toBe(false);
     });
 
-    it('should stick at the top of main without the phone overlay', () => {
+    it('should not pin the notices without the phone overlay either', () => {
       const plain = TestBed.createComponent(AppLayoutComponent);
       plain.detectChanges();
       const classes = (plain.nativeElement as HTMLElement).querySelector('main > div')?.classList;
-      expect(classes).toContain('sticky');
-      expect(classes).toContain('top-0');
+      expect(classes).not.toContain('sticky');
       expect(classes).not.toContain('max-md:top-[calc(3.5rem+env(safe-area-inset-top))]');
     });
 

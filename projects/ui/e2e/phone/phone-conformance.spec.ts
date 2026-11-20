@@ -449,13 +449,26 @@ for (const size of NOTICE_WIDTHS) {
           banner: await box('lk-offline-banner .banner'),
           prompt: await box('lk-update-prompt .prompt'),
         };
-        // Flush under the bar: no strip of scrolling content between them, no row hidden behind.
-        expect(boxes.banner?.top).toBeLessThanOrEqual((boxes.bar?.bottom ?? 0) + SURFACE_TOLERANCE);
         for (const notice of [boxes.banner, boxes.prompt]) {
           expect(notice).not.toBeNull();
-          expect(notice?.top).toBeGreaterThanOrEqual((boxes.bar?.bottom ?? 0) - SURFACE_TOLERANCE);
-          expect(notice?.bottom).toBeLessThanOrEqual(
-            (boxes.tabs?.top ?? Infinity) + SURFACE_TOLERANCE
+          if (scroll === 0) {
+            // Flush under the bar: no strip of scrolling content between them, no row hidden behind.
+            expect(notice?.top).toBeGreaterThanOrEqual(
+              (boxes.bar?.bottom ?? 0) - SURFACE_TOLERANCE
+            );
+            expect(notice?.bottom).toBeLessThanOrEqual(
+              (boxes.tabs?.top ?? Infinity) + SURFACE_TOLERANCE
+            );
+          } else {
+            // Notices scroll away with the content; none stays pinned over the page.
+            expect(notice?.bottom).toBeLessThanOrEqual(
+              (boxes.bar?.bottom ?? 0) + SURFACE_TOLERANCE
+            );
+          }
+        }
+        if (scroll === 0) {
+          expect(boxes.banner?.top).toBeLessThanOrEqual(
+            (boxes.bar?.bottom ?? 0) + SURFACE_TOLERANCE
           );
         }
       }
@@ -564,14 +577,11 @@ const STICKY_SECTION = 2;
 // How far past the pin point the section is scrolled, so its heading is held by sticky.
 const STICKY_PROBE = 80;
 
-/** The bottom edge of the pinned chrome: the top bar, or the notices stuck under it. */
+/** The bottom edge of the pinned chrome: the top bar (notices scroll with the content). */
 async function pinnedChromeBottom(page: Page): Promise<number> {
-  return page.evaluate(() => {
-    const bar = document.querySelector('cmn-top-bar header')?.getBoundingClientRect().bottom ?? 0;
-    const notices = document.querySelector('lk-offline-banner')?.parentElement;
-    const stuck = notices?.getClientRects().length ? notices.getBoundingClientRect().bottom : 0;
-    return Math.max(bar, stuck);
-  });
+  return page.evaluate(
+    () => document.querySelector('cmn-top-bar header')?.getBoundingClientRect().bottom ?? 0
+  );
 }
 
 /** Scrolls main to its end, then lists where `[data-last-content]` sits under the floating chrome. */

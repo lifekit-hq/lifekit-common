@@ -85,19 +85,26 @@ export class LkInstallHint extends LitElement {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: var(--space-3, 0.75rem);
+      gap: var(--space-2, 0.5rem);
       border-radius: var(--radius-lg);
       border: 1px solid var(--color-border-default, #d9e0e3);
       background: var(--color-surface-card, #ffffff);
       color: var(--color-text-primary);
-      padding: var(--space-3, 0.75rem) var(--space-4, 1rem);
+      padding: var(--space-1, 0.25rem) var(--space-2, 0.5rem) var(--space-1, 0.25rem)
+        var(--space-3, 0.75rem);
       font-family: var(--font-sans);
       font-size: 0.875rem;
     }
 
+    /* The copy is short enough for one line on a phone; if it ever is not, it wraps, never clips. */
+    .hint > span {
+      min-width: 0;
+    }
+
     .actions {
       display: flex;
-      gap: var(--space-2, 0.5rem);
+      flex-shrink: 0;
+      gap: var(--space-1, 0.25rem);
     }
 
     button {
@@ -105,8 +112,10 @@ export class LkInstallHint extends LitElement {
       border-radius: var(--radius-md);
       background: transparent;
       color: inherit;
-      padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+      padding: var(--space-1, 0.25rem) var(--space-3, 0.75rem);
       font: inherit;
+      white-space: nowrap;
+      min-height: var(--size-touch, 2.75rem);
       cursor: pointer;
     }
 
@@ -158,7 +167,7 @@ export class LkInstallHint extends LitElement {
     if (deferredPrompt) {
       return html`
         <div class="hint" role="region" aria-label="Install app">
-          <span>Install this app for quick access.</span>
+          <span>Install this app.</span>
           <div class="actions">
             <button type="button" class="install" @click=${this.onInstall}>Install</button>
             <button type="button" @click=${this.onDismiss}>Not now</button>
@@ -169,7 +178,7 @@ export class LkInstallHint extends LitElement {
     if (isIosSafari()) {
       return html`
         <div class="hint" role="region" aria-label="Install app">
-          <span>Install this app: tap Share, then Add to Home Screen.</span>
+          <span>Tap Share, then Add to Home Screen.</span>
           <div class="actions">
             <button type="button" @click=${this.onDismiss}>Got it</button>
           </div>

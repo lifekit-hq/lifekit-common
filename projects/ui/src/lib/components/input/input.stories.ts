@@ -17,7 +17,7 @@ const meta: Meta<InputStoryArgs> = {
   argTypes: {
     type: {
       control: 'select',
-      options: ['text', 'email', 'password', 'number', 'tel', 'search'],
+      options: ['text', 'email', 'password', 'number', 'tel', 'search', 'time'],
     },
     size: {control: 'select', options: ['sm', 'md', 'lg']},
     hasError: {control: 'boolean'},

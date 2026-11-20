@@ -122,12 +122,20 @@ test.describe(`alert item swipe ${PHONE.width}x${PHONE.height}`, () => {
     await expectTouchSized(page, 'Mark read Sync failed');
   });
 
-  test('a revealed action is a touch target and a keyboard reaches it', async ({page}) => {
-    await page.getByRole('button', {name: 'Dismiss Sync failed'}).focus();
+  test('a closed tray the visible X duplicates is out of the tree, and a swipe makes it a touch target', async ({
+    page,
+  }) => {
+    // The visible X does this job, so the closed tray is inert: one Dismiss for a screen reader.
+    const tray = page.getByRole('button', {name: 'Dismiss Sync failed'});
+    expect(await tray.evaluate(el => (el.closest('[data-swipe-tray]') as HTMLElement).inert)).toBe(
+      true
+    );
+    await touchDrag(page, await centreOf(page, 0, ALERT), -SWIPE_PX);
     await expect.poll(() => surfaceX(page, 0, ALERT)).toBeLessThan(0);
+    expect(await tray.evaluate(el => (el.closest('[data-swipe-tray]') as HTMLElement).inert)).toBe(
+      false
+    );
     await expectTouchSized(page, 'Dismiss Sync failed');
-    await page.keyboard.press('Escape');
-    await expect.poll(() => surfaceX(page, 0, ALERT)).toBe(0);
   });
 
   test('a vertical pan does not open the item', async ({page}) => {

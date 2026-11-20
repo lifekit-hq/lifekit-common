@@ -329,9 +329,11 @@ describe('PageComponent in the app shell', () => {
   it('puts the notices above the page title, inset by the page gutter', async () => {
     await go('/tasks');
     const notices = host().querySelector('[data-cmn-notices]') as HTMLElement;
-    for (const cls of ['px-cmn-page-gutter', 'max-w-[1200px]', 'mx-auto', 'bg-surface-bg']) {
+    for (const cls of ['px-cmn-page-gutter', 'max-w-[1200px]', 'mx-auto']) {
       expect(notices.classList).toContain(cls);
     }
+    // They scroll with the content: nothing pins them over the page.
+    expect(notices.classList).not.toContain('sticky');
     const order = notices.compareDocumentPosition(titles()[0]);
     expect(order & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });

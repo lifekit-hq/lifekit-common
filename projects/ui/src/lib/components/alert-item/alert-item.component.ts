@@ -59,6 +59,14 @@ const SEVERITY_ICON: Record<AlertItemSeverity, LucideIconName> = {
   info: 'Info',
 };
 
+/** The swipe action, flagged as repeated by a visible control unless the app already said. */
+function withDuplicate(
+  action: Nullable<CmnRowSwipeAction>,
+  duplicated: boolean
+): Nullable<CmnRowSwipeAction> {
+  return action && {...action, duplicated: action.duplicated ?? duplicated};
+}
+
 @Component({
   selector: 'cmn-alert-item',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -154,8 +162,8 @@ const SEVERITY_ICON: Record<AlertItemSeverity, LucideIconName> = {
     </ng-template>
     @if (swipeable()) {
       <cmn-row-swipe-frame
-        [leading]="swipeLeading()"
-        [trailing]="swipeTrailing()"
+        [leading]="leadingTray()"
+        [trailing]="trailingTray()"
         [name]="title()"
         [rounded]="!flat()"
         (leadingAction)="swipeLeadingAction.emit()"
@@ -212,6 +220,14 @@ export class AlertItemComponent {
   );
   public readonly relativeTime = computed(() => formatRelativeTime(this.timestamp()));
   public readonly flat = computed(() => this.density() === 'flat');
+  /** An unread item's title control already marks it read, so the leading tray repeats it. */
+  protected readonly leadingTray = computed(() =>
+    withDuplicate(this.swipeLeading(), !this.isRead())
+  );
+  /** The Dismiss X already dismisses, so the trailing tray repeats it. */
+  protected readonly trailingTray = computed(() =>
+    withDuplicate(this.swipeTrailing(), this.dismissible())
+  );
   protected readonly swipeable = computed(() => !!this.swipeLeading() || !!this.swipeTrailing());
   protected readonly titleClasses = computed(() =>
     [
