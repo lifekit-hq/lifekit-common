@@ -449,13 +449,26 @@ for (const size of NOTICE_WIDTHS) {
           banner: await box('lk-offline-banner .banner'),
           prompt: await box('lk-update-prompt .prompt'),
         };
-        // Flush under the bar: no strip of scrolling content between them, no row hidden behind.
-        expect(boxes.banner?.top).toBeLessThanOrEqual((boxes.bar?.bottom ?? 0) + SURFACE_TOLERANCE);
         for (const notice of [boxes.banner, boxes.prompt]) {
           expect(notice).not.toBeNull();
-          expect(notice?.top).toBeGreaterThanOrEqual((boxes.bar?.bottom ?? 0) - SURFACE_TOLERANCE);
-          expect(notice?.bottom).toBeLessThanOrEqual(
-            (boxes.tabs?.top ?? Infinity) + SURFACE_TOLERANCE
+          if (scroll === 0) {
+            // Flush under the bar: no strip of scrolling content between them, no row hidden behind.
+            expect(notice?.top).toBeGreaterThanOrEqual(
+              (boxes.bar?.bottom ?? 0) - SURFACE_TOLERANCE
+            );
+            expect(notice?.bottom).toBeLessThanOrEqual(
+              (boxes.tabs?.top ?? Infinity) + SURFACE_TOLERANCE
+            );
+          } else {
+            // Notices scroll away with the content; none stays pinned over the page.
+            expect(notice?.bottom).toBeLessThanOrEqual(
+              (boxes.bar?.bottom ?? 0) + SURFACE_TOLERANCE
+            );
+          }
+        }
+        if (scroll === 0) {
+          expect(boxes.banner?.top).toBeLessThanOrEqual(
+            (boxes.bar?.bottom ?? 0) + SURFACE_TOLERANCE
           );
         }
       }
